@@ -75,6 +75,7 @@
     },
     "title": {
       "build-personal-skill": "専用 Skill を作成",
+      "competitive-programming": "競技プログラミング",
       "curriculum-planner": "シリーズ設計",
       "stage-dsl": "授業文書構造",
       "deep-interactive": "ディープインタラクティブ",
