@@ -151,6 +151,12 @@ export const LLM_STAGES = [
   'maic-agent',
   'maic-agent-driver',
   'conversation-title',
+  'tutor-moderation',
+  'tutor-review-cp',
+  'tutor-review-cp-2',
+  'tutor-review-code',
+  'sim-learner',
+  'tutor-analyst',
 ] as const;
 
 export type LlmStage = (typeof LLM_STAGES)[number];
