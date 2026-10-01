@@ -1,0 +1,1986 @@
+{
+  "version": "1.0.0",
+  "locale": "vi-VN",
+  "subject": "informatics-competitive-programming",
+  "title_vi": "Bản đồ chuyên đề Tin học — luyện thi Chuyên Tin & HSG Tin QG",
+  "title_en": "Informatics Curriculum Map — Vietnamese Chuyên Tin & HSG QG track",
+  "exam_targets": [
+    "Tuyển sinh lớp 10 Chuyên Tin (PTNK, Chuyên Sư Phạm, Amsterdam, Lê Hồng Phong, ...)",
+    "HSG Tin cấp tỉnh/TP (lớp 9 & 12)",
+    "HSG Tin Quốc gia (VNOI / VOI)",
+    "Chọn đội tuyển Olympic khu vực & IOI"
+  ],
+  "audience": {
+    "grades": "8–12",
+    "goal": "Nền tảng vững để thi vào trường chuyên Tin, đoạt giải HSG QG, hướng tới đội tuyển IOI",
+    "assumed_prior": "Biết một ngôn ngữ lập trình (C++17 hoặc Python 3; HSG khuyến nghị C++17); biết biến, kiểu dữ liệu, vòng lặp, rẽ nhánh, mảng, hàm."
+  },
+  "course_shape": {
+    "scenes_per_course": {
+      "min": 6,
+      "max": 8
+    },
+    "one_topic_one_course": true,
+    "scene_mix": ["slide", "interactive", "quiz"],
+    "scene_recipe_vi": [
+      "Cảnh 1 – slide: đề bài + giới hạn dữ liệu + ví dụ nhỏ (gợi nhu cầu thuật toán).",
+      "Cảnh 2 – slide: vét cạn và điểm nghẽn (đếm số phép tính).",
+      "Cảnh 3 – slide: quan sát then chốt → ý tưởng, bất biến, chứng minh.",
+      "Cảnh 4 – interactive (walkthrough): chạy tay từng bước trên input nhỏ; học sinh ĐỔI INPUT để quan sát — chọn preset tính sẵn (nhỏ / đã sắp / đảo ngược / biên) hoặc nhập input của mình trong giới hạn; thầy dẫn theo các mốc (beats).",
+      "Cảnh 5 – interactive (walkthrough, tab C++/Python): đọc code C++ hoặc Python từng dòng theo bước — để đọc hiểu lời giải, không có ô soạn/chạy code.",
+      "Cảnh 6 – slide: độ phức tạp + biến thể.",
+      "Cảnh 7 – quiz: bẫy thường gặp (từ `pitfalls`) + dự đoán bước kế + câu tự luận do AI chấm (chấm lời giải thích, không chạy code). Không có cảnh luyện code.",
+      "Cảnh 8 (tùy chọn) – slide: tổng kết mindset + bài mở rộng giao về nhà."
+    ],
+    "difficulty_curve_rule": "Trong một tier, độ khó tăng đều; không để 3 bài dễ liền rồi 1 bài gánh toàn bộ phần khó. Nếu một chuyên đề gánh quá nhiều, tách thành 2 course.",
+    "fallback_vi": "Topic chưa có walkthrough: Cảnh 4–5 thay bằng storyboard (chuỗi frame viết tay có kiểm tra bất biến) hoặc widget tương tác do LLM sinh (simulation/diagram/game/3D) cho khái niệm định tính; khi học sinh hỏi, thầy dùng bảng trắng (wb_*).",
+    "note_vi": "Theo ADR 0003/0008 (làm rõ 2026-09-30): ứng dụng KHÔNG có code editor cho học sinh (đã bỏ 'code' khỏi scene_mix và bỏ cảnh luyện code); interactive + visualizer + đổi input để quan sát được giữ và khuyến khích. `est_scenes` của từng topic là ước lượng theo recipe cũ; dùng `scenes_per_course`. Số scene interactive linh hoạt 1–3."
+  },
+  "difficulty_scale": {
+    "1": "Làm quen, cài đặt trực tiếp, không cần tối ưu",
+    "2": "Cần hiểu kỹ, áp dụng một kỹ thuật đã học",
+    "3": "Cần nhận dạng + tối ưu, đúng chuẩn HSG tỉnh/TP",
+    "4": "Nâng cao, đúng chuẩn HSG QG",
+    "5": "Chuyên sâu, đội tuyển Olympic / IOI"
+  },
+  "tiers": [
+    {
+      "id": "tier-1",
+      "order": 1,
+      "name_vi": "Cơ sở",
+      "name_en": "Foundation",
+      "grade_band": "Lớp 8–9 (THCS → thi vào 10 chuyên Tin)",
+      "goal": "Xây phản xạ lập trình và tư duy độ phức tạp; biết chọn cấu trúc dữ liệu thô cho bài toán đơn giản; đọc được giới hạn đề để đoán thuật toán.",
+      "prerequisites": [],
+      "exit_skills": [
+        "Tính được độ phức tạp thời gian/bộ nhớ của một đoạn code đơn giản",
+        "Cài đặt thành thạo mảng, xâu, ngăn xếp, hàng đợi, bảng băm",
+        "Viết được đệ quy có điều kiện dừng đúng",
+        "Giải được bài mô phỏng / xử lý xâu / đếm cơ bản trong giới hạn 10^6"
+      ],
+      "topics": [
+        {
+          "id": "t1-complexity",
+          "name_vi": "Phân tích độ phức tạp",
+          "name_en": "Complexity Analysis",
+          "difficulty": 1,
+          "tracks": ["ts10"],
+          "est_scenes": 6,
+          "prerequisites": [],
+          "subtopics": [
+            "Ký hiệu O lớn, bỏ hằng số và bậc thấp",
+            "Đếm phép toán theo vòng lặp",
+            "Tính từ giới hạn đề (n ≤ 10^k ⇒ chọn O(n^?))",
+            "Bộ nhớ: sizeof, giới hạn 256MB"
+          ],
+          "typical_problems": [
+            {
+              "name": "Tổng 1..n — 3 cách O(n), O(1)",
+              "source": "nhập môn",
+              "level": 1
+            },
+            {
+              "name": "Đếm ước của n",
+              "source": "classic",
+              "level": 1
+            },
+            {
+              "name": "Kiểm tra nguyên tố (√n)",
+              "source": "classic",
+              "level": 1
+            }
+          ],
+          "pitfalls": [
+            "Coi 1 triệu phép toán ≈ 1 giây (thực tế ~10^8 phép/s, phải chừa hệ số)",
+            "Chỉ nhìn một vòng lặp mà quên vòng lặp lồng (O(n²) trên n=10^5 sẽ TLE)",
+            "Bỏ qua bộ nhớ: mảng 2 chiều 10^4×10^4 int = 400MB",
+            "Dùng đệ quy quá sâu gây tràn stack mà tưởng là vấn đề thuật toán"
+          ],
+          "interactive_ideas": [
+            "Bảng trượt: kéo n từ 10 đến 10^9, hiện bậc O tương ứng và ước lượng thời gian",
+            "Đồ thị tăng trưởng n log n vs n² vs 2^n"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Phân tích thời gian thực hiện giải thuật",
+            "VNOI Wiki"
+          ],
+          "exam_relevance": "Bắt buộc: mọi đề HSG đều giới hạn n để buộc chọn thuật toán."
+        },
+        {
+          "id": "t1-array-prefix",
+          "name_vi": "Mảng và mảng cộng dồn",
+          "name_en": "Arrays, Prefix Sums, Two Pointers",
+          "difficulty": 1,
+          "tracks": ["ts10"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-complexity"],
+          "subtopics": [
+            "Mảng 1 chiều/2 chiều, duyệt",
+            "Mảng cộng dồn 1D (prefix sum)",
+            "Mảng cộng dồn 2D (tổng hình chữ nhật)",
+            "Hai con trỏ (two pointers)",
+            "Cửa sổ trượt (sliding window)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Tổng đoạn [l,r] truy vấn nhiều lần",
+              "source": "VNOI / template",
+              "level": 1
+            },
+            {
+              "name": "Đoạn con có tổng lớn nhất độ dài ≥ k",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Đếm số đoạn con có tổng chia hết cho K",
+              "source": "classic (mảng cộng dồn + modulo)",
+              "level": 3
+            },
+            {
+              "name": "Tổng ma trận con (prefix 2D)",
+              "source": "classic",
+              "level": 2
+            }
+          ],
+          "pitfalls": [
+            "Truy vấn [l,r] quên +a[l] hoặc lệch chỉ số (dùng pre[r]-pre[l-1])",
+            "Prefix 2D sai công thức bao hàm — dùng nguyên lý bù trừ",
+            "Cửa sổ trượt trên mảng có số âm (two pointers chỉ đúng khi đơn điệu)",
+            "Mảng cộng dồn dùng int gây tràn khi tổng > 2^31 (phải long long)"
+          ],
+          "interactive_ideas": [
+            "Trực quan prefix sum: tô vùng [l,r] và hiện phép trừ pre[r]-pre[l-1]",
+            "Cửa sổ trượt mô phỏng: kéo cửa sổ, cập nhật tổng tức thời"
+          ],
+          "vn_sources": [
+            "VNOJ tag: Mảng cộng dồn",
+            "Tài liệu giáo khoa chuyên Tin — Quyển 1",
+            "VNOI Wiki — Mảng cộng dồn"
+          ],
+          "exam_relevance": "Xuất hiện gần như mọi đề; là nền của nhiều kỹ thuật nâng cao."
+        },
+        {
+          "id": "t1-string",
+          "name_vi": "Xâu cơ bản",
+          "name_en": "Basic Strings",
+          "difficulty": 1,
+          "tracks": ["ts10"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-complexity"],
+          "subtopics": [
+            "Biểu diễn xâu/bảng mã",
+            "Duyệt, đếm, đảo, đổi hoa-thường",
+            "So sánh xâu, tách/gộp từ (stringstream)",
+            "Đối xứng (palindrome)",
+            "Xử lý số lớn dạng xâu"
+          ],
+          "typical_problems": [
+            {
+              "name": "Xâu đối xứng",
+              "source": "classic",
+              "level": 1
+            },
+            {
+              "name": "Đếm từ trong câu",
+              "source": "HSG THCS các tỉnh",
+              "level": 1
+            },
+            {
+              "name": "Cộng hai số lớn (string big-int)",
+              "source": "HSG tỉnh / Tin học trẻ",
+              "level": 2
+            },
+            {
+              "name": "Chuẩn hóa tên riêng",
+              "source": "HSG THCS",
+              "level": 2
+            }
+          ],
+          "pitfalls": [
+            "Nhầm ký tự '0' vs số 0 khi tách số",
+            "Không chú ý khoảng trắng/dấu câu khi đếm từ",
+            "Xâu bé hơn khai báo gây lỗi nếu nhập bằng scanf/%s",
+            "So sánh xâu bằng == trong C thay vì hàm / std::string"
+          ],
+          "interactive_ideas": [
+            "Máy kiểm tra palindrome từng bước",
+            "Trực quan big-int cộng có nhớ"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, chương xử lý xâu",
+            "Tài liệu chuyên Tin Quyển 1",
+            "baitaponha.com — giải đề xâu"
+          ],
+          "exam_relevance": "Bài 1 của hầu hết đề HSG là xử lý xâu/mô phỏng — nguồn điểm chắc chắn."
+        },
+        {
+          "id": "t1-stack-queue",
+          "name_vi": "Ngăn xếp và Hàng đợi",
+          "name_en": "Stack & Queue",
+          "difficulty": 2,
+          "tracks": ["ts10"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-array-prefix"],
+          "subtopics": [
+            "LIFO/FIFO và ứng dụng",
+            "Kiểm tra ngoặc đúng",
+            "Biểu thức hậu tố (RPN) & đánh giá",
+            "Hàng đợi 2 đầu (deque)",
+            "Hàng đợi đơn điệu (monotonic queue) — nhập môn"
+          ],
+          "typical_problems": [
+            {
+              "name": "Kiểm tra biểu thức ngoặc đúng",
+              "source": "classic",
+              "level": 1
+            },
+            {
+              "name": "Đánh giá biểu thức hậu tố",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Hình chữ nhật lớn nhất trong histogram",
+              "source": "classic (monotonic stack)",
+              "level": 3
+            },
+            {
+              "name": "Max trong cửa sổ trượt k",
+              "source": "classic (deque đơn điệu)",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Pop/peek trên stack/deque rỗng",
+            "Nhầm thứ tự pop hai toán hạng trong biểu thức (a-b phải là a trước b)",
+            "Duy trì monotonic queue sai: quên loại phần tử hết cửa sổ",
+            "Dùng queue bằng mảng thủ công mà không quản chỉ số đầu/cuối đúng"
+          ],
+          "interactive_ideas": [
+            "Mô phỏng stack/queue có animation push/pop",
+            "Histogram: kéo thanh, thấy stack mở rộng/thu hẹp"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Ngăn xếp và hàng đợi",
+            "VNOJ tag: Monotonic Queue",
+            "VNOI Wiki"
+          ],
+          "exam_relevance": "Nền tảng cho DFS/BFS, biểu thức, và tối ưu cửa sổ trượt ở các tier sau."
+        },
+        {
+          "id": "t1-hash",
+          "name_vi": "Bảng băm (Hash)",
+          "name_en": "Hash Map & Set",
+          "difficulty": 2,
+          "tracks": ["ts10"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-array-prefix"],
+          "subtopics": [
+            "Map/Set trong C++ STL",
+            "Đếm tần suất",
+            "Kiểm tra tồn tại / khử trùng lặp",
+            "Two Sum, đếm cặp",
+            "Rời rạc hóa (coordinate compression)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm số lần xuất hiện của từng giá trị",
+              "source": "classic",
+              "level": 1
+            },
+            {
+              "name": "Two Sum (đếm cặp tổng bằng k)",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Đếm cặp nghịch thế bằng hash (phiên bản đơn giản)",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Rời rạc hóa giá trị",
+              "source": "VNOJ tag: Rời rạc hóa",
+              "level": 2
+            }
+          ],
+          "pitfalls": [
+            "Cho rằng unordered_map luôn O(1) — có thể bị hack/bị đụng độ trong đề thi",
+            "Hash std::string bằng hàm có sẵn nhưng không ổn định trên một số judge",
+            "Quên rằng map trả về giá trị mặc định 0 khi truy cập khóa mới (đôi khi ẩn bug)",
+            "Tọa độ/giá trị lớn không rời rạc hóa mà dùng mảng đánh dấu gây MLE"
+          ],
+          "interactive_ideas": [
+            "Trực quan hash tủ đựng đồ: chèn/đụng độ/xử lý chuỗi",
+            "So sánh O(n²) two-sum với O(n) hash"
+          ],
+          "vn_sources": ["VNOJ tag: Rời rạc hóa", "Tài liệu chuyên Tin Quyển 2"],
+          "exam_relevance": "Kỹ năng thực dụng bậc nhất: tối ưu vòng lặp lồng O(n²) xuống O(n)."
+        },
+        {
+          "id": "t1-recursion",
+          "name_vi": "Đệ quy",
+          "name_en": "Recursion",
+          "difficulty": 2,
+          "tracks": ["ts10"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-complexity"],
+          "subtopics": [
+            "Điều kiện dừng (base case)",
+            "Cây đệ quy & chi phí",
+            "Đệ quy trên mảng/xâu",
+            "Tháp Hà Nội",
+            "Đệ quy có nhớ (memo) — bắc cầu sang QHĐ"
+          ],
+          "typical_problems": [
+            {
+              "name": "Giai thừa / Fibonacci / tổ hợp C(n,k)",
+              "source": "classic",
+              "level": 1
+            },
+            {
+              "name": "Tháp Hà Nội (in các bước)",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Sinh dãy nhị phân bằng đệ quy",
+              "source": "Giải thuật và lập trình — Lê Minh Hoàng",
+              "level": 2
+            },
+            {
+              "name": "Đếm số cách leo cầu thang bằng memo",
+              "source": "classic",
+              "level": 2
+            }
+          ],
+          "pitfalls": [
+            "Thiếu hoặc sai base case ⇒ đệ quy vô hạn / tràn stack",
+            "Không nhận ra chi phí đệ quy ngây thơ (Fib(40) chậm kinh khủng nếu không memo)",
+            "Nhầm giá trị trả về trước/sau lời gọi đệ quy (thứ tự in Tháp Hà Nội)",
+            "Dùng đệ quy cho n lớn mà không tăng stack hoặc chuyển vòng lặp"
+          ],
+          "interactive_ideas": [
+            "Cây gọi đệ quy động cho Fibonacci, bật/tắt memo để thấy số nút giảm",
+            "Mô phỏng 3 cột Tháp Hà Nội"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Đệ quy và giải thuật đệ quy",
+            "Tài liệu chuyên Tin Quyển 1"
+          ],
+          "exam_relevance": "Cửa ngõ vào Quay lui, Chia để trị và Quy hoạch động — cả ba đều dựa trên đệ quy."
+        }
+      ]
+    },
+    {
+      "id": "tier-2",
+      "order": 2,
+      "name_vi": "Trung cấp",
+      "name_en": "Intermediate",
+      "grade_band": "Lớp 9–10 (ôn thi vào 10 chuyên, HSG tỉnh lớp 9/10)",
+      "goal": "Nắm bộ công cụ thuật toán chuẩn; biết nhận dạng kỹ thuật từ dạng bài; viết được vét cạn chắc tay và tối ưu dần.",
+      "prerequisites": ["tier-1"],
+      "exit_skills": [
+        "Viết được vét cạn đúng và biết khi nào cần tối ưu",
+        "Sắp xếp theo khóa, tìm kiếm nhị phân trên mảng và trên đáp án",
+        "Quay lui có nhánh cận cho bài tổ hợp nhỏ",
+        "Dùng bitmask và số học cơ bản (sàng, gcd, modulo) thành thạo"
+      ],
+      "topics": [
+        {
+          "id": "t2-sorting",
+          "name_vi": "Sắp xếp",
+          "name_en": "Sorting",
+          "difficulty": 2,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-array-prefix"],
+          "subtopics": [
+            "Sắp xếp nổi bọt/chèn/chọn (hiểu)",
+            "std::sort + comparator",
+            "Sắp xếp theo khóa / cấu trúc",
+            "Sắp xếp đếm (counting sort) & rời rạc hóa",
+            "Sắp xếp truy vấn offline",
+            "Đếm cặp nghịch thế (merge sort / BIT)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Sắp xếp dãy theo tiêu chí đa khóa",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Sắp xếp để đếm cặp (i<j, a[i]>a[j])",
+              "source": "HSG tỉnh",
+              "level": 3
+            },
+            {
+              "name": "Hai hiệp sĩ (2 con trỏ sau sort)",
+              "source": "VNOJ Free Contest",
+              "level": 3
+            },
+            {
+              "name": "Sắp xếp truy vấn theo Mo/offline — nhập môn",
+              "source": "VNOJ tag: Sort",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Comparator không strict-weak-order (dùng <=) gây crash/WA",
+            "Sắp xếp mảng cặp nhưng quên sắp cả mảng phụ đi kèm",
+            "std::sort O(n log n) nhưng vẫn TLE do comparator gọi hàm nặng",
+            "Sắp xếp làm mất chỉ số gốc khi đề cần truy vết vị trí"
+          ],
+          "interactive_ideas": [
+            "Animation các thuật toán sort cạnh nhau với số phép so sánh",
+            "Kéo điểm dữ liệu, thấy counting sort vs comparison sort"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Sắp xếp",
+            "VNOJ tag: Sort",
+            "Tài liệu chuyên Tin Quyển 2"
+          ],
+          "exam_relevance": "Tiền đề của two pointers, binary search, greedy, sweep line."
+        },
+        {
+          "id": "t2-binary-search",
+          "name_vi": "Tìm kiếm nhị phân",
+          "name_en": "Binary Search",
+          "difficulty": 2,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t2-sorting", "t1-array-prefix"],
+          "subtopics": [
+            "lower_bound / upper_bound",
+            "Tìm kiếm nhị phân trên mảng đã sort",
+            "Tìm kiếm nhị phân trên đáp án (binary search on answer)",
+            "Tìm kiếm nhị phân trên hàm đơn điệu",
+            "Ternary search (đơn điệu đoạn)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Tìm phần tử gần nhất ≤ x",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Cắt gỗ / Chặt cây (binary search on answer)",
+              "source": "VNOJ",
+              "level": 3
+            },
+            {
+              "name": "Chia kẹo / Chia mảng thành k đoạn tổng nhỏ nhất",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Cạnh hình vuông lớn nhất trong lưới",
+              "source": "HSG",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Vòng lặp while(l<=r) nhưng cập nhật l/r sai gây lặp vô hạn",
+            "Áp dụng nhị phân khi hàm không đơn điệu (điều kiện tiên quyết)",
+            "Tràn số khi tính mid = (l+r)/2 với l,r int lớn (dùng l+(r-l)/2)",
+            "Nhầm lower_bound (≥) với upper_bound (>) dẫn lệch kết quả"
+          ],
+          "interactive_ideas": [
+            "Mô phỏng đoán số 1..100, hiện vùng tìm kiếm co lại",
+            "Binary search on answer: kéo ngưỡng, hàm check đổi true/false"
+          ],
+          "vn_sources": [
+            "Lê Minh Hoàng — §Tìm kiếm",
+            "VNOI Wiki",
+            "chuyentin.pro — chuyên đề Sort & tìm kiếm nhị phân"
+          ],
+          "exam_relevance": "Kỹ thuật xuất hiện nhiều nhất trong đề HSG tỉnh và luôn trong đề QG."
+        },
+        {
+          "id": "t2-divide-conquer",
+          "name_vi": "Chia để trị",
+          "name_en": "Divide and Conquer",
+          "difficulty": 3,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-recursion", "t2-sorting"],
+          "subtopics": [
+            "Tư tưởng chia–trị–hợp",
+            "Merge sort & đếm nghịch thế",
+            "Quick select (phần tử thứ k)",
+            "Cặp điểm gần nhất",
+            "Chia để trị trên mảng (max subarray)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm cặp nghịch thế (merge sort)",
+              "source": "classic / VNOJ",
+              "level": 3
+            },
+            {
+              "name": "Maximum subarray (chia để trị)",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Cặp điểm gần nhất O(n log n)",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Phần tử thứ k (quick select)",
+              "source": "classic",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Sai bước hợp (combine) — thường là nguồn bug chính",
+            "Không chứng minh được T(n)=2T(n/2)+O(n)=O(n log n)",
+            "Chọn pivot tồi trong quick select ⇒ thoái hóa O(n²)",
+            "Quên xử lý mảng con rỗng/kích thước 1"
+          ],
+          "interactive_ideas": [
+            "Cây chia để trị động: hiện chia/cắt/hợp",
+            "Merge sort animation với bước merge tô màu"
+          ],
+          "vn_sources": ["Giải thuật và lập trình — Lê Minh Hoàng", "Tài liệu chuyên Tin Quyển 2"],
+          "exam_relevance": "Nền của merge sort, CDQ, và tối ưu QHĐ chia để trị ở Tier 4."
+        },
+        {
+          "id": "t2-brute-force",
+          "name_vi": "Vét cạn & kỹ thuật sinh",
+          "name_en": "Brute Force & Enumeration",
+          "difficulty": 2,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-recursion"],
+          "subtopics": [
+            "Vét cạn có tổ chức",
+            "Sinh nhị phân / tổ hợp / hoán vị",
+            "Duyệt bitmask tập con",
+            "Meet in the middle",
+            "Đánh giá và tối ưu vét cạn để ăn subtask"
+          ],
+          "typical_problems": [
+            {
+              "name": "Sinh mọi dãy nhị phân độ dài n",
+              "source": "Lê Minh Hoàng — Phương pháp sinh",
+              "level": 2
+            },
+            {
+              "name": "Sinh hoán vị / tổ hợp chập k",
+              "source": "Lê Minh Hoàng",
+              "level": 2
+            },
+            {
+              "name": "Đếm tập con có tổng bằng S (n≤40, meet-in-middle)",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Dò mìn / bài mô phỏng lớn",
+              "source": "HSG QG (Dò mìn)",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Vét cạn vượt giới hạn đề mà không cắt tỉa — phải đọc n trước",
+            "Sinh tổ hợp sinh cả hoán vị trùng (thiếu kiểm soát chỉ số)",
+            "Bitmask dùng 1<<n tràn khi n≥31 (dùng 1LL<<n)",
+            "Không tách file/nộp subtask — mất điểm dễ dù thuật toán đúng một phần"
+          ],
+          "interactive_ideas": [
+            "Cây liệt kê tổ hợp có/không chọn từng phần tử",
+            "Đồng hồ so sánh số trạng thái 2^n vs n!"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, PHẦN 1: Bài toán liệt kê",
+            "VNOI",
+            "hsgtin.vn"
+          ],
+          "exam_relevance": "Chiến lược thực chiến: mỗi đề QG luôn có subtask ăn được bằng vét cạn khéo."
+        },
+        {
+          "id": "t2-backtracking",
+          "name_vi": "Quay lui & nhánh cận",
+          "name_en": "Backtracking & Branch and Bound",
+          "difficulty": 3,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-recursion", "t2-brute-force"],
+          "subtopics": [
+            "Mô hình quay lui (thử–xác nhận–quay)",
+            "Ràng buộc theo trạng thái",
+            "Nhánh cận (bound) cắt tỉa",
+            "Bài toán tối ưu tổ hợp nhỏ",
+            "Kỹ thuật đặt cờ/huỷ cờ"
+          ],
+          "typical_problems": [
+            {
+              "name": "Bài toán 8 hậu / N hậu",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Mã đi tuần (knight's tour)",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Sudoku",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Người du lịch TSP (nhánh cận, n nhỏ)",
+              "source": "Lê Minh Hoàng — Kỹ thuật nhánh cận",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Quên hoàn tác trạng thái (backtrack) sau đệ quy ⇒ kết quả sai",
+            "Không sắp thứ tự thử để cận cắt sớm (heuristic ordering)",
+            "Cận tính sai/không hợp lệ ⇒ cắt nhầm nghiệm tối ưu",
+            "Không gian tìm kiếm bùng nổ, thiếu memo/visit đánh dấu"
+          ],
+          "interactive_ideas": [
+            "Bàn cờ N-hậu: đặt/huỷ quân, thấy vùng bị loại",
+            "Cây quay lui TSP với nhánh cận tô đỏ khi bị cắt"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Thuật toán quay lui & §Kỹ thuật nhánh cận",
+            "Tài liệu chuyên Tin Quyển 1"
+          ],
+          "exam_relevance": "Chuyên đề kinh điển trong đề HSG tỉnh và các bài đếm tổ hợp QG."
+        },
+        {
+          "id": "t2-bitwise",
+          "name_vi": "Toán tử bit & bitmask cơ bản",
+          "name_en": "Bitwise & Bitmask Basics",
+          "difficulty": 2,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-array-prefix"],
+          "subtopics": [
+            "AND/OR/XOR/shift",
+            "Kiểm tra/đặt/xoá bit",
+            "Biểu diễn tập hợp bằng bitmask",
+            "XOR và tính chất đối hợp",
+            "Duyệt tập con của mask"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm số bit 1 (popcount)",
+              "source": "classic",
+              "level": 1
+            },
+            {
+              "name": "Số xuất hiện lẻ lần (XOR)",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Duyệt mọi tập con của một mask",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Giao/tập hợp bằng bitmask",
+              "source": "classic",
+              "level": 2
+            }
+          ],
+          "pitfalls": [
+            "Nhầm & | ^ với && || (lỗi logic không báo compile)",
+            "Quên ưu tiên toán tử: a & b == 0 bị hiểu là a & (b==0)",
+            "Dịch trái quá 31 bit trên int gây UB",
+            "XOR khử phần tử nhưng quên trường hợp không có phần tử lẻ"
+          ],
+          "interactive_ideas": [
+            "Bảng 8 bit nhấp bật/tắt, hiện giá trị và AND/OR/XOR",
+            "Duyệt tập con mask trực quan"
+          ],
+          "vn_sources": ["Tài liệu chuyên Tin Quyển 2/3", "USACO Guide — Bitwise"],
+          "exam_relevance": "Cầu nối trực tiếp tới QHĐ bitmask và tối ưu bằng bit ở Tier 4."
+        },
+        {
+          "id": "t2-number-basics",
+          "name_vi": "Số học cơ bản",
+          "name_en": "Number Theory Basics",
+          "difficulty": 2,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-array-prefix"],
+          "subtopics": [
+            "Sàng nguyên tố (Eratosthenes)",
+            "Phân tích thừa số nguyên tố",
+            "GCD/LCM (thuật toán Euclid)",
+            "Xử lý modulo & tràn số",
+            "Lũy thừa nhanh (fast pow)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm số nguyên tố ≤ n",
+              "source": "VNOJ",
+              "level": 2
+            },
+            {
+              "name": "Phân tích n thành thừa số nguyên tố",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Tính a^b mod m",
+              "source": "classic",
+              "level": 2
+            },
+            {
+              "name": "Đếm ước của n! / đếm số 0 cuối n!",
+              "source": "HSG",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Sàng giới hạn nhỏ hơn n cần thiết (off-by-one)",
+            "Dùng int cho phép nhân modulo > 2^31 (phải long long trước khi mod)",
+            "Nhầm quan hệ giữa đếm ước và phân tích thừa số",
+            "Fast pow làm mất overflow do nhân trước khi mod"
+          ],
+          "interactive_ideas": [
+            "Sàng Eratosthenes animation gạch bội số",
+            "Bảng phân tích thừa số trực quan"
+          ],
+          "vn_sources": [
+            "chuyentin.pro — chuyên đề Số học",
+            "VNOI Wiki — Số học",
+            "IOI syllabus: number theory"
+          ],
+          "exam_relevance": "Số học luôn có mặt trong đề QG; là nền của Tier 4 số học/tổ hợp."
+        }
+      ]
+    },
+    {
+      "id": "tier-3",
+      "order": 3,
+      "name_vi": "Nâng cao",
+      "name_en": "Advanced",
+      "grade_band": "Lớp 10–11 (HSG tỉnh/TP, bước đầu chạm HSG QG)",
+      "goal": "Nắm các trụ cột của đề thi QG: tham lam, quy hoạch động, đồ thị, và cấu trúc dữ liệu tối ưu.",
+      "prerequisites": ["tier-2"],
+      "exit_skills": [
+        "Nhận dạng và chứng minh được tính đúng đắn của lời giải tham lam",
+        "Thiết kế được trạng thái QHĐ và chuyển trạng thái cho bài cỡ vừa",
+        "Duyệt đồ thị và phát hiện thành phần liên thông, topo, SCC, cầu/khớp",
+        "Dùng DSU, BIT, Segment Tree cho bài truy vấn cập nhật"
+      ],
+      "topics": [
+        {
+          "id": "t3-greedy",
+          "name_vi": "Tham lam",
+          "name_en": "Greedy",
+          "difficulty": 3,
+          "tracks": ["ts10", "hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t2-sorting", "t2-binary-search"],
+          "subtopics": [
+            "Tư tưởng chọn tối ưu cục bộ",
+            "Chứng minh bằng trao đổi (exchange argument)",
+            "Chọn hoạt động / phủ đoạn",
+            "Sắp xếp theo deadline",
+            "Tham lam + cấu trúc dữ liệu (heap)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Chọn nhiều hoạt động không chồng lấn nhất",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Đổi tiền (khi hệ mệnh giá chuẩn)",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Sắp lịch công việc theo deadline / lợi nhuận",
+              "source": "VNOJ",
+              "level": 3
+            },
+            {
+              "name": "Đường ống / trạm xăng (gas station)",
+              "source": "HSG / LeetCode-style",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Thấy đúng ví dụ là kết luận tham lam đúng mà không chứng minh (phản ví dụ đổi tiền)",
+            "Chọn sai tiêu chí sắp xếp (theo giá trị thay vì theo tỉ lệ/kết thúc)",
+            "Dùng tham lam cho bài cần QHĐ",
+            "Bỏ sót điều kiện ràng buộc khi tham lam từng bước"
+          ],
+          "interactive_ideas": [
+            "Bảng chọn hoạt động: kéo các thanh thời gian, thấy greedy vs QHĐ",
+            "Phản ví dụ tương tác cho coin change tham lam"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng (các bài tối ưu)",
+            "VNOI Wiki",
+            "USACO Guide — Greedy"
+          ],
+          "exam_relevance": "Bài 'cho điểm' của đề QG thường là greedy kèm chứng minh hoặc greedy + data structure."
+        },
+        {
+          "id": "t3-dp-basic",
+          "name_vi": "Quy hoạch động cơ bản",
+          "name_en": "Introductory Dynamic Programming",
+          "difficulty": 3,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-recursion", "t2-brute-force"],
+          "subtopics": [
+            "Trạng thái – chuyển – cơ sở",
+            "QHĐ trên dãy (LIS, dãy con)",
+            "Ba lô 0/1 & vô hạn (knapsack)",
+            "Xâu con chung dài nhất (LCS)",
+            "QHĐ trên lưới & biên tập xâu",
+            "Tối ưu bằng mảng cộng dồn / con trỏ"
+          ],
+          "typical_problems": [
+            {
+              "name": "Dãy con tăng dài nhất (LIS) O(n²)",
+              "source": "VNOJ / classic",
+              "level": 3
+            },
+            {
+              "name": "Ba lô 0/1 (Knapsack)",
+              "source": "classic / Lê Minh Hoàng",
+              "level": 3
+            },
+            {
+              "name": "Xâu con chung dài nhất (LCS)",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Đổi tiền (coin change)",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Số đường đi trong lưới có vật cản",
+              "source": "classic",
+              "level": 2
+            }
+          ],
+          "pitfalls": [
+            "Định nghĩa trạng thái thiếu/sai khiến không biểu diễn hết thông tin",
+            "Sai thứ tự duyệt (ba lô 0/1 phải duyệt ngược chiều khối lượng)",
+            "Không khởi tạo giá trị vô cực/âm vô cực đúng cho bài max/min",
+            "Nhầm giữa QHĐ và tham lam; bỏ qua việc tối ưu hóa bộ nhớ (rolling array)"
+          ],
+          "interactive_ideas": [
+            "Bảng QHĐ LCS/knapsack điền từng ô tương tác",
+            "So sánh đệ quy có nhớ vs QHĐ vòng lặp cùng bảng"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng",
+            "VNOJ tag: Quy hoạch động",
+            "VNOI Wiki — Quy hoạch động",
+            "USACO Guide — Intro DP"
+          ],
+          "exam_relevance": "Trụ cột lớn nhất của HSG QG; hơn nửa đề VOI chạm QHĐ ở một dạng nào đó."
+        },
+        {
+          "id": "t3-graph-traversal",
+          "name_vi": "Đồ thị cơ bản & duyệt đồ thị",
+          "name_en": "Graph Basics & Traversal (BFS/DFS/Topo)",
+          "difficulty": 3,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-stack-queue", "t1-recursion"],
+          "subtopics": [
+            "Biểu diễn đồ thị (adj list/matrix)",
+            "BFS & đường đi ngắn nhất cạnh 1",
+            "DFS & ứng dụng",
+            "Thành phần liên thông",
+            "Kiểm tra đồ thị hai phía (bipartite)",
+            "Sắp xếp tô-pô & phát hiện chu trình"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm số thành phần liên thông",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Đường đi ngắn nhất trên lưới (BFS)",
+              "source": "classic / HSG",
+              "level": 3
+            },
+            {
+              "name": "Sắp xếp tô-pô (Kahn)",
+              "source": "VNOJ",
+              "level": 3
+            },
+            {
+              "name": "Kiểm tra đồ thị hai phía / tô màu",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Mê cung / Dò mìn trên lưới",
+              "source": "HSG QG",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Đệ quy DFS quá sâu trên đồ thị lớn (tràn stack) — dùng stack hoặc tăng giới hạn",
+            "Quên đánh dấu visited ⇒ lặp vô hạn",
+            "BFS dùng queue nhưng xử lý đỉnh khi push thay vì khi pop (sai tầng)",
+            "Với đồ thị có cạnh 0/1 dùng BFS thường thay vì 0-1 BFS/Dijkstra"
+          ],
+          "interactive_ideas": [
+            "Mê cung: học sinh đổi tường, chạy BFS/DFS thấy khác nhau",
+            "Animation topo sort xoá dần đỉnh bậc vào 0"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, phần đồ thị",
+            "VNOI Wiki — Đồ thị",
+            "chuyentin.pro — Graph 1"
+          ],
+          "exam_relevance": "Đồ thị chiếm tỉ trọng lớn trong đề QG; BFS/DFS là kỹ năng bắt buộc."
+        },
+        {
+          "id": "t3-scc-bridges",
+          "name_vi": "Liên thông mạnh, khớp, cầu",
+          "name_en": "SCC, Bridges & Articulation Points",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-graph-traversal"],
+          "subtopics": [
+            "Thành phần liên thông mạnh (Tarjan/Kosaraju)",
+            "Đỉnh khớp (articulation)",
+            "Cầu (bridge)",
+            "Song liên thông (biconnected)",
+            "Thu gọn SCC thành DAG"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm số SCC của đồ thị có hướng",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Tìm cầu & đỉnh khớp",
+              "source": "VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Thu gọn SCC rồi QHĐ/đếm trên DAG",
+              "source": "VNSPOJ / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Mạng truyền tin (dùng topo/SCC)",
+              "source": "HSG QG",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Nhầm low-link với số thứ tự DFS (disc)",
+            "Không phân biệt cạnh ngược tới cha hợp lệ (đa cạnh) khi tìm cầu",
+            "Điều kiện cầu/khớp cho gốc DFS (root) bị bỏ sót",
+            "Tarjan đệ quy sâu gây tràn stack trên đồ thị lớn"
+          ],
+          "interactive_ideas": [
+            "Đồ thị có hướng: tô màu SCC theo bước Tarjan",
+            "Bấm phá một cạnh, thấy nó là cầu hay không"
+          ],
+          "vn_sources": [
+            "VNOI Wiki — Tarjan",
+            "chuyentin.pro — Graph 1 (liên thông mạnh, khớp, cầu)",
+            "VNOJ"
+          ],
+          "exam_relevance": "Dạng bài chuẩn của VNOI/HSG QG khi kết hợp đồ thị + QHĐ."
+        },
+        {
+          "id": "t3-dsu",
+          "name_vi": "Disjoint Set Union (DSU)",
+          "name_en": "Disjoint Set Union / Union-Find",
+          "difficulty": 3,
+          "tracks": ["hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-array-prefix", "t3-graph-traversal"],
+          "subtopics": [
+            "Union theo hạng/kích thước",
+            "Nén đường đi (path compression)",
+            "Đếm thành phần liên thông động",
+            "DSU có trọng số / rollback (nhập môn)",
+            "Ứng dụng Kruskal"
+          ],
+          "typical_problems": [
+            {
+              "name": "Nối cạnh, đếm số thành phần liên thông",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Kiểm tra chu trình bằng DSU",
+              "source": "classic",
+              "level": 3
+            },
+            {
+              "name": "Bạn bè / kết giao (friends)",
+              "source": "VNOJ",
+              "level": 3
+            },
+            {
+              "name": "Kruskal MST (chuẩn bị Tier 4)",
+              "source": "classic",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Chỉ cài union theo hạng mà không path compression (vẫn AC nhưng chậm)",
+            "Quên kiểm tra cùng gốc trước khi union",
+            "DSU không xử lý được xoá cạnh (phải rollback hoặc kiến trúc khác)",
+            "Nhầm find() đệ quy với đường dài gây tràn stack nếu không nén"
+          ],
+          "interactive_ideas": [
+            "Cây DSU animation: union hai nhánh, nén đường đi",
+            "Đồ thị nối dần, hiện số thành phần theo từng thao tác"
+          ],
+          "vn_sources": ["VNOI Wiki — Disjoint Set Union", "USACO Guide — DSU"],
+          "exam_relevance": "Công cụ không thể thiếu cho MST, bài thành phần, và tối ưu offline."
+        },
+        {
+          "id": "t3-fenwick",
+          "name_vi": "BIT (Fenwick Tree)",
+          "name_en": "Binary Indexed Tree (Fenwick)",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t1-array-prefix", "t2-bitwise"],
+          "subtopics": [
+            "Cập nhật điểm – truy vấn tiền tố",
+            "BIT cho tổng / max / đếm",
+            "BIT 2D",
+            "BIT + nén giá trị",
+            "BIT cho đếm nghịch thế"
+          ],
+          "typical_problems": [
+            {
+              "name": "Mảng động: point update, range sum query",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Đếm cặp nghịch thế O(n log n)",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Đếm số ≤ x trong đoạn [l,r]",
+              "source": "VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Số bộ ba tăng / truy vấn offline",
+              "source": "VNOJ",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Vòng lặp i += i & -i với i=0 gây treo",
+            "BIT max không hỗ trợ giảm giá trị (khác tổng)",
+            "Quên rời rạc hóa khi giá trị lớn",
+            "Nhầm truy vấn tiền tố với truy vấn đoạn (cần hiệu hai tiền tố)"
+          ],
+          "interactive_ideas": [
+            "Trực quan chỉ số BIT và bit thấp nhất (lowbit)",
+            "Mảng cập nhật, thấy các nút BIT nào đổi"
+          ],
+          "vn_sources": ["VNOI Wiki — Fenwick", "USACO Guide — BIT", "Tài liệu chuyên Tin Quyển 3"],
+          "exam_relevance": "Cấu trúc gọn, xuất hiện dày trong đề QG và VNOI."
+        },
+        {
+          "id": "t3-segment-tree",
+          "name_vi": "Cây phân đoạn (Segment Tree)",
+          "name_en": "Segment Tree (+ Lazy Propagation)",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-recursion", "t2-divide-conquer", "t3-fenwick"],
+          "subtopics": [
+            "Xây dựng, truy vấn, cập nhật điểm",
+            "Lazy propagation (gán/cộng khoảng)",
+            "Segment tree cho max/min/đếm",
+            "Segment tree trên cây (nhập môn)",
+            "Một số biến thể (merge sort tree, segment tree beats — nhập môn)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Range Minimum Query + point update",
+              "source": "VNOJ tag: Range Minimum Query",
+              "level": 4
+            },
+            {
+              "name": "Range add – range sum (lazy)",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Đếm số trong đoạn theo truy vấn",
+              "source": "VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Kết hợp greedy + segtree (chọn đoạn)",
+              "source": "HSG QG",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Lazy chưa đẩy xuống (push) trước khi đệ quy con",
+            "Kích thước mảng 4*n bị thiếu (dùng 4*n+5)",
+            "Merge hai nút sai (quên kết hợp cả hai con)",
+            "Lazy cộng dồn và lazy gán đè nhau mà không xử lý thứ tự"
+          ],
+          "interactive_ideas": [
+            "Cây phân đoạn tương tác: bấm nút thấy đoạn quản lý",
+            "Lazy: tô đoạn, thấy giá trị lazy lan xuống"
+          ],
+          "vn_sources": [
+            "VNOI Wiki — Tất tần tật về Segment Tree",
+            "VNOJ tag: Segment Tree",
+            "Chuyên đề Segment Tree (Scribd)"
+          ],
+          "exam_relevance": "Luôn xuất hiện trong đề QG dưới dạng kết hợp; là 'vũ khí' bắt buộc của tier QG."
+        }
+      ]
+    },
+    {
+      "id": "tier-4",
+      "order": 4,
+      "name_vi": "Chuyên sâu / Olympic",
+      "name_en": "Olympiad",
+      "grade_band": "Lớp 11–12 (HSG QG, đội tuyển Olympic, IOI)",
+      "goal": "Làm chủ các kỹ thuật nâng cao, biết kết hợp nhiều chuyên đề và tối ưu trong điều kiện đề thi.",
+      "prerequisites": ["tier-3"],
+      "exit_skills": [
+        "Thiết kế QHĐ phức tạp (bitmask, trên cây, chữ số) và tối ưu hóa QHĐ",
+        "Giải bài đồ thị nâng cao: đường đi ngắn nhất, MST, luồng, ghép cặp, LCA/HLD",
+        "Xử lý xâu bằng KMP, Z, hashing, Manacher, Trie, suffix",
+        "Vận dụng số học & tổ hợp nâng cao trong chứng minh và tối ưu"
+      ],
+      "topics": [
+        {
+          "id": "t4-dp-bitmask",
+          "name_vi": "Quy hoạch động bitmask",
+          "name_en": "Bitmask DP",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t2-bitwise", "t3-dp-basic"],
+          "subtopics": [
+            "Trạng thái = mask tập hợp",
+            "QHĐ trên tập con (submask enumeration)",
+            "TSP nhỏ (Held-Karp)",
+            "So khớp hai tập / gán việc",
+            "SOS DP (sum over subsets) — nhập môn"
+          ],
+          "typical_problems": [
+            {
+              "name": "TSP (Held-Karp, n ≤ 18)",
+              "source": "classic / Le Minh Hoàng",
+              "level": 4
+            },
+            {
+              "name": "Phân công n công việc n người (assignment)",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Đếm số cách phủ bằng domino (broken profile)",
+              "source": "classic",
+              "level": 5
+            },
+            {
+              "name": "SOS DP — đếm tập con có bit",
+              "source": "VNOJ / CF",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Không gian 2^n × n bùng nổ khi n > 20",
+            "Duyệt mask theo thứ tự sai (phải tăng dần)",
+            "submitenumeration làm O(3^n) ngoài ý muốn",
+            "Quên chi phí chuyển trạng thái từ mask sang mask | (1<<j)"
+          ],
+          "interactive_ideas": [
+            "Bảng truth-mask: chọn tập đỉnh, thấy trạng thái DP",
+            "Held-Karp trên 4-5 thành phố trực quan"
+          ],
+          "vn_sources": [
+            "VNOJ tag: Quy hoạch động bitmask",
+            "Tài liệu chuyên Tin Quyển 3",
+            "USACO Guide — Bitmask DP"
+          ],
+          "exam_relevance": "Dạng QHĐ nặng thường xuất hiện trong đề QG và kỳ thi chọn đội tuyển."
+        },
+        {
+          "id": "t4-dp-tree",
+          "name_vi": "Quy hoạch động trên cây",
+          "name_en": "Tree DP (+ Rerooting)",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-dp-basic", "t3-graph-traversal", "t3-dsu"],
+          "subtopics": [
+            "QHĐ từ lá lên gốc (post-order)",
+            "Chọn/bỏ đỉnh, đếm tập độc lập",
+            "Đường kính cây bằng DP",
+            "Đổi gốc (rerooting DP)",
+            "QHĐ cây + knapsack (knapsack on tree)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đường kính của cây",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Maximum independent set trên cây",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Sản xuất gỗ / bài QHĐ cây",
+              "source": "HSG QG (VOI 24 - wpro)",
+              "level": 4
+            },
+            {
+              "name": "Rerooting: tổng khoảng cách mọi cặp",
+              "source": "VNOJ",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Đệ quy DFS cây sâu gây tràn stack (dùng iterative / tăng stack)",
+            "Trộn chiều DP gốc–con và con–gốc",
+            "Rerooting quên trừ phần đóng góp 'không đi qua cạnh'",
+            "Bỏ sót trường hợp cây không liên thông (rừng)"
+          ],
+          "interactive_ideas": [
+            "Cây tương tác: chọn/bỏ đỉnh, hiện DP tại mỗi nút",
+            "Đổi gốc cây và thấy giá trị DP cập nhật"
+          ],
+          "vn_sources": [
+            "VNOJ tag: Quy hoạch động trên cây",
+            "VNOJ bài VOI 24 (netw, wpro)",
+            "Tài liệu chuyên Tin Quyển 3"
+          ],
+          "exam_relevance": "Gần như năm nào đề QG cũng có ít nhất một bài QHĐ trên cây."
+        },
+        {
+          "id": "t4-dp-digit",
+          "name_vi": "Quy hoạch động chữ số",
+          "name_en": "Digit DP",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-dp-basic", "t2-number-basics"],
+          "subtopics": [
+            "Đếm số thỏa điều kiện trong [L,R]",
+            "Trạng thái tight (đã chạm trần)",
+            "Đếm chữ số / tổng chữ số",
+            "Số không giảm / không chứa mẫu",
+            "QHĐ chữ số + memo"
+          ],
+          "typical_problems": [
+            {
+              "name": "Đếm số trong [L,R] có tổng chữ số bằng S",
+              "source": "classic",
+              "level": 5
+            },
+            {
+              "name": "Đếm số không chứa chữ số 4 hoặc 13",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Đếm số không giảm",
+              "source": "VNOJ / CF",
+              "level": 4
+            },
+            {
+              "name": "Đếm số chia hết cho K và tổng chữ số ...",
+              "source": "HSG QG / VNOJ",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Quên trạng thái started (số chưa bắt đầu, bỏ qua số 0 đầu)",
+            "Xử lý cận dưới L−1 sai (nên dùng f(R) − f(L−1) với f đếm ≤ n)",
+            "Memo sai khi trạng thái tight được lưu (tight không được cache chung)",
+            "Đếm trùng khi nhiều cách dẫn cùng số"
+          ],
+          "interactive_ideas": [
+            "Máy đếm digit DP: nhập L,R, thấy cây chữ số và trạng thái tight",
+            "Trực quan số không giảm từ 0..n"
+          ],
+          "vn_sources": ["VNOJ tag: Quy hoạch động chữ số", "Tài liệu chuyên Tin Quyển 3"],
+          "exam_relevance": "Dạng khó 'ăn điểm cao' trong đề QG; phân loại thí sinh giỏi."
+        },
+        {
+          "id": "t4-dp-optimize",
+          "name_vi": "Tối ưu hóa quy hoạch động",
+          "name_en": "DP Optimization (CHT, D&C, SOS, Matrix Expo)",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-dp-basic", "t3-segment-tree", "t2-divide-conquer"],
+          "subtopics": [
+            "Rolling array & giảm chiều",
+            "Convex Hull Trick (bao lồi)",
+            "Divide & Conquer DP optimization",
+            "Knuth optimization (nhập môn)",
+            "Nhân ma trận + lũy thừa nhanh",
+            "SOS DP / QHĐ thứ tự từ điển"
+          ],
+          "typical_problems": [
+            {
+              "name": "Tối ưu QHĐ bằng CHT (tối ưu dãy)",
+              "source": "VNOJ tag: Quy hoạch động bao lồi",
+              "level": 5
+            },
+            {
+              "name": "D&C DP optimization",
+              "source": "VNOJ / CF",
+              "level": 5
+            },
+            {
+              "name": "Đếm đường đi độ dài K (matrix exponentiation)",
+              "source": "classic",
+              "level": 5
+            },
+            {
+              "name": "QHĐ thứ tự từ điển",
+              "source": "VNOJ tag",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Áp dụng CHT khi hàm không lồi/lõm đúng chiều",
+            "Nhân ma trận sai thứ tự / tràn số khi mod",
+            "D&C DP khi chi phí không thỏa tính đơn điệu tối ưu",
+            "Tối ưu hóa bộ nhớ làm mất giá trị cần truy vết"
+          ],
+          "interactive_ideas": [
+            "Bao lồi CHT tương tác với các đường thẳng thêm dần",
+            "Nhân ma trận lũy thừa: thấy log bước"
+          ],
+          "vn_sources": [
+            "VNOJ tag: Quy hoạch động bao lồi, Nhân ma trận, Quy hoạch động thứ tự từ điển",
+            "Tài liệu chuyên Tin Quyển 3"
+          ],
+          "exam_relevance": "Kỹ thuật đặc trưng của bài QG/đội tuyển khi O(n²) không đủ."
+        },
+        {
+          "id": "t4-shortest-path",
+          "name_vi": "Đường đi ngắn nhất",
+          "name_en": "Shortest Paths (Dijkstra, Bellman-Ford, Floyd)",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-graph-traversal", "t1-stack-queue"],
+          "subtopics": [
+            "Dijkstra + heap",
+            "Bellman-Ford & chu trình âm",
+            "Floyd-Warshall",
+            "0-1 BFS",
+            "Đường đi ngắn nhất trên DAG (topo)",
+            "Ứng dụng: đồ thị trạng thái"
+          ],
+          "typical_problems": [
+            {
+              "name": "Dijkstra trên đồ thị có trọng số dương",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Phát hiện chu trình âm (Bellman-Ford)",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Floyd-Warshall nhiều truy vấn",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Sản xuất gỗ / mạng truyền tin (đường đi)",
+              "source": "HSG QG",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Dùng Dijkstra khi có cạnh âm (sai)",
+            "priority_queue là max-heap — quên greater/negate",
+            "Không bỏ qua phần tử cũ (stale) khi pop",
+            "Floyd O(n³) với n=1000 chắc chắn TLE"
+          ],
+          "interactive_ideas": [
+            "Dijkstra animation trên bản đồ thành phố",
+            "Bellman-Ford qua các vòng lặp, thấy cạnh âm"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Bài toán đường đi ngắn nhất",
+            "VNOI Wiki",
+            "VNOJ"
+          ],
+          "exam_relevance": "Bài đồ thị 'nền' của đề QG; thường kết hợp state graph."
+        },
+        {
+          "id": "t4-mst",
+          "name_vi": "Cây khung nhỏ nhất",
+          "name_en": "Minimum Spanning Tree",
+          "difficulty": 4,
+          "tracks": ["hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t3-dsu", "t2-sorting"],
+          "subtopics": [
+            "Kruskal + DSU",
+            "Prim + heap",
+            "MST trong đồ thị đặc biệt",
+            "Ứng dụng: nối mạng chi phí nhỏ nhất",
+            "Chứng minh tính đúng (cắt)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Kruskal xây mạng chi phí nhỏ nhất",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Prim trên đồ thị dày",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "MST + truy vấn cạnh trên đường đi",
+              "source": "VNOJ / CF",
+              "level": 5
+            },
+            {
+              "name": "Nối thành phố (HSG tỉnh)",
+              "source": "HSG",
+              "level": 3
+            }
+          ],
+          "pitfalls": [
+            "Kruskal quên sắp cạnh theo trọng số",
+            "Prim chọn nhầm nút ngoài cây / quên cập nhật key",
+            "Nhầm MST với đường đi ngắn nhất (hai bài khác nhau)",
+            "Đồ thị không liên thông mà cố tạo MST (phải xử lý rừng)"
+          ],
+          "interactive_ideas": [
+            "Bản đồ: thêm cạnh dần, Kruskal tô cạnh được chọn",
+            "Prim lan từ một đỉnh"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Bài toán cây khung nhỏ nhất",
+            "VNOI Wiki — Cây khung",
+            "USACO Guide — MST"
+          ],
+          "exam_relevance": "Chuyên đề chuẩn của đề QG và các bài mạng."
+        },
+        {
+          "id": "t4-flow-matching",
+          "name_vi": "Luồng cực đại & Ghép cặp",
+          "name_en": "Max Flow & Bipartite Matching",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-graph-traversal", "t3-dsu", "t4-shortest-path"],
+          "subtopics": [
+            "Mạng luồng & lát cắt (min-cut)",
+            "Ford-Fulkerson / Edmonds-Karp",
+            "Dinic",
+            "Ghép cặp hai phía (Kuhn, Hopcroft-Karp)",
+            "Định lý König & bài toán gán (Hungarian)",
+            "Mô hình hóa bài toán thành luồng"
+          ],
+          "typical_problems": [
+            {
+              "name": "Luồng cực đại cơ bản",
+              "source": "Lê Minh Hoàng",
+              "level": 5
+            },
+            {
+              "name": "Ghép cặp cực đại đồ thị hai phía (Kuhn)",
+              "source": "classic / VNOJ",
+              "level": 5
+            },
+            {
+              "name": "Phân công công việc chi phí nhỏ nhất (Hungarian)",
+              "source": "Lê Minh Hoàng",
+              "level": 5
+            },
+            {
+              "name": "Mô hình hóa min-cut (chọn tập)",
+              "source": "HSG QG / VNOJ",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Quên cạnh ngược (residual edge) khi cài luồng",
+            "Nhầm luồng cực đại với cắt nhỏ nhất khi mô hình chưa đúng",
+            "Kuhn không reset mảng matched mỗi lượt tăng cặp",
+            "Bùng nổ số cạnh khi mô hình hóa mà không thu gọn"
+          ],
+          "interactive_ideas": [
+            "Mạng luồng: kéo dung lượng, thấy luồng chảy",
+            "Ghép cặp: tô cạnh ghép và đường tăng"
+          ],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng (luồng & ghép cặp)",
+            "VNOI Wiki",
+            "VNOJ"
+          ],
+          "exam_relevance": "Chủ đề đội tuyển/IOI; phân loại top thí sinh."
+        },
+        {
+          "id": "t4-tree-advanced",
+          "name_vi": "Kỹ thuật cây nâng cao (LCA, HLD)",
+          "name_en": "Advanced Tree Techniques (LCA, HLD)",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t3-segment-tree", "t3-graph-traversal", "t4-dp-tree"],
+          "subtopics": [
+            "LCA bằng binary lifting",
+            "Truy vấn đường đi trên cây",
+            "Heavy-Light Decomposition",
+            "Euler tour + segment tree",
+            "Cây + Truy vấn offline (DSU on tree)"
+          ],
+          "typical_problems": [
+            {
+              "name": "LCA nhiều truy vấn",
+              "source": "VNOJ / classic",
+              "level": 5
+            },
+            {
+              "name": "Tổng/đếm trên đường đi u–v",
+              "source": "VNOJ",
+              "level": 5
+            },
+            {
+              "name": "HLD + segment tree",
+              "source": "CF / VNOJ",
+              "level": 5
+            },
+            {
+              "name": "Đếm màu trên cây (DSU on tree)",
+              "source": "CF Edu",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Xây bảng binary lifting sai số tầng (log2(n))",
+            "LCA nhầm khi một nút là tổ tiên của nút kia",
+            "HLD sai thứ tự tô chuỗi (pos) khiến segment tree truy vấn sai đoạn",
+            "Euler tour cộng/trừ sai khi truy vấn đường đi"
+          ],
+          "interactive_ideas": [
+            "Cây tương tác: chọn u,v, thấy đường đi và chuỗi HLD",
+            "Binary lifting: nhảy 2^k lên tổ tiên"
+          ],
+          "vn_sources": ["VNOI Wiki", "Tài liệu chuyên Tin Quyển 3", "USACO Guide — LCA / HLD"],
+          "exam_relevance": "Nhóm bài 'cây + truy vấn' xuất hiện thường xuyên trong đề QG/đội tuyển."
+        },
+        {
+          "id": "t4-string-advanced",
+          "name_vi": "Thuật toán xâu nâng cao",
+          "name_en": "Advanced String Algorithms",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t1-string", "t2-bitwise", "t3-dp-basic"],
+          "subtopics": [
+            "Hash xâu (rolling hash)",
+            "KMP & prefix function",
+            "Z-algorithm",
+            "Manacher (palindrome)",
+            "Trie",
+            "Aho-Corasick",
+            "Suffix Array / Suffix Automaton (nhập môn)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Tìm tất cả vị trí xâu mẫu trong xâu (KMP)",
+              "source": "classic / VNOJ",
+              "level": 4
+            },
+            {
+              "name": "Xâu con đối xứng dài nhất (Manacher)",
+              "source": "VNOJ tag: Manacher",
+              "level": 5
+            },
+            {
+              "name": "So khớp nhiều mẫu (Aho-Corasick)",
+              "source": "classic",
+              "level": 5
+            },
+            {
+              "name": "Suffix array / đếm xâu con phân biệt",
+              "source": "VNOJ tag: Suffix Array",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Hash bị đụng độ (không dùng double hash / mod lớn)",
+            "KMP xây failure function nhầm khi mẫu có tiền tố trùng",
+            "Manacher xử lý biên/độ dài chẵn lẻ sai",
+            "Trie bùng nổ bộ nhớ nếu không nén / dùng mảng động"
+          ],
+          "interactive_ideas": [
+            "KMP: thấy con trỏ mẫu nhảy theo failure",
+            "Trie: gõ từ, thấy cây tiền tố mọc"
+          ],
+          "vn_sources": [
+            "VNOJ tag: String, Suffix Array, Manacher",
+            "VNOI Wiki — Xâu",
+            "Tài liệu chuyên Tin Quyển 3"
+          ],
+          "exam_relevance": "Chuyên đề QG/IOI; thường kết hợp với QHĐ hoặc đếm."
+        },
+        {
+          "id": "t4-number-combinatorics",
+          "name_vi": "Số học & Tổ hợp nâng cao",
+          "name_en": "Advanced Number Theory & Combinatorics",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 7,
+          "prerequisites": ["t2-number-basics", "t3-dp-basic"],
+          "subtopics": [
+            "Modulo & nghịch đảo modular",
+            "Định lý Fermat nhỏ, Euler phi",
+            "Tổ hợp nCk, tam giác Pascal, Catalan",
+            "Nguyên lý bù trừ (inclusion–exclusion)",
+            "Định lý Trung Hoa (CRT)",
+            "Lũy thừa ma trận & truy hồi",
+            "Xác suất & kỳ vọng (nhập môn)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Tính C(n,k) mod p",
+              "source": "classic / VNOJ",
+              "level": 5
+            },
+            {
+              "name": "Đếm dãy bằng Catalan",
+              "source": "classic",
+              "level": 5
+            },
+            {
+              "name": "Bù trừ đếm số thỏa nhiều ràng buộc",
+              "source": "VNOJ / CF",
+              "level": 5
+            },
+            {
+              "name": "CRT / hệ phương trình đồng dư",
+              "source": "classic",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Dùng phép chia trong modulo mà không nhân nghịch đảo",
+            "Fermat chỉ đúng khi mod nguyên tố và cơ số không chia hết cho mod",
+            "Bù trừ sai dấu hoặc thiếu trường hợp giao nhiều tập",
+            "Tràn số ở giai thừa / lũy thừa trước khi mod"
+          ],
+          "interactive_ideas": ["Tam giác Pascal tương tác + nCk", "Bù trừ Venn 3 tập trực quan"],
+          "vn_sources": [
+            "Giải thuật và lập trình — Lê Minh Hoàng, §Đại số tổ hợp",
+            "VNOI Wiki — Số học",
+            "Tài liệu chuyên Tin Quyển 3",
+            "IOI syllabus"
+          ],
+          "exam_relevance": "Không thể thiếu trong đề QG; thường là 'phần khó' của bài đếm."
+        },
+        {
+          "id": "t4-geometry",
+          "name_vi": "Hình học tính toán (tùy chọn)",
+          "name_en": "Computational Geometry (optional)",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 6,
+          "prerequisites": ["t2-sorting", "t4-shortest-path"],
+          "subtopics": [
+            "Vector, tích có hướng, tích vô hướng",
+            "Kiểm tra giao/bao điểm",
+            "Bao lồi (convex hull)",
+            "Sweep line (đường quét)",
+            "Số học trên tọa độ nguyên"
+          ],
+          "typical_problems": [
+            {
+              "name": "Bao lồi tập điểm (Graham/Andrew)",
+              "source": "VNOJ tag",
+              "level": 5
+            },
+            {
+              "name": "Đếm giao điểm đoạn thẳng (sweep line)",
+              "source": "classic",
+              "level": 5
+            },
+            {
+              "name": "Diện tích đa giác",
+              "source": "VNOJ Educational Geometry",
+              "level": 4
+            },
+            {
+              "name": "Khoảng cách điểm–đoạn / hai đoạn",
+              "source": "VNOJ Educational Geometry",
+              "level": 4
+            }
+          ],
+          "pitfalls": [
+            "Sai số dấu phẩy động — ưu tiên số nguyên khi có thể",
+            "Điểm thẳng hàng làm hỏng bao lồi nếu không xử lý",
+            "Nhầm dấu tích có hướng khi kiểm tra cùng phía",
+            "Sweep line sai cấu trúc dữ liệu sự kiện"
+          ],
+          "interactive_ideas": [
+            "Bao lồi tương tác: kéo điểm, thấy hull cập nhật",
+            "Sweep line quét qua các đoạn"
+          ],
+          "vn_sources": [
+            "VNOJ Educational Geometry Contest",
+            "VNOI Wiki — Hình học",
+            "Tài liệu chuyên Tin Quyển 3"
+          ],
+          "exam_relevance": "Tùy chọn; hữu ích cho một số bài QG/IOI và kỳ thi khu vực."
+        },
+        {
+          "id": "t4-game-theory",
+          "name_vi": "Trò chơi & Sprague-Grundy (tùy chọn)",
+          "name_en": "Game Theory & Sprague-Grundy (optional)",
+          "difficulty": 5,
+          "tracks": ["hsg"],
+          "est_scenes": 5,
+          "prerequisites": ["t3-dp-basic", "t2-bitwise"],
+          "subtopics": [
+            "Trạng thái thắng/thua",
+            "Nim và XOR",
+            "Sprague-Grundy & trò chơi tổng",
+            "Trò chơi có chu kỳ (nhập môn)"
+          ],
+          "typical_problems": [
+            {
+              "name": "Nim cơ bản (XOR các đống)",
+              "source": "classic",
+              "level": 4
+            },
+            {
+              "name": "Trò chơi trên bàn cờ (thắng/thua DP)",
+              "source": "VNOJ",
+              "level": 5
+            },
+            {
+              "name": "Tổng trò chơi (Sprague-Grundy)",
+              "source": "classic",
+              "level": 5
+            }
+          ],
+          "pitfalls": [
+            "Nhầm trạng thái thắng/thua khi ván chơi có bắt buộc thắng",
+            "Grundy tính sai khi trò chơi có chu trình",
+            "Bỏ qua điều kiện thắng tức thời trong trò chơi đối kháng"
+          ],
+          "interactive_ideas": [
+            "Nim tương tác: bốc sỏi, hiện XOR",
+            "Bàn cờ trò chơi tô màu trạng thái thắng/thua"
+          ],
+          "vn_sources": [
+            "Tài liệu chuyên Tin Quyển 3",
+            "CPH (Competitive Programmer's Handbook)",
+            "Codeforces"
+          ],
+          "exam_relevance": "Tùy chọn, xuất hiện lẻ tẻ; hữu ích cho tư duy tổ hợp."
+        }
+      ]
+    }
+  ],
+  "sequencing": {
+    "note": "Thứ tự học trong mỗi tier là thứ tự đề xuất; một course = một topic. Các topic tùy chọn ở Tier 4 có thể bỏ nếu học sinh nhắm mức giải QG trở xuống.",
+    "grade_8": ["t1-complexity", "t1-array-prefix", "t1-string", "t1-stack-queue"],
+    "grade_9": [
+      "t1-hash",
+      "t1-recursion",
+      "t2-sorting",
+      "t2-binary-search",
+      "t2-brute-force",
+      "t2-backtracking"
+    ],
+    "grade_10": [
+      "t2-divide-conquer",
+      "t2-bitwise",
+      "t2-number-basics",
+      "t3-greedy",
+      "t3-dp-basic",
+      "t3-graph-traversal"
+    ],
+    "grade_11": [
+      "t3-scc-bridges",
+      "t3-dsu",
+      "t3-fenwick",
+      "t3-segment-tree",
+      "t4-dp-bitmask",
+      "t4-dp-tree",
+      "t4-shortest-path",
+      "t4-mst"
+    ],
+    "grade_12": [
+      "t4-dp-digit",
+      "t4-dp-optimize",
+      "t4-flow-matching",
+      "t4-tree-advanced",
+      "t4-string-advanced",
+      "t4-number-combinatorics",
+      "t4-geometry",
+      "t4-game-theory"
+    ]
+  },
+  "sources": [
+    {
+      "id": "vnoi-wiki",
+      "title": "VNOI Wiki",
+      "url": "https://wiki.vnoi.info/",
+      "type": "wiki",
+      "lang": "vi"
+    },
+    {
+      "id": "vnoj",
+      "title": "VNOJ — VNOI Online Judge (kèm tag chuyên đề)",
+      "url": "https://oj.vnoi.info/",
+      "type": "judge",
+      "lang": "vi"
+    },
+    {
+      "id": "vnoi-csp",
+      "title": "VNOI COPE — Chuyên Sư Phạm Online Practice",
+      "url": "https://csp.vnoi.info/",
+      "type": "judge",
+      "lang": "vi"
+    },
+    {
+      "id": "hsgtin",
+      "title": "hsgtin.vn — Ôn thi HSG Tin",
+      "url": "http://on.hsgtin.vn/",
+      "type": "judge",
+      "lang": "vi"
+    },
+    {
+      "id": "chuyentin",
+      "title": "chuyentin.pro — Học chuyên Tin online",
+      "url": "https://www.chuyentin.pro/p/chuong-trinh-hoc.html",
+      "type": "course",
+      "lang": "vi"
+    },
+    {
+      "id": "leminhhoang",
+      "title": "Lê Minh Hoàng — Giải thuật và lập trình",
+      "url": "https://dilib.vn/giai-thuat-va-lap-trinh-1258.html",
+      "type": "book",
+      "lang": "vi"
+    },
+    {
+      "id": "chuyentin-textbook",
+      "title": "Tài liệu giáo khoa chuyên Tin (Quyển 1–3)",
+      "url": "https://www.hdbmtinhoc.info/2017/11/tai-lieu-boi-duong-hoc-sinh-gioi.html",
+      "type": "book",
+      "lang": "vi"
+    },
+    {
+      "id": "ioi-syllabus",
+      "title": "IOI Syllabus (official)",
+      "url": "https://ioinformatics.org/page/syllabus/12",
+      "type": "syllabus",
+      "lang": "en"
+    },
+    {
+      "id": "usaco-guide",
+      "title": "USACO Guide",
+      "url": "https://usaco.guide/",
+      "type": "curriculum",
+      "lang": "en"
+    },
+    {
+      "id": "cph",
+      "title": "Competitive Programmer's Handbook — Antti Laaksonen",
+      "url": "https://cses.fi/book/book.pdf",
+      "type": "book",
+      "lang": "en"
+    },
+    {
+      "id": "codeforces",
+      "title": "Codeforces (luyện tập theo rating/tag)",
+      "url": "https://codeforces.com/",
+      "type": "judge",
+      "lang": "en"
+    },
+    {
+      "id": "hsgqg-results",
+      "title": "Kết quả & đề thi HSG QG Tin 2025–2026",
+      "url": "https://vnexpress.net/danh-sach-thu-khoa-ky-thi-hoc-sinh-gioi-quoc-gia-nam-hoc-2025-2026-o-tat-ca-13-mon-5007442.html",
+      "type": "exam",
+      "lang": "vi"
+    }
+  ],
+  "exam_profile": {
+    "hsgqg_format_vi": "Thi lập trình trên máy 2 buổi; mỗi buổi khoảng 3 bài, chấm theo subtask (điểm thành phần). Cấu trúc thường: 1 bài cơ bản cho điểm, 1–2 bài nâng cao, 1 bài rất khó phân loại top.",
+    "topic_weight_note_vi": "Theo phân tích đề các năm, trên 70% bài thuộc nhóm thuật toán nâng cao (QHĐ, đồ thị, cấu trúc dữ liệu, xâu, số học). QHĐ và đồ thị là hai mảng lớn nhất.",
+    "vnoi_tags_used": [
+      "Mảng cộng dồn",
+      "Monotonic Queue",
+      "Quy hoạch động",
+      "Quy hoạch động bao lồi",
+      "Quy hoạch động bitmask",
+      "Quy hoạch động chữ số",
+      "Quy hoạch động thứ tự từ điển",
+      "Quy hoạch động trên cây",
+      "Range Minimum Query",
+      "Rời rạc hóa",
+      "Segment Tree",
+      "Số học",
+      "String",
+      "Suffix Array / Suffix Automaton / Suffix Tree",
+      "Manacher",
+      "Sweep line",
+      "Nhân ma trận",
+      "2 con trỏ",
+      "Output Only"
+    ],
+    "ts10_format_vi": "[Unverified] Chưa có nguồn chính thức cho thể thức đề tuyển sinh lớp 10 chuyên Tin của từng trường (số bài, thời gian, ngôn ngữ được dùng — C++/Python/Pascal —, chấm theo test hay subtask). Hội đồng LLM Tin research kèm nguồn (URL); không có nguồn thì giữ [Unverified] và không dùng như sự thật trong bài giảng."
+  },
+  "provenance": {
+    "note_vi": "Tổng hợp và diễn đạt lại; không chép nguyên văn đề thi hay giáo trình. `sources` và `vn_sources` chỉ là con trỏ tới tài liệu tham khảo.",
+    "review_status": "Chưa rà soát bản quyền/giấy phép của các nguồn; đây không phải đánh giá pháp lý.",
+    "review_needed_vi": [
+      "Theo rà soát của chuyên gia (chưa kiểm lại): các URL Scribd, hdbmtinhoc.info, baitaponha.com trong `vn_sources` nên chỉ giữ dạng liên kết tham khảo.",
+      "Theo rà soát của chuyên gia (chưa kiểm lại): nguồn `hsgqg-results` (tiêu đề 'Kết quả & đề thi') trỏ tới danh sách thủ khoa của VnExpress, không chứng minh được `exam_profile`.",
+      "Số liệu '>70% bài thuộc nhóm thuật toán nâng cao' và cấu trúc '2 buổi × 3 bài' trong `exam_profile` chưa có nguồn: coi là ước lượng."
+    ],
+    "estimate_fields": ["exam_profile.hsgqg_format_vi", "exam_profile.topic_weight_note_vi"],
+    "tracks_added": "2026-09-30: thêm tracks (ts10/hsg), tracks_def, exam_profile.ts10_format_vi theo ADR 0012."
+  },
+  "tracks_def": {
+    "ts10": "Thi vào lớp 10 chuyên Tin (học sinh lớp 8–9). Mặc định: tier 1, tier 2 và t3-greedy.",
+    "hsg": "HSG Tin cấp tỉnh/TP và Quốc gia, đội tuyển. Mặc định: tier 2, tier 3, tier 4.",
+    "_note": "[Inference] Gắn nhãn theo tier và grade_band; hội đồng LLM Tin duyệt (ADR 0012, ADR 0014)."
+  }
+}

@@ -72,8 +72,9 @@ next-env.d.ts
 /data
 /logs
 
-# docs
-/docs
+# docs (design docs under docs/tutor are tracked)
+/docs/*
+!/docs/tutor/
 # Eval results
 eval/whiteboard-layout/results/
 eval/outline-language/results/
