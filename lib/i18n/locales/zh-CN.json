@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "播放",
+      "pause": "暂停",
+      "prev": "上一步",
+      "next": "下一步",
+      "reset": "重置",
+      "speed": "速度",
+      "explanation": "讲解",
+      "pseudocode": "伪代码",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "关键步骤",
+      "preset": "预设",
+      "variables": "变量",
+      "predict": "预测",
+      "skip": "跳过",
+      "blocked": "此内容已被关闭",
+      "blockedHint": "应用不提供面向学生的代码编辑与运行功能",
+      "input": "输入",
+      "apply": "应用",
+      "inputError": "输入无效"
+    }
   }
 }

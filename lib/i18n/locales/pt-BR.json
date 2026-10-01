@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "prev": "Anterior",
+      "next": "Próximo",
+      "reset": "Redefinir",
+      "speed": "Velocidade",
+      "explanation": "Explicação",
+      "pseudocode": "Pseudocódigo",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "Etapas principais",
+      "preset": "Predefinição",
+      "variables": "Variáveis",
+      "predict": "Prever",
+      "skip": "Pular",
+      "blocked": "Este conteúdo foi desativado",
+      "blockedHint": "O aplicativo não tem editor nem execução de código para os alunos",
+      "input": "Entrada",
+      "apply": "Aplicar",
+      "inputError": "Entrada inválida"
+    }
   }
 }

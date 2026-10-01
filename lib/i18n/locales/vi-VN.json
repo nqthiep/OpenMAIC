@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "Phát",
+      "pause": "Tạm dừng",
+      "prev": "Trước",
+      "next": "Tiếp",
+      "reset": "Đặt lại",
+      "speed": "Tốc độ",
+      "explanation": "Giải thích",
+      "pseudocode": "Mã giả",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "Các bước chính",
+      "preset": "Mẫu có sẵn",
+      "variables": "Biến",
+      "predict": "Dự đoán",
+      "skip": "Bỏ qua",
+      "blocked": "Nội dung này đã bị tắt",
+      "blockedHint": "Ứng dụng không có trình soạn và chạy code cho học sinh",
+      "input": "Đầu vào",
+      "apply": "Áp dụng",
+      "inputError": "Đầu vào không hợp lệ"
+    }
   }
 }

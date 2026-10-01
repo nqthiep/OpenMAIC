@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "再生",
+      "pause": "一時停止",
+      "prev": "前へ",
+      "next": "次へ",
+      "reset": "リセット",
+      "speed": "速度",
+      "explanation": "解説",
+      "pseudocode": "疑似コード",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "重要なステップ",
+      "preset": "プリセット",
+      "variables": "変数",
+      "predict": "予測",
+      "skip": "スキップ",
+      "blocked": "このコンテンツはオフになっています",
+      "blockedHint": "このアプリには、生徒向けのコードエディタと実行機能がありません",
+      "input": "入力",
+      "apply": "適用",
+      "inputError": "入力が無効です"
+    }
   }
 }
