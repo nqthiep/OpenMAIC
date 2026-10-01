@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "播放",
+      "pause": "暫停",
+      "prev": "上一步",
+      "next": "下一步",
+      "reset": "重設",
+      "speed": "速度",
+      "explanation": "講解",
+      "pseudocode": "虛擬碼",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "關鍵步驟",
+      "preset": "預設",
+      "variables": "變數",
+      "predict": "預測",
+      "skip": "跳過",
+      "blocked": "此內容已被關閉",
+      "blockedHint": "應用程式不提供給學生的程式碼編輯與執行功能",
+      "input": "輸入",
+      "apply": "套用",
+      "inputError": "輸入無效"
+    }
   }
 }

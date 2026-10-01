@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "재생",
+      "pause": "일시정지",
+      "prev": "이전",
+      "next": "다음",
+      "reset": "초기화",
+      "speed": "속도",
+      "explanation": "설명",
+      "pseudocode": "의사코드",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "핵심 단계",
+      "preset": "프리셋",
+      "variables": "변수",
+      "predict": "예측",
+      "skip": "건너뛰기",
+      "blocked": "이 콘텐츠는 꺼져 있습니다",
+      "blockedHint": "이 앱에는 학생용 코드 편집기와 실행기가 없습니다",
+      "input": "입력",
+      "apply": "적용",
+      "inputError": "잘못된 입력"
+    }
   }
 }

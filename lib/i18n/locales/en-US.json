@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "Play",
+      "pause": "Pause",
+      "prev": "Previous",
+      "next": "Next",
+      "reset": "Reset",
+      "speed": "Speed",
+      "explanation": "Explanation",
+      "pseudocode": "Pseudocode",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "Key steps",
+      "preset": "Preset",
+      "variables": "Variables",
+      "predict": "Predict",
+      "skip": "Skip",
+      "blocked": "This content has been turned off",
+      "blockedHint": "The app has no editor or runner for student code",
+      "input": "Input",
+      "apply": "Apply",
+      "inputError": "Invalid input"
+    }
   }
 }

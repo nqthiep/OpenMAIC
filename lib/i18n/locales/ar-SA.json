@@ -2035,5 +2035,29 @@
         "materialExtraction": null
       }
     }
+  },
+  "subject": {
+    "tutor": {
+      "play": "تشغيل",
+      "pause": "إيقاف مؤقت",
+      "prev": "السابق",
+      "next": "التالي",
+      "reset": "إعادة ضبط",
+      "speed": "السرعة",
+      "explanation": "الشرح",
+      "pseudocode": "الشيفرة الزائفة",
+      "cpp": "C++",
+      "python": "Python",
+      "beats": "الخطوات الرئيسية",
+      "preset": "إعداد مسبق",
+      "variables": "المتغيرات",
+      "predict": "توقّع",
+      "skip": "تخطّي",
+      "blocked": "تم إيقاف هذا المحتوى",
+      "blockedHint": "لا يوفّر التطبيق محرّر أكواد ولا تشغيلها للطلاب",
+      "input": "الإدخال",
+      "apply": "تطبيق",
+      "inputError": "إدخال غير صالح"
+    }
   }
 }
