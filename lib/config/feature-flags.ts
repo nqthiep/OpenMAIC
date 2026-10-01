@@ -143,3 +143,16 @@ export function isVideoExportEnabled(): boolean {
 export function isPptxImportEnabled(): boolean {
   return readBoolean(process.env.NEXT_PUBLIC_ENABLE_PPTX_IMPORT);
 }
+
+/**
+ * Server-only gate for the student-code widget ("code" widget type). Default
+ * OFF: the widget is blocked on a deployment unless this is set explicitly.
+ */
+export function isCodeWidgetAllowed(): boolean {
+  return readBoolean(process.env.OPENMAIC_ALLOW_CODE_WIDGET);
+}
+
+/** Server-only kill-switch that disables all widget providers. Default OFF. */
+export function isWidgetProvidersDisabled(): boolean {
+  return readBoolean(process.env.OPENMAIC_DISABLE_WIDGET_PROVIDERS);
+}
