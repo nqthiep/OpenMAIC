@@ -121,6 +121,8 @@ The type does not prove that edge endpoints or reveal ids exist in `nodes`.
 
 ## `code`
 
+Blocked on this deployment (`OPENMAIC_ALLOW_CODE_WIDGET` unset). Do not generate.
+
 | Field | Type | Required | Legal values / meaning |
 | --- | --- | --- | --- |
 | `type` | `"code"` | yes | discriminator |

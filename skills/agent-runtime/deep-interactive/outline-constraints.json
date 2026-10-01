@@ -3,7 +3,7 @@
   "allowedTypes": ["slide", "quiz", "interactive"],
   "firstSceneType": "slide",
   "typeMix": [{ "type": "interactive", "minRatio": 0.6 }],
-  "allowedWidgetTypes": ["simulation", "diagram", "code", "game", "visualization3d"],
+  "allowedWidgetTypes": ["simulation", "diagram", "game", "visualization3d"],
   "requiredWidgetOutlineFields": ["concept"],
   "noConsecutiveSameWidgetType": true
 }
