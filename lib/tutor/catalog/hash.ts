@@ -84,8 +84,10 @@ export function entryContentHash(entry: WalkthroughEntry): string {
   return hash16({
     code: entry.code,
     beatDefs: hashableBeatDefs(entry.beatDefs),
-    presets: entry.presets.map((p) => ({ id: p.id, input: p.input })),
+    presets: entry.presets.map((p) => ({ id: p.id, input: p.input, label: p.label })),
     problem: entry.problem ?? null,
+    title: entry.title,
+    pitfalls: entry.pitfalls ?? [],
     predictAnswers: predictAnswers(entry),
   });
 }
