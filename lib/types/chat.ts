@@ -314,6 +314,18 @@ export interface SlideElementReference {
 }
 
 /**
+ * Where a walkthrough widget of the current scene is (ADR 0009 step 1). Ids and numbers only —
+ * the server re-derives every word from the catalog. `input` exists only for preset `student`.
+ */
+export interface ChatWidgetState {
+  sceneId: string;
+  walkthroughId: string;
+  preset: string;
+  frame: number;
+  input?: unknown;
+}
+
+/**
  * Request body for the stateless chat API
  * All state is sent from the client on each request
  */
@@ -350,6 +362,8 @@ export interface StatelessChatRequest {
         aiComment?: string;
       }>;
     };
+    /** Widget position of the CURRENT scene, only once its iframe is `ready`. Absent otherwise. */
+    widgetState?: ChatWidgetState;
   };
   /** Optional Pi-only, identity-only reference to one slide element. */
   elementReference?: SlideElementReference;
