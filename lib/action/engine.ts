@@ -55,8 +55,23 @@ import {
 } from '@/lib/choreography';
 import katex from 'katex';
 import { createLogger } from '@/lib/logger';
+import { useWidgetRuntimeState } from '@/lib/store/widget-runtime-state';
 
 const log = createLogger('ActionEngine');
+
+/** Max wait for a prediction answer; on timeout the engine carries on (= skipped). */
+export const PREDICT_WAIT_MS = 20_000;
+
+/** Timer pair, injectable so the prediction wait is unit-testable. */
+export interface PredictTimer {
+  set: (fn: () => void, ms: number) => unknown;
+  clear: (handle: unknown) => void;
+}
+
+const REAL_TIMER: PredictTimer = {
+  set: (fn, ms) => setTimeout(fn, ms),
+  clear: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
+};
 
 // ==================== SVG Paths for Shapes ====================
 
@@ -181,16 +196,19 @@ export class ActionEngine {
   private audioPlayer: AudioPlayer | null;
   private effectTimer: ReturnType<typeof setTimeout> | null = null;
   private widgetMessageCallback: WidgetMessageCallback | null = null;
+  private predictTimer: PredictTimer;
 
   constructor(
     stageStore: StageStore,
     audioPlayer?: AudioPlayer | null,
     widgetMessageCallback?: WidgetMessageCallback | null,
+    predictTimer?: PredictTimer,
   ) {
     this.stageStore = stageStore;
     this.stageAPI = createStageAPI(stageStore);
     this.audioPlayer = audioPlayer ?? null;
     this.widgetMessageCallback = widgetMessageCallback ?? null;
+    this.predictTimer = predictTimer ?? REAL_TIMER;
   }
 
   /** Set callback for sending messages to widget iframe */
@@ -276,7 +294,7 @@ export class ActionEngine {
       case 'widget_highlight':
         return this.executeWidgetHighlight(action as WidgetHighlightAction);
       case 'widget_setState':
-        return this.executeWidgetSetState(action as WidgetSetStateAction);
+        return this.executeWidgetSetState(action as WidgetSetStateAction, options);
       case 'widget_annotation':
         return this.executeWidgetAnnotation(action as WidgetAnnotationAction);
       case 'widget_reveal':
@@ -879,10 +897,48 @@ export class ActionEngine {
   }
 
   /** Execute widget setState action */
-  private async executeWidgetSetState(action: WidgetSetStateAction): Promise<void> {
+  private async executeWidgetSetState(
+    action: WidgetSetStateAction,
+    options: ActionExecutionOptions = {},
+  ): Promise<void> {
+    // Prediction question: after sending, wait for the learner's answer (INTERFACES §1 item 6).
+    // `execute` returns early for silent mode, so silent/export never gets here.
+    const beatId = (action.state.predict as { beatId?: unknown } | undefined)?.beatId;
+    const sceneId = typeof beatId === 'string' ? this.stageStore.getState().currentSceneId : null;
+    // An older answer for the same beat (replay) does not count: wait for a new `state`.
+    const stale = sceneId ? useWidgetRuntimeState.getState().byScene[sceneId]?.state : undefined;
     this.sendWidgetMessage('SET_WIDGET_STATE', { state: action.state, content: action.content });
     // Quick delay for state change to propagate
     await delay(WIDGET_MS);
+    if (sceneId && typeof beatId === 'string') {
+      await this.waitForPrediction(sceneId, beatId, stale, options.signal);
+    }
+  }
+
+  /** Resolves when `widget-state` carries a prediction for `beatId` (answered or skipped), on timeout or on abort. */
+  private waitForPrediction(
+    sceneId: string,
+    beatId: string,
+    stale: unknown,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const answered = (byScene: ReturnType<typeof useWidgetRuntimeState.getState>['byScene']) => {
+        const state = byScene[sceneId]?.state;
+        return state !== stale && state?.prediction?.beatId === beatId;
+      };
+      let unsubscribe = () => {};
+      const finish = () => {
+        unsubscribe();
+        this.predictTimer.clear(timer);
+        signal?.removeEventListener('abort', finish);
+        resolve();
+      };
+      const timer = this.predictTimer.set(finish, PREDICT_WAIT_MS);
+      unsubscribe = useWidgetRuntimeState.subscribe((s) => answered(s.byScene) && finish());
+      signal?.addEventListener('abort', finish, { once: true });
+      if (signal?.aborted || answered(useWidgetRuntimeState.getState().byScene)) finish();
+    });
   }
 
   /** Execute widget annotation action */
