@@ -40,6 +40,7 @@ import { resolveModelFromRequest } from '@/lib/server/resolve-model';
 import { sortDocumentImagesForVision } from '@/lib/document/bundle';
 import { resolveVisionImagesForPrompt } from '@/lib/persistence/resolve-vision-images';
 import { resolveVocationalActive } from '@/lib/config/feature-flags';
+import { coerceCodeOutline } from './coerce-code-outline';
 const log = createLogger('Outlines Stream');
 
 export const maxDuration = 300;
@@ -584,9 +585,11 @@ export async function POST(req: NextRequest) {
                     ...outline,
                     order: parsedOutlines.length + 1,
                   };
+                  // The task-engine branch keeps `code` here (tests/generation/task-engine-outline-route
+                  // pins it); scene-content still coerces it before generation.
                   const normalized = taskEngineMode
                     ? normalizeTaskEngineOutline(enrichedBase, requirements.requirement)
-                    : sanitizeNonTaskEngineOutline(enrichedBase);
+                    : coerceCodeOutline(sanitizeNonTaskEngineOutline(enrichedBase));
                   const enriched = ensureUniqueOutlineId(normalized, usedOutlineIds);
                   parsedOutlines.push(enriched);
 
