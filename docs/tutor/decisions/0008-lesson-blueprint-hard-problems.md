@@ -117,7 +117,7 @@ Mỗi bài/thuật toán khó đi qua chuỗi giai đoạn sau; mỗi giai đo�
   - Đưa gợi ý mức 1 trước; chỉ đưa lời giải khi học sinh yêu cầu hoặc đã qua mức 3.
   - Luôn bám frame hiện tại.
   - Dùng `wb_*` cho phần dài.
-- **Độ dài:** lời thầy khi Q&A bị giới hạn khoảng 100 ký tự (`lib/orchestration/prompt-builder.ts:186`); action không tính vào giới hạn (`:182`). Với scene walkthrough, `buildLengthGuidelines` dùng ngân sách **"tutor"** khoảng 300 ký tự, cộng `wb_*` cho phần dài. Đây là sửa ở tầng app (`lib/orchestration/prompt-builder.ts`), đo bằng `eval:tutor-qa` [Inference].
+- **Độ dài:** lời thầy khi Q&A bị giới hạn khoảng 100 ký tự (`lib/orchestration/prompt-builder.ts:194`); action không tính vào giới hạn (`:182`). Với scene walkthrough, `buildLengthGuidelines` dùng ngân sách **"tutor"** khoảng 300 ký tự, cộng `wb_*` cho phần dài. Đây là sửa ở tầng app (`lib/orchestration/prompt-builder.ts`), đo bằng `eval:tutor-qa` [Inference].
 - **Kênh `wb_*` tới chat agent:** spike S2b chuyển vào lát 1c (trước đây ở Phase 2).
 - **Học sinh mang đề riêng tới hỏi:** ngoài phạm vi Phase 1–2. Thầy trả lời bằng chat + `wb_*` như hiện có, không có walkthrough cho đề lạ (ADR 0006 §5).
 

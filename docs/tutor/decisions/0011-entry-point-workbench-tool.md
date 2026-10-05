@@ -18,7 +18,7 @@
 | Tool của agent được đăng ký ở `buildDslCourseToolset` và phải có trong `buildCourseAllowlist`; tool **ghi tài liệu** còn phải có trong `STAGE_WRITER_TOOL_NAMES` để chạy tuần tự và được workbench cấp quyền ghi. Đã có tiền lệ đăng ký có điều kiện: `generate_video`. | `lib/server/agent-runtime/course-tools.ts:204-237`; `lib/agent-runtime/stage-writer-tools.ts:20` |
 | `generate_scene` gọi LLM sinh nội dung (`:387`), rồi gọi LLM sinh action (`:445`), rồi mới dựng `Scene` (`:450`). | `lib/server/agent-runtime/generation-tools.ts` |
 | `generate_actions` dựng lại outline từ scene. Outline này không có `walkthroughId` vì `generate_scene` không lưu outline. | `lib/server/agent-runtime/generation-tools.ts:130-143,513-537` |
-| `duplicate_scene` chép một trang sang vị trí mới, không kèm action. | `lib/server/agent-runtime/generation-tools.ts:581-600` |
+| `duplicate_scene` chép một trang sang vị trí mới, không kèm action. | `lib/server/agent-runtime/generation-tools.ts:609-600` |
 | `generate_video` trả tham chiếu ngay, video dựng nền. Tool đó "never edits a page itself"; agent phải tự vá `mediaRef` bằng `patch_stage`. | `lib/server/agent-runtime/generate-video.ts:480-483` |
 | Đường classic (`scene-outlines-stream` → `scene-content`) không nhận skill. Route `scene-content` nhận outline do client gửi lên. | `app/api/generate/scene-content/route.ts:65-105` |
 
