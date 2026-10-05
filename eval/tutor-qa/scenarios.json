@@ -1,0 +1,198 @@
+{
+  "entryId": "binary-search",
+  "locale": "vi-VN",
+  "scenarios": [
+    {
+      "id": "mh2-01",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "Sao mid lại bằng 4 ạ?",
+      "expectedFacts": ["lo = 0 và hi = 9", "mid = ⌊(0 + 9) / 2⌋ = 4"]
+    },
+    {
+      "id": "mh2-02",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "a[mid] đang bằng bao nhiêu, và nó so với target thế nào?",
+      "expectedFacts": ["a[mid] = a[4] = 25", "target = 25", "a[mid] bằng target"]
+    },
+    {
+      "id": "mh2-03",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "Bước tiếp theo thì lo hay hi sẽ đổi ạ?",
+      "expectedFacts": [
+        "lo và hi đều không đổi",
+        "a[mid] = target nên đã tìm thấy",
+        "kết quả là chỉ số 4"
+      ]
+    },
+    {
+      "id": "mh2-04",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "Em nghĩ cứ đặt lo = mid là xong, không cần +1, vì vòng lặp vẫn dừng được. Đúng không thầy?",
+      "expectedFacts": [
+        "lo = mid (không +1) có thể làm vòng lặp không bao giờ dừng, vì mid đã được xét rồi",
+        "cập nhật đúng là lo = mid + 1"
+      ],
+      "misconceptionId": "mid#0"
+    },
+    {
+      "id": "mh2-05",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "Mid là phần tử giữa của cả mảng đúng không ạ? Lần sau lo đổi thì mid có đổi không?",
+      "expectedFacts": [
+        "mid là phần tử giữa của khoảng [lo, hi], không phải của cả mảng",
+        "khi lo hoặc hi đổi thì mid được tính lại",
+        "lúc này lo = 0, hi = 9 nên khoảng là cả mảng"
+      ],
+      "misconceptionId": "mid#1"
+    },
+    {
+      "id": "mh2-06",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "Thầy cho em đáp án luôn đi: hàm sẽ trả về gì?",
+      "expectedFacts": ["hàm trả về chỉ số 4", "a[4] = 25 bằng target 25"],
+      "fullAnswerRequested": true
+    },
+    {
+      "id": "mh2-07",
+      "presetId": "mid-hit",
+      "frame": 2,
+      "question": "Tại sao chỉ so sánh một lần mà đã biết kết quả ạ? Em tưởng phải duyệt cả mảng.",
+      "expectedFacts": [
+        "a[4] = 25 bằng target = 25 ngay ở lần so sánh đầu",
+        "không cần xét các phần tử còn lại"
+      ]
+    },
+
+    {
+      "id": "ab3-01",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "Tại sao lo lại thành 5 mà không phải 4 ạ?",
+      "expectedFacts": [
+        "a[4] = 25 nhỏ hơn target = 45",
+        "mid = 4 đã được xét nên bỏ cả mid",
+        "lo = mid + 1 = 5"
+      ]
+    },
+    {
+      "id": "ab3-02",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "Nửa trái bị loại là những chỉ số nào ạ?",
+      "expectedFacts": [
+        "các chỉ số 0 đến 4 bị loại (gồm cả mid = 4)",
+        "còn lại các chỉ số 5 đến 9",
+        "lo = 5, hi = 9"
+      ]
+    },
+    {
+      "id": "ab3-03",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "a[mid] đang bằng bao nhiêu và so với 45 thế nào?",
+      "expectedFacts": ["a[mid] = a[4] = 25", "25 nhỏ hơn target = 45"]
+    },
+    {
+      "id": "ab3-04",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "Sao không đặt lo = mid luôn cho gọn ạ? Em thấy vẫn chạy được.",
+      "expectedFacts": [
+        "lo = mid giữ lại chỉ số 4, mà phần tử này đã được xét",
+        "có thể làm vòng lặp lặp mãi",
+        "phải đặt lo = mid + 1 = 5"
+      ],
+      "misconceptionId": "go-right#0"
+    },
+    {
+      "id": "ab3-05",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "Mảng có 10 phần tử, giờ còn bao nhiêu phần tử cần xét ạ?",
+      "expectedFacts": ["còn 5 phần tử, ở chỉ số 5 đến 9"]
+    },
+    {
+      "id": "ab3-06",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "Cho em biết luôn lần tới mid sẽ bằng bao nhiêu và a[mid] là gì đi thầy.",
+      "expectedFacts": ["mid tiếp theo = ⌊(5 + 9) / 2⌋ = 7", "a[7] = 52"],
+      "fullAnswerRequested": true
+    },
+    {
+      "id": "ab3-07",
+      "presetId": "absent",
+      "frame": 3,
+      "question": "Nếu mảng không sắp xếp thì việc bỏ nửa trái như vậy còn đúng không ạ?",
+      "expectedFacts": [
+        "tìm nhị phân chỉ đúng trên mảng đã sắp xếp tăng dần",
+        "mảng này đã sắp xếp nên các phần tử ở chỉ số 0 đến 4 đều không lớn hơn 25, không thể bằng 45"
+      ]
+    },
+
+    {
+      "id": "ab13-01",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Sao lo lại lớn hơn hi vậy thầy?",
+      "expectedFacts": [
+        "lo = 7 và hi = 6",
+        "a[6] = 40 nhỏ hơn 45 nên lo = mid + 1 = 7",
+        "lo > hi nghĩa là khoảng tìm rỗng"
+      ]
+    },
+    {
+      "id": "ab13-02",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Vậy 45 có trong mảng không ạ?",
+      "expectedFacts": ["45 không có trong mảng", "hàm trả về −1"]
+    },
+    {
+      "id": "ab13-03",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Không thấy 45 thì hàm trả về vị trí gần nhất là 6 đúng không ạ?",
+      "expectedFacts": ["hàm trả về −1, không phải vị trí gần nhất", "−1 nghĩa là không tìm thấy"],
+      "misconceptionId": "done#0"
+    },
+    {
+      "id": "ab13-04",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Vòng lặp dừng vì lý do nào ạ?",
+      "expectedFacts": [
+        "dừng vì lo > hi (7 > 6): khoảng tìm rỗng",
+        "không có lần nào a[mid] = target"
+      ]
+    },
+    {
+      "id": "ab13-05",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Lần so sánh cuối cùng là với phần tử nào ạ?",
+      "expectedFacts": ["mid = 6, a[6] = 40", "40 nhỏ hơn target = 45"]
+    },
+    {
+      "id": "ab13-06",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Thầy nói thẳng giá trị trả về là bao nhiêu đi ạ.",
+      "expectedFacts": ["giá trị trả về là −1"],
+      "fullAnswerRequested": true
+    },
+    {
+      "id": "ab13-07",
+      "presetId": "absent",
+      "frame": 13,
+      "question": "Lúc này khoảng tìm còn phần tử nào không ạ?",
+      "expectedFacts": ["không còn phần tử nào: lo = 7 > hi = 6", "khoảng tìm rỗng"]
+    }
+  ]
+}
