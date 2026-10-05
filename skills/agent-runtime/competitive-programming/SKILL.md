@@ -53,3 +53,21 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | --- | --- | --- | --- |
 | `binary-search` | Binary search | `mid-hit`, `first`, `absent`, `single` | `t2-binary-search` |
 <!-- END GENERATED: walkthrough-ids -->
+
+## Khi học sinh hỏi (Q&A)
+
+Skill này chỉ tới agent workbench lúc soạn bài, **không tới chat agent**. Hành vi trả lời câu hỏi của học sinh nằm ở `describe()` của walkthrough (hints, misconceptions theo từng beat) và prompt chat (`lib/orchestration/prompt-builder.ts`, `lib/chat/pi/prompts.ts`), không cài trong skill này. Mục này chỉ nói bài soạn phải mang gì để phần đó chạy được.
+
+Chat agent được dặn ở nơi khác (ADR 0008 Decision 6, CONTENT-DESIGN §4 điều 10) trả lời theo thang gợi ý:
+
+1. Hỏi lại học sinh đang nghĩ gì.
+2. Đưa `hints[0]`, rồi `hints[1]`, rồi `hints[2]`; chỉ đưa lời giải khi học sinh yêu cầu.
+3. Câu hỏi khớp một `misconception` thì gọi tên hiểu lầm và cho phản ví dụ.
+4. Phần dài dùng `wb_*`.
+
+Vì vậy khi soạn bài:
+
+- Mỗi beat của walkthrough phải có đủ **3 `hints`** theo mức tăng dần (gợi hướng, gợi bước, gần đáp án) và các `misconceptions` của nó trong catalog. Thiếu thì báo, đừng tự bịa trong slide.
+- **Không dán lời giải đầy đủ vào slide đầu** (trang 1-3 của blueprint): để học sinh còn gì để dự đoán và hỏi.
+- Dùng beat `ask`/`predict` để học sinh dự đoán trước khi hình xuất hiện.
+- `materialFacts` chỉ lấy từ `lessonKit` và catalog; hints và misconceptions do `describe()` cung cấp cho chat, không chép lại thành lời giải trong slide.
