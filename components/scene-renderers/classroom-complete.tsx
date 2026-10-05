@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { animate, motion, MotionConfig, useReducedMotion } from 'motion/react';
 import { FileText, HelpCircle, Gamepad2, Puzzle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,8 @@ import {
 } from '@/lib/classroom/complete-summary';
 import { loadQuizAttemptState } from '@/lib/quiz/runtime';
 import { createLogger } from '@/lib/logger';
+import { appendTutorLearning, buildRatingRecord } from '@/lib/tutor/learning-log';
+import { acceptRating, RATING_VALUES, shouldShowRating } from '@/lib/tutor/rating-ui';
 
 const log = createLogger('ClassroomComplete');
 
@@ -317,12 +319,66 @@ function QuizRing({
   );
 }
 
+/** "Dễ hiểu không?" 1..5 — một lần chọn cho mỗi lần xem; điểm đã chọn được giữ ở trạng thái nhấn. */
+function EasyRating({ stageId, compact }: { stageId: string; compact: boolean }) {
+  const { t } = useI18n();
+  const [chosen, setChosen] = useState<number | null>(null);
+  const titleId = useId();
+
+  const choose = (pressed: number) => {
+    const easy = acceptRating(chosen, pressed);
+    if (easy === undefined) return;
+    setChosen(easy);
+    // appendTutorLearning không reject: lỗi ghi chỉ log.warn bên trong.
+    void appendTutorLearning(stageId, buildRatingRecord({ stageId, easy }));
+  };
+
+  return (
+    <div role="group" aria-labelledby={titleId} className="flex flex-col items-center gap-2">
+      <div
+        id={titleId}
+        className={cn(
+          'font-semibold text-amber-800 dark:text-amber-200',
+          compact ? 'text-xs' : 'text-sm',
+        )}
+      >
+        {t('classroomComplete.rating.title')}
+      </div>
+      <div className="flex gap-2">
+        {RATING_VALUES.map((value) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={chosen === value}
+            aria-label={t('classroomComplete.rating.option', {
+              value,
+              max: RATING_VALUES.length,
+            })}
+            onClick={() => choose(value)}
+            className={cn(
+              'rounded-full border font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
+              compact ? 'h-8 w-8 text-xs' : 'h-10 w-10 text-sm',
+              chosen === value
+                ? 'border-amber-500 bg-amber-500 text-white'
+                : 'border-amber-200 bg-white/90 text-amber-800 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-gray-900/70 dark:text-amber-200 dark:hover:bg-amber-950/50',
+              chosen !== null && chosen !== value && 'opacity-60',
+            )}
+          >
+            {value}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 interface ClassroomCompletePageProps {
   readonly scenes: Scene[];
   readonly title: string;
+  readonly stageId?: string;
 }
 
-export function ClassroomCompletePage({ scenes, title }: ClassroomCompletePageProps) {
+export function ClassroomCompletePage({ scenes, title, stageId }: ClassroomCompletePageProps) {
   const { t, locale } = useI18n();
   const prefersReducedMotion = useReducedMotion();
 
@@ -646,6 +702,11 @@ export function ClassroomCompletePage({ scenes, title }: ClassroomCompletePagePr
                   </div>
                 </motion.div>
               )}
+
+              {/* Easy-to-understand rating — only for courses with a walkthrough scene */}
+              {stageId && shouldShowRating(scenes) && (
+                <EasyRating key={stageId} stageId={stageId} compact={compact} />
+              )}
             </div>
           </div>
         </div>
@@ -657,5 +718,5 @@ export function ClassroomCompletePage({ scenes, title }: ClassroomCompletePagePr
 export function ClassroomCompletePageConnected() {
   const stage = useStageStore((s) => s.stage);
   const scenes = useStageStore((s) => s.scenes);
-  return <ClassroomCompletePage scenes={scenes} title={stage?.name ?? ''} />;
+  return <ClassroomCompletePage scenes={scenes} title={stage?.name ?? ''} stageId={stage?.id} />;
 }
