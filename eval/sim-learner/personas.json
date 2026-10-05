@@ -1,0 +1,44 @@
+[
+  {
+    "id": "g8-weak-py",
+    "grade": 8,
+    "level": "weak",
+    "language": "py",
+    "description": "Lớp 8, học yếu, mới học Python được vài tháng. Hay nhầm chỉ số với giá trị, dễ đoán bừa khi chưa chắc, ít khi chú ý điều kiện dừng của vòng lặp."
+  },
+  {
+    "id": "g8-average-cpp",
+    "grade": 8,
+    "level": "average",
+    "language": "cpp",
+    "description": "Lớp 8, học khá, đang học C++ cơ bản (vòng lặp, mảng). Hiểu ý chính nhưng hay sai các chi tiết nhỏ như cộng trừ 1."
+  },
+  {
+    "id": "g8-strong-py",
+    "grade": 8,
+    "level": "strong",
+    "language": "py",
+    "description": "Lớp 8, học giỏi, thạo Python, đã từng thử tự viết vài thuật toán đơn giản. Tiếp thu nhanh, lập luận cẩn thận từng bước."
+  },
+  {
+    "id": "g9-weak-cpp",
+    "grade": 9,
+    "level": "weak",
+    "language": "cpp",
+    "description": "Lớp 9, học yếu, biết C++ ở mức viết được vòng for đơn giản. Hay lẫn lộn các phép gán biên, cần ví dụ cụ thể mới hiểu."
+  },
+  {
+    "id": "g9-average-py",
+    "grade": 9,
+    "level": "average",
+    "language": "py",
+    "description": "Lớp 9, học khá, dùng Python thường xuyên cho bài tập tin học. Nắm khái niệm mảng và vòng lặp, chưa quen tư duy loại bỏ một nửa."
+  },
+  {
+    "id": "g9-strong-cpp",
+    "grade": 9,
+    "level": "strong",
+    "language": "cpp",
+    "description": "Lớp 9, học giỏi, đã luyện C++ trong đội tuyển tin học trường. Đọc nhanh, nhận ra điều kiện biên, nhưng chỉ biết những gì bài giảng và kiến thức lớp 9 cho phép."
+  }
+]

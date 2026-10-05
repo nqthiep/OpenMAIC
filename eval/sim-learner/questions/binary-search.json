@@ -1,0 +1,99 @@
+{
+  "entryId": "binary-search",
+  "presetId": "absent",
+  "locale": "vi-VN",
+  "pre": [
+    {
+      "id": "pre-1",
+      "text": "Để dùng tìm kiếm nhị phân trên một mảng, mảng cần thỏa điều kiện nào?",
+      "options": [
+        "Các phần tử đều khác nhau",
+        "Đã được sắp xếp",
+        "Có số phần tử chẵn",
+        "Chỉ chứa số nguyên dương"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "pre-2",
+      "text": "Xét mảng a = [2, 5, 9, 14, 20, 27] (chỉ số từ 0), khoảng tìm lo = 0, hi = 5. Giá trị mid = (lo + hi) / 2 (chia nguyên) là bao nhiêu?",
+      "options": ["1", "2", "3", "5"],
+      "answer": 1
+    },
+    {
+      "id": "pre-3",
+      "text": "Đang tìm target = 14 trong mảng a ở trên, có mid = 2 (a[mid] = 9). Bước tiếp theo là gì?",
+      "options": ["hi = mid - 1", "lo = mid + 1", "lo = mid", "Trả về mid"],
+      "answer": 1
+    },
+    {
+      "id": "pre-4",
+      "text": "Vòng lặp tìm nhị phân dừng và trả về -1 khi nào?",
+      "options": [
+        "Khi lo > hi (khoảng tìm rỗng)",
+        "Khi a[mid] < target",
+        "Khi mid bằng 0",
+        "Khi lo = hi"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "pre-5",
+      "text": "Mỗi lần so sánh target với a[mid] mà chưa bằng nhau, ta loại bỏ phần nào của khoảng tìm?",
+      "options": [
+        "Chỉ phần tử mid",
+        "Cả mid và một nửa khoảng nằm về phía không chứa target",
+        "Một phần tư khoảng tìm",
+        "Không loại gì, chỉ dịch lo"
+      ],
+      "answer": 1
+    }
+  ],
+  "post": [
+    {
+      "id": "post-1",
+      "text": "Mảng b = [7, 2, 9, 4, 1] chưa được sắp xếp. Có thể áp dụng tìm nhị phân trực tiếp trên b không?",
+      "options": [
+        "Có, vì mảng có số phần tử lẻ",
+        "Có, mảng nào cũng được",
+        "Không, vì mảng chưa được sắp xếp",
+        "Không, vì mảng chứa số lẻ"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "post-2",
+      "text": "Với lo = 2, hi = 9, giá trị mid = (lo + hi) / 2 (chia nguyên) bằng bao nhiêu?",
+      "options": ["6", "7", "4", "5"],
+      "answer": 3
+    },
+    {
+      "id": "post-3",
+      "text": "Mảng c = [4, 9, 15, 21, 33, 48, 60, 71], target = 15, có mid = 5 (c[mid] = 48). Bước tiếp theo là gì?",
+      "options": ["lo = mid + 1", "Trả về mid", "lo = mid", "hi = mid - 1"],
+      "answer": 3
+    },
+    {
+      "id": "post-4",
+      "text": "Khi lo = 6 và hi = 5 thì điều nào đúng?",
+      "options": [
+        "Còn đúng một phần tử cần xét",
+        "Khoảng tìm rỗng: target không có, trả về -1",
+        "Phải lấy mid = 5 và so sánh tiếp",
+        "Phải đặt lại lo = 0"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "post-5",
+      "text": "Sau khi so sánh được c[mid] > target (chưa bằng nhau), các chỉ số nào bị loại khỏi khoảng tìm?",
+      "options": [
+        "Chỉ chỉ số mid",
+        "Các chỉ số từ lo đến mid",
+        "Các chỉ số từ mid đến hi",
+        "Các chỉ số từ lo đến mid - 1"
+      ],
+      "answer": 2
+    }
+  ]
+}
