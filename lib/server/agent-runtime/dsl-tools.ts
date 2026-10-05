@@ -4,7 +4,9 @@ import type { AgentTool } from '@earendil-works/pi-agent-core';
 import type { Action } from '@/lib/types/action';
 import type { Scene, SlideContent } from '@/lib/types/stage';
 import { validateAppScene } from '@/lib/document-store/validators';
-import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { isCodeWidgetAllowed, isTutorModerationEnabled } from '@/lib/config/feature-flags';
+import { resolveLocale } from '@/lib/tutor/locale';
+import { extractVisibleText, moderateScene } from './content-moderation';
 import { assertScenePolicy, isWalkthroughScene } from '@/lib/widgets/policy';
 import type { CourseDocument, CourseToolDeps } from './course-tools';
 import { putSceneBringingCurrent } from './document-writes';
@@ -861,6 +863,22 @@ export function buildDslCourseTools(deps: CourseToolDeps): AgentTool<never, neve
           { intent: params.intent, failedOp: params.ops.length },
           true,
         );
+      }
+      // Only a changed visible text is re-filtered (untouched pages stay writable when the filter is down).
+      if (
+        isTutorModerationEnabled() &&
+        !isDeepStrictEqual(extractVisibleText(resolved.scene), extractVisibleText(next))
+      ) {
+        const flagged = await moderateScene(next, {
+          locale: resolveLocale(loaded.doc.stage.languageDirective),
+        });
+        if (flagged) {
+          return toolResult(
+            `patch_stage rejected: content-blocked (${flagged.hint})`,
+            { intent: params.intent, ...flagged },
+            true,
+          );
+        }
       }
       try {
         await runStageMutation(signal, () =>

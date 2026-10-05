@@ -21,7 +21,9 @@ import type { SceneOutline } from '@/lib/types/generation';
 import type { Action } from '@/lib/types/action';
 import type { Scene } from '@/lib/types/stage';
 import type { Scene as DslScene } from '@openmaic/dsl';
-import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { isCodeWidgetAllowed, isTutorModerationEnabled } from '@/lib/config/feature-flags';
+import { resolveLocale } from '@/lib/tutor/locale';
+import { moderateScene } from './content-moderation';
 import { assertScenePolicy } from '@/lib/widgets/policy';
 import { widgetRegistry } from '@/lib/widgets';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
@@ -467,6 +469,18 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
       const blocked = assertScenePolicy(scene, { codeAllowed: isCodeWidgetAllowed() });
       if (blocked)
         return result('Widget "code" is blocked; nothing was written.', { ...blocked }, true);
+      if (isTutorModerationEnabled()) {
+        const flagged = await moderateScene(scene, {
+          locale: resolveLocale(doc.stage.languageDirective),
+        });
+        if (flagged) {
+          return result(
+            'Generated text was blocked by the content filter; nothing was written.',
+            { ...flagged },
+            true,
+          );
+        }
+      }
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, scene),
       );
