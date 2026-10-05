@@ -1276,7 +1276,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | --- | --- |
 | Cấp | W+ |
 | Cỡ | S |
-| Phụ thuộc | 1c-14 |
+| Phụ thuộc | 1b-01, 1c-14 |
 | Sở hữu | `components/scene-renderers/classroom-complete.tsx`, `lib/i18n/locales/*.json`, `tests/tutor/rating-keys.test.ts` |
 | Đọc | kết luận spike 1c-13 (card `1c-14`); [../INTERFACES](../INTERFACES.md) §8.3; `components/scene-renderers/classroom-complete.tsx` |
 
