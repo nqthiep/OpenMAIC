@@ -1,0 +1,24 @@
+{
+  "binary-search": {
+    "entryRev": 1,
+    "contentHash": "abbacc39bad22ec7",
+    "framesHash": {
+      "mid-hit": {
+        "vi-VN": "a476c2e233a68dc4",
+        "en-US": "0bb2fe0ec4e33652"
+      },
+      "first": {
+        "vi-VN": "2373927e77017533",
+        "en-US": "000219f20cf26b8b"
+      },
+      "absent": {
+        "vi-VN": "157ea5efc62d9285",
+        "en-US": "45ee0de02932074f"
+      },
+      "single": {
+        "vi-VN": "566671815173b488",
+        "en-US": "4cac6d580b52da2b"
+      }
+    }
+  }
+}
