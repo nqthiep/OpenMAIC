@@ -88,7 +88,7 @@ Mức: **C**ao / **V**ừa / **T**hấp. *Trigger* = tín hiệu để hành đ�
 
 | ID | Câu hỏi / đo gì | Đạt khi (`[Inference]`) | Chặn cái gì | Trạng thái |
 | --- | --- | --- | --- | --- |
-| Q1 | Công cụ build module runtime sinh sẵn (Rollup + `rollup-plugin-typescript2` hoặc khác); IIFE theo tsconfig riêng | build được, test độ mới xanh | Phase 1b | Chưa làm |
+| Q1 | Công cụ build module runtime sinh sẵn (Rollup + `rollup-plugin-typescript2` hoặc khác); IIFE theo tsconfig riêng | build được, test độ mới xanh | Phase 1b | **Đã làm (2026-10-05)**: Rollup + rpt2 (`scripts/generate-tutor-runtime.mjs`); mọi file mà runtime nhập phải chạy được trên trình duyệt (không `node:crypto`)  |
 | Q2–Q6 | Q2 (`widgetConfig` có bị ghi đè?): không. Q3 (locale): tham số tool + heuristic. Q4 (LLM dùng `frame`?): thay bằng kịch bản. Q5 (điểm sinh action): tool tự sinh; `generate_actions`/`duplicate_scene` qua provider (ADR 0011). Q6 (thông điệp sớm, pool): `widget-ready` + gửi lại (ADR 0013) | — | — | **Đã đóng bằng thiết kế** (Q6 cần e2e xác nhận) |
 | Q7 | Runtime nhận diện cờ chụp tĩnh của video-export để nhảy tới `posterBeat` | khả thi/không | Backlog MP4 | Chưa làm |
 | Q8 | KaTeX dựng sẵn trên server (CSS + font inline), qua export | công thức đúng ở HTML/MP4/ZIP; CSS + font ≤ ~300 KB | Phase 3B (walkthrough Toán) | Chưa làm |
@@ -107,9 +107,9 @@ Mức: **C**ao / **V**ừa / **T**hấp. *Trigger* = tín hiệu để hành đ�
 | S8 | `generate_clip_scenes{params}`: placeholder, timeout→failed, trúng cache, gộp job | không placeholder mãi | Đợt 3C | Chưa làm |
 | S9 | LLM tác giả Manim (ADR 0014): 20 brief Việt, RSR@1/@3, đúng toán do hội đồng LLM | RSR@3 ≥ 90%, đúng toán ≥ 90% | **Đợt 3A** | Chưa làm |
 | Q14 | Bộ lọc trong `/api/chat`: giữ `text_delta` tới `agent_end` có phá TTS/hiển thị hiện có không; độ trễ thêm | p95 ≤ 1,5 s; không mất `action` | Lát 1c | Chưa làm |
-| Q15 | Đường ghi chat/quiz vào kho runtime ở mọi màn học; API xoá phiên theo `learnerKey` | có/không; nếu không → thêm ghi từ client | Lát 1c | Chưa làm |
+| Q15 | Đường ghi chat/quiz vào kho runtime ở mọi màn học; API xoá phiên theo `learnerKey` | có/không; nếu không → thêm ghi từ client | Lát 1c | **Đã làm (2026-10-05)**: chat và quiz đều qua `getRuntimeStore()`, nhưng chỉ lên Postgres khi build với `NEXT_PUBLIC_PERSISTENCE=1` (mặc định ghi IndexedDB); **chưa có API xoá theo `learnerKey`** (chỉ xoá theo cặp stage+learner); route nhúng trả 403 cho xoá stage  |
 | Q16 | Định danh chính xác của DeepSeek V4.1 flash và GPT-6-luna; API (`openai-completions`/`openai-responses`) cho `maic-agent-driver`; hỗ trợ JSON schema cho hội đồng | gọi được cả hai qua `resolveModel`; JSON parse chặt | Trước lát 1c | Chưa làm |
-| S2b | Skill (`SKILL.md`/`references/`) có tới chat agent Q&A không | có/không | **Lát 1c** | Chưa làm |
+| S2b | Skill (`SKILL.md`/`references/`) có tới chat agent Q&A không | có/không | **Lát 1c** | **Đã làm (2026-10-05)**: KHÔNG. Skill chỉ tới agent workbench; quy tắc \"khi học sinh hỏi\" phải nằm trong `describe()` và prompt chat  |
 
 ## 5. Quyết định user đã xác nhận (không còn mở)
 

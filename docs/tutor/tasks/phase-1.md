@@ -474,7 +474,7 @@ export const CODE_WIDGET_HINT: string
 | Cỡ | M |
 | Phụ thuộc | 1b-01, 1b-02, 1b-03 |
 | Sở hữu | `components/scene-renderers/interactive-renderer.tsx`, `components/slide-renderer/components/ThumbnailInteractive/index.tsx`, `lib/hooks/use-code-widget-allowed.ts`, `components/scene-renderers/code-widget-blocked-notice.tsx` |
-| Đọc | ADR 0010 quyết định 3; `components/scene-renderers/interactive-renderer.tsx:34-37`; `components/slide-renderer/components/ThumbnailInteractive/index.tsx:49-53,82-88`; cách `app/page.tsx` gọi `/api/agent/runtime` (biến cache cấp module) |
+| Đọc | ADR 0010 quyết định 3; `components/scene-renderers/interactive-renderer.tsx:44-47`; `components/slide-renderer/components/ThumbnailInteractive/index.tsx:49-53,82-88`; cách `app/page.tsx` gọi `/api/agent/runtime` (biến cache cấp module) |
 
 **Làm**
 1. Hook `useCodeWidgetAllowed(): boolean | undefined`:
@@ -899,7 +899,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1a-03 |
 | Sở hữu | `components/scene-renderers/InteractiveIframeHost.tsx`, `lib/store/widget-runtime-state.ts`, `tests/widgets/widget-runtime-state.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §1 (đoạn Bắt tay), §2; ADR 0013 quyết định 2; [../DATA-MODEL](../DATA-MODEL.md) §6; `components/scene-renderers/InteractiveIframeHost.tsx:175-181` (hàm `send` đăng ký cho engine), `components/scene-renderers/InteractiveIframeHost.tsx:207-225`; tiền lệ store `lib/store/scene-runtime-errors.ts`; [README](README.md) §5 D9 |
+| Đọc | [../INTERFACES](../INTERFACES.md) §1 (đoạn Bắt tay), §2; ADR 0013 quyết định 2; [../DATA-MODEL](../DATA-MODEL.md) §6; `components/scene-renderers/InteractiveIframeHost.tsx:219-222` (hàm `send` đăng ký cho engine), `components/scene-renderers/InteractiveIframeHost.tsx:207-225`; tiền lệ store `lib/store/scene-runtime-errors.ts`; [README](README.md) §5 D9 |
 
 **Làm**
 1. Store `useWidgetRuntimeState`, theo mẫu `scene-runtime-errors.ts`. Mỗi `sceneId` giữ `{ ready, totals?, desired?, state? }`. Hàm reducer thuần được export để test:
@@ -1264,6 +1264,8 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Sở hữu | `lib/tutor/learning-log.ts`, `tests/tutor/learning-log.test.ts` |
 | Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.3); **kết luận của `1c-13`** |
 
+**Kết luận spike 1c-13 (2026-10-05):** dùng `appendTutorLearning(stageId, payload, sceneId?)` trong `lib/tutor/learning-log.ts` (thêm vào 'Sở hữu'): `getRuntimeStore()` + `getLearnerKey()` + `withRuntimeStorageSharedLock` (`lib/utils/chat-storage-lock.ts`), một phiên tất định `tutorLearning:<stageId>:<learnerKey>` (lấy rồi tạo, chịu race 409), `appendRecord` với id UUID; bọc `.catch(log.warn)`. Builder thuần phải kẹp `hint.level` 1..3 và `rating.easy` 1..5 (validator chỉ kiểm kiểu). `rating`: nút trong `components/scene-renderers/classroom-complete.tsx` (cần khoá i18n `classroomComplete.*`). `hint`: nút "Gợi ý" cạnh ô chat (`ChatArea`), `level` là số lần bấm cho cặp (sceneId, beatId) kẹp 3. Cần `NEXT_PUBLIC_PERSISTENCE=1` thì mới lên Postgres.
+
 **Làm:** module theo dõi `useWidgetRuntimeState` (beat tới, `prediction`) và các điểm `1c-13` chốt (`hint`, `rating`). Ghi bản ghi qua API kho runtime có sẵn. Hàm dựng bản ghi là hàm thuần, có test.
 
 **Xong khi:** `pnpm vitest run tests/tutor/learning-log.test.ts` xanh.
@@ -1394,6 +1396,8 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Phụ thuộc | 1b-23, 1c-13 |
 | Sở hữu | `skills/agent-runtime/competitive-programming/SKILL.md` |
 | Đọc | [../CONTENT-DESIGN](../CONTENT-DESIGN.md) §4 (điều 10); [../phase-2-competitive-programming/SCHEMA](../phase-2-competitive-programming/SCHEMA.md) §4 (mục 4.1, gạch "Khi học sinh hỏi"); kết luận S2b |
+
+**Kết luận S2b (2026-10-05): skill KHÔNG tới chat agent.** Mục này chỉ phục vụ agent workbench khi soạn bài; thang gợi ý cho Q&A phải đi qua `describe()` (hints, misconceptions của beat) và prompt chat (`lib/orchestration/prompt-builder.ts`, `lib/chat/pi/prompts.ts`).
 
 **Làm:** thêm mục thang gợi ý theo CONTENT-DESIGN §4 điều 10. Nếu S2b cho thấy skill không tới chat agent, ghi chú rằng hướng dẫn nằm trong `describe()`. Không sửa khối id sinh ra.
 

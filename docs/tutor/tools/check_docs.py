@@ -145,8 +145,8 @@ def parse_ranges(spec):
 # Neo nội dung cho các tham chiếu mà thiết kế dựa vào (R24). Khoá: "path:a" hoặc "path:a-b".
 ANCHORS = {
     "lib/server/agent-runtime/skills.ts:227": "constraints: null",
-    "components/scene-renderers/InteractiveIframeHost.tsx:281": 'sandbox="allow-scripts allow-forms allow-popups"',
-    "components/scene-renderers/InteractiveIframeHost.tsx:175-181": "postMessage",
+    "components/scene-renderers/InteractiveIframeHost.tsx:344": 'sandbox="allow-scripts allow-forms allow-popups"',
+    "components/scene-renderers/InteractiveIframeHost.tsx:219-222": "postMessage",
     "lib/store/interactive-iframe-pool.ts:21": "IFRAME_POOL_CAP = 3",
     "lib/orchestration/prompt-builder.ts:186": "around 100 characters",
     "lib/choreography/timing.ts:34": "MAX_VIDEO_WAIT_MS",
@@ -165,7 +165,7 @@ ANCHORS = {
     "components/slide-renderer/components/ThumbnailInteractive/index.tsx:82-88": "srcDoc={patchedHtml}",
     "app/api/stages/[id]/route.ts:118": "export async function PUT",
     "lib/export/use-export-pptx.ts:1263-1276": "interactive/",
-    "components/scene-renderers/interactive-renderer.tsx:34-37": "patchHtmlForIframe",
+    "components/scene-renderers/interactive-renderer.tsx:44-47": "patchHtmlForIframe",
     "lib/server/model-routes.ts:132-168": "export const LLM_STAGES",
     "lib/runtime/payload-validators.ts:112-118": "APP_RUNTIME_PAYLOAD_VALIDATORS",
     "packages/@openmaic/dsl/src/runtime.ts:152-157": "open `string`",

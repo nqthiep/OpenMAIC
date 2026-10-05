@@ -18,7 +18,7 @@
 
 ## 1. Host → iframe (đã có; runtime `walkthrough` xử lý)
 
-Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.contentWindow` (`lib/action/engine.ts:872-902`, `components/scene-renderers/InteractiveIframeHost.tsx:175-181`).
+Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.contentWindow` (`lib/action/engine.ts:872-902`, `components/scene-renderers/InteractiveIframeHost.tsx:219-222`).
 
 | Message | Payload | Runtime xử lý |
 | --- | --- | --- |

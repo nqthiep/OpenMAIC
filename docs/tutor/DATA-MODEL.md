@@ -178,11 +178,11 @@ File dữ liệu; hình dạng lấy từ `docs/tutor/curriculum/curriculum-info
 
 | Dữ liệu | Kind runtime | Có sẵn? | Ghi chú |
 | --- | --- | --- | --- |
-| Tin nhắn chat với thầy | `chat` | Đã có validator (`lib/runtime/payload-validators.ts:6-17`) | Đường ghi chat vào kho runtime ở mọi màn học: [Unverified], spike Q15 |
+| Tin nhắn chat với thầy | `chat` | Đã có validator (`lib/runtime/payload-validators.ts:6-17`) | Chat và quiz đều qua `getRuntimeStore()`; ghi lên Postgres **chỉ khi build `NEXT_PUBLIC_PERSISTENCE=1`**, mặc định là IndexedDB (spike Q15, 2026-10-05) |
 | Lượt làm quiz | `quizAttempt` | Đã có (`lib/runtime/payload-validators.ts:19-30`) | — |
 | Beat đã tới, dự đoán, gợi ý, đánh giá, nhãn lọc | `tutorLearning` | **Mới** | Hình dạng ở [INTERFACES §8.3](INTERFACES.md) |
 
 - **Vì sao không thêm bảng:** `RuntimeSession.kind` là chuỗi mở; app tự định nghĩa kind và validator (`packages/@openmaic/dsl/src/runtime.ts:152-157`; `packages/@openmaic/storage/src/runtime/types.ts:21-23`).
-- **Lưu giữ:** không tự xoá. Xoá theo yêu cầu: công cụ vận hành xoá mọi phiên của một `learnerKey` [Unverified: API xoá phiên của `RuntimeStore` cần kiểm ở spike Q15]. Sao lưu cùng Postgres (OPERATIONS §5).
+- **Lưu giữ:** không tự xoá. Xoá theo yêu cầu: `RuntimeStore` **chưa có** hàm xoá theo `learnerKey` xuyên stage (chỉ `deleteLearnerRuntime(stageId, learnerKey)`); công cụ vận hành tạm: `DELETE FROM runtime_sessions WHERE learner_key = $1` ([Unverified], chưa chạy thử), hoặc thêm `deleteLearner` vào storage (cần sửa package, ADR mới). Sao lưu cùng Postgres (OPERATIONS §5).
 - **Bỏ định danh khi phân tích:** `tutor-analyst` chỉ nhận số tổng hợp theo entry/beat (đếm, tỉ lệ), không nhận `learnerKey` hay nguyên văn chat.
 - **Không lưu:** nguyên văn nội dung bị bộ lọc chặn (chỉ lưu nhóm vi phạm); khoá API; dữ liệu định danh ngoài tài khoản sẵn có.

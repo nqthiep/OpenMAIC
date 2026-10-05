@@ -16,7 +16,7 @@
 
 | Sự thật | Nguồn |
 | --- | --- |
-| Host gửi vào iframe kiểu "gửi rồi quên": `postMessage` thẳng vào `contentWindow`, không có ack hay `ready`. | `components/scene-renderers/InteractiveIframeHost.tsx:175-181` |
+| Host gửi vào iframe kiểu "gửi rồi quên": `postMessage` thẳng vào `contentWindow`, không có ack hay `ready`. | `components/scene-renderers/InteractiveIframeHost.tsx:219-222` |
 | Chiều ngược lại đã phải có bộ đệm phát lại cho lỗi đồng bộ lúc `srcDoc` parse (`__maicErrorReplayRequest`). Đây là tiền lệ cho bắt tay. | `lib/utils/iframe.ts:45-80` |
 | Pool chỉ giữ 3 iframe; iframe bị đẩy ra thì dựng lại từ đầu. | `lib/store/interactive-iframe-pool.ts:21` |
 | `executeWidgetSetState` gửi rồi chờ cố định `WIDGET_MS`. | `lib/action/engine.ts:881-886` |

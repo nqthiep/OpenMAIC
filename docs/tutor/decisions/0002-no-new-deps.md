@@ -17,7 +17,7 @@
 
 | Ràng buộc | Nguồn |
 | --- | --- |
-| Widget chạy trong iframe `srcDoc`, `sandbox="allow-scripts allow-forms allow-popups"`, origin `null`. | `components/scene-renderers/InteractiveIframeHost.tsx:281` |
+| Widget chạy trong iframe `srcDoc`, `sandbox="allow-scripts allow-forms allow-popups"`, origin `null`. | `components/scene-renderers/InteractiveIframeHost.tsx:344` |
 | Export MP4 chụp widget trong trang có CSP `default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'none'; frame-src 'none'` → script/asset ngoài phải được inline sẵn. | `lib/video-export-app/prepare-interactive-html.ts:36+` |
 | Export HTML/PPTX có bộ inline asset cho `<script src>`. | `lib/export/inline-assets.ts` |
 | `d3-*`, `three`, `cytoscape`… **không** phải dependency của repo; `three` chỉ nạp qua CDN trong widget `visualization3d`. | `package.json`, `templates/visualization3d-content/system.md` |
