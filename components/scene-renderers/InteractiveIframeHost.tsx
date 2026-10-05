@@ -8,6 +8,10 @@ import {
   type IframePoolEntry,
 } from '@/lib/store/interactive-iframe-pool';
 import { useSceneRuntimeErrors } from '@/lib/store/scene-runtime-errors';
+import { useStageStore } from '@/lib/store/stage';
+import { useWidgetRuntimeState } from '@/lib/store/widget-runtime-state';
+import { parseInbound, parseWidgetEvent } from '@/lib/tutor/protocol/messages';
+import type { Scene } from '@/lib/types/stage';
 import {
   GENUI_LOGICAL_HEIGHT,
   GENUI_LOGICAL_WIDTH,
@@ -62,6 +66,42 @@ export function handleInteractivePickerMessage(
   refsStore.toggle(
     makeInteractiveElementRef(target.stageId, sceneId, { selector, outerHTML, text }, t),
   );
+  return true;
+}
+
+/** `walkthroughId` of a scene whose `widgetConfig.kind === 'walkthrough'`, else null. */
+export function walkthroughIdOf(scene: Scene | undefined): string | null {
+  if (scene?.content.type !== 'interactive') return null;
+  const cfg = scene.content.widgetConfig as { kind?: unknown; walkthroughId?: unknown } | undefined;
+  return cfg?.kind === 'walkthrough' && typeof cfg.walkthroughId === 'string'
+    ? cfg.walkthroughId
+    : null;
+}
+
+/**
+ * Handle a `widget-ready` / `widget-state` message from a walkthrough iframe (INTERFACES §2).
+ * The caller has already checked `e.source`. `ready` re-sends the last desired state via `post`.
+ */
+export function handleWidgetEvent(
+  sceneId: string,
+  walkthroughId: string,
+  data: unknown,
+  post: (type: string, payload: Record<string, unknown>) => void,
+): boolean {
+  const ev = parseWidgetEvent(data);
+  if (!ev || ev.walkthroughId !== walkthroughId) return false;
+  const runtime = useWidgetRuntimeState.getState();
+  if (ev.kind === 'widget-ready') {
+    const desired = runtime.markReady(sceneId, ev.presets);
+    if (desired) {
+      post('SET_WIDGET_STATE', {
+        state: desired.state,
+        ...(desired.content !== undefined ? { content: desired.content } : {}),
+      });
+    }
+  } else {
+    runtime.recordState(sceneId, ev);
+  }
   return true;
 }
 
@@ -160,6 +200,10 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
   const getSendMessage = useWidgetIframeStore((s) => s.getSendMessage);
   const pickTarget = useCanvasStore.use.pickTarget();
   const refs = useElementRefsStore.use.refs();
+  // Only walkthrough scenes use the ready handshake; every other widget is unchanged.
+  const walkthroughId = useStageStore((s) =>
+    walkthroughIdOf(s.scenes.find((x) => x.id === sceneId)),
+  );
   const armed = pickTarget?.purpose === 'element-ref' && pickTarget.sceneId === sceneId;
   const selectors = useMemo(
     () =>
@@ -173,12 +217,22 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
   // placeholder, since the iframe now lives in the host). Stable per scene:
   // the callback reads contentWindow lazily at send time.
   useEffect(() => {
-    const send = (type: string, payload: Record<string, unknown>) => {
+    const post = (type: string, payload: Record<string, unknown>) => {
       iframeRef.current?.contentWindow?.postMessage({ type, ...payload }, '*');
+    };
+    const send = (type: string, payload: Record<string, unknown>) => {
+      if (walkthroughId && type === 'SET_WIDGET_STATE') {
+        // Walkthrough: remember the last request; hold it until the iframe says `widget-ready`.
+        const msg = parseInbound({ type, ...payload });
+        if (msg?.type !== 'SET_WIDGET_STATE') return;
+        useWidgetRuntimeState.getState().setDesired(sceneId, msg);
+        if (!useWidgetRuntimeState.getState().byScene[sceneId]?.ready) return;
+      }
+      post(type, payload);
     };
     registerIframe(sceneId, send);
     return () => registerIframe(sceneId, null);
-  }, [sceneId, registerIframe]);
+  }, [sceneId, walkthroughId, registerIframe]);
 
   useEffect(() => {
     const send = getSendMessage(sceneId);
@@ -211,6 +265,12 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
         | (InteractivePickerMessage & { errorKind?: string; message?: unknown })
         | undefined;
       if (!d || d.__maicInteractive !== true) return;
+      if (walkthroughId && (d.kind === 'widget-ready' || d.kind === 'widget-state')) {
+        handleWidgetEvent(sceneId, walkthroughId, d, (type, payload) =>
+          iframeRef.current?.contentWindow?.postMessage({ type, ...payload }, '*'),
+        );
+        return;
+      }
       if (d.kind === 'runtime-error') {
         const kind = typeof d.errorKind === 'string' ? d.errorKind : 'error';
         const msg = typeof d.message === 'string' ? d.message : String(d.message ?? '');
@@ -222,12 +282,15 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
     window.addEventListener('message', onMessage);
     iframeRef.current?.contentWindow?.postMessage({ __maicErrorReplayRequest: true }, '*');
     return () => window.removeEventListener('message', onMessage);
-  }, [sceneId, entry.srcDoc, t]);
+  }, [sceneId, walkthroughId, entry.srcDoc, t]);
 
   // A content change reloads the iframe; drop the previous render's errors so the
   // captured set reflects the CURRENT page (e.g. after the agent applies a fix).
+  // Same for the walkthrough handshake: a fresh document is not ready yet and has no
+  // learner state (`desired` is kept and re-sent on its `widget-ready`).
   useEffect(() => {
     useSceneRuntimeErrors.getState().clearScene(sceneId);
+    useWidgetRuntimeState.getState().resetIframe(sceneId);
   }, [sceneId, entry.srcDoc]);
 
   const rect = entry.rect;
