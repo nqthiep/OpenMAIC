@@ -1,8 +1,11 @@
+import { isDeepStrictEqual } from 'node:util';
 import { Type, type Static } from 'typebox';
 import type { AgentTool } from '@earendil-works/pi-agent-core';
 import type { Action } from '@/lib/types/action';
 import type { Scene, SlideContent } from '@/lib/types/stage';
 import { validateAppScene } from '@/lib/document-store/validators';
+import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { assertScenePolicy, isWalkthroughScene } from '@/lib/widgets/policy';
 import type { CourseDocument, CourseToolDeps } from './course-tools';
 import { putSceneBringingCurrent } from './document-writes';
 import { runStageMutation } from './mutation-fence';
@@ -129,6 +132,18 @@ export const GREP_COURSE_SCHEMA = Type.Object({
 type ReadParams = Static<typeof READ_COURSE_SCHEMA>;
 type PatchParams = Static<typeof PATCH_COURSE_SCHEMA>;
 type GrepParams = Static<typeof GREP_COURSE_SCHEMA>;
+
+const WALKTHROUGH_LOCKED_HINT = 'call generate_walkthrough with another preset';
+
+/** ADR 0013 decision 7: html/widgetConfig of a walkthrough scene (before or after) are tool-owned. */
+function walkthroughLocked(before: Scene, after: Scene): boolean {
+  if (!isWalkthroughScene(before) && !isWalkthroughScene(after)) return false;
+  const pick = (scene: Scene) => {
+    const c = scene.content as unknown as { html?: unknown; widgetConfig?: unknown } | undefined;
+    return { html: c?.html, widgetConfig: c?.widgetConfig };
+  };
+  return !isDeepStrictEqual(pick(before), pick(after));
+}
 
 function toolResult(text: string, details: Record<string, unknown>, isError = false) {
   return {
@@ -821,6 +836,21 @@ export function buildDslCourseTools(deps: CourseToolDeps): AgentTool<never, neve
         return toolResult(
           `patch_stage rejected: the resulting scene still contains a read-only media placeholder (it was assembled across ops); write a real media src/URL instead`,
           { intent: params.intent, failedOp: params.ops.length },
+          true,
+        );
+      }
+      if (walkthroughLocked(resolved.scene, next)) {
+        return toolResult(
+          `patch_stage rejected: walkthrough-locked (${WALKTHROUGH_LOCKED_HINT})`,
+          { intent: params.intent, error: 'walkthrough-locked', hint: WALKTHROUGH_LOCKED_HINT },
+          true,
+        );
+      }
+      const blocked = assertScenePolicy(next, { codeAllowed: isCodeWidgetAllowed() });
+      if (blocked) {
+        return toolResult(
+          `patch_stage rejected: ${blocked.error} (${blocked.hint})`,
+          { intent: params.intent, error: blocked.error, hint: blocked.hint },
           true,
         );
       }
