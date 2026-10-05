@@ -20,6 +20,10 @@ import type { AppDocumentOutline } from '@/lib/document-store/persistence-types'
 import type { SceneOutline } from '@/lib/types/generation';
 import type { Action } from '@/lib/types/action';
 import type { Scene } from '@/lib/types/stage';
+import type { Scene as DslScene } from '@openmaic/dsl';
+import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { assertScenePolicy } from '@/lib/widgets/policy';
+import { widgetRegistry } from '@/lib/widgets';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
 import type { CourseToolDeps } from './course-tools';
 import { runStageMutation } from './mutation-fence';
@@ -32,55 +36,54 @@ import { isMediaPlaceholder } from '@/lib/store/media-generation';
 import { createLogger } from '@/lib/logger';
 
 const MAX_GENERATE_SCENE_MEDIA = 8;
+const WALKTHROUGH_STALE_HINT = 'call generate_walkthrough to rebuild this page';
 const SUPPORTED_SCENE_TYPES = new Set(['slide', 'quiz', 'interactive', 'pbl']);
 const log = createLogger('AgentGenerationTools');
 
-const SceneParams = Type.Object({
-  stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
-  order: Type.Integer({ minimum: 1 }),
-  title: Type.String({ minLength: 1 }),
-  type: Type.Union([
-    Type.Literal('slide'),
-    Type.Literal('quiz'),
-    Type.Literal('interactive'),
-    Type.Literal('pbl'),
-  ]),
-  widgetType: Type.Optional(
-    Type.Union(
-      [
-        Type.Literal('simulation'),
-        Type.Literal('diagram'),
-        Type.Literal('code'),
-        Type.Literal('game'),
-        Type.Literal('visualization3d'),
-      ],
-      {
+function sceneParams(codeAllowed: boolean) {
+  return Type.Object({
+    stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
+    order: Type.Integer({ minimum: 1 }),
+    title: Type.String({ minLength: 1 }),
+    type: Type.Union([
+      Type.Literal('slide'),
+      Type.Literal('quiz'),
+      Type.Literal('interactive'),
+      Type.Literal('pbl'),
+    ]),
+    widgetType: Type.Optional(
+      Type.Union(
+        (['simulation', 'diagram', 'code', 'game', 'visualization3d'] as const)
+          .filter((type) => codeAllowed || type !== 'code')
+          .map((type) => Type.Literal(type)),
+        {
+          description: `Interactive pages only: which widget to build. simulation = parameter explorer, diagram = flowchart/mindmap/hierarchy/system graph,${codeAllowed ? ' code = programming challenge,' : ''} game = quiz/puzzle/strategy/card/action, visualization3d = 3D scene. Defaults to simulation when omitted. procedural-skill stays gated behind task-engine mode and is not accepted here.`,
+        },
+      ),
+    ),
+    widgetOutline: Type.Optional(
+      Type.Unknown({
         description:
-          'Interactive pages only: which widget to build. simulation = parameter explorer, diagram = flowchart/mindmap/hierarchy/system graph, code = programming challenge, game = quiz/puzzle/strategy/card/action, visualization3d = 3D scene. Defaults to simulation when omitted. procedural-skill stays gated behind task-engine mode and is not accepted here.',
-      },
-    ),
-  ),
-  widgetOutline: Type.Optional(
-    Type.Unknown({
-      description:
-        'Interactive pages only: widget configuration object matching widgetType (e.g. { concept, keyVariables } for simulation, { diagramType, nodes } for diagram, { language } for code, { gameType, challenge } for game, { visualizationType, objects } for visualization3d). Must be a plain object. Defaults to { concept: title } when widgetType is set; when only widgetOutline is set, widgetType defaults to simulation.',
-    }),
-  ),
-  brief: Type.String({ minLength: 1 }),
-  instruction: Type.Optional(Type.String()),
-  materialFacts: Type.Optional(Type.Array(Type.String())),
-  media: Type.Optional(
-    Type.Array(
-      Type.Object({
-        src: Type.String({ minLength: 1 }),
-        description: Type.String({ minLength: 1 }),
-        width: Type.Optional(Type.Number({ minimum: 1 })),
-        height: Type.Optional(Type.Number({ minimum: 1 })),
+          'Interactive pages only: widget configuration object matching widgetType (e.g. { concept, keyVariables } for simulation, { diagramType, nodes } for diagram, { language } for code, { gameType, challenge } for game, { visualizationType, objects } for visualization3d). Must be a plain object. Defaults to { concept: title } when widgetType is set; when only widgetOutline is set, widgetType defaults to simulation.',
       }),
-      { maxItems: 8 },
     ),
-  ),
-});
+    brief: Type.String({ minLength: 1 }),
+    instruction: Type.Optional(Type.String()),
+    materialFacts: Type.Optional(Type.Array(Type.String())),
+    media: Type.Optional(
+      Type.Array(
+        Type.Object({
+          src: Type.String({ minLength: 1 }),
+          description: Type.String({ minLength: 1 }),
+          width: Type.Optional(Type.Number({ minimum: 1 })),
+          height: Type.Optional(Type.Number({ minimum: 1 })),
+        }),
+        { maxItems: 8 },
+      ),
+    ),
+  });
+}
+type SceneParamsType = ReturnType<typeof sceneParams>;
 const ListParams = Type.Object({
   stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
 });
@@ -226,12 +229,12 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
   const aiCallFor = (stage: Parameters<typeof routed>[0]) => deps.aiCall ?? routed(stage);
   const actionGenerator = deps.generateActions ?? generateSceneActions;
 
-  const generateScene: AgentTool<typeof SceneParams> = {
+  const generateScene: AgentTool<SceneParamsType> = {
     name: 'generate_scene',
     label: 'Generate page',
     description:
-      'Generate and durably persist one page from an explicit title, type, and brief. Reusing an order replaces that page. Interactive pages accept widgetType (simulation/diagram/code/game/visualization3d) plus a matching widgetOutline object; both are rejected for other page types.',
-    parameters: SceneParams,
+      'Generate and durably persist one page from an explicit title, type, and brief. Reusing an order replaces that page. Interactive pages accept widgetType (simulation/diagram/game/visualization3d, plus code only where allowed) plus a matching widgetOutline object; both are rejected for other page types. Walkthrough pages come from generate_walkthrough.',
+    parameters: sceneParams(isCodeWidgetAllowed()),
     async execute(_callId, params, signal) {
       if (!Number.isInteger(params.order) || params.order < 1) {
         return result(
@@ -296,6 +299,15 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         return result(
           'generate_scene needs widgetOutline to be an object matching widgetType.',
           { error: 'invalid-widget-outline' },
+          true,
+        );
+      }
+      const walkthroughId = (params.widgetOutline as { walkthroughId?: unknown } | undefined)
+        ?.walkthroughId;
+      if (walkthroughId !== undefined) {
+        return result(
+          'Walkthrough pages are built by generate_walkthrough, not generate_scene.',
+          { error: 'use-generate-walkthrough', validIds: widgetRegistry.walkthroughIds() },
           true,
         );
       }
@@ -452,6 +464,9 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
       });
       if (!built) return result('Page assembly failed; nothing was written.', {}, true);
       const scene = built as Scene;
+      const blocked = assertScenePolicy(scene, { codeAllowed: isCodeWidgetAllowed() });
+      if (blocked)
+        return result('Widget "code" is blocked; nothing was written.', { ...blocked }, true);
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, scene),
       );
@@ -521,20 +536,33 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         ? doc?.scenes.find((item) => item.id === params.sceneId)
         : doc?.scenes.find((item) => item.order === params.order);
       if (!doc || !scene) return result('Page not found. Call list_scenes.', {}, true);
+      const provider = widgetRegistry.providerForScene(scene as unknown as DslScene);
+      if (provider?.isStale?.(scene as unknown as DslScene)) {
+        return result(
+          'This page no longer matches the catalog; nothing was written.',
+          { error: 'walkthrough-stale', hint: WALKTHROUGH_STALE_HINT },
+          true,
+        );
+      }
       const outline = outlineFromScene(scene, doc.outline);
-      const actions = filterKnownActions(
-        await actionGenerator(
-          outline,
-          toGenerationContent(scene.content),
-          aiCallFor('scene-actions'),
-          {
-            ctx: actionContext(doc.scenes, scene),
-            agents: doc.stage.generatedAgentConfigs,
-            languageDirective: doc.stage.languageDirective ?? '',
-            userProfile: params.styleDirective,
-          },
-        ),
-      );
+      const actions = provider
+        ? // the scene's own locale wins inside the provider; en-US only backs a missing one
+          filterKnownActions(
+            provider.actions(scene as unknown as DslScene, { locale: 'en-US' }) as Action[],
+          )
+        : filterKnownActions(
+            await actionGenerator(
+              outline,
+              toGenerationContent(scene.content),
+              aiCallFor('scene-actions'),
+              {
+                ctx: actionContext(doc.scenes, scene),
+                agents: doc.stage.generatedAgentConfigs,
+                languageDirective: doc.stage.languageDirective ?? '',
+                userProfile: params.styleDirective,
+              },
+            ),
+          );
       if (!actions.length)
         return result('No known actions were generated; the page was unchanged.', {}, true);
       const next = { ...scene, actions } as Scene;
@@ -581,7 +609,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
     name: 'duplicate_scene',
     label: 'Duplicate page',
     description:
-      'Copy an existing page to a new position without actions. Replaying the same tool call is idempotent.',
+      'Copy an existing page to a new position (walkthrough pages keep their narration; other pages get no actions). Replaying the same tool call is idempotent.',
     parameters: DuplicateParams,
     async execute(callId, params, signal) {
       const doc = await deps.store.loadDocument(params.stageId);
@@ -599,6 +627,9 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         ? scenes.find((scene) => scene.id === params.templateSceneId)
         : scenes.find((scene) => scene.order === params.templateOrder);
       if (!template) return result('Template page not found.', {}, true);
+      const blocked = assertScenePolicy(template, { codeAllowed: isCodeWidgetAllowed() });
+      if (blocked)
+        return result('Widget "code" is blocked; nothing was copied.', { ...blocked }, true);
       const at = Math.min(params.targetOrder, scenes.length + 1);
       const shifted = shiftCourseOrders(
         scenes,
@@ -607,6 +638,10 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         1,
       );
       const now = Date.now();
+      // Walkthrough source: rebuild actions from the provider when current, else keep the old
+      // ones (never mix the new catalog with old html).
+      const provider = widgetRegistry.providerForScene(template as unknown as DslScene);
+      const rebuild = provider && !provider.isStale?.(template as unknown as DslScene);
       const created = {
         ...structuredClone(template),
         id,
@@ -614,7 +649,11 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         stageId: params.stageId,
         order: at,
         title: params.title?.trim() || template.title,
-        actions: [],
+        actions: provider
+          ? rebuild
+            ? provider.actions(template as unknown as DslScene, { locale: 'en-US' })
+            : structuredClone(template.actions ?? [])
+          : [],
         createdAt: now,
         updatedAt: now,
       } as Scene;
