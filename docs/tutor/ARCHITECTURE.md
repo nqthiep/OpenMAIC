@@ -335,7 +335,7 @@ interface ClipEntry<I = unknown> {           // lib/subjects/math/clips/<id>.ts 
 
 ## 9. Skills và curriculum
 
-- Mỗi môn một skill: `SKILL.md` (kênh chỉ dẫn LLM về cách dạy: blueprint ADR 0008, quy tắc "khi học sinh hỏi", khối bảng `walkthroughId` **sinh từ catalog**; id hợp lệ cũng nằm trong schema của tool `generate_walkthrough`) + `references/` (curriculum theo tier). `outline-constraints.json` chỉ giữ trường có nghĩa: `allowedTypes`, `firstSceneType`, `sceneCount` — **chỉ cảnh báo** (`lib/server/agent-runtime/skills.ts:879-890`), không phải cưỡng chế.
+- Mỗi môn một skill: `SKILL.md` (kênh chỉ dẫn LLM về cách dạy: blueprint ADR 0008, quy tắc "khi học sinh hỏi", khối bảng `walkthroughId` **sinh từ catalog**; id hợp lệ cũng nằm trong schema của tool `generate_walkthrough`) + `references/` (curriculum theo tier). `outline-constraints.json` chỉ giữ trường có nghĩa: `allowedTypes`, `firstSceneType` (không có `sceneCount`: test của repo cấm giới hạn số trang trong skill; công thức 6–8 scene nằm trong SKILL.md) — **chỉ cảnh báo** (`lib/server/agent-runtime/skills.ts:879-890`), không phải cưỡng chế.
 - **Curriculum là dữ liệu trong `references/` của skill** (công cụ `read` của agent chỉ đọc trong thư mục skill có `SKILL.md`, `lib/server/agent-runtime/skills.ts:596-604`); thư mục không có `SKILL.md` làm test `tests/agent-runtime/skills.test.ts:241-252` đỏ. File ~79 KB nên chia theo tier + một `index.json` (id, tên, tier, prerequisites, độ khó) để agent không đọc nguyên khối. Tạm thời ở `docs/tutor/curriculum/`.
 - Khi user hỏi "cả chuyên đề X": chọn topic theo chuỗi `prerequisites` (không chỉ theo tier; DP = 1 topic tier 3 + 4 topic tier 4), làm theo skill `curriculum-planner`.
 

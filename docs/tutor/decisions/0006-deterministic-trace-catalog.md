@@ -53,7 +53,7 @@ Sự thật liên quan (đã đọc code / đếm):
    2. **Widget LLM sinh** (`simulation`, `diagram`, `game`, `visualization3d`): **được phép** để minh hoạ khái niệm/mô hình. Đánh đổi: không có kiểm tra đúng/sai tất định → `SKILL.md` hướng dẫn dùng cho khái niệm và mô hình định tính; trace số liệu từng bước ưu tiên walkthrough/storyboard.
    3. Slide + `wb_*` khi Q&A.
    (Bản 2026-09-29 xếp widget LLM cuối cùng và cấm trong skill — bỏ, vì user muốn interactive/visualizer.)
-6. **LLM biết `walkthroughId` qua hai kênh, cùng sinh từ catalog:** (a) schema của tool `generate_walkthrough` (union literal id, ADR 0011); (b) khối bảng id + mô tả + hình dạng `input` trong `SKILL.md`, do script sinh, có snapshot test. Ràng buộc `outline-constraints.json` chỉ là cảnh báo sau ghi nên chỉ giữ `allowedTypes`, `firstSceneType`, `sceneCount`; **không** dùng `typeMix` sàn, `allowedWidgetTypes` (widget LLM được phép), `requiredWidgetOutlineFields` (25/32 topic không có walkthrough sẽ luôn vi phạm).
+6. **LLM biết `walkthroughId` qua hai kênh, cùng sinh từ catalog:** (a) schema của tool `generate_walkthrough` (union literal id, ADR 0011); (b) khối bảng id + mô tả + hình dạng `input` trong `SKILL.md`, do script sinh, có snapshot test. Ràng buộc `outline-constraints.json` chỉ là cảnh báo sau ghi nên chỉ giữ `allowedTypes`, `firstSceneType` (không có `sceneCount`: test của repo cấm giới hạn số trang trong skill; công thức 6–8 scene nằm trong SKILL.md); **không** dùng `typeMix` sàn, `allowedWidgetTypes` (widget LLM được phép), `requiredWidgetOutlineFields` (25/32 topic không có walkthrough sẽ luôn vi phạm).
 7. **Hình dạng entry** (khai báo TS đầy đủ, nguồn chính thức: [INTERFACES §5](../INTERFACES.md)):
    ```ts
    interface WalkthroughEntry<I = unknown, S = unknown> {

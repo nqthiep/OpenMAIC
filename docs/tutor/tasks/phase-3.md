@@ -315,7 +315,7 @@
    - "mỗi định lý có ≥ 1 hình minh hoạ";
    - các bước "cho / có / do / suy ra";
    - khối id sinh ra (để trống giữa marker; `I-08` sinh).
-3. `outline-constraints.json`: `allowedTypes`, `firstSceneType: "slide"`, `sceneCount {6, 8}`.
+3. `outline-constraints.json`: `allowedTypes`, `firstSceneType: "slide"` (không `sceneCount`, như skill Tin).
 
 **Xong khi:** `pnpm vitest run tests/agent-runtime/skills.test.ts tests/workbench/workbench-i18n.test.ts` xanh.
 

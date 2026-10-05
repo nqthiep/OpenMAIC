@@ -125,8 +125,7 @@ Frontmatter theo convention skill hiện có: `name: competitive-programming`; `
 {
   "$comment": "Warn-only: checkScenesAgainstSkill reports after write and ignores requiredWidgetOutlineFields (ADR 0005). Widget `code` is blocked by default (ADR 0010); walkthroughs come from the generate_walkthrough tool (ADR 0011); other interactive widgets are welcome.",
   "allowedTypes": ["slide", "quiz", "interactive"],
-  "firstSceneType": "slide",
-  "sceneCount": { "min": 6, "max": 8 }
+  "firstSceneType": "slide"
 }
 ```
 
