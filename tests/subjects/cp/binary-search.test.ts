@@ -297,8 +297,27 @@ describe('presets and beats', () => {
       expect(b.misconceptions?.length ?? 0, b.id).toBeGreaterThanOrEqual(1);
     }
     const mid = entry.beatDefs.find((b) => b.id === 'mid')!;
-    expect(mid.ask?.predict).toMatchObject({ kind: 'choice', answerFrom: 'next-frame' });
-    expect(mid.ask?.predict?.options).toHaveLength(2);
+    expect(mid.ask?.predict?.kind).toBe('choice');
+    expect(mid.ask?.predict?.options).toHaveLength(3);
+  });
+
+  it('mid prediction answer matches what really changes in the next frame', () => {
+    const predict = entry.beatDefs.find((b) => b.id === 'mid')!.ask!.predict!;
+    for (const preset of entry.presets) {
+      const frames = steps(entry, preset.input, { locale: 'en-US' });
+      frames.forEach((f, i) => {
+        if (!f.meta.tags?.includes('beat:mid')) return;
+        const next = frames[i + 1];
+        const answer = predict.answer(f, next);
+        expect(answer, `${preset.id}#${i}`).toBeGreaterThanOrEqual(0);
+        expect(answer, `${preset.id}#${i}`).toBeLessThan(predict.options.length);
+        const lo = next?.meta.vars?.lo;
+        const hi = next?.meta.vars?.hi;
+        const hit = next?.meta.tags?.includes('beat:done') && next.meta.codeLine === 4;
+        const expected = hit ? 2 : lo !== f.meta.vars?.lo ? 0 : hi !== f.meta.vars?.hi ? 1 : -1;
+        expect(answer, `${preset.id}#${i}`).toBe(expected);
+      });
+    }
   });
 
   it('pitfalls: cpp overflow and py // on beat mid, plus a generic one', () => {

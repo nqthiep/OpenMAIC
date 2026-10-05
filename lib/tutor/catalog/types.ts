@@ -2,7 +2,7 @@
  * Catalog types (INTERFACES §5 + ADR 0006 decision 7).
  * Type-only module: no runtime code, safe to import from server and iframe bundles.
  */
-import type { Emit, RunContext } from '@/lib/tutor/engine/types';
+import type { Emit, RunContext, Frame } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';
 
 /** 'vi-VN', 'en-US', …; fallback 'en-US'. */
@@ -21,9 +21,10 @@ export interface BeatDef {
   readonly ask?: {
     readonly text: Messages;
     readonly predict?: {
-      kind: 'choice' | 'pointer';
-      options?: readonly Messages[];
-      answerFrom: 'next-frame';
+      readonly kind: 'choice';
+      readonly options: readonly Messages[];
+      /** Pure: index into `options` of the correct answer, computed at build time from the beat frame and the frame after it. */
+      answer(frame: Frame<unknown>, next: Frame<unknown> | undefined): number;
     };
   };
   /** light → medium → close to the solution */

@@ -21,7 +21,7 @@ export interface WidgetRuntimeSnapshot {
   preset: string;
   frame: number;
   input?: unknown;
-  prediction?: { beatId: string; correct: boolean };
+  prediction?: { beatId: string; correct: boolean; skipped?: boolean };
 }
 
 export interface WidgetSceneRuntime {
@@ -99,7 +99,11 @@ export function recordState(
   const state: WidgetRuntimeSnapshot = { preset: raw.preset, frame };
   if (student && raw.input !== undefined && inputFits(raw.input)) state.input = raw.input;
   if (raw.prediction) {
-    state.prediction = { beatId: raw.prediction.beatId, correct: raw.prediction.correct };
+    state.prediction = {
+      beatId: raw.prediction.beatId,
+      correct: raw.prediction.correct,
+      ...(raw.prediction.skipped === true ? { skipped: true } : {}),
+    };
   }
   return withScene(map, sceneId, { ...cur, state });
 }

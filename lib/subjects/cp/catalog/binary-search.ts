@@ -84,8 +84,17 @@ const beatDefs: readonly BeatDef[] = [
       text: m('Theo em, bước tiếp theo lo hay hi đổi?', 'Which changes next, lo or hi?'),
       predict: {
         kind: 'choice',
-        options: [m('lo', 'lo'), m('hi', 'hi')],
-        answerFrom: 'next-frame',
+        options: [
+          m('lo đổi', 'lo changes'),
+          m('hi đổi', 'hi changes'),
+          m('Không đổi: tìm thấy', 'Neither: found it'),
+        ],
+        answer: (_frame, next) => {
+          const tags = next?.meta.tags ?? [];
+          if (tags.includes('beat:go-right')) return 0;
+          if (tags.includes('beat:go-left')) return 1;
+          return 2;
+        },
       },
     },
     hints: [

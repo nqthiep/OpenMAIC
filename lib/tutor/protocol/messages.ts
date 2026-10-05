@@ -60,7 +60,7 @@ export interface WidgetState {
   preset: string;
   frame: number;
   input?: unknown;
-  prediction?: { beatId: string; correct: boolean };
+  prediction?: { beatId: string; correct: boolean; skipped?: boolean };
 }
 
 function isRecord(x: unknown): x is Record<string, unknown> {
@@ -160,7 +160,7 @@ export function makeState(args: {
   preset: string;
   frame: number;
   input?: unknown;
-  prediction?: { beatId: string; correct: boolean };
+  prediction?: { beatId: string; correct: boolean; skipped?: boolean };
 }): WidgetState {
   const out: WidgetState = {
     __maicInteractive: true,
@@ -211,7 +211,11 @@ export function parseWidgetEvent(data: unknown): WidgetReady | WidgetState | nul
       }
       const pr = data.prediction;
       if (isRecord(pr) && typeof pr.beatId === 'string' && typeof pr.correct === 'boolean') {
-        out.prediction = { beatId: pr.beatId, correct: pr.correct };
+        out.prediction = {
+          beatId: pr.beatId,
+          correct: pr.correct,
+          ...(pr.skipped === true ? { skipped: true } : {}),
+        };
       }
       return out;
     }
