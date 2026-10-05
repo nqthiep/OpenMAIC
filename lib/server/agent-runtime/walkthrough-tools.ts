@@ -33,6 +33,8 @@ function fail(error: string, text: string, extra: Record<string, unknown> = {}) 
   return result(text, { error, ...extra }, true);
 }
 
+export const WALKTHROUGH_TOOL_NAME = 'generate_walkthrough';
+
 export function buildWalkthroughTool(deps: CourseToolDeps) {
   const ids = widgetRegistry.walkthroughIds();
   const Params = Type.Object({
@@ -54,7 +56,7 @@ export function buildWalkthroughTool(deps: CourseToolDeps) {
   });
 
   const tool: AgentTool<typeof Params> = {
-    name: 'generate_walkthrough',
+    name: WALKTHROUGH_TOOL_NAME,
     label: 'Generate walkthrough page',
     description:
       'Build and persist one step-by-step walkthrough page from the catalog, with a scripted narration and no LLM call. Reusing an order replaces that page. Replaying the same tool call is idempotent.',

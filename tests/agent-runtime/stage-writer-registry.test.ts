@@ -28,6 +28,7 @@ describe('stage writer registry is the single source (R6-P1-1)', () => {
         // course generation writers
         'set_roster',
         'generate_scene',
+        'generate_walkthrough',
         'generate_actions',
         'duplicate_scene',
         'import_pptx',

@@ -1202,6 +1202,7 @@ describe('DSL course-tool wiring', () => {
     expect(new Set(names)).toEqual(
       new Set([
         'generate_scene',
+        'generate_walkthrough',
         'list_scenes',
         'generate_actions',
         'duplicate_scene',

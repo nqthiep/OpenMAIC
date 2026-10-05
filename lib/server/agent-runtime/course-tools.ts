@@ -52,6 +52,8 @@ import {
   type GenerateVideoToolDeps,
 } from './generate-video';
 import type { SceneTtsInput, SceneTtsSummary } from './scene-tts';
+import { WALKTHROUGH_TOOL_NAME, buildWalkthroughTool } from './walkthrough-tools';
+import { isWidgetProvidersDisabled } from '@/lib/config/feature-flags';
 import type { LoadedSkill } from './skills';
 
 export type CourseDocument = MaicDocument<Scene, Stage>;
@@ -209,6 +211,7 @@ export function buildDslCourseToolset(
 ): AgentTool<never, never>[] {
   const tools = [
     ...buildGenerationTools(deps),
+    ...(isWidgetProvidersDisabled() ? [] : [buildWalkthroughTool(deps)]),
     buildImportPptxTool(deps),
     buildGenerateImageTool(deps),
     ...(hasConfiguredVideoGeneration(deps) ? [buildGenerateVideoTool(deps)] : []),
@@ -226,6 +229,7 @@ export function buildCourseAllowlist(
   return new Set([
     ...DSL_COURSE_TOOL_NAMES,
     ...GENERATION_TOOL_NAMES,
+    ...(isWidgetProvidersDisabled() ? [] : [WALKTHROUGH_TOOL_NAME]),
     IMPORT_PPTX_TOOL_NAME,
     GENERATE_IMAGE_TOOL_NAME,
     ...(hasConfiguredVideoGeneration(videoDeps) ? [GENERATE_VIDEO_TOOL_NAME] : []),
