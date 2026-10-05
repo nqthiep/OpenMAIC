@@ -32,7 +32,7 @@ Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.c
 3. `frame` không phải số nguyên thì bỏ trường; ngoài miền thì kẹp vào `[0, total(preset)-1]` của bộ **mới**.
 4. `speed` kẹp `[0.25, 2]`.
 5. `playing:true` là idempotent: đang phát thì không làm gì; ở frame cuối thì đứng yên, chỉ về 0 khi có `restart:true`.
-6. `predict` (1c) hiện câu hỏi dự đoán của beat, rồi báo kết quả qua `widget-state.prediction` (ADR 0008 Decision 5).
+6. `predict` (1c) hiện câu hỏi dự đoán của beat (`options` lấy từ `walkthrough-data.beatText[beatId].options`), học sinh chọn một phương án hoặc bấm "Bỏ qua"; runtime so chỉ số đã chọn với `sets[preset].beats[i].answer` rồi báo `widget-state.prediction = { beatId, correct, skipped? }` (ADR 0008 Decision 5). Engine chờ tối đa 20 s; hết giờ coi như bỏ qua (`skipped: true`).
 7. `content` hiện ở `#wt-caption`.
 
 **Bắt tay** (ADR 0013 §2):
@@ -143,7 +143,7 @@ interface BeatDef {
   readonly id: string
   readonly label: Messages
   readonly narration: MessageTemplate
-  readonly ask?: { readonly text: Messages; readonly predict?: { kind: 'choice' | 'pointer'; options?: readonly Messages[]; answerFrom: 'next-frame' } }
+  readonly ask?: { readonly text: Messages; readonly predict?: { readonly kind: 'choice'; readonly options: readonly Messages[]; readonly answer: (frame: Frame<unknown>, next: Frame<unknown> | undefined) => number } }  // chốt ở task 1c-05: chỉ kind 'choice'; answer là hàm thuần trả chỉ số đáp án đúng trong options; provider tính lúc dựng, lưu `answer` (số) vào sets[p].beats[i]; runtime chỉ so khớp số, không có hàm trong HTML
   readonly hints?: readonly [Messages, Messages, Messages]        // nhẹ → vừa → gần lời giải
   readonly misconceptions?: readonly Messages[]
   readonly required?: boolean                                     // mọi preset phải có beat này

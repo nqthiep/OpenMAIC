@@ -1100,8 +1100,10 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Sở hữu | — |
 | Đọc | ADR 0008 Decision 5; ADR 0013 quyết định 3; `lib/action/engine.ts:881-886`; `lib/playback/action-resume.ts:101-111` |
 
+**Đã chốt (2026-10-05, xem INTERFACES §1 điều 6, §5):** chỉ kind `choice`; `BeatDef.ask.predict.answer(frame, next): number` là hàm thuần trả chỉ số đáp án; provider tính lúc dựng và lưu số vào `sets[p].beats[i].answer`; runtime so khớp và gửi `prediction { beatId, correct, skipped? }`; engine chờ ≤ 20 s, hết giờ = bỏ qua; silent/export không chờ. Phần đo Q9 (tương tác với resume, chat mở giữa chừng) làm khi chạy e2e.
+
 **Làm**
-1. Chốt cách runtime biết đáp án đúng. Đề xuất: `BeatDef.ask.predict.answer(frame, next): number` là hàm thuần; provider tính lúc dựng và lưu vào `sets[p].beats[i].answer`.
+1. (đã chốt, xem trên)
 2. Đo Q9: tương tác với tạm dừng/tua, resume, chat mở giữa chừng, chế độ silent/export.
 3. Ghi vào INTERFACES §5 và RISKS Q9; cập nhật card `1c-04`, `1c-06`.
 
