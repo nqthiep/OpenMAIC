@@ -1226,7 +1226,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | S |
 | Phụ thuộc | — |
 | Sở hữu | `lib/runtime/payload-validators.ts`, `tests/runtime/tutor-learning.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.3); `lib/runtime/payload-validators.ts:33-37` (mẫu `chat`, `quizAttempt`) |
+| Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.3); `lib/runtime/payload-validators.ts:112-118` (mẫu `chat`, `quizAttempt`) |
 
 **Làm:** thêm validator `tutorLearning` cho 5 `type` ở INTERFACES §8.3, theo mẫu validator có sẵn.
 - Khoá lạ bị từ chối; mỗi bản ghi ≤ 2 KB.
