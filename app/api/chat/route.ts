@@ -20,6 +20,8 @@ import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { resolveModel } from '@/lib/server/resolve-model';
 import type { ThinkingConfig } from '@/lib/types/provider';
+import { isTutorModerationEnabled } from '@/lib/config/feature-flags';
+import { withTutorModeration } from '@/lib/tutor/chat-moderation';
 const log = createLogger('Chat API');
 
 // Allow streaming responses up to 60 seconds
@@ -139,7 +141,13 @@ export async function POST(req: NextRequest) {
           thinkingConfig,
         );
 
-        for await (const event of generator) {
+        // OPENMAIC_TUTOR_MODERATION: filter the student message first (blocked => the agent never
+        // runs) and hold each reply until it is filtered. Off by default = streaming unchanged.
+        const events = isTutorModerationEnabled()
+          ? withTutorModeration(body, generator)
+          : generator;
+
+        for await (const event of events) {
           if (signal.aborted) {
             log.info('Request was aborted');
             break;
