@@ -21,6 +21,8 @@ export interface BeatRef {
   id: string;
   occurrence: number;
   frame: number;
+  /** Chỉ số đáp án đúng của câu dự đoán; provider tính lúc dựng, chỉ có trong `sets[p].beats`. */
+  answer?: number;
 }
 
 export interface PresetInfo {
@@ -55,7 +57,7 @@ export interface WalkthroughData {
   title: string;
   locale: string;
   sets: Record<string, { frames: Frame<unknown>[]; beats: BeatRef[] }>;
-  beatText: Record<string, { label: string; ask?: string }>;
+  beatText: Record<string, { label: string; ask?: string; options?: string[] }>;
   code: {
     pseudo: string[];
     impl: { cpp: string[]; py: string[] };

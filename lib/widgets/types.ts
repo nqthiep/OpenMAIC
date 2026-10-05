@@ -45,6 +45,8 @@ export interface WidgetProvider {
   actions(scene: Scene, ctx: WidgetContext): Action[];
   /** Text comes from the catalog; stale `entryRev` → static digest. */
   describe(scene: Scene, runtime?: WidgetRuntimeState): string;
+  /** `entryRev`/`contentHash`/`framesHash` differ from the current catalog (ADR 0013 decision 6). */
+  isStale?(scene: Scene): boolean;
 }
 
 export interface SubjectPack {
