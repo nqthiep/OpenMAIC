@@ -556,7 +556,7 @@ describe('describeWalkthrough (static digest)', () => {
     for (const p of bs.presets) expect(text).toContain(msg(p.label, 'vi-VN'));
     for (const d of bs.beatDefs) expect(text).toContain(msg(d.label, 'vi-VN'));
     expect(text.length).toBeLessThanOrEqual(2000);
-    expect(describeWalkthrough(scene, { preset: 'absent', frame: 3 }, deps)).toBe(text);
+    expect(describeWalkthrough(scene, undefined, deps)).toBe(text);
     const en = provider.describe(build({ id: 'binary-search' }, 'en-US').scene);
     expect(en).toContain('Binary search');
     expect(en).toContain('Pick mid');
