@@ -26,6 +26,8 @@ import { type SvgPoints, toPoints, getSvgPathRange } from '@/lib/export/svg-path
 import { svg2Base64 } from '@/lib/export/svg2base64';
 import { latexToOmml } from '@/lib/export/latex-to-omml';
 import { createLogger } from '@/lib/logger';
+import { decideInteractiveMount } from '@/lib/widgets/policy';
+import { useCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
 import { inlineHtmlAssets, createAssetFetcher } from './inline-assets';
 import type { FetchAsset } from './inline-assets';
 import { createProxiedFetch } from './proxied-fetch';
@@ -1229,6 +1231,25 @@ export async function buildPptxBlob(
 // deck never touches the PPTX builder. Returns `empty: true` (and a null blob)
 // when there is nothing to ship.
 
+// Static page shipped in place of a blocked `code` widget (ADR 0010 decision 3):
+// no <script>, nothing to execute.
+const CODE_WIDGET_BLOCKED_HTML =
+  '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Unavailable</title></head>' +
+  '<body><p>This interactive page is not available in the exported pack: ' +
+  'student code widgets are blocked on this deployment.</p></body></html>';
+
+/**
+ * HTML written to `interactive/…` for one interactive scene. A `code` widget is
+ * replaced by a static notice unless `codeAllowed === true` (unknown = blocked).
+ */
+export function interactiveExportHtml(
+  content: { readonly html?: string },
+  codeAllowed: boolean | undefined,
+): string {
+  if (decideInteractiveMount(content, codeAllowed) === 'blocked') return CODE_WIDGET_BLOCKED_HTML;
+  return content.html ?? '';
+}
+
 export interface ResourcePackResult {
   /** Generated ZIP blob, or null when there is nothing to ship. */
   blob: Blob | null;
@@ -1254,6 +1275,8 @@ export async function buildResourcePackZip(
     getPptxBlob: () => Promise<Blob>;
     /** Passed through to `inlineHtmlAssets`; tests inject a no-op fetcher. */
     fetcher?: FetchAsset;
+    /** `useCodeWidgetAllowed()` result; `code` widget HTML is dropped unless `true`. */
+    codeAllowed?: boolean;
   },
 ): Promise<ResourcePackResult> {
   const JSZip = (await import('jszip')).default;
@@ -1267,7 +1290,8 @@ export async function buildResourcePackZip(
       interactiveIndex++;
       const safeName = scene.title.replace(/[\\/:*?"<>|]/g, '_');
       const htmlFileName = `interactive/${String(interactiveIndex).padStart(2, '0')}_${safeName}.html`;
-      const { html: inlinedHtml, report } = await inlineHtmlAssets(scene.content.html, {
+      const exportHtml = interactiveExportHtml(scene.content, opts.codeAllowed);
+      const { html: inlinedHtml, report } = await inlineHtmlAssets(exportHtml, {
         fetcher: opts.fetcher,
       });
       for (const f of report.failed) {
@@ -1301,6 +1325,7 @@ export function useExportPPTX() {
   const [exporting, setExporting] = useState(false);
   const exportingRef = useRef(false);
   const { t } = useI18n();
+  const codeAllowed = useCodeWidgetAllowed();
 
   const scenes = useStageStore((s) => s.scenes);
   const stage = useStageStore((s) => s.stage);
@@ -1384,6 +1409,7 @@ export function useExportPPTX() {
         ratioPx2Pt,
         fileName,
         fetcher: sharedFetcher,
+        codeAllowed,
         getPptxBlob: () =>
           buildPptxBlob(
             slides,
@@ -1436,6 +1462,7 @@ export function useExportPPTX() {
     viewportRatio,
     ratioPx2Inch,
     ratioPx2Pt,
+    codeAllowed,
     t,
   ]);
 
