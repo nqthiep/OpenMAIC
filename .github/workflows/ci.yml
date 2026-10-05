@@ -278,6 +278,17 @@ jobs:
         env:
           INTERACTIVE_STATIC_BROWSER: '1'
 
+      # SubjectTutor walkthrough runtime (iframe) in Chromium: one step per file.
+      - name: Walkthrough runtime Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/walkthrough-runtime.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
+      - name: Walkthrough prediction Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/predict.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
       # runner.* is only valid in step contexts (not job-level env).
       - name: Materialize Hyperframes lint samples
         run: pnpm exec vitest run tests/video-export/e2e-materialize.test.ts
