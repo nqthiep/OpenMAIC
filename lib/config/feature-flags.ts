@@ -152,6 +152,16 @@ export function isCodeWidgetAllowed(): boolean {
   return readBoolean(process.env.OPENMAIC_ALLOW_CODE_WIDGET);
 }
 
+/**
+ * Server-only gate for the tutor content filter on `/api/chat` (INTERFACES 8.1). Default OFF:
+ * chat behaves exactly as before. When ON, every chat turn goes through the filter and it is
+ * fail-closed (a missing `tutor-moderation` route blocks chat with a safe message). Tutor
+ * deployments are dedicated deployments, so this is a per-deployment switch, not per-request.
+ */
+export function isTutorModerationEnabled(): boolean {
+  return readBoolean(process.env.OPENMAIC_TUTOR_MODERATION);
+}
+
 /** Server-only kill-switch that disables all widget providers. Default OFF. */
 export function isWidgetProvidersDisabled(): boolean {
   return readBoolean(process.env.OPENMAIC_DISABLE_WIDGET_PROVIDERS);
