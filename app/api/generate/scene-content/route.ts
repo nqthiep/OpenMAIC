@@ -33,6 +33,7 @@ import {
   type VisionPromptImage,
 } from '@/lib/persistence/resolve-vision-images';
 import { generatePBLV2Project } from '@/lib/pbl/v2/agents/planner';
+import { coerceCodeOutline } from '../scene-outlines-stream/coerce-code-outline';
 
 const log = createLogger('Scene Content API');
 
@@ -102,7 +103,8 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'stageId is required');
     }
 
-    const outline: SceneOutline = { ...rawOutline };
+    // The outline comes from the client: apply the same code-widget block as the stream route.
+    const outline: SceneOutline = coerceCodeOutline({ ...rawOutline });
 
     // ── Model resolution from request headers/body ──
     // Route per scene-content type (e.g. `scene-content:quiz`); getStageModel
