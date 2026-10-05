@@ -1,5 +1,5 @@
 import { callLLM } from '@/lib/ai/llm';
-import type { Locale } from '@/lib/i18n/types';
+import type { Locale } from '@/lib/tutor/catalog/types';
 import { createLogger } from '@/lib/logger';
 import { resolveModel } from '@/lib/server/resolve-model';
 import { getTutorRoute, type RouteValue } from '@/lib/tutor/llm-roles';
