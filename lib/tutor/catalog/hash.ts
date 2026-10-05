@@ -3,6 +3,8 @@
  * Server-side only: uses node:crypto; do not import into the iframe runtime.
  */
 import { createHash } from 'node:crypto';
+import type { WalkthroughEntry } from '@/lib/tutor/catalog/types';
+import { steps } from '@/lib/tutor/engine/generate';
 
 export function canonicalJSON(v: unknown): string {
   if (v === null) return 'null';
@@ -44,5 +46,46 @@ export function contentHash(args: {
     beatDefs,
     presets: presets.map((p) => ({ id: p.id, input: p.input })),
     problem: problem ?? null,
+  });
+}
+
+/**
+ * beatDefs as hashed: the `ask.predict.answer` function is replaced by its observable behaviour
+ * (see {@link predictAnswers}), so the hash is stable and still moves when the answer logic changes.
+ */
+function hashableBeatDefs(beatDefs: WalkthroughEntry['beatDefs']): unknown {
+  return beatDefs.map((b) => {
+    if (!b.ask?.predict) return b;
+    const { answer: _answer, ...predict } = b.ask.predict;
+    return { ...b, ask: { ...b.ask, predict } };
+  });
+}
+
+/** Per preset: the correct option index at every beat frame that has a prediction, in frame order. */
+function predictAnswers(entry: WalkthroughEntry): Record<string, number[]> {
+  const out: Record<string, number[]> = {};
+  const withPredict = new Map(entry.beatDefs.filter((b) => b.ask?.predict).map((b) => [b.id, b]));
+  for (const preset of entry.presets) {
+    const frames = steps(entry, preset.input, { locale: 'en-US' });
+    const list: number[] = [];
+    frames.forEach((frame, i) => {
+      for (const tag of frame.meta.tags ?? []) {
+        const def = tag.startsWith('beat:') ? withPredict.get(tag.slice(5)) : undefined;
+        if (def?.ask?.predict) list.push(def.ask.predict.answer(frame, frames[i + 1]));
+      }
+    });
+    out[preset.id] = list;
+  }
+  return out;
+}
+
+/** The one place that computes an entry's contentHash (used by the provider and the catalog lock). */
+export function entryContentHash(entry: WalkthroughEntry): string {
+  return hash16({
+    code: entry.code,
+    beatDefs: hashableBeatDefs(entry.beatDefs),
+    presets: entry.presets.map((p) => ({ id: p.id, input: p.input })),
+    problem: entry.problem ?? null,
+    predictAnswers: predictAnswers(entry),
   });
 }

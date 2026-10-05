@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { SUBJECT_PACKS } from '@/lib/subjects';
-import { contentHash, framesHash } from '@/lib/tutor/catalog/hash';
+import { entryContentHash, framesHash } from '@/lib/tutor/catalog/hash';
 import { steps } from '@/lib/tutor/engine/generate';
 import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
 import {
@@ -20,51 +20,16 @@ const entries = SUBJECT_PACKS.flatMap((p) => p.walkthroughs);
 const ids = entries.map((e) => e.id);
 const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
 
-/**
- * `contentHash` rejects functions, so `beatDefs[].ask.predict.answer` is replaced by the answers it
- * yields on every beat frame of every (preset, locale): a change to its behaviour still moves the hash.
- */
 function snapshotEntry(e: AnyWalkthroughEntry): LockEntry {
-  const beats = new Map(e.beatDefs.map((b) => [b.id, b]));
   const framesByPreset: Record<string, Record<string, string>> = {};
-  const answers: Record<string, Record<string, number[]>> = {}; // beat → "preset/locale" → per occurrence
   for (const p of e.presets) {
     framesByPreset[p.id] = {};
     for (const locale of LOCALES) {
-      const fs = steps(e, p.input, { locale });
-      framesByPreset[p.id][locale] = framesHash(fs);
-      fs.forEach((f, i) => {
-        for (const tag of f.meta.tags ?? []) {
-          const predict = tag.startsWith('beat:')
-            ? beats.get(tag.slice(5))?.ask?.predict
-            : undefined;
-          if (predict) {
-            const bucket = ((answers[tag.slice(5)] ??= {})[`${p.id}/${locale}`] ??= []);
-            bucket.push(predict.answer(f, fs[i + 1]));
-          }
-        }
-      });
+      framesByPreset[p.id][locale] = framesHash(steps(e, p.input, { locale }));
     }
   }
-  const beatDefs = e.beatDefs.map((b) =>
-    b.ask?.predict
-      ? {
-          ...b,
-          ask: {
-            ...b.ask,
-            predict: {
-              ...Object.fromEntries(Object.entries(b.ask.predict).filter(([k]) => k !== 'answer')),
-              answers: answers[b.id] ?? {},
-            },
-          },
-        }
-      : b,
-  );
-  return {
-    entryRev: e.entryRev,
-    contentHash: contentHash({ code: e.code, beatDefs, presets: e.presets, problem: e.problem }),
-    framesHash: framesByPreset,
-  };
+  // entryContentHash (lib/tutor/catalog/hash.ts) is the single definition, shared with the provider.
+  return { entryRev: e.entryRev, contentHash: entryContentHash(e), framesHash: framesByPreset };
 }
 
 function snapshot(): CatalogLock {
