@@ -7,7 +7,9 @@ import {
   type AssetIndirectByteEgress,
 } from '@openmaic/storage/server';
 
+import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
 import { validateAppScene, validateAppStage } from '@/lib/document-store/validators';
+import { createLogger } from '@/lib/logger';
 import { resolveAssetCollectionGraceMs } from '@/lib/persistence/asset-collection-grace';
 import {
   decideDocumentAccess,
@@ -26,8 +28,11 @@ import {
 import { readStageMeta } from '@/lib/persistence/stage-meta';
 import { APP_RUNTIME_PAYLOAD_VALIDATORS } from '@/lib/runtime/payload-validators';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { isCodeWidget } from '@/lib/widgets/policy';
 
 export const runtime = 'nodejs';
+
+const log = createLogger('Persistence API');
 
 const ROUTE_PREFIX = '/api/persistence';
 
@@ -298,6 +303,22 @@ function runNodeHandler(handler: RequestListener, request: Request): Promise<Res
   });
 }
 
+/**
+ * ADR 0010 L2: a saved document or scene that carries a `code` widget is kept
+ * as-is (rejecting would drop imported classrooms); the display layer blocks it.
+ * `body` is a clone taken before the handler consumed the request.
+ */
+async function logStoredCodeWidgets(body: Request, stageId: string): Promise<void> {
+  try {
+    const json = (await body.json()) as { scenes?: unknown } | null;
+    const scenes: { content?: unknown }[] = Array.isArray(json?.scenes) ? json.scenes : [json];
+    const count = scenes.filter((scene) => isCodeWidget(scene?.content)).length;
+    if (count > 0) log.warn('code-widget-stored', { stageId, count });
+  } catch {
+    // Unparseable body: the storage handler already answered it; nothing to log.
+  }
+}
+
 interface PersistenceRequestDeps {
   poolFactory?: PersistencePoolFactory;
 }
@@ -338,6 +359,13 @@ export async function handlePersistenceRequest(
         );
       }
 
+      const codeScan =
+        request.method === 'PUT' &&
+        (action.kind === 'create' || action.kind === 'write') &&
+        !isCodeWidgetAllowed()
+          ? { stageId: action.stageId, body: request.clone() }
+          : null;
+
       const response =
         access === 'not-found'
           ? jsonError(404, 'DOCUMENT_NOT_FOUND', '@openmaic/storage: document not found')
@@ -345,6 +373,7 @@ export async function handlePersistenceRequest(
               await createPersistenceHandler(connectionString, ownerId, access, deps.poolFactory),
               request,
             );
+      if (codeScan && response.ok) await logStoredCodeWidgets(codeScan.body, codeScan.stageId);
       for (const [name, value] of responseHeaders.entries()) response.headers.append(name, value);
       return response;
     } catch (error) {

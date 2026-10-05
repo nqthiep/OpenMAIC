@@ -10,6 +10,8 @@ import {
 } from '@/lib/server/classroom-storage';
 import { sanitizeSceneContent } from '@/lib/server/sanitize-scene-content';
 import { createLogger } from '@/lib/logger';
+import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { isCodeWidget } from '@/lib/widgets/policy';
 
 const log = createLogger('Classroom API');
 
@@ -84,6 +86,12 @@ export async function POST(request: NextRequest) {
       { id, stage: { ...safeStage, id }, scenes: safeScenes },
       baseUrl,
     );
+
+    // ADR 0010 L2: stored as-is (rejecting would drop imported classrooms); the display layer blocks it.
+    if (!isCodeWidgetAllowed()) {
+      const count = scenes.filter((scene) => isCodeWidget(scene?.content)).length;
+      if (count > 0) log.warn('code-widget-stored', { stageId: persisted.id, count });
+    }
 
     return apiSuccess({ id: persisted.id, url: persisted.url }, 201);
   } catch (error) {

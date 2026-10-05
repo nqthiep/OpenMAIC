@@ -21,14 +21,18 @@ import type { NextRequest } from 'next/server';
 
 import { DocumentNotFoundError, DocumentVersionError, type MaicDocument } from '@openmaic/storage';
 
-import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
+import { isAgentRuntimeConfigured, isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { createLogger } from '@/lib/logger';
 import { apiError } from '@/lib/server/api-response';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerApiError, ownerJson, ownerNotFound } from '@/lib/server/agent-runtime/route-response';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
+import { isCodeWidget } from '@/lib/widgets/policy';
 
 export const runtime = 'nodejs';
+
+const log = createLogger('Stages API');
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -171,6 +175,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
       });
     } catch (error) {
       return mapSaveError(error, responseHeaders);
+    }
+    // ADR 0010 L2: stored as-is (rejecting would drop existing courses); the display layer blocks it.
+    if (!isCodeWidgetAllowed()) {
+      const count = (candidate.scenes as { content?: unknown }[]).filter((scene) =>
+        isCodeWidget(scene?.content),
+      ).length;
+      if (count > 0) log.warn('code-widget-stored', { stageId: id, count });
     }
     return ownerJson({ success: true }, 200, responseHeaders);
   });
