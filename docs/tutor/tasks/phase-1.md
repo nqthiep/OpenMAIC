@@ -496,7 +496,7 @@ export const CODE_WIDGET_HINT: string
 | Cỡ | S |
 | Phụ thuộc | 1b-03, 1b-04 |
 | Sở hữu | `lib/export/use-export-pptx.ts`, `tests/widgets/export-code-block.test.ts` |
-| Đọc | ADR 0010 quyết định 3; `lib/export/use-export-pptx.ts:1263-1276` |
+| Đọc | ADR 0010 quyết định 3; `lib/export/use-export-pptx.ts:1288-1294` |
 
 **Làm**
 1. Tách hàm thuần, export trong cùng file: `interactiveExportHtml(content, codeAllowed): string`.
@@ -514,7 +514,7 @@ export const CODE_WIDGET_HINT: string
 | Cỡ | S |
 | Phụ thuộc | 1b-02, 1b-03 |
 | Sở hữu | `app/api/classroom/route.ts`, `app/api/persistence/[...path]/route.ts`, `app/api/stages/[id]/route.ts` |
-| Đọc | ADR 0010 quyết định 4 (gạch đầu dòng thứ hai); `app/api/classroom/route.ts:80-81`; `app/api/stages/[id]/route.ts:118` |
+| Đọc | ADR 0010 quyết định 4 (gạch đầu dòng thứ hai); `app/api/classroom/route.ts:80-81`; `app/api/stages/[id]/route.ts:122` |
 
 **Làm**
 - Ở ba route, sau bước kiểm hiện có: nếu `!isCodeWidgetAllowed()` và có scene `isCodeWidget(scene.content)`, gọi logger có sẵn (`lib/logger.ts`) mức `warn` với sự kiện `code-widget-stored` và `{ stageId, count }`.
@@ -1098,7 +1098,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | — |
 | Phụ thuộc | — |
 | Sở hữu | — |
-| Đọc | ADR 0008 Decision 5; ADR 0013 quyết định 3; `lib/action/engine.ts:881-886`; `lib/playback/action-resume.ts:101-111` |
+| Đọc | ADR 0008 Decision 5; ADR 0013 quyết định 3; `lib/action/engine.ts:900-905`; `lib/playback/action-resume.ts:101-111` |
 
 **Đã chốt (2026-10-05, xem INTERFACES §1 điều 6, §5):** chỉ kind `choice`; `BeatDef.ask.predict.answer(frame, next): number` là hàm thuần trả chỉ số đáp án; provider tính lúc dựng và lưu số vào `sets[p].beats[i].answer`; runtime so khớp và gửi `prediction { beatId, correct, skipped? }`; engine chờ ≤ 20 s, hết giờ = bỏ qua; silent/export không chờ. Phần đo Q9 (tương tác với resume, chat mở giữa chừng) làm khi chạy e2e.
 
@@ -1117,7 +1117,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-22, 1c-05 |
 | Sở hữu | `lib/action/engine.ts`, `tests/tutor/predict-wait.test.ts` |
-| Đọc | `lib/action/engine.ts:881-886`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §2 (dòng `lib/action/engine.ts`); **hợp đồng do `1c-05` chốt** |
+| Đọc | `lib/action/engine.ts:900-905`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §2 (dòng `lib/action/engine.ts`); **hợp đồng do `1c-05` chốt** |
 
 **Làm:** trong `executeWidgetSetState`, nếu `state.predict` thì chờ tối đa 20 s cho tới khi `useWidgetRuntimeState` có `prediction` của `beatId` đó (hoặc tín hiệu bỏ qua). Chế độ silent/export không chờ. Timer tiêm vào được để test.
 
@@ -1204,7 +1204,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | --- | --- |
 | Cấp | L |
 | Cỡ | M |
-| Phụ thuộc | 1c-09 |
+| Phụ thuộc | 1b-02, 1c-09 |
 | Sở hữu | `app/api/chat/route.ts`, `lib/config/feature-flags.ts`, `tests/tutor/chat-moderation.test.ts` |
 | Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.1); `app/api/chat/route.ts:44-132`; RISKS dòng Q14 |
 

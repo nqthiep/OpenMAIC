@@ -19,7 +19,7 @@
 | Host gửi vào iframe kiểu "gửi rồi quên": `postMessage` thẳng vào `contentWindow`, không có ack hay `ready`. | `components/scene-renderers/InteractiveIframeHost.tsx:219-222` |
 | Chiều ngược lại đã phải có bộ đệm phát lại cho lỗi đồng bộ lúc `srcDoc` parse (`__maicErrorReplayRequest`). Đây là tiền lệ cho bắt tay. | `lib/utils/iframe.ts:45-80` |
 | Pool chỉ giữ 3 iframe; iframe bị đẩy ra thì dựng lại từ đầu. | `lib/store/interactive-iframe-pool.ts:21` |
-| `executeWidgetSetState` gửi rồi chờ cố định `WIDGET_MS`. | `lib/action/engine.ts:881-886` |
+| `executeWidgetSetState` gửi rồi chờ cố định `WIDGET_MS`. | `lib/action/engine.ts:900-905` |
 | `widget_setState`, `widget_highlight`, `widget_annotation`, `widget_reveal` là action "không an toàn" khi resume/nhảy; resume với loại này quay về action 0. Chế độ silent bỏ qua `widget_*`. | `lib/playback/action-navigation.ts:16-23`; `lib/playback/action-resume.ts:101-111`; `lib/action/engine.ts:222-224` |
 | `patch_stage` ghi được `/content/html` và `widgetConfig`. Nó có sẵn tiền lệ kiểm **trạng thái cuối** của scene trước khi ghi. | `lib/server/agent-runtime/dsl-tools.ts:504-509,815-836` |
 | `WidgetConfigBase` là túi mở có `type: WidgetType`. `scene-builder` chép nguyên `widgetConfig`. | `packages/@openmaic/dsl/src/interactive.ts:37-40`; `packages/@openmaic/generation/src/scene-builder.ts:92-93` |

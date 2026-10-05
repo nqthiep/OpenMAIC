@@ -88,7 +88,7 @@ Mỗi bài/thuật toán khó đi qua chuỗi giai đoạn sau; mỗi giai đo�
 | --- | --- | --- | --- | --- |
 | Hỏi để nói cho có (bản cũ) | Không sửa gì. | Học sinh xem thụ động; rubric đếm câu *được hỏi*, không đếm câu *được trả lời*. | — | "Sinh động" thành trình chiếu. |
 | Thêm action mới "chờ trả lời" | Rõ nghĩa. | Đổi union action trong `@openmaic/dsl` (package). | — | Trái ADR 0005. |
-| **Chế độ dự đoán trong widget + engine chờ có giới hạn (chọn)** | Không đổi package: dùng `widget_setState{predict}` có sẵn; engine ở app chờ `widget-state{prediction}` hoặc hết giờ. | Sửa `executeWidgetSetState` (`lib/action/engine.ts:881-886`); cần xử lý silent mode/export. | Ghi được kết quả dự đoán để thầy dạy kèm. | Học sinh bỏ qua → nút "Bỏ qua" + hết giờ. |
+| **Chế độ dự đoán trong widget + engine chờ có giới hạn (chọn)** | Không đổi package: dùng `widget_setState{predict}` có sẵn; engine ở app chờ `widget-state{prediction}` hoặc hết giờ. | Sửa `executeWidgetSetState` (`lib/action/engine.ts:900-905`); cần xử lý silent mode/export. | Ghi được kết quả dự đoán để thầy dạy kèm. | Học sinh bỏ qua → nút "Bỏ qua" + hết giờ. |
 
 **Quyết định:**
 1. **Dự đoán khi đang giảng (1c):**
