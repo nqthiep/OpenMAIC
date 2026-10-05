@@ -125,3 +125,69 @@ export function markTabs(tabs: Partial<Record<Panel, HTMLElement>>, panel: Panel
     tab?.setAttribute('aria-pressed', String(p === panel));
   }
 }
+
+export interface PredictLabels {
+  predict: string;
+  skip: string;
+  correct: string;
+  incorrect: string;
+}
+
+/**
+ * Câu hỏi dự đoán trong `#wt-predict`: đề, các nút chọn (`<button data-option>`, dùng được bằng
+ * bàn phím) và "Bỏ qua". `onPick(i | null)` được gọi tối đa một lần; sau đó nút bị khoá, nút đúng
+ * có `wt-on`, nút đã chọn `aria-pressed`, kết quả hiện ở `<p role="status">` (bỏ qua: xoá panel).
+ */
+export function renderPredict(
+  el: HTMLElement,
+  q: { ask: string; options: readonly string[]; answer: number },
+  labels: PredictLabels,
+  onPick: (chosen: number | null) => void,
+): void {
+  const doc = el.ownerDocument;
+  const ask = doc.createElement('p');
+  ask.className = 'wt-predict-ask';
+  ask.textContent = q.ask;
+  const group = doc.createElement('div');
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', labels.predict);
+  group.className = 'wt-predict-options';
+  const status = doc.createElement('p');
+  status.setAttribute('role', 'status');
+  status.className = 'wt-predict-result';
+  const skip = doc.createElement('button');
+  skip.type = 'button';
+  skip.setAttribute('data-predict-skip', '');
+  skip.textContent = labels.skip;
+
+  const buttons = q.options.map((text, i) => {
+    const btn = doc.createElement('button');
+    btn.type = 'button';
+    btn.setAttribute('data-option', String(i));
+    btn.setAttribute('aria-pressed', 'false');
+    btn.textContent = text;
+    return btn;
+  });
+  let done = false;
+  const finish = (chosen: number | null) => {
+    if (done) return;
+    done = true;
+    if (chosen === null) {
+      el.replaceChildren();
+    } else {
+      const hit = chosen === q.answer;
+      for (const b of [...buttons, skip]) b.disabled = true;
+      buttons[chosen].setAttribute('aria-pressed', 'true');
+      buttons[q.answer].classList.add('wt-on');
+      el.setAttribute('data-result', hit ? 'correct' : 'incorrect');
+      status.textContent = hit ? labels.correct : labels.incorrect;
+    }
+    onPick(chosen);
+  };
+  buttons.forEach((b, i) => b.addEventListener('click', () => finish(i)));
+  skip.addEventListener('click', () => finish(null));
+
+  group.append(...buttons, skip);
+  el.removeAttribute('data-result');
+  el.replaceChildren(ask, group, status);
+}

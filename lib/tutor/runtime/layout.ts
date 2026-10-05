@@ -26,6 +26,7 @@ export interface Refs {
   beats: HTMLElement | null;
   codeLines: HTMLElement | null;
   caption: HTMLElement | null;
+  predict: HTMLElement | null;
   prev: HTMLElement | null;
   play: HTMLElement | null;
   next: HTMLElement | null;
@@ -69,6 +70,7 @@ export function findRefs(doc: Document): Refs | null {
     beats: $('wt-beats'),
     codeLines,
     caption: $('wt-caption'),
+    predict: $('wt-predict'),
     prev: $('wt-prev'),
     play: $('wt-play'),
     next: $('wt-next'),

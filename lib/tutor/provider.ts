@@ -65,6 +65,8 @@ const EXTRA_LABELS: Readonly<Record<string, Messages>> = {
   frame: { 'vi-VN': 'Bước', 'en-US': 'Frame' },
   aux: { 'vi-VN': 'Dữ liệu phụ', 'en-US': 'Auxiliary data' },
   code: { 'vi-VN': 'Mã', 'en-US': 'Code' },
+  correct: { 'vi-VN': 'Đúng rồi!', 'en-US': 'Correct!' },
+  incorrect: { 'vi-VN': 'Chưa đúng.', 'en-US': 'Not quite.' },
 };
 
 type TutorStrings = Readonly<Record<string, string>>;
@@ -152,7 +154,12 @@ function actionsFor(
     out.push({
       id: nextId(),
       type: 'widget_setState',
-      state: { preset: presetId, frame: ref.frame, playing: false },
+      state: {
+        preset: presetId,
+        frame: ref.frame,
+        playing: false,
+        ...(def.ask?.predict && { predict: { beatId: ref.id } }),
+      },
     });
     speak(fill(msg(def.narration, locale), built.frames[ref.frame].meta.vars));
   }

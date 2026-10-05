@@ -29,8 +29,10 @@ import {
   renderAux,
   renderBeats,
   renderCode,
+  renderPredict,
   renderVars,
 } from './panels';
+import { buildPrediction, resolvePredict } from './predict';
 
 const FLASH_MS = 1500;
 const LOAD_ERROR = 'Walkthrough data could not be loaded.';
@@ -113,6 +115,7 @@ function boot(visualizer: VisualizerRenderer): void {
   let beatButtons: HTMLButtonElement[] = [];
   let shown: { preset: string; index: number } | null = null;
   let prevFrame: Frame<unknown> | undefined;
+  let predictAt: { preset: string; index: number } | null = null; // frame đang hiện câu hỏi
   let batching = false; // gộp nhiều op của một message thành một lần vẽ + một `widget-state`
 
   const player = createPlayer({ total: presets.find((p) => p.id === preset)?.total ?? 1 });
@@ -166,6 +169,46 @@ function boot(visualizer: VisualizerRenderer): void {
     beatButtons = refs.beats ? renderBeats(refs.beats, beats, text, (f) => player.jump(f)) : [];
   }
 
+  // --- dự đoán ---
+  function clearPredict(): void {
+    predictAt = null;
+    if (!refs.predict) return;
+    refs.predict.removeAttribute('data-result');
+    refs.predict.replaceChildren();
+  }
+
+  function showPredict(beatId: string): void {
+    clearPredict();
+    const index = player.getState().index;
+    const q = resolvePredict(beatId, beats, index, data.beatText);
+    if (!q || !refs.predict) return;
+    const at = { preset, index };
+    predictAt = at;
+    renderPredict(
+      refs.predict,
+      q,
+      {
+        predict: labelOf('predict'),
+        skip: labelOf('skip'),
+        correct: labelOf('correct'),
+        incorrect: labelOf('incorrect'),
+      },
+      (chosen) => {
+        // Chỉ message này mang `prediction`; `sync` không bao giờ gửi lại (engine coi mọi
+        // `prediction` của beat là đã trả lời).
+        post(
+          makeState({
+            walkthroughId: config.walkthroughId,
+            preset: at.preset,
+            frame: at.index,
+            prediction: buildPrediction(q, chosen),
+          }),
+        );
+        if (chosen === null) clearPredict();
+      },
+    );
+  }
+
   // --- vẽ ---
   function paintFrame(index: number): void {
     const frame = data.sets[preset].frames[index];
@@ -205,6 +248,7 @@ function boot(visualizer: VisualizerRenderer): void {
       shown = { preset, index: s.index };
     }
     paintControls(s);
+    if (predictAt && (predictAt.preset !== preset || predictAt.index !== s.index)) clearPredict();
     if (moved && notify) {
       post(makeState({ walkthroughId: config.walkthroughId, preset, frame: s.index }));
     }
@@ -242,7 +286,8 @@ function boot(visualizer: VisualizerRenderer): void {
         setCaption(op.content);
         break;
       case 'predict':
-        break; // câu hỏi dự đoán: lát 1c
+        showPredict(op.beatId);
+        break;
     }
   }
 
@@ -273,6 +318,16 @@ function boot(visualizer: VisualizerRenderer): void {
       batching = false;
     }
     sync(true);
+  }
+
+  function announceReady(): void {
+    post(
+      makeReady({
+        walkthroughId: config.walkthroughId,
+        entryRev: config.entryRev,
+        presets: presets.map((p) => ({ id: p.id, total: p.total })),
+      }),
+    );
   }
 
   // --- khởi tạo ---
@@ -316,6 +371,10 @@ function boot(visualizer: VisualizerRenderer): void {
 
   window.addEventListener('message', (event) => {
     if (event.source !== window.parent) return;
+    if (isRecord(event.data) && event.data.__maicErrorReplayRequest === true) {
+      announceReady(); // host gắn listener muộn: báo lại để nhận state mong muốn
+      return;
+    }
     const msg = parseInbound(event.data);
     if (!msg) return;
     try {
@@ -325,13 +384,7 @@ function boot(visualizer: VisualizerRenderer): void {
     }
   });
 
-  post(
-    makeReady({
-      walkthroughId: config.walkthroughId,
-      entryRev: config.entryRev,
-      presets: presets.map((p) => ({ id: p.id, total: p.total })),
-    }),
-  );
+  announceReady();
 }
 
 /** Điểm vào của mỗi entry visualizer (`lib/tutor/runtime/entries/<v>.ts`). */
