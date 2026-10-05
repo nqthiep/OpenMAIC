@@ -23,6 +23,7 @@ vi.mock('@/lib/server/resolve-model', () => ({
 
 vi.mock('@/lib/config/feature-flags', () => ({
   resolveVocationalActive: mocks.resolveVocationalActive,
+  isCodeWidgetAllowed: () => false,
 }));
 
 vi.mock('@openmaic/generation', async (importOriginal) => ({
