@@ -259,8 +259,8 @@ declare function moderate(text: string, ctx: { direction: 'in' | 'out'; locale: 
   "sources": ["https://…"] }
 ```
 
-- **Đạt** khi hai model (`tutor-review-cp`, `tutor-review-cp-2`) đều có mọi điểm ≥ 4 và `factErrors` rỗng. Bất đồng thì chạy model thứ ba **nếu có nhà cung cấp thứ ba**; cấu hình hiện tại chỉ có hai nhà cung cấp nên bất đồng = trượt (ADR 0014 quyết định 8). Trượt → entry **không được phát hành** (không vào `pack.ts` của bản phát hành).
-- Kết quả lưu cạnh entry: `lib/subjects/<id>/reviews/<entryId>@<entryRev>.json`, được commit. Test kiểm mọi entry trong `pack.ts` có review đạt ở đúng `entryRev`.
+- **Đạt** khi hai model (`tutor-review-cp`, `tutor-review-cp-2`) đều có mọi điểm ≥ 4 và `factErrors` rỗng. Bất đồng thì chạy model thứ ba **nếu có nhà cung cấp thứ ba**; cấu hình hiện tại chỉ có hai nhà cung cấp nên bất đồng = trượt (ADR 0014 quyết định 8). Trượt → entry **không được phát hành**: dev, test và e2e dùng mọi entry trong `SUBJECT_PACKS`; bản phát hành đặt `OPENMAIC_REQUIRE_REVIEW=true` (`isReviewRequired()`), khi đó `lib/widgets/index.ts` dựng registry từ `releasedPacks()` (`lib/subjects/release.ts`) và chỉ giữ entry có file review đạt ở đúng `entryRev`.
+- Kết quả lưu cạnh entry: `lib/subjects/<id>/reviews/<entryId>@<entryRev>.json`, được commit. File có dạng `{ "contentHash", "reviews": [r1, r2] }`; "đạt" tính lại bằng `panelVerdict(r1, r2)` (không tin trường `verdict` lưu sẵn) và `contentHash` phải bằng `entryContentHash(entry)` hiện tại, nên sửa entry sau khi duyệt thì review mất hiệu lực. Test `tests/subjects/reviews.test.ts` kiểm cơ chế lọc.
 
 ### 8.3. Dữ liệu học sinh: kind `tutorLearning`
 

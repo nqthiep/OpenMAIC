@@ -166,3 +166,12 @@ export function isTutorModerationEnabled(): boolean {
 export function isWidgetProvidersDisabled(): boolean {
   return readBoolean(process.env.OPENMAIC_DISABLE_WIDGET_PROVIDERS);
 }
+
+/**
+ * Server-only release gate for subject catalog entries (INTERFACES 8.2). Default OFF: dev, tests and
+ * e2e expose every entry. A release deployment sets it, and then only entries with a passing review
+ * for their exact entryRev are exposed (`lib/subjects/release.ts`).
+ */
+export function isReviewRequired(): boolean {
+  return readBoolean(process.env.OPENMAIC_REQUIRE_REVIEW);
+}
