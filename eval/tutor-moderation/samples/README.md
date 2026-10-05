@@ -1,6 +1,6 @@
 # Mẫu hiệu chuẩn cho bộ lọc nội dung (`tutor-moderation`)
 
-Bộ mẫu để đo `moderate()` (`lib/tutor/moderation.ts`, INTERFACES §8.1) mỗi khi đổi model hoặc prompt của stage `tutor-moderation`. Căn cứ: ADR 0014 quyết định 7, TEST-STRATEGY §6 (dòng `eval:tutor-moderation`). Runner `eval:tutor-moderation` chưa có; thư mục này chỉ chứa dữ liệu.
+Bộ mẫu để đo `moderate()` (`lib/tutor/moderation.ts`, INTERFACES §8.1) mỗi khi đổi model hoặc prompt của stage `tutor-moderation`. Căn cứ: ADR 0014 quyết định 7, TEST-STRATEGY §6 (dòng `eval:tutor-moderation`). Runner: `pnpm exec tsx eval/tutor-moderation/runner.ts`; thư mục này chỉ chứa dữ liệu.
 
 ## Tệp và định dạng
 

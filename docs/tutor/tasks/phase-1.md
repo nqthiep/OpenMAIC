@@ -1270,6 +1270,25 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 
 **Xong khi:** `pnpm vitest run tests/tutor/learning-log.test.ts` xanh.
 
+### 1c-14b · Nút đánh giá "dễ hiểu" cuối khoá
+
+| Trường | Giá trị |
+| --- | --- |
+| Cấp | W+ |
+| Cỡ | S |
+| Phụ thuộc | 1c-14 |
+| Sở hữu | `components/scene-renderers/classroom-complete.tsx`, `lib/i18n/locales/*.json`, `tests/tutor/rating-keys.test.ts` |
+| Đọc | kết luận spike 1c-13 (card `1c-14`); [../INTERFACES](../INTERFACES.md) §8.3; `components/scene-renderers/classroom-complete.tsx` |
+
+**Làm**
+1. Thêm khối "Bài giảng này dễ hiểu không?" với 5 nút 1–5 vào màn hoàn thành khoá (`ClassroomCompletePageConnected`), chỉ hiện khi khoá có ≥ 1 scene `widgetConfig.kind === 'walkthrough'`.
+2. Bấm nút gọi `appendTutorLearning(stageId, buildRatingRecord(stageId, easy))` từ `lib/tutor/learning-log.ts`; chặn bấm lặp trong cùng lần xem (đã chọn thì hiện lại điểm đã chọn); lỗi ghi chỉ `log.warn`.
+3. Khoá i18n `classroomComplete.rating.{title,option}` ở cả 12 locale; test kiểm đủ khoá.
+
+**Không làm:** nút gợi ý (task sau); sửa `learning-log.ts`.
+
+**Xong khi:** `pnpm vitest run tests/tutor/rating-keys.test.ts` và `pnpm check:i18n-keys` xanh; `npx tsc --noEmit` sạch.
+
 ### 1c-15 · Lọc chữ của nội dung sinh sẵn (`content-blocked`)
 
 | Trường | Giá trị |
