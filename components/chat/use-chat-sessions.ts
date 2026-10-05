@@ -28,7 +28,8 @@ import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { USER_AVATAR } from '@/lib/types/roundtable';
 import { StreamBuffer } from '@/lib/buffer/stream-buffer';
 import type { AgentStartItem, ActionItem } from '@/lib/buffer/stream-buffer';
-import { runAgentLoop, type AgentLoopStoreState } from '@/lib/chat/agent-loop';
+import { runAgentLoop, currentWidgetState, type AgentLoopStoreState } from '@/lib/chat/agent-loop';
+import { useWidgetRuntimeState } from '@/lib/store/widget-runtime-state';
 import { ActionEngine } from '@/lib/action/engine';
 import {
   buildQuizResultsForStoreState,
@@ -204,6 +205,11 @@ async function buildFreshAgentLoopStoreState(): Promise<AgentLoopStoreState> {
     )
       ? quizResults
       : undefined,
+    widgetState: currentWidgetState(
+      freshState.currentSceneId,
+      useWidgetRuntimeState.getState().byScene,
+      freshState.scenes,
+    ),
   };
 }
 

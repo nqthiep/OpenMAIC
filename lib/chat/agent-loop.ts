@@ -11,7 +11,8 @@
  * indicate something is wrong.
  */
 
-import type { StatelessEvent, DirectorState } from '@/lib/types/chat';
+import type { StatelessEvent, DirectorState, ChatWidgetState } from '@/lib/types/chat';
+import type { WidgetRuntimeMap } from '@/lib/store/widget-runtime-state';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import { createLogger } from '@/lib/logger';
 
@@ -44,6 +45,36 @@ export interface AgentLoopStoreState {
       aiComment?: string;
     }>;
   };
+  /** Widget position of the current scene (ids + numbers); absent when not ready. */
+  widgetState?: ChatWidgetState;
+}
+
+/**
+ * Widget state to send with a chat request: the CURRENT scene's, once its iframe is `ready` and
+ * has reported a state. `scenes` supplies `walkthroughId` (the runtime store does not hold it).
+ * Returns undefined for any other case, so the request is unchanged.
+ */
+export function currentWidgetState(
+  sceneId: string | null | undefined,
+  runtime: WidgetRuntimeMap,
+  scenes: readonly { id: string; content: unknown }[],
+): ChatWidgetState | undefined {
+  if (!sceneId || !Object.hasOwn(runtime, sceneId)) return undefined;
+  const { ready, state } = runtime[sceneId];
+  if (!ready || !state) return undefined;
+  const content = scenes.find((s) => s.id === sceneId)?.content as
+    | { type?: unknown; widgetConfig?: { kind?: unknown; walkthroughId?: unknown } }
+    | undefined;
+  const cfg = content?.type === 'interactive' ? content.widgetConfig : undefined;
+  if (cfg?.kind !== 'walkthrough' || typeof cfg.walkthroughId !== 'string') return undefined;
+  const out: ChatWidgetState = {
+    sceneId,
+    walkthroughId: cfg.walkthroughId,
+    preset: state.preset,
+    frame: state.frame,
+  };
+  if (state.input !== undefined) out.input = state.input;
+  return out;
 }
 
 /** Request template — fields that stay constant across loop iterations */
