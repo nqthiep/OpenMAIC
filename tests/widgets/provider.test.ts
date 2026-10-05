@@ -172,7 +172,12 @@ describe('walkthrough provider: build', () => {
           expect(b.actions.map((a) => a.type)).toEqual(types);
           const states = b.actions.filter((a) => a.type === 'widget_setState');
           expect(states.map((a) => (a as { state: unknown }).state)).toEqual(
-            beats.map((x) => ({ preset: presetId, frame: x.frame, playing: false })),
+            beats.map((x) => ({
+              preset: presetId,
+              frame: x.frame,
+              playing: false,
+              ...(defs.get(x.id)!.ask?.predict && { predict: { beatId: x.id } }),
+            })),
           );
           expect(new Set(b.actions.map((a) => a.id)).size).toBe(b.actions.length);
           expect(b.actions.map((a) => a.id)).toEqual(
@@ -211,6 +216,18 @@ describe('walkthrough provider: build', () => {
       type: 'speech',
       text: msg(bs.beatDefs[1].ask!.text, 'vi-VN'),
     });
+  });
+
+  it('predict beats send widget_setState with predict.beatId right after the question', () => {
+    const b = build({ id: 'binary-search', presetId: 'mid-hit' });
+    const asked = b.data.sets['mid-hit'].beats.filter((x) => x.answer !== undefined);
+    expect(asked.length).toBeGreaterThan(0);
+    const at = b.actions.findIndex(
+      (a) => a.type === 'widget_setState' && 'predict' in (a.state as object),
+    );
+    expect(b.actions[at]).toMatchObject({ state: { predict: { beatId: asked[0].id } } });
+    expect(b.actions[at - 1]).toMatchObject({ type: 'speech' }); // ask first
+    expect(b.actions[at + 1]).toMatchObject({ type: 'speech' }); // then narration
   });
 
   it('presetId defaults to the first preset; panel defaults to pseudo', () => {
