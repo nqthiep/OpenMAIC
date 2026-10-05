@@ -5,6 +5,9 @@ import type { InteractiveContent } from '@/lib/types/stage';
 import { useInteractiveIframePool } from '@/lib/store/interactive-iframe-pool';
 import { patchHtmlForIframe } from '@/lib/utils/iframe';
 import { visibleClientRect } from '@/lib/edit/visible-client-rect';
+import { decideInteractiveMount } from '@/lib/widgets/policy';
+import { useCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
+import { CodeWidgetBlockedNotice } from './code-widget-blocked-notice';
 
 interface InteractiveRendererProps {
   readonly content: InteractiveContent;
@@ -21,6 +24,13 @@ interface InteractiveRendererProps {
  * return on the next mount.
  */
 export function InteractiveRenderer({ content, sceneId }: InteractiveRendererProps) {
+  const allowed = useCodeWidgetAllowed();
+  // Blocked widgets never reach the iframe pool, so no iframe is ever mounted.
+  if (decideInteractiveMount(content, allowed) === 'blocked') return <CodeWidgetBlockedNotice />;
+  return <InteractiveSlot content={content} sceneId={sceneId} />;
+}
+
+function InteractiveSlot({ content, sceneId }: InteractiveRendererProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   // Unique per mounted placeholder instance — its visibility ownership token, so
   // a stale unmount during the mode cross-fade can't hide a newer instance.
