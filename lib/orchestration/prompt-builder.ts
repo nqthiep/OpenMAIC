@@ -12,6 +12,7 @@ import { buildStateContext } from './summarizers/state-context';
 import { buildVirtualWhiteboardContext } from './summarizers/whiteboard-ledger';
 import { buildPeerContextSection } from './summarizers/peer-context';
 import { buildPrompt, PROMPT_IDS } from '@/lib/prompts';
+import { isWalkthroughScene } from '@/lib/widgets/policy';
 
 // ==================== Role Guidelines ====================
 
@@ -155,7 +156,7 @@ export function buildStructuredPrompt(
     mutualExclusionNote: hasSlideActions ? MUTUAL_EXCLUSION_NOTE : '',
     stateContext: buildStateContext(storeState),
     virtualWhiteboardContext: buildVirtualWhiteboardContext(storeState, whiteboardLedger),
-    lengthGuidelines: buildLengthGuidelines(agentConfig.role),
+    lengthGuidelines: buildLengthGuidelines(agentConfig.role, isWalkthroughScene(currentScene)),
     whiteboardGuidelines: buildWhiteboardGuidelines(agentConfig.role),
     discussionContextSection: buildDiscussionContextSection(discussionContext, agentResponses),
   };
@@ -178,15 +179,22 @@ export function buildStructuredPrompt(
  * All agents should be concise and conversational. Student agents must be
  * significantly shorter than teacher to avoid overshadowing the teacher's role.
  */
-function buildLengthGuidelines(role: string): string {
+/**
+ * Tutor coaching for walkthrough scenes (spike S2b: skills do not reach the chat agent, so the
+ * hint ladder is injected here). Shared with lib/chat/pi/prompts.ts.
+ */
+export const TUTOR_COACHING =
+  '- Tutor coaching: first ask what the student thinks; then give hint level 1, then 2, then 3; give the full solution only if the student asks. If their answer matches a known misconception, name it and give a counterexample. Put long parts on the whiteboard with the whiteboard tools.';
+
+function buildLengthGuidelines(role: string, walkthrough = false): string {
   const common = `- Length targets count ONLY your speech text (type:"text" content). Actions (spotlight, whiteboard, etc.) do NOT count toward length. Use as many actions as needed — they don't make your speech "too long."
 - Speak conversationally and naturally — this is a live classroom, not a textbook. Use oral language, not written prose.`;
 
   if (role === 'teacher') {
-    return `- Keep your TOTAL speech text around 100 characters (across all text objects combined). Prefer 2-3 short sentences over one long paragraph.
+    return `- Keep your TOTAL speech text around ${walkthrough ? 300 : 100} characters (across all text objects combined). Prefer 2-3 short sentences over one long paragraph.
 ${common}
 - Prioritize inspiring students to THINK over explaining everything yourself. Ask questions, pose challenges, give hints — don't just lecture.
-- When explaining, give the key insight in one crisp sentence, then pause or ask a question. Avoid exhaustive explanations.`;
+- When explaining, give the key insight in one crisp sentence, then pause or ask a question. Avoid exhaustive explanations.${walkthrough ? `\n${TUTOR_COACHING}` : ''}`;
   }
 
   if (role === 'assistant') {

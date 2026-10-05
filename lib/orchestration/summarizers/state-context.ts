@@ -1,4 +1,6 @@
+import type { Scene } from '@openmaic/dsl';
 import type { StatelessChatRequest } from '@/lib/types/chat';
+import { widgetRegistry } from '@/lib/widgets';
 import { buildWhiteboardConflicts } from './whiteboard-conflicts';
 import { type CodeLine, createCodeRenderBudget, renderCodeLines } from './code-line-budget';
 
@@ -134,7 +136,8 @@ export function summarizeElements(
  * Build context string from store state
  */
 export function buildStateContext(storeState: StatelessChatRequest['storeState']): string {
-  const { stage, scenes, currentSceneId, mode, whiteboardOpen, quizResults } = storeState;
+  const { stage, scenes, currentSceneId, mode, whiteboardOpen, quizResults, widgetState } =
+    storeState;
 
   const lines: string[] = [];
 
@@ -167,6 +170,18 @@ export function buildStateContext(storeState: StatelessChatRequest['storeState']
       if (currentScene.content.type === 'slide') {
         const elements = currentScene.content.canvas.elements;
         lines.push(`Current slide elements (${elements.length}):\n${summarizeElements(elements)}`);
+      }
+
+      // Interactive scene claimed by a widget provider: the provider's catalog-derived text
+      // (position only when the reported state belongs to this scene), not the iframe HTML.
+      if (currentScene.content.type === 'interactive') {
+        const scene = currentScene as unknown as Scene;
+        const runtime =
+          widgetState?.sceneId === currentScene.id
+            ? { preset: widgetState.preset, frame: widgetState.frame, input: widgetState.input }
+            : undefined;
+        const text = widgetRegistry.providerForScene(scene)?.describe(scene, runtime);
+        if (text) lines.push(text);
       }
 
       // Quiz scene: include question summary, or post-submit results when the
