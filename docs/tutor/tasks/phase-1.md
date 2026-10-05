@@ -1205,7 +1205,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cấp | L |
 | Cỡ | M |
 | Phụ thuộc | 1c-09 |
-| Sở hữu | `app/api/chat/route.ts`, `tests/tutor/chat-moderation.test.ts` |
+| Sở hữu | `app/api/chat/route.ts`, `lib/config/feature-flags.ts`, `tests/tutor/chat-moderation.test.ts` |
 | Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.1); `app/api/chat/route.ts:44-132`; RISKS dòng Q14 |
 
 **Làm**
@@ -1213,7 +1213,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 2. **Ra:** giữ `text_delta` theo `messageId` tới `agent_end`, rồi `moderate(…, 'out')`.
    - Đạt: phát các sự kiện đã giữ.
    - Không đạt: một `text_delta` an toàn, bỏ `action` của lượt đó, ghi `tutorLearning{type:'moderation'}`.
-3. Chỉ áp cho lớp học của môn tutor; leader chốt cách nhận diện trong task này.
+3. **Đã chốt (2026-10-05):** bộ lọc bật bằng cờ môi trường `OPENMAIC_TUTOR_MODERATION` (`isTutorModerationEnabled()` trong `lib/config/feature-flags.ts`, thêm vào 'Sở hữu'; không đặt = tắt, hành vi chat cũ). Khi bật thì mọi lượt chat qua bộ lọc và **fail-closed** (thiếu route `tutor-moderation` → chat bị chặn bằng câu an toàn). Lý do: triển khai tutor là triển khai riêng (workbench); không có dấu hiệu 'lớp học của môn tutor' đáng tin trong request.
 4. Đo Q14: TTS và hiển thị không vỡ; p95 độ trễ thêm; không mất `action`.
 
 **Xong khi:** `pnpm vitest run tests/tutor/chat-moderation.test.ts tests/api` xanh; kết quả Q14 ghi vào RISKS.
