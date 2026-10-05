@@ -662,6 +662,10 @@
       "high": "Outstanding — you nailed it.",
       "mid": "Solid work — keep it up.",
       "low": "A good start — review and try again."
+    },
+    "rating": {
+      "title": "Was this lesson easy to understand?",
+      "option": "{{value}} out of {{max}}"
     }
   },
   "whiteboard": {

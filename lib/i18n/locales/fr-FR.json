@@ -662,6 +662,10 @@
       "high": "Remarquable, vous maîtrisez le sujet.",
       "mid": "Du bon travail, continuez ainsi.",
       "low": "Un bon début. Revoyez le cours et retentez."
+    },
+    "rating": {
+      "title": "Cette leçon était-elle facile à comprendre ?",
+      "option": "{{value}} sur {{max}}"
     }
   },
   "whiteboard": {

@@ -662,6 +662,10 @@
       "high": "Excelente — você arrasou!",
       "mid": "Bom trabalho — continue assim.",
       "low": "Um bom começo — revise e tente novamente."
+    },
+    "rating": {
+      "title": "Esta aula foi fácil de entender?",
+      "option": "{{value}} de {{max}}"
     }
   },
   "whiteboard": {

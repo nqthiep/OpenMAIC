@@ -662,6 +662,10 @@
       "high": "Xuất sắc — bạn làm rất tốt.",
       "mid": "Khá tốt — cứ giữ đà này.",
       "low": "Khởi đầu ổn — hãy xem lại rồi thử lần nữa."
+    },
+    "rating": {
+      "title": "Bài giảng này dễ hiểu không?",
+      "option": "{{value}} trên {{max}}"
     }
   },
   "whiteboard": {

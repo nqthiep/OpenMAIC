@@ -662,6 +662,10 @@
       "high": "Hervorragend — das sitzt.",
       "mid": "Starke Leistung — weiter so.",
       "low": "Ein guter Anfang — wiederhole den Stoff und versuche es erneut."
+    },
+    "rating": {
+      "title": "War diese Lektion leicht verständlich?",
+      "option": "{{value}} von {{max}}"
     }
   },
   "whiteboard": {
