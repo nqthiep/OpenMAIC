@@ -7,6 +7,8 @@ import { buildVirtualWhiteboardContext } from '@/lib/orchestration/summarizers/w
 import { getActionDescriptions } from '@/lib/orchestration/tool-schemas';
 import type { AgentTurnSummary, WhiteboardActionRecord } from '@/lib/orchestration/types';
 import type { StatelessChatRequest } from '@/lib/types/chat';
+import { TUTOR_COACHING } from '@/lib/orchestration/prompt-builder';
+import { isWalkthroughScene } from '@/lib/widgets/policy';
 
 function compactOutlineText(value: string, maxLength: number): string {
   const compact = value.replace(/\s+/g, ' ').trim();
@@ -177,7 +179,7 @@ export function buildChildPrompt(
     buildLanguageConstraint(body.storeState.stage?.languageDirective),
     '',
     '# Length & Style (CRITICAL)',
-    buildLengthGuidelines(agent.role),
+    buildLengthGuidelines(agent.role, isWalkthroughScene(currentScene)),
     '- Speak conversationally and naturally. This is live classroom speech, not an essay.',
     '- NEVER use markdown formatting, headings, bullet lists, bold markers, blockquotes, or code fences in visible speech.',
     '- Lead with the direct answer when the user asked a concrete question.',
@@ -257,7 +259,10 @@ export function buildNativeChildPrompt(
     ...nativeWhiteboardGuidance,
     '',
     '# Length & Style (CRITICAL)',
-    buildLengthGuidelines(agent.role),
+    buildLengthGuidelines(
+      agent.role,
+      isWalkthroughScene(body.storeState.scenes.find((s) => s.id === requestStartScene?.sceneId)),
+    ),
     '- Speak conversationally. Do not use markdown, headings, lists, or code fences.',
     '- Lead with the direct answer and ask at most one short follow-up question.',
     '',
@@ -297,13 +302,16 @@ function buildRoleGuideline(role: string): string {
   ].join('\n');
 }
 
-function buildLengthGuidelines(role: string): string {
+function buildLengthGuidelines(role: string, walkthrough = false): string {
   if (role === 'teacher') {
     return [
-      '- Keep your TOTAL visible speech around 70 Chinese characters or 1-2 short sentences.',
+      walkthrough
+        ? '- Keep your TOTAL visible speech around 300 characters.'
+        : '- Keep your TOTAL visible speech around 70 Chinese characters or 1-2 short sentences.',
       '- This is a hard cap, not a suggestion.',
       '- Give the key insight in one crisp sentence, then optionally ask one short question.',
       '- Avoid exhaustive explanations unless the user explicitly asks for depth.',
+      ...(walkthrough ? [TUTOR_COACHING] : []),
     ].join('\n');
   }
   if (role === 'assistant') {

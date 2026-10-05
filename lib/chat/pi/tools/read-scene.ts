@@ -3,6 +3,7 @@ import { Type, type Static } from 'typebox';
 import { resolveSceneOutline } from '@/lib/agent/client/resolve-scene-outline';
 import { buildStateContext } from '@/lib/orchestration/summarizers/state-context';
 import type { StatelessChatRequest } from '@/lib/types/chat';
+import { isWalkthroughScene } from '@/lib/widgets/policy';
 
 const ReadSceneParams = Type.Object({
   sceneId: Type.String({
@@ -58,7 +59,8 @@ function buildSceneEvidence(body: StatelessChatRequest, sceneId: string): string
     `Outline key points: ${outline.keyPoints?.join('; ') || '(none)'}`,
   ].join('\n');
   const featureBoundary =
-    scene.type === 'interactive' || scene.type === 'pbl'
+    // walkthrough scenes are described by their provider inside buildStateContext
+    (scene.type === 'interactive' && !isWalkthroughScene(scene)) || scene.type === 'pbl'
       ? `\nContent boundary: ${scene.type} payload is not exposed by read_scene v1; only its visible outline and scene metadata are available.`
       : '';
 
