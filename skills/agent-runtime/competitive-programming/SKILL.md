@@ -86,15 +86,27 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 <!-- BEGIN GENERATED: walkthrough-ids -->
 | walkthroughId | Title | presetId | Curriculum topics |
 | --- | --- | --- | --- |
+| `activity-selection` | Activity selection: the most disjoint segments | `classic`, `nested`, `disjoint`, `single`, `same-end` | `t3-greedy` |
+| `bfs` | BFS: breadth-first search | `tree`, `cycle`, `disconnected`, `single`, `two-paths` | `t3-graph-traversal` |
 | `binary-search` | Binary search | `absent`, `mid-hit`, `first`, `single` | `t2-binary-search` |
+| `bit-subsets` | Enumerating subsets with bit masks | `n3`, `n1`, `none`, `many` | `t2-bitwise` |
 | `bs-answer` | Problem walkthrough: cutting wood | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
 | `bs-answer-mini` | Problem walkthrough: cutting wood (mini) | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
+| `dfs` | DFS: depth-first search | `tree`, `cycle`, `disconnected`, `single`, `deep-chain` | `t3-graph-traversal` |
+| `euclid-gcd` | Euclid's algorithm (greatest common divisor) | `basic`, `coprime`, `b-zero`, `equal`, `a-less` | `t2-number-basics` |
 | `fib-recursion-tree` | The recursion tree of Fibonacci | `plain-5`, `memo-5`, `base-0`, `base-1`, `memo-6` | `t1-recursion` |
+| `hash-count` | Counting frequencies with a hash table | `repeat`, `all-same`, `distinct`, `single` | `t1-hash` |
+| `knapsack-01` | Dynamic programming: the 0/1 knapsack | `classic`, `cap-zero`, `one-item`, `too-heavy` | `t3-dp-basic` |
+| `lcs` | Longest common subsequence (LCS) | `classic`, `same`, `disjoint`, `single` | `t3-dp-basic` |
+| `lis` | Longest increasing subsequence (O(n²)) | `mixed`, `increasing`, `decreasing`, `single`, `dups` | `t3-dp-basic` |
 | `merge-sort` | Merge sort (top-down) | `random`, `reverse`, `dups`, `n2` | `t2-sorting`, `t2-divide-conquer` |
+| `min-total-wait` | Problem walkthrough: minimum total waiting time | `classic`, `sorted`, `equal`, `single` | `t3-greedy` |
 | `n-queens` | N queens by backtracking | `n1`, `n3-none`, `n4`, `n5` | `t2-backtracking` |
 | `prefix-sum` | Prefix sums | `basic`, `whole`, `one-cell`, `negative`, `n1` | `t1-array-prefix` |
 | `quick-sort` | Quick sort (Lomuto partition) | `random`, `sorted`, `dups`, `n2` | `t2-sorting`, `t2-divide-conquer` |
+| `sieve` | The sieve of Eratosthenes | `n30`, `n2`, `n49`, `n60` | `t2-number-basics` |
 | `stack-queue` | Stack: valid brackets | `nested`, `sequence`, `mismatch`, `unclosed`, `extra-close` | `t1-stack-queue` |
+| `string-scan` | Checking a palindrome | `odd`, `even`, `not`, `single`, `near` | `t1-string` |
 | `subset-gen` | Generating all subsets by recursion | `n3`, `n1`, `n2`, `n4` | `t2-brute-force` |
 | `two-pointers` | Two pointers: a pair with a given sum | `middle`, `ends`, `absent`, `n2`, `negative` | `t1-array-prefix` |
 <!-- END GENERATED: walkthrough-ids -->
