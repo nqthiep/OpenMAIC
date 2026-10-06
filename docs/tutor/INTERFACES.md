@@ -18,7 +18,7 @@
 
 ## 1. Host → iframe (đã có; runtime `walkthrough` xử lý)
 
-Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.contentWindow` (`lib/action/engine.ts:872-902`, `components/scene-renderers/InteractiveIframeHost.tsx:219-222`).
+Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.contentWindow` (`lib/action/engine.ts:872-902`, `components/scene-renderers/InteractiveIframeHost.tsx:236-238`).
 
 | Message | Payload | Runtime xử lý |
 | --- | --- | --- |
@@ -100,8 +100,12 @@ Idempotent theo `callId` (như `duplicate_scene`). `order` đã có trang thì *
 | `walkthrough-too-large` | HTML dựng ra vượt `maxBytes` của entry | — |
 | `unsupported-type` / `pbl-type-change` | `order` đang giữ trang loại không thay được (PBL…): như `generate_scene` | như `generate_scene` |
 | `code-widget-blocked` | (các tool khác) scene cuối là widget `code` khi bị chặn | `hint`: dùng walkthrough/simulation/diagram/game/3D |
+| `no-document` | chưa có tài liệu để ghi trang (`generate_scene`, `generate_walkthrough`, `duplicate_scene`) | — |
+| `content-blocked` | (`generate_actions`) lời thoại LLM mới bị kiểm duyệt chặn khi `OPENMAIC_TUTOR_MODERATION` bật | không ghi gì |
 | `walkthrough-locked` | `patch_stage` làm đổi `/content/html` hoặc `/content/widgetConfig` của scene là walkthrough **ở trạng thái trước hoặc sau** (so sánh deep-equal) | `hint`: gọi `generate_walkthrough` với preset khác |
 | `walkthrough-stale` | `generate_actions`/`duplicate_scene` trên scene có `entryRev`/`framesHash`/`contentHash` lệch catalog hiện tại | `hint`: gọi `generate_walkthrough` để dựng lại |
+
+`generate_walkthrough` gọi lại cùng `callId` (hoặc cùng tiêu đề và nội dung giống hệt) trả `replay: true` và không ghi lại. Tool chỉ đăng ký khi provider bật và catalog có ít nhất một walkthrough.
 
 **Thay đổi ở tool hiện có:**
 

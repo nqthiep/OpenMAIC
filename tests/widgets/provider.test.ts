@@ -256,7 +256,7 @@ describe('walkthrough provider: build', () => {
       py: 'Python',
       pseudo: 'Pseudocode',
     });
-    expect(b.config.presets[2].label).toBe('Not in the array');
+    expect(b.config.presets[0].label).toBe('Not in the array');
     expect(b.data.title).toBe('Binary search');
     expect(b.html).toContain('<html lang="en-US">');
     expect(b.html).toContain('aria-label="Controls"');
@@ -464,7 +464,7 @@ describe('walkthrough provider: build', () => {
       bs.pitfalls!.map((x) => ({ text: msg(x.text, 'vi-VN'), ...(x.lang && { lang: x.lang }) })),
     );
     expect(kit.hints.length).toBeGreaterThan(0);
-    expect(kit.hints).toEqual(lightHints('mid-hit', 'vi-VN'));
+    expect(kit.hints).toEqual(lightHints('absent', 'vi-VN'));
     const en = build({ id: 'binary-search' }, 'en-US').result.lessonKit as typeof kit;
     expect(en.pitfalls[2].text).toMatch(/^The loop condition/);
 
@@ -496,7 +496,7 @@ describe('walkthrough provider: build', () => {
         text: msg(x.text, 'en-US'),
         ...(x.lang && { lang: x.lang }),
       })),
-      hints: lightHints('mid-hit', 'en-US'),
+      hints: lightHints('absent', 'en-US'),
       homework: [{ judge: 'oj', problemId: 'p1' }],
     });
 

@@ -145,13 +145,13 @@ def parse_ranges(spec):
 # Neo nội dung cho các tham chiếu mà thiết kế dựa vào (R24). Khoá: "path:a" hoặc "path:a-b".
 ANCHORS = {
     "lib/server/agent-runtime/skills.ts:227": "constraints: null",
-    "components/scene-renderers/InteractiveIframeHost.tsx:344": 'sandbox="allow-scripts allow-forms allow-popups"',
-    "components/scene-renderers/InteractiveIframeHost.tsx:219-222": "postMessage",
+    "components/scene-renderers/InteractiveIframeHost.tsx:365": 'sandbox="allow-scripts allow-forms allow-popups"',
+    "components/scene-renderers/InteractiveIframeHost.tsx:236-238": "postMessage",
     "lib/store/interactive-iframe-pool.ts:21": "IFRAME_POOL_CAP = 3",
     "lib/orchestration/prompt-builder.ts:194": "TOTAL speech text around",
     "lib/choreography/timing.ts:34": "MAX_VIDEO_WAIT_MS",
     "lib/playback/action-navigation.ts:16-23": "'widget_setState'",
-    "lib/server/agent-runtime/generation-tools.ts:623": "duplicate_scene",
+    "lib/server/agent-runtime/generation-tools.ts:644": "duplicate_scene",
     "lib/server/agent-runtime/generation-tools.ts:540-564": "generate_actions",
     "lib/server/agent-runtime/generation-tools.ts:130-143": "function outlineFromScene",
     "packages/@openmaic/dsl/src/interactive.ts:38": "type: WidgetType",

@@ -63,7 +63,7 @@
 | # | Thuộc tính | Chỉ số | Ngưỡng | Cách đo | Cổng | Chủ | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | NFR-S1 | Không code editor cho học sinh | Số đường hiển thị editor `code`; số đường ghi chưa phân loại | 0 khi không đặt biến (mặc định chặn); 0 đường ghi chưa phân loại. Editor "trá hình" trong widget LLM là rủi ro dư (SECURITY §6) | e2e `code-widget-blocked.spec.ts` + `tests/widgets/write-paths.test.ts` + `policy.test.ts` | CI | Dev | Đề xuất |
-| NFR-S2 | Cách ly iframe | `sandbox` không có `allow-same-origin` | Giữ nguyên | test tĩnh trên `InteractiveIframeHost.tsx:344` | CI | Dev | Đã có |
+| NFR-S2 | Cách ly iframe | `sandbox` không có `allow-same-origin` | Giữ nguyên | test tĩnh trên `InteractiveIframeHost.tsx:365` | CI | Dev | Đã có |
 | NFR-S3 | Không chạy mã LLM trên server | Manim chỉ chạy mẫu của ta; `params` số/enum | 100% | review + test tool | CI + review | Kiến trúc sư | Đề xuất |
 | NFR-S4 | Sandbox render | Red-team: 0 thoát; canary không bị đọc; kill ≤ timeout + 5 s | như spike S6 | spike S6 | Cổng đợt 3C | DevOps | Cần spike |
 | NFR-S5 | Walkthrough/clip không gửi dữ liệu ra ngoài | Số request ra ngoài origin khi phát scene walkthrough/clip | 0 | e2e đếm request (Playwright `page.on('request')`) | CI | Dev | Đề xuất |

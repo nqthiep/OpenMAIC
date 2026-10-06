@@ -30,7 +30,7 @@ const review = (over: Partial<Review> = {}): Review => ({
   reviewer: 'tutor-review-cp',
   model: 'p:m',
   entryId: 'binary-search',
-  entryRev: 1,
+  entryRev: binarySearchEntry.entryRev,
   scores: { dung: 5, roRang: 4, chiTiet: 4, deHieu: 4, trucQuan: 5, sinhDong: 4 },
   factErrors: [],
   issues: [{ where: 'beatDefs.mid.hints[1]', problem: 'p', fix: 'f' }],
@@ -113,7 +113,7 @@ describe('panelVerdict', () => {
 
   it('fails when the two reviews are not two reviewers about the same entry and revision', () => {
     expect(panelVerdict(a, review())).toBe('fail');
-    expect(panelVerdict(a, { ...b, entryRev: 2 })).toBe('fail');
+    expect(panelVerdict(a, { ...b, entryRev: binarySearchEntry.entryRev + 1 })).toBe('fail');
     expect(panelVerdict(a, { ...b, entryId: 'other' })).toBe('fail');
   });
 
@@ -182,7 +182,7 @@ describe('review material and prompt', () => {
     );
     expect(material.alt?.pitfalls[0].text).toBe(binarySearchEntry.pitfalls![0].text['en-US']);
     expect(material.frames.every((f) => typeof f.explanationAlt === 'string')).toBe(true);
-    expect(material.frames[0].explanationAlt).toMatch(/^Look for 25/);
+    expect(material.frames[0].explanationAlt).toMatch(/^Look for 45/);
     const en = buildReviewMaterial(binarySearchEntry, 'en-US');
     expect(en.frames[0].explanation).toBe(material.frames[0].explanationAlt);
     expect(buildReviewMaterial(binarySearchEntry, 'vi-VN', null).alt).toBeUndefined();
@@ -250,7 +250,7 @@ describe('review material and prompt', () => {
   it('shows the narrated beats, the prediction asks and the truncation', () => {
     const mini = buildReviewMaterial(bsAnswerMiniEntry);
     const one = mini.script.find((s) => s.preset === 'one-tree')!;
-    expect(one).toMatchObject({ totalBeats: 13, narratedBeats: 12, truncated: true });
+    expect(one).toMatchObject({ totalBeats: 14, narratedBeats: 12, truncated: true });
     const classic = mini.script.find((s) => s.preset === 'classic')!;
     expect(classic.truncated).toBe(false);
     const asks = classic.steps.filter((s) => s.type === 'setState' && s.predictBeat);
@@ -344,7 +344,7 @@ describe('reviewOnce / reviewPanel with a fake model', () => {
     });
     expect(seen.prompt).toContain(DATA_BEGIN);
     expect(seen.system).toContain('"reviewer": "tutor-review-cp"');
-    expect(seen.system).toContain('"entryRev": 1');
+    expect(seen.system).toContain(`"entryRev": ${binarySearchEntry.entryRev}`);
   });
 
   it('passes the panel only when both reviewers pass', async () => {

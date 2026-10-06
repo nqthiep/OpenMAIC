@@ -160,7 +160,7 @@
       "frame": 13,
       "question": "Không thấy 45 thì hàm trả về vị trí gần nhất là 6 đúng không ạ?",
       "expectedFacts": ["hàm trả về −1, không phải vị trí gần nhất", "−1 nghĩa là không tìm thấy"],
-      "misconceptionId": "done#0"
+      "misconceptionId": "not-found#0"
     },
     {
       "id": "ab13-04",

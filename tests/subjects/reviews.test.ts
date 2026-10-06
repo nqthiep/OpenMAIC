@@ -32,7 +32,7 @@ const review = (over: Partial<Review> = {}): Review => ({
 const file = (over: { contentHash?: string; reviews?: unknown[]; verdict?: string } = {}) =>
   JSON.stringify({
     contentHash: entryContentHash(entry),
-    reviews: [review(), review({ reviewer: 'tutor-review-cp-2' })],
+    reviews: [review(), review({ reviewer: 'tutor-review-cp-2', model: 'q:n' })],
     ...over,
   });
 const loaderOf =
