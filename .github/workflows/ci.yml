@@ -300,6 +300,26 @@ jobs:
         env:
           TUTOR_BROWSER: '1'
 
+      - name: Walkthrough Array modes visualizer Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/array-modes.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
+      - name: Walkthrough Tree visualizer Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/tree.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
+      - name: Walkthrough Graph visualizer Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/graph.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
+      - name: Walkthrough Grid visualizer Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/grid.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
       # runner.* is only valid in step contexts (not job-level env).
       - name: Materialize Hyperframes lint samples
         run: pnpm exec vitest run tests/video-export/e2e-materialize.test.ts

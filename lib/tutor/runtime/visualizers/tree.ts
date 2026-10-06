@@ -21,7 +21,6 @@ const MAX_PLOT_H = 448;
 const MAX_R = 16;
 const POINTER_LANE_H = 12;
 const KINDS = new Set(['active', 'compare', 'result', 'visited', 'muted']);
-const GROUPS = 6;
 const GROUP_KIND = /^group-([0-5])$/;
 
 /**

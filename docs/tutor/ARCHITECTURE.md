@@ -295,13 +295,15 @@ Host chỉ nhận `widget-state` sau `ready`. Host kẹp lại, lưu store, và 
 
 | `type` | Giai đoạn | `state` | key `highlights` | Ghi chú |
 | --- | --- | --- | --- | --- |
-| `array` | 1 | `{ values, mode: 'bars'|'cells'|'bits', rows? }` | chỉ số | 2 hàng cho KMP/big-int; chế độ bit cho mask |
-| `tree` | 2A | `{ nodes:{id,label,parent?}[] }` (rừng) | id node | cây gọi đệ quy, DSU, segment tree, DP cây |
-| `graph` | 2A | `{ nodes:{id,x,y}[], edges:{from,to,weight?,directed?,kind?}[] }` | id node / `"A-B"` | toạ độ từ entry hoặc vòng tròn; panel phụ cho heap/stack/queue |
-| `grid` | 2A | `{ rows, cols, cells }` | `"r,c"` | DP lưới (thay `dpTable`), bàn cờ, sàng |
+| `array` | 1, 2 | `{ values, mode: 'bars'\|'cells'\|'bits', rows?: {label,values,offset?}[], intervals?: {id,start,end,label?}[], threshold? }` | chỉ số `"3"`; `"r<k>:<i>"` (hàng phụ k); id khoảng | hàng phụ cho cộng dồn/KMP/lịch sử; khoảng `[start,end)` cho chọn đoạn; chế độ bit cho mask |
+| `tree` | 2 | `{ nodes:{id,label,parent?,note?,edgeLabel?}[] }` (rừng, tối đa 31 node) | id node | cây gọi đệ quy, DSU, segment tree, DP cây, trie; `note` dưới node, `edgeLabel` trên cạnh tới cha |
+| `graph` | 2 | `{ nodes:{id,label?,x?,y?}[], edges:{from,to,weight?,directed?,kind?,label?}[] }` | id node / `"A-B"` | toạ độ từ entry hoặc vòng tròn; `label` thay id (ví dụ `A (d=3)`), `edge.label` cạnh luồng `3/5`; panel phụ cho heap/stack/queue |
+| `grid` | 2 | `{ rows, cols, cells, rowLabels?, colLabels?, arrows?:{from,to}[] }` | `"r,c"` | DP lưới (thay `dpTable`), bàn cờ, sàng; tối đa 16 × 13, nhãn ≤ 8 ký tự; `arrows` là phụ thuộc DP (khoá `"r,c"`) |
 | `geometry` | 3B | `{ points, segments, circles?, angles? }` | id đối tượng | dùng chung Tin (`t4-geometry`) và Toán |
 | `functionPlotter` | 3B | `{ curves:{id,points}[], marks?, bounds }` | id | mẫu tính ở server từ hệ số đa thức; không parser/`eval` |
 | `proofOutline` | 3B | `{ nodes: ProofNode[] }` | id node | cây logic + KaTeX |
+
+Mọi visualizer của Phase 2 dùng chung kind: `active`, `compare`, `result`, `visited`, `muted` và `group-0`…`group-5` (bảng màu cố định kèm mẫu nét/nét đứt, không phân biệt chỉ bằng màu).
 
 Panel phụ dùng chung: `vars` (bảng biến) và `aux` (danh sách có nhãn) — hiển thị heap của Dijkstra, stack của Tarjan, queue của BFS, mảng failure của KMP.
 

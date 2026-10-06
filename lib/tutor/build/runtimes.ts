@@ -1,8 +1,14 @@
 import { RUNTIME_ARRAY } from './generated/runtime-array';
+import { RUNTIME_GRAPH } from './generated/runtime-graph';
+import { RUNTIME_GRID } from './generated/runtime-grid';
+import { RUNTIME_TREE } from './generated/runtime-tree';
 
 /** Bảng runtime theo visualizer (D6). Visualizer mới: sinh file rồi thêm một dòng vào đây. */
 const RUNTIMES: Record<string, string> = {
   array: RUNTIME_ARRAY,
+  graph: RUNTIME_GRAPH,
+  grid: RUNTIME_GRID,
+  tree: RUNTIME_TREE,
 };
 
 /** Trả JS runtime của visualizer, hoặc null nếu chưa có. */
