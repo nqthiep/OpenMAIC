@@ -1,0 +1,122 @@
+{
+  "locale": "vi-VN",
+  "scenarios": [
+    {
+      "id": "ts10-prefix-sum",
+      "track": "ts10",
+      "kind": "concept",
+      "topicId": "t1-array-prefix",
+      "requirement": "Dạy mảng cộng dồn (prefix sum) cho học sinh lớp 8-9 ôn thi vào lớp 10 chuyên Tin: trả lời nhiều truy vấn tổng đoạn [l, r] trên một mảng cố định.",
+      "prerequisites": ["mảng một chiều và chỉ số", "vòng lặp for", "độ phức tạp O(n) và O(1)"],
+      "materialFacts": [
+        "Quy ước chỉ số từ 1: pre[0] = 0 và pre[i] = pre[i-1] + a[i].",
+        "Tổng đoạn [l, r] bằng pre[r] - pre[l-1].",
+        "Dựng mảng cộng dồn tốn O(n); mỗi truy vấn sau đó tốn O(1).",
+        "Với n, q đến 10^5, duyệt trực tiếp mỗi truy vấn tốn khoảng n*q = 10^10 phép tính, quá chậm.",
+        "Tổng có thể vượt 2^31 - 1 nên phải dùng kiểu 64 bit (long long trong C++)."
+      ]
+    },
+    {
+      "id": "ts10-binary-search",
+      "track": "ts10",
+      "kind": "concept",
+      "topicId": "t2-binary-search",
+      "requirement": "Dạy tìm kiếm nhị phân trên mảng đã sắp xếp cho học sinh lớp 9 ôn thi vào lớp 10 chuyên Tin, gồm cả vì sao thuật toán dừng và đúng.",
+      "prerequisites": [
+        "mảng một chiều và chỉ số",
+        "vòng lặp while",
+        "so sánh số",
+        "độ phức tạp O(n)"
+      ],
+      "materialFacts": [
+        "Tìm kiếm nhị phân chỉ đúng khi mảng đã được sắp xếp.",
+        "Mỗi bước so sánh a[mid] với giá trị cần tìm rồi loại bỏ một nửa khoảng đang xét.",
+        "Độ phức tạp là O(log n); với n = 10^5 thì cần khoảng 17 bước (vì 2^17 = 131072 >= 10^5).",
+        "Cập nhật đúng là lo = mid + 1 hoặc hi = mid - 1; đặt lo = mid có thể làm vòng lặp không dừng.",
+        "Trong C++ nên tính mid = lo + (hi - lo) / 2 để tránh tràn số khi lo + hi quá lớn."
+      ]
+    },
+    {
+      "id": "ts10-pair-sum-problem",
+      "track": "ts10",
+      "kind": "exam-problem",
+      "topicId": "t1-hash",
+      "requirement": "Giải đề: bài đếm số cặp có tổng bằng K, từ cách vét cạn tới cách nhanh, cho học sinh lớp 9 ôn thi vào lớp 10 chuyên Tin. Đề do nhóm eval tự soạn.",
+      "problem": "Cho n số nguyên a[1..n] và số nguyên K. Đếm số cặp chỉ số (i, j) với i < j sao cho a[i] + a[j] = K. Giới hạn: 1 <= n <= 10^5, |a[i]|, |K| <= 10^9. Ví dụ: n = 5, K = 6, a = [1, 5, 3, 3, 5] cho kết quả 3 (các cặp chỉ số (1,2), (1,5) và (3,4)).",
+      "prerequisites": [
+        "mảng một chiều",
+        "vòng lặp lồng nhau",
+        "độ phức tạp O(n) và O(n^2)",
+        "sắp xếp mảng"
+      ],
+      "materialFacts": [
+        "Có n(n-1)/2 cặp (i, j) với i < j; với n = 10^5 là 4999950000, khoảng 5*10^9 cặp.",
+        "Vét cạn hai vòng lặp tốn O(n^2) nên quá chậm với n = 10^5.",
+        "Đếm bằng bảng tần suất: với mỗi a[j], cộng số lần đã gặp giá trị K - a[j] ở các vị trí trước j rồi mới ghi nhận a[j]; tốn O(n) kỳ vọng.",
+        "Có thể thay bằng sắp xếp rồi hai con trỏ, tốn O(n log n).",
+        "Nếu 2*x = K thì các giá trị bằng x tạo c*(c-1)/2 cặp, với c là số lần x xuất hiện.",
+        "Kết quả có thể lên tới khoảng 5*10^9, vượt 2^31 - 1, nên phải dùng kiểu 64 bit."
+      ]
+    },
+    {
+      "id": "hsg-knapsack-01",
+      "track": "hsg",
+      "kind": "concept",
+      "topicId": "t3-dp-basic",
+      "requirement": "Dạy bài cái túi 0/1 bằng quy hoạch động cho học sinh ôn thi HSG Tin cấp tỉnh: định nghĩa trạng thái, công thức chuyển, và vì sao duyệt trọng lượng giảm dần khi dùng mảng một chiều.",
+      "prerequisites": [
+        "mảng hai chiều",
+        "đệ quy và bài toán con",
+        "độ phức tạp theo hai tham số",
+        "vét cạn tập con"
+      ],
+      "materialFacts": [
+        "Có n vật, vật i có khối lượng w[i] và giá trị v[i]; túi chứa tối đa W; mỗi vật dùng nhiều nhất một lần.",
+        "dp[i][c] là giá trị lớn nhất khi chỉ xét i vật đầu và sức chứa c.",
+        "dp[i][c] = dp[i-1][c] nếu không lấy vật i, và dp[i-1][c - w[i]] + v[i] nếu c >= w[i]; lấy giá trị lớn hơn của hai trường hợp.",
+        "Độ phức tạp thời gian là O(n*W).",
+        "Với mảng một chiều phải duyệt c giảm dần để mỗi vật chỉ được dùng một lần.",
+        "Ví dụ: các vật (w, v) = (2,3), (3,4), (4,5), (5,6) với W = 5 cho đáp án 7, lấy hai vật đầu (khối lượng 5)."
+      ]
+    },
+    {
+      "id": "hsg-grid-components-problem",
+      "track": "hsg",
+      "kind": "exam-problem",
+      "topicId": "t3-graph-traversal",
+      "requirement": "Giải đề: bài đếm số vùng liên thông trên lưới, cho học sinh ôn thi HSG Tin cấp tỉnh, kể cả lý do chọn BFS thay vì DFS đệ quy. Đề do nhóm eval tự soạn.",
+      "problem": "Cho lưới n x m gồm ký tự '.' (ô trống) và '#' (tường). Hai ô trống kề cạnh (trên, dưới, trái, phải) thuộc cùng một vùng. Đếm số vùng. Giới hạn: 1 <= n, m <= 1000.",
+      "prerequisites": ["mảng hai chiều", "hàng đợi", "đệ quy", "độ phức tạp O(n*m)"],
+      "materialFacts": [
+        "Lưới có tối đa 10^6 ô.",
+        "Duyệt BFS hoặc DFS từ mỗi ô trống chưa thăm và đánh dấu cả vùng; số lần bắt đầu duyệt chính là số vùng.",
+        "Mỗi ô được thăm nhiều nhất một lần nên tổng thời gian là O(n*m).",
+        "DFS đệ quy có thể sâu tới khoảng 10^6 tầng trên lưới 1000 x 1000 và có nguy cơ tràn ngăn xếp; BFS bằng hàng đợi hoặc DFS khử đệ quy tránh được.",
+        "Chỉ xét 4 hướng kề cạnh, không xét đường chéo.",
+        "Cần kiểm tra biên của lưới trước khi truy cập ô láng giềng."
+      ]
+    },
+    {
+      "id": "hsg-lis-problem",
+      "track": "hsg",
+      "kind": "exam-problem",
+      "topicId": "t3-dp-basic",
+      "requirement": "Giải đề: bài dãy con tăng dài nhất (LIS) với n lớn, từ quy hoạch động O(n^2) tới cách O(n log n), cho học sinh ôn thi HSG Tin. Đề do nhóm eval tự soạn.",
+      "problem": "Cho dãy a[1..n]. Tìm độ dài lớn nhất của dãy con tăng chặt (chọn các vị trí i1 < i2 < ... < ik sao cho a[i1] < a[i2] < ... < a[ik]). Giới hạn: 1 <= n <= 10^5, |a[i]| <= 10^9. Ví dụ: a = [3, 1, 4, 1, 5, 9, 2, 6] cho kết quả 4.",
+      "prerequisites": [
+        "quy hoạch động một chiều",
+        "tìm kiếm nhị phân",
+        "mảng",
+        "độ phức tạp O(n^2) và O(n log n)"
+      ],
+      "materialFacts": [
+        "Quy hoạch động cơ bản: f[i] là độ dài dãy con tăng dài nhất kết thúc tại i, f[i] = 1 + max f[j] với j < i và a[j] < a[i]; tốn O(n^2), khoảng 10^10 phép với n = 10^5, quá chậm.",
+        "Cách nhanh: giữ mảng tails, tails[k] là giá trị kết thúc nhỏ nhất của một dãy con tăng chặt có độ dài k+1.",
+        "Mảng tails luôn tăng chặt, nên với mỗi a[i] dùng tìm kiếm nhị phân vị trí đầu tiên có tails[k] >= a[i] (lower_bound) để thay thế, hoặc thêm vào cuối nếu không có.",
+        "Độ dài dãy con tăng dài nhất bằng kích thước cuối cùng của tails; thời gian O(n log n).",
+        "Với a = [3, 1, 4, 1, 5, 9, 2, 6] kết quả là 4, ví dụ dãy con 1, 4, 5, 9.",
+        "Mảng tails không nhất thiết là một dãy con tăng có thật của đầu vào."
+      ]
+    }
+  ]
+}
