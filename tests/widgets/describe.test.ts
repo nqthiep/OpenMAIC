@@ -68,6 +68,55 @@ describe('describeWalkthrough per frame', () => {
     }
   });
 
+  it('adds a State line with index:value pairs, after the frame content', () => {
+    const text = describeWalkthrough(scene, { preset: 'absent', frame: 13 }, deps);
+    const values = (frames[13].state as { values: number[] }).values;
+    expect(text).toContain(`State: ${values.map((v, i) => `${i}:${v}`).join(', ')}`);
+    expect(text).toContain('7:52');
+    expect(text.indexOf('State:')).toBeGreaterThan(text.indexOf('Explanation:'));
+    expect(text.length).toBeLessThanOrEqual(MAX_DIGEST_CHARS);
+  });
+
+  it('lists threshold, pointers and aux of a synthetic entry, bounded', () => {
+    const values = Array.from({ length: 80 }, (_, i) => i * 2);
+    const synth: AnyWalkthroughEntry = {
+      ...bs,
+      id: 'synth',
+      run(_input, emit) {
+        emit(
+          { values, mode: 'bars', threshold: { label: 'H', value: 7 } },
+          {
+            explanation: 'e',
+            pointers: { lo: 0, hi: 79 },
+            aux: [{ id: 'q', label: 'Queue', items: Array.from({ length: 40 }, (_, i) => i) }],
+          },
+        );
+      },
+    };
+    const p = createWalkthroughProvider({
+      findWalkthrough: () => synth,
+      getLabels: getTutorLabels,
+    });
+    const sc = {
+      content: p.build({ id: 'synth', presetId: 'absent' }, { locale: 'en-US' }).content,
+    } as unknown as Scene;
+    const text = describeWalkthrough(
+      sc,
+      { preset: 'absent', frame: 0 },
+      { findWalkthrough: () => synth },
+    );
+    expect(text).toContain('49:98');
+    expect(text).not.toContain('50:100');
+    expect(text).toContain('(80 values)');
+    expect(text).toContain('Threshold: H = 7');
+    expect(text).toContain('Pointers: lo=0, hi=79');
+    expect(text).toContain('Queue: 0, 1, 2');
+    expect(text).not.toContain(
+      'Queue: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20',
+    );
+    expect(text.length).toBeLessThanOrEqual(MAX_DIGEST_CHARS);
+  });
+
   it('ignores text injected into html and widgetConfig', () => {
     const evil = clone(scene);
     evil.content.html = String(evil.content.html)

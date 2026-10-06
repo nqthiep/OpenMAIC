@@ -136,7 +136,7 @@ describe('bs-answer-mini: input', () => {
   it('m greater than total height is rejected with m-exceeds-total', () => {
     expect(validateInput(entry, { h: [3, 8, 2], m: 14 })).toEqual({
       ok: false,
-      issues: ['m-exceeds-total'],
+      issues: ['$: m-exceeds-total'],
     });
     expect(validateInput(entry, { h: [3, 8, 2], m: 13 }).ok).toBe(true);
   });

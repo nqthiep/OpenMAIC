@@ -40,11 +40,11 @@ describe('buildTranscript', () => {
     expect(t[i + 1].frame).toBe(t[i].frame);
   });
 
-  it('has one narration per narrated beat and one ask per predict beat', () => {
+  it('has one narration per narrated beat and asks only on the first 2 occurrences of a beat', () => {
     const narrations = t.filter((l) => l.kind === 'narration').length;
     expect(narrations).toBeLessThanOrEqual(MAX_NARRATED_BEATS);
     expect(narrations).toBe(10); // preset "absent": start + 4 x (mid, move) + done
-    expect(t.filter((l) => l.kind === 'ask')).toHaveLength(4);
+    expect(t.filter((l) => l.kind === 'ask')).toHaveLength(2); // 4 predict beats, MAX_ASKS_PER_BEAT = 2
   });
 
   it('is deterministic, and follows the locale', () => {

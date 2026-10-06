@@ -44,7 +44,7 @@ describe('validateInput', () => {
     expect(validateInput<In>({ inputSpec, check }, { l: 1, r: 2 }).ok).toBe(true);
     expect(validateInput<In>({ inputSpec, check }, { l: 3, r: 2 })).toEqual({
       ok: false,
-      issues: ['l-gt-r'],
+      issues: ['$: l-gt-r'],
     });
     expect(seen).toEqual([
       { l: 1, r: 2 },
@@ -55,7 +55,18 @@ describe('validateInput', () => {
   it('caps check issues at 5', () => {
     const check = () => ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
     const res = validateInput<In>({ inputSpec, check }, { l: 1, r: 2 });
-    expect(res).toEqual({ ok: false, issues: ['a', 'b', 'c', 'd', 'e'] });
+    expect(res).toEqual({
+      ok: false,
+      issues: ['$: a', '$: b', '$: c', '$: d', '$: e'],
+    });
+  });
+
+  it('keeps check issues that already have a path: reason shape', () => {
+    const check = () => ['l: too-big', 'plain'];
+    expect(validateInput<In>({ inputSpec, check }, { l: 1, r: 2 })).toEqual({
+      ok: false,
+      issues: ['l: too-big', '$: plain'],
+    });
   });
 
   it('maps a throwing check to check-failed', () => {

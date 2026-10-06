@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { canonicalJSON, contentHash, framesHash, hash16 } from '@/lib/tutor/catalog/hash';
+import { binarySearchEntry } from '@/lib/subjects/cp/catalog/binary-search';
+import { canonicalJSON, entryContentHash, framesHash, hash16 } from '@/lib/tutor/catalog/hash';
+import type { WalkthroughEntry } from '@/lib/tutor/catalog/types';
 
 describe('canonicalJSON', () => {
   it('sorts keys recursively and keeps array order', () => {
@@ -27,17 +29,33 @@ describe('hashes', () => {
     expect(hash16(v)).toBe(expected);
     expect(framesHash(v)).toBe(expected);
   });
-  it('contentHash uses only preset id/input and defaults problem to null', () => {
-    const base = { code: { a: 1 }, beatDefs: [1] };
-    const a = contentHash({ ...base, presets: [{ id: 'p', input: 1 }] });
-    const b = contentHash({
-      ...base,
-      presets: [{ id: 'p', input: 1, label: 'x' } as { id: string; input: number }],
-      problem: undefined,
-    });
-    expect(a).toBe(b);
-    expect(a).toBe(
-      hash16({ code: { a: 1 }, beatDefs: [1], presets: [{ id: 'p', input: 1 }], problem: null }),
-    );
+  it('framesHash drops undefined fields but refuses non-finite numbers', () => {
+    expect(framesHash([{ a: 1, b: undefined }])).toBe(framesHash([{ a: 1 }]));
+    for (const bad of [NaN, Infinity, -Infinity]) {
+      expect(() => framesHash([{ state: { values: [1, bad] } }])).toThrow(TypeError);
+    }
+  });
+});
+
+describe('entryContentHash', () => {
+  it('is memoised per entry object and keeps its value', () => {
+    const entry = binarySearchEntry as WalkthroughEntry;
+    const first = entryContentHash(entry);
+    expect(first).toMatch(/^[0-9a-f]{16}$/);
+    let runs = 0;
+    const counting: WalkthroughEntry = {
+      ...entry,
+      run: (i, emit, tick, ctx) => {
+        runs++;
+        entry.run(i, emit, tick, ctx);
+      },
+    };
+    const h = entryContentHash(counting);
+    const after = runs;
+    expect(after).toBeGreaterThan(0);
+    expect(entryContentHash(counting)).toBe(h);
+    expect(runs).toBe(after);
+    // a copy is a different object but the same content
+    expect(entryContentHash({ ...counting })).toBe(h);
   });
 });

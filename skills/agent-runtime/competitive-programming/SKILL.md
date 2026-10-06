@@ -68,7 +68,7 @@ Chat agent được dặn ở nơi khác (ADR 0008 Decision 6, CONTENT-DESIGN §
 
 Vì vậy khi soạn bài:
 
-- Mỗi beat của walkthrough phải có đủ **3 `hints`** theo mức tăng dần (gợi hướng, gợi bước, gần đáp án) và các `misconceptions` của nó trong catalog. Thiếu thì báo, đừng tự bịa trong slide.
+- Mỗi beat của catalog đã có sẵn 3 `hints` theo mức tăng dần (gợi hướng, gợi bước, gần đáp án) và các `misconceptions`; Q&A dùng chúng qua `describe()`. `lessonKit.hints` là gợi ý nhẹ của từng beat để bạn tham khảo; đừng tự bịa gợi ý khác trong slide.
 - **Không dán lời giải đầy đủ vào slide đầu** (trang 1-3 của blueprint): để học sinh còn gì để dự đoán và hỏi.
-- Dùng beat `ask`/`predict` để học sinh dự đoán trước khi hình xuất hiện.
-- `materialFacts` chỉ lấy từ `lessonKit` và catalog; hints và misconceptions do `describe()` cung cấp cho chat, không chép lại thành lời giải trong slide.
+- Beat có câu hỏi dự đoán thì chạy tự động khi phát lời thầy (mỗi beat hỏi tối đa 2 lần đầu); bạn không cần dựng thêm trang để hỏi lại.
+- `materialFacts` chỉ lấy từ `lessonKit` và catalog; hints và misconceptions do `describe()` cung cấp cho chat nên không cần chép lại thành lời giải trong slide.
