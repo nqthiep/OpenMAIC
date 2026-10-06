@@ -1,7 +1,7 @@
 /** Harness for `binary-search` (card 2-I1). stdin: n, then n sorted ints, then target. stdout: index or -1. */
 type In = { values: number[]; target: number };
 
-export default {
+const harness = {
   entryId: 'binary-search',
   // Explicit headers, not <bits/stdc++.h>: Apple clang (macOS g++) lacks it.
   cppPrelude: [
@@ -29,3 +29,5 @@ export default {
   // Independent oracle: linear scan (values are strictly increasing, so the index is unique).
   expected: ({ values, target }: In) => String(values.indexOf(target)),
 };
+
+export default harness;

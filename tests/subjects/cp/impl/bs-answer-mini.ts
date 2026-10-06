@@ -1,7 +1,7 @@
 /** Harness for `bs-answer-mini` (card 2-I1). stdin: n, n heights, m. stdout: the best cut height H. */
 type In = { h: number[]; m: number };
 
-export default {
+const harness = {
   entryId: 'bs-answer-mini',
   // Explicit headers, not <bits/stdc++.h>: Apple clang (macOS g++) lacks it.
   cppPrelude: [
@@ -37,3 +37,5 @@ export default {
     return String(best);
   },
 };
+
+export default harness;

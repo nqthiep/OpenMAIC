@@ -19,10 +19,17 @@ interface Harness {
   expected: (input: never) => string;
 }
 
+// import.meta.glob is Vite-only and not in this project's TS types.
+const glob = (
+  import.meta as unknown as {
+    glob: (p: string, o: { eager: true }) => Record<string, { default: Harness }>;
+  }
+).glob;
 const harnesses = Object.fromEntries(
-  Object.values(import.meta.glob<{ default: Harness }>('./cp/impl/*.ts', { eager: true })).map(
-    (mod) => [mod.default.entryId, mod.default],
-  ),
+  Object.values(glob('./cp/impl/*.ts', { eager: true })).map((mod) => [
+    mod.default.entryId,
+    mod.default,
+  ]),
 );
 const entries = SUBJECT_PACKS.flatMap((p) => p.walkthroughs);
 const ENABLED = process.env.TUTOR_IMPL_CHECK === '1';
