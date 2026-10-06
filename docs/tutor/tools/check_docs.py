@@ -167,7 +167,7 @@ ANCHORS = {
     "lib/export/use-export-pptx.ts:1288-1294": "interactive/",
     "components/scene-renderers/interactive-renderer.tsx:44-47": "patchHtmlForIframe",
     "lib/server/model-routes.ts:132-168": "export const LLM_STAGES",
-    "lib/runtime/payload-validators.ts:112-118": "APP_RUNTIME_PAYLOAD_VALIDATORS",
+    "lib/runtime/payload-validators.ts:135-141": "APP_RUNTIME_PAYLOAD_VALIDATORS",
     "packages/@openmaic/dsl/src/runtime.ts:152-157": "open `string`",
     "app/api/chat/route.ts:44-132": "statelessGenerate(",
     "packages/@openmaic/generation/templates/slide-actions/system.md:116-117": "MUST be the **last**",

@@ -13,14 +13,33 @@ import type { SubjectPack } from '@/lib/widgets/types';
 /** Raw text of a review file, or null when it does not exist. Injectable for tests. */
 export type ReviewLoader = (subject: string, entryId: string, entryRev: number) => string | null;
 
-export const diskReviewLoader: ReviewLoader = (subject, entryId, entryRev) => {
-  try {
-    return readFileSync(path.join(process.cwd(), reviewPath(subject, entryId, entryRev)), 'utf8');
-  } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null;
-    throw e;
-  }
-};
+/**
+ * Roots searched for `lib/subjects/<subject>/reviews/**`: the cwd first (repo root in dev/CI, the
+ * standalone dir in Docker), then the repo root relative to this module (works when the cwd is not
+ * the project dir). `__dirname` is absent in some bundles: then only the cwd is searched.
+ */
+function defaultReviewRoots(): string[] {
+  const roots = [process.cwd()];
+  if (typeof __dirname === 'string') roots.push(path.resolve(__dirname, '..', '..'));
+  return roots;
+}
+
+export function makeDiskReviewLoader(roots: () => string[] = defaultReviewRoots): ReviewLoader {
+  return (subject, entryId, entryRev) => {
+    const rel = reviewPath(subject, entryId, entryRev);
+    for (const root of roots()) {
+      try {
+        return readFileSync(path.join(root, rel), 'utf8');
+      } catch (e) {
+        const code = (e as NodeJS.ErrnoException).code;
+        if (code !== 'ENOENT' && code !== 'ENOTDIR') throw e;
+      }
+    }
+    return null;
+  };
+}
+
+export const diskReviewLoader: ReviewLoader = makeDiskReviewLoader();
 
 /** Stored shape: `{ "contentHash": "…", "reviews": [r1, r2] }` (the stored `verdict`, if any, is ignored). */
 function isReleased(

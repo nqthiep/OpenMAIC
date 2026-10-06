@@ -12,6 +12,7 @@ import {
   type AICallFn,
   type AgentInfo,
 } from '@openmaic/generation';
+import { coerceCodeOutline } from '@/app/api/generate/scene-outlines-stream/coerce-code-outline';
 import { createSceneWithActions } from '@/lib/server/scene-generation';
 import { generatePBLV2Project } from '@/lib/pbl/v2/agents/planner';
 import { getDefaultAgents } from '@/lib/orchestration/registry/store';
@@ -556,7 +557,8 @@ export async function generateClassroom(
   let generatedScenes = 0;
 
   for (const [index, outline] of outlines.entries()) {
-    const safeOutline = applyOutlineFallbacks(outline, true, {
+    // L3 of the code-widget block (ADR 0010): same coercion as the browser routes, before any content call.
+    const safeOutline = applyOutlineFallbacks(coerceCodeOutline(outline), true, {
       allowProceduralSkill: vocationalActive,
     });
     const progressStart = 30 + Math.floor((index / Math.max(outlines.length, 1)) * 60);

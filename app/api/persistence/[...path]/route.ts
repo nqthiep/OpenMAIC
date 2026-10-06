@@ -303,16 +303,27 @@ function runNodeHandler(handler: RequestListener, request: Request): Promise<Res
   });
 }
 
+/** Documents above this are not scanned: the clone would buffer the whole body a second time. */
+const CODE_SCAN_MAX_BYTES = 4 * 1024 * 1024;
+
+/** Number of `code` widget scenes in a PUT body (one scene, or a document with `scenes`). */
+export function countCodeWidgetScenes(text: string): number {
+  // Cheap pre-check: skip the JSON parse unless the text can name a code widget at all.
+  if (!text.includes('"code"')) return 0;
+  const json = JSON.parse(text) as { scenes?: unknown } | null;
+  const scenes: { content?: unknown }[] = Array.isArray(json?.scenes) ? json.scenes : [json];
+  return scenes.filter((scene) => isCodeWidget(scene?.content)).length;
+}
+
 /**
  * ADR 0010 L2: a saved document or scene that carries a `code` widget is kept
  * as-is (rejecting would drop imported classrooms); the display layer blocks it.
- * `body` is a clone taken before the handler consumed the request.
+ * `body` is a clone taken before the handler consumed the request. Fire-and-forget:
+ * the response never waits for it.
  */
 async function logStoredCodeWidgets(body: Request, stageId: string): Promise<void> {
   try {
-    const json = (await body.json()) as { scenes?: unknown } | null;
-    const scenes: { content?: unknown }[] = Array.isArray(json?.scenes) ? json.scenes : [json];
-    const count = scenes.filter((scene) => isCodeWidget(scene?.content)).length;
+    const count = countCodeWidgetScenes(await body.text());
     if (count > 0) log.warn('code-widget-stored', { stageId, count });
   } catch {
     // Unparseable body: the storage handler already answered it; nothing to log.
@@ -362,7 +373,9 @@ export async function handlePersistenceRequest(
       const codeScan =
         request.method === 'PUT' &&
         (action.kind === 'create' || action.kind === 'write') &&
-        !isCodeWidgetAllowed()
+        !isCodeWidgetAllowed() &&
+        // Unknown length (chunked) or large: skip, so the clone never buffers a big body twice.
+        Number(request.headers.get('content-length') ?? Infinity) <= CODE_SCAN_MAX_BYTES
           ? { stageId: action.stageId, body: request.clone() }
           : null;
 
@@ -373,7 +386,7 @@ export async function handlePersistenceRequest(
               await createPersistenceHandler(connectionString, ownerId, access, deps.poolFactory),
               request,
             );
-      if (codeScan && response.ok) await logStoredCodeWidgets(codeScan.body, codeScan.stageId);
+      if (codeScan && response.ok) void logStoredCodeWidgets(codeScan.body, codeScan.stageId);
       for (const [name, value] of responseHeaders.entries()) response.headers.append(name, value);
       return response;
     } catch (error) {

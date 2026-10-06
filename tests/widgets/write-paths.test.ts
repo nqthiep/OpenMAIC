@@ -3,6 +3,7 @@
  * Inventory only: it does not check that the guard for each layer is installed.
  */
 import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 type Layer = 'L2-tool' | 'L1-render-only' | 'L1-render-point' | 'L1-export' | 'not-scene';
@@ -62,6 +63,17 @@ const CLASSIFIED: Record<string, Classified> = {
     why: 'inlineHtmlAssets for video export',
   },
 
+  // --- server-side classroom job: outlines go through coerceCodeOutline (L3) ---
+  'lib/server/classroom-generation.ts': {
+    layer: 'L1-render-only',
+    why: 'server classroom job: saves scenes via createSceneWithActions (outline coerced first)',
+  },
+
+  'lib/server/scene-generation.ts': {
+    layer: 'L1-render-only',
+    why: 'defines createSceneWithActions (store-independent scene assembly)',
+  },
+
   // --- API routes accepting writes ---
   'app/api/classroom/route.ts': { layer: 'L1-render-only', why: 'POST/PUT classroom with scenes' },
   'app/api/persistence/[...path]/route.ts': {
@@ -111,7 +123,7 @@ function findMatches(): string[] {
   const dirs = 'lib app components';
   const code = gitGrep(
     `-E -e "putScene\\(" -e "putSceneBringingCurrent\\(" -e "saveDocument\\(" ` +
-      `-e "srcDoc[=:]" -e "inlineHtmlAssets\\(" -- ${dirs}`,
+      `-e "createSceneWithActions\\(" -e "srcDoc[=:]" -e "inlineHtmlAssets\\(" -- ${dirs}`,
   );
   const routes = gitGrep(
     `-E "export (async function|const) (PUT|POST)" -- app/api/classroom app/api/persistence ` +
@@ -119,6 +131,35 @@ function findMatches(): string[] {
   );
   return [...new Set([...code, ...routes])].sort();
 }
+
+// Files allowed to call generateSceneContent( (a classic code outline must be coerced before it).
+const CONTENT_GENERATION_CALLERS = [
+  'app/api/generate/scene-content/route.ts', // coerceCodeOutline
+  'lib/server/agent-runtime/generation-tools.ts', // L2: policy applied by the tool
+  'lib/server/classroom-generation.ts', // coerceCodeOutline
+  'lib/server/scene-generation.ts', // buildSceneFromOutline: no production caller
+];
+
+describe('generateSceneContent callers (ADR 0010 L3)', () => {
+  it('only approved files call generateSceneContent(', () => {
+    const callers = gitGrep('-F -e "generateSceneContent(" -- lib app components');
+    const extra = callers.filter((f) => !CONTENT_GENERATION_CALLERS.includes(f));
+    expect(
+      extra,
+      extra
+        .map(
+          (f) =>
+            `${f} gọi generateSceneContent(: phải coerceCodeOutline trước, rồi thêm vào danh sách`,
+        )
+        .join('\n'),
+    ).toEqual([]);
+  });
+
+  it('the server classroom job coerces every outline before applyOutlineFallbacks', () => {
+    const src = readFileSync('lib/server/classroom-generation.ts', 'utf8');
+    expect(src).toContain('applyOutlineFallbacks(coerceCodeOutline(outline)');
+  });
+});
 
 describe('scene write-path inventory (ADR 0010)', () => {
   const found = findMatches();
