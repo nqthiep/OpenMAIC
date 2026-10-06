@@ -15,7 +15,18 @@
  *             entry wins, else DEFAULT_MODEL (the same resolution the app does), so the eval
  *             talks to the model students get.
  *   judge     stage 'tutor-analyst', MODEL_ROUTES entry required (no fallback), temperature 0.
+ *             No dedicated judge stage exists, so this one is reused. The run is REFUSED (exit 2,
+ *             also with --dry-run) when the answerer and the judge resolve to the same
+ *             `provider:model`: a model must not grade its own answers.
  *   e.g. MODEL_ROUTES='{"tutor-analyst":"<provider:model>"}'
+ *
+ * Teacher prompt: a PROXY of the production one (see ./teacher-prompt.ts). It uses the real
+ * TUTOR_COACHING from lib/orchestration/prompt-builder.ts; the role and 300-character length
+ * lines are copied from lib/chat/pi/prompts.ts, whose helpers are module-private and need a chat
+ * request. The answerer sees no tools, whiteboard state or peer agents.
+ *
+ * Judge: "correct" needs at least one expected fact stated or implied, unless hintFirst applies
+ * and the answer is a hint-first reply (see ./judge.ts).
  *
  * --dry-run     print the plan (counts, route status); no model call
  * --limit N     N scenarios, spread evenly (default: all)
@@ -35,11 +46,13 @@ import { SUBJECT_PACKS } from '@/lib/subjects';
 import { describeWalkthrough } from '@/lib/widgets/describe';
 import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
 import { judge, type JudgeLlm } from './judge';
+import { buildTeacherSystem } from './teacher-prompt';
 import {
   ARMS,
   exitCode,
   formatReport,
   parseScenarios,
+  sameModel,
   score,
   spread,
   type Arm,
@@ -139,6 +152,12 @@ async function main(): Promise<number> {
     );
     return exitCode(false);
   }
+  if (sameModel(answerModel, judgeRoute?.model)) {
+    console.error(
+      `Judge: REFUSED. The answerer and the judge are both "${answerModel}"; a model must not grade its own answers. Route "${JUDGE_STAGE}" to a different model.`,
+    );
+    return exitCode(false);
+  }
   const calls = scenarios.length * ARMS.length * 2;
   if (values['dry-run']) {
     console.log(
@@ -181,14 +200,12 @@ async function main(): Promise<number> {
   const sceneOf = (s: Scenario) =>
     provider.build({ id: entry.id, presetId: s.presetId }, { locale: file.locale }).content;
   const teacherSystem = (digest: string) =>
-    [
-      `You are the teacher in a live classroom lesson about ${entry.id}, talking to a school student. Reply in ${file.locale}.`,
-      '- Keep your speech around 300 characters, 2-3 short sentences, conversational. Plain text only.',
-      TUTOR_COACHING,
-      '',
-      'Lesson context (what the student is looking at):',
+    buildTeacherSystem({
+      entryId: entry.id,
+      locale: file.locale,
       digest,
-    ].join('\n');
+      coaching: TUTOR_COACHING,
+    });
 
   type Job = { scenario: Scenario; arm: Arm };
   const jobs: Job[] = scenarios.flatMap((scenario) => ARMS.map((arm) => ({ scenario, arm })));

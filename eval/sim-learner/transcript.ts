@@ -107,7 +107,7 @@ export function renderTranscript(lines: readonly TranscriptLine[]): string {
   return lines
     .map(
       (l, i) =>
-        `${i + 1}. ${l.kind === 'ask' ? 'Teacher asks' : 'Teacher says'}: ${l.text}\n   On screen: ${l.frame}`,
+        `${i + 1}. ${l.kind === 'ask' ? 'Teacher asks' : 'Teacher says'}: ${l.text}${l.frame ? `\n   On screen: ${l.frame}` : ''}`,
     )
     .join('\n');
 }
@@ -125,8 +125,9 @@ function prng(seed: number): () => number {
 }
 
 /**
- * A deliberately bad lesson: steps shuffled out of order, then half of them dropped
- * (at least one line stays). Same input and `seed` give the same output.
+ * A deliberately bad lesson: steps shuffled out of order, half of them dropped (at least one
+ * line stays), and every frame description removed, so the student never sees the values,
+ * ranges or highlights on screen. Same input and `seed` give the same output.
  */
 export function degrade(lines: readonly TranscriptLine[], seed: number): TranscriptLine[] {
   const rand = prng(seed);
@@ -135,5 +136,5 @@ export function degrade(lines: readonly TranscriptLine[], seed: number): Transcr
     const j = Math.floor(rand() * (i + 1));
     [out[i], out[j]] = [out[j], out[i]];
   }
-  return out.slice(0, Math.max(1, Math.ceil(out.length / 2)));
+  return out.slice(0, Math.max(1, Math.ceil(out.length / 2))).map((l) => ({ ...l, frame: '' }));
 }

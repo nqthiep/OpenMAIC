@@ -16,13 +16,13 @@
     },
     {
       "id": "pre-2",
-      "text": "Xét mảng a = [2, 5, 9, 14, 20, 27] (chỉ số từ 0), khoảng tìm lo = 0, hi = 5. Giá trị mid = (lo + hi) / 2 (chia nguyên) là bao nhiêu?",
-      "options": ["1", "2", "3", "5"],
+      "text": "Mảng a = [3, 8, 12, 17, 25, 31, 40, 52, 66, 79] (chỉ số từ 0 đến 9). Với lo = 0, hi = 9, giá trị mid = (lo + hi) / 2 (chia nguyên) là bao nhiêu?",
+      "options": ["3", "4", "5", "9"],
       "answer": 1
     },
     {
       "id": "pre-3",
-      "text": "Đang tìm target = 14 trong mảng a ở trên, có mid = 2 (a[mid] = 9). Bước tiếp theo là gì?",
+      "text": "Đang tìm target = 66 trong mảng a ở trên, có lo = 0, hi = 9, mid = 4 (a[mid] = 25). Bước tiếp theo là gì?",
       "options": ["hi = mid - 1", "lo = mid + 1", "lo = mid", "Trả về mid"],
       "answer": 1
     },
@@ -52,48 +52,38 @@
   "post": [
     {
       "id": "post-1",
-      "text": "Mảng b = [7, 2, 9, 4, 1] chưa được sắp xếp. Có thể áp dụng tìm nhị phân trực tiếp trên b không?",
-      "options": [
-        "Có, vì mảng có số phần tử lẻ",
-        "Có, mảng nào cũng được",
-        "Không, vì mảng chưa được sắp xếp",
-        "Không, vì mảng chứa số lẻ"
-      ],
-      "answer": 2
+      "text": "Trong bài giảng, thầy tìm 45 trong mảng đã sắp xếp 10 phần tử. Khi lo = 5 và hi = 9, giá trị mid = (lo + hi) / 2 (chia nguyên) là bao nhiêu?",
+      "options": ["6", "7", "8", "5"],
+      "answer": 1
     },
     {
       "id": "post-2",
-      "text": "Với lo = 2, hi = 9, giá trị mid = (lo + hi) / 2 (chia nguyên) bằng bao nhiêu?",
-      "options": ["6", "7", "4", "5"],
-      "answer": 3
+      "text": "Trong bài giảng, ở lượt thầy chọn mid = 7, giá trị a[7] của mảng là bao nhiêu (so với target = 45)?",
+      "options": ["40", "45", "52", "66"],
+      "answer": 2
     },
     {
       "id": "post-3",
-      "text": "Mảng c = [4, 9, 15, 21, 33, 48, 60, 71], target = 15, có mid = 5 (c[mid] = 48). Bước tiếp theo là gì?",
+      "text": "Mảng c = [4, 9, 15, 21, 33, 48, 60, 71], khoảng tìm lo = 3, hi = 7, có mid = 5 (c[mid] = 48), target = 21. Bước tiếp theo là gì?",
       "options": ["lo = mid + 1", "Trả về mid", "lo = mid", "hi = mid - 1"],
       "answer": 3
     },
     {
       "id": "post-4",
-      "text": "Khi lo = 6 và hi = 5 thì điều nào đúng?",
-      "options": [
-        "Còn đúng một phần tử cần xét",
-        "Khoảng tìm rỗng: target không có, trả về -1",
-        "Phải lấy mid = 5 và so sánh tiếp",
-        "Phải đặt lại lo = 0"
-      ],
+      "text": "Trong bài giảng, để kết luận 45 không có trong mảng, thầy đã so sánh 45 với a[mid] tất cả bao nhiêu lần?",
+      "options": ["3", "4", "5", "10"],
       "answer": 1
     },
     {
       "id": "post-5",
-      "text": "Sau khi so sánh được c[mid] > target (chưa bằng nhau), các chỉ số nào bị loại khỏi khoảng tìm?",
+      "text": "Ở cuối bài giảng, lo = 7 và hi = 6. Điều nào đúng?",
       "options": [
-        "Chỉ chỉ số mid",
-        "Các chỉ số từ lo đến mid",
-        "Các chỉ số từ mid đến hi",
-        "Các chỉ số từ lo đến mid - 1"
+        "Còn đúng một phần tử cần xét là a[6]",
+        "Khoảng tìm rỗng: 45 không có trong mảng, trả về -1",
+        "Phải lấy mid = 6 và so sánh lại",
+        "Phải đặt lại lo = 0"
       ],
-      "answer": 2
+      "answer": 1
     }
   ]
 }

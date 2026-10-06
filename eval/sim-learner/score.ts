@@ -2,13 +2,21 @@
 // model answers, the per-persona flow (with an injectable model) and scoring.
 // No file or network I/O here: the runner reads files and supplies the model call.
 
-/** Targets as whole percents; compared with integer math (no float error at the boundary). */
-export const MIN_GAIN_PCT = 20;
+/**
+ * Targets as whole percents; compared with integer math (no float error at the boundary).
+ * The gate is relative, never an absolute gain: the lesson must beat a student who sat the same
+ * post-test without reading anything (control) and a deliberately broken lesson (degraded).
+ */
+export const MIN_VS_CONTROL_PCT = 20;
+/** The degraded lesson must score at least this many points below the good one. */
+export const MIN_CALIBRATION_GAP_PCT = 10;
 export const MIN_CLEAR_SHARE_PCT = 70;
 /** "dễ hiểu" rating that counts as clear. */
 export const MIN_CLEAR_RATING = 4;
-/** The degraded lesson must gain at least this many points less than the good one. */
-export const MIN_CALIBRATION_GAP_PCT = 10;
+/** More failed samples than this share of all samples fails the lesson (and exits 1). */
+export const MAX_FAILED_SAMPLE_PCT = 10;
+/** Samples per persona and arm (temperature 0.3); the median is scored. */
+export const MIN_SAMPLES = 3;
 
 export interface Persona {
   id: string;
@@ -38,12 +46,25 @@ export interface QuestionSet {
 /** One model call. The answer is raw model text. */
 export type SimLlm = (req: { system: string; prompt: string }) => Promise<string>;
 
-/** One persona on one lesson: correct answers before and after, and the "dễ hiểu" rating. */
+/**
+ * One persona on one lesson: the median number of correct answers per arm over the samples that
+ * succeeded (null when every sample of that arm failed), and the median "dễ hiểu" rating.
+ * Arms: `pre` pre-test; `good` post-test after the real lesson; `control` the same post-test with
+ * no lesson; `bad` post-test after the degraded lesson.
+ */
 export interface PersonaRun {
   personaId: string;
-  pre: number;
-  post: number;
-  clarity: number;
+  pre: number | null;
+  good: number | null;
+  control: number | null;
+  bad: number | null;
+  clarity: number | null;
+}
+
+/** Model samples taken and how many failed (model call or parse, after the one retry). */
+export interface SampleCount {
+  total: number;
+  failed: number;
 }
 
 // --- file parsing -----------------------------------------------------------------------------
@@ -155,12 +176,21 @@ function renderQuestions(qs: readonly Question[]): string {
 const ANSWER_FORMAT = (n: number, withClarity: boolean) =>
   `{"answers": [${n} integers, the 0-based index of the chosen option for Q1..Q${n}]${withClarity ? ', "clarity": integer 1-5' : ''}}`;
 
-export function buildPrePrompt(set: QuestionSet): string {
+function buildQuizPrompt(qs: readonly Question[]): string {
   return [
     'Answer this quiz. You have not had the lesson yet.',
-    renderQuestions(set.pre),
-    `Reply as ${ANSWER_FORMAT(set.pre.length, false)}.`,
+    renderQuestions(qs),
+    `Reply as ${ANSWER_FORMAT(qs.length, false)}.`,
   ].join('\n\n');
+}
+
+export function buildPrePrompt(set: QuestionSet): string {
+  return buildQuizPrompt(set.pre);
+}
+
+/** The control arm: the post-test with no lesson at all. */
+export function buildControlPrompt(set: QuestionSet): string {
+  return buildQuizPrompt(set.post);
 }
 
 export function buildPostPrompt(set: QuestionSet, transcript: string): string {
@@ -237,6 +267,17 @@ export async function takePre(p: Persona, set: QuestionSet, llm: SimLlm): Promis
   return countCorrect(set.pre, r.answers);
 }
 
+/** The control arm: the persona takes the post-test without any lesson. */
+export async function takeControl(p: Persona, set: QuestionSet, llm: SimLlm): Promise<number> {
+  const r = await ask(
+    llm,
+    { system: buildSystem(p), prompt: buildControlPrompt(set) },
+    (raw) => parseAnswers(raw, set.post, false),
+    `${p.id} control post-test`,
+  );
+  return countCorrect(set.post, r.answers);
+}
+
 /** The persona reads `transcript`, takes the post-test and rates the lesson. */
 export async function takePost(
   p: Persona,
@@ -253,52 +294,143 @@ export async function takePost(
   return { post: countCorrect(set.post, r.answers), clarity: r.clarity! };
 }
 
+/** Lower median (an integer for integer input); null for an empty list. */
+export function median(xs: readonly number[]): number | null {
+  if (xs.length === 0) return null;
+  const sorted = [...xs].sort((a, b) => a - b);
+  return sorted[Math.floor((sorted.length - 1) / 2)];
+}
+
+/**
+ * All arms of one persona on one lesson, `k` samples each. A sample whose model call or parse
+ * fails (after the retry in `ask`) is recorded as failed and left out of the median; it never
+ * aborts the run.
+ */
+export async function runPersona(
+  p: Persona,
+  set: QuestionSet,
+  lessons: { good: string; bad: string },
+  llm: SimLlm,
+  k: number,
+  onFail: (what: string, err: unknown) => void = () => {},
+): Promise<{ run: PersonaRun; samples: SampleCount }> {
+  const samples: SampleCount = { total: 0, failed: 0 };
+  const collect = async <T>(what: string, fn: () => Promise<T>): Promise<T[]> => {
+    const out: T[] = [];
+    for (let i = 0; i < k; i++) {
+      samples.total++;
+      try {
+        out.push(await fn());
+      } catch (err) {
+        samples.failed++;
+        onFail(`${p.id} ${what} sample ${i + 1}`, err);
+      }
+    }
+    return out;
+  };
+  const pre = await collect('pre', () => takePre(p, set, llm));
+  const good = await collect('good', () => takePost(p, set, lessons.good, llm));
+  const control = await collect('control', () => takeControl(p, set, llm));
+  const bad = await collect('degraded', () => takePost(p, set, lessons.bad, llm));
+  return {
+    run: {
+      personaId: p.id,
+      pre: median(pre),
+      good: median(good.map((g) => g.post)),
+      control: median(control),
+      bad: median(bad.map((g) => g.post)),
+      clarity: median(good.map((g) => g.clarity)),
+    },
+    samples,
+  };
+}
+
 // --- scoring ----------------------------------------------------------------------------------
+
+/** Gap between two arms over the personas that have both, in points of the test. */
+export interface Gap {
+  /** Personas with both values. */
+  n: number;
+  /** Sum over them of (a - b) in correct answers. */
+  sum: number;
+  pct: number;
+  ok: boolean;
+}
 
 export interface LessonScore {
   /** Personas and questions per test. */
   personas: number;
   questions: number;
-  /** Sum over personas of (post - pre) in correct answers. */
-  gainSum: number;
-  /** Average gain in percentage points. */
-  gainPct: number;
+  samples: SampleCount;
+  failedPct: number;
+  failedOk: boolean;
+  /** Mean share of correct answers per arm, in percent; null when no persona has a value. */
+  prePct: number | null;
+  goodPct: number | null;
+  controlPct: number | null;
+  badPct: number | null;
+  /** good - control, target >= MIN_VS_CONTROL_PCT. */
+  vsControl: Gap;
+  /** good - degraded, target >= MIN_CALIBRATION_GAP_PCT. */
+  vsDegraded: Gap;
+  /** Personas that gave a rating, and how many rated >= MIN_CLEAR_RATING. */
+  rated: number;
   clearCount: number;
   clearPct: number;
-  gainOk: boolean;
   clearOk: boolean;
   ok: boolean;
 }
 
-export function scoreLesson(runs: readonly PersonaRun[], questions: number): LessonScore {
-  const personas = runs.length;
-  const gainSum = runs.reduce((s, r) => s + (r.post - r.pre), 0);
-  const clearCount = runs.filter((r) => r.clarity >= MIN_CLEAR_RATING).length;
-  const denom = questions * personas;
-  // An empty run cannot show it meets a target.
-  const gainOk = personas > 0 && gainSum * 100 >= MIN_GAIN_PCT * denom;
-  const clearOk = personas > 0 && clearCount * 100 >= MIN_CLEAR_SHARE_PCT * personas;
+type Arm = 'pre' | 'good' | 'control' | 'bad';
+
+function gap(runs: readonly PersonaRun[], a: Arm, b: Arm, questions: number, minPct: number): Gap {
+  const pairs = runs.filter((r) => r[a] !== null && r[b] !== null);
+  const sum = pairs.reduce((s, r) => s + (r[a] as number) - (r[b] as number), 0);
+  const denom = questions * pairs.length;
   return {
-    personas,
-    questions,
-    gainSum,
-    gainPct: personas === 0 ? 0 : (100 * gainSum) / denom,
-    clearCount,
-    clearPct: personas === 0 ? 0 : (100 * clearCount) / personas,
-    gainOk,
-    clearOk,
-    ok: gainOk && clearOk,
+    n: pairs.length,
+    sum,
+    pct: pairs.length === 0 ? 0 : (100 * sum) / denom,
+    // An empty comparison cannot show it meets a target.
+    ok: pairs.length > 0 && sum * 100 >= minPct * denom,
   };
 }
 
-/** The degraded lesson gained at least MIN_CALIBRATION_GAP_PCT points less than the good one. */
-export function calibrationOk(good: LessonScore, bad: LessonScore): boolean {
-  return (
-    good.personas > 0 &&
-    good.personas === bad.personas &&
-    good.questions === bad.questions &&
-    (good.gainSum - bad.gainSum) * 100 >= MIN_CALIBRATION_GAP_PCT * good.questions * good.personas
-  );
+function meanPct(runs: readonly PersonaRun[], arm: Arm, questions: number): number | null {
+  const v = runs.map((r) => r[arm]).filter((x): x is number => x !== null);
+  return v.length === 0 ? null : (100 * v.reduce((s, x) => s + x, 0)) / (questions * v.length);
+}
+
+export function scoreLesson(
+  runs: readonly PersonaRun[],
+  questions: number,
+  samples: SampleCount,
+): LessonScore {
+  const rated = runs.filter((r) => r.clarity !== null);
+  const clearCount = rated.filter((r) => (r.clarity as number) >= MIN_CLEAR_RATING).length;
+  const clearOk = rated.length > 0 && clearCount * 100 >= MIN_CLEAR_SHARE_PCT * rated.length;
+  const failedOk =
+    samples.total > 0 && samples.failed * 100 <= MAX_FAILED_SAMPLE_PCT * samples.total;
+  const vsControl = gap(runs, 'good', 'control', questions, MIN_VS_CONTROL_PCT);
+  const vsDegraded = gap(runs, 'good', 'bad', questions, MIN_CALIBRATION_GAP_PCT);
+  return {
+    personas: runs.length,
+    questions,
+    samples,
+    failedPct: samples.total === 0 ? 0 : (100 * samples.failed) / samples.total,
+    failedOk,
+    prePct: meanPct(runs, 'pre', questions),
+    goodPct: meanPct(runs, 'good', questions),
+    controlPct: meanPct(runs, 'control', questions),
+    badPct: meanPct(runs, 'bad', questions),
+    vsControl,
+    vsDegraded,
+    rated: rated.length,
+    clearCount,
+    clearPct: rated.length === 0 ? 0 : (100 * clearCount) / rated.length,
+    clearOk,
+    ok: vsControl.ok && vsDegraded.ok && clearOk && failedOk,
+  };
 }
 
 /** 2 = cannot run (no route, bad input), 1 = target missed, 0 = ok. */
@@ -307,10 +439,17 @@ export function exitCode(routeOk: boolean, ok?: boolean): 0 | 1 | 2 {
   return ok === false ? 1 : 0;
 }
 
+const fmt = (x: number | null) => (x === null ? 'n/a' : x.toFixed(1));
+const status = (ok: boolean) => (ok ? 'PASS' : 'FAIL');
+
 export function formatLesson(label: string, s: LessonScore): string {
-  return [
+  const lines = [
     `${label}: ${s.personas} personas x ${s.questions} questions`,
-    `  gain:  ${s.gainPct.toFixed(1)} points (target >= ${MIN_GAIN_PCT}) ${s.gainOk ? 'PASS' : 'FAIL'}`,
-    `  clear: ${s.clearCount}/${s.personas} = ${s.clearPct.toFixed(1)}% rated >= ${MIN_CLEAR_RATING} (target >= ${MIN_CLEAR_SHARE_PCT}%) ${s.clearOk ? 'PASS' : 'FAIL'}`,
-  ].join('\n');
+    `  mean correct: pre ${fmt(s.prePct)}%, lesson ${fmt(s.goodPct)}%, no-lesson control ${fmt(s.controlPct)}%, degraded lesson ${fmt(s.badPct)}% (informational)`,
+    `  lesson - control:  ${s.vsControl.pct.toFixed(1)} points over ${s.vsControl.n} personas (target >= ${MIN_VS_CONTROL_PCT}) ${status(s.vsControl.ok)}`,
+    `  lesson - degraded: ${s.vsDegraded.pct.toFixed(1)} points over ${s.vsDegraded.n} personas (target >= ${MIN_CALIBRATION_GAP_PCT}) ${status(s.vsDegraded.ok)}`,
+    `  clear: ${s.clearCount}/${s.rated} = ${s.clearPct.toFixed(1)}% rated >= ${MIN_CLEAR_RATING} (target >= ${MIN_CLEAR_SHARE_PCT}%) ${status(s.clearOk)}`,
+    `  failed samples: ${s.samples.failed}/${s.samples.total} = ${s.failedPct.toFixed(1)}% (target <= ${MAX_FAILED_SAMPLE_PCT}%) ${status(s.failedOk)}`,
+  ];
+  return lines.join('\n');
 }
