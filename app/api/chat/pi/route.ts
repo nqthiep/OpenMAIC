@@ -9,6 +9,7 @@ import { NextRequest } from 'next/server';
 import { isProviderKeyRequired } from '@/lib/ai/providers';
 import {
   isPiChatEnabled,
+  isTutorModerationEnabled,
   isPiNativeChildRuntimeEnabled,
   isPiNativeChildSpotlightEnabled,
 } from '@/lib/config/feature-flags';
@@ -22,6 +23,7 @@ import { runPiDirectorLoop } from '@/lib/chat/pi/director-loop';
 import type { SendEvent } from '@/lib/chat/pi/types';
 import { resolveModel } from '@/lib/server/resolve-model';
 import { apiError } from '@/lib/server/api-response';
+import { eventsFromProducer, withTutorModeration } from '@/lib/tutor/chat-moderation';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import type { StatelessChatRequest } from '@/lib/types/chat';
 import { resolveClassroomWebSearchConfig } from '@/lib/server/web-search-config';
@@ -223,32 +225,44 @@ export async function POST(req: NextRequest) {
       try {
         startHeartbeat();
 
-        await runPiDirectorLoop({
-          body,
-          elementReference,
-          agentConfigs,
-          send,
-          languageModel,
-          thinkingConfig,
-          maxOutputTokens: modelInfo?.outputWindow,
-          contextWindow: modelInfo?.contextWindow,
-          abortSignal: abortController.signal,
-          signal,
-          maxAgentTurns,
-          maxActionsPerAgent,
-          enableWhiteboardTools,
-          childRuntimeMode,
-          enableNativeChildSpotlight,
-          nativeWebSearchConfig,
-          nativeWhiteboardService,
-          nativeWhiteboardStageId: nativeWhiteboardService ? validRequestStartStageId : undefined,
-          nativeWhiteboardLearnerKey,
-          requestStartManualVisibilityRevision:
-            Number.isSafeInteger(body.storeState.whiteboardManualVisibilityRevision) &&
-            (body.storeState.whiteboardManualVisibilityRevision ?? -1) >= 0
-              ? body.storeState.whiteboardManualVisibilityRevision
-              : 0,
-        });
+        const runLoop = (sendEvent: SendEvent) =>
+          runPiDirectorLoop({
+            body,
+            elementReference,
+            agentConfigs,
+            send: sendEvent,
+            languageModel,
+            thinkingConfig,
+            maxOutputTokens: modelInfo?.outputWindow,
+            contextWindow: modelInfo?.contextWindow,
+            abortSignal: abortController.signal,
+            signal,
+            maxAgentTurns,
+            maxActionsPerAgent,
+            enableWhiteboardTools,
+            childRuntimeMode,
+            enableNativeChildSpotlight,
+            nativeWebSearchConfig,
+            nativeWhiteboardService,
+            nativeWhiteboardStageId: nativeWhiteboardService ? validRequestStartStageId : undefined,
+            nativeWhiteboardLearnerKey,
+            requestStartManualVisibilityRevision:
+              Number.isSafeInteger(body.storeState.whiteboardManualVisibilityRevision) &&
+              (body.storeState.whiteboardManualVisibilityRevision ?? -1) >= 0
+                ? body.storeState.whiteboardManualVisibilityRevision
+                : 0,
+          });
+
+        // OPENMAIC_TUTOR_MODERATION: same input/output filter as /api/chat. Blocked input => the
+        // loop never starts; replies are held until filtered. Off (default) = streaming unchanged.
+        if (isTutorModerationEnabled()) {
+          for await (const event of withTutorModeration(body, eventsFromProducer(runLoop))) {
+            if (signal.aborted) break;
+            await send(event);
+          }
+        } else {
+          await runLoop(send);
+        }
 
         if (signal.aborted) {
           stopHeartbeat();
