@@ -1,8 +1,11 @@
 # Handoff: SubjectTutor, trạng thái và việc tiếp theo
 
+- **Trạng thái**: Living document, chụp ngày 2026-10-06; cập nhật khi bàn giao tiếp
 - **Ngày**: 2026-10-06
 - **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 144 commit chưa push so với `origin/it-math`. Chưa push gì sau lần push đầu tiên của tài liệu.
 - **Người nhận**: agent hoặc người tiếp quản. Đọc hết file này trước khi làm gì.
+
+> **Tóm tắt:** Phase 1 đã làm xong, review và sửa; Phase 2 mới xong 4 task nền (`2-IS1`, `2-00`, `2-S1`, `2-I1`). Năm task dở (`2-V1`…`2-V4`, `2-E1`) nằm ở worktree, chưa commit. Còn lại: đợt 2A–2E, lát 1d, Phase 3. Cổng LLM, Docker, Playwright đang chờ khoá API và môi trường.
 
 > Mọi điều chưa kiểm chứng trong file này gắn nhãn `[Unverified]` hoặc `[Inference]`. Không coi chúng là sự thật.
 
