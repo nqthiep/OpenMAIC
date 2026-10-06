@@ -93,7 +93,7 @@ Sự thật liên quan (đã đọc code / đếm):
      | { kind: 'enum'; values: readonly (string | number)[] }                // chọn một trong tập hữu hạn (vd. loại hàm, loại hằng đẳng thức)
      | { kind: 'number'; range: Range; step: number; ui?: 'slider' }
      | { kind: 'int-array'; len: Range; range: Range; strictlyIncreasing?: boolean }
-     | { kind: 'string'; len: Range; alphabet: 'a-z' | '0-9' | 'ab' }
+     | { kind: 'string'; len: Range; alphabet: 'a-z' | '0-9' | 'ab' | 'brackets' }
      | { kind: 'edge-list'; nodes: Range; edges: Range; weight?: Range }     // nhãn node tự sinh A, B, C…
      | { kind: 'grid'; rows: Range; cols: Range; cell: 'bit' | 'int'; range?: Range }
      | { kind: 'record'; fields: Readonly<Record<string, InputSpec>> }       // strict: khoá lạ bị từ chối
