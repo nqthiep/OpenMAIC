@@ -7,6 +7,8 @@ export const MAX_FALSE_BLOCK_PCT = 10;
 /** Calibration set size (ADR 0014 decision 7): >= 30 seeded entries and >= 10 valid ones. */
 export const MIN_MUTANTS = 30;
 export const MIN_CLEAN = 10;
+/** More than this share of samples with an unusable review (call failed, late, malformed) fails the run. */
+export const MAX_UNUSABLE_PCT = 10;
 
 export interface Sample {
   id: string;
@@ -18,13 +20,17 @@ export interface Sample {
 
 /**
  * What the panel said about one sample. `passes[i]` is reviewer i's own verdict, or null when it
- * gave no usable review (an error counts as a fail for the panel).
+ * gave no usable review (call failed, late or malformed). A sample with a null is UNUSABLE: it is
+ * reported and left out of the catch and false-block rates (it neither catches nor blocks).
  */
 export interface Outcome {
   sample: Sample;
   verdict: 'pass' | 'fail';
   passes: readonly [boolean | null, boolean | null];
 }
+
+/** A failed model call or unparseable review in either seat. */
+export const isUnusable = (o: Outcome): boolean => o.passes[0] === null || o.passes[1] === null;
 
 export interface Wrong {
   id: string;
@@ -57,17 +63,31 @@ export interface Report {
   falseBlocks: Wrong[];
   /** Reviews that could not be used (null), summed over both reviewers. */
   noReview: number;
+  /** Samples with an unusable review: excluded from every rate above. */
+  unusable: Wrong[];
+  /** Samples run, usable or not. */
+  total: number;
+  unusableOk: boolean;
+  /** Counted on usable samples only. */
   undersized: boolean;
-  /** Panel meets both targets, reviewer 1 alone meets both (ADR 0014 d8), and the set is big enough. */
+  /**
+   * Panel meets both targets, reviewer 1 alone meets both (ADR 0014 d8), at most MAX_UNUSABLE_PCT
+   * of the samples were unusable, and the (usable) set is big enough.
+   */
   ok: boolean;
 }
 
-function rates(outcomes: readonly Outcome[], failed: (o: Outcome) => boolean): Rates {
+function rates(
+  outcomes: readonly Outcome[],
+  failed: (o: Outcome) => boolean,
+  usable: (o: Outcome) => boolean,
+): Rates {
   let mutants = 0;
   let caught = 0;
   let clean = 0;
   let falseBlocked = 0;
   for (const o of outcomes) {
+    if (!usable(o)) continue;
     if (o.sample.kind === 'mutant') {
       mutants++;
       if (failed(o)) caught++;
@@ -89,20 +109,37 @@ function rates(outcomes: readonly Outcome[], failed: (o: Outcome) => boolean): R
 
 /** `partial`: a --limit run; the calibration size minimums are then not required. */
 export function score(outcomes: readonly Outcome[], opts: { partial?: boolean } = {}): Report {
-  const panel = rates(outcomes, (o) => o.verdict === 'fail');
-  const r1 = rates(outcomes, (o) => o.passes[0] !== true);
-  const r2 = rates(outcomes, (o) => o.passes[1] !== true);
+  const panel = rates(
+    outcomes,
+    (o) => o.verdict === 'fail',
+    (o) => !isUnusable(o),
+  );
+  const r1 = rates(
+    outcomes,
+    (o) => o.passes[0] !== true,
+    (o) => o.passes[0] !== null,
+  );
+  const r2 = rates(
+    outcomes,
+    (o) => o.passes[1] !== true,
+    (o) => o.passes[1] !== null,
+  );
 
   const rows = new Map<string, GroupRow>();
   const missed: Wrong[] = [];
   const falseBlocks: Wrong[] = [];
+  const unusable: Wrong[] = [];
   let noReview = 0;
   for (const o of outcomes) {
     const { id, group, kind } = o.sample;
+    noReview += o.passes.filter((p) => p === null).length;
+    if (isUnusable(o)) {
+      unusable.push({ id, group });
+      continue;
+    }
     const row = rows.get(group) ?? { group, total: 0, wrong: 0 };
     rows.set(group, row);
     row.total++;
-    noReview += o.passes.filter((p) => p === null).length;
     if (kind === 'mutant' && o.verdict === 'pass') {
       row.wrong++;
       missed.push({ id, group });
@@ -111,6 +148,7 @@ export function score(outcomes: readonly Outcome[], opts: { partial?: boolean } 
       falseBlocks.push({ id, group });
     }
   }
+  const unusableOk = unusable.length * 100 <= outcomes.length * MAX_UNUSABLE_PCT;
   const undersized = !opts.partial && (panel.mutants < MIN_MUTANTS || panel.clean < MIN_CLEAN);
   const gate = (r: Rates) => r.catchOk && r.falseBlockOk;
   return {
@@ -120,8 +158,11 @@ export function score(outcomes: readonly Outcome[], opts: { partial?: boolean } 
     missed,
     falseBlocks,
     noReview,
+    unusable,
+    total: outcomes.length,
+    unusableOk,
     undersized,
-    ok: gate(panel) && gate(r1) && !undersized,
+    ok: gate(panel) && gate(r1) && unusableOk && !undersized,
   };
 }
 
@@ -150,9 +191,9 @@ export function formatReport(r: Report): string {
     line('Reviewer 1', r.reviewers[0]) + '  [gated: ADR 0014 d8]',
     line('Reviewer 2', r.reviewers[1]) + '  [reported only]',
   );
-  if (r.noReview > 0) {
+  if (r.unusable.length > 0) {
     lines.push(
-      `WARNING: ${r.noReview} review(s) were unusable (error, timeout or malformed); they count as fails and inflate the catch rate.`,
+      `Unusable: ${r.unusable.length}/${r.total} sample(s) = ${pct(r.unusable.length, r.total)} (${r.noReview} review(s) failed: error, timeout or malformed), excluded from every rate above; limit ${MAX_UNUSABLE_PCT}% ${verdict(r.unusableOk)}`,
     );
   }
   if (r.undersized) {
@@ -165,6 +206,7 @@ export function formatReport(r: Report): string {
     lines.push('', `${title} (${wrong.length}):`);
     for (const w of wrong) lines.push(`  ${w.id}`);
   };
+  list('Unusable samples (excluded from the rates)', r.unusable);
   list('Missed seeded errors (panel passed them)', r.missed);
   list('False blocks (unmodified entry failed)', r.falseBlocks);
   lines.push('', r.ok ? 'RESULT: PASS' : 'RESULT: FAIL');

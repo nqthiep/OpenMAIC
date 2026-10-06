@@ -3,21 +3,34 @@
  *
  * Review one entry with the two panel models and store the result:
  *   pnpm exec tsx eval/tutor-review/runner.ts <entryId> [--dry-run]
- * Calibrate the panel on seeded errors and unmodified entries:
+ * Calibrate the panel on seeded errors and known-good variants:
  *   pnpm exec tsx eval/tutor-review/runner.ts --calibrate [<entryId>] [--dry-run] [--limit N] [--clean-runs N]
  *
  * Both stages need a MODEL_ROUTES entry, e.g.
  *   MODEL_ROUTES='{"tutor-review-cp":"<provider:model>","tutor-review-cp-2":"<provider:model>"}'
+ * on two different providers (a panel on one provider is refused, see --allow-same-provider).
  *
- * --dry-run      print the plan (counts, route status); no model call, no file written
- * --calibrate    seeded-error calibration: catch >= 90% of mutants, false-block <= 10% of unmodified
- *                entries (each entry run --clean-runs times, default 10); never writes a review file
- * --limit N      N mutants, spread evenly (default: all)
- * --clean-runs N unmodified runs in --calibrate (default 10)
- * --concurrency  parallel samples (default 2; each sample makes two model calls)
+ * --dry-run             print the plan (counts, route status, prompt sizes); no model call, no file written
+ * --calibrate           seeded-error calibration: catch >= 90% of mutants, false-block <= 10% of the clean
+ *                       set; never writes a review file
+ * --limit N             N mutants, spread evenly (default: all non-equivalent mutants)
+ * --clean-runs N        use only the first N clean variants (default: all; N < 10 makes the run partial)
+ * --concurrency         parallel samples (default 2; each sample makes two model calls)
+ * --allow-same-provider dev/test only: accept two reviewers on the same provider (default: refuse)
+ *
+ * CLEAN SET. The catalog is small, so the clean set is the real entries plus deterministic,
+ * semantics-preserving rewrites of their data (clean-variants.ts): DISTINCT VARIANTS, never plain
+ * repeats. They are not independent entries: independent, human-verified entries are still
+ * preferable, and the false-block rate measured here is only as good as that set. Fewer than 10
+ * distinct clean variants -> exit 2. Every review shows both locales side by side; the primary
+ * locale alternates (vi-VN, en-US) over the clean variants.
+ *
+ * A failed model call or unparseable review makes its sample UNUSABLE: reported, excluded from
+ * the catch and false-block rates, the run continues; more than 10% unusable samples -> exit 1.
  *
  * A real review writes lib/subjects/<subject>/reviews/<entryId>@<entryRev>.json.
- * Exit code: 0 pass, 1 target missed or review failed, 2 cannot run (no route, bad args or entry).
+ * Exit code: 0 pass, 1 target missed or review failed, 2 cannot run (no route, bad args or entry,
+ * too few distinct clean variants, a panel on one provider).
  */
 
 import { mkdirSync, writeFileSync } from 'fs';
@@ -29,6 +42,8 @@ import type { RouteValue } from '@/lib/tutor/llm-roles';
 import {
   buildReviewMaterial,
   buildReviewPrompt,
+  buildReviewSystem,
+  providerOf,
   reviewPanel,
   reviewPasses,
   reviewPath,
@@ -39,7 +54,8 @@ import {
 import type { LlmStage } from '@/lib/server/model-routes';
 import { SUBJECT_PACKS } from '@/lib/subjects';
 import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
-import { exitCode, formatReport, score } from './score';
+import { cleanVariants, fingerprint } from './clean-variants';
+import { MIN_CLEAN, exitCode, formatReport, score } from './score';
 import type { Outcome, Sample } from './score';
 import { seedErrors } from './seed-errors';
 
@@ -48,6 +64,8 @@ const PANELS: Readonly<Record<string, readonly [LlmStage, LlmStage]>> = {
   cp: ['tutor-review-cp', 'tutor-review-cp-2'],
 };
 const LOCALE = 'vi-VN';
+/** Primary locale of the clean variants, alternating; the other locale is always shown side by side. */
+const CLEAN_LOCALES = ['vi-VN', 'en-US'] as const;
 
 function getCurrentDir(): string {
   return typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
@@ -91,20 +109,25 @@ async function main(): Promise<number> {
       calibrate: { type: 'boolean', default: false },
       'dry-run': { type: 'boolean', default: false },
       limit: { type: 'string' },
-      'clean-runs': { type: 'string', default: '10' },
+      'clean-runs': { type: 'string' },
       concurrency: { type: 'string', default: '2' },
+      'allow-same-provider': { type: 'boolean', default: false },
     },
     allowPositionals: true,
     strict: true,
   });
   const concurrency = positiveInt('concurrency', values.concurrency);
-  const cleanRuns = positiveInt('clean-runs', values['clean-runs']);
+  const cleanRuns =
+    values['clean-runs'] === undefined
+      ? undefined
+      : positiveInt('clean-runs', values['clean-runs']);
+  const allowSameProvider = values['allow-same-provider'];
   const limit = values.limit === undefined ? undefined : positiveInt('limit', values.limit);
   const calibrate = values.calibrate;
   const dryRun = values['dry-run'];
   if (positionals.length > 1) throw new Error('at most one <entryId>');
   if (!calibrate && positionals.length === 0) throw new Error('give an <entryId> or --calibrate');
-  if (!calibrate && (limit !== undefined || values['clean-runs'] !== '10')) {
+  if (!calibrate && (limit !== undefined || cleanRuns !== undefined)) {
     throw new Error('--limit and --clean-runs only apply to --calibrate');
   }
 
@@ -147,6 +170,20 @@ async function main(): Promise<number> {
     return exitCode(false);
   }
 
+  // A panel on one provider is not independent (ADR 0014 decision 8): refuse, as the verdict would.
+  if (!allowSameProvider) {
+    const same = [...routes].filter(([, [a, b]]) => {
+      const p = providerOf(a.model);
+      return p !== null && p === providerOf(b.model);
+    });
+    if (same.length > 0) {
+      console.error(
+        `Both reviewers of ${same.map(([s]) => s).join(', ')} are on one provider. Use two providers (or --allow-same-provider for dev/test).`,
+      );
+      return exitCode(false);
+    }
+  }
+
   // Imported late so --dry-run never loads the LLM stack.
   const llm: ReviewLlm = async (req) => {
     const [{ callLLM }, { resolveModel }] = await Promise.all([
@@ -171,26 +208,35 @@ async function main(): Promise<number> {
     return result.text;
   };
   const panelOf = (e: AnyWalkthroughEntry, material: ReviewMaterial): Promise<PanelResult> =>
-    reviewPanel(material, stagesOf(e.subject), routes.get(e.subject)!, llm);
+    reviewPanel(material, stagesOf(e.subject), routes.get(e.subject)!, llm, undefined, {
+      allowSameProvider,
+    });
 
   if (!calibrate) return reviewOne(entries[0], dryRun, panelOf);
 
   // --- calibration ---
   const mutants = entries.flatMap((e) => seedErrors(e, LOCALE));
   const picked = limit === undefined ? mutants : spread(mutants, limit);
-  const clean = Array.from({ length: cleanRuns }, (_, i) => entries[i % entries.length]);
-  console.log(
-    `Seeded errors: ${picked.length} of ${mutants.length} (${countBy(picked.map((m) => m.kind))})`,
-  );
-  console.log(`Unmodified:    ${clean.length} run(s) over ${entries.length} entry(ies)`);
-  if (limit !== undefined) console.log(`Partial run: --limit ${limit} mutants.`);
-  const calls = 2 * (picked.length + clean.length);
-  if (dryRun) {
-    console.log(
-      `Dry run: would make ${calls} calls, concurrency ${concurrency} samples. No model called.`,
+  const variants = cleanVariants(entries);
+  const distinct = new Set(variants.map((v) => fingerprint(v.entry))).size;
+  if (distinct < MIN_CLEAN) {
+    console.error(
+      `Only ${distinct} distinct clean variant(s) (need >= ${MIN_CLEAN}); a calibration needs a real clean set.`,
     );
-    return exitCode(true);
+    return 2;
   }
+  const clean = variants.slice(0, cleanRuns ?? variants.length);
+  const partial = limit !== undefined || clean.length < MIN_CLEAN;
+  console.log(
+    `Seeded errors: ${picked.length} of ${mutants.length} non-equivalent (${countBy(picked.map((m) => m.kind))})`,
+  );
+  console.log(
+    `Clean set:     ${clean.length} distinct variant(s) of ${entries.length} entry(ies), ${clean.filter((v) => v.ops.length === 0).length} real; reviewed alternately with ${CLEAN_LOCALES.join(' / ')} first, both locales shown.`,
+  );
+  console.log(
+    'Note: the clean set is only DISTINCT VARIANTS (rewrites of the real entries), not independent entries; independent human-verified entries are still preferable.',
+  );
+  if (partial) console.log('Partial run: the size minimums are not required.');
 
   type Job = { sample: Sample; entry: AnyWalkthroughEntry; material: ReviewMaterial };
   const jobs: Job[] = [
@@ -199,24 +245,56 @@ async function main(): Promise<number> {
       entry: m.entry,
       material: m.material,
     })),
-    ...clean.map((e, i) => ({
-      sample: { id: `${e.id}:clean:${i + 1}`, kind: 'clean' as const, group: 'clean' },
-      entry: e,
-      material: buildReviewMaterial(e, LOCALE),
+    ...clean.map((v, i) => ({
+      sample: { id: `${v.id}:clean`, kind: 'clean' as const, group: 'clean' },
+      entry: v.entry,
+      material: buildReviewMaterial(v.entry, CLEAN_LOCALES[i % CLEAN_LOCALES.length]),
     })),
   ];
+  // Prompt sizes (chars): what one call sends; too big a prompt cannot run.
+  const sizes: number[] = [];
+  let tooBig = 0;
+  for (const j of jobs) {
+    try {
+      sizes.push(buildReviewPrompt(j.material).length);
+    } catch (e) {
+      tooBig++;
+      console.error(`${j.sample.id}: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+  if (sizes.length > 0) {
+    const avg = Math.round(sizes.reduce((a, b) => a + b, 0) / sizes.length);
+    console.log(
+      `Prompt size:   min ${Math.min(...sizes)}, avg ${avg}, max ${Math.max(...sizes)} chars (+ system ${buildReviewSystem('r', 'm', jobs[0].material).length})`,
+    );
+  }
+  if (tooBig > 0) return 2;
+  const calls = 2 * jobs.length;
+  if (dryRun) {
+    console.log(
+      `Dry run: would make ${calls} calls, concurrency ${concurrency} samples. No model called.`,
+    );
+    return exitCode(true);
+  }
+
   let done = 0;
   const outcomes = await pool(jobs, concurrency, async (job): Promise<Outcome> => {
-    const r = await panelOf(job.entry, job.material);
+    let r: PanelResult | null = null;
+    try {
+      r = await panelOf(job.entry, job.material);
+    } catch (e) {
+      // reviewPanel never throws; a failure here is one unusable sample, not the end of the run
+      console.error(`${job.sample.id}: ${e instanceof Error ? e.message : e}`);
+    }
     if (++done % 10 === 0) console.error(`  ${done}/${jobs.length}`);
     const pass = (i: 0 | 1) => {
-      const review = r.outcomes[i].review;
+      const review = r?.outcomes[i].review ?? null;
       return review === null ? null : reviewPasses(review);
     };
-    return { sample: job.sample, verdict: r.verdict, passes: [pass(0), pass(1)] };
+    return { sample: job.sample, verdict: r?.verdict ?? 'fail', passes: [pass(0), pass(1)] };
   });
 
-  const report = score(outcomes, { partial: limit !== undefined });
+  const report = score(outcomes, { partial });
   console.log(`\n${formatReport(report)}`);
   return exitCode(true, report);
 }
