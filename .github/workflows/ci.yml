@@ -130,6 +130,12 @@ jobs:
             'tsc' 'npx tsc --noEmit' \
             'i18n' 'pnpm check:i18n-keys'
 
+      - name: SubjectTutor design docs and generated files
+        run: |
+          python3 docs/tutor/tools/check_docs.py
+          node scripts/generate-tutor-runtime.mjs --check
+          pnpm exec tsx scripts/generate-skill-catalog.ts --check
+
       # Keep these sequential. Running root vitest alongside the storage
       # package on a 4-core runner made 5s-timeout tests flake (CPU
       # contention, not a product regression).

@@ -20,5 +20,31 @@
         "en-US": "4cac6d580b52da2b"
       }
     }
+  },
+  "bs-answer-mini": {
+    "entryRev": 1,
+    "contentHash": "6bd4d197cffdd840",
+    "framesHash": {
+      "classic": {
+        "vi-VN": "f7e74773bbb1d169",
+        "en-US": "5d76498f2367840a"
+      },
+      "all-equal": {
+        "vi-VN": "3cc72820cdc9a52c",
+        "en-US": "af21749478900c7d"
+      },
+      "one-tree": {
+        "vi-VN": "041678b225d6a253",
+        "en-US": "0a4aeaf79be664b6"
+      },
+      "take-all": {
+        "vi-VN": "55ea53850f6d0ddf",
+        "en-US": "0bbb43b3972aa259"
+      },
+      "tiny-need": {
+        "vi-VN": "5cafaf6c0eedd334",
+        "en-US": "099f9cc70e17d30e"
+      }
+    }
   }
 }

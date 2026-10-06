@@ -31,7 +31,8 @@ export function hash16(v: unknown): string {
 }
 
 export function framesHash(frames: unknown): string {
-  return hash16(frames);
+  // meta fields may be explicitly `undefined`; the JSON round-trip drops them (they are dropped in the HTML too).
+  return hash16(JSON.parse(JSON.stringify(frames)));
 }
 
 export function contentHash(args: {
@@ -81,13 +82,18 @@ function predictAnswers(entry: WalkthroughEntry): Record<string, number[]> {
 
 /** The one place that computes an entry's contentHash (used by the provider and the catalog lock). */
 export function entryContentHash(entry: WalkthroughEntry): string {
-  return hash16({
-    code: entry.code,
-    beatDefs: hashableBeatDefs(entry.beatDefs),
-    presets: entry.presets.map((p) => ({ id: p.id, input: p.input, label: p.label })),
-    problem: entry.problem ?? null,
-    title: entry.title,
-    pitfalls: entry.pitfalls ?? [],
-    predictAnswers: predictAnswers(entry),
-  });
+  // JSON round-trip drops `undefined` object properties (optional fields) which canonicalJSON rejects.
+  return hash16(
+    JSON.parse(
+      JSON.stringify({
+        code: entry.code,
+        beatDefs: hashableBeatDefs(entry.beatDefs),
+        presets: entry.presets.map((p) => ({ id: p.id, input: p.input, label: p.label })),
+        problem: entry.problem ?? null,
+        title: entry.title,
+        pitfalls: entry.pitfalls ?? [],
+        predictAnswers: predictAnswers(entry),
+      }),
+    ),
+  );
 }

@@ -52,6 +52,7 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | walkthroughId | Title | presetId | Curriculum topics |
 | --- | --- | --- | --- |
 | `binary-search` | Binary search | `mid-hit`, `first`, `absent`, `single` | `t2-binary-search` |
+| `bs-answer-mini` | Problem walkthrough: cutting wood (mini) | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
 <!-- END GENERATED: walkthrough-ids -->
 
 ## Khi học sinh hỏi (Q&A)
