@@ -87,7 +87,16 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | walkthroughId | Title | presetId | Curriculum topics |
 | --- | --- | --- | --- |
 | `binary-search` | Binary search | `absent`, `mid-hit`, `first`, `single` | `t2-binary-search` |
+| `bs-answer` | Problem walkthrough: cutting wood | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
 | `bs-answer-mini` | Problem walkthrough: cutting wood (mini) | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
+| `fib-recursion-tree` | The recursion tree of Fibonacci | `plain-5`, `memo-5`, `base-0`, `base-1`, `memo-6` | `t1-recursion` |
+| `merge-sort` | Merge sort (top-down) | `random`, `reverse`, `dups`, `n2` | `t2-sorting`, `t2-divide-conquer` |
+| `n-queens` | N queens by backtracking | `n1`, `n3-none`, `n4`, `n5` | `t2-backtracking` |
+| `prefix-sum` | Prefix sums | `basic`, `whole`, `one-cell`, `negative`, `n1` | `t1-array-prefix` |
+| `quick-sort` | Quick sort (Lomuto partition) | `random`, `sorted`, `dups`, `n2` | `t2-sorting`, `t2-divide-conquer` |
+| `stack-queue` | Stack: valid brackets | `nested`, `sequence`, `mismatch`, `unclosed`, `extra-close` | `t1-stack-queue` |
+| `subset-gen` | Generating all subsets by recursion | `n3`, `n1`, `n2`, `n4` | `t2-brute-force` |
+| `two-pointers` | Two pointers: a pair with a given sum | `middle`, `ends`, `absent`, `n2`, `negative` | `t1-array-prefix` |
 <!-- END GENERATED: walkthrough-ids -->
 
 ## Khi học sinh hỏi (Q&A)

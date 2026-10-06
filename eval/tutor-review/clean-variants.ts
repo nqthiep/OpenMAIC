@@ -92,6 +92,21 @@ export const CLEAN_OPS: Readonly<Record<string, Op>> = {
     ...withBeats(e, (b) => ({ ...b, label: mapMessages(b.label, rename) })),
     presets: e.presets.map((p) => ({ ...p, label: mapMessages(p.label, rename) })),
   }),
+  // always changes the data, so an entry whose wording matches no phrase above still has variants
+  'rename-title': (e) => ({
+    ...e,
+    title: mapMessages(
+      e.title,
+      (s, l) => `${s}${l === 'vi-VN' ? ' (bản học)' : ' (study version)'}`,
+    ),
+  }),
+  'tag-presets': (e) => ({
+    ...e,
+    presets: e.presets.map((p) => ({
+      ...p,
+      label: mapMessages(p.label, (s, l) => `${s}${l === 'vi-VN' ? ' (ví dụ)' : ' (example)'}`),
+    })),
+  }),
   'reorder-pitfalls': (e) => ({ ...e, pitfalls: e.pitfalls && [...e.pitfalls].reverse() }),
   'reorder-misconceptions': (e) =>
     withBeats(e, (b) => ({
@@ -109,6 +124,9 @@ const COMBOS: readonly (readonly string[])[] = [
   ['reorder-presets', 'rename-labels'],
   ['reword-narration', 'reword-misconceptions'],
   ['reorder-misconceptions', 'reword-hints', 'rename-labels'],
+  ['rename-title', 'reorder-presets'],
+  ['tag-presets', 'reorder-pitfalls'],
+  ['rename-title', 'tag-presets', 'reorder-presets'],
 ];
 
 /** Everything the reviewer can see in the entry, as text (functions such as `run` are not data). */

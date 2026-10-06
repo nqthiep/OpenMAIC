@@ -21,6 +21,32 @@
       }
     }
   },
+  "bs-answer": {
+    "entryRev": 1,
+    "contentHash": "54a6a014015e8c44",
+    "framesHash": {
+      "classic": {
+        "vi-VN": "b6d436853c114739",
+        "en-US": "ec0d91fa318f2a0b"
+      },
+      "all-equal": {
+        "vi-VN": "212b415455531b1d",
+        "en-US": "980786d071c932b9"
+      },
+      "one-tree": {
+        "vi-VN": "24ff5591ff35b3ee",
+        "en-US": "dd16282574dd6cfa"
+      },
+      "take-all": {
+        "vi-VN": "f41841bf660635b0",
+        "en-US": "ecef74c7fd73b566"
+      },
+      "tiny-need": {
+        "vi-VN": "1551ef91dcecf4ec",
+        "en-US": "e2e8ce768ab1a479"
+      }
+    }
+  },
   "bs-answer-mini": {
     "entryRev": 2,
     "contentHash": "ae6b447d5b4d829e",
@@ -44,6 +70,198 @@
       "tiny-need": {
         "vi-VN": "2ae1c05aa0584fdf",
         "en-US": "b65c9e50fc02d971"
+      }
+    }
+  },
+  "fib-recursion-tree": {
+    "entryRev": 1,
+    "contentHash": "0f290548a301110f",
+    "framesHash": {
+      "plain-5": {
+        "vi-VN": "464bfae38e24c7ab",
+        "en-US": "f4cc7d88bb443aef"
+      },
+      "memo-5": {
+        "vi-VN": "ac5d1fda73340cd5",
+        "en-US": "14e84521ef409a17"
+      },
+      "base-0": {
+        "vi-VN": "a4b863eae384bf4f",
+        "en-US": "4c3d42d81cbc968c"
+      },
+      "base-1": {
+        "vi-VN": "e9b23b32ffa6e550",
+        "en-US": "a4238b6b4f0c2916"
+      },
+      "memo-6": {
+        "vi-VN": "1a9e780fbdc1209d",
+        "en-US": "65f2ac5ffd7c5dd9"
+      }
+    }
+  },
+  "merge-sort": {
+    "entryRev": 1,
+    "contentHash": "13c27f7efeb50254",
+    "framesHash": {
+      "random": {
+        "vi-VN": "e2691ba49022d958",
+        "en-US": "a80c4fcfd5415dfd"
+      },
+      "reverse": {
+        "vi-VN": "25c2ec11a278f17e",
+        "en-US": "7ccd9d38fea9afc3"
+      },
+      "dups": {
+        "vi-VN": "d7552fb78a01383f",
+        "en-US": "20d5017f2a45cbd0"
+      },
+      "n2": {
+        "vi-VN": "583030703e9b7bde",
+        "en-US": "c3681423a38aaed1"
+      }
+    }
+  },
+  "n-queens": {
+    "entryRev": 1,
+    "contentHash": "0d2d6672138ef41c",
+    "framesHash": {
+      "n1": {
+        "vi-VN": "039d99734c54642e",
+        "en-US": "865a0f59de335eee"
+      },
+      "n3-none": {
+        "vi-VN": "e6ea8314e778258d",
+        "en-US": "f6bb7e97c953a216"
+      },
+      "n4": {
+        "vi-VN": "a5c17887ef0c1c1b",
+        "en-US": "00f30d259854084f"
+      },
+      "n5": {
+        "vi-VN": "2893be4bf60e3fd3",
+        "en-US": "d5b7903502dfc8f2"
+      }
+    }
+  },
+  "prefix-sum": {
+    "entryRev": 1,
+    "contentHash": "159ce8a87818146a",
+    "framesHash": {
+      "basic": {
+        "vi-VN": "2ca633731f4de595",
+        "en-US": "50dfc7d273415ea9"
+      },
+      "whole": {
+        "vi-VN": "1801e5bbfd026ea0",
+        "en-US": "8127f9589a67fdb4"
+      },
+      "one-cell": {
+        "vi-VN": "c6434c252ce7f1f1",
+        "en-US": "dbbbed5947ca6508"
+      },
+      "negative": {
+        "vi-VN": "0bca4432a0852a28",
+        "en-US": "5b1effa271dcc42f"
+      },
+      "n1": {
+        "vi-VN": "ee90047f3b1627bb",
+        "en-US": "fe82560387f33aba"
+      }
+    }
+  },
+  "quick-sort": {
+    "entryRev": 1,
+    "contentHash": "debe432250829d77",
+    "framesHash": {
+      "random": {
+        "vi-VN": "dd82fc3555a39150",
+        "en-US": "c9ba14d11bfe7225"
+      },
+      "sorted": {
+        "vi-VN": "97ecfb383ab0fadd",
+        "en-US": "3a0ed593e9650ea2"
+      },
+      "dups": {
+        "vi-VN": "2240ac835642b122",
+        "en-US": "71840858cc142d6f"
+      },
+      "n2": {
+        "vi-VN": "c03daf682c1a9dbf",
+        "en-US": "99a523aafbddfc12"
+      }
+    }
+  },
+  "stack-queue": {
+    "entryRev": 1,
+    "contentHash": "e2a3a1e8bdc09e49",
+    "framesHash": {
+      "nested": {
+        "vi-VN": "3112e25d240f881f",
+        "en-US": "81cf90eb2e3ff493"
+      },
+      "sequence": {
+        "vi-VN": "8a56c3e8fb6d68f0",
+        "en-US": "2723ce1760522a42"
+      },
+      "mismatch": {
+        "vi-VN": "1cc5919f05321921",
+        "en-US": "8a120de93c1a2b5a"
+      },
+      "unclosed": {
+        "vi-VN": "06ef7dfbb9d4f503",
+        "en-US": "4940e06988bedee3"
+      },
+      "extra-close": {
+        "vi-VN": "8139c0653325988a",
+        "en-US": "8b7d69f646eccd5a"
+      }
+    }
+  },
+  "subset-gen": {
+    "entryRev": 1,
+    "contentHash": "08feef25b534316a",
+    "framesHash": {
+      "n3": {
+        "vi-VN": "c383aed1a3e3dfd6",
+        "en-US": "4cb530512ba7d9c7"
+      },
+      "n1": {
+        "vi-VN": "c5c16e1649b11d09",
+        "en-US": "d4c2f636691c0184"
+      },
+      "n2": {
+        "vi-VN": "119dea682edc3aff",
+        "en-US": "8916f583794ea0b4"
+      },
+      "n4": {
+        "vi-VN": "011fe148be9733b0",
+        "en-US": "e75678bcadb221c1"
+      }
+    }
+  },
+  "two-pointers": {
+    "entryRev": 1,
+    "contentHash": "e0b9e7b0ff94d37d",
+    "framesHash": {
+      "middle": {
+        "vi-VN": "59157e8b1b682df7",
+        "en-US": "dceaf4516eda299d"
+      },
+      "ends": {
+        "vi-VN": "7c73a79dc73e0c43",
+        "en-US": "ac6c78d9816490e7"
+      },
+      "absent": {
+        "vi-VN": "0afb8e0857ec3376",
+        "en-US": "d6736f2ce4174bbd"
+      },
+      "n2": {
+        "vi-VN": "56143a9d082cab05",
+        "en-US": "1f2c964486fc7fe7"
+      },
+      "negative": {
+        "vi-VN": "26f91ed0a84e706f",
+        "en-US": "37985e4c4ec579a9"
       }
     }
   }
