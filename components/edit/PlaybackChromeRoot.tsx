@@ -38,6 +38,8 @@ import { ActionEngine } from '@/lib/action/engine';
 import { createAudioPlayer } from '@/lib/utils/audio-player';
 import { useDiscussionTTS } from '@/lib/hooks/use-discussion-tts';
 import { useWidgetIframeStore } from '@/lib/store/widget-iframe';
+import { recordDesiredPayload } from '@/lib/store/widget-runtime-state';
+import { walkthroughIdOf } from '@/components/scene-renderers/InteractiveIframeHost';
 import type { AudioIndicatorState } from '@/components/roundtable/audio-indicator';
 import type { Action, DiscussionAction, SpeechAction } from '@/lib/types/action';
 import { cn } from '@/lib/utils';
@@ -745,8 +747,15 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         // on a scene's first visit and silently drop every widget action. Looking it
         // up per-send always sees the live registration.
         const sceneIdForWidget = currentScene.id;
-        const widgetSendMessage = (type: string, payload: Record<string, unknown>) =>
-          useWidgetIframeStore.getState().getSendMessage(sceneIdForWidget)?.(type, payload);
+        const widgetSendMessage = (type: string, payload: Record<string, unknown>) => {
+          const send = useWidgetIframeStore.getState().getSendMessage(sceneIdForWidget);
+          // Walkthrough: before the pooled iframe registers `send`, still remember the request
+          // as `desired` so it is replayed on `widget-ready`.
+          if (!send && walkthroughIdOf(currentScene)) {
+            recordDesiredPayload(sceneIdForWidget, type, payload);
+          }
+          send?.(type, payload);
+        };
 
         // Create ActionEngine for playback (with audioPlayer for TTS and widget messaging)
         const actionEngine = new ActionEngine(

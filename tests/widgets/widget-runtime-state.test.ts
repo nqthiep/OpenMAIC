@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   handleWidgetEvent,
   walkthroughIdOf,
+  walkthroughPresetsOf,
 } from '@/components/scene-renderers/InteractiveIframeHost';
 import {
   markReady,
+  recordDesiredPayload,
   recordState,
   resetIframe,
   setDesired,
@@ -21,7 +23,6 @@ const PRESETS = [
 const DESIRED: SetWidgetStateMessage = {
   type: 'SET_WIDGET_STATE',
   state: { preset: 'mid-hit', frame: 5, playing: false },
-  content: 'Nhìn lo và hi thu hẹp',
 };
 const EMPTY: WidgetRuntimeMap = {};
 
@@ -38,10 +39,78 @@ describe('widget-runtime-state reducers', () => {
     expect(r.map.s1).toMatchObject({ ready: true, totals: { 'mid-hit': 10, empty: 0 } });
   });
 
-  it('setDesired keeps only the last message and does not mark ready', () => {
-    const next: SetWidgetStateMessage = { type: 'SET_WIDGET_STATE', state: { frame: 2 } };
-    const map = setDesired(setDesired(EMPTY, 's1', DESIRED), 's1', next);
-    expect(map.s1).toEqual({ ready: false, desired: next });
+  const msg = (state: SetWidgetStateMessage['state'], content?: string): SetWidgetStateMessage => ({
+    type: 'SET_WIDGET_STATE',
+    state,
+    ...(content ? { content } : {}),
+  });
+
+  it('setDesired merges partial patches and does not mark ready', () => {
+    let map = setDesired(EMPTY, 's1', msg({ preset: 'mid-hit', speed: 2 }));
+    map = setDesired(map, 's1', msg({ frame: 5 }));
+    map = setDesired(map, 's1', msg({ panel: 'cpp', playing: true }));
+    expect(map.s1).toEqual({
+      ready: false,
+      desired: msg({ preset: 'mid-hit', speed: 2, frame: 5, panel: 'cpp', playing: true }),
+    });
+  });
+
+  it('a new preset without frame drops the stale frame; the same preset keeps it', () => {
+    let map = setDesired(EMPTY, 's1', DESIRED);
+    map = setDesired(map, 's1', msg({ preset: 'mid-hit' }));
+    expect(map.s1.desired?.state).toEqual({ preset: 'mid-hit', frame: 5, playing: false });
+    map = setDesired(map, 's1', msg({ preset: 'empty' }));
+    expect(map.s1.desired?.state).toEqual({ preset: 'empty', playing: false });
+    map = setDesired(map, 's1', msg({ preset: 'mid-hit', frame: 1 }));
+    expect(map.s1.desired?.state).toEqual({ preset: 'mid-hit', frame: 1, playing: false });
+  });
+
+  it('one-shot predict/restart/content are never stored, so a rebuild does not replay them', () => {
+    let map = setDesired(EMPTY, 's1', msg({ preset: 'mid-hit', frame: 2 }));
+    map = setDesired(
+      map,
+      's1',
+      msg({ frame: 3, predict: { beatId: 'b1' }, restart: true }, 'câu hỏi'),
+    );
+    expect(map.s1.desired).toEqual(msg({ preset: 'mid-hit', frame: 3 }));
+    // a message with only one-shot fields leaves the map untouched
+    expect(setDesired(map, 's1', msg({ predict: { beatId: 'b2' } }, 'x'))).toBe(map);
+    expect(setDesired(EMPTY, 's1', msg({ restart: true }))).toBe(EMPTY);
+
+    const rebuilt = markReady(resetIframe(map, 's1'), 's1', PRESETS).desired;
+    expect(rebuilt).toEqual(msg({ preset: 'mid-hit', frame: 3 }));
+  });
+
+  it('markReady keeps only presets in the scene widgetConfig, with the config totals', () => {
+    const own = [
+      { id: 'mid-hit', total: 4 },
+      { id: 'other', total: 9 },
+    ];
+    const r = markReady(EMPTY, 's1', PRESETS, own);
+    expect(r.map.s1.totals).toEqual({ 'mid-hit': 4 }); // 'empty' not in config; iframe total 10 ignored
+    const st = recordState(
+      r.map,
+      's1',
+      makeState({ walkthroughId: 'w', preset: 'mid-hit', frame: 99 }),
+    );
+    expect(st.s1.state).toEqual({ preset: 'mid-hit', frame: 3 });
+    expect(
+      recordState(r.map, 's1', makeState({ walkthroughId: 'w', preset: 'empty', frame: 1 })),
+    ).toBe(r.map);
+  });
+
+  it('recordDesiredPayload records a SET_WIDGET_STATE before any iframe registered', () => {
+    useWidgetRuntimeState.setState({ byScene: {} });
+    recordDesiredPayload('s1', 'SET_WIDGET_STATE', { state: { preset: 'mid-hit', frame: 2 } });
+    recordDesiredPayload('s1', 'HIGHLIGHT_ELEMENT', { target: '#x' });
+    expect(useWidgetRuntimeState.getState().byScene.s1.desired?.state).toEqual({
+      preset: 'mid-hit',
+      frame: 2,
+    });
+    expect(useWidgetRuntimeState.getState().markReady('s1', PRESETS)?.state).toEqual({
+      preset: 'mid-hit',
+      frame: 2,
+    });
   });
 
   it('recordState ignores everything before ready', () => {
@@ -210,13 +279,36 @@ describe('InteractiveIframeHost walkthrough wiring', () => {
 
     expect(handleWidgetEvent('s1', 'binary-search', readyMsg, post)).toBe(true);
     expect(post).toHaveBeenCalledOnce();
-    expect(post).toHaveBeenCalledWith('SET_WIDGET_STATE', {
-      state: DESIRED.state,
-      content: DESIRED.content,
-    });
+    expect(post).toHaveBeenCalledWith('SET_WIDGET_STATE', { state: DESIRED.state });
 
     handleWidgetEvent('s1', 'binary-search', stateMsg, post);
     expect(st().byScene.s1.state).toEqual({ preset: 'mid-hit', frame: 9 });
+  });
+
+  it('ready clamps against the scene widgetConfig.presets, not the iframe-reported ones', () => {
+    const wt = {
+      type: 'simulation',
+      kind: 'walkthrough',
+      walkthroughId: 'w',
+      presets: [{ id: 'mid-hit', total: 4 }, { id: 'bad', total: -1 }, { total: 3 }],
+    };
+    const sc = scene({ type: 'interactive', widgetConfig: wt });
+    expect(walkthroughPresetsOf(sc)).toEqual([{ id: 'mid-hit', total: 4 }]);
+    expect(walkthroughPresetsOf(scene({ type: 'interactive', widgetConfig: {} }))).toBeUndefined();
+    expect(walkthroughPresetsOf(scene({ type: 'slide' }))).toBeUndefined();
+
+    const st = () => useWidgetRuntimeState.getState();
+    const readyMsg = makeReady({ walkthroughId: 'w', entryRev: 1, presets: PRESETS });
+    handleWidgetEvent('s1', 'w', readyMsg, vi.fn(), walkthroughPresetsOf(sc));
+    expect(st().byScene.s1.totals).toEqual({ 'mid-hit': 4 });
+    handleWidgetEvent(
+      's1',
+      'w',
+      makeState({ walkthroughId: 'w', preset: 'mid-hit', frame: 9 }),
+      vi.fn(),
+      walkthroughPresetsOf(sc),
+    );
+    expect(st().byScene.s1.state).toEqual({ preset: 'mid-hit', frame: 3 });
   });
 
   it('ready without a desired message sends nothing; garbage is ignored', () => {

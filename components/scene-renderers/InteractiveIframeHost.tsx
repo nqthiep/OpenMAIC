@@ -78,6 +78,21 @@ export function walkthroughIdOf(scene: Scene | undefined): string | null {
     : null;
 }
 
+/** `widgetConfig.presets` (id, total) of a walkthrough scene, or undefined when absent. */
+export function walkthroughPresetsOf(
+  scene: Scene | undefined,
+): { id: string; total: number }[] | undefined {
+  if (walkthroughIdOf(scene) === null) return undefined;
+  const presets = (scene?.content as { widgetConfig?: { presets?: unknown } }).widgetConfig
+    ?.presets;
+  if (!Array.isArray(presets)) return undefined;
+  return presets.flatMap((p) =>
+    typeof p?.id === 'string' && Number.isInteger(p.total) && p.total >= 0
+      ? [{ id: p.id as string, total: p.total as number }]
+      : [],
+  );
+}
+
 /**
  * Handle a `widget-ready` / `widget-state` message from a walkthrough iframe (INTERFACES §2).
  * The caller has already checked `e.source`. `ready` re-sends the last desired state via `post`.
@@ -87,12 +102,13 @@ export function handleWidgetEvent(
   walkthroughId: string,
   data: unknown,
   post: (type: string, payload: Record<string, unknown>) => void,
+  configPresets?: readonly { id: string; total: number }[],
 ): boolean {
   const ev = parseWidgetEvent(data);
   if (!ev || ev.walkthroughId !== walkthroughId) return false;
   const runtime = useWidgetRuntimeState.getState();
   if (ev.kind === 'widget-ready') {
-    const desired = runtime.markReady(sceneId, ev.presets);
+    const desired = runtime.markReady(sceneId, ev.presets, configPresets);
     if (desired) {
       post('SET_WIDGET_STATE', {
         state: desired.state,
@@ -266,8 +282,13 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
         | undefined;
       if (!d || d.__maicInteractive !== true) return;
       if (walkthroughId && (d.kind === 'widget-ready' || d.kind === 'widget-state')) {
-        handleWidgetEvent(sceneId, walkthroughId, d, (type, payload) =>
-          iframeRef.current?.contentWindow?.postMessage({ type, ...payload }, '*'),
+        handleWidgetEvent(
+          sceneId,
+          walkthroughId,
+          d,
+          (type, payload) =>
+            iframeRef.current?.contentWindow?.postMessage({ type, ...payload }, '*'),
+          walkthroughPresetsOf(useStageStore.getState().scenes.find((x) => x.id === sceneId)),
         );
         return;
       }

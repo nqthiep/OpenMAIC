@@ -3,15 +3,21 @@
 /**
  * Per-scene runtime state of walkthrough widget iframes (INTERFACES §1-§2, ADR 0013 §2,
  * DATA-MODEL §6). Not persisted. Keyed by sceneId:
- * - `desired`: last `SET_WIDGET_STATE` the engine asked for. Kept when the iframe is rebuilt,
- *   so it can be re-sent on the next `widget-ready`.
+ * - `desired`: sticky fields (`preset/frame/panel/speed/playing`) of the `SET_WIDGET_STATE`
+ *   messages the engine sent, merged. One-shot fields (`predict`, `restart`, `content`) are never
+ *   kept. Kept when the iframe is rebuilt, so it can be re-sent on the next `widget-ready`.
  * - `ready`/`totals`: set by `widget-ready`, cleared when the iframe is rebuilt.
  * - `state`: last `widget-state` (clamped), cleared when the iframe is rebuilt.
  *
  * The reducers are pure (`map in -> map out`) and exported for tests; the store wraps them.
  */
 import { create } from 'zustand';
-import type { SetWidgetStateMessage, WidgetState } from '@/lib/tutor/protocol/messages';
+import {
+  parseInbound,
+  type SetWidgetStateMessage,
+  type WidgetState,
+  type WidgetStatePatch,
+} from '@/lib/tutor/protocol/messages';
 
 const MAX_INPUT_BYTES = 2048;
 /** Preset id for the learner's own input: has no `total` in `widgetConfig`. */
@@ -51,23 +57,52 @@ function inputFits(input: unknown): boolean {
   }
 }
 
+/**
+ * Merges the sticky fields of `msg` into `desired`. A different `preset` without a `frame` drops
+ * the old frame (it belonged to the old preset). `predict`/`restart`/`content` are one-shot and
+ * must not be replayed when the iframe is rebuilt, so they are not stored.
+ */
 export function setDesired(
   map: WidgetRuntimeMap,
   sceneId: string,
   msg: SetWidgetStateMessage,
 ): WidgetRuntimeMap {
-  return withScene(map, sceneId, { ...(map[sceneId] ?? { ready: false }), desired: msg });
+  const cur = map[sceneId] ?? { ready: false };
+  const prev = cur.desired?.state ?? {};
+  const { preset, frame, panel, speed, playing } = msg.state;
+  const state: WidgetStatePatch = { ...prev };
+  if (preset !== undefined) {
+    if (preset !== prev.preset) delete state.frame;
+    state.preset = preset;
+  }
+  if (frame !== undefined) state.frame = frame;
+  if (panel !== undefined) state.panel = panel;
+  if (speed !== undefined) state.speed = speed;
+  if (playing !== undefined) state.playing = playing;
+  if ([preset, frame, panel, speed, playing].every((v) => v === undefined)) return map;
+  return withScene(map, sceneId, { ...cur, desired: { type: 'SET_WIDGET_STATE', state } });
 }
 
-/** Marks the scene ready; `desired` is what the caller must send again (if any). */
+/**
+ * Marks the scene ready; `desired` is what the caller must send again (if any). When the scene's
+ * own `widgetConfig.presets` are given, only the ready presets that are in it are kept, with the
+ * config's `total` (the iframe-reported one is not trusted).
+ */
 export function markReady(
   map: WidgetRuntimeMap,
   sceneId: string,
   presets: readonly { id: string; total: number }[],
+  configPresets?: readonly { id: string; total: number }[],
 ): { map: WidgetRuntimeMap; desired?: SetWidgetStateMessage } {
   const cur = map[sceneId];
   const totals: Record<string, number> = {};
-  for (const p of presets) totals[p.id] = p.total;
+  for (const p of presets) {
+    if (!configPresets) totals[p.id] = p.total;
+    else {
+      const own = configPresets.find((c) => c.id === p.id);
+      if (own) totals[p.id] = own.total;
+    }
+  }
   return {
     map: withScene(map, sceneId, { ...cur, ready: true, totals }),
     desired: cur?.desired,
@@ -126,6 +161,7 @@ interface WidgetRuntimeStore {
   markReady: (
     sceneId: string,
     presets: readonly { id: string; total: number }[],
+    configPresets?: readonly { id: string; total: number }[],
   ) => SetWidgetStateMessage | undefined;
   recordState: (sceneId: string, raw: WidgetState) => void;
   resetIframe: (sceneId: string) => void;
@@ -134,11 +170,25 @@ interface WidgetRuntimeStore {
 export const useWidgetRuntimeState = create<WidgetRuntimeStore>((set, get) => ({
   byScene: {},
   setDesired: (sceneId, msg) => set((s) => ({ byScene: setDesired(s.byScene, sceneId, msg) })),
-  markReady: (sceneId, presets) => {
-    const r = markReady(get().byScene, sceneId, presets);
+  markReady: (sceneId, presets, configPresets) => {
+    const r = markReady(get().byScene, sceneId, presets, configPresets);
     set({ byScene: r.map });
     return r.desired;
   },
   recordState: (sceneId, raw) => set((s) => ({ byScene: recordState(s.byScene, sceneId, raw) })),
   resetIframe: (sceneId) => set((s) => ({ byScene: resetIframe(s.byScene, sceneId) })),
 }));
+
+/**
+ * Records the `desired` of a `SET_WIDGET_STATE` payload even when no iframe is registered yet
+ * (the pooled iframe registers its `send` a commit after the playback engine is built).
+ */
+export function recordDesiredPayload(
+  sceneId: string,
+  type: string,
+  payload: Record<string, unknown>,
+): void {
+  if (type !== 'SET_WIDGET_STATE') return;
+  const msg = parseInbound({ type, ...payload });
+  if (msg?.type === 'SET_WIDGET_STATE') useWidgetRuntimeState.getState().setDesired(sceneId, msg);
+}

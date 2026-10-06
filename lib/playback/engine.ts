@@ -92,6 +92,7 @@ export class PlaybackEngine {
   private browserTTSChunks: string[] = []; // sentence-level chunks for sequential playback
   private browserTTSChunkIndex: number = 0; // current chunk being spoken
   private browserTTSPausedChunks: string[] = []; // remaining chunks saved on pause (for cancel+re-speak)
+  private widgetWait: Promise<void> | null = null; // in-flight prediction wait (see processNext)
   private speechTimerRemaining: number = 0; // remaining ms (set on pause)
   private playbackGeneration: number = 0;
 
@@ -185,6 +186,7 @@ export class PlaybackEngine {
 
     const autoplay = options.autoplay ?? this.mode === 'playing';
     const generation = this.invalidatePlaybackGeneration();
+    this.widgetWait = null;
     this.cancelActivePlaybackWork();
     this.sceneIndex = 0;
     this.actionIndex = 0;
@@ -306,6 +308,10 @@ export class PlaybackEngine {
           this.callbacks.onSpeechEnd?.();
           if (this.mode === 'playing') this.processNext(generation);
         }, this.speechTimerRemaining);
+      } else if (this.widgetWait) {
+        // Paused during a prediction wait: do not continue the lecture until it ends
+        const generation = this.playbackGeneration;
+        void this.widgetWait.then(() => this.processNext(generation));
       } else {
         // TTS finished while paused, continue to next event
         this.processNext();
@@ -315,6 +321,7 @@ export class PlaybackEngine {
 
   /** → idle */
   stop(): void {
+    this.widgetWait = null;
     this.invalidatePlaybackGeneration();
     // Set mode BEFORE stopping audio to prevent spurious processNext from
     // synchronous onend callbacks (see handleUserInterrupt for details).
@@ -732,7 +739,16 @@ export class PlaybackEngine {
       case 'widget_annotation':
       case 'widget_reveal': {
         // Synchronous actions — await completion, then continue
-        await this.actionEngine.execute(action);
+        const run = this.actionEngine.execute(action);
+        // A prediction question blocks until answered/timeout; resume() must re-await it
+        // instead of skipping the wait (pause cancels this continuation via the generation).
+        const predicting =
+          action.type === 'widget_setState' &&
+          (action as { state?: { predict?: unknown } }).state?.predict !== undefined;
+        const wait = predicting ? run.catch(() => {}) : null;
+        if (wait) this.widgetWait = wait;
+        await run;
+        if (wait && this.widgetWait === wait) this.widgetWait = null;
         if (!this.isCurrentGeneration(generation)) return;
         if (this.mode === 'playing') {
           this.processNext(generation);
