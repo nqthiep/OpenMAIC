@@ -110,12 +110,11 @@ npx vitest run tests/tutor tests/widgets tests/subjects tests/runtime tests/play
 TUTOR_BROWSER=1 npx vitest run tests/tutor
 ```
 
-Kết quả hiện tại: `tsc` sạch, `eslint` 0 lỗi (một cảnh báo `Static` chưa dùng), browser test `tests/tutor` đạt 542/542. Test vitest các thư mục trên đạt, **trừ** lỗi nền có từ trước, không do công việc này (chưa tự điều tra nguyên nhân `[Unverified]`):
+Kết quả hiện tại: `tsc` sạch, `eslint` 0 lỗi (một cảnh báo `Static` chưa dùng), browser test `tests/tutor` đạt 542/542. Test vitest các thư mục trên đạt, **trừ** các lỗi nền:
 
-- `tests/runtime/chat-storage.test.ts` (nhiều test)
-- `tests/persistence/stage-access-fidelity.test.ts`
-- `tests/persistence/asset-byte-store.test.ts`
-- hai test "cross-owner isolation" trong `tests/agent-runtime/dsl-tools.test.ts` (cột `owner_id` không tồn tại)
+- `tests/runtime/chat-storage.test.ts` (nhiều test) và `tests/persistence/stage-access-fidelity.test.ts`: **đã kiểm chứng** cũng đỏ trên worktree `base` (nhánh `main`, commit `4685cad`: 43 test đỏ ở hai file này), nên không do công việc này.
+- `tests/persistence/asset-byte-store.test.ts`: đỏ khi chạy cả bộ song song, **đạt 3/3 khi chạy riêng** trên `it-math`. Coi là lỗi phụ thuộc tải; chưa điều tra `[Unverified]`.
+- hai test "cross-owner isolation" trong `tests/agent-runtime/dsl-tools.test.ts` (cột `owner_id` không tồn tại): do agent báo, chưa tự chạy lại trên `main` `[Unverified]`.
 
 `tests/tutor/build/runtime-fresh.test.ts` thỉnh thoảng quá 5 giây khi chạy cả bộ song song (đã nâng timeout 60 giây); chạy riêng thì qua.
 
@@ -142,6 +141,30 @@ Báo cáo cuối ngắn: đã làm gì, file, lệnh test + kết quả, dòng l
 
 Khi merge nhánh task, kiểm `git diff --name-only it-math...task/<id>` chỉ chứa file trong Sở hữu. Sau khi merge mọi nhánh của một đợt, mới sinh lại `catalog-lock.json`, `SKILL.md` id block và runtime, rồi sửa các test cũ bị đổi (các lần trước, test của `qa-score`, `review-schema`, `sim-transcript`, `provider` phải sửa tay sau khi catalog đổi). Nếu doc neo trôi thì sửa như §1.
 
+### Chỉ dẫn đang hiệu lực của user (nguyên ý)
+
+Thứ tự user đã yêu cầu cho toàn bộ dự án: (1) implement phase kế tiếp; (2) xong mỗi phase thì review kỹ và nêu nhận xét cụ thể; (3) improve theo nhận xét của reviewer; (4) implement phase tiếp; (5) lặp đến hết mọi phase; (6) test tất cả chức năng đã làm. Khi chạm giới hạn phiên thì chờ reset rồi làm tiếp.
+
+Chỉ dẫn của tổ chức áp lên mọi câu trả lời: không trình bày nội dung suy đoán như sự thật; gắn nhãn `[Inference]`, `[Speculation]`, `[Unverified]`; không dùng các từ "ngăn chặn tuyệt đối/đảm bảo/sửa triệt để" mà không có nguồn; ví dụ mã và thực hành tốt, không lan man.
+
+### Script ngoài repo (chép nguyên để dựng lại)
+
+`mk.sh` và `accept.sh` nằm ở `/Users/quangthiep/Projects/tutor-wt/`, **không** thuộc repo. Nếu mất, dựng lại bằng các lệnh sau.
+
+Tạo worktree từ `it-math` và nối `node_modules`:
+
+```bash
+cd /Users/quangthiep/Projects/OpenMAIC
+id=<task-id>; d=/Users/quangthiep/Projects/tutor-wt/$id
+git worktree add -q $d -b task/$id it-math
+ln -s /Users/quangthiep/Projects/OpenMAIC/node_modules $d/node_modules
+for p in packages/@openmaic/*; do
+  [ -d $p/node_modules ] && ln -s /Users/quangthiep/Projects/OpenMAIC/$p/node_modules $d/$p/node_modules
+done
+```
+
+Nghiệm thu một nhánh: trong worktree chạy eslint và prettier trên file đổi, vitest trên test đổi, kiểm `git diff --name-only origin/main -- packages/@openmaic` rỗng; rồi `git add` đúng file sở hữu, `git commit`, và ở checkout chính `git merge --no-edit task/<id>`.
+
 ## 6. Việc bị chặn, cần người hoặc điều kiện bên ngoài
 
 | Việc | Vì sao chặn | Task liên quan |
@@ -164,10 +187,16 @@ Lấy từ REVIEW vòng 11 và báo cáo của các agent:
 - Bộ lọc kiểm duyệt: mẫu "benign" gồm lời hỗ trợ khi học sinh có ý tự hại có thể bị lọc chặn; ghi nhận chứ không xoá mẫu.
 - Replay của `generate_walkthrough` giữ map `(sessionId, callId)` trong bộ nhớ tiến trình (tối đa 1000); sau khi khởi động lại chỉ dựa vào so sánh nội dung giống hệt.
 - Khi người dùng bấm Play lúc đang có câu hỏi dự đoán, tick đi tiếp và câu hỏi bị coi là bỏ qua (không giữ phát).
-- Quản lý lỗi mới của tool `generate_walkthrough` (`no-document`, `content-blocked`, replay) đã ghi vào INTERFACES §3; hình dạng `lessonKit` mới (`pitfalls: {text, lang?}[]`, `hints: string[]`) đã khớp INTERFACES.
+- Các mã lỗi mới của tool `generate_walkthrough` (`no-document`, `content-blocked`, replay) đã ghi vào INTERFACES §3; hình dạng `lessonKit` mới (`pitfalls: {text, lang?}[]`, `hints: string[]`) đã khớp INTERFACES.
 - `docs/tutor/curriculum/` là nguồn gốc; đổi nó thì chạy lại `npx tsx scripts/split-curriculum.ts`.
 
-## 8. Kiểm tra nhanh để biết trạng thái ban đầu
+## 8. Những gì tài liệu này không có
+
+- Báo cáo review chi tiết của ba reviewer (`review_A/B/C.md`, `phase1_issues.md`) nằm trong thư mục scratchpad của phiên cũ và **đã mất**. Phần còn lại là mã số phát hiện (A1…A18, B1…B15, C1…C29) trong REVIEW vòng 9–11 và trong commit của chín nhánh `task/fix-*`; `git log --stat` và `git show` trên các commit đó cho biết từng thay đổi.
+- Mã kết quả test và log của từng agent con không được lưu lại ngoài các báo cáo đã tóm tắt ở đây.
+- Sau khi merge `2-IS1`, `2-00`, `2-I1` đã chạy lại `tests/tutor/input-spec`, `curriculum-map`, `tests/subjects`, `tests/agent-runtime/skills`: 214 đạt, 9 bỏ qua (cần `TUTOR_IMPL_CHECK=1`). Chưa chạy lại toàn bộ các thư mục test còn lại sau ba merge đó.
+
+## 9. Kiểm tra nhanh để biết trạng thái ban đầu
 
 ```bash
 cd /Users/quangthiep/Projects/OpenMAIC
