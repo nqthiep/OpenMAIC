@@ -241,7 +241,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
     codeLine: number,
     vars: Record<string, number | string>,
     marks: Record<string, HighlightKind>,
-    currentPiles = piles,
+    tag?: string,
   ): void => {
     emit(
       {
