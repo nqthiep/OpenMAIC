@@ -37,6 +37,7 @@
     "eval:tutor-review": "tsx eval/tutor-review/runner.ts",
     "eval:sim-learner": "tsx eval/sim-learner/runner.ts",
     "eval:tutor-qa": "tsx eval/tutor-qa/runner.ts",
+    "eval:tutor-lesson": "tsx eval/tutor-lesson/runner.ts",
     "generate:skill-catalog": "tsx scripts/generate-skill-catalog.ts"
   },
   "dependencies": {

@@ -228,6 +228,29 @@ jobs:
       - name: Build container image
         run: docker build --tag openmaic-render-service:ci render-service
 
+  # SubjectTutor catalog: compile and run every walkthrough's C++ and Python implementation on its
+  # presets and compare with an independent oracle (card 2-I1). ubuntu-latest ships g++ and python3.
+  tutor-impl:
+    name: Tutor C++/Python implementations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Implementation equivalence
+        run: pnpm exec vitest run tests/subjects/impl-equivalence.test.ts
+        env:
+          TUTOR_IMPL_CHECK: '1'
+
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
