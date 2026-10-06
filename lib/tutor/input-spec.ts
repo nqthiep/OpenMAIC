@@ -6,12 +6,15 @@
 
 export type Range = readonly [number, number];
 
+/** 'brackets' = only ()[]{} (2-IS1). */
+export type Alphabet = 'a-z' | '0-9' | 'ab' | 'brackets';
+
 export type InputSpec =
   | { kind: 'int'; range: Range; ui?: 'slider' }
   | { kind: 'enum'; values: readonly (string | number)[] }
   | { kind: 'number'; range: Range; step: number; ui?: 'slider' }
   | { kind: 'int-array'; len: Range; range: Range; strictlyIncreasing?: boolean }
-  | { kind: 'string'; len: Range; alphabet: 'a-z' | '0-9' | 'ab' }
+  | { kind: 'string'; len: Range; alphabet: Alphabet }
   | { kind: 'edge-list'; nodes: Range; edges: Range; weight?: Range }
   | { kind: 'grid'; rows: Range; cols: Range; cell: 'bit' | 'int'; range?: Range }
   | { kind: 'record'; fields: Readonly<Record<string, InputSpec>> };
@@ -21,10 +24,11 @@ export type ParseResult<I> = { ok: true; value: I } | { ok: false; issues: reado
 export const MAX_INPUT_BYTES = 2048;
 export const MAX_ISSUES = 5;
 
-const ALPHABETS: Record<'a-z' | '0-9' | 'ab', RegExp> = {
+const ALPHABETS: Record<Alphabet, RegExp> = {
   'a-z': /^[a-z]*$/,
   '0-9': /^[0-9]*$/,
   ab: /^[ab]*$/,
+  brackets: /^[()[\]{}]*$/,
 };
 
 const STEP_EPSILON = 1e-9;

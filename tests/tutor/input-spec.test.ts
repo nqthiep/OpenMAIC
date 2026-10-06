@@ -98,6 +98,11 @@ describe('string', () => {
     expect(bad(s, 'abc')).toEqual(['$: bad-char']);
     expect(bad(s, 5)).toEqual(['$: not-string']);
     expect(good({ kind: 'string', len: [0, 3], alphabet: '0-9' }, '042')).toBe('042');
+    const br: InputSpec = { kind: 'string', len: [1, 12], alphabet: 'brackets' };
+    expect(good(br, '([]{})')).toBe('([]{})');
+    expect(good(br, ')(')).toBe(')(');
+    for (const x of ['(a)', '<>', '( )', '(\n)']) expect(bad(br, x)).toEqual(['$: bad-char']);
+    expect(bad(br, '')).toEqual(['$: bad-length']);
     expect(bad({ kind: 'string', len: [0, 3], alphabet: 'a-z' }, 'aB')).toEqual(['$: bad-char']);
   });
 });
