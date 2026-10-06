@@ -92,12 +92,21 @@ describe('degrade', () => {
     expect(degrade(good, 1)).not.toEqual(degrade(good, 2));
   });
 
-  it('drops half the steps and reorders the rest, without inventing lines', () => {
+  it('drops half the steps, reorders the rest and removes every frame description', () => {
     const bad = degrade(good, 1);
     expect(bad).toHaveLength(7);
-    for (const l of bad) expect(good).toContainEqual(l);
+    for (const l of bad) {
+      expect(l.frame).toBe('');
+      expect(good).toContainEqual({ ...l, frame: expect.any(String) });
+    }
     expect(new Set(bad.map((l) => l.text)).size).toBe(bad.length);
-    expect(bad).not.toEqual(good.slice(0, 7));
+    expect(bad.map((l) => l.text)).not.toEqual(good.slice(0, 7).map((l) => l.text));
+  });
+
+  it('renders a degraded line without an "On screen" line', () => {
+    const text = renderTranscript(degrade(good, 1));
+    expect(text).not.toContain('On screen');
+    expect(renderTranscript(good)).toContain('On screen: f0');
   });
 
   it('keeps at least one line and does not mutate the input', () => {

@@ -1,17 +1,27 @@
 import { readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
-import { buildJudgePrompt, judge, parseVerdict, DATA_BEGIN, DATA_END } from '@/eval/tutor-qa/judge';
+import {
+  buildJudgePrompt,
+  buildJudgeSystem,
+  judge,
+  parseVerdict,
+  DATA_BEGIN,
+  DATA_END,
+} from '@/eval/tutor-qa/judge';
 import {
   MIN_SCENARIOS,
   exitCode,
   formatReport,
   meets,
   parseScenarios,
+  sameModel,
   score,
   type Outcome,
   type Scenario,
   type Verdict,
 } from '@/eval/tutor-qa/score';
+import { buildTeacherSystem } from '@/eval/tutor-qa/teacher-prompt';
+import { TUTOR_COACHING } from '@/lib/orchestration/prompt-builder';
 import { binarySearchEntry as bs } from '@/lib/subjects/cp/catalog/binary-search';
 import { steps } from '@/lib/tutor/engine/generate';
 
@@ -33,6 +43,7 @@ const verdict = (over: Partial<Verdict> = {}): Verdict => ({
   onFrame: true,
   hintFirst: true,
   usesMisconception: null,
+  statedFacts: 1,
   reason: 'r',
   ...over,
 });
@@ -165,6 +176,7 @@ describe('judge', () => {
     onFrame: false,
     hintFirst: true,
     usesMisconception: null,
+    statedFacts: 1,
     reason: 'x',
   };
 
@@ -180,6 +192,11 @@ describe('judge', () => {
     expect(p({ ...good, extra: 1 })).toBeNull();
     expect(p({ ...good, correct: 'yes' })).toBeNull();
     expect(p({ ...good, reason: undefined })).toBeNull();
+    const { statedFacts: _drop, ...noStated } = good;
+    expect(p(noStated)).toBeNull(); // the sixth key is required
+    expect(p({ ...good, statedFacts: -1 })).toBeNull();
+    expect(p({ ...good, statedFacts: 1.5 })).toBeNull();
+    expect(p({ ...good, statedFacts: 2 })).toBeNull(); // the scenario has one expected fact
     expect(p({ ...good, hintFirst: null })).toBeNull(); // applicable: needs a boolean
     expect(p({ ...good, usesMisconception: true })).toBeNull(); // no misconception: must be null
     expect(p({ ...good, hintFirst: true }, sc({ fullAnswerRequested: true }))).toBeNull();
@@ -187,6 +204,30 @@ describe('judge', () => {
     expect(
       p({ ...good, usesMisconception: false }, sc({ misconceptionId: 'mid#0' })),
     ).not.toBeNull();
+  });
+
+  it('correct needs a stated fact unless hintFirst applies and the answer holds back', () => {
+    const v = (o: object, scenario = s) =>
+      parseVerdict(JSON.stringify({ ...good, ...o }), scenario);
+    // hintFirst applies, answer is a pure hint with no fact: stays correct
+    expect(v({ statedFacts: 0, hintFirst: true })?.correct).toBe(true);
+    // hintFirst applies but the answer gave the solution away and states no fact: overruled
+    expect(v({ statedFacts: 0, hintFirst: false })?.correct).toBe(false);
+    // a fact is stated: correct, whatever hintFirst says
+    expect(v({ statedFacts: 1, hintFirst: false })?.correct).toBe(true);
+    // the student asked for the full answer: no hint-first escape
+    const full = sc({ fullAnswerRequested: true });
+    expect(v({ statedFacts: 0, hintFirst: null }, full)?.correct).toBe(false);
+    expect(v({ statedFacts: 1, hintFirst: null }, full)?.correct).toBe(true);
+    // the judge said not correct: stays false
+    expect(v({ correct: false, statedFacts: 1 })?.correct).toBe(false);
+    expect(v({ statedFacts: 0, hintFirst: true })?.statedFacts).toBe(0);
+  });
+
+  it('the judge prompt states the same rule', () => {
+    const sys = buildJudgeSystem();
+    expect(sys).toContain('states or clearly implies at least one expected fact');
+    expect(sys).toContain('"statedFacts"');
   });
 
   it('puts the answer in a data block that cannot hold a marker', () => {
@@ -207,5 +248,29 @@ describe('judge', () => {
     expect(v.correct).toBe(true);
     expect(seen[0]).toContain('ans');
     await expect(judge(s, 'truth', 'ans', async () => 'nope')).rejects.toThrow('malformed');
+  });
+});
+
+describe('answerer / judge separation and the teacher prompt', () => {
+  it('sameModel compares provider:model strings, ignoring case and outer spaces', () => {
+    expect(sameModel('openai:gpt-x', ' OpenAI:GPT-X ')).toBe(true);
+    expect(sameModel('openai:gpt-x', 'openai:gpt-y')).toBe(false);
+    expect(sameModel('openai:gpt-x', 'anthropic:gpt-x')).toBe(false);
+    expect(sameModel(undefined, undefined)).toBe(false);
+    expect(sameModel('', '')).toBe(false);
+  });
+
+  it('builds the teacher prompt from the production coaching, digest and locale', () => {
+    const p = buildTeacherSystem({
+      entryId: 'binary-search',
+      locale: 'vi-VN',
+      digest: 'DIGEST-TEXT',
+      coaching: TUTOR_COACHING,
+    });
+    expect(p).toContain(TUTOR_COACHING);
+    expect(p).toContain('around 300 characters');
+    expect(p).toContain('LEAD TEACHER');
+    expect(p).toContain('Reply in vi-VN');
+    expect(p.endsWith('DIGEST-TEXT')).toBe(true);
   });
 });

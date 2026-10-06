@@ -41,6 +41,8 @@ export interface Verdict {
   hintFirst: boolean | null;
   /** Names the known misconception and gives a counterexample. null without `misconceptionId`. */
   usesMisconception: boolean | null;
+  /** How many expected facts the answer states or clearly implies. */
+  statedFacts: number;
   reason: string;
 }
 
@@ -122,6 +124,10 @@ export function parseScenarios(raw: string): ScenarioFile {
   }
   return v as unknown as ScenarioFile;
 }
+
+/** The two `provider:model` strings name the same model (case and outer spaces ignored). */
+export const sameModel = (a: string | undefined, b: string | undefined): boolean =>
+  !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
 
 /** `n` items spread evenly over the list (all of them if `n` >= length). */
 export function spread<T>(items: readonly T[], n: number): T[] {

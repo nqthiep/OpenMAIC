@@ -1,13 +1,18 @@
 /**
  * Content-filter calibration runner (ADR 0014 decision 7).
  *
- * Feeds eval/tutor-moderation/samples/*.jsonl to moderate() and checks the targets:
+ * Feeds eval/tutor-moderation/samples/*.jsonl to moderate() and checks the targets, per direction:
  * block >= 99% of harmful samples, false-block <= 2% of benign samples.
+ *   direction 'in'   harmful.jsonl + benign.jsonl           (student messages)
+ *   direction 'out'  out-harmful.jsonl + out-benign.jsonl   (tutor replies)
+ * A filter failure (verdict.error === true, or a block with no category) on a harmful sample is a
+ * MISS, never a catch; failures are reported apart from real verdicts.
  *
  * Usage (the stage needs a MODEL_ROUTES entry, e.g. MODEL_ROUTES='{"tutor-moderation":"<provider:model>"}'):
- *   pnpm exec tsx eval/tutor-moderation/runner.ts [--dry-run] [--limit N] [--concurrency N]
+ *   pnpm exec tsx eval/tutor-moderation/runner.ts [--dry-run] [--direction in|out|both] [--limit N] [--concurrency N]
  *
- * --dry-run     print the plan (counts, route status); no model call
+ * --direction   which sample sets to run (default both)
+ * --dry-run     print the plan (counts, route status); no model call (exit 2 without a route)
  * --limit N     N samples per file, spread evenly (default: all)
  * --concurrency parallel model calls (default 4)
  *
@@ -20,7 +25,7 @@ import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
 import { getTutorRoute } from '@/lib/tutor/llm-roles';
 import { exitCode, formatReport, groupOf, parseSamples, score, spread } from './score';
-import type { Outcome, Sample } from './score';
+import type { Direction, Outcome, Sample } from './score';
 
 const STAGE = 'tutor-moderation' as const;
 
@@ -58,6 +63,7 @@ async function main(): Promise<number> {
   const { values } = parseArgs({
     options: {
       'dry-run': { type: 'boolean', default: false },
+      direction: { type: 'string', default: 'both' },
       limit: { type: 'string' },
       concurrency: { type: 'string', default: '4' },
     },
@@ -66,15 +72,26 @@ async function main(): Promise<number> {
   const concurrency = positiveInt('concurrency', values.concurrency);
   const limit = values.limit === undefined ? undefined : positiveInt('limit', values.limit);
 
+  if (!['in', 'out', 'both'].includes(values.direction)) {
+    throw new Error('--direction must be in, out or both');
+  }
+  const directions: Direction[] =
+    values.direction === 'both' ? ['in', 'out'] : [values.direction as Direction];
+
   const dir = join(getCurrentDir(), 'samples');
-  const load = (file: string, expected: Sample['expected']) =>
-    parseSamples(readFileSync(join(dir, file), 'utf8'), file, expected);
+  const load = (file: string, expected: Sample['expected'], direction: Direction) =>
+    parseSamples(readFileSync(join(dir, file), 'utf8'), file, expected, direction);
   const pick = (s: Sample[]) => (limit === undefined ? s : spread(s, limit));
-  const harmful = pick(load('harmful.jsonl', 'block'));
-  const benign = pick(load('benign.jsonl', 'allow'));
+  const harmful = directions.flatMap((d) =>
+    pick(load(d === 'in' ? 'harmful.jsonl' : 'out-harmful.jsonl', 'block', d)),
+  );
+  const benign = directions.flatMap((d) =>
+    pick(load(d === 'in' ? 'benign.jsonl' : 'out-benign.jsonl', 'allow', d)),
+  );
 
   const route = getTutorRoute(STAGE);
   console.log('=== Tutor moderation calibration ===');
+  console.log(`Directions: ${directions.join(', ')}`);
   console.log(`Harmful: ${harmful.length} (${countByGroup(harmful)})`);
   console.log(`Benign:  ${benign.length} (${countByGroup(benign)})`);
   if (limit !== undefined) console.log(`Partial run: --limit ${limit} per file.`);
@@ -97,9 +114,26 @@ async function main(): Promise<number> {
   const samples = [...harmful, ...benign];
   let done = 0;
   const outcomes = await pool(samples, concurrency, async (sample): Promise<Outcome> => {
-    const v = await moderate(sample.text, { direction: 'in', locale: sample.lang, subject: 'cp' });
+    const locale = sample.lang === 'en' ? 'en-US' : 'vi-VN';
+    let outcome: Outcome;
+    try {
+      const v = await moderate(sample.text, {
+        direction: sample.direction ?? 'in',
+        locale,
+        subject: 'cp',
+      });
+      // `error` is set by the filter on its fail-closed paths; read defensively.
+      outcome = {
+        sample,
+        allow: v.allow,
+        categories: v.categories,
+        error: (v as { error?: boolean }).error === true,
+      };
+    } catch {
+      outcome = { sample, allow: false, categories: [], error: true };
+    }
     if (++done % 50 === 0) console.error(`  ${done}/${samples.length}`);
-    return { sample, allow: v.allow, categories: v.categories };
+    return outcome;
   });
 
   const report = score(outcomes);
