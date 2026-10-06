@@ -32,22 +32,14 @@ export function hash16(v: unknown): string {
 
 export function framesHash(frames: unknown): string {
   // meta fields may be explicitly `undefined`; the JSON round-trip drops them (they are dropped in the HTML too).
-  return hash16(JSON.parse(JSON.stringify(frames)));
-}
-
-export function contentHash(args: {
-  code: unknown;
-  beatDefs: unknown;
-  presets: ReadonlyArray<{ id: string; input: unknown }>;
-  problem?: unknown;
-}): string {
-  const { code, beatDefs, presets, problem } = args;
-  return hash16({
-    code,
-    beatDefs,
-    presets: presets.map((p) => ({ id: p.id, input: p.input })),
-    problem: problem ?? null,
+  // A non-finite number would silently become null in the round-trip, so refuse it first.
+  const json = JSON.stringify(frames, (key, v) => {
+    if (typeof v === 'number' && !Number.isFinite(v)) {
+      throw new TypeError(`framesHash: non-finite number ${v} at "${key}"`);
+    }
+    return v;
   });
+  return hash16(JSON.parse(json));
 }
 
 /**
@@ -80,10 +72,17 @@ function predictAnswers(entry: WalkthroughEntry): Record<string, number[]> {
   return out;
 }
 
-/** The one place that computes an entry's contentHash (used by the provider and the catalog lock). */
+const contentHashes = new WeakMap<WalkthroughEntry, string>();
+
+/**
+ * The one place that computes an entry's contentHash (used by the provider and the catalog lock).
+ * Pure in the entry, so memoised per entry object (catalog entries are never mutated).
+ */
 export function entryContentHash(entry: WalkthroughEntry): string {
+  const cached = contentHashes.get(entry);
+  if (cached) return cached;
   // JSON round-trip drops `undefined` object properties (optional fields) which canonicalJSON rejects.
-  return hash16(
+  const hash = hash16(
     JSON.parse(
       JSON.stringify({
         code: entry.code,
@@ -96,4 +95,6 @@ export function entryContentHash(entry: WalkthroughEntry): string {
       }),
     ),
   );
+  contentHashes.set(entry, hash);
+  return hash;
 }

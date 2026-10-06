@@ -7,7 +7,9 @@ import type { Messages } from '@/lib/tutor/catalog/types';
 import { steps } from '@/lib/tutor/engine/generate';
 import { htmlBytes } from '@/lib/tutor/build/build-html';
 import {
+  MAX_ASKS_PER_BEAT,
   MAX_NARRATED_BEATS,
+  narratedBeats,
   createWalkthroughProvider,
   getTutorLabels,
 } from '@/lib/tutor/provider';
@@ -111,6 +113,13 @@ const manyBeats: AnyWalkthroughEntry = {
   },
 };
 
+/** Light (first) hint of each distinct beat of a preset, in order of appearance. */
+const lightHints = (presetId: string, locale: string): string[] =>
+  [...new Set(beatsOf(bs, presetId, locale).map((b) => b.id))].flatMap((id) => {
+    const hint = bs.beatDefs.find((d) => d.id === id)?.hints?.[0];
+    return hint ? [msg(hint, locale)] : [];
+  });
+
 describe('walkthrough provider: build', () => {
   for (const locale of LOCALES) {
     for (const presetId of PRESET_IDS) {
@@ -162,10 +171,12 @@ describe('walkthrough provider: build', () => {
         });
 
         it('actions follow [ask] -> setState -> speech, at most 12 beats', () => {
-          const beats = beatsOf(bs, presetId, locale).slice(0, MAX_NARRATED_BEATS);
+          const required = new Set(bs.beatDefs.filter((d) => d.required).map((d) => d.id));
+          const beats = narratedBeats(beatsOf(bs, presetId, locale), required);
           const defs = new Map(bs.beatDefs.map((d) => [d.id, d]));
+          const asks = (x: BeatRef) => defs.get(x.id)!.ask && x.occurrence <= MAX_ASKS_PER_BEAT;
           const types = beats.flatMap((x) => [
-            ...(defs.get(x.id)!.ask ? ['speech'] : []),
+            ...(asks(x) ? ['speech'] : []),
             'widget_setState',
             'speech',
           ]);
@@ -176,7 +187,7 @@ describe('walkthrough provider: build', () => {
               preset: presetId,
               frame: x.frame,
               playing: false,
-              ...(defs.get(x.id)!.ask?.predict && { predict: { beatId: x.id } }),
+              ...(asks(x) && defs.get(x.id)!.ask?.predict && { predict: { beatId: x.id } }),
             })),
           );
           expect(new Set(b.actions.map((a) => a.id)).size).toBe(b.actions.length);
@@ -320,9 +331,52 @@ describe('walkthrough provider: build', () => {
       1, 2, 3, 4, 5, 6, 7,
     ]);
     expect(b.actions.filter((a) => a.type === 'widget_setState')).toHaveLength(12);
-    // 12 setState + 6 asks (the beats 'mid' among the first 12) + 12 narrations
-    expect(b.actions).toHaveLength(30);
+    // 12 setState + 2 asks (only the first 2 occurrences of 'mid' ask) + 12 narrations
+    expect(b.actions).toHaveLength(26);
     expect(b.actions[0]).toMatchObject({ type: 'widget_setState' });
+  });
+
+  it('asks the prediction question only on the first 2 occurrences of a beat', () => {
+    const p = createWalkthroughProvider({
+      findWalkthrough: () => manyBeats,
+      getLabels: getTutorLabels,
+    });
+    const b = build({ id: 'many-beats', presetId: 'mid-hit' }, 'vi-VN', p);
+    const states = b.actions.filter((a) => a.type === 'widget_setState') as unknown as {
+      state: { frame: number; predict?: { beatId: string } };
+    }[];
+    const mids = states.filter((s) =>
+      b.config.beats.some((x) => x.id === 'mid' && x.frame === s.state.frame),
+    );
+    expect(mids.length).toBeGreaterThan(2);
+    expect(mids.map((s) => s.state.predict?.beatId)).toEqual(
+      mids.map((_, i) => (i < 2 ? 'mid' : undefined)),
+    );
+    const askText = msg(bs.beatDefs.find((d) => d.id === 'mid')!.ask!.text, 'vi-VN');
+    expect(b.actions.filter((a) => a.type === 'speech' && a.text === askText)).toHaveLength(2);
+  });
+
+  it('always narrates the last occurrence of every required beat when the cap truncates', () => {
+    const entry: AnyWalkthroughEntry = {
+      ...manyBeats,
+      beatDefs: bs.beatDefs.map((d) => (d.id === 'go-right' ? { ...d, required: true } : d)),
+    };
+    const p = createWalkthroughProvider({
+      findWalkthrough: () => entry,
+      getLabels: getTutorLabels,
+    });
+    const b = build({ id: 'many-beats', presetId: 'mid-hit' }, 'vi-VN', p);
+    const frames = b.actions
+      .filter((a) => a.type === 'widget_setState')
+      .map((a) => (a as unknown as { state: { frame: number } }).state.frame);
+    const lastOf = (id: string) =>
+      Math.max(...b.config.beats.filter((x) => x.id === id).map((x) => x.frame));
+    // first 11 beats + the last go-right (frame 14) + done (frame 15)
+    expect(frames).toHaveLength(13);
+    expect(frames).toEqual([...frames].sort((x, y) => x - y));
+    for (const id of ['start', 'go-right', 'done']) expect(frames).toContain(lastOf(id));
+    // fewer beats than the cap: nothing changes
+    expect(MAX_NARRATED_BEATS).toBe(12);
   });
 
   it('shows C++/Python tabs only when the entry has that code (D19)', () => {
@@ -401,13 +455,18 @@ describe('walkthrough provider: build', () => {
 
   it('lessonKit comes from problem + pitfalls in the scene locale', () => {
     const kit = build({ id: 'binary-search' }).result.lessonKit as {
-      pitfalls: string[];
+      pitfalls: { text: string; lang?: string }[];
+      hints: string[];
       statement: string;
     };
     expect(kit.statement).toBe('');
-    expect(kit.pitfalls).toEqual(bs.pitfalls!.map((x) => msg(x.text, 'vi-VN')));
+    expect(kit.pitfalls).toEqual(
+      bs.pitfalls!.map((x) => ({ text: msg(x.text, 'vi-VN'), ...(x.lang && { lang: x.lang }) })),
+    );
+    expect(kit.hints.length).toBeGreaterThan(0);
+    expect(kit.hints).toEqual(lightHints('mid-hit', 'vi-VN'));
     const en = build({ id: 'binary-search' }, 'en-US').result.lessonKit as typeof kit;
-    expect(en.pitfalls[2]).toMatch(/^The loop condition/);
+    expect(en.pitfalls[2].text).toMatch(/^The loop condition/);
 
     const withProblem: AnyWalkthroughEntry = {
       ...bs,
@@ -433,8 +492,11 @@ describe('walkthrough provider: build', () => {
       statement: 'Statement',
       constraints: ['n ≤ 10'],
       subtasks: [{ id: 's1', limit: 'n ≤ 3', idea: 'brute force', complexity: 'O(n)' }],
-      pitfalls: bs.pitfalls!.map((x) => msg(x.text, 'en-US')),
-      hints: [],
+      pitfalls: bs.pitfalls!.map((x) => ({
+        text: msg(x.text, 'en-US'),
+        ...(x.lang && { lang: x.lang }),
+      })),
+      hints: lightHints('mid-hit', 'en-US'),
       homework: [{ judge: 'oj', problemId: 'p1' }],
     });
 
@@ -549,6 +611,17 @@ describe('walkthrough provider: isStale', () => {
     delete broken.content.widgetConfig.contentHash;
     expect(provider.isStale(broken as unknown as Scene)).toBe(true);
     expect(provider.isStale({ id: 'x' } as unknown as Scene)).toBe(true);
+  });
+
+  it('is true, and actions() is safe, when the scene preset is no longer in the catalog', () => {
+    const scene = fresh();
+    const renamed = clone({
+      presets: bs.presets.map((p) => (p.id === 'absent' ? { ...p, id: 'gone' } : p)),
+    });
+    withCatalog(renamed, () => {
+      expect(provider.isStale(scene)).toBe(true);
+      expect(provider.actions(scene, { locale: 'vi-VN' })).toEqual([]);
+    });
   });
 
   it('actions() throws on a scene that is not a walkthrough or whose entry is gone', () => {

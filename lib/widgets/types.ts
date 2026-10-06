@@ -28,6 +28,10 @@ export interface BuildRequest {
 export interface BuildResult {
   readonly content: InteractiveContent | SlideContent[];
   readonly actions: Action[][];
+  /**
+   * Walkthrough: `{statement, constraints, subtasks, pitfalls: {text, lang?}[], hints: string[],
+   * homework}`; `hints` = light (first) hint of each distinct narrated beat. Text is localized.
+   */
   readonly lessonKit?: unknown;
 }
 
@@ -45,7 +49,7 @@ export interface WidgetProvider {
   actions(scene: Scene, ctx: WidgetContext): Action[];
   /** Text comes from the catalog; stale `entryRev` → static digest. */
   describe(scene: Scene, runtime?: WidgetRuntimeState): string;
-  /** `entryRev`/`contentHash`/`framesHash` differ from the current catalog (ADR 0013 decision 6). */
+  /** `entryRev`/`contentHash`/`framesHash` differ from the current catalog, or the scene's preset is gone (ADR 0013 decision 6). */
   isStale?(scene: Scene): boolean;
 }
 

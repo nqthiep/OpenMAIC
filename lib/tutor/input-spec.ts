@@ -81,6 +81,7 @@ function check(spec: InputSpec, raw: unknown, path: string, out: Issues): unknow
       if (!inRange(raw.length, spec.len)) return void out.add(path, 'bad-length');
       const res: number[] = [];
       let ok = true;
+      // compared with the last accepted element, so a skipped invalid one adds no spurious issue
       for (let i = 0; i < raw.length && !out.full; i++) {
         const v: unknown = raw[i];
         const p = `${path}[${i}]`;
@@ -90,7 +91,7 @@ function check(spec: InputSpec, raw: unknown, path: string, out: Issues): unknow
         } else if (!inRange(v, spec.range)) {
           out.add(p, 'out-of-range');
           ok = false;
-        } else if (spec.strictlyIncreasing && i > 0 && !(v > (raw[i - 1] as number))) {
+        } else if (spec.strictlyIncreasing && res.length > 0 && !(v > res[res.length - 1])) {
           out.add(p, 'not-increasing');
           ok = false;
         } else res.push(v);
@@ -184,7 +185,8 @@ function check(spec: InputSpec, raw: unknown, path: string, out: Issues): unknow
       if (!isPlainObject(raw)) return void out.add(path, 'not-object');
       const before = out.list.length;
       const res: Record<string, unknown> = {};
-      for (const k of Object.keys(raw)) if (!hasOwn(spec.fields, k)) out.add(k, 'unknown-key');
+      for (const k of Object.keys(raw))
+        if (!hasOwn(spec.fields, k)) out.add(path === '$' ? k : `${path}.${k}`, 'unknown-key');
       for (const k of Object.keys(spec.fields)) {
         if (out.full) break;
         const p = path === '$' ? k : `${path}.${k}`;

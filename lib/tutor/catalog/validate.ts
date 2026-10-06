@@ -16,7 +16,11 @@ export function validateInput<I>(
   if (!entry.check) return parsed;
   try {
     const issues = entry.check(parsed.value);
-    if (issues.length > 0) return { ok: false, issues: issues.slice(0, MAX_ISSUES) };
+    if (issues.length > 0) {
+      // same `path: reason` style as parseInput issues; a bare code is about the whole input
+      const styled = issues.map((x) => (x.includes(': ') ? x : `$: ${x}`));
+      return { ok: false, issues: styled.slice(0, MAX_ISSUES) };
+    }
   } catch {
     return { ok: false, issues: ['check-failed'] };
   }

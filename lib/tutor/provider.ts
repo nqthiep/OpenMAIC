@@ -33,6 +33,8 @@ import type {
 export const RUNTIME_VERSION = 1;
 /** Beats narrated per scene (ADR 0013 decision 4) [Inference]; the rest stay reachable by seeking. */
 export const MAX_NARRATED_BEATS = 12;
+/** A beat's prediction question is asked on its first N occurrences in a script; later ones are plain narration. */
+export const MAX_ASKS_PER_BEAT = 2;
 
 type Preset = AnyWalkthroughEntry['presets'][number];
 type WalkthroughSet = WalkthroughData['sets'][string];
@@ -135,6 +137,24 @@ function buildPreset(entry: AnyWalkthroughEntry, preset: Preset, locale: string)
   return { frames, beats };
 }
 
+/**
+ * Beats to narrate: all of them up to the cap; beyond it the first `MAX - 1` plus the last
+ * occurrence of every `required` beat not already among them (frame order), so a required beat
+ * is never silently dropped.
+ */
+export function narratedBeats(
+  beats: readonly BeatRef[],
+  required: ReadonlySet<string>,
+): readonly BeatRef[] {
+  if (beats.length <= MAX_NARRATED_BEATS) return beats;
+  const head = beats.slice(0, MAX_NARRATED_BEATS - 1);
+  const last = new Map<string, BeatRef>();
+  for (const b of beats) if (required.has(b.id)) last.set(b.id, b);
+  const extra = [...last.values()].filter((b) => !head.includes(b));
+  const keep = new Set([...head, ...extra]);
+  return beats.filter((b) => keep.has(b));
+}
+
 /** Per beat: `[ask] → setState → narration` (ADR 0006 decision 2). Ids are deterministic. */
 function actionsFor(
   entry: AnyWalkthroughEntry,
@@ -148,9 +168,10 @@ function actionsFor(
   const speak = (text: string) => {
     if (text.trim() !== '') out.push({ id: nextId(), type: 'speech', text });
   };
-  for (const ref of built.beats.slice(0, MAX_NARRATED_BEATS)) {
+  for (const ref of narratedOf(entry, built)) {
     const def = defs.get(ref.id)!; // buildPreset rejected unknown beats
-    if (def.ask) speak(msg(def.ask.text, locale));
+    const asks = def.ask && ref.occurrence <= MAX_ASKS_PER_BEAT ? def.ask : undefined;
+    if (asks) speak(msg(asks.text, locale));
     out.push({
       id: nextId(),
       type: 'widget_setState',
@@ -158,7 +179,7 @@ function actionsFor(
         preset: presetId,
         frame: ref.frame,
         playing: false,
-        ...(def.ask?.predict && { predict: { beatId: ref.id } }),
+        ...(asks?.predict && { predict: { beatId: ref.id } }),
       },
     });
     speak(fill(msg(def.narration, locale), built.frames[ref.frame].meta.vars));
@@ -166,7 +187,16 @@ function actionsFor(
   return out;
 }
 
-function lessonKitOf(entry: AnyWalkthroughEntry, locale: string) {
+function narratedOf(entry: AnyWalkthroughEntry, built: PresetBuild): readonly BeatRef[] {
+  const required = new Set(entry.beatDefs.filter((d) => d.required).map((d) => d.id));
+  return narratedBeats(built.beats, required);
+}
+
+/**
+ * Shape (INTERFACES §5 `lessonKit`, leader updates the doc): `pitfalls` keep their `lang`;
+ * `hints` = the light (first) hint of each distinct narrated beat, localized.
+ */
+function lessonKitOf(entry: AnyWalkthroughEntry, locale: string, narrated: readonly BeatRef[]) {
   const t = (m: Messages) => msg(m, locale);
   const p = entry.problem;
   if (!p && !entry.pitfalls?.length) return undefined;
@@ -179,10 +209,23 @@ function lessonKitOf(entry: AnyWalkthroughEntry, locale: string) {
       idea: t(s.idea),
       complexity: s.complexity,
     })),
-    pitfalls: (entry.pitfalls ?? []).map((x) => t(x.text)),
-    hints: [] as string[], // ponytail: no source defined for lesson-level hints yet
+    pitfalls: (entry.pitfalls ?? []).map((x) => ({
+      text: t(x.text),
+      ...(x.lang && { lang: x.lang }),
+    })),
+    hints: hintsOf(entry, locale, narrated),
     homework: (p?.homework ?? []).map((h) => ({ ...h })),
   };
+}
+
+function hintsOf(entry: AnyWalkthroughEntry, locale: string, narrated: readonly BeatRef[]) {
+  const defs = new Map(entry.beatDefs.map((d) => [d.id, d]));
+  const hints: string[] = [];
+  for (const id of new Set(narrated.map((b) => b.id))) {
+    const light = defs.get(id)?.hints?.[0];
+    if (light) hints.push(msg(light, locale));
+  }
+  return hints;
 }
 
 // --- provider -------------------------------------------------------------------------------
@@ -306,7 +349,7 @@ export function createWalkthroughProvider(
           widgetConfig: { ...config },
         },
         actions: [actionsFor(entry, presetId, locale, current)],
-        lessonKit: lessonKitOf(entry, locale),
+        lessonKit: lessonKitOf(entry, locale, narratedOf(entry, current)),
       };
     },
 
@@ -315,7 +358,7 @@ export function createWalkthroughProvider(
       if (!ref) throw new Error('not a walkthrough scene');
       const entry = find(ref.walkthroughId);
       const preset = entry.presets.find((p) => p.id === ref.presetId);
-      if (!preset) throw new Error(`unknown presetId "${ref.presetId}"`);
+      if (!preset) return []; // the preset is gone from the catalog: stale scene, nothing to script
       const locale = ref.locale || ctx.locale;
       return actionsFor(entry, preset.id, locale, buildPreset(entry, preset, locale));
     },
@@ -326,6 +369,7 @@ export function createWalkthroughProvider(
       const ref = readWalkthroughRef(scene);
       const entry = ref && deps.findWalkthrough(ref.walkthroughId);
       if (!ref || !entry) return true;
+      if (!entry.presets.some((p) => p.id === ref.presetId)) return true;
       if (ref.entryRev !== entry.entryRev || ref.contentHash !== entryContentHash(entry)) {
         return true;
       }

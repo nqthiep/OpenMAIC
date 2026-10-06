@@ -76,6 +76,13 @@ describe('int-array', () => {
     expect(bad(st, [1, 2, 2])).toEqual(['$[2]: not-increasing']);
     expect(bad(st, [3, 2])).toEqual(['$[1]: not-increasing']);
   });
+  it('strictlyIncreasing compares with the last accepted element', () => {
+    const st: InputSpec = { ...s, strictlyIncreasing: true } as InputSpec;
+    // 20 is out of range and skipped; 3 > 1 is fine, so no spurious not-increasing
+    expect(bad(st, [1, 20, 3])).toEqual(['$[1]: out-of-range']);
+    expect(bad(st, [1, 1.5, 3])).toEqual(['$[1]: not-int']);
+    expect(bad(st, [5, 20, 3])).toEqual(['$[1]: out-of-range', '$[2]: not-increasing']);
+  });
   it('caps issues at 5', () => {
     const big: InputSpec = { kind: 'int-array', len: [0, 50], range: [0, 1] };
     expect(bad(big, Array(30).fill(7))).toHaveLength(5);
@@ -173,6 +180,14 @@ describe('record', () => {
     expect(bad(s, { n: 9, xs: [1, 20] })).toEqual(['n: out-of-range', 'xs[1]: out-of-range']);
     expect(bad(s, [1])).toEqual(['$: not-object']);
     expect(bad(s, new Date(0))).toEqual(['$: not-object']);
+  });
+  it('unknown keys of a nested record carry the full path', () => {
+    const nested: InputSpec = {
+      kind: 'record',
+      fields: { a: { kind: 'record', fields: { x: { kind: 'int', range: [0, 9] } } } },
+    };
+    expect(bad(nested, { a: { x: 1, y: 2 } })).toEqual(['a.y: unknown-key']);
+    expect(bad(nested, { a: { x: 1 }, z: 1 })).toEqual(['z: unknown-key']);
   });
   it('rejects __proto__ key as unknown', () => {
     const raw = JSON.parse('{"n":1,"xs":[1],"__proto__":{"a":1}}');

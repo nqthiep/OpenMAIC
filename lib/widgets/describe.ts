@@ -13,6 +13,10 @@ import type { Frame } from '@/lib/tutor/engine/types';
 import type { AnyWalkthroughEntry, WidgetRuntimeState } from '@/lib/widgets/types';
 
 export const MAX_DIGEST_CHARS = 2000;
+const MAX_STATE_NUMBERS = 50;
+const MAX_AUX_ITEMS = 20;
+const MAX_AUX_ENTRIES = 5;
+const MAX_LABEL_CHARS = 40;
 
 export interface DescribeDeps {
   findWalkthrough(id: string): AnyWalkthroughEntry | undefined;
@@ -78,6 +82,38 @@ function freshFrames(
   return wanted;
 }
 
+const clip = (v: unknown) => String(v).slice(0, MAX_LABEL_CHARS);
+
+/**
+ * Bounded dump of the frame's visual state (recomputed from the catalog, never from the scene):
+ * `{values:number[]}` as `index:value` pairs (so "a[7]" is answerable), an optional
+ * `threshold {label, value}`, pointers and `meta.aux`. Appended after the frame content.
+ */
+function stateLines(frame: Frame<unknown>): string[] {
+  const lines: string[] = [];
+  const state = asRecord(frame.state);
+  const values = state?.values;
+  if (Array.isArray(values) && values.every((x) => typeof x === 'number')) {
+    const shown = values.slice(0, MAX_STATE_NUMBERS).map((x, i) => `${i}:${x}`);
+    const more = values.length > shown.length ? `, … (${values.length} values)` : '';
+    lines.push(`State: ${shown.join(', ')}${more}`);
+    const thr = asRecord(state?.threshold);
+    if (typeof thr?.value === 'number' && Number.isFinite(thr.value)) {
+      lines.push(`Threshold: ${clip(thr.label ?? 'threshold')} = ${thr.value}`);
+    }
+  }
+  const pointers = Object.entries(frame.meta.pointers ?? {});
+  if (pointers.length) {
+    lines.push(`Pointers: ${pointers.map(([n, v]) => `${clip(n)}=${clip(v)}`).join(', ')}`);
+  }
+  for (const a of (frame.meta.aux ?? []).slice(0, MAX_AUX_ENTRIES)) {
+    const items = a.items.slice(0, MAX_AUX_ITEMS).map(clip);
+    const more = a.items.length > items.length ? ', …' : '';
+    lines.push(`${clip(a.label)}: ${items.join(', ')}${more}`);
+  }
+  return lines;
+}
+
 function describeFrame(
   entry: AnyWalkthroughEntry,
   presetId: string,
@@ -125,7 +161,11 @@ function describeFrame(
     for (const x of def.misconceptions ?? []) lines.push(`Common mistake: ${t(x)}`);
     break;
   }
-  return lines;
+  // frame content first; the state dump gets whatever budget is left
+  const head = lines.join('\n').slice(0, MAX_DIGEST_CHARS);
+  const room = MAX_DIGEST_CHARS - head.length - 1;
+  const tail = room > 0 ? stateLines(frames[k]).join('\n').slice(0, room) : '';
+  return [head, ...(tail ? [tail] : [])];
 }
 
 export function describeWalkthrough(
