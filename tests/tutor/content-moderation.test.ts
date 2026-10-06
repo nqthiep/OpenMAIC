@@ -92,7 +92,7 @@ describe('extractVisibleText', () => {
     expect(extractVisibleText(quiz)).toEqual(['Quiz', 'Which?', 'Alpha', 'Beta', 'Because Alpha.']);
   });
 
-  it('skips interactive html and walkthrough scenes entirely', () => {
+  it('skips interactive html (also for walkthroughs) but still moderates title and speech', () => {
     const widget = {
       id: 'w',
       order: 1,
@@ -107,7 +107,7 @@ describe('extractVisibleText', () => {
       content: { ...widget.content, widgetConfig: { kind: 'walkthrough' } },
       actions: [{ id: 'a', type: 'speech', text: 'Trusted' }],
     } as unknown as Scene;
-    expect(extractVisibleText(walk)).toEqual([]);
+    expect(extractVisibleText(walk)).toEqual(['W', 'Trusted']);
   });
 });
 
@@ -300,6 +300,45 @@ describe('tool wiring', () => {
       isError: true,
       details: { error: 'content-blocked', categories: ['violence'] },
     });
+    expect(on.putScene).not.toHaveBeenCalled();
+  });
+
+  it('generate_actions: flag ON moderates the new LLM speech before writing; OFF does not', async () => {
+    const run = (s: ReturnType<typeof store>) =>
+      find(
+        buildGenerationTools({
+          store: s.store,
+          stageAccess: async () => ({ kind: 'owned' as const }),
+          sessionId: 'sess',
+          onCheckpoint: vi.fn(),
+          aiCall: async () => '[]',
+          generateActions: vi.fn(async () => [
+            { id: 'n1', type: 'speech', text: 'Generated narration' },
+          ]) as never,
+          synthesizeTts: vi.fn(),
+        } as never),
+        'generate_actions',
+      ).execute('c', {
+        stageId: 'stage-test',
+        sceneId: 'scene_s1',
+        synthesizeAudio: false,
+      } as never);
+
+    const off = store(slideScene());
+    expect(await run(off)).not.toHaveProperty('isError');
+    expect(fakeModerate).not.toHaveBeenCalled();
+
+    vi.stubEnv('OPENMAIC_TUTOR_MODERATION', '1');
+    fakeModerate.mockResolvedValue(BLOCK);
+    const on = store(slideScene());
+    expect(await run(on)).toMatchObject({
+      isError: true,
+      details: { error: 'content-blocked', categories: ['violence'] },
+    });
+    expect(fakeModerate).toHaveBeenCalledWith(
+      expect.stringContaining('Generated narration'),
+      expect.objectContaining({ direction: 'out' }),
+    );
     expect(on.putScene).not.toHaveBeenCalled();
   });
 });

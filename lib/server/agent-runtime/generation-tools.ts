@@ -24,7 +24,7 @@ import type { Scene as DslScene } from '@openmaic/dsl';
 import { isCodeWidgetAllowed, isTutorModerationEnabled } from '@/lib/config/feature-flags';
 import { resolveLocale } from '@/lib/tutor/locale';
 import { moderateScene } from './content-moderation';
-import { assertScenePolicy } from '@/lib/widgets/policy';
+import { assertScenePolicy, isWalkthroughScene } from '@/lib/widgets/policy';
 import { widgetRegistry } from '@/lib/widgets';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
 import type { CourseToolDeps } from './course-tools';
@@ -39,7 +39,7 @@ import { createLogger } from '@/lib/logger';
 
 const MAX_GENERATE_SCENE_MEDIA = 8;
 const WALKTHROUGH_STALE_HINT = 'call generate_walkthrough to rebuild this page';
-const SUPPORTED_SCENE_TYPES = new Set(['slide', 'quiz', 'interactive', 'pbl']);
+export const SUPPORTED_SCENE_TYPES = new Set(['slide', 'quiz', 'interactive', 'pbl']);
 const log = createLogger('AgentGenerationTools');
 
 function sceneParams(codeAllowed: boolean) {
@@ -130,6 +130,11 @@ function duplicateId(sessionId: string | undefined, callId: string) {
 
 function result(text: string, details: Record<string, unknown>, isError = false) {
   return { content: [{ type: 'text' as const, text }], details, ...(isError ? { isError } : {}) };
+}
+
+/** Shared by every page tool: the stage has no document yet. */
+export function noDocument() {
+  return result('No course document yet. Call create_stage first.', { error: 'no-document' }, true);
 }
 
 function outlineFromScene(scene: Scene, snapshot: unknown): SceneOutline {
@@ -248,7 +253,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         );
       }
       const doc = await deps.store.loadDocument(params.stageId);
-      if (!doc) return result('No course document yet. Call create_stage first.', {}, true);
+      if (!doc) return noDocument();
       const existing = doc.scenes.find((scene) => scene.order === params.order);
       const title = params.title.trim();
       const brief = params.brief.trim();
@@ -466,6 +471,10 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
       });
       if (!built) return result('Page assembly failed; nothing was written.', {}, true);
       const scene = built as Scene;
+      // Only generate_walkthrough may mint a walkthrough: drop a `kind` the LLM put in its widget config.
+      if (isWalkthroughScene(scene)) {
+        delete (scene.content as unknown as { widgetConfig: { kind?: unknown } }).widgetConfig.kind;
+      }
       const blocked = assertScenePolicy(scene, { codeAllowed: isCodeWidgetAllowed() });
       if (blocked)
         return result('Widget "code" is blocked; nothing was written.', { ...blocked }, true);
@@ -580,6 +589,18 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
       if (!actions.length)
         return result('No known actions were generated; the page was unchanged.', {}, true);
       const next = { ...scene, actions } as Scene;
+      if (!provider && isTutorModerationEnabled()) {
+        const flagged = await moderateScene(next, {
+          locale: resolveLocale(doc.stage.languageDirective),
+        });
+        if (flagged) {
+          return result(
+            'Generated text was blocked by the content filter; nothing was written.',
+            { ...flagged },
+            true,
+          );
+        }
+      }
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, next),
       );
@@ -627,7 +648,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
     parameters: DuplicateParams,
     async execute(callId, params, signal) {
       const doc = await deps.store.loadDocument(params.stageId);
-      if (!doc) return result('No course document yet. Call create_stage first.', {}, true);
+      if (!doc) return noDocument();
       const scenes = [...doc.scenes].sort((a, b) => a.order - b.order);
       const id = duplicateId(deps.sessionId, callId);
       const replay = scenes.find((scene) => scene.id === id);

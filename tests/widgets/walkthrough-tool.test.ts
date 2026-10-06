@@ -168,11 +168,72 @@ describe('generate_walkthrough', () => {
     expect(t.scenes()).toHaveLength(0);
   });
 
+  it('reports a blank title as invalid-title and a bad order as invalid-order', async () => {
+    const t = setup();
+    expect((await run(t, 'c1', { title: '   ' })).details).toMatchObject({
+      error: 'invalid-title',
+    });
+    expect((await run(t, 'c2', { order: 0 })).details).toMatchObject({ error: 'invalid-order' });
+    expect((await run(t, 'c3', { order: 1.5 })).details).toMatchObject({ error: 'invalid-order' });
+    expect(t.scenes()).toHaveLength(0);
+  });
+
+  it('refuses to replace a PBL page, like generate_scene', async () => {
+    const pbl = { ...slide('pbl1', 1), type: 'pbl' } as unknown as Scene;
+    const t = setup([pbl]);
+    const out = await run(t, 'c1', { order: 1 });
+    expect(out).toMatchObject({
+      isError: true,
+      details: { blocked: 'pbl-type-change', sceneId: 'pbl1', type: 'pbl' },
+    });
+    expect(t.store.putScene).not.toHaveBeenCalled();
+    expect(t.scenes()[0]!.type).toBe('pbl');
+  });
+
+  it('refuses to replace a page of an unsupported type', async () => {
+    const odd = { ...slide('odd1', 1), type: 'mystery' } as unknown as Scene;
+    const t = setup([odd]);
+    const out = await run(t, 'c1', { order: 1 });
+    expect(out).toMatchObject({
+      isError: true,
+      details: { blocked: 'unsupported-type', sceneId: 'odd1', type: 'mystery' },
+    });
+    expect(t.store.putScene).not.toHaveBeenCalled();
+  });
+
+  it('is idempotent when the call replaced an occupied order', async () => {
+    const t = setup([slide('old', 1)]);
+    const first = await run(t, 'c1', { order: 1 });
+    expect(first.details).not.toHaveProperty('replay');
+    expect(t.store.putScene).toHaveBeenCalledTimes(1);
+    const again = await run(t, 'c1', { order: 1 });
+    expect(again.isError).toBeUndefined();
+    expect(again.details).toMatchObject({ sceneId: 'old', replay: true });
+    expect(t.store.putScene).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats an identical existing walkthrough as a replay even without the call memory', async () => {
+    const t = setup([slide('old', 1)]);
+    await run(t, 'c1', { order: 1 });
+    const again = await run(t, 'other-call', { order: 1 });
+    expect(again.details).toMatchObject({ sceneId: 'old', replay: true });
+    expect(t.store.putScene).toHaveBeenCalledTimes(1);
+  });
+
+  it('rewrites an existing walkthrough when the request differs', async () => {
+    const t = setup([slide('old', 1)]);
+    await run(t, 'c1', { order: 1 });
+    const other = await run(t, 'c2', { order: 1, title: 'Another title' });
+    expect(other.details).not.toHaveProperty('replay');
+    expect(t.store.putScene).toHaveBeenCalledTimes(2);
+    expect(t.scenes()[0]!.title).toBe('Another title');
+  });
+
   it('reports a missing course document as a tool result', async () => {
     const t = setup();
     t.clear();
     const out = await run(t, 'c1', {});
-    expect(out.isError).toBe(true);
+    expect(out).toMatchObject({ isError: true, details: { error: 'no-document' } });
   });
 });
 

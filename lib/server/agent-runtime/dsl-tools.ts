@@ -7,7 +7,7 @@ import { validateAppScene } from '@/lib/document-store/validators';
 import { isCodeWidgetAllowed, isTutorModerationEnabled } from '@/lib/config/feature-flags';
 import { resolveLocale } from '@/lib/tutor/locale';
 import { extractVisibleText, moderateScene } from './content-moderation';
-import { assertScenePolicy, isWalkthroughScene } from '@/lib/widgets/policy';
+import { assertScenePolicy, isCodeWidget, isWalkthroughScene } from '@/lib/widgets/policy';
 import type { CourseDocument, CourseToolDeps } from './course-tools';
 import { putSceneBringingCurrent } from './document-writes';
 import { runStageMutation } from './mutation-fence';
@@ -848,11 +848,24 @@ export function buildDslCourseTools(deps: CourseToolDeps): AgentTool<never, neve
           true,
         );
       }
-      const blocked = assertScenePolicy(next, { codeAllowed: isCodeWidgetAllowed() });
+      const codeAllowed = isCodeWidgetAllowed();
+      // Relabelling a blocked code widget (widgetType / widgetConfig.type) must not leave its html renderable.
+      const relabelled =
+        !codeAllowed &&
+        isCodeWidget(resolved.scene.content) &&
+        !isCodeWidget(next.content) &&
+        isDeepStrictEqual(
+          (resolved.scene.content as { html?: unknown }).html,
+          (next.content as { html?: unknown }).html,
+        );
+      const blocked = assertScenePolicy(relabelled ? resolved.scene : next, { codeAllowed });
       if (blocked) {
+        const hint = relabelled
+          ? `${blocked.hint} Relabelling is not enough: the batch must also replace /content/html.`
+          : blocked.hint;
         return toolResult(
-          `patch_stage rejected: ${blocked.error} (${blocked.hint})`,
-          { intent: params.intent, error: blocked.error, hint: blocked.hint },
+          `patch_stage rejected: ${blocked.error} (${hint})`,
+          { intent: params.intent, error: blocked.error, hint },
           true,
         );
       }
