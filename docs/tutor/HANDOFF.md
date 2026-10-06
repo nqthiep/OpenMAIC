@@ -5,7 +5,7 @@
 - **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 144 commit chưa push so với `origin/it-math`. Chưa push gì sau lần push đầu tiên của tài liệu.
 - **Người nhận**: agent hoặc người tiếp quản. Đọc hết file này trước khi làm gì.
 
-> **Tóm tắt:** Phase 1 đã làm xong, review và sửa; Phase 2 mới xong 4 task nền (`2-IS1`, `2-00`, `2-S1`, `2-I1`). Năm task dở (`2-V1`…`2-V4`, `2-E1`) nằm ở worktree, chưa commit. Còn lại: đợt 2A–2E, lát 1d, Phase 3. Cổng LLM, Docker, Playwright đang chờ khoá API và môi trường.
+> **Tóm tắt:** Phase 1 xong, đã review và sửa. Phase 2 đã triển khai **mã** cho 4 visualizer (`array` nhiều chế độ, `tree`, `graph`, `grid`), eval `tutor-lesson`, và 37 entry catalog (đợt 2A 9, 2B 12, 2C 8, 2D 4, 2E 4; `graham-scan` chờ visualizer `geometry` của Phase 3). Chưa làm: review LLM từng entry và cổng G2 (cần khoá API), review ba góc của Phase 2, lát 1d (chặn bởi cổng 1d-00), Phase 3.
 
 > Mọi điều chưa kiểm chứng trong file này gắn nhãn `[Unverified]` hoặc `[Inference]`. Không coi chúng là sự thật.
 
@@ -57,35 +57,39 @@ Vòng sửa sau review (vòng 11) đã merge đủ chín nhóm: server/an ninh, 
 
 Còn một thay đổi tài liệu chưa commit trong checkout chính: `docs/tutor/decisions/0006-deterministic-trace-catalog.md` (thêm `'brackets'` ở dòng 96). Commit nó trước khi làm gì khác.
 
-## 3. Việc dở dang: cần nhặt lại
+## 3. Trạng thái Phase 2 (cập nhật 2026-10-06, phiên 2)
 
-Năm task bị dừng giữa chừng. Việc dở nằm ở các worktree, **chưa commit, chưa nghiệm thu**:
+Đã merge/commit vào `it-math`:
 
-| Task | Worktree | Có gì |
-| --- | --- | --- |
-| `2-V1` visualizer `array` nhiều chế độ | `/Users/quangthiep/Projects/tutor-wt/2-V1` | sửa `array.ts`, `generated/runtime-array.ts`, `array-layout.test.ts`; **chưa có** `array-modes.browser.test.ts` |
-| `2-V2` visualizer `tree` | `…/tutor-wt/2-V2` | file mới: `visualizers/tree.ts`, `entries/tree.ts`, `generated/runtime-tree.ts`, `tree-layout.test.ts`, `tree.browser.test.ts` |
-| `2-V3` visualizer `graph` | `…/tutor-wt/2-V3` | file mới: `visualizers/graph.ts`, `entries/graph.ts`, `generated/runtime-graph.ts`, `graph-layout.test.ts`, `graph.browser.test.ts` |
-| `2-V4` visualizer `grid` | `…/tutor-wt/2-V4` | file mới: `visualizers/grid.ts`, `entries/grid.ts`, `generated/runtime-grid.ts`, `grid-layout.test.ts`, `grid.browser.test.ts`, và `tmpshot.browser.test.ts` (**file tạm, phải xoá**) |
-| `2-E1` eval `tutor-lesson` | `…/tutor-wt/2-E1` | thư mục `eval/tutor-lesson/` (chưa biết đã đủ `runner.ts`, `judge.ts`, `scenarios.json` chưa) |
+- `2-V1`…`2-V4`, `2-E1`; `I-03` (đăng ký runtime `tree/graph/grid`, bước CI cho 4 browser test, hợp đồng state trong ARCHITECTURE §8).
+- Đợt 2A (9), 2B (12), 2C (8), 2D (4), 2E (4: `kmp`, `tarjan`, `digit-dp`, `nim-grundy`): mỗi entry có `lib/subjects/cp/catalog/<id>.ts`, `tests/subjects/cp/<id>.test.ts`, harness `tests/subjects/cp/impl/<id>.ts`. Test dùng chung `tests/subjects/cp/contract.ts` (hợp đồng của card mẫu) cộng oracle độc lập riêng từng entry. Đã đăng ký vào `lib/subjects/cp/pack.ts`, `catalog-lock.json`, khối id của `SKILL.md`.
+- CI: job `tutor-impl` (`TUTOR_IMPL_CHECK=1`), script `eval:tutor-lesson`.
+- `eval/tutor-review/clean-variants.ts`: thêm op `rename-title`, `tag-presets` để mỗi entry có ≥ 10 biến thể.
 
-Không có commit nào trên các nhánh `task/2-V1`…`task/2-E1` ngoài `848fa5e`. Mọi thứ trong bảng là thay đổi chưa commit.
+Lệch so với card (đều đo được, ghi trong commit và comment đầu file):
 
-Cách xử lý: mở từng worktree, đọc `git status` và `git diff`, đối chiếu với card trong `tasks/phase-2.md` §1, coi mã dở là bản nháp chưa tin cậy. Chạy lại test của chính nó, hoàn thiện phần thiếu, rồi nghiệm thu như ở §5. Hoặc bỏ worktree và làm lại từ `it-math` bằng `mk.sh`.
+- `n-queens`: `n ∈ {1,3,4,5}`; `n = 6` cần ~380 frame, vượt ngưỡng 120.
+- `subset-gen`: `maxBytes` 260000 (frame cây lặp mọi nút, đo 213 KB; NFR-P2 cho tới 512 KB).
+- `bfs` `maxFrames` 70 (đo tối đa 58 với 8 đỉnh, 12 cạnh); `dijkstra` 90; `dijkstra-coupon` 120; `lis` 100; `knapsack-01` giá trị v tới 30 (preset `classic` của card có v = 30), nhãn hàng `món:w/v` (giới hạn 8 ký tự).
+- `dfs`/`dijkstra`/`dp-bitmask`/`dijkstra-coupon`/`hld`/`aho-corasick`/`kmp`/`tarjan`: câu hỏi dự đoán chỉ có ở hai lần xuất hiện đầu của beat (script chỉ hỏi tối đa `MAX_ASKS_PER_BEAT = 2`), các frame kết quả không gắn thẻ beat đó.
 
-Không còn agent nào đang chạy. Các agent trước đã bị dừng, hệ thống coi là huỷ.
+Chưa làm và vì sao:
+
+| Việc | Lý do |
+| --- | --- |
+| Hội đồng review LLM từng entry (`I-04`…`I-07`), `2-G2`, mọi eval thật | cần khoá API và tên model |
+| `2E-05` `graham-scan`, `I-12` | cần visualizer `geometry` (`3B-V1`, Phase 3) |
+| Lát 1d (`1d-00`…`1d-05`), `2-CI1` | cổng `1d-00` cần 20 lần e2e liên tiếp, ≥ 10 lớp dùng thật và G1 đạt (ADR 0012 quyết định 7) |
+| Phase 3 | cần Docker/Manim/LaTeX (máy này có `docker` và `ffmpeg`, không có `manim`, `latex`) và LLM tác giả; 3B trở đi chờ G1 |
+| Review ba góc của Phase 2 (an ninh/server, host/runtime/a11y, nội dung/catalog/provider) | chưa làm; việc kế tiếp |
 
 ## 4. Việc tiếp theo (theo thứ tự)
 
-1. Commit thay đổi ADR 0006 ở checkout chính.
-2. Hoàn thành và merge `2-V1`…`2-V4`, `2-E1` (mục 3).
-3. Đăng ký visualizer mới (task `I-03`, của leader): thêm mỗi visualizer một dòng vào `lib/tutor/build/runtimes.ts`; kiểm `scripts/generate-tutor-runtime.mjs` có tự nhận entry mới không (`node scripts/generate-tutor-runtime.mjs --check`); thêm bước CI cho từng browser test mới (`.github/workflows/ci.yml`, kiểm bởi `tests/ci/browser-steps.test.ts`); thêm bước `TUTOR_IMPL_CHECK=1 pnpm vitest run tests/subjects/impl-equivalence.test.ts` (cần `g++` và `python3` trên runner).
-4. Đợt 2A (9 task, giao song song): `2A-01 prefix-sum`, `2A-02 two-pointers`, `2A-03 stack-queue` (cần `2-IS1`, đã xong), `2A-04 fib-recursion-tree`, `2A-05 quick-sort`, `2A-06 merge-sort`, `2A-07 subset-gen`, `2A-08 n-queens`, `2A-09 bs-answer`. Mỗi card có input, preset, beat, oracle sẵn. Mỗi task phải để lại harness `tests/subjects/cp/impl/<id>.ts` (test bao phủ của `2-I1` đỏ nếu thiếu harness cho entry nào có trong `SUBJECT_PACKS`).
-5. `I-04` (tích hợp 2A, của leader): đăng ký vào `lib/subjects/cp/pack.ts`, sinh lại `tests/subjects/catalog-lock.json` (`UPDATE_CATALOG_LOCK=1`), sinh lại khối id trong `SKILL.md` (`npx tsx scripts/generate-skill-catalog.ts`), chạy hội đồng review LLM (cần khoá API).
-6. Cổng `2-G2` rồi các đợt 2B (12 task), 2C + 2D (12 task), 2E (5 task) với các task tích hợp `I-05`, `I-06`, `I-07`, `I-12`. Thứ tự và phụ thuộc: `tasks/README.md` §7 và `tasks/phase-2.md` §3–§8.
-7. Lát 1d (nhập input tuỳ chỉnh): `1d-00`…`1d-05` (`tasks/phase-1.md`); `2-CI1` cần `1d-05`.
-8. Phase 3 (`tasks/phase-3.md`): 3-0 và 3A không chờ G1; 3B trở đi chờ `G1-01` và `I-02`. Có các spike Docker/Manim (xem §6).
-9. Mỗi khi xong một phase: review kỹ (ba góc: an ninh/server, host/runtime/a11y, nội dung/catalog/provider), ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét, rồi mới sang phase tiếp. Đây là quy trình user yêu cầu.
+1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
+2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
+3. Khi có khoá API: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
+4. Phase 3: 3-0 và 3A không chờ G1 (xem `tasks/phase-3.md`); `2E-05` làm sau `3B-V1`.
+5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)
 
