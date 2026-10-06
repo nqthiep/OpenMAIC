@@ -25,6 +25,28 @@
       }
     }
   },
+  "aho-corasick": {
+    "entryRev": 1,
+    "contentHash": "dbb1288e11bb18ab",
+    "framesHash": {
+      "classic": {
+        "vi-VN": "0838681cd3ea8fac",
+        "en-US": "8d010c4ab1397973"
+      },
+      "nested": {
+        "vi-VN": "f4123ada32790ce1",
+        "en-US": "bf07804800e268ce"
+      },
+      "none": {
+        "vi-VN": "2c6db72fd5e730d5",
+        "en-US": "fbfddcc480756d03"
+      },
+      "same": {
+        "vi-VN": "d7246b3be1470db9",
+        "en-US": "6eaffdea424a07e6"
+      }
+    }
+  },
   "bfs": {
     "entryRev": 1,
     "contentHash": "5663c1e6d7115303",
@@ -147,6 +169,28 @@
       }
     }
   },
+  "convex-hull-trick": {
+    "entryRev": 1,
+    "contentHash": "94d1eea75ef03c50",
+    "framesHash": {
+      "classic": {
+        "vi-VN": "725c67aebbfcb250",
+        "en-US": "53f8b6a30346c4d0"
+      },
+      "useless-line": {
+        "vi-VN": "a6e4a796c5fb4d59",
+        "en-US": "cf86235e35ddf7a1"
+      },
+      "single-line": {
+        "vi-VN": "3a873133f64543f6",
+        "en-US": "cbf2832edd359677"
+      },
+      "parallel-like": {
+        "vi-VN": "6ebc315abbb2fcd4",
+        "en-US": "8c32a1a80e72cff6"
+      }
+    }
+  },
   "dfs": {
     "entryRev": 1,
     "contentHash": "494fc73ca5ed104d",
@@ -170,6 +214,28 @@
       "deep-chain": {
         "vi-VN": "ec918d5b27d41106",
         "en-US": "889dd1d670d61ab3"
+      }
+    }
+  },
+  "digit-dp": {
+    "entryRev": 1,
+    "contentHash": "a4af5ec1525a6916",
+    "framesHash": {
+      "n999-s5": {
+        "vi-VN": "c9afb5279c88fc0a",
+        "en-US": "a18ecb89d85ebc1c"
+      },
+      "n0-s0": {
+        "vi-VN": "6e3dccad023dc4d6",
+        "en-US": "9150c204d7946931"
+      },
+      "n100-s1": {
+        "vi-VN": "96dae990cf6498e9",
+        "en-US": "f8755bdd81db0e5a"
+      },
+      "n345-s12": {
+        "vi-VN": "638e73a36b620d21",
+        "en-US": "7a34eae5264cdcfa"
       }
     }
   },
@@ -387,6 +453,50 @@
       }
     }
   },
+  "hld": {
+    "entryRev": 1,
+    "contentHash": "212bf254b1fed2cb",
+    "framesHash": {
+      "binary": {
+        "vi-VN": "972b398aafd24c4d",
+        "en-US": "b4be5ee021294bac"
+      },
+      "caterpillar": {
+        "vi-VN": "26e13ccbe6aa2656",
+        "en-US": "bc2149a7fd932787"
+      },
+      "path": {
+        "vi-VN": "74ff5ec115d33d7b",
+        "en-US": "5358a454c9ff86bf"
+      },
+      "star": {
+        "vi-VN": "ff495b5bb866128f",
+        "en-US": "e0606aac78be725d"
+      }
+    }
+  },
+  "kmp": {
+    "entryRev": 1,
+    "contentHash": "b3b0dea4e7d4afdb",
+    "framesHash": {
+      "twice": {
+        "vi-VN": "2c99e18cf660e5d5",
+        "en-US": "2bd4193c9d707b9d"
+      },
+      "none": {
+        "vi-VN": "2289fff03b1d860f",
+        "en-US": "5bdc28b89f6e6ea6"
+      },
+      "whole": {
+        "vi-VN": "1b370828b109e594",
+        "en-US": "f775a13266238795"
+      },
+      "periodic": {
+        "vi-VN": "0123c0a0922814cc",
+        "en-US": "aedbb9c0a1c82833"
+      }
+    }
+  },
   "knapsack-01": {
     "entryRev": 1,
     "contentHash": "f881a66ebeed8c7b",
@@ -483,6 +593,28 @@
       }
     }
   },
+  "max-flow": {
+    "entryRev": 1,
+    "contentHash": "44de7f92c948dfc5",
+    "framesHash": {
+      "classic": {
+        "vi-VN": "9d464795696a28c9",
+        "en-US": "b6ab4d2862c1ec75"
+      },
+      "bottleneck": {
+        "vi-VN": "dd118490bda95761",
+        "en-US": "dfb15fd16321a763"
+      },
+      "back-edge": {
+        "vi-VN": "7dd5e47379d66292",
+        "en-US": "8ab247a27c141861"
+      },
+      "no-path": {
+        "vi-VN": "e678630c411ab323",
+        "en-US": "ee28334a4272a95e"
+      }
+    }
+  },
   "merge-sort": {
     "entryRev": 1,
     "contentHash": "13c27f7efeb50254",
@@ -546,6 +678,28 @@
       "n5": {
         "vi-VN": "2893be4bf60e3fd3",
         "en-US": "d5b7903502dfc8f2"
+      }
+    }
+  },
+  "nim-grundy": {
+    "entryRev": 1,
+    "contentHash": "43e9430b4efa53d4",
+    "framesHash": {
+      "win": {
+        "vi-VN": "e6f1cb500b7e96ef",
+        "en-US": "5b69bf969da14a79"
+      },
+      "lose": {
+        "vi-VN": "610fc41234859d5c",
+        "en-US": "6560632f62d02763"
+      },
+      "single": {
+        "vi-VN": "dc2be74eebd4229d",
+        "en-US": "462bce79e27bad42"
+      },
+      "empty": {
+        "vi-VN": "0f74739522b73845",
+        "en-US": "19aa69d3757d32af"
       }
     }
   },
@@ -716,6 +870,28 @@
       "n4": {
         "vi-VN": "011fe148be9733b0",
         "en-US": "e75678bcadb221c1"
+      }
+    }
+  },
+  "tarjan": {
+    "entryRev": 1,
+    "contentHash": "012d26011d6e68ab",
+    "framesHash": {
+      "two-scc": {
+        "vi-VN": "b5a3713bf54ad05f",
+        "en-US": "21291d0d164fc86b"
+      },
+      "dag": {
+        "vi-VN": "62f6f70c2ef37cd8",
+        "en-US": "9d7e2d2330951df0"
+      },
+      "one-cycle": {
+        "vi-VN": "8ec015716eabf1d8",
+        "en-US": "9ce7f412a66ef847"
+      },
+      "single": {
+        "vi-VN": "30778a7415f14eb4",
+        "en-US": "2bd929d238079745"
       }
     }
   },

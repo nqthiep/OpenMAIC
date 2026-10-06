@@ -87,12 +87,15 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | walkthroughId | Title | presetId | Curriculum topics |
 | --- | --- | --- | --- |
 | `activity-selection` | Activity selection: the most disjoint segments | `classic`, `nested`, `disjoint`, `single`, `same-end` | `t3-greedy` |
+| `aho-corasick` | Aho–Corasick: many patterns at once | `classic`, `nested`, `none`, `same` | `t4-string-advanced` |
 | `bfs` | BFS: breadth-first search | `tree`, `cycle`, `disconnected`, `single`, `two-paths` | `t3-graph-traversal` |
 | `binary-search` | Binary search | `absent`, `mid-hit`, `first`, `single` | `t2-binary-search` |
 | `bit-subsets` | Enumerating subsets with bit masks | `n3`, `n1`, `none`, `many` | `t2-bitwise` |
 | `bs-answer` | Problem walkthrough: cutting wood | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
 | `bs-answer-mini` | Problem walkthrough: cutting wood (mini) | `classic`, `all-equal`, `one-tree`, `take-all`, `tiny-need` | `t2-binary-search` |
+| `convex-hull-trick` | Convex hull trick | `classic`, `useless-line`, `single-line`, `parallel-like` | `t4-dp-optimize` |
 | `dfs` | DFS: depth-first search | `tree`, `cycle`, `disconnected`, `single`, `deep-chain` | `t3-graph-traversal` |
+| `digit-dp` | Digit DP: counting numbers by digit sum | `n999-s5`, `n0-s0`, `n100-s1`, `n345-s12` | `t4-dp-digit` |
 | `dijkstra` | Dijkstra: shortest paths | `classic`, `relax-twice`, `unreachable`, `single`, `line` | `t4-shortest-path` |
 | `dijkstra-coupon` | Problem walkthrough: one free edge | `classic`, `free-last`, `no-gain`, `unreachable` | `t4-shortest-path` |
 | `dp-bitmask` | Bitmask DP: the travelling salesman (Held-Karp) | `n4`, `n3`, `n2`, `n4-asym` | `t4-dp-bitmask` |
@@ -102,13 +105,17 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `fenwick` | The binary indexed tree (Fenwick) | `n8-q7`, `n8-q8`, `n4-q1`, `n8-q5` | `t3-fenwick` |
 | `fib-recursion-tree` | The recursion tree of Fibonacci | `plain-5`, `memo-5`, `base-0`, `base-1`, `memo-6` | `t1-recursion` |
 | `hash-count` | Counting frequencies with a hash table | `repeat`, `all-same`, `distinct`, `single` | `t1-hash` |
+| `hld` | Heavy-light decomposition | `binary`, `caterpillar`, `path`, `star` | `t4-tree-advanced` |
+| `kmp` | KMP: finding a pattern in a text | `twice`, `none`, `whole`, `periodic` | `t4-string-advanced` |
 | `knapsack-01` | Dynamic programming: the 0/1 knapsack | `classic`, `cap-zero`, `one-item`, `too-heavy` | `t3-dp-basic` |
 | `kruskal` | Kruskal: the minimum spanning tree | `classic`, `ties`, `forest`, `already-tree`, `min` | `t4-mst` |
 | `lcs` | Longest common subsequence (LCS) | `classic`, `same`, `disjoint`, `single` | `t3-dp-basic` |
 | `lis` | Longest increasing subsequence (O(n²)) | `mixed`, `increasing`, `decreasing`, `single`, `dups` | `t3-dp-basic` |
+| `max-flow` | Maximum flow (Edmonds–Karp) | `classic`, `bottleneck`, `back-edge`, `no-path` | `t4-flow-matching` |
 | `merge-sort` | Merge sort (top-down) | `random`, `reverse`, `dups`, `n2` | `t2-sorting`, `t2-divide-conquer` |
 | `min-total-wait` | Problem walkthrough: minimum total waiting time | `classic`, `sorted`, `equal`, `single` | `t3-greedy` |
 | `n-queens` | N queens by backtracking | `n1`, `n3-none`, `n4`, `n5` | `t2-backtracking` |
+| `nim-grundy` | Sprague–Grundy: a take-1-to-3 game | `win`, `lose`, `single`, `empty` | `t4-game-theory` |
 | `prefix-sum` | Prefix sums | `basic`, `whole`, `one-cell`, `negative`, `n1` | `t1-array-prefix` |
 | `quick-sort` | Quick sort (Lomuto partition) | `random`, `sorted`, `dups`, `n2` | `t2-sorting`, `t2-divide-conquer` |
 | `segment-tree` | Segment tree: build and range-sum query | `n8-mid`, `n8-full`, `n4-point`, `n8-edge`, `n4-span` | `t3-segment-tree` |
@@ -116,6 +123,7 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `stack-queue` | Stack: valid brackets | `nested`, `sequence`, `mismatch`, `unclosed`, `extra-close` | `t1-stack-queue` |
 | `string-scan` | Checking a palindrome | `odd`, `even`, `not`, `single`, `near` | `t1-string` |
 | `subset-gen` | Generating all subsets by recursion | `n3`, `n1`, `n2`, `n4` | `t2-brute-force` |
+| `tarjan` | Tarjan: strongly connected components | `two-scc`, `dag`, `one-cycle`, `single` | `t3-scc-bridges` |
 | `two-pointers` | Two pointers: a pair with a given sum | `middle`, `ends`, `absent`, `n2`, `negative` | `t1-array-prefix` |
 <!-- END GENERATED: walkthrough-ids -->
 
