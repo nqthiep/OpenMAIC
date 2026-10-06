@@ -19,11 +19,11 @@ interface Harness {
   expected: (input: never) => string;
 }
 
-// import.meta.glob is Vite-only (statically replaced, so it must be called by its full name)
-// and is not in this project's TS types.
-const modules: Record<string, { default: Harness }> =
-  // @ts-expect-error no vite/client types
-  import.meta.glob('./cp/impl/*.ts', { eager: true });
+// import.meta.glob is statically replaced by Vite, so it must be called by its full name.
+const modules = import.meta.glob('./cp/impl/*.ts', { eager: true }) as Record<
+  string,
+  { default: Harness }
+>;
 const harnesses = Object.fromEntries(
   Object.values(modules).map((mod) => [mod.default.entryId, mod.default]),
 );
