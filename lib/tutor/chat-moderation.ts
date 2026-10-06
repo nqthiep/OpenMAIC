@@ -2,7 +2,7 @@
  * Nối bộ lọc nội dung vào luồng `/api/chat` (INTERFACES 8.1, ADR 0014 quyết định 2).
  *
  * `withTutorModeration(body, source)` bọc luồng sự kiện của `statelessGenerate`:
- * - Vào: lọc tin nhắn học sinh mới nhất; vi phạm thì thay cả luồng bằng một lượt thầy soạn sẵn
+ * - Vào: lọc MỌI tin nhắn học sinh trong request (tối đa 10 tin cuối); vi phạm thì thay cả luồng bằng một lượt thầy soạn sẵn
  *   (agent không bao giờ chạy: generator chưa được kéo thì chưa làm gì).
  * - Ra: giữ `text_delta` và `action` theo `messageId` tới `agent_end`, lọc trọn câu, rồi mới phát.
  *
@@ -91,22 +91,49 @@ export function safeMessage(categories: readonly ModerationCategory[], locale: S
   return SAFE_MESSAGES[key][locale];
 }
 
-/**
- * Chữ của tin nhắn học sinh mới nhất, chỉ khi nó là tin CUỐI của lịch sử. Vòng lặp client gọi
- * `/api/chat` nhiều lần cho một lượt của học sinh (mỗi lần một agent); từ lần hai tin cuối là
- * của agent, tin học sinh đã được lọc ở lần một. Đọc `parts` kiểu text giống
- * `convertMessagesToOpenAI`, tức đúng chữ agent sẽ thấy.
- */
+/** Số tin học sinh tối đa được lọc ở chiều vào, và số lời gọi lọc song song. */
+const MAX_USER_MESSAGES = 10;
+const INPUT_CONCURRENCY = 3;
+
+/** Chữ của một tin học sinh đúng như agent sẽ thấy (`convertMessagesToOpenAI`): text, tên người gửi, kết quả action-*. */
+function userMessageText(msg: StatelessChatRequest['messages'][number]): string {
+  const out: string[] = [];
+  for (const part of msg.parts ?? []) {
+    const p = part as { type?: string; text?: unknown; actionName?: unknown; output?: unknown };
+    if (p.type === 'text' && typeof p.text === 'string') out.push(p.text);
+    else if (typeof p.type === 'string' && p.type.startsWith('action-')) {
+      const o = (p.output ?? {}) as { data?: unknown; error?: unknown };
+      out.push(
+        typeof p.actionName === 'string' ? p.actionName : p.type,
+        typeof o.error === 'string' ? o.error : '',
+        o.data === undefined ? '' : JSON.stringify(o.data).slice(0, 100),
+      );
+    }
+  }
+  const name = msg.metadata?.senderName;
+  if (typeof name === 'string') out.push(name);
+  return out.join('\n').trim();
+}
+
+/** Chữ của tin nhắn học sinh mới nhất, chỉ khi nó là tin CUỐI của lịch sử. */
 export function latestStudentText(messages: StatelessChatRequest['messages']): string | null {
   const last = messages[messages.length - 1];
   if (last?.role !== 'user') return null;
-  const text = (last.parts ?? [])
-    .map((p) => p as { type?: string; text?: unknown })
-    .filter((p) => p.type === 'text' && typeof p.text === 'string')
-    .map((p) => p.text as string)
-    .join('\n')
-    .trim();
-  return text || null;
+  return userMessageText(last) || null;
+}
+
+/**
+ * Chữ của MỌI tin học sinh agent sẽ thấy, tối đa `MAX_USER_MESSAGES` tin cuối, bỏ tin rỗng và
+ * trùng. Client gửi lại cả lịch sử mỗi request và không thể tin cờ "đã lọc" do client gửi, nên
+ * tin bị chặn ở lượt trước (còn trong lịch sử) cũng phải bị chặn lại ở đây.
+ */
+export function studentTexts(messages: StatelessChatRequest['messages']): string[] {
+  const texts = messages
+    .filter((m) => m.role === 'user')
+    .slice(-MAX_USER_MESSAGES)
+    .map(userMessageText)
+    .filter(Boolean);
+  return [...new Set(texts)];
 }
 
 /** Lọc không bao giờ ném: `moderate` thật đã fail-closed, bản tiêm vào cũng bị bọc ở đây. */
@@ -119,8 +146,35 @@ async function check(
   try {
     return await mod(text, { direction, locale, subject: SUBJECT });
   } catch {
-    return { allow: false, categories: [], model: '' };
+    return { allow: false, categories: [], model: '', error: true };
   }
+}
+
+/**
+ * Lọc các chữ vào, tối đa `INPUT_CONCURRENCY` lời gọi cùng lúc, dừng phát lời gọi mới khi đã có
+ * một tin bị chặn. Trả verdict chặn của tin đứng đầu (theo thứ tự), hoặc null nếu tất cả qua.
+ * Chi phí: tới 10 lời gọi lọc/request (~ceil(10/3) lượt song song, mỗi lượt ≤ 5 s timeout);
+ * vòng lặp client gọi `/api/chat` nhiều lần cho một lượt học sinh nên mỗi lần đều lọc lại.
+ * ponytail: không có cache giữa các request; cần thì thêm cache LRU theo hash chữ.
+ */
+async function checkInputs(
+  mod: ModerateFn,
+  texts: string[],
+  locale: SafeLocale,
+): Promise<ModerationVerdict | null> {
+  const verdicts: (ModerationVerdict | undefined)[] = new Array(texts.length);
+  let next = 0;
+  let blocked = false;
+  const worker = async () => {
+    while (!blocked && next < texts.length) {
+      const i = next++;
+      const v = await check(mod, texts[i], 'in', locale);
+      verdicts[i] = v;
+      if (!v.allow) blocked = true;
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(INPUT_CONCURRENCY, texts.length) }, worker));
+  return verdicts.find((v) => v && !v.allow) ?? null;
 }
 
 /**
@@ -213,6 +267,18 @@ function scrubDone(event: DoneEvent, droppedActions: number, safeText: string): 
   };
 }
 
+/** Chuỗi trong `params` của action (đệ quy, giới hạn độ sâu); bỏ trường id/URL/màu không phải lời. */
+const NON_PROSE_KEY = /^id$|[a-z_]Id$|_id$|^(src|url|color|fill|stroke|style|type|kind)$/;
+function paramText(value: unknown, depth = 0): string {
+  if (typeof value === 'string') return value.trim();
+  if (depth > 6 || !value || typeof value !== 'object') return '';
+  return Object.entries(value)
+    .filter(([k]) => !NON_PROSE_KEY.test(k))
+    .map(([, v]) => paramText(v, depth + 1))
+    .filter(Boolean)
+    .join('\n');
+}
+
 /**
  * Chiều ra. Quy tắc giữ sự kiện:
  * - `text_delta` và `action` của một `messageId` bị giữ tới `agent_end` của nó (giữ cả `action`
@@ -222,8 +288,8 @@ function scrubDone(event: DoneEvent, droppedActions: number, safeText: string): 
  * - Sự kiện không có `messageId` gắn vào lượt đang mở (`agent_start` gần nhất).
  * - `done` hoặc hết luồng mà còn phần chưa chốt (không có `agent_end`) thì chốt nốt qua bộ lọc.
  * - Nguồn ném lỗi: phần đang giữ bị bỏ, chưa lọc thì không phát.
- * Trần đã biết: chữ trong `params` của `action` (vd. `wb_draw_text`) không qua bộ lọc, chỉ chữ
- * lời thầy qua; các lượt chỉ-có-action cũng không tốn một lần gọi lọc.
+ * Chữ trong `params` của `action` (vd. `wb_draw_text`) cũng qua bộ lọc cùng lời thầy; nhóm chỉ
+ * có action thì lọc chữ trong params, và không tốn lời gọi khi params không có chữ (id, số...).
  */
 async function* moderateOutput(
   source: AsyncIterable<StatelessEvent>,
@@ -239,7 +305,11 @@ async function* moderateOutput(
     const events = held.get(id);
     if (!events) return;
     held.delete(id);
-    const text = events.map((e) => (e.type === 'text_delta' ? e.data.content : '')).join('');
+    // Chữ lời thầy (nối liền, không thêm dấu cách) + chữ tự do trong `params` của action
+    // (wb_draw_text, latex, ô bảng...), mỗi action một dòng.
+    const speech = events.map((e) => (e.type === 'text_delta' ? e.data.content : '')).join('');
+    const fromActions = events.map((e) => (e.type === 'action' ? paramText(e.data.params) : ''));
+    const text = [speech, ...fromActions].filter((t) => t.trim()).join('\n');
     const verdict = text.trim()
       ? await check(mod, text, 'out', locale)
       : ({ allow: true, categories: [], model: '' } satisfies ModerationVerdict);
@@ -287,14 +357,51 @@ export async function* withTutorModeration(
   const mod = deps.moderate ?? moderate;
   const locale = pickLocale(body.storeState?.stage?.languageDirective);
 
-  const text = latestStudentText(body.messages);
-  if (text) {
-    const verdict = await check(mod, text, 'in', locale);
-    if (!verdict.allow) {
-      logBlocked('in', verdict);
-      yield* scriptedTurn(body, safeMessage(verdict.categories, locale));
-      return;
-    }
+  const verdict = await checkInputs(mod, studentTexts(body.messages), locale);
+  if (verdict) {
+    logBlocked('in', verdict);
+    yield* scriptedTurn(body, safeMessage(verdict.categories, locale));
+    return;
   }
   yield* moderateOutput(source, mod, locale);
+}
+
+/**
+ * Biến một nhà sản xuất kiểu đẩy (`produce(send)`, như `runPiDirectorLoop`) thành luồng kéo để
+ * đưa vào `withTutorModeration`. Lười: `produce` chỉ chạy khi có người kéo lần đầu, nên đầu vào
+ * bị chặn thì agent không bao giờ chạy. `send` không chặn (hàng đợi); lỗi của `produce` được ném
+ * lại sau khi đã phát hết các sự kiện đã xếp.
+ */
+export async function* eventsFromProducer(
+  produce: (send: (event: StatelessEvent) => Promise<void>) => Promise<unknown>,
+): AsyncGenerator<StatelessEvent, void, undefined> {
+  const queue: StatelessEvent[] = [];
+  let wake: (() => void) | null = null;
+  let finished = false;
+  let failure: { error: unknown } | null = null;
+  const ping = () => {
+    wake?.();
+    wake = null;
+  };
+  produce(async (event) => {
+    queue.push(event);
+    ping();
+  }).then(
+    () => {
+      finished = true;
+      ping();
+    },
+    (error) => {
+      failure = { error };
+      finished = true;
+      ping();
+    },
+  );
+  for (;;) {
+    const event = queue.shift();
+    if (event) yield event;
+    else if (finished) break;
+    else await new Promise<void>((r) => (wake = r));
+  }
+  if (failure) throw (failure as { error: unknown }).error;
 }

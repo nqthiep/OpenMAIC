@@ -6,6 +6,8 @@ import {
   latestStudentText,
   pickLocale,
   safeMessage,
+  eventsFromProducer,
+  studentTexts,
   withTutorModeration,
   type ModerateFn,
 } from '@/lib/tutor/chat-moderation';
@@ -49,12 +51,12 @@ const text = (content: string, id = 'm1'): E<'text_delta'> => ({
   type: 'text_delta',
   data: { content, messageId: id },
 });
-const action = (name: string, id = 'm1'): E<'action'> => ({
+const action = (name: string, id = 'm1', params: Record<string, unknown> = {}): E<'action'> => ({
   type: 'action',
   data: {
     actionId: `a-${name}`,
     actionName: name,
-    params: { n: name },
+    params,
     agentId: 'default-1',
     messageId: id,
   },
@@ -191,15 +193,50 @@ describe('withTutorModeration - input', () => {
     expect(mod.mock.calls[0][1].locale).toBe('en');
   });
 
-  it('skips the input filter when the last message is from an agent (continuation turn)', async () => {
-    const mod = vi.fn<ModerateFn>().mockResolvedValue(ALLOW);
+  it('moderates earlier student messages too, even when the last message is from an agent', async () => {
+    const mod = vi
+      .fn<ModerateFn>()
+      .mockImplementation(async (t) => (t === 'old bad' ? verdict(['hate']) : ALLOW));
     const a = { id: 'a', role: 'assistant', parts: [{ type: 'text', text: 'hi' }] };
-    await collect(
-      withTutorModeration(makeBody([userMsg('q'), a] as never), fakeSource([done()]).gen, {
+    const src = fakeSource([start(), text('x'), end(), done()]);
+    const out = await collect(
+      withTutorModeration(makeBody([userMsg('old bad'), a, userMsg('fine')] as never), src.gen, {
         moderate: mod,
       }),
     );
-    expect(mod).not.toHaveBeenCalled();
+    expect(src.state.started).toBe(false);
+    expect((out[1] as E<'text_delta'>).data.content).toBe(SAFE_MESSAGES.hate.vi);
+  });
+
+  it('studentTexts: last 10 user messages, deduped, includes action-* output text', () => {
+    const many = Array.from({ length: 12 }, (_, i) => userMsg(`m${i}`));
+    const t = studentTexts([...many, userMsg('m2'), userMsg('m2')] as never);
+    expect(t).toHaveLength(9); // last 10 user messages = m4..m11 + m2, m2 deduped
+    expect(t[0]).toBe('m4');
+    const act = {
+      id: 'x',
+      role: 'user',
+      parts: [{ type: 'action-foo', actionName: 'foo', output: { error: 'evil words' } }],
+    };
+    expect(studentTexts([act] as never)[0]).toContain('evil words');
+  });
+
+  it('caps input filter concurrency at 3 and stops launching after a block', async () => {
+    let live = 0;
+    let peak = 0;
+    const mod = vi.fn<ModerateFn>().mockImplementation(async (t) => {
+      live++;
+      peak = Math.max(peak, live);
+      await new Promise((r) => setTimeout(r, 5));
+      live--;
+      return t === 'm0' ? verdict(['hate']) : ALLOW;
+    });
+    const msgs = Array.from({ length: 10 }, (_, i) => userMsg(`m${i}`));
+    await collect(
+      withTutorModeration(makeBody(msgs as never), fakeSource([]).gen, { moderate: mod }),
+    );
+    expect(peak).toBeLessThanOrEqual(3);
+    expect(mod.mock.calls.length).toBeLessThan(10);
   });
 
   it('fails closed when the filter throws or reports a failure', async () => {
@@ -361,6 +398,27 @@ describe('withTutorModeration - output', () => {
     expect(deltas.map((d) => d.data.content)).toEqual(['fine', SAFE_MESSAGES.violence.vi]);
   });
 
+  it('moderates free text in action params, even for action-only turns', async () => {
+    const mod = vi
+      .fn<ModerateFn>()
+      .mockImplementation(async (t) => (t.includes('bad') ? verdict(['hate']) : ALLOW));
+    const events = [
+      start(),
+      action('wb_draw_text', 'm1', { x: 1, content: 'bad words', elementId: 'e1' }),
+      action('wb_draw_latex', 'm1', { latex: 'x^2', color: '#fff' }),
+      end(),
+      done({ totalActions: 2 }),
+    ];
+    const out = await collect(withTutorModeration(body, fakeSource(events).gen, { moderate: mod }));
+    expect(mod.mock.calls[0][0]).toContain('bad words');
+    expect(mod.mock.calls[0][0]).not.toContain('e1');
+    expect(out.filter((e) => e.type === 'action')).toHaveLength(0);
+    expect((out.find((e) => e.type === 'text_delta') as E<'text_delta'>).data.content).toBe(
+      SAFE_MESSAGES.hate.vi,
+    );
+    expect((out.at(-1) as E<'done'>).data.totalActions).toBe(0);
+  });
+
   it('keeps action-only turns without a filter call', async () => {
     const mod = vi.fn<ModerateFn>().mockResolvedValue(verdict(['violence']));
     const out = await collect(
@@ -396,5 +454,41 @@ describe('withTutorModeration - output', () => {
       })(),
     ).rejects.toThrow('upstream boom');
     expect(types(seen)).toEqual(['agent_start']);
+  });
+});
+
+describe('eventsFromProducer', () => {
+  it('is lazy, forwards events in order, and rethrows producer errors after draining', async () => {
+    let ran = false;
+    const gen = eventsFromProducer(async (send) => {
+      ran = true;
+      await send(start());
+      await send(end());
+      throw new Error('loop boom');
+    });
+    expect(ran).toBe(false);
+    const seen: string[] = [];
+    await expect(
+      (async () => {
+        for await (const e of gen) seen.push(e.type);
+      })(),
+    ).rejects.toThrow('loop boom');
+    expect(seen).toEqual(['agent_start', 'agent_end']);
+  });
+
+  it('never starts the producer when input is blocked (pi route path)', async () => {
+    let ran = false;
+    const mod = vi.fn<ModerateFn>().mockResolvedValue(verdict(['self-harm']));
+    const out = await collect(
+      withTutorModeration(
+        makeBody([userMsg('bad')] as never),
+        eventsFromProducer(async () => {
+          ran = true;
+        }),
+        { moderate: mod },
+      ),
+    );
+    expect(ran).toBe(false);
+    expect(types(out)).toContain('cue_user');
   });
 });
