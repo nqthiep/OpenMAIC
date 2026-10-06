@@ -20,7 +20,7 @@
 | --- | --- |
 | Model được chọn theo **stage**: `MODEL_ROUTES` (JSON, giá trị là chuỗi model hoặc `{model, thinking}`) thắng `x-model` và `DEFAULT_MODEL`. Danh sách stage là hằng ở tầng app | `lib/server/model-routes.ts:132-168`; `lib/server/resolve-model.ts:41-47`; `.env.example:355-365` |
 | Chat là SSE không trạng thái; server phát các sự kiện `agent_start`, `text_delta`, `action`, `agent_end`, `thinking` | `app/api/chat/route.ts:44-132`; `lib/types/chat.ts` (`StatelessEvent`) |
-| Kho runtime phía server lưu **phiên học** theo `(stageId, learnerKey, kind)` với bản ghi append-only; `kind` là **chuỗi mở**, app tự định nghĩa kind và validator | `packages/@openmaic/storage/src/runtime/types.ts:1-24`; `packages/@openmaic/dsl/src/runtime.ts:152-157,211-212`; `lib/runtime/payload-validators.ts:112-118` (đang có `chat`, `quizAttempt`, `whiteboard`) |
+| Kho runtime phía server lưu **phiên học** theo `(stageId, learnerKey, kind)` với bản ghi append-only; `kind` là **chuỗi mở**, app tự định nghĩa kind và validator | `packages/@openmaic/storage/src/runtime/types.ts:1-24`; `packages/@openmaic/dsl/src/runtime.ts:152-157,211-212`; `lib/runtime/payload-validators.ts:135-141` (đang có `chat`, `quizAttempt`, `whiteboard`) |
 | Chat của lớp học cũng được lưu ở IndexedDB phía trình duyệt | `lib/utils/chat-storage.ts:96-101`; `lib/utils/database.ts:313` |
 | Eval hiện có đã dùng model chấm riêng (`EVAL_SCORER_MODEL`) | `eval/whiteboard-layout/runner.ts:17-37` |
 | Triển khai này luôn có Postgres (agent runtime cần `DATABASE_URL`) | ADR 0011 |

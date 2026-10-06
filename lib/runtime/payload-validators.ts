@@ -59,6 +59,15 @@ const TUTOR_LEARNING_SHAPES: Readonly<Record<string, Readonly<Record<string, Tut
   moderation: { direction: 'string' },
 };
 
+/** Inclusive integer ranges (INTERFACES §8.3); `min` only where there is no upper bound. */
+const TUTOR_LEARNING_RANGES: Readonly<Record<string, readonly [number, number]>> = {
+  level: [1, 3],
+  easy: [1, 5],
+  occurrence: [1, Number.MAX_SAFE_INTEGER],
+  entryRev: [0, Number.MAX_SAFE_INTEGER],
+};
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+
 function tutorLearningErrors(payload: unknown): string[] {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
     return ['tutorLearning payload must be an object'];
@@ -83,7 +92,17 @@ function tutorLearningErrors(payload: unknown): string[] {
         : kind === 'int'
           ? typeof v === 'number' && Number.isInteger(v)
           : typeof v === 'boolean';
-    if (!ok) errors.push(`"${key}" must be a ${kind}`);
+    if (!ok) {
+      errors.push(`"${key}" must be a ${kind}`);
+      continue;
+    }
+    const range = TUTOR_LEARNING_RANGES[key];
+    if (kind === 'int' && range && ((v as number) < range[0] || (v as number) > range[1])) {
+      errors.push(`"${key}" must be an integer in ${range[0]}..${range[1]}`);
+    }
+    if (key === 'at' && (!ISO_DATE_RE.test(v as string) || Number.isNaN(Date.parse(v as string)))) {
+      errors.push('"at" must be an ISO 8601 date-time string');
+    }
   }
   if (type === 'moderation') {
     if (rec.direction !== 'in' && rec.direction !== 'out') {
@@ -97,7 +116,10 @@ function tutorLearningErrors(payload: unknown): string[] {
       errors.push('"categories" must be an array of known moderation categories');
     }
   }
-  if (errors.length === 0 && JSON.stringify(payload).length > TUTOR_LEARNING_MAX_BYTES) {
+  if (
+    errors.length === 0 &&
+    new TextEncoder().encode(JSON.stringify(payload)).byteLength > TUTOR_LEARNING_MAX_BYTES
+  ) {
     errors.push(`record exceeds ${TUTOR_LEARNING_MAX_BYTES} bytes`);
   }
   return errors;

@@ -1,7 +1,15 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SUBJECT_PACKS } from '@/lib/subjects';
 import { cpPack } from '@/lib/subjects/cp/pack';
-import { diskReviewLoader, releasedPacks, type ReviewLoader } from '@/lib/subjects/release';
+import {
+  diskReviewLoader,
+  makeDiskReviewLoader,
+  releasedPacks,
+  type ReviewLoader,
+} from '@/lib/subjects/release';
 import { entryContentHash } from '@/lib/tutor/catalog/hash';
 import type { Review } from '@/lib/tutor/review-schema';
 
@@ -103,6 +111,24 @@ describe('real loader and the env gate', () => {
 
   it('the disk loader returns null when no review file exists', () => {
     expect(diskReviewLoader(cpPack.id, entry.id, entry.entryRev)).toBeNull();
+  });
+
+  it('the disk loader falls back to the next root when the cwd has no review file', () => {
+    const [a, b] = [
+      mkdtempSync(path.join(tmpdir(), 'rev-a-')),
+      mkdtempSync(path.join(tmpdir(), 'rev-b-')),
+    ];
+    try {
+      const rel = `lib/subjects/${cpPack.id}/reviews/${entry.id}@${entry.entryRev}.json`;
+      mkdirSync(path.dirname(path.join(b, rel)), { recursive: true });
+      writeFileSync(path.join(b, rel), '{"x":1}');
+      const load = makeDiskReviewLoader(() => [a, b]);
+      expect(load(cpPack.id, entry.id, entry.entryRev)).toBe('{"x":1}');
+      expect(makeDiskReviewLoader(() => [a])(cpPack.id, entry.id, entry.entryRev)).toBeNull();
+    } finally {
+      rmSync(a, { recursive: true, force: true });
+      rmSync(b, { recursive: true, force: true });
+    }
   });
 
   it('with OPENMAIC_REQUIRE_REVIEW unset the registry exposes every entry', async () => {

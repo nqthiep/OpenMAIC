@@ -49,7 +49,9 @@ flowchart TB
 | `DATABASE_URL` | không đặt | **Bắt buộc**: runtime chỉ chạy khi có URL khác rỗng | Đã có (`.env.example:353`) |
 | `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` | tắt | **Bắt buộc bật lúc build**: hiện workbench; thiếu thì `/workbench` trả 404 (`middleware.ts:55-58`). **Cần thêm vào `ARG`/`ENV` của `Dockerfile` (`:51-72`) và `build.args` của compose (`docker-compose.yml:5-22`)**, vì hiện chưa có | Đã có (biến); Đề xuất (Dockerfile/compose) |
 | `OPENMAIC_ALLOW_CODE_WIDGET` | **không đặt = chặn** widget `code` toàn ứng dụng | Đặt `true` chỉ khi triển khai muốn hành vi upstream (có code editor). Không có biến `NEXT_PUBLIC_*` tương ứng; client hỏi server (ADR 0010) | Đề xuất |
-| `OPENMAIC_DISABLE_WIDGET_PROVIDERS` | không đặt | Kill-switch: không đăng ký tool `generate_walkthrough`/`generate_clip_scenes` (§10) | Đề xuất |
+| `OPENMAIC_DISABLE_WIDGET_PROVIDERS` | không đặt | Kill-switch kiểu **boolean** (`true`/`1`; không phải danh sách provider): không đăng ký tool `generate_walkthrough`/`generate_clip_scenes` (§10) | Đã có (`lib/config/feature-flags.ts`) |
+| `OPENMAIC_TUTOR_MODERATION` | không đặt = **tắt** | Boolean (`true`/`1`). **Tắt: chat `/api/chat` không được lọc, kể cả khi đã cấu hình route `tutor-moderation`.** Bật: mọi lượt chat qua bộ lọc, **fail-closed** (thiếu route `tutor-moderation` → chat bị chặn bằng câu an toàn). Chỉ phủ `/api/chat` (SECURITY §6) | Đã có |
+| `OPENMAIC_REQUIRE_REVIEW` | không đặt = tắt (mọi entry) | Boolean (`true`/`1`). Bật: chỉ entry có file review đạt ở đúng `entryRev` (`lib/subjects/<môn>/reviews/<id>@<entryRev>.json`). **Bật mà không có file review → không lộ walkthrough nào.** `next.config.ts` đưa `lib/subjects/*/reviews/**` vào bản standalone (`outputFileTracingIncludes`); `release.ts` tìm file theo `process.cwd()` rồi theo đường dẫn của module. Sau build Docker, kiểm `ls .next/standalone/lib/subjects/*/reviews` [Unverified: chưa chạy build Docker] | Đã có |
 | `MODEL_ROUTES` (thêm stage, ADR 0014) | không đặt | Model cho từng vai trò LLM: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `manim-author`, `sim-learner`, `tutor-analyst`. **Thiếu route thì tính năng phụ thuộc tắt** (thiếu `tutor-moderation` → chat học sinh bị chặn). Khuyến nghị hai nhà cung cấp khác model dạy | Đề xuất (biến đã có: `lib/server/model-routes.ts:132-168`) |
 | `MANIM_SERVICE_URL`, `MANIM_SERVICE_TOKEN` | không đặt | Địa chỉ + token của `manim-service`; không đặt → render theo yêu cầu tắt (`clip-render-unavailable`) | Đề xuất |
 | `MANIM_MAX_CONCURRENCY`, `MANIM_MAX_QUEUE`, `MANIM_MAX_JOBS_PER_USER`, `MANIM_MAX_GLOBAL`, `MANIM_JOB_TTL_MS`, `MANIM_JOB_DEADLINE_MS` | tính theo §8 | Số job chạy đồng thời (= số worker); số job chờ; giới hạn mỗi owner; **tổng job đang chờ + đang chạy** toàn dịch vụ; TTL; hạn tối đa mỗi job | Đề xuất |
@@ -205,6 +207,9 @@ Ví dụ truy vấn (với `jq` trên log JSON): `jq -c 'select(.event=="code_wi
    - hỏi thầy ở frame k → thầy thấy đúng frame và gợi ý mức 1.
 5. Xuất HTML/ZIP lớp học có walkthrough (Toán: có clip); import lại vào máy sạch.
 6. (Đợt 3C) `MANIM_SERVICE_URL` bỏ trống → clip dựng sẵn vẫn phát. Đặt lại → `generate_clip_scenes{params}` tạo placeholder rồi `media_ready`.
+7. `OPENMAIC_TUTOR_MODERATION=true` (nếu triển khai cho học sinh): gửi một tin vi phạm vào chat → nhận câu an toàn, agent không chạy; bỏ route `tutor-moderation` → chat vẫn bị chặn (fail-closed). Nhớ: cờ tắt = chat **không lọc**.
+8. `OPENMAIC_REQUIRE_REVIEW=true`: workbench chỉ liệt kê entry có file review; trong container chạy `ls lib/subjects/*/reviews` (thư mục standalone) phải thấy các file review, nếu không thì **không walkthrough nào được lộ**.
+9. `OPENMAIC_DISABLE_WIDGET_PROVIDERS` là boolean: đặt `true` rồi hỏi agent tạo walkthrough → tool không còn; bỏ đặt → trở lại.
 
 ## 10. Phát hành, rollback và kill-switch
 
@@ -220,6 +225,8 @@ Ví dụ truy vấn (với `jq` trên log JSON): `jq -c 'select(.event=="code_wi
 | --- | --- | --- | --- |
 | Bỏ đặt `MANIM_SERVICE_URL` | Render clip theo yêu cầu | Chỉ dùng clip dựng sẵn; `generate_clip_scenes{params}` trả `clip-render-unavailable` | Đề xuất |
 | `OPENMAIC_DISABLE_WIDGET_PROVIDERS=true` | Tool `generate_walkthrough`/`generate_clip_scenes` | Agent chỉ còn `generate_scene` (widget LLM); scene đã lưu **vẫn phát** (HTML tự chứa) | Đề xuất |
+| Bỏ đặt `OPENMAIC_TUTOR_MODERATION` | Bộ lọc chat | **Chat không còn được lọc** (không phải fail-closed): chỉ tắt khi sự cố bộ lọc, và thông báo cho người phụ trách | Đã có |
+| Bỏ đặt `OPENMAIC_REQUIRE_REVIEW` | Cổng phát hành | Mọi entry trong `SUBJECT_PACKS` hiện ra, kể cả entry chưa được duyệt | Đã có |
 | Tắt cờ `NEXT_PUBLIC_*` liên quan hiện có | Tính năng UI của OpenMAIC gốc | Như hiện có | Đã có |
 
 **Rollback:**

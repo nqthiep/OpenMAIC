@@ -47,4 +47,30 @@ describe('tutorLearning validator', () => {
   it('rejects records over 2 KB', () => {
     expect(ok({ ...beat, sceneId: 'x'.repeat(3000) })).toBe(false);
   });
+
+  it('sizes by UTF-8 bytes, not UTF-16 length', () => {
+    // 800 chars x 3 bytes = 2400 bytes > 2048, though .length is only ~800
+    expect(ok({ ...beat, sceneId: '€'.repeat(800) })).toBe(false);
+    expect(ok({ ...beat, sceneId: '€'.repeat(100) })).toBe(true);
+  });
+
+  it('enforces integer ranges', () => {
+    const hint = { type: 'hint', sceneId: 's', beatId: 'm' };
+    expect([0, 1, 3, 4].map((level) => ok({ ...hint, level }))).toEqual([false, true, true, false]);
+    expect([0, 1, 5, 6].map((easy) => ok({ type: 'rating', stageId: 'st', easy }))).toEqual([
+      false,
+      true,
+      true,
+      false,
+    ]);
+    expect(ok({ ...beat, occurrence: 0 })).toBe(false);
+    expect(ok({ ...beat, entryRev: -1 })).toBe(false);
+    expect(ok({ ...beat, entryRev: 0 })).toBe(true);
+  });
+
+  it('requires `at` to be an ISO date-time', () => {
+    expect(ok({ ...beat, at: 'yesterday' })).toBe(false);
+    expect(ok({ ...beat, at: '2026-13-45T99:00:00Z' })).toBe(false);
+    expect(ok({ ...beat, at: '2026-10-01T09:00:00.123+07:00' })).toBe(true);
+  });
 });
