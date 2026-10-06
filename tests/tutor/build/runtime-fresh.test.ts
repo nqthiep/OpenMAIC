@@ -16,7 +16,7 @@ describe('runtime walkthrough sinh sẵn', () => {
         `Runtime sinh sẵn đã cũ. Chạy lại script: pnpm gen:tutor-runtime\n${err.stdout ?? ''}${err.stderr ?? ''}`,
       );
     }
-  });
+  }, 60_000); // Rollup + tsc: quá 5 s khi cả bộ test chạy song song
 
   it('getRuntimeJs("array") là chuỗi JS an toàn để nhúng vào <script>', () => {
     const js = getRuntimeJs('array');

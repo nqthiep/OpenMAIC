@@ -22,7 +22,7 @@ const MIN_BAR_H = 2; // cột khác 0 luôn nhìn thấy được (giá trị nh
 const KINDS = new Set(['active', 'compare', 'result', 'visited', 'muted']);
 
 const CSS = `
-.wta{display:block;inline-size:100%;block-size:auto}
+.wta{display:block;inline-size:100%;block-size:auto;direction:ltr}
 .wta text{fill:var(--wt-fg,#1f2937);font:11px/1 system-ui,sans-serif;text-anchor:middle}
 .wta text.wta-idx{fill:var(--wt-mut,#6b7280)}
 :where(.wta-bar){fill:var(--wt-bg,#fff);stroke:var(--wt-mut,#6b7280);stroke-width:1}
@@ -31,7 +31,8 @@ const CSS = `
 .wta-thr text{fill:var(--wt-err,#dc2626);text-anchor:end}
 .wta-ptr polygon{fill:var(--wt-acc,#2563eb)}
 .wta-ptr text{fill:var(--wt-acc,#2563eb);font-weight:600}
-.wta g,.wta rect{transition:transform .3s ease,y .3s ease,height .3s ease,fill .3s,opacity .3s}
+.wta-bar.wt-hl-muted{opacity:1}
+.wta g,.wta rect{transition:transform .3s ease,y .3s ease,height .3s ease,fill .3s,opacity .3s,stroke .3s,stroke-width .3s}
 `.trim();
 
 /** Số hữu hạn từ số hoặc chuỗi số; ngược lại `NaN`. */
@@ -131,6 +132,27 @@ export function layoutPointers(pointers: unknown, n: number): PointerMark[] {
   }
   for (const m of marks) m.lanes = perCell.get(m.index) ?? 1;
   return marks;
+}
+
+/**
+ * Mô tả cho trình đọc màn hình: `5, 8 (compare), 13 (active, mid)`. Mỗi ô: giá trị, rồi trong ngoặc
+ * loại tô sáng (nếu có) và nhãn các con trỏ đang trỏ vào ô đó; ô không có gì thì chỉ có giá trị.
+ */
+export function describeBars(
+  values: readonly unknown[],
+  highlights: Readonly<Record<string, unknown>>,
+  marks: readonly PointerMark[],
+): string {
+  return values
+    .map((v, i) => {
+      const kind = highlights[String(i)];
+      const notes = [
+        ...(typeof kind === 'string' && KINDS.has(kind) ? [kind] : []),
+        ...marks.filter((m) => m.index === i).map((m) => m.label),
+      ];
+      return notes.length > 0 ? `${String(v)} (${notes.join(', ')})` : String(v);
+    })
+    .join(', ');
 }
 
 // --- vẽ ---
@@ -261,7 +283,8 @@ export const arrayVisualizer: VisualizerRenderer = {
     );
     const baseY = PLOT_TOP + layout.baseline;
 
-    v.svg.setAttribute('aria-label', values.map(String).join(', '));
+    const marks = layoutPointers(frame.meta?.pointers, values.length);
+    v.svg.setAttribute('aria-label', describeBars(values, highlights, marks));
     v.axis.setAttribute('transform', `translate(0 ${f(baseY)})`);
 
     while (v.bars.length < values.length) v.bars.push(createBar(v));
@@ -299,7 +322,6 @@ export const arrayVisualizer: VisualizerRenderer = {
       v.thr.setAttribute('display', 'none');
     }
 
-    const marks = layoutPointers(frame.meta?.pointers, values.length);
     const slot = (VIEW_W - 2 * PAD_X) / Math.max(values.length, 1);
     const seen = new Set<string>();
     for (const m of marks) {

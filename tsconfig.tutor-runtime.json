@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "removeComments": true,
     "paths": { "@/*": ["./*"] }
   },
   "include": ["lib/tutor/runtime/**/*.ts"],

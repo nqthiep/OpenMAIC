@@ -216,7 +216,9 @@ describe('renderShell', () => {
 
   it('has static containers, aria-live, wt-flash CSS and logical properties', () => {
     const html = build();
-    expect(html).toContain('<div id="wt-predict"></div>');
+    expect(html).toMatch(
+      /<div id="wt-predict" role="region" aria-live="polite" aria-label="[^"]+"><\/div>/,
+    );
     expect(html).toContain('<div id="wt-exercise"></div>');
     expect(html).toMatch(/<p id="wt-explanation" aria-live="polite">/);
     expect(html).toContain('.wt-flash');

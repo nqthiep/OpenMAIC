@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { layoutBars, layoutPointers } from '@/lib/tutor/runtime/visualizers/array';
+import { describeBars, layoutBars, layoutPointers } from '@/lib/tutor/runtime/visualizers/array';
 
 describe('layoutBars', () => {
   it('mảng 1 phần tử: một cột dương chạm đỉnh, nằm giữa vùng vẽ, đáy trên đường gốc', () => {
@@ -118,5 +118,25 @@ describe('layoutPointers', () => {
     expect(layoutPointers(undefined, 5)).toEqual([]);
     expect(layoutPointers([1, 2], 5)).toEqual([]);
     expect(layoutPointers({ lo: 0 }, 0)).toEqual([]);
+  });
+});
+
+describe('describeBars (aria-label)', () => {
+  it('announces highlights and pointers per cell', () => {
+    const marks = layoutPointers({ lo: 0, mid: 2, hi: 3 }, 4);
+    expect(describeBars([5, 8, 13, 21], { '1': 'compare', '2': 'active' }, marks)).toBe(
+      '5 (lo), 8 (compare), 13 (active, mid), 21 (hi)',
+    );
+  });
+
+  it('plain values when nothing is marked; unknown kinds are ignored', () => {
+    expect(describeBars([1, 2], {}, [])).toBe('1, 2');
+    expect(describeBars([1, 2], { '0': 'bogus' }, [])).toBe('1, 2');
+  });
+
+  it('keeps the value of an out-of-range pointer in its label', () => {
+    expect(describeBars([4, 9], { '0': 'muted' }, layoutPointers({ hi: -1 }, 2))).toBe(
+      '4 (muted, hi=-1), 9',
+    );
   });
 });
