@@ -91,8 +91,60 @@ describe('score', () => {
     const none = build(30, 0, 10, 0).map((x) => ({ ...x, passes: [null, true] as const }));
     const r2 = score(none);
     expect(r2.noReview).toBe(40);
-    expect(r2.reviewers[0].caught).toBe(30);
-    expect(r2.reviewers[0].falseBlocked).toBe(10);
+    expect(r2.unusable).toHaveLength(40);
+    expect(r2.reviewers[0]).toMatchObject({ mutants: 0, clean: 0, catchOk: false });
+    expect(r2.ok).toBe(false);
+  });
+
+  describe('unusable reviews (C24)', () => {
+    /** `n` of the samples get a null review in seat 0 (a failed call), the rest are fine. */
+    const withNulls = (n: number, m = 60, c = 20): Outcome[] =>
+      build(m, 0, c, 0).map((x, i) =>
+        i < n ? { ...x, passes: [null, true] as const, verdict: 'fail' as const } : x,
+      );
+
+    it('excludes an unusable sample from the catch and false-block rates, and lists it', () => {
+      const r = score(withNulls(3));
+      expect(r.unusable.map((u) => u.id)).toEqual(['m-map-0', 'm-map-1', 'm-map-2']);
+      expect(r.panel).toMatchObject({ mutants: 57, caught: 57, clean: 20, falseBlocked: 0 });
+      expect(r.reviewers[0]).toMatchObject({ mutants: 57 }); // reviewer 1's own null is out too
+      expect(r.reviewers[1]).toMatchObject({ mutants: 60 }); // reviewer 2 answered all of them
+      expect(r.rows.find((x) => x.group === 'map')).toEqual({ group: 'map', total: 57, wrong: 0 });
+      expect(r.ok).toBe(true);
+    });
+
+    it('does not count a failed call as a catch', () => {
+      const o = build(30, 0, 10, 0);
+      o[0] = { ...o[0], passes: [null, null], verdict: 'fail' };
+      const r = score(o);
+      expect(r.panel.caught).toBe(29);
+      expect(r.panel.mutants).toBe(29);
+    });
+
+    it('does not count a failed call as a false block', () => {
+      const o = build(30, 0, 10, 0);
+      o[30] = { ...o[30], passes: [true, null], verdict: 'fail' };
+      const r = score(o);
+      expect(r.panel).toMatchObject({ clean: 9, falseBlocked: 0 });
+      expect(r.falseBlocks).toEqual([]);
+    });
+
+    it('fails the run (exit 1) when more than 10% of the samples are unusable', () => {
+      const ok = score(withNulls(8)); // 8 of 80 = 10%
+      expect(ok.unusableOk).toBe(true);
+      expect(ok.ok).toBe(true);
+      const bad = score(withNulls(9)); // 9 of 80 = 11.25%
+      expect(bad.unusableOk).toBe(false);
+      expect(bad.ok).toBe(false);
+      expect(exitCode(true, bad)).toBe(1);
+      expect(formatReport(bad)).toContain('Unusable: 9/80');
+      expect(formatReport(bad)).toContain('excluded from every rate');
+      expect(formatReport(bad)).toContain('m-map-0');
+    });
+
+    it('needs the size minimums on usable samples only', () => {
+      expect(score(withNulls(1, 30, 10)).undersized).toBe(true); // 29 usable mutants
+    });
   });
 
   it('reports reviewer 2 without gating on it', () => {
@@ -132,6 +184,10 @@ describe('exitCode / formatReport', () => {
 });
 
 describe('calibration end to end with a fake panel', () => {
+  const stages = ['tutor-review-cp', 'tutor-review-cp-2'] as const;
+  const routes = [{ model: 'a:1' }, { model: 'b:2' }] as const;
+  const pass = (r: { review: Review | null }) => (r.review ? reviewPasses(r.review) : null);
+
   // A fake reviewer that has "read" the clean entry: it fails any prompt that differs from it.
   const base = buildReviewMaterial(binarySearchEntry);
   const cleanPrompt = buildReviewPrompt(base);
@@ -175,5 +231,55 @@ describe('calibration end to end with a fake panel', () => {
     expect(report.missed).toEqual([]);
     expect(report.falseBlocks).toEqual([]);
     expect(report.ok).toBe(true);
+  }, 60_000);
+
+  it('a failing model call is one unusable sample; the run continues', async () => {
+    let calls = 0;
+    const flaky: ReviewLlm = async (req) => {
+      if (++calls === 3) throw new Error('boom');
+      return llm(req);
+    };
+    const samples = [
+      ...seedErrors(binarySearchEntry)
+        .slice(0, 6)
+        .map((m) => ({
+          sample: { id: m.id, kind: 'mutant' as const, group: m.kind },
+          material: m.material,
+        })),
+      { sample: { id: 'c', kind: 'clean' as const, group: 'clean' }, material: base },
+    ];
+    const outcomes: Outcome[] = [];
+    for (const s of samples) {
+      const r = await reviewPanel(s.material, stages, routes, flaky);
+      outcomes.push({
+        sample: s.sample,
+        verdict: r.verdict,
+        passes: [pass(r.outcomes[0]), pass(r.outcomes[1])],
+      });
+    }
+    expect(outcomes).toHaveLength(7);
+    const report = score(outcomes, { partial: true });
+    expect(report.unusable).toHaveLength(1);
+    expect(report.panel.mutants).toBe(5);
+    expect(report.panel.caught).toBe(5);
+    expect(report.unusableOk).toBe(false); // 1 of 7 is over 10%
+    expect(exitCode(true, report)).toBe(1);
+  }, 60_000);
+
+  it('two reviewers on one provider never pass the panel, whatever they say', async () => {
+    const r = await reviewPanel(base, stages, [{ model: 'x:1' }, { model: 'x:2' }], llm);
+    expect(r.outcomes[0].review).not.toBeNull();
+    expect(r.verdict).toBe('fail');
+    const dev = await reviewPanel(
+      base,
+      stages,
+      [{ model: 'x:1' }, { model: 'x:2' }],
+      llm,
+      undefined,
+      {
+        allowSameProvider: true,
+      },
+    );
+    expect(dev.verdict).toBe('pass');
   });
 });
