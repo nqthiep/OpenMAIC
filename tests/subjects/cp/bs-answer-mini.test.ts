@@ -35,6 +35,14 @@ const beatsOf = (fs: readonly F[]): { id: string; frame: number }[] =>
   fs.flatMap((f, frame) => beatTags(f).map((id) => ({ id, frame })));
 const last = (fs: readonly F[]): F => fs[fs.length - 1];
 const num = (v: unknown): number => v as number;
+/** Beat tags per preset (the provider narrates at most 12 and always keeps the last required beat). */
+const BEAT_COUNTS: Record<string, number> = {
+  classic: 12,
+  'all-equal': 8,
+  'one-tree': 14,
+  'take-all': 10,
+  'tiny-need': 12,
+};
 
 /** Deterministic pseudo-random inputs (MINSTD), valid for the input spec. */
 function samples(count: number): BsAnswerMiniInput[] {
@@ -88,7 +96,7 @@ function allMessages(): { where: string; m: Messages }[] {
 describe('bs-answer-mini: static fields', () => {
   it('matches SCHEMA 4.2', () => {
     expect(entry.id).toBe('bs-answer-mini');
-    expect(entry.entryRev).toBe(1);
+    expect(entry.entryRev).toBe(2);
     expect(entry.subject).toBe('cp');
     expect(entry.visualizer).toBe('array');
     expect(entry.curriculumTopics).toEqual(['t2-binary-search']);
@@ -210,6 +218,7 @@ describe('bs-answer-mini: beats', () => {
     expect(entry.beatDefs.map((b) => b.id)).toEqual([
       'brute',
       'monotonic',
+      'init',
       'check',
       'narrow',
       'done',
@@ -235,15 +244,72 @@ describe('bs-answer-mini: beats', () => {
     for (const id of defs) expect(used.has(id), id).toBe(true);
   });
 
-  it('beat order: brute, monotonic, then (check, narrow)+, then done only at the end', () => {
+  it('beat order: brute, monotonic, init, then (check, narrow)+, then done only at the end', () => {
     for (const input of family()) {
       const ids = beatsOf(frames(input)).map((b) => b.id);
-      expect(ids.slice(0, 2), JSON.stringify(input)).toEqual(['brute', 'monotonic']);
+      expect(ids.slice(0, 3), JSON.stringify(input)).toEqual(['brute', 'monotonic', 'init']);
       expect(ids[ids.length - 1]).toBe('done');
       expect(ids.filter((x) => x === 'done')).toHaveLength(1);
-      const mid = ids.slice(2, -1);
+      const mid = ids.slice(3, -1);
       expect(mid.length).toBeGreaterThanOrEqual(2);
       expect(mid.every((x, i) => x === (i % 2 === 0 ? 'check' : 'narrow'))).toBe(true);
+    }
+  });
+
+  it('brute is tagged on the LAST attempt, whose narration covers every try', () => {
+    for (const input of family()) {
+      const fs = frames(input);
+      const brute = fs.filter((f) => f.meta.codeLine === 1 && f.meta.vars?.tried !== undefined);
+      expect(brute, JSON.stringify(input)).toHaveLength(1);
+      const at = fs.indexOf(brute[0]);
+      expect(beatTags(fs[at])).toEqual(['brute']);
+      // every earlier brute attempt is untagged and its H is listed in `tried`
+      const tried = String(brute[0].meta.vars?.tried).split(', ').map(Number);
+      expect(tried.length).toBeGreaterThanOrEqual(2);
+      expect(tried[0]).toBe(Math.max(...input.h));
+      fs.slice(0, at).forEach((f, i) => {
+        expect(beatTags(f)).toEqual([]);
+        expect(f.meta.vars?.H).toBe(tried[i]);
+      });
+      expect(brute[0].meta.vars?.H).toBe(tried[tried.length - 1]);
+    }
+  });
+
+  it('init frame draws the whole range [0, max h] on the H axis', () => {
+    for (const p of entry.presets) {
+      const fs = frames(p.input);
+      const init = fs.find((f) => beatTags(f).includes('init'))!;
+      expect(init.meta.vars).toEqual({ lo: 0, hi: Math.max(...p.input.h), m: p.input.m });
+      expect(init.meta.codeLine).toBe(2);
+      const row = init.meta.aux?.find((a) => a.id === 'range');
+      expect(row?.items[0]).toBe(0);
+      expect(row?.items[row.items.length - 1]).toBe(Math.max(...p.input.h));
+    }
+  });
+
+  it('the [lo, hi] band row always starts at lo and ends at hi', () => {
+    for (const input of family().slice(0, 200)) {
+      for (const f of frames(input)) {
+        const row = f.meta.aux?.find((a) => a.id === 'range');
+        if (!row) continue;
+        expect(row.items[0]).toBe(f.meta.vars?.lo);
+        expect(row.items[row.items.length - 1]).toBe(f.meta.vars?.hi);
+      }
+    }
+  });
+
+  it('pseudo lines: mid is line 4 (check), the comparison line 5, assignment 5 or 6', () => {
+    for (const input of family().slice(0, 200)) {
+      const fs = frames(input);
+      fs.forEach((f, i) => {
+        const tags = beatTags(f);
+        if (tags.includes('check')) expect(f.meta.codeLine).toBe(4);
+        if (tags.includes('narrow')) {
+          expect(f.meta.codeLine).toBe(5);
+          const upd = fs[i + 1];
+          expect(upd.meta.codeLine).toBe(upd.meta.vars?.lo !== f.meta.vars?.lo ? 5 : 6);
+        }
+      });
     }
   });
 
@@ -261,13 +327,22 @@ describe('bs-answer-mini: beats', () => {
       }
     }
   });
+
+  it('beat tags per preset: the real numbers (one-tree has 14, above the narration cap of 12)', () => {
+    const counts = Object.fromEntries(
+      entry.presets.map((p) => [p.id, beatsOf(frames(p.input)).length]),
+    );
+    expect(counts).toEqual(BEAT_COUNTS);
+  });
 });
 
 describe('bs-answer-mini: predictions', () => {
   const asked = entry.beatDefs.filter((b) => b.ask?.predict);
+  const w = (input: BsAnswerMiniInput, H: number): number =>
+    input.h.reduce((s, x) => s + (x > H ? x - H : 0), 0);
 
-  it('monotonic and narrow ask a choice question with valid options', () => {
-    expect(asked.map((b) => b.id)).toEqual(['monotonic', 'narrow']);
+  it('monotonic, check and narrow ask a choice question with valid options', () => {
+    expect(asked.map((b) => b.id)).toEqual(['monotonic', 'check', 'narrow']);
     for (const b of asked) {
       const predict = b.ask!.predict!;
       expect(predict.kind).toBe('choice');
@@ -282,25 +357,74 @@ describe('bs-answer-mini: predictions', () => {
         const def = entry.beatDefs.find((b) => b.id === id);
         const predict = def?.ask?.predict;
         if (!predict) continue;
-        const got = predict.answer(fs[frame], fs[frame + 1]);
+        const f = fs[frame];
+        const next = fs[frame + 1];
+        const got = predict.answer(f, next);
         expect(Number.isInteger(got) && got >= 0 && got < predict.options.length).toBe(true);
-        const vars = fs[frame].meta.vars!;
         if (id === 'monotonic') {
-          // independent: wood at the two heights, from the raw input
-          const w = (H: number): number => input.h.reduce((s, x) => s + (x > H ? x - H : 0), 0);
-          expect(w(num(vars.H)) < w(num(vars.Hold))).toBe(true);
+          // the question frame is at H, the answer frame at H + 1, wood from the raw input
+          expect(num(next.meta.vars?.H)).toBe(num(f.meta.vars?.H) + 1);
+          expect(w(input, num(next.meta.vars?.H)) < w(input, num(f.meta.vars?.H))).toBe(true);
           expect(got).toBe(1); // "goes down"
+        } else if (id === 'check') {
+          // the next frame is the result frame of the SAME mid
+          expect(next.meta.vars?.mid).toBe(f.meta.vars?.mid);
+          expect(got).toBe(w(input, num(f.meta.vars?.mid)) >= input.m ? 0 : 1);
         } else {
-          const enough = input.h.reduce((s, x) => s + Math.max(0, x - num(vars.mid)), 0) >= input.m;
+          const mid = num(f.meta.vars?.mid);
+          const enough = w(input, mid) >= input.m;
           expect(got).toBe(enough ? 0 : 1); // enough -> lo changes; short -> hi changes
-          // and it really is what the next check sees
-          const nextCheck = fs.slice(frame + 1).find((f) => beatTags(f).includes('check'));
-          const after = nextCheck ? nextCheck.meta.vars! : fs[fs.length - 1].meta.vars!;
-          expect(got === 0 ? after.lo : after.hi).toBe(got === 0 ? vars.lo : vars.hi);
+          // and it really is what the update frame shows
+          expect(next.meta.vars?.lo).toBe(enough ? mid : f.meta.vars?.lo);
+          expect(next.meta.vars?.hi).toBe(enough ? f.meta.vars?.hi : mid - 1);
         }
       }
     }
-  });
+  }, 30_000);
+
+  it('a prediction frame does not display its answer (explanation, vars, aux)', () => {
+    for (const input of [...entry.presets.map((p) => p.input), ...family().slice(0, 120)]) {
+      for (const locale of LOCALES) {
+        const fs = frames(input, locale);
+        for (const { id, frame } of beatsOf(fs)) {
+          if (!entry.beatDefs.find((b) => b.id === id)?.ask?.predict) continue;
+          const f = fs[frame];
+          const next = fs[frame + 1];
+          const where = `${locale} ${JSON.stringify(input)} ${id}: "${f.meta.explanation}"`;
+          const text = f.meta.explanation;
+          const keys = Object.keys(f.meta.vars ?? {});
+          const auxIds = (f.meta.aux ?? []).map((a) => a.id);
+          if (id === 'monotonic') {
+            // only the old H and its wood: no raised H, no drop, no words about it
+            expect(keys, where).not.toContain('Hold');
+            expect(keys, where).not.toContain('gotOld');
+            expect(num(f.state.threshold?.value), where).toBe(num(f.meta.vars?.H));
+            expect(text, where).not.toMatch(/xuống|giảm|tăng|drops|less|more/);
+            expect(next.meta.explanation).toMatch(/xuống|drops/); // revealed one frame later
+          } else if (id === 'check') {
+            // no wood, no per-tree row, no verdict
+            expect(keys, where).not.toContain('got');
+            expect(auxIds, where).not.toContain('cut');
+            // no "được N mét" / "gives N meters": the wood quantity is not stated
+            expect(text, where).not.toMatch(/(được|gives|got) \d+ (mét|meters)/);
+            expect(text, where).not.toMatch(/chưa đủ|thiếu|not enough|Đủ gỗ|, enough|Enough/);
+          } else {
+            // wood and verdict are shown, but the bounds are still the old ones
+            expect(keys, where).toContain('got');
+            const range = f.meta.aux?.find((a) => a.id === 'range');
+            expect(range?.items[0], where).toBe(f.meta.vars?.lo);
+            expect(range?.items[range.items.length - 1], where).toBe(f.meta.vars?.hi);
+            for (const k of ['lo', 'hi'] as const) {
+              const after = next.meta.vars?.[k];
+              if (after === f.meta.vars?.[k]) continue;
+              expect(text, where).not.toContain(`${k} = ${after}`);
+              expect(text, where).not.toContain(`[${next.meta.vars?.lo}, ${next.meta.vars?.hi}]`);
+            }
+          }
+        }
+      }
+    }
+  }, 30_000);
 
   it('answer() is pure: same frames, same index; missing vars give -1, not a crash', () => {
     const fs = frames(entry.presets[0].input);
@@ -317,11 +441,11 @@ describe('bs-answer-mini: predictions', () => {
 });
 
 describe('bs-answer-mini: frames', () => {
-  it('frame count <= 2*(floor(log2 max h)+1) + 6, and within maxFrames', () => {
+  it('frame count <= 3*(floor(log2 max h)+1) + 7, and within maxFrames', () => {
     let worst = 0;
     for (const input of family()) {
       const n = frames(input).length;
-      const bound = 2 * bits(Math.max(...input.h)) + 6;
+      const bound = 3 * bits(Math.max(...input.h)) + 7;
       expect(n, JSON.stringify(input)).toBeLessThanOrEqual(bound);
       worst = Math.max(worst, n);
     }
@@ -388,6 +512,17 @@ describe('bs-answer-mini: frames', () => {
     }
   });
 
+  it('en-US wording: meters, "Remaining", a single name m (no M, no metres, no Left)', () => {
+    const texts: string[] = [];
+    for (const p of entry.presets)
+      for (const f of frames(p.input, 'en-US')) texts.push(f.meta.explanation);
+    for (const { m } of allMessages()) texts.push(m['en-US']);
+    const all = texts.join('\n');
+    expect(all).not.toMatch(/metres?\b|\bLeft:|\bM\b/);
+    expect(all).toContain('meters');
+    expect(all).toContain('Remaining: [');
+  });
+
   it('the two locales differ in text but not in frames', () => {
     const a = frames(entry.presets[0].input, 'vi-VN');
     const b = frames(entry.presets[0].input, 'en-US');
@@ -417,12 +552,12 @@ describe('bs-answer-mini: code', () => {
     });
   }
 
-  it('pseudo has 7 lines, C++ 14, Python 11; no leftover line-number comments', () => {
+  it('pseudo has 7 lines, C++ 14, Python 11; no comments at all (impl is not localized)', () => {
     expect(entry.code.pseudo).toHaveLength(7);
     expect(entry.code.impl.cpp).toHaveLength(14);
     expect(entry.code.impl.py).toHaveLength(11);
-    for (const line of entry.code.impl.cpp) expect(line).not.toMatch(/\/\/\s*\d+\s*$/);
-    for (const line of entry.code.impl.py) expect(line).not.toMatch(/#\s*\d+\s*$/);
+    for (const line of entry.code.impl.cpp) expect(line).not.toContain('//');
+    for (const line of entry.code.impl.py) expect(line).not.toContain('#');
   });
 
   it('C++ uses long long for the total and rounds mid up; Python uses //', () => {

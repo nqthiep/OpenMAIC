@@ -19,6 +19,8 @@ export interface BsAnswerMiniState {
 
 /** Brute force shows at most this many attempts (from the tallest tree downwards). */
 const BRUTE_TRIES = 3;
+/** The H-axis band lists every candidate up to this many; wider bands are shortened with an ellipsis. */
+const BAND_FULL = 8;
 
 const same = (s: string): Messages => ({ 'vi-VN': s, 'en-US': s });
 
@@ -31,6 +33,20 @@ const varOf = (f: Frame<unknown> | undefined, key: string): number | undefined =
   const v = f?.meta.vars?.[key];
   return typeof v === 'number' ? v : undefined;
 };
+
+/** Candidate H values lo..hi for the band row; long bands keep both ends and the second value. */
+const band = (lo: number, hi: number): (number | string)[] => {
+  if (hi - lo + 1 <= BAND_FULL) return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
+  return [lo, lo + 1, '…', hi - 1, hi];
+};
+
+interface PutOpts {
+  kind?: HighlightKind;
+  /** per-tree wood row; hidden on frames that ask whether the wood is enough */
+  cut?: boolean;
+  /** candidate band [lo, hi] on the H axis */
+  range?: readonly [number, number];
+}
 
 function run(
   input: Readonly<BsAnswerMiniInput>,
@@ -47,51 +63,83 @@ function run(
   const put = (
     H: number | undefined,
     meta: Omit<FrameMeta, 'index'>,
-    kind: HighlightKind = 'active',
+    { kind = 'active', cut = true, range }: PutOpts = {},
   ): void => {
     const state: BsAnswerMiniState = { values: [...h], mode: 'bars' };
-    if (H === undefined) return emit(state, meta);
-    state.threshold = { value: H, label: 'H' };
-    const highlights: Record<string, HighlightKind> = {};
-    h.forEach((x, i) => {
-      if (x > H) highlights[String(i)] = kind;
-    });
-    emit(state, {
-      ...meta,
-      highlights,
-      aux: [
-        {
+    const extra: {
+      highlights?: Record<string, HighlightKind>;
+      aux?: { id: string; label: string; items: (number | string)[] }[];
+    } = {};
+    const aux: NonNullable<typeof extra.aux> = [];
+    if (H !== undefined) {
+      state.threshold = { value: H, label: 'H' };
+      const highlights: Record<string, HighlightKind> = {};
+      h.forEach((x, i) => {
+        if (x > H) highlights[String(i)] = kind;
+      });
+      extra.highlights = highlights;
+      if (cut) {
+        aux.push({
           id: 'cut',
-          label: t('Gỗ mỗi cây = max(0, h − H)', 'Wood per tree'),
+          label: t('Gỗ mỗi cây = max(0, h − H)', 'Wood per tree = max(0, h − H)'),
           items: woodPer(h, H),
-        },
-      ],
-    });
+        });
+      }
+    }
+    if (range) {
+      aux.push({
+        id: 'range',
+        label: t('Các H còn có thể là đáp án', 'H values still possible'),
+        items: band(range[0], range[1]),
+      });
+    }
+    if (aux.length > 0) extra.aux = aux;
+    emit(state, { ...meta, ...extra });
   };
 
   // brute: try H from the tallest tree downwards, stop when there is enough wood
-  let found = false;
-  for (let k = 0; k < BRUTE_TRIES && top - k >= 0 && !found; k++) {
-    tick();
+  const tries: { H: number; got: number }[] = [];
+  for (let k = 0; k < BRUTE_TRIES && top - k >= 0; k++) {
     const H = top - k;
-    const got = wood(h, H);
-    found = got >= m;
-    const more = !found && k === BRUTE_TRIES - 1;
+    tries.push({ H, got: wood(h, H) });
+    if (tries[k].got >= m) break;
+  }
+  tries.forEach(({ H, got }, k) => {
+    tick();
+    const isLast = k === tries.length - 1;
+    const enough = got >= m;
     put(H, {
       explanation: vi
-        ? `Thử H = ${H}: wood(H) = ${got}, ${found ? 'đủ' : 'chưa đủ'} m = ${m}.${more ? ' Cứ thử mãi thế này thì quá chậm.' : ''}`
-        : `Try H = ${H}: wood(H) = ${got}, ${found ? 'enough' : 'not enough'} for m = ${m}.${more ? ' Trying them all like this is too slow.' : ''}`,
+        ? `Thử H = ${H}: wood(H) = ${got}, ${enough ? 'đủ' : 'chưa đủ'} m = ${m}.${isLast && !enough ? ' Cứ thử mãi thế này thì quá chậm.' : ''}`
+        : `Try H = ${H}: wood(H) = ${got}, ${enough ? 'enough' : 'not enough'} for m = ${m}.${isLast && !enough ? ' Trying them all like this is too slow.' : ''}`,
       codeLine: 1,
-      vars: { H, got, m, top },
-      tags: k === 0 ? ['beat:brute'] : undefined,
+      vars: {
+        H,
+        got,
+        m,
+        top,
+        ...(isLast && { tried: tries.map((x) => x.H).join(', ') }),
+      },
+      // the narrated brute beat sits on the last try and covers all of them
+      tags: isLast ? ['beat:brute'] : undefined,
     });
-  }
+  });
 
-  // monotonic: raise H by one from the middle height; wood strictly drops (the tallest tree loses 1)
+  // monotonic: raise H by one from the middle height; wood strictly drops (the tallest tree loses 1).
+  // The question frame shows only the old H; the next frame reveals the drop.
   const Hold = Math.floor(top / 2);
   const H1 = Hold + 1;
   const gotOld = wood(h, Hold);
   const got1 = wood(h, H1);
+  put(Hold, {
+    explanation: t(
+      `Cưa ở H = ${Hold} được ${gotOld} mét. Nếu nâng H lên một đơn vị thì tổng gỗ thay đổi thế nào?`,
+      `Cutting at H = ${Hold} gives ${gotOld} meters. If we raise H by one, how does the total wood change?`,
+    ),
+    codeLine: 1,
+    vars: { H: Hold, got: gotOld, m, top },
+    tags: ['beat:monotonic'],
+  });
   put(H1, {
     explanation: t(
       `Nâng H từ ${Hold} lên ${H1}: gỗ từ ${gotOld} xuống ${got1}. H càng cao, gỗ càng ít.`,
@@ -99,50 +147,76 @@ function run(
     ),
     codeLine: 1,
     vars: { H: H1, got: got1, Hold, gotOld, m, top },
-    tags: ['beat:monotonic'],
   });
 
   // binary search on H; invariant: wood(lo) >= m (m <= sum(h) = wood(0)) and no H > hi works
   let lo = 0;
   let hi = top;
-  put(undefined, {
-    explanation: t(
-      `Chặt nhị phân trên H: lo = ${lo} luôn đủ gỗ (m ≤ tổng), hi = ${hi} là cây cao nhất.`,
-      `Binary search on H: lo = ${lo} always works (m ≤ total), hi = ${hi} is the tallest tree.`,
-    ),
-    codeLine: 2,
-    vars: { lo, hi, m },
-  });
+  put(
+    undefined,
+    {
+      explanation: t(
+        `Chặt nhị phân trên H: lo = ${lo} luôn đủ gỗ (m ≤ tổng), hi = ${hi} là cây cao nhất.`,
+        `Binary search on H: lo = ${lo} always works (m ≤ total), hi = ${hi} is the tallest tree.`,
+      ),
+      codeLine: 2,
+      vars: { lo, hi, m },
+      tags: ['beat:init'],
+    },
+    { range: [lo, hi] },
+  );
   while (lo < hi) {
     tick();
     const mid = Math.floor((lo + hi + 1) / 2); // round up, or lo = mid would loop forever
     const got = wood(h, mid);
     const ok = got >= m;
-    put(mid, {
-      explanation: t(
-        `Cưa ở mid = ${mid}: được ${got} mét, ${ok ? 'đủ' : 'chưa đủ'} m = ${m}.`,
-        `Cut at mid = ${mid}: ${got} metres, ${ok ? 'enough' : 'not enough'} for m = ${m}.`,
-      ),
-      codeLine: 5,
-      vars: { lo, hi, mid, got, m },
-      tags: ['beat:check'],
-    });
+    // question frame: H line at mid, but neither the wood nor the verdict is shown yet
+    put(
+      mid,
+      {
+        explanation: t(
+          `Còn [${lo}, ${hi}]. Thử cưa ở H = ${mid} (giữa, làm tròn lên): có đủ m = ${m} mét gỗ không?`,
+          `Remaining: [${lo}, ${hi}]. Try cutting at H = ${mid} (middle, rounded up): is there enough wood for m = ${m}?`,
+        ),
+        codeLine: 4,
+        vars: { lo, hi, mid, m },
+        tags: ['beat:check'],
+      },
+      { cut: false, range: [lo, hi] },
+    );
+    // result frame: wood and verdict, the bounds are still the old ones
+    put(
+      mid,
+      {
+        explanation: t(
+          `Cưa ở H = ${mid}: được ${got} mét, ${ok ? 'đủ' : 'chưa đủ'} m = ${m}.`,
+          `Cut at H = ${mid}: ${got} meters, ${ok ? 'enough' : 'not enough'} for m = ${m}.`,
+        ),
+        codeLine: 5,
+        vars: { lo, hi, mid, got, m },
+        tags: ['beat:narrow'],
+      },
+      { range: [lo, hi] },
+    );
     if (ok) lo = mid;
     else hi = mid - 1;
-    put(mid, {
-      explanation: ok
-        ? t(
-            `Đủ gỗ nên đáp án ≥ ${mid}: lo = ${lo}. Còn [${lo}, ${hi}].`,
-            `Enough wood, so the answer is ≥ ${mid}: lo = ${lo}. Left: [${lo}, ${hi}].`,
-          )
-        : t(
-            `Thiếu gỗ nên đáp án < ${mid}: hi = ${hi}. Còn [${lo}, ${hi}].`,
-            `Not enough wood, so the answer is < ${mid}: hi = ${hi}. Left: [${lo}, ${hi}].`,
-          ),
-      codeLine: ok ? 5 : 6,
-      vars: { lo, hi, mid, got, m },
-      tags: ['beat:narrow'],
-    });
+    put(
+      mid,
+      {
+        explanation: ok
+          ? t(
+              `Đủ gỗ nên đáp án ≥ ${mid}: lo = ${lo}. Còn [${lo}, ${hi}].`,
+              `Enough wood, so the answer is ≥ ${mid}: lo = ${lo}. Remaining: [${lo}, ${hi}].`,
+            )
+          : t(
+              `Thiếu gỗ nên đáp án < ${mid}: hi = ${hi}. Còn [${lo}, ${hi}].`,
+              `Not enough wood, so the answer is < ${mid}: hi = ${hi}. Remaining: [${lo}, ${hi}].`,
+            ),
+        codeLine: ok ? 5 : 6,
+        vars: { lo, hi, mid, got, m },
+      },
+      { range: [lo, hi] },
+    );
   }
 
   const got = wood(h, lo);
@@ -151,19 +225,19 @@ function run(
     {
       explanation: t(
         `lo = hi = ${lo}: H lớn nhất là ${lo}, được ${got} mét, đủ m = ${m}.`,
-        `lo = hi = ${lo}: the largest H is ${lo}, giving ${got} metres, enough for m = ${m}.`,
+        `lo = hi = ${lo}: the largest H is ${lo}, giving ${got} meters, enough for m = ${m}.`,
       ),
       codeLine: 7,
       vars: { lo, hi, got, m },
       tags: ['beat:done'],
     },
-    'result',
+    { kind: 'result' },
   );
 }
 
 export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMiniState> = {
   id: 'bs-answer-mini',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],
@@ -184,14 +258,14 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
     impl: {
       cpp: [
         'long long wood(const std::vector<int>& h, int H) {',
-        '    long long s = 0;  // tổng có thể vượt int',
+        '    long long s = 0;',
         '    for (int x : h) s += std::max(0, x - H);',
         '    return s;',
         '}',
         'int best_height(const std::vector<int>& h, long long m) {',
         '    int lo = 0, hi = *std::max_element(h.begin(), h.end());',
         '    while (lo < hi) {',
-        '        int mid = lo + (hi - lo + 1) / 2;  // làm tròn lên',
+        '        int mid = lo + (hi - lo + 1) / 2;',
         '        if (wood(h, mid) >= m) lo = mid;',
         '        else hi = mid - 1;',
         '    }',
@@ -204,7 +278,7 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
         'def best_height(h, m):',
         '    lo, hi = 0, max(h)',
         '    while lo < hi:',
-        '        mid = (lo + hi + 1) // 2  # làm tròn lên, dùng //',
+        '        mid = (lo + hi + 1) // 2',
         '        if wood(h, mid) >= m:',
         '            lo = mid',
         '        else:',
@@ -229,27 +303,27 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
   presets: [
     {
       id: 'classic',
-      label: { 'vi-VN': 'Ví dụ chuẩn', 'en-US': 'Classic' },
+      label: { 'vi-VN': 'Ví dụ chuẩn', 'en-US': 'Standard example' },
       input: { h: [20, 15, 10, 17], m: 7 },
     },
     {
       id: 'all-equal',
-      label: { 'vi-VN': 'Các cây bằng nhau', 'en-US': 'All equal' },
+      label: { 'vi-VN': 'Các cây bằng nhau', 'en-US': 'All trees equal' },
       input: { h: [5, 5, 5, 5], m: 8 },
     },
     {
       id: 'one-tree',
-      label: { 'vi-VN': 'Một cây', 'en-US': 'One tree' },
+      label: { 'vi-VN': 'Một cây', 'en-US': 'A single tree' },
       input: { h: [30], m: 12 },
     },
     {
       id: 'take-all',
-      label: { 'vi-VN': 'Lấy hết (H = 0)', 'en-US': 'Take all (H = 0)' },
+      label: { 'vi-VN': 'Lấy hết (H = 0)', 'en-US': 'Take all the wood (H = 0)' },
       input: { h: [3, 8, 2], m: 13 },
     },
     {
       id: 'tiny-need',
-      label: { 'vi-VN': 'Nhu cầu nhỏ', 'en-US': 'Tiny need' },
+      label: { 'vi-VN': 'Cần rất ít gỗ', 'en-US': 'Very little wood needed' },
       input: { h: [9, 4, 7], m: 1 },
     },
   ],
@@ -260,9 +334,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Vét cạn', 'en-US': 'Brute force' },
       narration: {
         'vi-VN':
-          'Vét cạn: thử H từ cây cao nhất ({top}) trở xuống. Cưa ở H = {H} được {got} mét, cần m = {m}.',
+          'Vét cạn: thử H lần lượt {tried}, từ cây cao nhất ({top}) hạ dần. Ở H = {H} được {got} mét, cần m = {m}. Thử từng H thế này quá chậm khi h rất lớn.',
         'en-US':
-          'Brute force: try H from the tallest tree ({top}) downwards. Cutting at H = {H} gives {got}, and we need m = {m}.',
+          'Brute force: try H = {tried}, going down from the tallest tree ({top}). At H = {H} we get {got} meters and need m = {m}. Trying every H like this is too slow when h is huge.',
       },
       hints: [
         {
@@ -272,7 +346,7 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
         {
           'vi-VN': 'Cây cao hơn H cho h[i] − H mét gỗ, cây thấp hơn cho 0. Cộng lại được wood(H).',
           'en-US':
-            'A tree taller than H gives h[i] − H metres, a shorter one gives 0. Add them up to get wood(H).',
+            'A tree taller than H gives h[i] − H meters, a shorter one gives 0. Add them up to get wood(H).',
         },
         {
           'vi-VN':
@@ -294,9 +368,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Gỗ giảm khi H tăng', 'en-US': 'Wood shrinks as H grows' },
       narration: {
         'vi-VN':
-          'Nâng H từ {Hold} lên {H}: gỗ từ {gotOld} xuống {got}. H càng cao thì gỗ càng ít, nên nếu một H đủ gỗ thì mọi H thấp hơn cũng đủ.',
+          'Cưa ở H = {H} được {got} mét. Nâng H lên thì mỗi cây cao hơn H mất bớt gỗ, nên gỗ chỉ giảm hoặc giữ nguyên: một H đủ gỗ thì mọi H thấp hơn cũng đủ.',
         'en-US':
-          'Raise H from {Hold} to {H}: wood drops from {gotOld} to {got}. The higher H, the less wood, so if some H has enough wood then every lower H does too.',
+          'Cutting at H = {H} gives {got} meters. Raising H makes every tree taller than H lose wood, so the total never grows: if some H has enough wood then every lower H does too.',
       },
       ask: {
         text: {
@@ -310,9 +384,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
             { 'vi-VN': 'Giảm', 'en-US': 'Goes down' },
             { 'vi-VN': 'Không đổi', 'en-US': 'Stays the same' },
           ],
-          answer: (frame) => {
-            const before = varOf(frame, 'gotOld');
-            const after = varOf(frame, 'got');
+          answer: (frame, next) => {
+            const before = varOf(frame, 'got');
+            const after = varOf(next, 'got');
             if (before === undefined || after === undefined) return -1;
             return after > before ? 0 : after < before ? 1 : 2;
           },
@@ -350,13 +424,65 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       ],
     },
     {
+      id: 'init',
+      label: { 'vi-VN': 'Khoảng ban đầu', 'en-US': 'Starting range' },
+      narration: {
+        'vi-VN':
+          'Ta chặt nhị phân trên H. Bất biến: lo = {lo} luôn đủ gỗ vì m = {m} không vượt tổng chiều cao, và không H nào lớn hơn hi = {hi} đủ gỗ. Đáp án nằm trong [{lo}, {hi}].',
+        'en-US':
+          'We binary search on H. Invariant: lo = {lo} always has enough wood because m = {m} does not exceed the total height, and no H above hi = {hi} does. The answer lies in [{lo}, {hi}].',
+      },
+      hints: [
+        {
+          'vi-VN': 'Trước khi chặt, đáp án H có thể nằm trong khoảng nào?',
+          'en-US': 'Before searching, which range can the answer H lie in?',
+        },
+        {
+          'vi-VN': 'H nhỏ nhất là 0 (lấy hết gỗ); H lớn hơn cây cao nhất thì không có gỗ nào.',
+          'en-US':
+            'The smallest H is 0 (take all the wood); an H above the tallest tree gives no wood.',
+        },
+        {
+          'vi-VN':
+            'lo = 0 luôn đủ gỗ vì m ≤ tổng; mọi H lớn hơn hi đều thiếu gỗ. Đáp án thuộc [lo, hi].',
+          'en-US':
+            'lo = 0 always has enough wood since m ≤ total; every H above hi falls short. The answer is in [lo, hi].',
+        },
+      ],
+      misconceptions: [
+        {
+          'vi-VN': 'Nghĩ rằng lo phải bắt đầu từ 1: khi m bằng tổng chiều cao thì đáp án là 0.',
+          'en-US': 'Thinking lo must start at 1: when m equals the total height the answer is 0.',
+        },
+      ],
+    },
+    {
       id: 'check',
       label: { 'vi-VN': 'Kiểm tra mid', 'en-US': 'Check mid' },
       narration: {
         'vi-VN':
-          'Thử một H ở giữa: mid = {mid} trong [{lo}, {hi}], làm tròn lên. wood(mid) = {got}, cần m = {m}.',
+          'Khoảng đang xét còn [{lo}, {hi}]. Thử H ở giữa, làm tròn lên: mid = {mid}. Cần wood(mid) ≥ m = {m}.',
         'en-US':
-          'Try the middle H: mid = {mid} in [{lo}, {hi}], rounded up. wood(mid) = {got}, and we need m = {m}.',
+          'The range is [{lo}, {hi}]. Try the middle H, rounded up: mid = {mid}. We need wood(mid) ≥ m = {m}.',
+      },
+      ask: {
+        text: {
+          'vi-VN': 'Theo em, cưa ở mid này có đủ gỗ (wood(mid) ≥ m) không?',
+          'en-US': 'Do you think cutting at this mid gives enough wood (wood(mid) ≥ m)?',
+        },
+        predict: {
+          kind: 'choice',
+          options: [
+            { 'vi-VN': 'Đủ gỗ', 'en-US': 'Enough wood' },
+            { 'vi-VN': 'Thiếu gỗ', 'en-US': 'Not enough wood' },
+          ],
+          answer: (_frame, next) => {
+            const got = varOf(next, 'got');
+            const m = varOf(next, 'm');
+            if (got === undefined || m === undefined) return -1;
+            return got >= m ? 0 : 1;
+          },
+        },
       },
       hints: [
         {
@@ -390,9 +516,10 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       id: 'narrow',
       label: { 'vi-VN': 'Thu hẹp', 'en-US': 'Narrow down' },
       narration: {
-        'vi-VN': 'Sau khi so wood({mid}) = {got} với m = {m}, đáp án nằm trong [{lo}, {hi}].',
+        'vi-VN':
+          'Cưa ở H = {mid} được {got} mét, so với m = {m}. Đủ gỗ thì đáp án ≥ mid nên lo = mid; thiếu gỗ thì đáp án < mid nên hi = mid − 1.',
         'en-US':
-          'After comparing wood({mid}) = {got} with m = {m}, the answer lies in [{lo}, {hi}].',
+          'Cutting at H = {mid} gives {got} meters, compared with m = {m}. Enough wood: the answer is ≥ mid, so lo = mid. Not enough: the answer is < mid, so hi = mid − 1.',
       },
       ask: {
         text: {
@@ -405,11 +532,11 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
             { 'vi-VN': 'lo', 'en-US': 'lo' },
             { 'vi-VN': 'hi', 'en-US': 'hi' },
           ],
-          answer: (frame) => {
-            const lo = varOf(frame, 'lo');
-            const mid = varOf(frame, 'mid');
-            if (lo === undefined || mid === undefined) return -1;
-            return lo === mid ? 0 : 1;
+          answer: (frame, next) => {
+            const before = varOf(frame, 'lo');
+            const after = varOf(next, 'lo');
+            if (before === undefined || after === undefined) return -1;
+            return after !== before ? 0 : 1;
           },
         },
       },
@@ -450,7 +577,7 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       narration: {
         'vi-VN': 'Khi lo = hi = {lo}, đó là H lớn nhất: cưa ở đó được {got} mét, đủ m = {m}.',
         'en-US':
-          'When lo = hi = {lo}, that is the largest H: cutting there gives {got} metres, enough for m = {m}.',
+          'When lo = hi = {lo}, that is the largest H: cutting there gives {got} meters, enough for m = {m}.',
       },
       hints: [
         {
@@ -477,11 +604,11 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
   problem: {
     statement: {
       'vi-VN':
-        'Có n cây, cây thứ i cao h[i] mét; cần ít nhất M mét gỗ. Đặt máy cưa ở độ cao H: cây cao hơn H bị cắt phần trên, cây thấp hơn giữ nguyên. Tìm H nguyên lớn nhất để tổng gỗ thu được không ít hơn M.',
+        'Có n cây, cây thứ i cao h[i] mét; cần ít nhất m mét gỗ. Đặt máy cưa ở độ cao H: cây cao hơn H bị cắt phần trên, cây thấp hơn giữ nguyên. Tìm H nguyên lớn nhất để tổng gỗ thu được không ít hơn m.',
       'en-US':
-        'There are n trees, tree i is h[i] metres tall; at least M metres of wood are needed. The saw is set at height H: trees taller than H lose their top, shorter trees stay. Find the largest integer H whose total wood is at least M.',
+        'There are n trees, tree i is h[i] meters tall; at least m meters of wood are needed. The saw is set at height H: trees taller than H lose their top, shorter trees stay. Find the largest integer H whose total wood is at least m.',
     },
-    constraints: [same('1 ≤ n ≤ 10^5'), same('1 ≤ h[i] ≤ 10^9'), same('1 ≤ M ≤ Σ h[i]')],
+    constraints: [same('1 ≤ n ≤ 10^5'), same('1 ≤ h[i] ≤ 10^9'), same('1 ≤ m ≤ Σ h[i]')],
     subtasks: [
       {
         id: 'brute',
@@ -535,8 +662,8 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       beat: 'done',
       text: {
         'vi-VN':
-          'Quên biên H = 0: khi M bằng tổng chiều cao thì lo phải bắt đầu từ 0, không phải 1.',
-        'en-US': 'Forgetting H = 0: when M equals the total height, lo must start at 0, not 1.',
+          'Quên biên H = 0: khi m bằng tổng chiều cao thì lo phải bắt đầu từ 0, không phải 1.',
+        'en-US': 'Forgetting H = 0: when m equals the total height, lo must start at 0, not 1.',
       },
     },
   ],

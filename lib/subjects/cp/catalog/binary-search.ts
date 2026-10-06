@@ -26,8 +26,12 @@ const EX = {
     'Take the middle of the range [{lo}, {hi}]: mid = {mid}, a[mid] = {amid}.',
   ),
   hit: m(
-    'a[{mid}] = {amid} bằng target = {target}: tìm thấy, trả về chỉ số {mid}.',
-    'a[{mid}] = {amid} equals target = {target}: found, return index {mid}.',
+    'a[{mid}] = {amid} bằng target = {target}: tìm thấy ở chỉ số {mid}.',
+    'a[{mid}] = {amid} equals target = {target}: found at index {mid}.',
+  ),
+  doneHit: m(
+    'Trả về chỉ số {mid} sau {steps} lần so sánh với phần tử giữa.',
+    'Return index {mid} after {steps} comparisons with the middle element.',
   ),
   right: m(
     'a[{mid}] = {amid} nhỏ hơn target = {target}, nên target ở bên phải. Bỏ nửa trái: lo = {lo}.',
@@ -38,8 +42,12 @@ const EX = {
     'a[{mid}] = {amid} is larger than target = {target}, so target is on the left. Drop the right half: hi = {hi}.',
   ),
   miss: m(
-    'lo = {lo} > hi = {hi}: khoảng tìm rỗng, {target} không có trong mảng nên trả về −1.',
-    'lo = {lo} > hi = {hi}: the range is empty, {target} is not in the array, so return −1.',
+    'lo = {lo} > hi = {hi}: khoảng tìm rỗng, {target} không có trong mảng.',
+    'lo = {lo} > hi = {hi}: the range is empty, {target} is not in the array.',
+  ),
+  doneMiss: m(
+    'Trả về −1 sau {steps} lần so sánh với phần tử giữa.',
+    'Return −1 after {steps} comparisons with the middle element.',
   ),
 };
 
@@ -93,7 +101,7 @@ const beatDefs: readonly BeatDef[] = [
           const tags = next?.meta.tags ?? [];
           if (tags.includes('beat:go-right')) return 0;
           if (tags.includes('beat:go-left')) return 1;
-          return 2;
+          return 2; // beat:found
         },
       },
     },
@@ -104,8 +112,8 @@ const beatDefs: readonly BeatDef[] = [
         'If a[mid] is smaller than target, which side is target on?',
       ),
       m(
-        'a[mid] < target ⇒ bỏ nửa trái ⇒ lo = mid + 1; ngược lại hi = mid − 1.',
-        'a[mid] < target ⇒ drop the left half ⇒ lo = mid + 1; otherwise hi = mid − 1.',
+        'a[mid] = target ⇒ tìm thấy, trả về mid; a[mid] < target ⇒ lo = mid + 1; a[mid] > target ⇒ hi = mid − 1.',
+        'a[mid] = target ⇒ found, return mid; a[mid] < target ⇒ lo = mid + 1; a[mid] > target ⇒ hi = mid − 1.',
       ),
     ],
     misconceptions: [
@@ -176,12 +184,65 @@ const beatDefs: readonly BeatDef[] = [
     ],
   },
   {
+    id: 'found',
+    label: m('Tìm thấy', 'Found'),
+    narration: m(
+      'a[{mid}] = {amid} đúng bằng {target}: tìm thấy {target} ở chỉ số {mid}, dừng vòng lặp.',
+      'a[{mid}] = {amid} equals {target}: we found {target} at index {mid} and stop the loop.',
+    ),
+    hints: [
+      m('So a[mid] với target: hai số thế nào?', 'Compare a[mid] with target: how do they relate?'),
+      m(
+        'Hai số bằng nhau thì không còn gì phải tìm nữa.',
+        'When the two are equal there is nothing left to search for.',
+      ),
+      m(
+        'a[mid] = target ⇒ trả về mid ngay, không đổi lo hay hi.',
+        'a[mid] = target ⇒ return mid at once, without changing lo or hi.',
+      ),
+    ],
+    misconceptions: [
+      m(
+        'Nghĩ rằng sau khi tìm thấy vẫn phải thu hẹp khoảng tiếp.',
+        'Thinking we must keep narrowing the range after finding the target.',
+      ),
+    ],
+  },
+  {
+    id: 'not-found',
+    label: m('Không có', 'Not found'),
+    narration: m(
+      'lo = {lo} đã vượt hi = {hi}: khoảng tìm rỗng nên {target} không có trong mảng.',
+      'lo = {lo} has passed hi = {hi}: the range is empty, so {target} is not in the array.',
+    ),
+    hints: [
+      m(
+        'Khoảng [lo, hi] lúc này còn phần tử nào không?',
+        'Does the range [lo, hi] hold any element now?',
+      ),
+      m(
+        'lo > hi nghĩa là khoảng rỗng: mọi phần tử đã bị loại.',
+        'lo > hi means the range is empty: every element has been ruled out.',
+      ),
+      m(
+        'Mọi phần tử đã bị loại mà không có target, nên target không có trong mảng.',
+        'Every element was ruled out and none was target, so target is not in the array.',
+      ),
+    ],
+    misconceptions: [
+      m(
+        'Nghĩ rằng khi không thấy thì hàm trả về vị trí gần nhất, thay vì −1.',
+        'Thinking the function returns the nearest position when not found, instead of −1.',
+      ),
+    ],
+  },
+  {
     id: 'done',
     required: true,
     label: m('Kết thúc', 'Done'),
     narration: m(
-      'Kết thúc: trả về chỉ số của {target} nếu tìm thấy, ngược lại trả về −1.',
-      'Done: return the index of {target} if it was found, otherwise return −1.',
+      'Xong sau {steps} lần so sánh. Mỗi lần loại một nửa khoảng tìm, nên với n phần tử chỉ cần cỡ log₂ n lần.',
+      'Done after {steps} comparisons. Each one drops half of the range, so n elements need only about log₂ n of them.',
     ),
     hints: [
       m('Vòng lặp dừng vì lý do nào?', 'Why did the loop stop?'),
@@ -190,14 +251,14 @@ const beatDefs: readonly BeatDef[] = [
         'There are two ways to stop: a[mid] = target is found, or lo > hi.',
       ),
       m(
-        'Khi lo > hi, khoảng tìm rỗng nên target không có trong mảng: trả về −1.',
-        'When lo > hi the range is empty, so target is not in the array: return −1.',
+        'Mỗi lần so sánh loại một nửa khoảng, nên số lần so sánh chỉ cỡ log₂ n, không phải n.',
+        'Each comparison drops half of the range, so the number of comparisons is about log₂ n, not n.',
       ),
     ],
     misconceptions: [
       m(
-        'Nghĩ rằng khi không thấy thì hàm trả về vị trí gần nhất, thay vì −1.',
-        'Thinking the function returns the nearest position when not found, instead of −1.',
+        'Nghĩ rằng tìm nhị phân cần đọc gần hết mảng như tìm tuần tự.',
+        'Thinking binary search must read most of the array, like a linear scan.',
       ),
     ],
   },
@@ -208,16 +269,18 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
   const state: S = { values: a, mode: 'bars' };
   let lo = 0;
   let hi = a.length - 1;
-  let mid = -1; // -1 until the first mid is computed
+  let mid = -1;
+  let steps = 0; // comparisons with the middle element so far
 
-  /** `mark`: how to draw mid in this frame; omit to hide the mid pointer. */
+  /** `mark`: how to draw mid in this frame; without it mid is hidden and not in vars (no stale mid). */
   const at = (text: Messages, codeLine: number, tag?: string, mark?: HighlightKind): void => {
     const vars: Record<string, number> = { lo, hi };
-    if (mid >= 0) {
+    if (mark) {
       vars.mid = mid;
       vars.amid = a[mid];
     }
     vars.target = target;
+    if (tag === 'done') vars.steps = steps;
     const highlights: Record<string, HighlightKind> = {};
     for (let i = 0; i < a.length; i++) highlights[i] = i < lo || i > hi ? 'muted' : 'active';
     const pointers: Record<string, number> = { lo, hi };
@@ -240,8 +303,12 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
     tick();
     at(EX.check, 2);
     mid = Math.floor((lo + hi) / 2);
+    steps++;
     at(EX.mid, 3, 'mid', 'compare');
-    if (a[mid] === target) return at(EX.hit, 4, 'done', 'result');
+    if (a[mid] === target) {
+      at(EX.hit, 4, 'found', 'result');
+      return at(EX.doneHit, 4, 'done', 'result');
+    }
     if (a[mid] < target) {
       lo = mid + 1;
       at(EX.right, 5, 'go-right', 'muted');
@@ -250,14 +317,15 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
       at(EX.left, 6, 'go-left', 'muted');
     }
   }
-  at(EX.miss, 7, 'done');
+  at(EX.miss, 7, 'not-found');
+  at(EX.doneMiss, 7, 'done');
 }
 
 const SORTED = [3, 8, 12, 17, 25, 31, 40, 52, 66, 79];
 
 export const binarySearchEntry: WalkthroughEntry<In, S> = {
   id: 'binary-search',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],
@@ -277,7 +345,7 @@ export const binarySearchEntry: WalkthroughEntry<In, S> = {
         'int binary_search(const std::vector<int>& a, int target) {',
         '    int lo = 0, hi = (int)a.size() - 1;',
         '    while (lo <= hi) {',
-        '        int mid = lo + (hi - lo) / 2;  // tránh tràn số',
+        '        int mid = lo + (hi - lo) / 2;',
         '        if (a[mid] == target) return mid;',
         '        if (a[mid] < target) lo = mid + 1;',
         '        else hi = mid - 1;',
@@ -289,7 +357,7 @@ export const binarySearchEntry: WalkthroughEntry<In, S> = {
         'def binary_search(a, target):',
         '    lo, hi = 0, len(a) - 1',
         '    while lo <= hi:',
-        '        mid = (lo + hi) // 2  # Python không tràn số',
+        '        mid = (lo + hi) // 2',
         '        if a[mid] == target:',
         '            return mid',
         '        if a[mid] < target:',
@@ -313,19 +381,19 @@ export const binarySearchEntry: WalkthroughEntry<In, S> = {
   customInput: false,
   presets: [
     {
+      id: 'absent',
+      label: m('Không có trong mảng', 'Not in the array'),
+      input: { values: SORTED, target: 45 },
+    },
+    {
       id: 'mid-hit',
-      label: m('Trúng ngay giữa', 'Hit at the first middle'),
+      label: m('Trúng ngay giữa', 'Hit on the first try'),
       input: { values: SORTED, target: 25 },
     },
     {
       id: 'first',
       label: m('Phần tử đầu tiên', 'First element'),
       input: { values: SORTED, target: 3 },
-    },
-    {
-      id: 'absent',
-      label: m('Không có trong mảng', 'Not in the array'),
-      input: { values: SORTED, target: 45 },
     },
     {
       id: 'single',

@@ -10,7 +10,7 @@ type In = { values: number[]; target: number };
 type S = { values: number[]; mode: 'bars' };
 
 const LOCALES = ['vi-VN', 'en-US'] as const;
-const VAR_NAMES = ['lo', 'hi', 'mid', 'amid', 'target'];
+const VAR_NAMES = ['lo', 'hi', 'mid', 'amid', 'target', 'steps'];
 
 const gen = (input: In, locale: string = 'vi-VN'): readonly Frame<S>[] =>
   steps<In, S>(entry, input, { locale });
@@ -39,7 +39,7 @@ const WIDE: In[] = [
 describe('binarySearchEntry static fields', () => {
   it('matches SCHEMA §4.1', () => {
     expect(entry.id).toBe('binary-search');
-    expect(entry.entryRev).toBe(1);
+    expect(entry.entryRev).toBe(2);
     expect(entry.subject).toBe('cp');
     expect(entry.visualizer).toBe('array');
     expect(entry.curriculumTopics).toEqual(['t2-binary-search']);
@@ -54,13 +54,15 @@ describe('binarySearchEntry static fields', () => {
       'mid',
       'go-right',
       'go-left',
+      'found',
+      'not-found',
       'done',
     ]);
   });
 
-  it('keeps meaning comments but no line-number comments in real code', () => {
-    for (const line of [...entry.code.impl.cpp, ...entry.code.impl.py])
-      expect(line).not.toMatch(/(\/\/|#)\s*\d+\s*$/);
+  it('real code has no comments: impl lines are not localized, pitfalls carry the notes', () => {
+    for (const line of entry.code.impl.cpp) expect(line).not.toContain('//');
+    for (const line of entry.code.impl.py) expect(line).not.toContain('#');
   });
 });
 
@@ -102,9 +104,21 @@ describe('run: result', () => {
   });
 
   it('n = 1: hit and miss on both sides', () => {
-    expect(beats(gen({ values: [7], target: 7 }))).toEqual(['start', 'mid', 'done']);
-    expect(beats(gen({ values: [7], target: 3 }))).toEqual(['start', 'mid', 'go-left', 'done']);
-    expect(beats(gen({ values: [7], target: 9 }))).toEqual(['start', 'mid', 'go-right', 'done']);
+    expect(beats(gen({ values: [7], target: 7 }))).toEqual(['start', 'mid', 'found', 'done']);
+    expect(beats(gen({ values: [7], target: 3 }))).toEqual([
+      'start',
+      'mid',
+      'go-left',
+      'not-found',
+      'done',
+    ]);
+    expect(beats(gen({ values: [7], target: 9 }))).toEqual([
+      'start',
+      'mid',
+      'go-right',
+      'not-found',
+      'done',
+    ]);
     const left = gen({ values: [7], target: 3 });
     expect(left[left.length - 1].meta.vars).toMatchObject({ lo: 0, hi: -1 });
   });
@@ -160,6 +174,16 @@ describe('run: frame shape', () => {
         const { mid, amid } = f.meta.vars ?? {};
         expect(f.meta.pointers?.mid).toBe(mid);
         expect(input.values[mid as number]).toBe(amid);
+      }
+    }
+  });
+
+  it('only frames that draw mid carry mid/amid in vars (no stale mid on check frames)', () => {
+    for (const input of all) {
+      for (const f of gen(input)) {
+        const drawn = f.meta.pointers?.mid !== undefined;
+        expect('mid' in (f.meta.vars ?? {}), JSON.stringify(f.meta)).toBe(drawn);
+        expect('amid' in (f.meta.vars ?? {})).toBe(drawn);
       }
     }
   });
@@ -244,14 +268,14 @@ describe('code maps', () => {
 });
 
 describe('presets and beats', () => {
-  it('has the four presets', () => {
-    expect(entry.presets.map((p) => p.id)).toEqual(['mid-hit', 'first', 'absent', 'single']);
+  it('has the four presets, `absent` first (the default)', () => {
+    expect(entry.presets.map((p) => p.id)).toEqual(['absent', 'mid-hit', 'first', 'single']);
     expect(new Set(entry.presets.map((p) => p.id)).size).toBe(entry.presets.length);
   });
 
   it('mid-hit lands on the first mid; single has n = 1', () => {
     const mid = entry.presets.find((p) => p.id === 'mid-hit')!;
-    expect(beats(gen(mid.input))).toEqual(['start', 'mid', 'done']);
+    expect(beats(gen(mid.input))).toEqual(['start', 'mid', 'found', 'done']);
     expect(entry.presets.find((p) => p.id === 'single')!.input.values).toHaveLength(1);
     const first = entry.presets.find((p) => p.id === 'first')!;
     expect(first.input.target).toBe(first.input.values[0]);
@@ -280,12 +304,17 @@ describe('presets and beats', () => {
     for (const id of ids) expect(count.get(id), id).toBeGreaterThanOrEqual(1);
   });
 
-  it('beat order: mid is always followed by go-* or done', () => {
+  it('beat order: mid is followed by go-* or found; exactly one of found / not-found, then done', () => {
     for (const p of entry.presets) {
       const seq = beats(gen(p.input));
       seq.forEach((b, i) => {
-        if (b === 'mid') expect(['go-left', 'go-right', 'done']).toContain(seq[i + 1]);
+        if (b === 'mid') expect(['go-left', 'go-right', 'found']).toContain(seq[i + 1]);
       });
+      expect(seq.slice(-2), p.id).toEqual([
+        p.input.values.includes(p.input.target) ? 'found' : 'not-found',
+        'done',
+      ]);
+      expect(seq.filter((b) => b === 'found' || b === 'not-found')).toHaveLength(1);
     }
   });
 
@@ -313,9 +342,30 @@ describe('presets and beats', () => {
         expect(answer, `${preset.id}#${i}`).toBeLessThan(predict.options.length);
         const lo = next?.meta.vars?.lo;
         const hi = next?.meta.vars?.hi;
-        const hit = next?.meta.tags?.includes('beat:done') && next.meta.codeLine === 4;
+        const hit = next?.meta.tags?.includes('beat:found');
         const expected = hit ? 2 : lo !== f.meta.vars?.lo ? 0 : hi !== f.meta.vars?.hi ? 1 : -1;
         expect(answer, `${preset.id}#${i}`).toBe(expected);
+      });
+    }
+  });
+
+  it('the question frame (mid) does not show its answer', () => {
+    for (const input of [...entry.presets.map((p) => p.input), ...WIDE, ...exhaustive(5)]) {
+      const frames = gen(input);
+      frames.forEach((f, i) => {
+        if (!f.meta.tags?.includes('beat:mid')) return;
+        const next = frames[i + 1];
+        const before = frames[i - 1];
+        // lo/hi are still the old ones: the update only appears on the next frame
+        expect(f.meta.vars?.lo).toBe(before.meta.vars?.lo);
+        expect(f.meta.vars?.hi).toBe(before.meta.vars?.hi);
+        expect(f.meta.codeLine).toBe(3);
+        // no verdict words, and no bound of the next frame stated as an assignment
+        expect(f.meta.explanation).not.toMatch(/found|tìm thấy|smaller|larger|nhỏ hơn|lớn hơn/);
+        for (const k of ['lo', 'hi'] as const) {
+          if (next.meta.vars?.[k] !== f.meta.vars?.[k])
+            expect(f.meta.explanation).not.toContain(`${k} = ${next.meta.vars?.[k]}`);
+        }
       });
     }
   });

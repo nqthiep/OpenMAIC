@@ -1,49 +1,49 @@
 {
   "binary-search": {
-    "entryRev": 1,
-    "contentHash": "03d3a56b073f6526",
+    "entryRev": 2,
+    "contentHash": "89fcb92b5f25645e",
     "framesHash": {
+      "absent": {
+        "vi-VN": "57704ab25060035a",
+        "en-US": "fe05def2d665f7d2"
+      },
       "mid-hit": {
-        "vi-VN": "a476c2e233a68dc4",
-        "en-US": "0bb2fe0ec4e33652"
+        "vi-VN": "c35998614eeac2f4",
+        "en-US": "7d80166e7b510e4a"
       },
       "first": {
-        "vi-VN": "2373927e77017533",
-        "en-US": "000219f20cf26b8b"
-      },
-      "absent": {
-        "vi-VN": "157ea5efc62d9285",
-        "en-US": "45ee0de02932074f"
+        "vi-VN": "2b9b49a1a9ff2a48",
+        "en-US": "84b17844a1d5549d"
       },
       "single": {
-        "vi-VN": "566671815173b488",
-        "en-US": "4cac6d580b52da2b"
+        "vi-VN": "5cf525bf85e76cba",
+        "en-US": "f81d0f1ce8759cf5"
       }
     }
   },
   "bs-answer-mini": {
-    "entryRev": 1,
-    "contentHash": "6bd4d197cffdd840",
+    "entryRev": 2,
+    "contentHash": "ae6b447d5b4d829e",
     "framesHash": {
       "classic": {
-        "vi-VN": "f7e74773bbb1d169",
-        "en-US": "5d76498f2367840a"
+        "vi-VN": "645b7181bd0eca38",
+        "en-US": "aac694e67e6c1bc9"
       },
       "all-equal": {
-        "vi-VN": "3cc72820cdc9a52c",
-        "en-US": "af21749478900c7d"
+        "vi-VN": "6c508937443eddce",
+        "en-US": "8bc6f8ed32f8e0b1"
       },
       "one-tree": {
-        "vi-VN": "041678b225d6a253",
-        "en-US": "0a4aeaf79be664b6"
+        "vi-VN": "1b6ed39ee2c40191",
+        "en-US": "c5bc26c8127e566f"
       },
       "take-all": {
-        "vi-VN": "55ea53850f6d0ddf",
-        "en-US": "0bbb43b3972aa259"
+        "vi-VN": "df7752ad9858c997",
+        "en-US": "b7ec2b7158087c1a"
       },
       "tiny-need": {
-        "vi-VN": "5cafaf6c0eedd334",
-        "en-US": "099f9cc70e17d30e"
+        "vi-VN": "2ae1c05aa0584fdf",
+        "en-US": "b65c9e50fc02d971"
       }
     }
   }
