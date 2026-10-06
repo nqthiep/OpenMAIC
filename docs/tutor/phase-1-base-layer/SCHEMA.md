@@ -205,7 +205,7 @@ tests/widgets/  tests/tutor/  tests/subjects/cp/
 | Q2 | `widgetConfig` có bị ghi đè? | **Đã trả lời: không** (`packages/@openmaic/generation/src/scene-builder.ts:92-93`); tool tự dựng scene nên không còn phụ thuộc |
 | Q3 | Locale. | **Đã chốt**: tham số tool + heuristic, mặc định `vi-VN` (ADR 0005) |
 | Q4 | LLM có dùng `frame` đúng không. | **Thay bằng kịch bản tất định** (ADR 0006) |
-| Q5 | Điểm sinh action cho scene walkthrough | **Đã chốt bằng thiết kế** (ADR 0011): tool tự sinh action; `generate_actions` (`lib/server/agent-runtime/generation-tools.ts:513-537`) và `duplicate_scene` đi qua provider; classic không gặp walkthrough |
+| Q5 | Điểm sinh action cho scene walkthrough | **Đã chốt bằng thiết kế** (ADR 0011): tool tự sinh action; `generate_actions` (`lib/server/agent-runtime/generation-tools.ts:540-564`) và `duplicate_scene` đi qua provider; classic không gặp walkthrough |
 | Q6 | Message tới trước khi iframe load; iframe bị đẩy khỏi pool | **Đã chốt bằng thiết kế** (ADR 0013 §2: `widget-ready` + gửi lại `desired`); e2e kiểm chứng |
 | Q7 | Runtime nhận diện cờ chụp tĩnh của video-export để nhảy tới `posterBeat`? | Chưa làm (ARCHITECTURE §12) |
 | Q9 | Engine chờ dự đoán: tương tác với tạm dừng/tua, resume, chat mở giữa chừng, silent mode | Chưa làm (1c) |

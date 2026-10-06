@@ -806,7 +806,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1b-03, 1b-16 |
 | Sở hữu | `lib/server/agent-runtime/walkthrough-tools.ts`, `lib/tutor/locale.ts`, `tests/widgets/walkthrough-tool.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §3; ADR 0011; tiền lệ `duplicate_scene` (`lib/server/agent-runtime/generation-tools.ts:609-600`, hàm `duplicateId`); `lib/server/agent-runtime/document-writes.ts:32`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §4 (dòng Locale) |
+| Đọc | [../INTERFACES](../INTERFACES.md) §3; ADR 0011; tiền lệ `duplicate_scene` (`lib/server/agent-runtime/generation-tools.ts:623-600`, hàm `duplicateId`); `lib/server/agent-runtime/document-writes.ts:32`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §4 (dòng Locale) |
 
 **Làm**
 1. `lib/tutor/locale.ts`: `resolveLocale(languageDirective?: string): 'vi-VN' | 'en-US'`.
@@ -858,7 +858,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1b-03, 1b-16 |
 | Sở hữu | `lib/server/agent-runtime/generation-tools.ts`, `tests/widgets/generation-tools-policy.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §3 (bảng "Thay đổi ở tool hiện có"); ADR 0010 quyết định 4–5; `lib/server/agent-runtime/generation-tools.ts:513-537`, `lib/server/agent-runtime/generation-tools.ts:609-600` |
+| Đọc | [../INTERFACES](../INTERFACES.md) §3 (bảng "Thay đổi ở tool hiện có"); ADR 0010 quyết định 4–5; `lib/server/agent-runtime/generation-tools.ts:540-564`, `lib/server/agent-runtime/generation-tools.ts:623-600` |
 
 **Làm**
 1. `generate_scene`:
