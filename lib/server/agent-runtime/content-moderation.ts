@@ -1,4 +1,3 @@
-import { isWalkthroughScene } from '@/lib/widgets/policy';
 import { moderate, type ModerationCategory, type ModerationVerdict } from '@/lib/tutor/moderation';
 import { inventorySlide } from './course-edit/apply';
 import type { Action } from '@/lib/types/action';
@@ -22,10 +21,10 @@ export interface SceneModerationDeps {
 
 /**
  * Student-visible text of a scene (pure): slide text/table/shape text, quiz question, options and
- * explanation, speech lines. Interactive html is skipped; walkthroughs are catalog content and trusted.
+ * explanation, speech lines. Interactive html is skipped (also for walkthroughs); a walkthrough's
+ * title and speech are still moderated: the `kind` flag is data and not a trust boundary.
  */
 export function extractVisibleText(scene: Scene): string[] {
-  if (isWalkthroughScene(scene)) return [];
   const out: string[] = [];
   const add = (v: unknown) => {
     if (typeof v === 'string' && v.trim()) out.push(v.trim());

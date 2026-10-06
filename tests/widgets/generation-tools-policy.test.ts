@@ -3,7 +3,7 @@ import type { AgentTool } from '@earendil-works/pi-agent-core';
 import { Value } from 'typebox/value';
 import type { CourseDocument, CourseStore } from '@/lib/server/agent-runtime/course-tools';
 import { buildGenerationTools } from '@/lib/server/agent-runtime/generation-tools';
-import { widgetRegistry, walkthroughProvider } from '@/lib/widgets';
+import { isWalkthroughScene, widgetRegistry, walkthroughProvider } from '@/lib/widgets';
 import type { Scene } from '@/lib/types/stage';
 
 const throwingAi = vi.fn(async () => {
@@ -114,6 +114,36 @@ describe('generate_scene policy', () => {
       } as never);
     expect(res).toMatchObject({ isError: true, details: { error: 'code-widget-blocked' } });
     expect(t.store.putScene).not.toHaveBeenCalled();
+  });
+
+  it('strips a walkthrough `kind` an LLM widget embeds in its widget-config JSON', async () => {
+    const t = setup([]);
+    const html =
+      '<html><body><input id="e" type="range"><script type="application/json" id="widget-config">' +
+      '{"kind":"walkthrough","walkthroughId":"x","variables":["e"]}</script></body></html>';
+    const tools = buildGenerationTools({
+      store: t.store,
+      stageAccess: async () => ({ kind: 'owned' as const }),
+      onCheckpoint: vi.fn(),
+      aiCall: vi.fn(async () => html),
+      generateActions: vi.fn(async () => []) as never,
+    } as never) as AgentTool<never, never>[];
+    const res = await tools
+      .find((x) => x.name === 'generate_scene')!
+      .execute('c', {
+        stageId: 'stage-test',
+        order: 1,
+        title: 'T',
+        type: 'interactive',
+        widgetType: 'simulation',
+        brief: 'b',
+      } as never);
+    expect(res).not.toMatchObject({ isError: true });
+    const saved = (t.store.putScene as ReturnType<typeof vi.fn>).mock.calls[0]![1] as Scene;
+    expect(isWalkthroughScene(saved)).toBe(false);
+    expect(
+      (saved.content as unknown as { widgetConfig: Record<string, unknown> }).widgetConfig,
+    ).toMatchObject({ walkthroughId: 'x', variables: ['e'] });
   });
 
   it('rejects widgetOutline.walkthroughId with validIds, without calling the LLM', async () => {

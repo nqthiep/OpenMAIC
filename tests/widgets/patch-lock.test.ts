@@ -150,3 +150,45 @@ describe('patch_stage code-widget-blocked', () => {
     expect(t.putScene).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('patch_stage relabelling a blocked code widget', () => {
+  const codeByType = () => widgetScene('code', { type: 'simulation', concept: 'g' });
+  const codeByConfig = () => widgetScene('simulation', { type: 'code', concept: 'g' });
+  const html = { op: 'set', path: '/content/html', value: '<body>fresh</body>' };
+
+  it.each([
+    ['widgetType', codeByType, { op: 'set', path: '/content/widgetType', value: 'simulation' }],
+    [
+      'widgetConfig.type',
+      codeByConfig,
+      { op: 'set', path: '/content/widgetConfig/type', value: 'simulation' },
+    ],
+  ])('rejects a %s-only relabel that keeps the old html', async (_name, scene, relabel) => {
+    const t = setup(scene());
+    const res = await t.run([relabel]);
+    expect(res).toMatchObject({
+      isError: true,
+      details: { error: 'code-widget-blocked', hint: expect.stringContaining('/content/html') },
+    });
+    expect(t.putScene).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['widgetType', codeByType, { op: 'set', path: '/content/widgetType', value: 'simulation' }],
+    [
+      'widgetConfig.type',
+      codeByConfig,
+      { op: 'set', path: '/content/widgetConfig/type', value: 'simulation' },
+    ],
+  ])('accepts a %s relabel that also replaces /content/html', async (_name, scene, relabel) => {
+    const t = setup(scene());
+    const res = await t.run([relabel, html]);
+    expect(res).not.toHaveProperty('isError');
+    expect((t.get().content as InteractiveContent).html).toBe('<body>fresh</body>');
+  });
+
+  it('accepts an html-only edit of a non-code widget and leaves other code edits to the policy', async () => {
+    const t = setup(widgetScene('simulation', { type: 'simulation', concept: 'g' }));
+    expect(await t.run([html])).not.toHaveProperty('isError');
+  });
+});

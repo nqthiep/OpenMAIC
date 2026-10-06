@@ -54,6 +54,7 @@ import {
 import type { SceneTtsInput, SceneTtsSummary } from './scene-tts';
 import { WALKTHROUGH_TOOL_NAME, buildWalkthroughTool } from './walkthrough-tools';
 import { isWidgetProvidersDisabled } from '@/lib/config/feature-flags';
+import { widgetRegistry } from '@/lib/widgets';
 import type { LoadedSkill } from './skills';
 
 export type CourseDocument = MaicDocument<Scene, Stage>;
@@ -211,7 +212,7 @@ export function buildDslCourseToolset(
 ): AgentTool<never, never>[] {
   const tools = [
     ...buildGenerationTools(deps),
-    ...(isWidgetProvidersDisabled() ? [] : [buildWalkthroughTool(deps)]),
+    ...(walkthroughToolEnabled() ? [buildWalkthroughTool(deps)] : []),
     buildImportPptxTool(deps),
     buildGenerateImageTool(deps),
     ...(hasConfiguredVideoGeneration(deps) ? [buildGenerateVideoTool(deps)] : []),
@@ -222,6 +223,11 @@ export function buildDslCourseToolset(
   return markDocumentWritersSequential(withOwnerStageAuthorization(tools, deps));
 }
 
+/** generate_walkthrough exists only with providers on and at least one catalog id (no empty Type.Union). */
+function walkthroughToolEnabled(): boolean {
+  return !isWidgetProvidersDisabled() && widgetRegistry.walkthroughIds().length > 0;
+}
+
 /** The exact registered tool names of this slice's toolset. */
 export function buildCourseAllowlist(
   videoDeps: Partial<GenerateVideoToolDeps> = {},
@@ -229,7 +235,7 @@ export function buildCourseAllowlist(
   return new Set([
     ...DSL_COURSE_TOOL_NAMES,
     ...GENERATION_TOOL_NAMES,
-    ...(isWidgetProvidersDisabled() ? [] : [WALKTHROUGH_TOOL_NAME]),
+    ...(walkthroughToolEnabled() ? [WALKTHROUGH_TOOL_NAME] : []),
     IMPORT_PPTX_TOOL_NAME,
     GENERATE_IMAGE_TOOL_NAME,
     ...(hasConfiguredVideoGeneration(videoDeps) ? [GENERATE_VIDEO_TOOL_NAME] : []),
