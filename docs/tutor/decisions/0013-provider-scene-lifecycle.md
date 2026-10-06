@@ -74,7 +74,7 @@
 5. **`widgetConfig` bắt buộc có:** `type:'simulation'`, `kind:'walkthrough'`, `walkthroughId`, `entryRev`, `contentHash`, `subject`, `visualizer`, `locale`, `presetId`, `panel`, `presets:[{id,label,total,framesHash}]`, `beats` (của `presetId`), `runtimeVersion`. Từ 1d: `llmInput?`, và nếu có thì `presets[]` có thêm mục `llm`. Hình dạng ở [DATA-MODEL §3](../DATA-MODEL.md).
 6. **Phiên bản entry:**
    - `entryRev` là số nguyên, tăng khi frame, lời thầy, preset, code hoặc `problem` đổi.
-   - Test snapshot giữ `framesHash` của mọi preset **và** `contentHash` (băm `code`, `beatDefs`, `presets[].input`, `problem`) ở `entryRev` hiện tại. Hash nào đổi mà `entryRev` không tăng thì test đỏ. `contentHash` lưu trong `widgetConfig`.
+   - Test snapshot giữ `framesHash` của mọi preset **và** `contentHash` (`entryContentHash`: băm `code`, `beatDefs` không kèm hàm `answer`, `presets`, `problem`, `title`, `pitfalls` và đáp án dự đoán `predictAnswers`) ở `entryRev` hiện tại. Hash nào đổi mà `entryRev` không tăng thì test đỏ. `contentHash` lưu trong `widgetConfig`.
    - **Lệch catalog** (`entryRev`/`framesHash`/`contentHash` khác): `describe()` chỉ trả digest tĩnh; `generate_actions` trả `walkthrough-stale` và không ghi; `duplicate_scene` chép cả `actions` cũ.
    - `describe()`: nếu `scene.entryRev ≠ entry.entryRev` hoặc `framesHash` lệch, chỉ trả digest tĩnh (title, beats), không mô tả frame.
 7. **Khoá sửa:**

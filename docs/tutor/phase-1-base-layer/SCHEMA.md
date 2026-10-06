@@ -91,7 +91,7 @@ lib/tutor/
   provider.ts                                  # WidgetProvider 'walkthrough'
 lib/subjects/
   index.ts
-  cp/  pack.ts  catalog/{binary-search.ts, bs-answer-mini.ts}  messages/{vi-VN,en-US}.ts
+  cp/  pack.ts  catalog/{binary-search.ts, bs-answer-mini.ts}   # chữ vi/en nằm trong từng entry (Messages), không có file messages/ riêng
 scripts/generate-tutor-runtime.mjs             # sinh module runtime (tiền lệ generate-video-export-katex.mjs)
 tests/widgets/  tests/tutor/  tests/subjects/cp/
 ```
@@ -109,7 +109,7 @@ tests/widgets/  tests/tutor/  tests/subjects/cp/
 ### 4.1. Entry tham chiếu: `binary-search`
 
 - `subject:'cp'`, `visualizer:'array'` (`mode:'bars'`), `curriculumTopics:['t2-binary-search']`, `entryRev: 1`.
-- `inputSpec`: `record{ values: int-array(len 1–12, range [-999,999], strictlyIncreasing), target: int([-999,999]) }`; `customInput: true` (chỉ có hiệu lực từ lát 1d).
+- `inputSpec`: `record{ values: int-array(len 1–12, range [-999,999], strictlyIncreasing), target: int([-999,999]) }`; `customInput: false` (bật ở lát 1d).
 - **Presets (≥4, gồm ≥1 biên)**: `mid-hit` (10 phần tử, target ở `mid` đầu tiên); `first` (target = phần tử đầu); `absent` (target vắng mặt); `single` (n=1).
 - **Pseudocode (7 dòng)**:
   ```
@@ -121,7 +121,7 @@ tests/widgets/  tests/tutor/  tests/subjects/cp/
   6      else: hi ← mid − 1
   7  return −1
   ```
-- **C++ chỉ-đọc (9 dòng)**, `map.cpp`: 1→[2], 2→[3], 3→[4], 4→[5], 5→[6], 6→[7], 7→[9]:
+- **C++ chỉ-đọc (10 dòng)**, `map.cpp`: 1→[2], 2→[3], 3→[4], 4→[5], 5→[6], 6→[7], 7→[9]:
   ```cpp
   int binary_search(const std::vector<int>& a, int target) {   // 1
       int lo = 0, hi = (int)a.size() - 1;                      // 2

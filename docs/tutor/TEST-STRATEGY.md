@@ -1,6 +1,6 @@
 # Chiến lược kiểm thử
 
-- **Trạng thái**: Accepted — chưa có test nào của tính năng được viết; công cụ và lệnh lấy từ repo hiện tại (sửa 2026-09-30 theo review: chặn `code` nhiều lớp, bắt tay, beat theo preset, `entryRev`, cổng sư phạm, bước CI cho browser test)
+- **Trạng thái**: Accepted — test của lát 1a–1c đã có (tests/tutor, tests/widgets, tests/subjects); công cụ và lệnh lấy từ repo (sửa 2026-09-30 theo review: chặn `code` nhiều lớp, bắt tay, beat theo preset, `entryRev`, cổng sư phạm, bước CI cho browser test)
 - **Ngày**: 2026-09-30
 - **Người sở hữu**: Chủ dự án (QA)
 - **Liên quan**: [NFR](NFR.md), [SECURITY](SECURITY.md), [OPERATIONS §3](OPERATIONS.md), [RISKS](RISKS.md), [ONBOARDING](ONBOARDING.md), [REQUIREMENTS §3b](REQUIREMENTS.md), [ADR 0006 Eval](decisions/0006-deterministic-trace-catalog.md), [ADR 0008 Rubric](decisions/0008-lesson-blueprint-hard-problems.md), [ADR 0012 cổng G1/G2](decisions/0012-audience-scope-pedagogy-gates.md)
@@ -36,7 +36,7 @@
 | Skill/workbench | vitest | tên skill ở 12 locale; `title` chứa chữ Hán; không thư mục thiếu `SKILL.md`; skill `deep-interactive` không còn `code` | `pnpm vitest run tests/workbench/workbench-i18n.test.ts tests/agent-runtime/skills.test.ts` | mọi PR |
 | Tĩnh | ESLint (có luật tất định cho catalog), Prettier, TypeScript | kiểu, định dạng, cấm `Intl`/`Date`/`Math.random` trong `run` | `pnpm lint` · `pnpm check` · `npx tsc --noEmit` | mọi PR |
 | Tài liệu | `docs/tutor/tools/check_docs.py` | cấu trúc, liên kết, tham chiếu code, **neo nội dung** | `python3 docs/tutor/tools/check_docs.py` | mọi PR (đề xuất thêm vào job `check`) |
-| Eval (LLM) | `eval/<tên>/` (mẫu `eval/outline-language`, `eval/orchestration`) | chất lượng bài, lời thầy khớp frame, Q&A, RSR (offline) | `pnpm eval:tutor-lesson`, `pnpm eval:tutor-qa`, `pnpm eval:walkthrough-actions`: **các script này chưa có**, cần thêm vào `package.json` | thủ công/định kỳ, **không** chặn CI |
+| Eval (LLM) | `eval/<tên>/` (mẫu `eval/outline-language`, `eval/orchestration`) | chất lượng bài, lời thầy khớp frame, Q&A, RSR (offline) | `pnpm eval:tutor-lesson`, `pnpm eval:tutor-qa`, `pnpm eval:walkthrough-actions`: `eval:tutor-qa`, `eval:tutor-review`, `eval:tutor-moderation`, `eval:sim-learner` đã có trong `package.json`; `eval:tutor-lesson`, `eval:walkthrough-actions` chưa có | thủ công/định kỳ, **không** chặn CI |
 | Vai trò LLM (cổng) | `eval/tutor-review/`, `eval/tutor-moderation/`, `eval/sim-learner/`, `eval/manim-author/` (đề xuất) | Hội đồng LLM duyệt entry (JSON có schema); học sinh mô phỏng G1/G2; **bộ hiệu chuẩn** của từng vai trò (ADR 0014 quyết định 7) | `pnpm eval:tutor-review`, `eval:tutor-moderation`, `eval:sim-learner`, `eval:manim-author` (chưa có) | mỗi khi entry đổi (`entryRev`), đổi model/prompt, và trước mỗi cổng |
 | Thủ công có ghi chép | checklist demo | "dạy em Binary Search" trọn vòng trên workbench; xuất/nhập lớp học; clip phát; Safari/Firefox; màn 375 px; `ar-SA` | — | trước phát hành mỗi đợt |
 
@@ -112,7 +112,7 @@ Quy tắc test tự bỏ qua theo môi trường: mọi test cần trình duyệ
 - **Golden frame** của mỗi mẫu clip ở params cố định (dùng cho SSIM); cập nhật có chủ đích khi nâng Manim/mẫu.
 - **Frame tổng hợp** để đo kích thước payload (mảng, bảng DP, đồ thị) ở test P2/P3.
 - **HTML độc** cho test bảo mật (SECURITY §5): chữ tiêm trong `walkthrough-data`, `widgetConfig.type:'code'`, `widget-state` trước `ready`.
-- **Bộ câu hỏi Q&A** cho `eval:tutor-qa`: ≥ 20 câu × 3 frame, gồm câu khớp `misconceptions`.
+- **Bộ câu hỏi Q&A** cho `eval:tutor-qa`: ≥ 20 câu trên ≥ 3 frame, gồm câu khớp `misconceptions`.
 - Không dùng dữ liệu thật của học sinh trong test tự động. Dữ liệu của cổng G1/G2 được ẩn danh.
 
 ## 5. Cổng CI (theo `.github/workflows/ci.yml`)

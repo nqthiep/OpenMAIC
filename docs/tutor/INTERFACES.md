@@ -56,7 +56,7 @@ Kênh hiện có gồm `runtime-error`, `element-picked`, `element-picker-disarm
 | Kind (mới) | Payload | Host xử lý |
 | --- | --- | --- |
 | `widget-ready` | `{ __maicInteractive: true, kind: 'widget-ready', v: 1, walkthroughId, entryRev, presets: [{ id, total }] }` | Kiểm `e.source === iframe.contentWindow` và `walkthroughId` khớp `widgetConfig`; đánh dấu ready; gửi lại `desired[sceneId]` |
-| `widget-state` | `{ __maicInteractive: true, kind: 'widget-state', v: 1, walkthroughId, preset, frame: int, input?: object, prediction?: { beatId, correct: boolean } }` | Chỉ nhận **sau `ready`** và khi scene có `widgetConfig.kind==='walkthrough'`. Ép `frame` nguyên trong `[0,total-1]`; giữ `input` chỉ khi `preset==='student'` và ≤ 2048 byte; ghi vào `widget-runtime-state` (chỉ giữ giá trị cuối); xoá trạng thái học sinh khi iframe đổi |
+| `widget-state` | `{ __maicInteractive: true, kind: 'widget-state', v: 1, walkthroughId, preset, frame: int, input?: object, prediction?: { beatId, correct: boolean, skipped?: boolean } }` | Chỉ nhận **sau `ready`** và khi scene có `widgetConfig.kind==='walkthrough'`. Ép `frame` nguyên trong `[0,total-1]`; giữ `input` chỉ khi `preset==='student'` và ≤ 2048 byte; ghi vào `widget-runtime-state` (chỉ giữ giá trị cuối); xoá trạng thái học sinh khi iframe đổi |
 
 `preset` trong `widget-state` ∈ `presets[].id` ∪ {`student`}:
 - `llm` là input do LLM cấp khi sinh bài (từ 1d). Nó là **một mục trong `widgetConfig.presets[]`** (có `total`, `framesHash`), nên host kẹp như preset thường.
@@ -82,8 +82,8 @@ Kênh hiện có gồm `runtime-error`, `element-picked`, `element-picker-disarm
   "input": { "values": [2,5,8,12,16,23,38,56], "target": 23 } }   // CHỈ từ lát 1d; không đồng thời với presetId
 // kết quả thành công
 { "sceneId": "…", "order": 4, "beats": [{ "id": "start", "occurrence": 1, "frame": 0 }],
-  "lessonKit": { "statement": "…", "constraints": ["…"], "subtasks": [{ "id": "s1", "limit": "n ≤ 1000", "idea": "…" }],
-                 "pitfalls": ["…"], "hints": ["…"], "homework": [] } }
+  "lessonKit": { "statement": "…", "constraints": ["…"], "subtasks": [{ "id": "s1", "limit": "n ≤ 1000", "idea": "…", "complexity": "O(n)" }],
+                 "pitfalls": [{ "text": "…", "lang": "cpp" }], "hints": ["…"], "homework": [] } }   // hints: gợi ý mức nhẹ của từng beat; pitfalls kèm `lang` nếu riêng một ngôn ngữ
 ```
 
 Idempotent theo `callId` (như `duplicate_scene`). `order` đã có trang thì **thay trang đó** (cùng ngữ nghĩa với `generate_scene`). Scene sinh ra theo [DATA-MODEL §3](DATA-MODEL.md).
@@ -96,6 +96,9 @@ Idempotent theo `callId` (như `duplicate_scene`). `order` đã có trang thì *
 | `invalid-preset-id` | `presetId` ∉ `presets[].id` | `validPresetIds: string[]` |
 | `invalid-input` | không qua `InputSpec` (kiểu, miền, khoá lạ, > 2048 byte) hoặc `entry.check` (ràng buộc giữa các trường), hoặc `input` gửi trước lát 1d | `issues: string[]` (≤ 5) |
 | `input-and-preset` | có cả `presetId` và `input` | — |
+| `invalid-title` | `title` rỗng | — |
+| `walkthrough-too-large` | HTML dựng ra vượt `maxBytes` của entry | — |
+| `unsupported-type` / `pbl-type-change` | `order` đang giữ trang loại không thay được (PBL…): như `generate_scene` | như `generate_scene` |
 | `code-widget-blocked` | (các tool khác) scene cuối là widget `code` khi bị chặn | `hint`: dùng walkthrough/simulation/diagram/game/3D |
 | `walkthrough-locked` | `patch_stage` làm đổi `/content/html` hoặc `/content/widgetConfig` của scene là walkthrough **ở trạng thái trước hoặc sau** (so sánh deep-equal) | `hint`: gọi `generate_walkthrough` với preset khác |
 | `walkthrough-stale` | `generate_actions`/`duplicate_scene` trên scene có `entryRev`/`framesHash`/`contentHash` lệch catalog hiện tại | `hint`: gọi `generate_walkthrough` để dựng lại |

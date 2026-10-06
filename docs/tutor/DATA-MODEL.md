@@ -55,7 +55,7 @@ erDiagram
 Hai khối JSON trong HTML tự chứa (ARCHITECTURE §6). Trường bắt buộc theo ADR 0013 §5.
 
 ```jsonc
-// <script type="application/json" id="widget-config">  — NHẸ: lưu vào widgetConfig + vào prompt
+// <script type="application/json" id="widget-config">  — NHẸ: lưu vào widgetConfig + vào prompt (số `total`, `frame` dưới đây chỉ là ví dụ; số thật do provider tính từ `run()`)
 {
   "type": "simulation", "kind": "walkthrough",
   "walkthroughId": "binary-search", "entryRev": 3, "contentHash": "9e8d7c6b5a493827", "subject": "cp", "visualizer": "array",
@@ -98,7 +98,7 @@ Hai khối JSON trong HTML tự chứa (ARCHITECTURE §6). Trường bắt buộ
 | `Frame.meta.highlights/pointers/vars/aux/tags` | xem ADR 0001 | key do visualizer định nghĩa; tag `beat:<id>` |
 | `beatDefs` (catalog) | 5–10 định nghĩa | mỗi cái dùng ở ≥1 preset; `required` có ở mọi preset; kịch bản kể ≤ 12 beat/scene |
 | `presets` | ≥4, ≤6, gồm ≥1 biên | `total` = số frame; tổng frame mọi preset ≤ 300 (đề xuất [Inference]); mỗi preset ≤ `maxFrames` |
-| `entryRev`, `framesHash`, `contentHash` | int; 16 ký tự hex (sha256 cắt ngắn của frames JSON chuẩn hoá, theo từng **(preset, locale)** vì `explanation` theo locale; `widgetConfig` mang hash của locale của scene); 16 ký tự hex (băm `code`, `beatDefs`, `presets[].input`, `problem`) | test snapshot: hash nào đổi thì `entryRev` phải tăng |
+| `entryRev`, `framesHash`, `contentHash` | int; 16 ký tự hex (sha256 cắt ngắn của frames JSON chuẩn hoá, theo từng **(preset, locale)** vì `explanation` theo locale; `widgetConfig` mang hash của locale của scene); 16 ký tự hex (`entryContentHash`, `lib/tutor/catalog/hash.ts`: băm `code`, `beatDefs` (không có hàm `answer`), `presets[].{id,input,label}`, `problem`, `title`, `pitfalls` và `predictAnswers` = đáp án của câu dự đoán tại mọi frame của mọi preset) | test snapshot: hash nào đổi thì `entryRev` phải tăng |
 | `code.map.cpp`, `code.map.py` | pseudo → dòng cài đặt | **toàn phần** cho từng ngôn ngữ, có test |
 | `input` (1d) | theo `InputSpec` | ≤ 2048 byte UTF-8 của `JSON.stringify(input)` |
 | kích thước HTML | ≤ `maxBytes` của entry | đo bằng số byte UTF-8 của HTML đã dựng; vượt → tool trả lỗi, không ghi |

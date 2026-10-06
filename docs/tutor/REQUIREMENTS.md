@@ -1,6 +1,6 @@
 # Yêu cầu gốc, truy vết và bảng quyết định (SWOT)
 
-- **Trạng thái**: Accepted — bảng truy vết phản ánh **thiết kế**, chưa có mã nguồn (sửa 2026-09-30 theo 4 quyết định của user và review 4 chuyên gia)
+- **Trạng thái**: Accepted — bảng truy vết phản ánh **thiết kế**; lát 1a–1c đã có mã (nhánh `it-math`) (sửa 2026-09-30 theo 4 quyết định của user và review 4 chuyên gia)
 - **Ngày**: 2026-09-30
 - **Người sở hữu**: Chủ dự án
 - **Liên quan**: [README](README.md), [NFR](NFR.md), [ARCHITECTURE](ARCHITECTURE.md), [RISKS](RISKS.md), [decisions/](decisions/README.md)
@@ -36,7 +36,7 @@ Yêu cầu bổ sung: các tài liệu phải thoả yêu cầu trên; bản thi
 
 ## 3. Ma trận truy vết (sau khi sửa)
 
-Trạng thái *Thiết kế* nghĩa là tài liệu đã đáp ứng; chưa có mã nguồn nào của tính năng. Nhãn: [Inference] suy luận; [Unverified] chưa kiểm chứng.
+Trạng thái *Thiết kế* nghĩa là tài liệu đã đáp ứng; mã nguồn mới có ở lát 1a–1c (xem README §5). Nhãn: [Inference] suy luận; [Unverified] chưa kiểm chứng.
 
 | R | Đáp ứng ở đâu | Trạng thái | Ghi chú / còn mở |
 | --- | --- | --- | --- |

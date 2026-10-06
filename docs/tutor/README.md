@@ -1,6 +1,6 @@
 # OpenMAIC SubjectTutor — Tài liệu thiết kế
 
-- **Trạng thái**: Thiết kế (vòng 9: đã chia task cho worker), **chưa có mã nguồn của tính năng**
+- **Trạng thái**: Thiết kế; **lát 1a–1c đã triển khai trên nhánh `it-math`** (vòng 11 review + sửa), cổng G1 và lát 1d chưa chạy; Phase 2–3 đang làm theo bảng task
 - **Ngày**: 2026-10-01
 - **Người sở hữu**: Chủ dự án
 - **Liên quan**: mọi tài liệu trong thư mục này (mục lục ở §2)
@@ -96,7 +96,7 @@ Chỉ có ước lượng cỡ S/M/L ([ADR 0004](decisions/0004-three-phase-plan
   - Đã kiểm tra không có `prerequisites` treo/vòng/ngược tier; `course_shape` theo ADR 0008; `sequencing` đủ 32 topic.
   - **Chưa được git theo dõi**; cần rà nguồn/bản quyền trước khi commit (`provenance` trong file).
 - `.gitignore`: đã bỏ ignore `docs/tutor/` (`/docs/*` + `!/docs/tutor/`); các file **chưa commit**.
-- Chưa có `lib/tutor/`, `lib/widgets/`, `lib/subjects/`, `lib/clips/`, `manim/`.
+- Đã có `lib/tutor/`, `lib/widgets/`, `lib/subjects/cp/` (2 entry); chưa có `lib/clips/`, `manim/` (Phase 3).
 - Quyết định của user (2026-09-30), chi tiết ở [REQUIREMENTS §5](REQUIREMENTS.md):
   - chặn `code` toàn ứng dụng;
   - nhập input sau khi preset chạy ổn;
