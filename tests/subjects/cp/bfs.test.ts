@@ -117,7 +117,7 @@ entryContract<In>({
     enqueue: {
       options: 2,
       expected: (_input, frames, idx) => {
-        const f = frames[idx];
+        const f = frames[idx] as Frame<S>;
         const v = (f.meta.vars as { v: string }).v;
         const node = f.state.nodes.find((x) => x.id === v)!;
         return node.label.includes('(d=') ? 1 : 0;

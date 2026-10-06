@@ -123,7 +123,7 @@ entryContract<In>({
     visit: {
       options: 3,
       expected: (input, frames, idx) => {
-        const f = frames[idx];
+        const f = frames[idx] as Frame<S>;
         const u = (f.meta.vars as { u: string }).u.charCodeAt(0) - 65;
         const seen = new Set(
           f.state.nodes.map((x, i) => (/#\d+/.test(x.label) ? i : -1)).filter((i) => i >= 0),
