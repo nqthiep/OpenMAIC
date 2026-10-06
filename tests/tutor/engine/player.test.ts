@@ -1,11 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { BASE_FRAME_MS, createPlayer } from '@/lib/tutor/engine/player';
 
 function fake() {
   let next = 1;
   const timers = new Map<number, { fn: () => void; ms: number }>();
+  let t = 0;
   return {
     timers,
+    now: () => t,
+    advance: (ms: number) => {
+      t += ms;
+    },
     setTimer: (fn: () => void, ms: number) => {
       const id = next++;
       timers.set(id, { fn, ms });
@@ -23,7 +28,16 @@ function fake() {
 }
 const make = (total: number, speed?: number) => {
   const f = fake();
-  return { f, p: createPlayer({ total, speed, setTimer: f.setTimer, clearTimer: f.clearTimer }) };
+  return {
+    f,
+    p: createPlayer({
+      total,
+      speed,
+      setTimer: f.setTimer,
+      clearTimer: f.clearTimer,
+      now: f.now,
+    }),
+  };
 };
 
 describe('createPlayer', () => {
@@ -138,5 +152,54 @@ describe('createPlayer', () => {
     off();
     p.jump(2);
     expect(calls).toBe(1);
+  });
+
+  it('setSpeed to the same speed does not touch the timer', () => {
+    const { f, p } = make(5);
+    p.play();
+    const [id] = [...f.timers.keys()];
+    f.advance(800);
+    p.setSpeed(1);
+    expect([...f.timers.keys()]).toEqual([id]);
+  });
+
+  it('a real speed change keeps the elapsed fraction of the current interval', () => {
+    const { f, p } = make(5);
+    p.play();
+    f.advance(600); // half of 1200
+    p.setSpeed(2); // period 600, half left
+    expect([...f.timers.values()].map((t) => t.ms)).toEqual([300]);
+    f.advance(150); // 300 of 600 + 150 -> 0.75 of the interval elapsed
+    p.setSpeed(1); // period 1200, a quarter left
+    expect([...f.timers.values()].map((t) => t.ms)).toEqual([300]);
+  });
+
+  it('jump while playing keeps the running timer', () => {
+    const { f, p } = make(5);
+    p.play();
+    const [id] = [...f.timers.keys()];
+    f.advance(800);
+    p.jump(2);
+    p.jump(2);
+    expect(p.getState()).toMatchObject({ index: 2, isPlaying: true });
+    expect([...f.timers.keys()]).toEqual([id]);
+  });
+});
+
+describe('createPlayer with real timers', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('re-sending speed and frame every 800 ms at the 1200 ms period does not freeze autoplay', () => {
+    vi.useFakeTimers();
+    const p = createPlayer({ total: 20 });
+    p.play();
+    for (let i = 0; i < 6; i++) {
+      vi.advanceTimersByTime(800);
+      p.setSpeed(1);
+      p.jump(p.getState().index);
+    }
+    // 4800 ms at 1200 ms per frame
+    expect(p.getState().index).toBe(4);
+    p.dispose();
   });
 });

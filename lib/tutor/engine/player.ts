@@ -43,9 +43,12 @@ export function createPlayer(opts: {
   speed?: number;
   setTimer?: (fn: () => void, ms: number) => unknown;
   clearTimer?: (h: unknown) => void;
+  /** Đồng hồ (ms) để tính phần khoảng nhịp đã trôi qua; mặc định `Date.now`. */
+  now?: () => number;
 }): Player {
   const setTimer = opts.setTimer ?? ((fn, ms) => setTimeout(fn, ms));
   const clearTimer = opts.clearTimer ?? ((h) => clearTimeout(h as ReturnType<typeof setTimeout>));
+  const now = opts.now ?? (() => Date.now());
 
   let state: PlayerState = {
     index: 0,
@@ -55,6 +58,8 @@ export function createPlayer(opts: {
   };
   let handle: unknown = null;
   let hasTimer = false;
+  let tickStart = 0; // lúc khoảng nhịp hiện tại bắt đầu (đã quy đổi nếu đổi tốc độ giữa chừng)
+  let tickPeriod = BASE_FRAME_MS; // độ dài đầy đủ của khoảng nhịp hiện tại
   let disposed = false;
   const subscribers = new Set<(s: PlayerState) => void>();
 
@@ -66,10 +71,13 @@ export function createPlayer(opts: {
     }
   }
 
-  function scheduleTick() {
+  /** `elapsed` = phần [0,1) của khoảng nhịp đã trôi qua; chỉ đổi tốc độ mới truyền khác 0. */
+  function scheduleTick(elapsed = 0) {
     cancelTimer();
+    tickPeriod = BASE_FRAME_MS / state.speed;
+    tickStart = now() - elapsed * tickPeriod;
     hasTimer = true;
-    handle = setTimer(tick, BASE_FRAME_MS / state.speed);
+    handle = setTimer(tick, (1 - elapsed) * tickPeriod);
   }
 
   function commit(next: PlayerState) {
@@ -145,12 +153,16 @@ export function createPlayer(opts: {
       const stillPlaying = state.isPlaying && next < state.total - 1;
       if (!stillPlaying) cancelTimer();
       commit({ ...state, index: next, isPlaying: stillPlaying });
-      if (stillPlaying) scheduleTick();
+      // Đang chạy: giữ nguyên bộ đếm (host gửi lại frame liên tục không được làm treo autoplay).
+      if (stillPlaying && !hasTimer) scheduleTick();
     },
     setSpeed(speed) {
       if (disposed || Number.isNaN(speed)) return;
-      commit({ ...state, speed: normSpeed(speed) });
-      if (state.isPlaying) scheduleTick();
+      const next = normSpeed(speed);
+      if (next === state.speed) return; // cùng tốc độ: không đụng tới bộ đếm
+      const elapsed = hasTimer ? clamp((now() - tickStart) / tickPeriod, 0, 1) : 0;
+      commit({ ...state, speed: next });
+      if (state.isPlaying) scheduleTick(elapsed);
     },
     setTotal(total) {
       if (disposed) return;

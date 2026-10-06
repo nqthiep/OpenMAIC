@@ -4,7 +4,9 @@
  *
  * Hợp đồng với runtime/visualizer (class do CSS ở đây định nghĩa):
  * - `wt-on`: dòng code (`[data-line]`) hoặc nút beat đang chọn; tab code đang chọn dùng `aria-pressed="true"`.
- * - `wt-flash`: nháy khi HIGHLIGHT_ELEMENT; `wt-hl-active|compare|result|visited|muted` tô nền/`fill`.
+ * - `wt-flash`: nháy khi HIGHLIGHT_ELEMENT (viền `outline`; phần tử SVG dùng `stroke` + `filter` vì `outline` không vẽ trên SVG).
+ * - `wt-hl-active|compare|result|visited|muted`: tô nền/`fill` VÀ viền `stroke` riêng cho từng loại (màu `--wt-k-*`,
+ *   độ dày, nét đứt khác nhau; tương phản >= 3:1 với `--wt-bg`, có test) nên trạng thái không chỉ dựa vào màu nền.
  * - Dòng code được runtime dựng trong `.wt-code-lines` (không có id từng dòng).
  */
 import type { Panel } from '@/lib/tutor/protocol/widget-data';
@@ -30,8 +32,8 @@ export function escapeHtml(value: string): string {
 }
 
 export const SHELL_CSS = `
-:root{--wt-bg:#fff;--wt-fg:#1f2937;--wt-mut:#6b7280;--wt-bd:#d1d5db;--wt-acc:#2563eb;--wt-on:#dbeafe;--wt-cmp:#fde68a;--wt-res:#bbf7d0;--wt-vis:#e5e7eb;--wt-err:#dc2626}
-@media (prefers-color-scheme:dark){:root{--wt-bg:#111827;--wt-fg:#e5e7eb;--wt-mut:#9ca3af;--wt-bd:#374151;--wt-acc:#60a5fa;--wt-on:#1e3a8a;--wt-cmp:#854d0e;--wt-res:#166534;--wt-vis:#374151;--wt-err:#f87171}}
+:root{color-scheme:light;--wt-bg:#fff;--wt-fg:#1f2937;--wt-mut:#6b7280;--wt-bd:#d1d5db;--wt-acc:#2563eb;--wt-on:#dbeafe;--wt-cmp:#fde68a;--wt-res:#bbf7d0;--wt-vis:#e5e7eb;--wt-err:#dc2626;--wt-k-active:#1d4ed8;--wt-k-compare:#b45309;--wt-k-result:#15803d;--wt-k-visited:#4b5563;--wt-k-muted:#6b7280}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--wt-bg:#111827;--wt-fg:#e5e7eb;--wt-mut:#9ca3af;--wt-bd:#374151;--wt-acc:#60a5fa;--wt-on:#1e3a8a;--wt-cmp:#854d0e;--wt-res:#166534;--wt-vis:#374151;--wt-err:#f87171;--wt-k-active:#60a5fa;--wt-k-compare:#fbbf24;--wt-k-result:#4ade80;--wt-k-visited:#d1d5db;--wt-k-muted:#9ca3af}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--wt-bg);color:var(--wt-fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 #wt-root{display:grid;gap:12px;padding:12px}
@@ -64,14 +66,16 @@ button.wt-on,button[aria-pressed=true]{background:var(--wt-on);border-color:var(
 .wt-input-row{display:flex;flex-wrap:wrap;flex-basis:100%;gap:8px;align-items:center}
 #wt-input{flex:1 1 160px;min-inline-size:0}
 #wt-input-error{margin:0;flex-basis:100%;color:var(--wt-err)}
-.wt-hl-active{background:var(--wt-on);fill:var(--wt-on)}
-.wt-hl-compare{background:var(--wt-cmp);fill:var(--wt-cmp)}
-.wt-hl-result{background:var(--wt-res);fill:var(--wt-res)}
-.wt-hl-visited{background:var(--wt-vis);fill:var(--wt-vis)}
-.wt-hl-muted{opacity:.45}
-.wt-hl-active,.wt-hl-compare,.wt-hl-result,.wt-hl-visited,.wt-hl-muted{transition:background-color .3s,fill .3s,opacity .3s}
+.wt-hl-active{background:var(--wt-on);fill:var(--wt-on);stroke:var(--wt-k-active);stroke-width:4px}
+.wt-hl-compare{background:var(--wt-cmp);fill:var(--wt-cmp);stroke:var(--wt-k-compare);stroke-width:3px;stroke-dasharray:6 3}
+.wt-hl-result{background:var(--wt-res);fill:var(--wt-res);stroke:var(--wt-k-result);stroke-width:5px}
+.wt-hl-visited{background:var(--wt-vis);fill:var(--wt-vis);stroke:var(--wt-k-visited);stroke-width:2px;stroke-dasharray:2 2}
+.wt-hl-muted{opacity:.45;stroke:var(--wt-k-muted);stroke-width:1px;stroke-dasharray:1 3}
+.wt-hl-active,.wt-hl-compare,.wt-hl-result,.wt-hl-visited,.wt-hl-muted{transition:background-color .3s,fill .3s,opacity .3s,stroke .3s,stroke-width .3s}
 :where(#wt-root,#wt-root *){outline:2px solid transparent;outline-offset:2px;transition:outline-color .3s}
 :focus-visible,.wt-flash{outline-color:var(--wt-acc)}
+svg.wt-flash,svg .wt-flash{filter:drop-shadow(0 0 3px var(--wt-acc))}
+svg :is(rect,circle,ellipse,path,line,polygon,polyline).wt-flash{stroke:var(--wt-acc);stroke-width:3px;stroke-dasharray:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `.trim();
 
@@ -98,7 +102,7 @@ export function renderShell(o: ShellOptions): string {
     `<div id="wt-code" dir="ltr" role="group" aria-label="${L('code')}"><div class="wt-tabs">${tabs}</div><div class="wt-code-lines"></div></div>`,
     `</div>`,
     `</div>`,
-    `<div id="wt-predict"></div>`,
+    `<div id="wt-predict" role="region" aria-live="polite" aria-label="${L('predict')}"></div>`,
     `<div id="wt-exercise"></div>`,
     `<p id="wt-caption" aria-live="polite"></p>`,
     `<div id="wt-controls" role="group" aria-label="${L('controls')}">`,

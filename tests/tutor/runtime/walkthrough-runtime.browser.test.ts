@@ -62,7 +62,9 @@ describe.skipIf(!REQUIRED)('walkthrough runtime (browser)', () => {
   let errors: string[];
 
   const msgs = () => page.evaluate(() => (window as unknown as { msgs: Msg[] }).msgs);
-  const states = async () => (await msgs()).filter((m) => m.kind === 'widget-state');
+  const allStates = async () => (await msgs()).filter((m) => m.kind === 'widget-state');
+  /** Reports after the boot one (which follows widget-ready straight away). */
+  const states = async () => (await allStates()).slice(1);
   const root = () => widget.locator('#wt-root');
   const send = (state: object, extra: object = {}) =>
     page.evaluate(
@@ -154,7 +156,18 @@ describe.skipIf(!REQUIRED)('walkthrough runtime (browser)', () => {
     await pw(root()).toHaveAttribute('data-total-frames', String(totalOf('mid-hit')));
     await pw(widget.locator('#wt-frame-counter')).toHaveText(`1 / ${totalOf('mid-hit')}`);
     expect(await widget.locator('#wt-preset option').count()).toBe(config.presets.length);
-    expect(await states()).toHaveLength(0); // booting reports no state
+    // right after widget-ready the widget reports where it stands, so chat has context at once
+    expect((await msgs()).map((m) => m.kind)).toEqual(['widget-ready', 'widget-state']);
+    expect(await allStates()).toEqual([
+      {
+        __maicInteractive: true,
+        kind: 'widget-state',
+        v: 1,
+        walkthroughId: 'binary-search',
+        preset: 'mid-hit',
+        frame: 0,
+      },
+    ]);
   });
 
   it('SET_WIDGET_STATE applies preset and frame, then reports one matching widget-state', async () => {
@@ -184,6 +197,18 @@ describe.skipIf(!REQUIRED)('walkthrough runtime (browser)', () => {
     await load();
     await send({ frame: 1 }, { content: 'Nhìn lo và hi' });
     await pw(widget.locator('#wt-caption')).toHaveText('Nhìn lo và hi');
+  });
+
+  it('reports widget-state after a SET_WIDGET_STATE even when the frame did not move', async () => {
+    await load();
+    await send({ frame: 0 });
+    await vi.waitFor(async () => expect(await states()).toHaveLength(1));
+    await send({ speed: 2 });
+    await vi.waitFor(async () => expect(await states()).toHaveLength(2));
+    expect((await states()).map((m) => [m.preset, m.frame])).toEqual([
+      ['mid-hit', 0],
+      ['mid-hit', 0],
+    ]);
   });
 
   it('clamps frame to the new preset total, and to 0 below range', async () => {
@@ -216,7 +241,13 @@ describe.skipIf(!REQUIRED)('walkthrough runtime (browser)', () => {
     await pw(root()).toHaveAttribute('data-frame-index', '2');
     await pw(widget.locator('#wt-tab-py')).toHaveAttribute('aria-pressed', 'false');
     await pw(widget.locator('#wt-caption')).toHaveText('');
-    expect(await states()).toHaveLength(1);
+    // only the replay answer (ready + current state) was added: the dropped message reported nothing
+    await vi.waitFor(async () =>
+      expect((await states()).map((m) => [m.preset, m.frame])).toEqual([
+        ['mid-hit', 2],
+        ['mid-hit', 2],
+      ]),
+    );
   });
 
   it('ignores messages from a window that is not the parent', async () => {
@@ -235,7 +266,10 @@ describe.skipIf(!REQUIRED)('walkthrough runtime (browser)', () => {
     await pw(root()).toHaveAttribute('data-preset', 'mid-hit');
     await pw(root()).toHaveAttribute('data-frame-index', '0');
     await pw(widget.locator('#wt-caption')).toHaveText('');
-    expect(await states()).toHaveLength(0);
+    // only the replay answer (ready + current state at frame 0) was added
+    await vi.waitFor(async () =>
+      expect((await states()).map((m) => [m.preset, m.frame])).toEqual([['mid-hit', 0]]),
+    );
 
     // the same message from the real parent is accepted
     await send({ preset: 'absent', frame: 3 });
@@ -249,6 +283,15 @@ describe.skipIf(!REQUIRED)('walkthrough runtime (browser)', () => {
       await pw(widget.locator('#wt-play')).toHaveClass(/wt-flash/);
       await pw(widget.locator('#wt-caption')).toHaveText('Bấm vào đây');
       await pw(widget.locator('#wt-play')).not.toHaveClass(/wt-flash/, { timeout: 4000 });
+    });
+
+    it('is visible on SVG children (stroke + drop-shadow, outline does not paint there)', async () => {
+      await load();
+      await post({ type: 'HIGHLIGHT_ELEMENT', target: '.wta-bar' });
+      const bar = widget.locator('.wta-bar').first();
+      await pw(bar).toHaveClass(/wt-flash/);
+      await pw(bar).toHaveCSS('stroke-width', '3px');
+      expect(await bar.evaluate((el) => getComputedStyle(el).filter)).toContain('drop-shadow');
     });
 
     it('ignores a bad selector, a missing element and an over-long target', async () => {

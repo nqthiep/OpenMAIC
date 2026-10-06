@@ -136,7 +136,9 @@ export interface PredictLabels {
 /**
  * Câu hỏi dự đoán trong `#wt-predict`: đề, các nút chọn (`<button data-option>`, dùng được bằng
  * bàn phím) và "Bỏ qua". `onPick(i | null)` được gọi tối đa một lần; sau đó nút bị khoá, nút đúng
- * có `wt-on`, nút đã chọn `aria-pressed`, kết quả hiện ở `<p role="status">` (bỏ qua: xoá panel).
+ * có `wt-on`, nút đã chọn `aria-pressed`, kết quả hiện ở `<p role="status" tabindex="-1">`
+ * (bỏ qua: chỉ còn đoạn này, chữ là nhãn `skip`, `data-result="skipped"`).
+ * Focus: nút đầu tiên khi câu hỏi hiện ra, đoạn kết quả sau khi trả lời hoặc bỏ qua.
  */
 export function renderPredict(
   el: HTMLElement,
@@ -154,6 +156,7 @@ export function renderPredict(
   group.className = 'wt-predict-options';
   const status = doc.createElement('p');
   status.setAttribute('role', 'status');
+  status.tabIndex = -1;
   status.className = 'wt-predict-result';
   const skip = doc.createElement('button');
   skip.type = 'button';
@@ -173,7 +176,9 @@ export function renderPredict(
     if (done) return;
     done = true;
     if (chosen === null) {
-      el.replaceChildren();
+      el.setAttribute('data-result', 'skipped');
+      status.textContent = labels.skip;
+      el.replaceChildren(status);
     } else {
       const hit = chosen === q.answer;
       for (const b of [...buttons, skip]) b.disabled = true;
@@ -182,6 +187,7 @@ export function renderPredict(
       el.setAttribute('data-result', hit ? 'correct' : 'incorrect');
       status.textContent = hit ? labels.correct : labels.incorrect;
     }
+    status.focus();
     onPick(chosen);
   };
   buttons.forEach((b, i) => b.addEventListener('click', () => finish(i)));
@@ -190,4 +196,5 @@ export function renderPredict(
   group.append(...buttons, skip);
   el.removeAttribute('data-result');
   el.replaceChildren(ask, group, status);
+  buttons[0]?.focus();
 }

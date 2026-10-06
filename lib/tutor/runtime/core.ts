@@ -32,7 +32,7 @@ import {
   renderPredict,
   renderVars,
 } from './panels';
-import { buildPrediction, resolvePredict } from './predict';
+import { buildPrediction, resolvePredict, type Prediction } from './predict';
 
 const FLASH_MS = 1500;
 const LOAD_ERROR = 'Walkthrough data could not be loaded.';
@@ -42,6 +42,18 @@ interface PresetEntry {
   label: string;
   total: number;
 }
+
+/** Câu hỏi dự đoán đang hiện trong `#wt-predict` (đã trả lời thì panel còn kết quả tới khi đổi frame). */
+interface OpenQuestion {
+  preset: string;
+  index: number;
+  beatId: string;
+  answered: boolean;
+  /** Player đang chạy khi câu hỏi hiện: tạm dừng, chạy lại sau khi trả lời/bỏ qua. */
+  resume: boolean;
+}
+
+const skipped = (beatId: string): Prediction => ({ beatId, correct: false, skipped: true });
 
 interface Loaded {
   config: WalkthroughWidgetConfig;
@@ -115,7 +127,8 @@ function boot(visualizer: VisualizerRenderer): void {
   let beatButtons: HTMLButtonElement[] = [];
   let shown: { preset: string; index: number } | null = null;
   let prevFrame: Frame<unknown> | undefined;
-  let predictAt: { preset: string; index: number } | null = null; // frame đang hiện câu hỏi
+  let open: OpenQuestion | null = null;
+  const pending: Prediction[] = []; // câu hỏi bị bỏ không ai trả lời: báo `skipped` ở lần `sync` tới
   let batching = false; // gộp nhiều op của một message thành một lần vẽ + một `widget-state`
 
   const player = createPlayer({ total: presets.find((p) => p.id === preset)?.total ?? 1 });
@@ -128,6 +141,16 @@ function boot(visualizer: VisualizerRenderer): void {
       // không có parent để báo: bỏ qua
     }
   };
+  /** `widget-state` của frame đang hiện; chỉ message mang `prediction` thì engine mới coi là đã trả lời. */
+  const postState = (prediction?: Prediction) =>
+    post(
+      makeState({
+        walkthroughId: config.walkthroughId,
+        preset,
+        frame: player.getState().index,
+        prediction,
+      }),
+    );
   const setCaption = (text: string) => {
     if (refs.caption) refs.caption.textContent = text;
   };
@@ -170,20 +193,27 @@ function boot(visualizer: VisualizerRenderer): void {
   }
 
   // --- dự đoán ---
-  function clearPredict(): void {
-    predictAt = null;
-    if (!refs.predict) return;
-    refs.predict.removeAttribute('data-result');
-    refs.predict.replaceChildren();
+  /** Đóng câu hỏi hiện tại; chưa trả lời thì ghi nhận `skipped` để engine không chờ tới hết giờ. */
+  function closePredict(): void {
+    const o = open;
+    open = null;
+    if (refs.predict) {
+      refs.predict.removeAttribute('data-result');
+      refs.predict.replaceChildren();
+    }
+    if (o && !o.answered) pending.push(skipped(o.beatId));
   }
 
   function showPredict(beatId: string): void {
-    clearPredict();
+    closePredict();
     const index = player.getState().index;
     const q = resolvePredict(beatId, beats, index, data.beatText);
-    if (!q || !refs.predict) return;
-    const at = { preset, index };
-    predictAt = at;
+    if (!q || !refs.predict) {
+      pending.push(skipped(beatId)); // không hỏi được: báo bỏ qua ngay
+      return;
+    }
+    const o: OpenQuestion = { preset, index, beatId, answered: false, resume: false };
+    open = o;
     renderPredict(
       refs.predict,
       q,
@@ -196,15 +226,12 @@ function boot(visualizer: VisualizerRenderer): void {
       (chosen) => {
         // Chỉ message này mang `prediction`; `sync` không bao giờ gửi lại (engine coi mọi
         // `prediction` của beat là đã trả lời).
-        post(
-          makeState({
-            walkthroughId: config.walkthroughId,
-            preset: at.preset,
-            frame: at.index,
-            prediction: buildPrediction(q, chosen),
-          }),
-        );
-        if (chosen === null) clearPredict();
+        o.answered = true;
+        postState(buildPrediction(q, chosen));
+        if (o.resume) {
+          o.resume = false;
+          player.play();
+        }
       },
     );
   }
@@ -239,8 +266,11 @@ function boot(visualizer: VisualizerRenderer): void {
     setRootState(refs.root, { index: s.index, total: s.total, playing: s.isPlaying, preset });
   }
 
-  /** Vẽ lại theo player; báo `widget-state` khi frame hoặc preset đổi (và `notify`). */
-  function sync(notify: boolean): void {
+  /**
+   * Vẽ lại theo player; báo `widget-state` khi frame hoặc preset đổi (và `notify`), hoặc khi `force`.
+   * Câu hỏi bị bỏ lại (đổi frame/preset) được báo `skipped` trong chính message đó.
+   */
+  function sync(notify: boolean, force = false): void {
     const s = player.getState();
     const moved = !shown || shown.preset !== preset || shown.index !== s.index;
     if (moved) {
@@ -248,10 +278,10 @@ function boot(visualizer: VisualizerRenderer): void {
       shown = { preset, index: s.index };
     }
     paintControls(s);
-    if (predictAt && (predictAt.preset !== preset || predictAt.index !== s.index)) clearPredict();
-    if (moved && notify) {
-      post(makeState({ walkthroughId: config.walkthroughId, preset, frame: s.index }));
-    }
+    if (open && (open.preset !== preset || open.index !== s.index)) closePredict();
+    const skips = pending.splice(0);
+    if (skips.length > 0) skips.forEach((p) => postState(p));
+    else if ((moved && notify) || force) postState();
   }
 
   // --- op từ planSetWidgetState ---
@@ -310,14 +340,23 @@ function boot(visualizer: VisualizerRenderer): void {
       return;
     }
     const ops = planSetWidgetState(msg, presets, preset);
-    if (!ops) return; // preset lạ: bỏ cả message
+    if (!ops) {
+      // preset lạ: bỏ cả message; câu hỏi kèm theo cũng không hiện được
+      if (msg.state.predict) postState(skipped(msg.state.predict.beatId));
+      return;
+    }
     batching = true;
     try {
       for (const op of ops) applyOp(op);
+      if (open && !open.answered && player.getState().isPlaying) {
+        // tick kế tiếp sẽ xoá câu hỏi chưa ai trả lời: tạm dừng, chạy lại sau khi trả lời/bỏ qua
+        open.resume = true;
+        player.pause();
+      }
     } finally {
       batching = false;
     }
-    sync(true);
+    sync(true, true); // báo state cả khi frame không đổi: chat luôn có ngữ cảnh mới nhất
   }
 
   function announceReady(): void {
@@ -328,6 +367,7 @@ function boot(visualizer: VisualizerRenderer): void {
         presets: presets.map((p) => ({ id: p.id, total: p.total })),
       }),
     );
+    postState(); // ngay sau widget-ready để host có frame/preset hiện tại
   }
 
   // --- khởi tạo ---

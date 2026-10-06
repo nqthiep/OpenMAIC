@@ -89,9 +89,90 @@ describe.skipIf(!REQUIRED)('runtime predict mode (browser)', () => {
     await pw(widget.locator('#wt-predict button[data-predict-skip]')).toHaveText(data.labels.skip);
     expect(await predictions()).toHaveLength(0); // asking alone sends no prediction
 
+    // moving on before an answer clears the panel and reports it skipped (the engine stops waiting)
     await send({ frame: 0 });
     await pw(widget.locator('#wt-predict button')).toHaveCount(0);
+    await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
+    expect((await predictions())[0]).toMatchObject({
+      frame: 0,
+      prediction: { beatId: beat.id, correct: false, skipped: true },
+    });
+    await page.close();
+  });
+
+  it('is a labelled polite live region', async () => {
+    await load();
+    const region = widget.locator('#wt-predict');
+    await pw(region).toHaveAttribute('role', 'region');
+    await pw(region).toHaveAttribute('aria-live', 'polite');
+    await pw(region).toHaveAttribute('aria-label', data.labels.predict);
+    await page.close();
+  });
+
+  it('moves focus to the first option, then to the result after an answer', async () => {
+    await load();
+    await ask();
+    await pw(widget.locator('#wt-predict button[data-option]').first()).toBeFocused();
+    await widget.locator(`#wt-predict button[data-option="${WRONG}"]`).click();
+    const result = widget.locator('#wt-predict p[role=status]');
+    await pw(result).toHaveAttribute('tabindex', '-1');
+    await pw(result).toBeFocused();
+    await page.close();
+  });
+
+  it('moves focus to the result paragraph after skip', async () => {
+    await load();
+    await ask();
+    await widget.locator('#wt-predict button[data-predict-skip]').click();
+    const result = widget.locator('#wt-predict p[role=status]');
+    await pw(result).toHaveText(data.labels.skip);
+    await pw(result).toBeFocused();
+    await page.close();
+  });
+
+  it('a question that cannot be shown is reported skipped at once', async () => {
+    await load();
+    await send({ predict: { beatId: 'no-such-beat' } });
+    await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
+    expect((await predictions())[0].prediction).toEqual({
+      beatId: 'no-such-beat',
+      correct: false,
+      skipped: true,
+    });
+    await pw(widget.locator('#wt-predict button')).toHaveCount(0);
+
+    // unknown preset: the whole message is dropped, the question still counts as skipped
+    await send({ preset: 'nope', predict: { beatId: beat.id } });
+    await vi.waitFor(async () => expect(await predictions()).toHaveLength(2));
+    expect((await predictions())[1].prediction).toEqual({
+      beatId: beat.id,
+      correct: false,
+      skipped: true,
+    });
+    await page.close();
+  });
+
+  it('predict with playing:true holds playback until the question is answered', async () => {
+    await load();
+    await send({
+      preset: 'absent',
+      frame: beat.frame,
+      speed: 2,
+      playing: true,
+      predict: { beatId: beat.id },
+    });
+    const root = widget.locator('#wt-root');
+    await pw(widget.locator('#wt-predict button[data-option]').first()).toBeVisible();
+    await pw(root).toHaveAttribute('data-playing', 'false');
+    await page.waitForTimeout(1500); // > 2 ticks at speed 2
+    await pw(root).toHaveAttribute('data-frame-index', String(beat.frame));
+    await pw(widget.locator('#wt-predict button[data-option]').first()).toBeVisible();
     expect(await predictions()).toHaveLength(0);
+
+    await widget.locator(`#wt-predict button[data-option="${beat.answer}"]`).click();
+    await pw(root).toHaveAttribute('data-playing', 'true');
+    await pw(root).not.toHaveAttribute('data-frame-index', String(beat.frame), { timeout: 3000 });
+    await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
     await page.close();
   });
 
