@@ -1,0 +1,227 @@
+{
+  "entryId": "dijkstra",
+  "entryRev": 1,
+  "contentHash": "607a57881e16407f",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "dijkstra",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "classic frame 6 (pop): heap items show (9, C), (14, F) but (7, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "classic frame 6 (pop): explanation asks which element comes out next but the heap already lacks (7, B), so the answer (smallest d = 7, B) is not visible in the frame.",
+        "classic frame 9 (settle C): heap items show (14, F), (22, D) but (9, C) was just popped, which is correct; however the previous frame 8 pushed (22, D) and the heap should contain (14, F), (22, D) — this is consistent, no error.",
+        "classic frame 12 (settle F): heap items show (14, F), (20, D), (22, D) but (11, F) was just popped; correct.",
+        "classic frame 15 (settle D): heap items show (20, E), (22, D) but (20, D) was just popped; correct.",
+        "classic frame 16 (settle E): heap items show (22, D) but (20, E) was just popped; correct.",
+        "classic frame 17 (skip-stale D): heap items show empty but (22, D) was just popped; correct.",
+        "relax-twice frame 5 (pop): heap items show (10, B) but (3, C) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "relax-twice frame 5 (pop): explanation asks which element comes out next but the heap already lacks (3, C), so the answer (smallest d = 3, C) is not visible in the frame.",
+        "unreachable frame 4 (pop): heap items show empty but (4, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "unreachable frame 4 (pop): explanation asks which element comes out next but the heap already lacks (4, B), so the answer (smallest d = 4, B) is not visible in the frame.",
+        "line frame 4 (pop): heap items show empty but (2, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "line frame 4 (pop): explanation asks which element comes out next but the heap already lacks (2, B), so the answer (smallest d = 2, B) is not visible in the frame.",
+        "single frame 1 (pop): heap items show empty but (0, A) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "single frame 1 (pop): explanation asks which element comes out next but the heap already lacks (0, A), so the answer (smallest d = 0, A) is not visible in the frame.",
+        "classic frame 1 (pop): heap items show empty but (0, A) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "classic frame 1 (pop): explanation asks which element comes out next but the heap already lacks (0, A), so the answer (smallest d = 0, A) is not visible in the frame.",
+        "classic frame 6 (pop): heap items show (9, C), (14, F) but (7, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "classic frame 6 (pop): explanation asks which element comes out next but the heap already lacks (7, B), so the answer (smallest d = 7, B) is not visible in the frame.",
+        "classic frame 9 (settle C): heap items show (14, F), (22, D) but (9, C) was just popped, which is correct; however the previous frame 8 pushed (22, D) and the heap should contain (14, F), (22, D) — this is consistent, no error.",
+        "classic frame 12 (settle F): heap items show (14, F), (20, D), (22, D) but (11, F) was just popped; correct.",
+        "classic frame 15 (settle D): heap items show (20, E), (22, D) but (20, D) was just popped; correct.",
+        "classic frame 16 (settle E): heap items show (22, D) but (20, E) was just popped; correct.",
+        "classic frame 17 (skip-stale D): heap items show empty but (22, D) was just popped; correct.",
+        "relax-twice frame 5 (pop): heap items show (10, B) but (3, C) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "relax-twice frame 5 (pop): explanation asks which element comes out next but the heap already lacks (3, C), so the answer (smallest d = 3, C) is not visible in the frame.",
+        "unreachable frame 4 (pop): heap items show empty but (4, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "unreachable frame 4 (pop): explanation asks which element comes out next but the heap already lacks (4, B), so the answer (smallest d = 4, B) is not visible in the frame.",
+        "line frame 4 (pop): heap items show empty but (2, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "line frame 4 (pop): explanation asks which element comes out next but the heap already lacks (2, B), so the answer (smallest d = 2, B) is not visible in the frame.",
+        "single frame 1 (pop): heap items show empty but (0, A) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "single frame 1 (pop): explanation asks which element comes out next but the heap already lacks (0, A), so the answer (smallest d = 0, A) is not visible in the frame.",
+        "classic frame 1 (pop): heap items show empty but (0, A) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+        "classic frame 1 (pop): explanation asks which element comes out next but the heap already lacks (0, A), so the answer (smallest d = 0, A) is not visible in the frame."
+      ],
+      "issues": [
+        {
+          "where": "all pop frames",
+          "problem": "The pop frames show the heap after the pop has already happened, so the prediction question cannot be answered from the visible state.",
+          "fix": "Show the heap before the pop (with the element still present) in the pop frame, or move the prediction to the frame before the pop."
+        },
+        {
+          "where": "classic script",
+          "problem": "The script jumps from frame 10 (relax C-D) directly to frame 18 (done), skipping the settle of F, relax F-E, settle D, settle E, and the two stale skips that are the key teaching moments of the classic preset.",
+          "fix": "Add the missing setState/speech steps for frames 11-17 so the narrated beats match the totalBeats and the stale-skip lesson is actually shown."
+        },
+        {
+          "where": "relax-twice script",
+          "problem": "The script jumps from frame 10 (relax B-D) directly to frame 14 (done), skipping the settle of D and the two stale skips that are the point of this preset.",
+          "fix": "Add the missing setState/speech steps for frames 11-13."
+        },
+        {
+          "where": "line script",
+          "problem": "The script jumps from frame 10 (relax D-E) directly to frame 12 (done), skipping the settle of E.",
+          "fix": "Add the missing setState/speech step for frame 11."
+        },
+        {
+          "where": "done beat narration",
+          "problem": "The done narration says 'Mỗi cạnh làm tối đa một lần đẩy heap' (each edge causes at most one heap push), but a node can be improved multiple times and each improvement pushes a new entry, so the number of pushes can exceed the number of edges.",
+          "fix": "Say 'Mỗi lần nới lỏng thành công đẩy một phần tử, tối đa O(m) lần' or clarify that the bound is O(m) pushes in total, not one per edge."
+        },
+        {
+          "where": "done beat hints",
+          "problem": "The hint 'Mỗi lần nới lỏng thành công đẩy một phần tử, tối đa một lần cho mỗi cạnh (hai chiều)' repeats the same incorrect claim that each edge causes at most one push.",
+          "fix": "Correct the hint to say the total number of pushes is O(m), not one per edge."
+        },
+        {
+          "where": "classic frame 18 (done)",
+          "problem": "The explanation says 'Khoảng cách xa nhất là 20' but the frame does not show a 'far' variable or any visual indication of the farthest distance.",
+          "fix": "Either add a visual highlight for the farthest node or remove the claim from the explanation."
+        },
+        {
+          "where": "relax-twice frame 14 (done)",
+          "problem": "The explanation says 'Khoảng cách xa nhất là 9' but the frame does not show a 'far' variable or any visual indication of the farthest distance.",
+          "fix": "Either add a visual highlight for the farthest node or remove the claim from the explanation."
+        },
+        {
+          "where": "unreachable frame 8 (done)",
+          "problem": "The explanation says 'Khoảng cách xa nhất là 7' but the frame does not show a 'far' variable or any visual indication of the farthest distance.",
+          "fix": "Either add a visual highlight for the farthest node or remove the claim from the explanation."
+        },
+        {
+          "where": "single frame 3 (done)",
+          "problem": "The explanation says 'Khoảng cách xa nhất là 0' but the frame does not show a 'far' variable or any visual indication of the farthest distance.",
+          "fix": "Either add a visual highlight for the farthest node or remove the claim from the explanation."
+        },
+        {
+          "where": "line frame 12 (done)",
+          "problem": "The explanation says 'Khoảng cách xa nhất là 14' but the frame does not show a 'far' variable or any visual indication of the farthest distance.",
+          "fix": "Either add a visual highlight for the farthest node or remove the claim from the explanation."
+        },
+        {
+          "where": "classic frame 6 (pop)",
+          "problem": "The heap items show (9, C), (14, F) but (7, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+          "fix": "Show the heap before the pop (with (7, B) still present) in the pop frame, or move the prediction to the frame before the pop."
+        },
+        {
+          "where": "relax-twice frame 5 (pop)",
+          "problem": "The heap items show (10, B) but (3, C) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+          "fix": "Show the heap before the pop (with (3, C) still present) in the pop frame, or move the prediction to the frame before the pop."
+        },
+        {
+          "where": "unreachable frame 4 (pop)",
+          "problem": "The heap items show empty but (4, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+          "fix": "Show the heap before the pop (with (4, B) still present) in the pop frame, or move the prediction to the frame before the pop."
+        },
+        {
+          "where": "line frame 4 (pop)",
+          "problem": "The heap items show empty but (2, B) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+          "fix": "Show the heap before the pop (with (2, B) still present) in the pop frame, or move the prediction to the frame before the pop."
+        },
+        {
+          "where": "single frame 1 (pop)",
+          "problem": "The heap items show empty but (0, A) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+          "fix": "Show the heap before the pop (with (0, A) still present) in the pop frame, or move the prediction to the frame before the pop."
+        },
+        {
+          "where": "classic frame 1 (pop)",
+          "problem": "The heap items show empty but (0, A) should still be present before the pop; the frame claims the pop already happened while the explanation asks which element comes out next.",
+          "fix": "Show the heap before the pop (with (0, A) still present) in the pop frame, or move the prediction to the frame before the pop."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "dijkstra",
+      "entryRev": 1,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beats[settle].narration / narrationExample (both locales)",
+          "problem": "The justification 'mọi đường khác tới {u} đều phải đi qua đỉnh xa hơn' is false for the source: for u = A the example reads 'every other path to A goes through a farther node', but no path to A goes through any node at all. The claim only holds for u ≠ s.",
+          "fix": "Rephrase as 'mọi đường khác tới {u} phải đi qua một đỉnh chưa chốt có d ≥ {d}, và trọng số dương nên đường đó không thể ngắn hơn {d}' — or state the source case separately."
+        },
+        {
+          "where": "beats[settle].narrationExample (both locales)",
+          "problem": "The example is degenerate: it settles A with d = 0, so the 'positive weights' argument is vacuous and the student cannot see the invariant in action.",
+          "fix": "Use a non-source example, e.g. 'Cặp (7, B) khớp với dist[B] = 7, nên B được chốt...'."
+        },
+        {
+          "where": "beats[skip-stale].narration / narrationExample (both locales)",
+          "problem": "It says '{u} đã được chốt với khoảng cách nhỏ hơn' / '{u} was settled with a smaller distance', but the stale entry is skipped precisely because u was already settled earlier; the smaller distance is the one u was settled with, not a new one. The wording suggests a second settling.",
+          "fix": "Say '{u} đã được chốt trước đó với khoảng cách {cur} nhỏ hơn, nên mục này là thừa'."
+        },
+        {
+          "where": "beats[relax].hints[2] and pitfalls[0] (both locales)",
+          "problem": "The stale test is written as 'if d > dist[u]: continue', but the code uses 'if (d > dist[u]) continue;' — the colon form is Python syntax presented as if it were the general/C++ form, which can confuse beginners reading the C++ tab.",
+          "fix": "Write the test language-neutrally ('nếu d > dist[u] thì bỏ qua') or give both forms: C++ 'if (d > dist[u]) continue;' and Python 'if d > dist[u]: continue'."
+        },
+        {
+          "where": "pitfalls[1] (cpp, beat pop)",
+          "problem": "The pitfall is attached to beat 'pop', but the max-heap declaration is only visible in the code, never in a frame of that beat; the narration of 'pop' never mentions greater<>.",
+          "fix": "Attach it to the 'start' beat (where the heap is introduced) or add a frame/line highlight showing the priority_queue declaration."
+        },
+        {
+          "where": "script, preset 'classic' (both locales)",
+          "problem": "The script jumps from frame 10 straight to frame 18, skipping the stale-entry frames 14 and 17, so the 'skip-stale' beat and its pitfall are never narrated in the main example even though the heap visibly contains (14, F) and (22, D).",
+          "fix": "Insert the two skip-stale steps (frames 14 and 17) before the final frame, or mark them as optional seek-only steps explicitly."
+        },
+        {
+          "where": "script, preset 'relax-twice' (both locales)",
+          "problem": "The script jumps from frame 10 to frame 14, skipping frames 12 and 13 where the stale entries (10, B) and (11, D) are discarded; the 'relax-twice' preset is exactly the one meant to teach stale entries, so the key moment is not narrated.",
+          "fix": "Narrate frames 12 and 13 (skip-stale) before the final frame."
+        },
+        {
+          "where": "script, preset 'line' (both locales)",
+          "problem": "The script jumps from frame 10 to frame 12, skipping frame 11 where E is settled; the final narration then claims 'heap rỗng nên xong' while E's settling was never shown.",
+          "fix": "Add the settle step for frame 11 before the final frame."
+        },
+        {
+          "where": "frames[classic, index 13] highlights",
+          "problem": "The edge F–E is highlighted with key 'E-F' while the explanation and vars call it F–E (u = F, v = E); the edge key does not match the direction used everywhere else (e.g. 'A-B', 'B-D').",
+          "fix": "Use the key 'F-E' consistently with the (u, v) order of the relaxation."
+        },
+        {
+          "where": "frames[classic, index 18] explanation (both locales)",
+          "problem": "'đỉnh không có số là không tới được từ A' is a generic sentence that is vacuous in this preset (all six nodes have numbers) and is only meaningful in the 'unreachable' preset; it may make students look for a missing node.",
+          "fix": "Drop the clause in presets where every node is reachable, or say 'ở ví dụ này mọi đỉnh đều tới được'."
+        },
+        {
+          "where": "frames[classic, index 1] and other pop frames",
+          "problem": "The pop frame shows an empty heap while the explanation asks which element comes out next; the answer (the smallest d) is not visible in that frame, only in the following settle frame.",
+          "fix": "Keep the heap contents visible in the pop frame (or show the popped pair as a pending item) so the prediction can be checked against the frame."
+        },
+        {
+          "where": "code.map.cpp['1'] and code.map.py['1']",
+          "problem": "Pseudocode line 1 ('dist[s] ← 0; heap ← {(0, s)}') maps to C++ lines 3–6 and Python lines 4–6, which also contain the INF constant and the dist array allocation; the mapping is acceptable but the INF line is not part of pseudocode line 1.",
+          "fix": "Optionally split the map so the INF/allocation lines are noted as setup, or add a pseudocode line for initialisation."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

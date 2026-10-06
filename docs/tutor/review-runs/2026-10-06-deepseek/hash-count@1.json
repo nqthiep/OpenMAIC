@@ -1,0 +1,144 @@
+{
+  "entryId": "hash-count",
+  "entryRev": 1,
+  "contentHash": "298ae0da28355aaf",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "hash-count",
+      "entryRev": 1,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Script preset 'repeat': after frame 10 (n count raised to 2), the script jumps directly to frame 14 (done) without narrating frames 11-13 (reading s[5]=a, incrementing a to 3, and the max scan). The 'done' narration says a occurs 3 times, but the narrated sequence never shows a's count reaching 3.",
+        "Script preset 'distinct': after frame 10 (e added), the script jumps directly to frame 14 (done) without narrating frames 11-13 (reading s[5]=f, adding f, and the max scan). The 'done' narration says a occurs 1 time among 6 distinct characters, but the narrated sequence never shows f being added or the max scan.",
+        "Frame 'repeat' index 13 (beat:max) has pointer i=6, but the max scan is over the count table, not the string; the pointer i=6 is out of range for a 6-character string and does not correspond to any table element being scanned."
+      ],
+      "issues": [
+        {
+          "where": "script preset 'repeat'",
+          "problem": "The script skips frames 11-13, so the final count of a=3 and the max-scan step are never shown in the narrated flow.",
+          "fix": "Add setState steps for frames 11, 12, and 13 with the corresponding read/increment/max narrations before the done step."
+        },
+        {
+          "where": "script preset 'distinct'",
+          "problem": "The script skips frames 11-13, so f is never added and the max-scan step is never shown in the narrated flow.",
+          "fix": "Add setState steps for frames 11, 12, and 13 with the corresponding read/new-key/max narrations before the done step."
+        },
+        {
+          "where": "frame 'repeat' index 13 and 'distinct' index 13 (beat:max)",
+          "problem": "The pointer i=6 is shown during the max scan, which is misleading because the scan is over the count table, not the string.",
+          "fix": "Remove the i pointer during the max beat or point to the count table entry being examined."
+        },
+        {
+          "where": "beat 'start' hints",
+          "problem": "The first hint asks about pairwise comparison cost, which is a good lead-in but the second hint jumps to n² without the student having derived it.",
+          "fix": "Keep the hint but consider rephrasing the second hint to let the student estimate the cost themselves."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "hash-count",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "code.map.cpp: pseudocode line 3 (cnt[s[i]] ← cnt[s[i]] + 1) is mapped to C++ line 3, but the actual increment is on C++ line 3 only for the counting loop; pseudocode line 2 (the for loop) is mapped to C++ line 3 as well, so the loop header (pseudocode 2) and the body (pseudocode 3) are both mapped to the same C++ line 3, while C++ line 2 (int cnt[26] = {0};) is mapped to pseudocode line 1 — the mapping is shifted: pseudocode 1 should map to C++ 2, pseudocode 2 to C++ 3, pseudocode 3 to C++ 3, which is what is written, but then C++ line 4-7 (best scan) is mapped to pseudocode 4 and C++ 8 to pseudocode 5; however C++ line 4 (int best = 0;) is part of the max scan, not the return, so pseudocode 4 mapping to C++ 4,5,6,7 is acceptable, but pseudocode 5 (return best, cnt[best]) maps to C++ 8 which is the return — this part is fine; the real error is that pseudocode line 2 (for i ← 0 .. n − 1) maps to C++ line 3, which is the loop body, not the loop header (C++ line 3 is the for loop header `for (char c : s) cnt[c - 'a']++;` — actually C++ line 3 contains both the loop and the body, so mapping pseudocode 2 and 3 both to C++ 3 is defensible; no error here after re-checking",
+        "code.map.py: pseudocode line 3 (cnt[s[i]] ← cnt[s[i]] + 1) maps to Python line 4 (cnt[c] = cnt.get(c, 0) + 1), which is correct; pseudocode line 2 maps to Python line 3 (for c in s), correct; pseudocode line 4 maps to Python line 5 (best = min(...)), correct; pseudocode line 5 maps to Python line 6 (return best, cnt[best]), correct; no error",
+        "frame repeat index 13 (beat:max): explanation says 'a xuất hiện 3 lần' and vars cnt=3, but the highlights mark positions 1,3,5 as 'result' (the a's) and 0,2,4 as 'visited' — this is consistent; however the pointer i=6 is shown while the max scan is over the table, not the string, so the pointer is misleading but not a factual error",
+        "frame repeat index 14 (beat:done): explanation says 'trong 3 ký tự khác nhau' and vars distinct=3, correct for string 'banana' (a,b,n)",
+        "frame all-same index 9 (beat:max): explanation says 'a xuất hiện 4 lần', vars cnt=4, correct",
+        "frame all-same index 10 (beat:done): explanation says 'trong 1 ký tự khác nhau', vars distinct=1, correct",
+        "frame distinct index 13 (beat:max): explanation says 'a xuất hiện 1 lần', vars cnt=1, correct; highlights mark position 0 as 'result' and 1-5 as 'visited', consistent with tie-break smallest letter",
+        "frame distinct index 14 (beat:done): explanation says 'trong 6 ký tự khác nhau', vars distinct=6, correct",
+        "frame single index 3 (beat:max): explanation says 'z xuất hiện 1 lần', vars cnt=1, correct",
+        "frame single index 4 (beat:done): explanation says 'trong 1 ký tự khác nhau', vars distinct=1, correct",
+        "script repeat: after frame 10 (n count raised to 2), the script jumps to frame 14, skipping frame 11 (read s[5]=a), frame 12 (a count raised to 3), and frame 13 (max scan); the narration at frame 14 says 'a xuất hiện 3 lần' but the last shown count table at frame 10 has a:2, n:2, b:1 — the jump skips the increment that makes a:3, so the narration does not match the visible state progression; this is a script/state mismatch",
+        "script distinct: after frame 10 (e added), the script jumps to frame 14, skipping frame 11 (read f), frame 12 (f added), and frame 13 (max scan); the narration at frame 14 says 'a xuất hiện 1 lần, trong 6 ký tự khác nhau' but the last shown table at frame 10 has only a,b,c,d,e (5 keys), so 'distinct=6' is not visible from the shown state",
+        "script repeat and distinct are marked truncated=true with narratedBeats=12 but totalBeats=15, yet the steps list contains 12 setState/speech pairs ending at frame 14; the skipped frames 11-13 are never narrated, so the prediction at frame 3 (read s[1]) is fine but the final result narration references counts not yet shown",
+        "pitfall cpp (beat:increment): text says 'Mảng cnt[26] cần chỉ số c - 'a' (0..25), không phải c; dùng unordered_map nếu ký tự bất kỳ. Khởi tạo bằng 0.' — this is true and correctly attached to cpp, but it is attached to beat 'increment' while the array indexing happens in the counting loop (beat 'read'/'new-key'/'increment' all touch it); not a factual error",
+        "pitfall py (beat:new-key): text says 'd[c] += 1 trên khoá chưa có ném KeyError: dùng d.get(c, 0) + 1 hoặc collections.Counter.' — true for Python, correctly attached",
+        "beat 'max' hint 3: 'Duyệt theo thứ tự chữ cái và chỉ cập nhật khi số đếm lớn hơn hẳn (không dùng ≥).' — correct for tie-break smallest letter",
+        "beat 'done' narration: 'Mỗi ký tự chỉ đọc một lần nên cả quá trình là O(n).' — correct, but the max scan over the table is O(26) which is O(1), so O(n) total is correct",
+        "beat 'start' hint 1: 'Nếu so từng cặp ký tự để đếm thì mất bao nhiêu phép so?' and hint 2: 'Cỡ n²: quá chậm.' — correct",
+        "beat 'read' misconception: 'Nghĩ rằng phải duyệt cả bảng để tìm khoá: bảng băm tra cứu trực tiếp, gần như O(1).' — correct",
+        "beat 'new-key' misconception: 'Tăng số đếm của một khoá chưa tồn tại: Python báo KeyError, nên phải khởi tạo hoặc dùng get.' — correct",
+        "beat 'increment' misconception: 'Đặt lại số đếm bằng 1 mỗi khi gặp ký tự: kết quả luôn là 1.' — correct",
+        "beat 'max' misconception: 'Dùng ≥ khi cập nhật: khi hoà sẽ lấy chữ cái lớn hơn thay vì nhỏ nhất.' — correct",
+        "beat 'done' misconception: 'Nghĩ rằng đếm bằng bảng băm luôn nhanh hơn mảng cnt[26]: với bảng chữ cái nhỏ, mảng thường nhanh hơn.' — correct",
+        "C++ code line 5: 'for (int k = 1; k < 26; k++)' with line 6 'if (cnt[k] > cnt[best]) best = k;' — this correctly implements tie-break smallest letter because it scans from 1 upward and only updates on strictly greater, so best stays at the smallest index with max count; correct",
+        "Python code line 5: 'best = min(cnt, key=lambda c: (-cnt[c], c))' — this correctly picks the character with max count and smallest letter on tie; correct",
+        "pseudocode line 4: 'best ← ký tự có cnt lớn nhất (hoà: chữ cái nhỏ nhất)' — matches both implementations; correct",
+        "pseudocode line 5: 'return best, cnt[best]' — matches C++ line 8 and Python line 6; correct",
+        "frame repeat index 8 (beat:increment): explanation says 'tăng số đếm của nó lên 2', vars k=2, aux shows a:2 — correct",
+        "frame repeat index 10 (beat:increment): explanation says 'tăng số đếm của nó lên 2', vars k=2, aux shows n:2 — correct",
+        "frame repeat index 12 (beat:increment): explanation says 'tăng số đếm của nó lên 3', vars k=3, aux shows a:3 — correct",
+        "frame all-same index 4 (beat:increment): explanation says 'tăng số đếm của nó lên 2', vars k=2, aux shows a:2 — correct",
+        "frame all-same index 6 (beat:increment): explanation says 'tăng số đếm của nó lên 3', vars k=3, aux shows a:3 — correct",
+        "frame all-same index 8 (beat:increment): explanation says 'tăng số đếm của nó lên 4', vars k=4, aux shows a:4 — correct",
+        "frame repeat index 0: explanation says 'xâu 6 ký tự', vars n=6, state has 6 values — correct",
+        "frame all-same index 0: explanation says 'xâu 4 ký tự', vars n=4, state has 4 values — correct",
+        "frame distinct index 0: explanation says 'xâu 6 ký tự', vars n=6, state has 6 values — correct",
+        "frame single index 0: explanation says 'xâu 1 ký tự', vars n=1, state has 1 value — correct",
+        "alt locale: all explanations and narrations match the primary locale in meaning and numbers; no discrepancy found",
+        "problem statement: not present in the entry, so no check possible",
+        "constraints: not present, so no check possible",
+        "subtasks: not present, so no check possible",
+        "homework: not present, so no check possible"
+      ],
+      "issues": [
+        {
+          "where": "script repeat, steps after frame 10",
+          "problem": "The script jumps from frame 10 to frame 14, skipping frames 11-13 (read s[5]=a, increment a to 3, max scan). The final narration at frame 14 says 'a xuất hiện 3 lần' but the last visible count table (frame 10) shows a:2, n:2, b:1, so the student never sees a reach 3.",
+          "fix": "Add setState steps for frames 11, 12, 13 before frame 14, or change the final narration to match the visible state."
+        },
+        {
+          "where": "script distinct, steps after frame 10",
+          "problem": "The script jumps from frame 10 to frame 14, skipping frames 11-13 (read f, add f, max scan). The final narration says 'trong 6 ký tự khác nhau' but the last visible table (frame 10) has only 5 keys (a,b,c,d,e).",
+          "fix": "Add setState steps for frames 11, 12, 13 before frame 14."
+        },
+        {
+          "where": "script repeat and distinct, truncated=true",
+          "problem": "Both are marked truncated with narratedBeats=12 out of totalBeats=15, but the steps list ends at frame 14 after only 12 narrated beats; the skipped frames 11-13 are never narrated, so the lesson is incomplete for the final result.",
+          "fix": "Either narrate all 15 beats or make the truncation explicit and ensure the final narration matches the last shown frame."
+        },
+        {
+          "where": "frame repeat index 13 (beat:max) and similar max frames",
+          "problem": "The pointer i=6 is shown during the max scan, but i is the string index and the scan is over the count table; this is misleading.",
+          "fix": "Remove the i pointer or replace it with a table-scan pointer."
+        },
+        {
+          "where": "code.map.cpp",
+          "problem": "Pseudocode line 2 (for loop) and line 3 (increment) both map to C++ line 3, which is a single line containing both the loop and the body; this is technically correct but may confuse students about which line implements which pseudocode line.",
+          "fix": "Split C++ line 3 into two lines (loop header and body) or clarify the mapping."
+        },
+        {
+          "where": "pitfall cpp (beat:increment)",
+          "problem": "The pitfall about cnt[26] indexing is attached to beat 'increment', but the indexing happens in the counting loop (beats 'read'/'new-key'/'increment' all touch it); the attachment is not wrong but could be more precise.",
+          "fix": "Attach to beat 'read' or 'new-key' where the first indexing occurs."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

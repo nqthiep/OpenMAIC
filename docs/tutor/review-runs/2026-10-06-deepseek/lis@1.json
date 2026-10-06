@@ -1,0 +1,109 @@
+{
+  "entryId": "lis",
+  "entryRev": 1,
+  "contentHash": "53b617f5fbafa781",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "lis",
+      "entryRev": 1,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame 'decreasing' index 12: explanation says 'Đáp án là max(dp) = 1, ở vị trí 0, không phải dp[n − 1]' but the highlighted cell is 1,0 (dp[0]) while the narration for beat 'best' says max(dp) = 1; the claim 'không phải dp[n − 1]' is misleading because dp[n−1] = dp[4] = 1 equals the answer here, so the example does not demonstrate the point.",
+        "Frame 'decreasing' index 14 and 'single' index 4: explanation says 'Dãy tăng ngặt dài nhất có 1 phần tử' but the English alt says 'has 1 elements' (grammar only, not a factual error in meaning; however the Vietnamese is fine).",
+        "Script 'dups' preset: the step 'setState frame 13' is followed by the traceback narration twice (frames 12 and 13 both speak the traceback beat), so the second narration repeats the same beat instead of advancing to the next trace step; this is a script sequencing error.",
+        "Script 'mixed' preset: after the prediction at frame 9, the narration for frame 11 says 'Với i = 4, ta thử từng j < i. Vì a[1] = 10 nhỏ hơn a[4] = 20...' but the frame 11 explanation says 'Xét i = 4, j = 1: a[1] = 10 < a[4] = 20. Nối a[4] vào sau dãy kết thúc tại 1 có làm dp[4] = 2 tăng không?' which matches; however the script skips the update frame 12 and jumps to frame 13, so the narration for frame 13 says 'a[2] = 2 < a[4] = 20' while the state still shows dp[4] = 2 from frame 11, not the updated dp[4] = 3 from frame 12; the setState frame 13 shows dp[4] = 3, so the narration is consistent with the frame, but the script omits the update narration for frame 12.",
+        "Frame 'mixed' index 47: explanation says 'Đáp án là max(dp) = 4, ở vị trí 7' and highlights 1,7, but the vars show 'best': 4, 'at': 7; this is correct. However the explanation also says 'không phải dp[n − 1]' and dp[n−1] = dp[7] = 4, so the example does not demonstrate the point that the answer need not be dp[n−1].",
+        "Frame 'increasing' index 22: explanation says 'Đáp án là max(dp) = 5, ở vị trí 4, không phải dp[n − 1]' but dp[n−1] = dp[4] = 5 equals the answer, so the example does not demonstrate the point."
+      ],
+      "issues": [
+        {
+          "where": "Frame 'decreasing' index 12 and 'increasing' index 22",
+          "problem": "The explanation claims the answer is not dp[n−1], but in these presets dp[n−1] equals the answer, so the example does not illustrate the pitfall.",
+          "fix": "Use a preset where the last element is not part of the LIS, or rephrase to say 'dp[n−1] may not be the answer' and add a concrete counterexample."
+        },
+        {
+          "where": "Script 'dups' preset",
+          "problem": "The traceback narration is repeated twice (frames 12 and 13) without advancing the trace, which is confusing.",
+          "fix": "Remove the duplicate speech step or advance to the next trace frame."
+        },
+        {
+          "where": "Script 'mixed' preset",
+          "problem": "The script skips the update narration for frame 12 (dp[4] = 3) and jumps from frame 11 to frame 13, so the student does not hear why dp[4] changed.",
+          "fix": "Insert a speech step for frame 12 explaining the update before moving to frame 13."
+        },
+        {
+          "where": "Beat 'best' hints",
+          "problem": "The hint says 'ví dụ [5, 4, 3, 2, 1] cho dp toàn 1' but the decreasing preset already shows this; the hint is correct but redundant.",
+          "fix": "Keep the hint but ensure the example is distinct from the preset if possible."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "lis",
+      "entryRev": 1,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "frames mixed index 47 / increasing index 22 / dups index 11 / decreasing index 12 / single index 2 (beat:best)",
+          "problem": "The sentence 'Đáp án là max(dp) = 4, ở vị trí 7, không phải dp[n − 1]' is self-contradictory in the mixed preset: the best position IS n−1 = 7, so the 'not dp[n−1]' clause is false there (it is only true for decreasing/single).",
+          "fix": "Make the clause conditional, e.g. 'Đáp án là max(dp) = 4 (ở đây trùng với dp[n−1] = 4, nhưng nói chung phải lấy max vì dãy tốt nhất có thể kết thúc sớm hơn).'"
+        },
+        {
+          "where": "frames mixed index 2, 9, 11, 13, 15, 17, 20, 22, 25, 28, 30, 33, 35, 38, 40, 43, 45 (beat:extend)",
+          "problem": "The narration 'Nối a[i] vào sau dãy kết thúc tại j có làm dp[i] = d tăng không?' is spoken at the frame BEFORE the comparison is evaluated, so the student cannot yet see whether dp[j]+1 > dp[i]; the answer only becomes visible in the next frame.",
+          "fix": "Ask the prediction at the frame where cand and up are shown (the frame after the comparison), or add cand/di to the pre-comparison frame's vars."
+        },
+        {
+          "where": "script mixed, step 'setState frame 52' after the i=6 speech",
+          "problem": "The script jumps from frame 25 (i=6, j=0) straight to frame 52 (done), skipping all remaining i=6 and i=7 comparisons; the narration never covers them, so the 'done' frame appears without the intervening work.",
+          "fix": "Either narrate the remaining comparisons or add a short bridging line such as 'các bước còn lại làm tương tự' before jumping to frame 52."
+        },
+        {
+          "where": "script mixed, step 'setState frame 9' with predictBeat extend",
+          "problem": "The prediction is asked at frame 9 (i=4, j=0) but the preceding speech describes i=1, j=0; the jump is abrupt and the question's referent ('j này') is ambiguous.",
+          "fix": "Insert the i=4, j=0 speech before the prediction, or move the prediction to the frame that matches the last spoken comparison."
+        },
+        {
+          "where": "script dups, steps 'setState frame 12' and 'setState frame 13'",
+          "problem": "The same traceback sentence is spoken twice in a row for two different frames, which reads as a duplicate.",
+          "fix": "Vary the second line, e.g. 'Truy vết tiếp: a[0] = 2 là phần tử đầu tiên (dp[0] = 1).'"
+        },
+        {
+          "where": "beats done, narration 'Hai vòng lặp lồng nhau cho O(n²) thời gian; có cách O(n log n) bằng tìm kiếm nhị phân.'",
+          "problem": "The O(n log n) alternative is mentioned but never explained, and the problem statement/constraints are absent, so the complexity claim is not tied to any input bound.",
+          "fix": "Add the problem statement with n's bound and either sketch the binary-search method in one sentence or drop the mention."
+        },
+        {
+          "where": "beats start, hint 'Thử mọi dãy con có bao nhiêu khả năng?'",
+          "problem": "The hint asks a question but the answer 2^n only appears in the next hint; as a first hint it is fine, but the escalation is compressed.",
+          "fix": "Keep as is or merge hints 1–2 so the light hint states the brute-force count directly."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

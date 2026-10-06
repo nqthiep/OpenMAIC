@@ -69,7 +69,7 @@ export function entryContract<I>(c: Contract<I>): void {
   describe(`${entry.id} contract: static fields`, () => {
     it('matches the card', () => {
       expect(entry.subject).toBe('cp');
-      expect(entry.entryRev).toBe(1);
+      expect(entry.entryRev).toBeGreaterThanOrEqual(1);
       expect(entry.visualizer).toBe(c.visualizer);
       expect(entry.curriculumTopics).toEqual(c.topics);
       expect(entry.customInput).toBe(false);

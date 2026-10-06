@@ -1,0 +1,148 @@
+{
+  "entryId": "kruskal",
+  "entryRev": 1,
+  "contentHash": "f2b1c90de5c6ce1f",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "kruskal",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "classic frame 9: explanation says 'Gốc của A là A, của C là E' but DSU items show A→E, B→C, C→D, D→E, E→E; find(C) follows C→D→E so rv=E is correct, but the explanation omits the intermediate step and the DSU table is inconsistent with a naive find (C→D, D→E gives E, which is fine, but the text 'của C là E' is correct only after path compression; the table shows C→D not C→E, so the displayed DSU does not match the claimed root without explaining the chain).",
+        "classic frame 11: vars show only ru=E but the explanation says 'A và B cùng gốc E'; rv is missing from vars though the narration uses both roots.",
+        "classic frame 13: vars show only ru=E but the explanation says 'C và D cùng gốc E'; rv is missing from vars though the narration uses both roots.",
+        "classic frame 15: vars show only ru=E but the explanation says 'C và E cùng gốc E'; rv is missing from vars though the narration uses both roots.",
+        "classic frame 18: explanation says 'Đủ 5 cạnh (n − 1) nên dừng sớm' but the script jumps from frame 10 directly to frame 18, skipping frames 11-17 where the remaining edges are processed; the narration at frame 18 claims the total is 14 with 5 edges, which is correct, but the script never shows the rejection of A-B, C-D, C-E or the taking of E-F, so the student cannot see how the total was reached.",
+        "classic script: the step 'setState frame 18' follows immediately after the speech about edge A-B (frame 10), so the prediction for edge A-B is never resolved and the narration for frames 11-17 is missing; the script's totalBeats is 19 but only 12 are narrated, and the jump skips the reject/take beats that the frames 11-17 represent.",
+        "min preset frame 0: explanationAlt says '1 weighted edges' (grammatical error, but the meaning is the same as the primary locale, so not a factual error; however the primary locale says '1 cạnh' which is correct).",
+        "min preset frame 4: explanationAlt says '1 edges' (grammatical error, same meaning as primary locale).",
+        "code.map cpp: pseudocode line 5 ('else: bỏ cạnh') maps to cpp line 11, but line 11 is the find_root call that is also part of line 4; the else branch is not explicitly implemented in the C++ code (there is no else statement), so mapping line 5 to line 11 is misleading.",
+        "code.map py: pseudocode line 5 ('else: bỏ cạnh') maps to py line 9, but line 9 is the find_root call that is also part of line 4; the else branch is not explicitly implemented in the Python code, so mapping line 5 to line 9 is misleading.",
+        "code.map cpp: pseudocode line 3 ('for mỗi cạnh') maps to cpp line 10, but line 10 is the range-based for loop that also includes the structured binding; this is acceptable, but the map for line 4 includes line 11 which is the find_root call, and line 5 also maps to line 11, so the same line is mapped to two different pseudocode lines, which is confusing.",
+        "code.map py: pseudocode line 3 ('for mỗi cạnh') maps to py line 8, but line 8 is the for loop that also includes the sorted() call; this is acceptable, but the map for line 4 includes line 9 which is the find_root call, and line 5 also maps to line 9, so the same line is mapped to two different pseudocode lines, which is confusing.",
+        "pitfall cpp: 'Sắp các bộ std::tuple<int, int, int> theo thứ tự (w, u, v)' is correct, but the C++ code uses std::tuple<int, int, int> and the structured binding [w, u, v] in line 10, which is correct; however the pitfall says 'trọng số phải đứng đầu bộ để std::sort sắp theo nó', which is true, but the code does not explicitly show the tuple creation, so the pitfall is not directly verifiable from the code.",
+        "pitfall py: 'sorted(edges) sắp bộ (w, u, v) theo w trước nên đúng' is correct, but the Python code uses sorted(edges) in line 8, which sorts by the first element of each tuple; if the edges are stored as (w, u, v), this is correct, but the code does not show the edge format, so the pitfall is not directly verifiable from the code."
+      ],
+      "issues": [
+        {
+          "where": "classic script",
+          "problem": "The script jumps from frame 10 to frame 18, skipping the processing of edges A-B, C-D, C-E, and E-F. The student never sees the rejection of A-B, C-D, C-E or the taking of E-F, so the final total of 14 is not visually justified.",
+          "fix": "Add setState steps for frames 11-17 with the corresponding narration for each edge, or reduce the totalBeats to match the narrated steps and adjust the final frame to show the intermediate steps."
+        },
+        {
+          "where": "classic frames 11, 13, 15",
+          "problem": "The vars object only contains ru but not rv, even though the explanation mentions both roots. This makes the frame inconsistent with the explanation.",
+          "fix": "Add rv to the vars object in frames 11, 13, and 15 with the correct value (E in all three cases)."
+        },
+        {
+          "where": "code.map cpp and py",
+          "problem": "Pseudocode line 5 ('else: bỏ cạnh') is mapped to the same implementation line as the find_root call in line 4, but the else branch is not explicitly implemented in either language. This is misleading for students trying to understand the mapping.",
+          "fix": "Either add an explicit else branch to the code (e.g., a comment or a no-op) and map line 5 to it, or remove line 5 from the map and explain in the pitfalls that the else branch is implicit."
+        },
+        {
+          "where": "min preset frames 0 and 4",
+          "problem": "The English explanationAlt has grammatical errors ('1 weighted edges', '1 edges'), which may confuse students reading the English version.",
+          "fix": "Change to '1 weighted edge' and '1 edge' respectively."
+        },
+        {
+          "where": "classic frame 9",
+          "problem": "The explanation says 'Gốc của C là E' but the DSU table shows C→D, D→E, so the root is E only after following the chain. The explanation does not mention the intermediate step, which may confuse students who are learning DSU for the first time.",
+          "fix": "Either update the DSU table to show C→E directly (if path compression is applied) or add a note in the explanation that find(C) follows C→D→E."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "kruskal",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "code.map cpp: pseudocode line 5 ('else: bỏ cạnh') is mapped to C++ line 11 (int ru = find_root(p, u), rv = find_root(p, v);), which is the find step, not the else branch; the else branch is implicit (no code line), so the map is wrong",
+        "code.map py: pseudocode line 5 ('else: bỏ cạnh') is mapped to Python line 9 (ru, rv = find_root(p, u), find_root(p, v)), which is the find step, not the else branch",
+        "code.map cpp: pseudocode line 1 ('sắp các cạnh tăng dần') is mapped only to C++ line 6 (std::sort), but the sort key is fixed by the tuple layout declared in the signature on line 5, so the mapping is incomplete/misleading",
+        "frame classic index 18 (beat:done): explanation says 'Đủ 5 cạnh (n − 1) nên dừng sớm' but the algorithm never checks the n−1 condition in the code (no early-exit in cpp/py), and the frame is reached only after all 9 edges are scanned; the 'dừng sớm' claim contradicts the shown code",
+        "frame classic index 18: vars comps=1 is shown but the code never computes or maintains a component count, so the variable is unsupported by the algorithm as presented",
+        "frame forest index 10: explanation says 'Hết cạnh: chọn 3 cạnh, còn 3 thành phần liên thông' — with 6 nodes and 3 chosen edges the number of components is 6−3=3 only if the chosen edges form a forest, which they do, but the frame's vars comps=3 is again not produced by the code (no component counter), so the displayed variable is unsupported",
+        "beat 'reject' narration: 'Trong chu trình cạnh nặng nhất luôn thừa, và nó là cạnh này (xét sau)' — the claim that the current edge is the heaviest in the cycle is only true because edges are processed in nondecreasing weight, but the narration says '(xét sau)' (looked at later) which is backwards: the current edge is looked at now, and the other cycle edges were looked at earlier (lighter or equal); the parenthetical is factually inverted",
+        "beat 'reject' hint 2: 'nó không nhẹ hơn các cạnh đã chọn trong vòng đó' is correct, but the narration's '(xét sau)' contradicts it; the two statements in the same beat disagree",
+        "pitfall (no lang, beat sort): 'có thể dừng sớm khi đã đủ n − 1 cạnh' — the provided C++ and Python implementations have no early-exit check, so the pitfall describes behavior the code does not implement",
+        "script classic: after frame 10 the script jumps to frame 18, skipping frames 11–17 (the reject of A–B, C–D, C–E and the take of E–F); the narration at frame 18 says 'Tổng trọng số là 14 với 5 cạnh' but the last narrated state (frame 10) has total=8 with 4 edges, so the jump is not narrated and the total jumps without explanation",
+        "script classic: the prediction 'Theo em, cạnh này có tạo chu trình không?' is asked before frame 2, 4 (predictBeat consider), but never asked for the reject cases (frames 11, 13, 15) even though those are the pedagogically important 'cycle' cases; the predict is only asked when the answer is 'no cycle', so the question is misleading",
+        "script classic: the speech at frame 10 says 'Cạnh A–B (trọng số 4) là cạnh nhẹ nhất chưa xét' but frame 10's vars show u=A, v=B, w=4 and the DSU shows A and B already in the same set (A→E, B→C→D→E), so the following narration should be the reject case, yet the script jumps to frame 18 without narrating the reject",
+        "frame classic index 11 (beat:reject): vars only has u, v, ru (ru=E) but the explanation says 'A và B cùng gốc E' — rv is missing from vars even though the explanation implicitly needs both roots; minor but the frame's vars are incomplete for the claim",
+        "frame classic index 13 (beat:reject): same issue, vars has u=C, v=D, ru=E but no rv, while the explanation says 'C và D cùng gốc E'",
+        "frame classic index 15 (beat:reject): same issue, vars has u=C, v=E, ru=E but no rv",
+        "frame forest index 7 (beat:reject): vars has u=A, v=B, ru=C but no rv, while the explanation says 'A và B cùng gốc C'",
+        "frame already-tree index 9 (beat:take): explanation says 'Gốc của C là C, của D là E' and vars ru=C, rv=E — correct, but the DSU aux at frame 8 shows C→C and D→E, so find(C)=C and find(D)=E, consistent; no error here, but the frame's aux at index 9 shows C→E after union, which is correct",
+        "frame min index 4 (beat:done): explanation says 'Đủ 1 cạnh (n − 1) nên dừng sớm' but again the code has no early-exit; the frame is reached after the single edge is processed, so 'dừng sớm' is vacuous/misleading",
+        "beat 'done' narration: 'Kruskal dừng khi đủ n − 1 cạnh hoặc hết cạnh' — the provided implementations never stop at n−1 edges, they always scan all m edges; the narration describes a variant not shown in the code",
+        "beat 'start' narration: 'Cây khung nối mọi đỉnh bằng n − 1 cạnh' — for the 'forest' preset the graph is disconnected and the result is a spanning forest, not a spanning tree with n−1 edges; the beat is used in the forest preset (frame 0) where n=6 but only 3 edges are chosen, so the narration is wrong for that preset",
+        "beat 'done' narration in forest preset: 'Tổng trọng số là 8 với 3 cạnh' — correct, but the preceding sentence 'Kruskal dừng khi đủ n − 1 cạnh' is wrong for this preset since n−1=5 was never reached",
+        "pitfall (no lang, beat sort): 'Thứ tự giữa các cạnh cùng trọng số không đổi tổng' — true, but the C++ std::sort is not stable, so the order among equal weights may change; the statement 'không đổi tổng' is about the total, which is true, but the earlier frame explanation says 'Cạnh trùng trọng số giữ thứ tự ban đầu' which is false for std::sort (not stable) — the frame explanation claims stable order that the C++ code does not guarantee",
+        "frame classic index 1 (beat:sort) explanation: 'Cạnh trùng trọng số giữ thứ tự ban đầu' — false for the C++ std::sort used in the code (not stable); the Python sorted() is stable, so the claim is language-dependent and wrong for C++",
+        "frame ties index 1 (beat:sort) explanation: same claim 'Cạnh trùng trọng số giữ thứ tự ban đầu' — false for C++ std::sort",
+        "frame forest index 1, already-tree index 1, min index 1: same stable-order claim, false for C++ std::sort"
+      ],
+      "issues": [
+        {
+          "where": "code.map cpp/py, pseudocode line 5",
+          "problem": "The else branch (drop the edge) has no explicit code line, so mapping it to the find line is wrong and confusing for students tracing the code.",
+          "fix": "Either add an explicit else branch in the implementations (e.g., 'else { /* drop */ }') and map line 5 to it, or map line 5 to the empty set and note that the else is implicit."
+        },
+        {
+          "where": "frames with beat:done (classic 18, ties 8, forest 10, already-tree 10, min 4)",
+          "problem": "The explanations say 'dừng sớm' (stop early) at n−1 edges, but the shown C++/Python code never checks n−1 and always scans all edges; the 'comps' variable is also never computed by the code.",
+          "fix": "Either add an early-exit check (if taken == n-1 break) and a component counter to the implementations, or change the explanations to say the loop ends when edges run out and remove the unsupported 'comps' variable."
+        },
+        {
+          "where": "beat reject narration (both locales)",
+          "problem": "The parenthetical '(xét sau)' / '(looked at later)' is backwards: the current edge is being looked at now, and the other edges of the cycle were looked at earlier (they are lighter or equal).",
+          "fix": "Replace with '(đang xét)' / '(the one being looked at now)' or explain that because edges are processed in nondecreasing weight, the current edge is the heaviest in the cycle."
+        },
+        {
+          "where": "script classic, steps after frame 10",
+          "problem": "The script jumps from frame 10 to frame 18, skipping the reject cases (frames 11, 13, 15) and the E–F take (frame 17); the total jumps from 8 to 14 with no narration, and the prediction is never asked on the reject cases where the answer is 'yes, cycle'.",
+          "fix": "Narrate frames 11–17 (or at least the reject of A–B and the take of E–F) and ask the prediction at a reject frame so students see the 'yes' case."
+        },
+        {
+          "where": "beat start narration in the forest preset",
+          "problem": "The narration says a spanning tree connects all nodes with n−1 edges, but the forest preset is disconnected and the result is a spanning forest with fewer than n−1 edges; the narration is wrong for that preset.",
+          "fix": "Add a conditional sentence for disconnected graphs, or use a different start narration for the forest preset."
+        },
+        {
+          "where": "frame explanations claiming stable order for equal weights (classic 1, ties 1, forest 1, already-tree 1, min 1)",
+          "problem": "C++ std::sort is not stable, so 'Cạnh trùng trọng số giữ thứ tự ban đầu' is false for the C++ implementation; Python sorted() is stable, so the claim is language-dependent.",
+          "fix": "Say the order among equal weights does not affect the total (which is true) and note that std::sort may reorder equal-weight edges, while Python's sorted() is stable."
+        },
+        {
+          "where": "frames with beat:reject (classic 11, 13, 15; forest 7)",
+          "problem": "vars omit rv even though the explanation implicitly compares both roots; students may wonder why only one root is shown.",
+          "fix": "Add rv to vars (equal to ru) so the comparison find(u) == find(v) is visible."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "entryId": "nim-grundy",
+  "entryRev": 1,
+  "contentHash": "43e9430b4efa53d4",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "nim-grundy",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame win index 13: explanation says 'lấy 2 viên từ đống 0 (còn 1)' but the pile size is 3, so taking 2 leaves 1; however the winning move should take 2 stones leaving 1, which is correct, but the highlight '0,1' points to g(1)=1 while the pile row shows 3,4,5; the explanation is consistent but the highlight 'compare' on 0,1 is misleading since g(1)=1 is the target, not a comparison.",
+        "Frame single index 13: explanation says 'lấy 2 viên từ đống 0 (còn 4)' but the pile size is 6, so taking 2 leaves 4; this is correct, but the highlight '0,4' points to g(4)=0 which is the target, not a comparison; the highlight 'compare' is misleading.",
+        "Code map: pseudocode line 4 maps to cpp line 12 and py line 12, but line 12 is 'return total' which does not implement the win/lose decision; the decision is not implemented in the code at all, so the map is incorrect.",
+        "Code map: pseudocode line 5 maps to cpp line 12 and py line 12, but line 12 is 'return total' which does not implement 'return total' as a separate step; the map is incorrect.",
+        "Beat 'winning-move' narration says 'Luôn làm được vì mex mọi giá trị nhỏ hơn đều đạt tới được' (always possible because every smaller value is reachable by mex), but this is not generally true for arbitrary impartial games; it is true for this specific take-1-to-3 game because g(x) = x mod 4, but the claim is stated as a general property of mex, which is false.",
+        "Beat 'done' hint 3 says 'Chi phí tuyến tính theo kích thước đống' (cost linear in pile sizes), but the code computes g for x = 0..7 regardless of pile sizes, so the cost is constant, not linear in pile sizes.",
+        "Frame win index 11: explanation says 'Giá trị g của các đống: 3, 0, 1' but the pile row shows 3, 4, 5, so the g values are g(3)=3, g(4)=0, g(5)=1, which is correct, but the highlight '1,0', '1,1', '1,2' points to the pile row, not the g row, so the highlight is misleading.",
+        "Frame lose index 11: explanation says 'Giá trị g của các đống: 1, 2, 3' but the pile row shows 1, 2, 3, so the g values are g(1)=1, g(2)=2, g(3)=3, which is correct, but the highlight '1,0', '1,1', '1,2' points to the pile row, not the g row, so the highlight is misleading.",
+        "Frame single index 11: explanation says 'Giá trị g của các đống: 2' but the pile row shows 6, so the g value is g(6)=2, which is correct, but the highlight '1,0' points to the pile row, not the g row, so the highlight is misleading.",
+        "Frame empty index 11: explanation says 'Giá trị g của các đống: 0, 0' but the pile row shows 0, 0, so the g values are g(0)=0, g(0)=0, which is correct, but the highlight '1,0', '1,1' points to the pile row, not the g row, so the highlight is misleading."
+      ],
+      "issues": [
+        {
+          "where": "Beat 'winning-move' narration",
+          "problem": "The claim 'Luôn làm được vì mex mọi giá trị nhỏ hơn đều đạt tới được' is stated as a general property of mex, but it is not true for arbitrary impartial games; it is only true for this specific game because g(x) = x mod 4.",
+          "fix": "Clarify that this property holds for this specific take-1-to-3 game, not for all impartial games."
+        },
+        {
+          "where": "Beat 'done' hint 3",
+          "problem": "The hint says the cost is linear in pile sizes, but the code computes g for x = 0..7 regardless of pile sizes, so the cost is constant.",
+          "fix": "Change the hint to say the cost is constant for this fixed range, or explain that for larger pile sizes the cost would be linear in the maximum pile size."
+        },
+        {
+          "where": "Code map",
+          "problem": "Pseudocode lines 4 and 5 both map to the same implementation line 12, which is 'return total', but the win/lose decision is not implemented in the code.",
+          "fix": "Either implement the win/lose decision in the code or remove pseudocode lines 4 and 5 from the map."
+        },
+        {
+          "where": "Frame highlights for g values",
+          "problem": "The highlights for the g values of the piles point to the pile row instead of the g row, which is misleading.",
+          "fix": "Point the highlights to the g row cells that correspond to the pile sizes."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "nim-grundy",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame win/13 (beat winning-move): explanation says 'lấy 2 viên từ đống 0 (còn 1)' but the pile at index 0 has 3 stones, so taking 2 leaves 1 — the pile row shows 3, and vars np=1, gp=3, gn=1 are consistent; however the narration of beat winning-move claims the new g equals 'g xor tổng nim' = 3 xor 2 = 1, which matches, so this frame is fine; the real error is in preset single/13: 'lấy 2 viên từ đống 0 (còn 4)' with pile 6 and vars np=4, gp=2, gn=0 — g(4)=0 is correct and 6-2=4 is correct, so also fine; the actual factual error is the mex beat narration 'g(x) là mex của các g(x − t) với t = 1..3' applied to x=0..2 where t ≤ x restricts moves, but the narration never states the t ≤ x restriction, so for x=1 it claims t=1..3 while only t=1 is legal — misleading but the frames' sets are correct",
+        "Beat 'mex' ask options are '0','1','2','3' but the question 'Theo em, g(x) bằng bao nhiêu?' is asked at frame 4 (x=3, answer 3) and frame 6 (x=4, answer 0); the option list does not include the answer 0 for the second ask in a way distinguishable from the first, and the same generic question is reused for two different x values, so the prediction at frame 6 cannot be answered from the options as posed",
+        "Pitfall 'Mảng seen cần kích thước đủ lớn cho giá trị mex (ở đây tối đa 3 nên seen[4])' is attached to beat mex and lang cpp: seen[4] is indexed by g[x-t] which is at most 3, so seen[4] is correct, but the claim 'giá trị mex tối đa 3' is only true because g is periodic with period 4 for this game; the code hardcodes g[8] and seen[4], which is correct for piles ≤ 7 but the pitfall does not warn that g[p] with p ≥ 8 is out of bounds — the code silently reads out of range for larger piles",
+        "code.map cpp line '1' maps to [2,3,4,5,8] but pseudocode line 1 is the whole for-loop including the mex computation; mapping it to lines 2-5 and 8 omits line 6-7 (the mex while-loop) which is pseudocode line 2, so the split is defensible, but pseudocode line 1 also includes 'g[x] ← mex{...}' whose assignment is line 8 — acceptable; however pseudocode line 5 'return total' maps to cpp line 12 which is 'return total;' inside the function, correct",
+        "Frame win/11 explanation 'Giá trị g của các đống: 3, 0, 1. Tổng nim = xor của chúng = 2' — 3 xor 0 xor 1 = 2, correct; frame lose/11 '1, 2, 3 ... = 0' — 1 xor 2 xor 3 = 0, correct; frame single/11 'g của các đống: 2 ... = 2' — pile is 6, g(6)=2, correct; frame empty/11 '0, 0 ... = 0' correct",
+        "Frame win/13 highlights '0,1' as compare but the new g value 1 is at column 1 of row g, which is correct; frame single/13 highlights '0,4' as compare and g(4)=0, correct",
+        "Beat 'winning-move' narration 'chọn một đống mà g xor tổng nim nhỏ hơn g của nó' — for win preset, g=3, xor=2, 3 xor 2 = 1 < 3, correct; for single preset, g=2, xor=2, 2 xor 2 = 0 < 2, correct",
+        "Beat 'done' hint 'Chi phí tuyến tính theo kích thước đống thay vì tích số trạng thái' — computing g for each pile size up to max is O(max) and xor is O(k), so linear in pile sizes, correct",
+        "The 'empty' preset has two empty piles (0,0) and the verdict is 'thua' (lose) with xor 0, correct; but the preset label says 'Biên: hai đống rỗng' and the start frame says 'Trò chơi: 2 đống' with k=2, consistent",
+        "Frame win/0 explanation says 'Ta tính g(x) cho x = 0..7' but the piles are 3,4,5 so only g(0..5) are needed; computing to 7 is harmless but the stated range 0..7 is arbitrary and not justified — minor, not a factual error",
+        "The C++ code declares 'int g[8]' and indexes g[p] for p in piles; if any pile has ≥ 8 stones this is out of bounds, and the problem statement/constraints are absent from the entry, so the code's correctness for the intended constraints cannot be verified — the walkthrough never states the constraint that piles ≤ 7"
+      ],
+      "issues": [
+        {
+          "where": "beat 'mex' ask",
+          "problem": "The same question 'Theo em, g(x) bằng bao nhiêu?' with options 0/1/2/3 is asked twice (frames 4 and 6) for different x values (3 and 4), so the second ask is ambiguous and the option set does not distinguish the two cases.",
+          "fix": "Make the question specific, e.g. 'g(3) bằng bao nhiêu?' and 'g(4) bằng bao nhiêu?', and include the correct answer in the options."
+        },
+        {
+          "where": "beat 'mex' narration",
+          "problem": "The narration says 'mex của các g(x − t) với t = 1..3' without the condition t ≤ x, which is false for x < 3 (e.g. x=1 has only t=1).",
+          "fix": "State 'với t = 1..3 và t ≤ x' explicitly."
+        },
+        {
+          "where": "code (cpp and py)",
+          "problem": "Both implementations hardcode g[8] and index g[p] without any bound check or stated constraint on pile sizes; the entry has no problem statement or constraints, so the code is only correct for piles ≤ 7.",
+          "fix": "Add the problem constraints (piles ≤ 7 or compute g up to max(piles)) and size the array accordingly, or state the assumption."
+        },
+        {
+          "where": "pitfall (cpp, beat mex)",
+          "problem": "The pitfall says seen[4] is enough because mex ≤ 3, but does not mention that g[p] for p ≥ 8 is out of bounds, which is the more likely bug.",
+          "fix": "Add a pitfall about sizing g to max(piles)+1 or the stated constraint."
+        },
+        {
+          "where": "preset 'single' frame 13",
+          "problem": "The winning-move frame for the single pile (6 stones) says 'lấy 2 viên từ đống 0 (còn 4)' and g changes 2→0; this is correct, but the frame's highlight '0,4' points at g(4)=0 while the pile row still shows 6, so the visual does not show the pile after the move.",
+          "fix": "Update the pile row to show 4 after the move, or add a note that the pile row shows the initial state."
+        },
+        {
+          "where": "script (all presets)",
+          "problem": "The prediction for beat 'mex' is asked at frames 4 and 6, but the narration for the mex beat is repeated verbatim after each ask, and the second ask at frame 6 (x=4, answer 0) is not answerable from the options 0/1/2/3 in a way that distinguishes it from the first ask.",
+          "fix": "Use distinct questions per frame and ensure the correct option is present and unambiguous."
+        },
+        {
+          "where": "entry metadata",
+          "problem": "No problem statement, constraints, subtasks, or homework are present, so the algorithm's complexity claims and the code's bounds cannot be checked against the intended problem.",
+          "fix": "Include the problem statement with constraints (number of piles, pile sizes) and subtask complexities."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

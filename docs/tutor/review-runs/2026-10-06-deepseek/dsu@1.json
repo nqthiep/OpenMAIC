@@ -1,0 +1,172 @@
+{
+  "entryId": "dsu",
+  "entryRev": 1,
+  "contentHash": "8b7c2dbcbeb78402",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "dsu",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "preset 'two-sets', frame 9: explanation says 'gắn gốc nhỏ hơn vào gốc lớn hơn' (hang the smaller root under the larger one) but both roots have size 2, so neither is smaller; the tie is broken arbitrarily (root 2 under root 0), which the text does not state.",
+        "preset 'two-sets', frame 11: explanation says 'mọi đỉnh trên đường từ 3 lên gốc 0 giờ trỏ thẳng tới 0' (every node on the way from 3 up to root 0 now points straight at 0), but the state shows node 2 still has parent 0 and node 3 now has parent 0; node 2 was already pointing to 0 before compression, so the claim that every node on the path now points straight at 0 is misleading/incorrect as a description of what changed.",
+        "preset 'two-sets', frame 11: vars contain only x=3 and r=0, but the explanation mentions the path from 3 to root 0; the intermediate node 2 is not represented in vars, making the explanation's claim about 'every node on the path' unsupported by the frame data.",
+        "preset 'two-sets', frame 12: explanation says 'gốc của 3 là 0' (the root of 3 is 0) and asks how many steps up for 0, but the frame's codeLine is 3 and the state shows node 3 with parent 0; the narration in the script for this frame says 'find(3) climbs...' while the frame explanation says 'find the root of 0', a mismatch between the frame explanation and the script narration.",
+        "preset 'two-sets', frame 13: explanation says '3 và 0 cùng gốc 0' (3 and 0 share the root 0), but the vars only contain a=3, b=0, ra=0; rb is missing, so the claim that both share root 0 is not fully supported by the frame's vars.",
+        "preset 'two-sets', frame 17: explanation says 'Sau 5 phép union còn 2 tập rời nhau' (After 5 unions there are 2 disjoint sets), but the preset performed 5 union calls: union(0,1), union(2,3), union(1,3), union(3,0), union(4,5); union(3,0) was redundant, so only 4 unions actually merged sets, leaving 2 sets. The statement is technically correct about the final count but the wording 'Sau 5 phép union' is ambiguous and could mislead about the number of effective unions.",
+        "preset 'min', frame 0: explanationAlt says 'We perform 1 union(a, b) calls' (grammatical error, 'calls' should be 'call'), a factual error in the English text.",
+        "preset 'min', frame 4: explanationAlt says 'After 1 unions there are 1 disjoint sets' (grammatical error, 'unions' and 'sets' should be singular), a factual error in the English text.",
+        "preset 'chain', frame 16: explanationAlt says 'After 5 unions there are 1 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'star', frame 13: explanationAlt says 'After 4 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'redundant', frame 10: explanationAlt says 'After 3 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'two-sets', frame 17: explanationAlt says 'After 5 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'two-sets', frame 9: explanationAlt says 'The roots 0 (size 2) and 2 (size 2) differ: hang the smaller root under the larger one' but both are size 2, so 'smaller' is incorrect.",
+        "preset 'two-sets', frame 11: explanationAlt says 'every node on the way from 3 up to the root 0 now points straight at 0' but the state shows node 2 already pointed to 0 before compression, so the claim is misleading.",
+        "preset 'two-sets', frame 12: explanationAlt says 'the root of 3 is 0. Now find the root of 0' but the script narration for this frame says 'find(3) climbs...', a mismatch between the frame explanation and the script narration.",
+        "preset 'two-sets', frame 13: explanationAlt says '3 and 0 share the root 0' but the vars only contain a=3, b=0, ra=0; rb is missing, so the claim is not fully supported by the frame's vars.",
+        "preset 'two-sets', frame 17: explanationAlt says 'After 5 unions there are 2 disjoint sets' but the preset performed 5 union calls with one redundant, so only 4 unions actually merged sets, leaving 2 sets. The statement is technically correct about the final count but the wording is ambiguous.",
+        "preset 'min', frame 0: explanationAlt says 'We perform 1 union(a, b) calls' (grammatical error, 'calls' should be 'call'), a factual error in the English text.",
+        "preset 'min', frame 4: explanationAlt says 'After 1 unions there are 1 disjoint sets' (grammatical error, 'unions' and 'sets' should be singular), a factual error in the English text.",
+        "preset 'chain', frame 16: explanationAlt says 'After 5 unions there are 1 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'star', frame 13: explanationAlt says 'After 4 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'redundant', frame 10: explanationAlt says 'After 3 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text.",
+        "preset 'two-sets', frame 17: explanationAlt says 'After 5 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular), a factual error in the English text."
+      ],
+      "issues": [
+        {
+          "where": "preset 'two-sets', frame 9",
+          "problem": "The explanation says 'gắn gốc nhỏ hơn vào gốc lớn hơn' (hang the smaller root under the larger one) but both roots have size 2, so neither is smaller. The tie is broken arbitrarily (root 2 under root 0), which the text does not state.",
+          "fix": "Change the explanation to say 'hai gốc bằng kích thước, ta gắn gốc 2 vào gốc 0' (the two roots have equal size, we hang root 2 under root 0) or similar."
+        },
+        {
+          "where": "preset 'two-sets', frame 11",
+          "problem": "The explanation says 'mọi đỉnh trên đường từ 3 lên gốc 0 giờ trỏ thẳng tới 0' (every node on the way from 3 up to root 0 now points straight at 0), but the state shows node 2 already pointed to 0 before compression, so the claim that every node on the path now points straight at 0 is misleading/incorrect as a description of what changed.",
+          "fix": "Change the explanation to say 'đỉnh 3 giờ trỏ thẳng tới 0' (node 3 now points straight at 0) or 'đường từ 3 lên gốc 0 được nén lại' (the path from 3 to root 0 is compressed)."
+        },
+        {
+          "where": "preset 'two-sets', frame 11",
+          "problem": "The vars only contain x=3 and r=0, but the explanation mentions the path from 3 to root 0; the intermediate node 2 is not represented in vars, making the explanation's claim about 'every node on the path' unsupported by the frame data.",
+          "fix": "Add the intermediate node 2 to the vars or change the explanation to only mention node 3 and root 0."
+        },
+        {
+          "where": "preset 'two-sets', frame 12",
+          "problem": "The frame explanation says 'gốc của 3 là 0. Giờ tìm gốc của 0' (the root of 3 is 0. Now find the root of 0), but the script narration for this frame says 'find(3) climbs...', a mismatch between the frame explanation and the script narration.",
+          "fix": "Make the frame explanation and the script narration consistent: either both say 'find the root of 0' or both say 'find(3) climbs'."
+        },
+        {
+          "where": "preset 'two-sets', frame 13",
+          "problem": "The explanation says '3 và 0 cùng gốc 0' (3 and 0 share the root 0), but the vars only contain a=3, b=0, ra=0; rb is missing, so the claim that both share root 0 is not fully supported by the frame's vars.",
+          "fix": "Add rb=0 to the vars or change the explanation to say 'gốc của 3 là 0, gốc của 0 là 0' (the root of 3 is 0, the root of 0 is 0)."
+        },
+        {
+          "where": "preset 'two-sets', frame 17",
+          "problem": "The explanation says 'Sau 5 phép union còn 2 tập rời nhau' (After 5 unions there are 2 disjoint sets), but the preset performed 5 union calls with one redundant, so only 4 unions actually merged sets, leaving 2 sets. The statement is technically correct about the final count but the wording is ambiguous.",
+          "fix": "Change the explanation to say 'Sau 5 phép union (1 phép thừa) còn 2 tập rời nhau' (After 5 unions (1 redundant) there are 2 disjoint sets) or similar."
+        },
+        {
+          "where": "preset 'min', frame 0",
+          "problem": "The explanationAlt says 'We perform 1 union(a, b) calls' (grammatical error, 'calls' should be 'call').",
+          "fix": "Change 'calls' to 'call'."
+        },
+        {
+          "where": "preset 'min', frame 4",
+          "problem": "The explanationAlt says 'After 1 unions there are 1 disjoint sets' (grammatical error, 'unions' and 'sets' should be singular).",
+          "fix": "Change 'unions' to 'union' and 'sets' to 'set'."
+        },
+        {
+          "where": "preset 'chain', frame 16",
+          "problem": "The explanationAlt says 'After 5 unions there are 1 disjoint sets' (grammatical error, 'sets' should be singular).",
+          "fix": "Change 'sets' to 'set'."
+        },
+        {
+          "where": "preset 'star', frame 13",
+          "problem": "The explanationAlt says 'After 4 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular).",
+          "fix": "Change 'sets' to 'set'."
+        },
+        {
+          "where": "preset 'redundant', frame 10",
+          "problem": "The explanationAlt says 'After 3 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular).",
+          "fix": "Change 'sets' to 'set'."
+        },
+        {
+          "where": "preset 'two-sets', frame 17",
+          "problem": "The explanationAlt says 'After 5 unions there are 2 disjoint sets' (grammatical error, 'sets' should be singular).",
+          "fix": "Change 'sets' to 'set'."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "dsu",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "preset 'two-sets', frame index 11 (beat:compress): the frame's codeLine is 1, but the path compression happens inside find (pseudocode line 1) which is called from line 3; the frame is placed between the find of 3 (frame 10, codeLine 1) and the find of 0 (frame 12, codeLine 3), so the compression is shown before the second find is executed, and the narration 'gốc của 3 là 0' at frame 12 is inconsistent with the compression having already happened at frame 11",
+        "preset 'two-sets', frame index 9 (beat:union): explanation says 'Gốc 0 (kích thước 2) và gốc 2 (kích thước 2) khác nhau: gắn gốc nhỏ hơn vào gốc lớn hơn' — the two roots have equal size 2, so there is no 'smaller' root; the tie-break (ra stays root) is not explained, and the state shows 2 parented to 0 which is correct only because of the arbitrary tie-break",
+        "preset 'chain', frame index 16 (beat:done): explanation says 'Sau 5 phép union còn 1 tập rời nhau trong 6 đỉnh' but the chain preset performs 5 unions on 6 nodes, which is correct; however the script for 'chain' jumps from frame 10 to frame 16, skipping frames 11-15, so the narration 'Còn 1 tập rời nhau' is spoken while the state shown is frame 16 which is correct, but the intermediate unions (3,4) and (4,5) are never narrated — this is a script truncation issue, not a factual error",
+        "preset 'star', frame index 13 (beat:done): explanation says 'Sau 4 phép union còn 2 tập rời nhau trong 6 đỉnh' — correct (4 unions, 2 sets), but the script jumps from frame 10 to frame 13, skipping frame 11-12 (union(0,4)), so the narration 'Còn 2 tập rời nhau' is spoken at frame 13 which shows the correct state",
+        "preset 'two-sets', frame index 17 (beat:done): explanation says 'Sau 5 phép union còn 2 tập rời nhau trong 6 đỉnh' — correct (5 unions, 2 sets), but the script jumps from frame 10 to frame 17, skipping frames 11-16, so the narration 'Còn 2 tập rời nhau' is spoken at frame 17 which shows the correct state",
+        "code.map cpp: pseudocode line 5 maps to cpp lines [12,13,14,15], but cpp line 15 is 'sets--;' which implements the set count decrement, not the union-by-size logic; the union-by-size logic is lines 12-14, and line 15 belongs to the 'return số tập' bookkeeping, so the map is slightly over-inclusive",
+        "code.map py: pseudocode line 5 maps to py lines [13,14,15,16,17], but py line 17 is 'sets -= 1' which is the set count decrement, not the union-by-size logic; same over-inclusion as cpp",
+        "pitfall 'Nén đường bằng đệ quy p[x] = find_root(p, p[x]); với cây rất sâu (hàng trăm nghìn) dễ tràn stack, khi đó dùng bản lặp.' — this is true for C++ but the pitfall is not tagged with lang 'cpp' in the Vietnamese version (it has lang 'cpp' in the alt version but the Vietnamese pitfall object lacks the lang field), so it is attached to the wrong language context",
+        "beat 'find' narration: 'Số bước đi lên bằng độ sâu của {x}' — this is correct for the number of edges from x to the root, but the narrationExample uses find(0) where 0 is a root, so the depth is 0 and the example does not illustrate a non-trivial climb; the hint 'Đếm số cạnh đi lên tới đỉnh đầu tiên không có cha' is correct",
+        "beat 'done' narration: 'Với nén đường và hợp theo kích thước, mỗi phép tốn gần như O(1) (hàm Ackermann ngược)' — the inverse Ackermann function is α(n), and the amortized cost is O(α(n)), which is 'gần như O(1)' — correct, but the narration does not mention that this is amortized, which could mislead students into thinking each individual operation is O(1)"
+      ],
+      "issues": [
+        {
+          "where": "preset 'two-sets', frame index 11 (beat:compress)",
+          "problem": "The compression frame is inserted between the two find calls of union(3,0), but path compression happens inside find(3) when it returns, so the frame should come after frame 10 (the find of 3) and before frame 12 (the find of 0). The current placement makes the narration 'gốc của 3 là 0' at frame 12 redundant and confusing.",
+          "fix": "Move the compression frame to after the find of 3 completes, or merge it into frame 10's explanation as a note about what happens on the way back."
+        },
+        {
+          "where": "preset 'two-sets', frame index 9 (beat:union)",
+          "problem": "The explanation says 'gắn gốc nhỏ hơn vào gốc lớn hơn' but the two roots have equal size (2 and 2), so there is no smaller root. The tie-break rule is not stated.",
+          "fix": "Add 'khi hai gốc bằng kích thước, ta giữ gốc a (hoặc gốc b) làm gốc mới' or similar to explain the tie-break."
+        },
+        {
+          "where": "script for 'chain', 'star', 'two-sets'",
+          "problem": "The scripts are truncated (narratedBeats < totalBeats) and jump from an early frame to the final frame, skipping many intermediate union steps. Students watching the narrated version will not see the full algorithm.",
+          "fix": "Either narrate all beats or clearly mark the skipped frames as 'seek to see' in the UI."
+        },
+        {
+          "where": "code.map cpp and py, pseudocode line 5",
+          "problem": "The map includes the 'sets--' / 'sets -= 1' line in the union-by-size mapping, but that line implements the set count bookkeeping, not the union-by-size logic.",
+          "fix": "Map pseudocode line 5 to only the union-by-size lines (cpp 12-14, py 13-16) and map the set count decrement to a separate pseudocode line or to line 6."
+        },
+        {
+          "where": "pitfalls, Vietnamese version",
+          "problem": "The C++ pitfall about stack overflow lacks the 'lang': 'cpp' field in the Vietnamese version (it is present in the alt version), so it may be shown for Python too.",
+          "fix": "Add 'lang': 'cpp' to the Vietnamese pitfall object."
+        },
+        {
+          "where": "beat 'done' narration",
+          "problem": "The narration says 'mỗi phép tốn gần như O(1)' without specifying that this is amortized over a sequence of operations.",
+          "fix": "Add 'tính trung bình (amortized)' to clarify that individual operations can be slower."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

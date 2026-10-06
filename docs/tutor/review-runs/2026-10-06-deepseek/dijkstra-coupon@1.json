@@ -1,0 +1,83 @@
+{
+  "entryId": "dijkstra-coupon",
+  "entryRev": 1,
+  "contentHash": "50bfd4c037a42b5b",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "dijkstra-coupon",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "dijkstra-coupon",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "beats[relax-free].narration (both locales): \"Điều đó có lợi nếu {d} nhỏ hơn dist hiện tại của trạng thái lớp 1\" / \"That helps if {d} is below the current dist of the layer-1 state\" — the condition is d < dist[u][1], not d < dist[u][0]; the narration omits the edge weight and the target state, so it is wrong as written (e.g. classic frame 4: d=0 < dist[B0]=6 would wrongly predict a gain).",
+        "script classic, step after frame 3: the prediction \"Theo em, dùng vé ở cạnh này có lợi hơn không?\" is asked at frame 3, where the ticket edge A0→B1 has not been shown yet (it appears at frame 4); the answer cannot be seen at the frame where it is asked.",
+        "script free-last, step after frame 10: the prediction is asked at frame 10, but the ticket edge B0→A1 is only shown at frame 11; same problem as classic.",
+        "script no-gain, step after frame 9: the prediction is asked at frame 9, but the ticket edge B0→A1 is only shown at frame 10.",
+        "script unreachable, step after frame 9: the prediction is asked at frame 9, but the ticket edge B0→A1 is only shown at frame 10.",
+        "script classic, step after frame 12: the narration says \"Heap trả về trạng thái chưa chốt có chi phí nhỏ nhất, (0, C1)\" but frame 12 shows the pop of (0, C1) with the heap already emptied of it; the narration describes the state before the pop, not the frame content (minor mismatch between narration and frame)."
+      ],
+      "issues": [
+        {
+          "where": "beats[relax-free].narration and its alt",
+          "problem": "The gain condition is stated as \"{d} nhỏ hơn dist hiện tại của trạng thái lớp 1\" without naming the target state (u,1) and without the edge weight; a student cannot tell which dist is compared.",
+          "fix": "Rewrite as: \"Dùng vé trên cạnh (v,u) đưa ta tới (u,1) với chi phí d (không cộng w); có lợi nếu d < dist[u][1].\""
+        },
+        {
+          "where": "script (all presets), prediction placement",
+          "problem": "The predict question is asked one frame before the frame that shows the ticket edge, so the answer is not visible when the question is asked.",
+          "fix": "Move the predict question to the frame that shows the ticket edge (frame 4 in classic/free-last/no-gain/unreachable), or add a setState to that frame before the speech."
+        },
+        {
+          "where": "beats[done].misconceptions (both locales)",
+          "problem": "The misconception text is confusing: \"Chỉ lấy dist[n − 1][1]: nếu một cạnh duy nhất đã đủ, vẫn đúng, nhưng đồ thị không có cạnh thì phải xét lớp 0\" mixes two unrelated cases and does not clearly state the real bug (taking only layer 1 when layer 0 is smaller).",
+          "fix": "State plainly: \"Chỉ lấy dist[n−1][1] là sai khi đường tốt nhất không dùng vé (dist[n−1][0] nhỏ hơn), ví dụ đồ thị chỉ có một cạnh.\""
+        },
+        {
+          "where": "beats[states].hints[2] (both locales)",
+          "problem": "The hint says the state graph has 2n nodes and the path goes from (0,0) to (n−1,0) or (n−1,1), but the code uses 0-based node indices while the frames use A0/A1 labels; the mapping between \"A0\" and node 0 is never stated.",
+          "fix": "Add one sentence mapping labels to indices (A = 0, B = 1, ...) or use the same notation in hints and frames."
+        },
+        {
+          "where": "problem.subtasks[try-each].complexity",
+          "problem": "The complexity O(m·m log n) is written as if each of the m runs costs m log n; a single Dijkstra run costs O(m log n), so trying each edge is O(m · m log n) only if m is the number of edges in each run — it is correct but the notation is ambiguous (m used for both the number of runs and the edges per run).",
+          "fix": "Write O(m · (m log n)) or O(m² log n) explicitly."
+        },
+        {
+          "where": "pitfalls[1] (cpp)",
+          "problem": "The pitfall says INF must be below the int limit so d + w does not overflow, but with INF = 10^9 and w up to 10^9, d + w can reach 2·10^9 which overflows 32-bit int (max ~2.147·10^9 is close but 10^9 + 10^9 = 2·10^9 is still below INT_MAX, so it is technically safe; however the code never adds w to INF because it only relaxes when d + w < dist, and d is a real distance ≤ 10^9, so the claim is imprecise rather than false).",
+          "fix": "Clarify that d is a real distance (≤ 10^9) so d + w ≤ 2·10^9 < INT_MAX, or use long long to be safe."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

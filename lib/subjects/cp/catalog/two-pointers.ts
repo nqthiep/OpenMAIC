@@ -241,14 +241,10 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
     codeLine: number,
     tag?: string,
     mark?: HighlightKind,
-    withSum = false,
+    seen?: { ai: number; aj: number; sum: number },
   ): void => {
     const vars: Record<string, number> = { i, j, target };
-    if (withSum) {
-      vars.ai = a[i];
-      vars.aj = a[j];
-      vars.sum = a[i] + a[j];
-    }
+    if (seen) Object.assign(vars, seen);
     if (tag === 'done') vars.steps = steps;
     const highlights: Record<string, HighlightKind> = {};
     for (let k = 0; k < a.length; k++) highlights[k] = k < i || k > j ? 'muted' : 'active';
@@ -270,18 +266,19 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
   while (i < j) {
     tick();
     steps++;
-    at(EX.compare, 3, 'compare', 'compare', true);
     const sum = a[i] + a[j];
+    const seen = { ai: a[i], aj: a[j], sum }; // the sum just compared, kept after a pointer moves
+    at(EX.compare, 3, 'compare', 'compare', seen);
     if (sum === target) {
-      at(EX.found, 4, 'found', 'result', true);
+      at(EX.found, 4, 'found', 'result', seen);
       return at(EX.doneHit, 4, 'done', 'result');
     }
     if (sum < target) {
       i++;
-      at(EX.right, 5, 'move-right', undefined, true);
+      at(EX.right, 5, 'move-right', undefined, seen);
     } else {
       j--;
-      at(EX.left, 6, 'move-left', undefined, true);
+      at(EX.left, 6, 'move-left', undefined, seen);
     }
   }
   at(EX.miss, 7);
@@ -290,7 +287,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const twoPointersEntry: WalkthroughEntry<In, S> = {
   id: 'two-pointers',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-array-prefix'],

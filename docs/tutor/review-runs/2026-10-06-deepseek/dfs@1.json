@@ -1,0 +1,121 @@
+{
+  "entryId": "dfs",
+  "entryRev": 1,
+  "contentHash": "494fc73ca5ed104d",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "dfs",
+      "entryRev": 1,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame 'tree' index 1 (and all other 'visit' frames): explanation says 'Call stack có 1 đỉnh' (holds 1 nodes) which is grammatically wrong in Vietnamese for 1 (should be '1 đỉnh' is fine, but '1 nodes' in English is wrong); this is a minor locale error, not a factual one.",
+        "Frame 'tree' index 27: vars has 'count': 7, 'n': 7, 'tree': 6, but the explanation says 'DFS thăm 7 trong 7 đỉnh từ A qua 6 cạnh cây' which matches; however the 'done' beat narration says 'DFS thăm {count} đỉnh qua {tree} cạnh cây' and the script for 'tree' preset jumps from frame 10 directly to frame 27, skipping frames 11-26, so the narration 'DFS thăm 7 đỉnh qua 6 cạnh cây' is spoken at frame 27 which is correct.",
+        "Frame 'cycle' index 16: explanation says 'A đã thăm (#1): bỏ qua... Cạnh F–A không thuộc cây DFS' but the highlight for edge is 'A-F': 'muted' while the edge in the graph is F–A; this is consistent but the edge label in highlights uses 'A-F' instead of 'F-A' which is a minor inconsistency.",
+        "Frame 'cycle' index 23: explanation says 'F đã thăm (#6): bỏ qua... Cạnh A–F không thuộc cây DFS' but the highlight for edge is 'A-F': 'muted' and the edge in the graph is A–F; this is consistent.",
+        "Frame 'cycle' index 25: vars has 'count': 6, 'n': 6, 'tree': 5, but the explanation says 'DFS thăm 6 trong 6 đỉnh từ A qua 5 cạnh cây' which matches; however the 'done' beat narration says 'DFS thăm {count} đỉnh qua {tree} cạnh cây' and the script for 'cycle' preset jumps from frame 10 directly to frame 25, skipping frames 11-24, so the narration 'DFS thăm 6 đỉnh qua 5 cạnh cây' is spoken at frame 25 which is correct.",
+        "Frame 'disconnected' index 11: vars has 'count': 3, 'n': 6, 'tree': 2, but the explanation says 'DFS thăm 3 trong 6 đỉnh từ A qua 2 cạnh cây' which matches; however the 'done' beat narration says 'DFS thăm {count} đỉnh qua {tree} cạnh cây' and the script for 'disconnected' preset jumps from frame 10 directly to frame 11, so the narration 'DFS thăm 3 đỉnh qua 2 cạnh cây' is spoken at frame 11 which is correct.",
+        "Frame 'single' index 3: vars has 'count': 1, 'n': 1, 'tree': 0, but the explanation says 'DFS thăm 1 trong 1 đỉnh từ A qua 0 cạnh cây' which matches; however the 'done' beat narration says 'DFS thăm {count} đỉnh qua {tree} cạnh cây' and the script for 'single' preset jumps from frame 2 directly to frame 3, so the narration 'DFS thăm 1 đỉnh qua 0 cạnh cây' is spoken at frame 3 which is correct.",
+        "Frame 'deep-chain' index 31: vars has 'count': 8, 'n': 8, 'tree': 7, but the explanation says 'DFS thăm 8 trong 8 đỉnh từ A qua 7 cạnh cây' which matches; however the 'done' beat narration says 'DFS thăm {count} đỉnh qua {tree} cạnh cây' and the script for 'deep-chain' preset jumps from frame 10 directly to frame 31, skipping frames 11-30, so the narration 'DFS thăm 8 đỉnh qua 7 cạnh cây' is spoken at frame 31 which is correct.",
+        "Code map for Python: pseudocode line 5 '(xong u: quay lui)' maps to [6] which is the last line of the Python function, but the Python code does not explicitly implement backtracking; this is acceptable as the backtracking is implicit in the recursion return, but the map should be empty or map to the function end.",
+        "Code map for C++: pseudocode line 5 '(xong u: quay lui)' maps to [5, 6] which are the closing brace and the function end, but the C++ code does not explicitly implement backtracking; this is acceptable as the backtracking is implicit in the recursion return, but the map should be empty or map to the function end.",
+        "Pitfall 'Bản dùng stack lặp phải đẩy hàng xóm theo thứ tự NGƯỢC (từ chỉ số lớn xuống nhỏ) mới thăm đúng thứ tự như bản đệ quy' is attached to beat 'tree-edge' but it is about the iterative stack version, which is not introduced in the walkthrough; this is a minor issue.",
+        "Pitfall 'Python giới hạn độ sâu đệ quy (mặc định khoảng 1000): đồ thị dài hàng chục nghìn đỉnh cần sys.setrecursionlimit hoặc DFS lặp. Ở đây đồ thị nhỏ nên không sao.' is attached to beat 'visit' but the walkthrough does not mention Python recursion limit; this is a minor issue.",
+        "Pitfall 'Đệ quy sâu có thể tràn stack hệ thống với đồ thị lớn (vài trăm nghìn đỉnh trên một đường); khi đó dùng DFS lặp.' is attached to beat 'visit' but the walkthrough does not mention C++ stack overflow; this is a minor issue."
+      ],
+      "issues": [
+        {
+          "where": "Frame 'tree' index 1 (and all other 'visit' frames)",
+          "problem": "The explanation says 'Call stack có 1 đỉnh' (holds 1 nodes) which is grammatically wrong in English for 1 (should be '1 node'); this is a minor locale error.",
+          "fix": "Change '1 nodes' to '1 node' in all 'visit' frames."
+        },
+        {
+          "where": "Frame 'cycle' index 16",
+          "problem": "The highlight for edge is 'A-F': 'muted' while the edge in the graph is F–A; this is a minor inconsistency.",
+          "fix": "Change the highlight key to 'F-A' to match the edge label."
+        },
+        {
+          "where": "Code map for Python and C++",
+          "problem": "Pseudocode line 5 '(xong u: quay lui)' maps to [6] for Python and [5, 6] for C++, but the code does not explicitly implement backtracking; this is acceptable as the backtracking is implicit in the recursion return, but the map should be empty or map to the function end.",
+          "fix": "Remove the mapping for pseudocode line 5 or map it to the function end."
+        },
+        {
+          "where": "Pitfall 'Bản dùng stack lặp phải đẩy hàng xóm theo thứ tự NGƯỢC (từ chỉ số lớn xuống nhỏ) mới thăm đúng thứ tự như bản đệ quy'",
+          "problem": "This pitfall is attached to beat 'tree-edge' but it is about the iterative stack version, which is not introduced in the walkthrough.",
+          "fix": "Move this pitfall to a more appropriate beat or remove it."
+        },
+        {
+          "where": "Pitfall 'Python giới hạn độ sâu đệ quy (mặc định khoảng 1000): đồ thị dài hàng chục nghìn đỉnh cần sys.setrecursionlimit hoặc DFS lặp. Ở đây đồ thị nhỏ nên không sao.'",
+          "problem": "This pitfall is attached to beat 'visit' but the walkthrough does not mention Python recursion limit.",
+          "fix": "Move this pitfall to a more appropriate beat or remove it."
+        },
+        {
+          "where": "Pitfall 'Đệ quy sâu có thể tràn stack hệ thống với đồ thị lớn (vài trăm nghìn đỉnh trên một đường); khi đó dùng DFS lặp.'",
+          "problem": "This pitfall is attached to beat 'visit' but the walkthrough does not mention C++ stack overflow.",
+          "fix": "Move this pitfall to a more appropriate beat or remove it."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "dfs",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "code.map.cpp: pseudocode line 5 '(xong u: quay lui)' is mapped to C++ lines 5-6, but line 5 is '}' closing the for loop and line 6 is '}' closing the function; the backtrack is implicit in the function return, so the map is wrong (py map '5':[6] is acceptable since line 6 is the recursive call whose return is the backtrack)",
+        "code.map.py: pseudocode line 2 'đánh dấu u đã thăm; order[u] ← ++timer' is mapped to py lines 2-3, but the marking is done by order[u] = timer[0] on line 3; line 2 only increments the timer, so the mapping is misleading",
+        "pitfalls[1] (iterative stack must push neighbours in reverse order to match the recursive order): this is false in general — pushing neighbours in reverse order makes the iterative stack visit them in the same order as the recursive version only when the stack is used as a plain LIFO without re-pushing; the claim as stated is not a correct invariant and is attached to the wrong beat (tree-edge instead of a stack-specific beat)",
+        "script 'tree' and 'cycle' and 'deep-chain': the narration jumps from frame 10 to the final frame (27/25/31) without narrating the intermediate backtracking steps, so the 'done' narration ('DFS thăm 7 đỉnh qua 6 cạnh cây') is spoken while the displayed frame is the final one but the preceding frames were never shown; the scripted lesson is truncated and the jump skips the backtracking beats that the 'done' narration depends on"
+      ],
+      "issues": [
+        {
+          "where": "frames[].explanation for 'visit' beats (e.g. tree index 1, 3, 6, 10, 15, 18, 22)",
+          "problem": "The explanation says 'Call stack có 1 đỉnh' / 'holds 1 nodes' — the English is grammatically wrong ('1 nodes') and the Vietnamese 'có 1 đỉnh' is ambiguous (could read as 'has 1 node' vs 'the stack has 1 node').",
+          "fix": "Use 'Call stack has 1 node' / 'Call stack có 1 đỉnh' consistently, and for plural use 'nodes'/'đỉnh' correctly."
+        },
+        {
+          "where": "beats[].narration for 'visit' (e.g. 'Thăm {u}: ... đưa {u} lên call stack (đang có {size} đỉnh)')",
+          "problem": "The narration says the node is pushed onto the call stack, but the frame's aux stack already includes the node at the moment of the visit; the narration and the frame are consistent, but the phrase 'đang có {size} đỉnh' is read after the push, which may confuse students about whether the count includes the current node.",
+          "fix": "Clarify: 'sau khi đưa {u} lên, call stack có {size} đỉnh'."
+        },
+        {
+          "where": "script 'tree' step at frame 27 (and 'cycle' frame 25, 'deep-chain' frame 31)",
+          "problem": "The script jumps from frame 10 to the final frame without narrating the intermediate backtracking and remaining tree-edge beats, so the 'done' narration is spoken over a frame that shows the final state but the student never saw how the remaining nodes were visited.",
+          "fix": "Either narrate the skipped beats or mark the jump explicitly as a summary; do not speak the 'done' narration as if the intermediate steps were shown."
+        },
+        {
+          "where": "pitfalls[1] beat 'tree-edge'",
+          "problem": "The pitfall about iterative stack order is attached to the 'tree-edge' beat, but it is about the iterative implementation, not about tree edges; it would fit better with a stack/implementation beat.",
+          "fix": "Move the pitfall to a beat about the iterative implementation or the call stack."
+        },
+        {
+          "where": "code.pseudo line 5 '(xong u: quay lui)'",
+          "problem": "The pseudocode line is a comment-like line, but the frame.codeLine for backtrack frames is 5, which is fine; however the C++ map maps it to lines 5-6 which are closing braces, so the frame.codeLine 5 does not correspond to an executable line in C++.",
+          "fix": "Map pseudocode line 5 to the implicit function return (or add an explicit comment line in C++), and ensure frame.codeLine points to a line that exists in the implementation."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

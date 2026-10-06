@@ -1,0 +1,102 @@
+{
+  "entryId": "euclid-gcd",
+  "entryRev": 1,
+  "contentHash": "bf6078dffa5e395a",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "euclid-gcd",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "euclid-gcd",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "code.map.cpp: pseudocode line 1 (\"while b ≠ 0:\") is mapped to C++ line 2, but C++ line 1 is the function header `int gcd_euclid(int a, int b) {`; the while condition is line 2, so the map should be 1→[1,2] (or the pseudo should not include the header).",
+        "code.map.py: pseudocode line 1 (\"while b ≠ 0:\") is mapped to Python line 2, but Python line 1 is `def gcd_euclid(a, b):`; the map should be 1→[1,2].",
+        "code.map.py: pseudocode line 2 (\"r ← a mod b\") and line 3 (\"a ← b; b ← r\") are both mapped to Python line 3, but line 3 (`a, b = b, a % b`) implements only the swap/assignment; the remainder computation is implicit in the same line, so the map is at best ambiguous and should be documented as 2→[3], 3→[3] with a note, or the Python should be split into two lines.",
+        "pitfall (py, beat stop): \"math.gcd có sẵn\" — the Python standard-library function is `math.gcd` only from Python 3.9; before that it is `math.gcd` does not exist (it is `math.gcd` in 3.5+ actually `math.gcd` was added in 3.5, but the canonical name is `math.gcd`; the correct modern name is `math.gcd` — however the widely used name is `math.gcd`; the pitfall should say `math.gcd` (Python 3.5+) or `math.gcd`; as written it is acceptable but the claim \"nhiều đề yêu cầu tự cài đặt\" is unsourced).",
+        "frame basic index 8 explanation: \"vì mọi số chia hết cho 0 nên gcd(6, 0) = 6\" — the phrase \"mọi số chia hết cho 0\" is mathematically false: 0 is divisible by every nonzero integer, but \"mọi số chia hết cho 0\" means every number is a multiple of 0, which is false (only 0 is a multiple of 0). The intended statement is \"mọi số khác 0 đều chia hết 0\" (every nonzero number divides 0). Same error in frames basic 8, coprime 14, b-zero 1, equal 4, a-less 10 and in the stop beat narration (vi and en).",
+        "beat stop narration (vi): \"Mọi số chia hết cho 0\" — same reversed divisibility statement as above; should be \"mọi số khác 0 đều chia hết 0\" / \"every nonzero number divides 0\".",
+        "beat done narration: \"Mỗi hai bước phần dư ít nhất giảm một nửa\" — the standard bound is that the remainder at least halves every two steps only for the *larger* argument; the claim as stated (remainder halves every two steps) is not true in general (e.g. gcd(100, 99): 100 mod 99 = 1, one step, fine; but gcd(99, 100) → 99 mod 100 = 99, then 100 mod 99 = 1, so after two steps remainder 1 < 99/2, ok; however gcd(8,5): 8 mod 5=3, 5 mod 3=2, 3 mod 2=1 — after two steps 2 > 5/2? 5/2=2.5, 2<2.5 ok; the bound is usually stated as: after two steps the larger number at least halves, which is true; the narration says \"phần dư\" (the remainder) which is imprecise but not strictly false for the pair's max). Marked as imprecise, not a hard error.",
+        "frame basic index 1 explanation: \"Mọi ước chung của a và b cũng chia hết a mod b\" — should be \"cũng chia hết a mod b\" is fine (d divides a and b ⇒ d divides a mod b), but the sentence omits the converse needed for equality of gcd; the beat insight narration states it correctly, so this is a minor incompleteness, not a factual error."
+      ],
+      "issues": [
+        {
+          "where": "code.map.cpp and code.map.py",
+          "problem": "Pseudocode line 1 (the while) is mapped to the implementation line that is the function header, not the while line; and in Python pseudo lines 2 and 3 both map to the single tuple-assignment line without explanation.",
+          "fix": "Map pseudo 1→[1,2] (header+while) or drop the header from the pseudo; for Python, either split `r = a % b; a = b; b = r` into separate lines or add a note that line 3 performs both pseudo lines 2 and 3."
+        },
+        {
+          "where": "frames basic 8, coprime 14, b-zero 1, equal 4, a-less 10; beat stop (vi/en)",
+          "problem": "The justification \"mọi số chia hết cho 0\" / \"every number divides 0\" reverses the divisibility relation; it should be \"mọi số khác 0 đều chia hết 0\" / \"every nonzero number divides 0\".",
+          "fix": "Rewrite as \"mọi số khác 0 đều là ước của 0\" / \"every nonzero number is a divisor of 0\"."
+        },
+        {
+          "where": "beat done narration and all done frames",
+          "problem": "\"Mỗi hai bước phần dư ít nhất giảm một nửa\" is imprecise: the standard bound is that the larger of the two numbers at least halves every two steps, not the remainder itself.",
+          "fix": "Say \"sau mỗi hai bước, số lớn trong cặp ít nhất giảm một nửa\" / \"every two steps the larger number at least halves\"."
+        },
+        {
+          "where": "pitfall (py, beat stop)",
+          "problem": "The claim \"math.gcd có sẵn nhưng nhiều đề yêu cầu tự cài đặt\" is unsourced and the function name/version is not stated.",
+          "fix": "State the exact name and version (`math.gcd` since Python 3.5, `math.gcd` in 3.9+) and drop or source the claim about contest requirements."
+        },
+        {
+          "where": "script, all presets",
+          "problem": "The prediction question \"Theo em, sau bước này b có bằng 0 không?\" is asked at frames 2 and 4, but the answer (whether the new b is 0) is only visible at the *next* remainder frame (3 and 5), not at the frame where it is asked; the predictBeat is attached to the frame before the remainder is computed.",
+          "fix": "Move the predict question to the frame where r is shown (frames 3, 5, 7, ...) or add a frame showing r before asking."
+        },
+        {
+          "where": "script, preset equal",
+          "problem": "The prediction is asked at frame 2 (before 12 mod 12 is computed) and the answer is only visible at frame 3; also the script jumps from frame 2 to frame 4, skipping frame 3 where r = 0 is shown.",
+          "fix": "Include frame 3 in the script and ask the prediction there."
+        },
+        {
+          "where": "script, preset b-zero",
+          "problem": "The narration says \"Mỗi hai bước phần dư ít nhất giảm một nửa\" for a case with 0 remainder steps, which is vacuous and confusing.",
+          "fix": "For the b = 0 preset, replace the complexity line with a note that the loop body never runs."
+        },
+        {
+          "where": "frames, all presets",
+          "problem": "The `state.values` array shows three cells (a, b, r) but the frame explanations sometimes refer to a and b after the swap while the state still shows the pre-swap values (e.g. frame 3 shows [48,18,12] but the explanation says the new pair is (18,12)).",
+          "fix": "Either update state.values to the post-swap pair or label the cells explicitly as (a_old, b_old, r)."
+        },
+        {
+          "where": "beats, start/insight hints",
+          "problem": "The hints use \"a − b\" and \"a − q·b\" without defining q or explaining that q is the quotient; for grade 8-9 this may be too terse.",
+          "fix": "Add one sentence defining q = a div b and that a mod b = a − q·b."
+        }
+      ],
+      "unsourcedClaims": [
+        "\"nhiều đề yêu cầu tự cài đặt\" (many tasks require your own implementation) — no source given."
+      ],
+      "sources": []
+    }
+  ]
+}

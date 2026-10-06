@@ -1,0 +1,97 @@
+{
+  "entryId": "string-scan",
+  "entryRev": 1,
+  "contentHash": "643d5794012572b9",
+  "locale": "vi-VN",
+  "verdict": "pass",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "string-scan",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beats/done",
+          "problem": "The narration says 'Mỗi ký tự được xét nhiều nhất một lần' (each character is looked at at most once), but in the odd-length case the middle character is never compared at all, and in general each character is compared at most once, not exactly once. The phrase is technically true but slightly imprecise.",
+          "fix": "Keep the wording as 'at most once' since it is accurate, or clarify that the middle character of an odd-length string is not compared."
+        },
+        {
+          "where": "script/odd",
+          "problem": "The prediction question is asked before the frame showing the comparison (frame 1), but the answer can only be seen after the setState to frame 1. The question is spoken while frame 0 is still displayed, so the student cannot yet see the characters being compared.",
+          "fix": "Move the prediction question to after the setState to frame 1, or add a setState to frame 1 before asking the question."
+        },
+        {
+          "where": "script/even",
+          "problem": "Same as odd: the prediction question is asked before the comparison frame is shown.",
+          "fix": "Move the prediction question to after the setState to frame 1."
+        },
+        {
+          "where": "script/not",
+          "problem": "Same as odd: the prediction question is asked before the comparison frame is shown.",
+          "fix": "Move the prediction question to after the setState to frame 1."
+        },
+        {
+          "where": "script/near",
+          "problem": "Same as odd: the prediction question is asked before the comparison frame is shown.",
+          "fix": "Move the prediction question to after the setState to frame 1."
+        },
+        {
+          "where": "beats/start",
+          "problem": "The narration uses the term 'ký tự kề cuối' (second last) without defining it, which may be slightly unclear for grade 8-9 students.",
+          "fix": "Add a brief definition or example, e.g., 'ký tự kề cuối là ký tự đứng ngay trước ký tự cuối'."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "string-scan",
+      "entryRev": 1,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "preset \"not\", frame 5 (beat:done) và preset \"near\", frame 7 (beat:done)",
+          "problem": "Sau khi đã kết luận không đối xứng ở frame mismatch, frame done lại đổi highlight hai ô đang so từ \"compare\" thành \"active\", trông như cặp đó chưa được xét; trong khi frame done của preset \"odd\"/\"even\" giữ nguyên trạng thái đã xét.",
+          "fix": "Giữ highlight \"compare\" (hoặc \"visited\") cho hai ô i, j ở frame done của preset \"not\" và \"near\" để nhất quán với các preset khác."
+        },
+        {
+          "where": "preset \"even\", frame 4 (beat:move)",
+          "problem": "Câu \"Thu hẹp: i = 2, j = 1\" đúng về mặt cơ chế nhưng dễ gây hiểu nhầm là còn một cặp để xét, trong khi thực tế vòng lặp kết thúc ngay.",
+          "fix": "Thêm nửa câu: \"i = 2, j = 1 — hai con trỏ đã vượt qua nhau nên vòng lặp dừng\"."
+        },
+        {
+          "where": "preset \"single\", frame 1 (beat:done)",
+          "problem": "Câu \"mọi cặp đều khớp\" không có cặp nào được so trong preset này, dễ khiến học sinh tưởng đã bỏ sót bước.",
+          "fix": "Đổi thành \"không có cặp nào cần so (i = j), xâu một ký tự luôn đối xứng\"."
+        },
+        {
+          "where": "pitfalls[0] (beat:start)",
+          "problem": "Pitfall đúng nhưng không nói rõ điều gì xảy ra khi i != j với xâu độ dài chẵn: hai con trỏ vượt nhau và s[i], s[j] truy cập ngoài xâu.",
+          "fix": "Bổ sung: \"...vòng lặp không bao giờ dừng và s[i], s[j] truy cập ra ngoài xâu\"."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}
