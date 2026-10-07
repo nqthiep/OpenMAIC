@@ -8,6 +8,8 @@ import type { SubjectPack } from '@/lib/widgets/types';
 export interface ClipRegistry {
   findClip(id: string): AnyClipEntry | undefined;
   clipIds(): string[];
+  /** ids of the clips that have been rendered (at least one preset has its files); only those can be inserted */
+  prebuiltIds(): string[];
 }
 
 export function createClipRegistry(
@@ -28,5 +30,9 @@ export function createClipRegistry(
   return {
     findClip: (id) => clips.get(id)?.entry,
     clipIds: () => [...clips.keys()],
+    prebuiltIds: () =>
+      [...clips.values()]
+        .filter(({ entry }) => entry.presets.some((p) => entry.asset(p.input, 'vi-VN') !== null))
+        .map(({ entry }) => entry.id),
   };
 }

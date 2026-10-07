@@ -48,7 +48,8 @@ export interface ClipToolSeams {
 export function buildClipTool(deps: CourseToolDeps, seams: ClipToolSeams = {}) {
   const registry = seams.registry ?? clipRegistry;
   const provider = seams.provider ?? clipProvider;
-  const ids = registry.clipIds();
+  // only a clip that has been rendered can be inserted; the others would answer `clip-not-prebuilt` every time
+  const ids = registry.prebuiltIds();
   const Params = Type.Object({
     stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
     afterOrder: Type.Integer({

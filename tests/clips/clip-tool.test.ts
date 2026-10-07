@@ -85,7 +85,7 @@ describe('generate_clip_scenes', () => {
     const t = setup();
     expect((await run(t, 'c1', { clipId: 'nope' })).details).toEqual({
       error: 'invalid-clip-id',
-      validIds: registry.clipIds(),
+      validIds: registry.prebuiltIds(),
     });
     expect((await run(t, 'c2', { presetId: 'zzz' })).details).toEqual({
       error: 'invalid-preset-id',

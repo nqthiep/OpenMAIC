@@ -52,8 +52,10 @@ import {
   type GenerateVideoToolDeps,
 } from './generate-video';
 import type { SceneTtsInput, SceneTtsSummary } from './scene-tts';
+import { CLIP_TOOL_NAME, buildClipTool } from './clip-tools';
 import { WALKTHROUGH_TOOL_NAME, buildWalkthroughTool } from './walkthrough-tools';
 import { isWidgetProvidersDisabled } from '@/lib/config/feature-flags';
+import { clipRegistry } from '@/lib/clips';
 import { widgetRegistry } from '@/lib/widgets';
 import type { LoadedSkill } from './skills';
 
@@ -213,6 +215,7 @@ export function buildDslCourseToolset(
   const tools = [
     ...buildGenerationTools(deps),
     ...(walkthroughToolEnabled() ? [buildWalkthroughTool(deps)] : []),
+    ...(clipToolEnabled() ? [buildClipTool(deps)] : []),
     buildImportPptxTool(deps),
     buildGenerateImageTool(deps),
     ...(hasConfiguredVideoGeneration(deps) ? [buildGenerateVideoTool(deps)] : []),
@@ -228,6 +231,11 @@ function walkthroughToolEnabled(): boolean {
   return !isWidgetProvidersDisabled() && widgetRegistry.walkthroughIds().length > 0;
 }
 
+/** generate_clip_scenes exists only with providers on and at least one clip that has been rendered (no empty Type.Union). */
+function clipToolEnabled(): boolean {
+  return !isWidgetProvidersDisabled() && clipRegistry.prebuiltIds().length > 0;
+}
+
 /** The exact registered tool names of this slice's toolset. */
 export function buildCourseAllowlist(
   videoDeps: Partial<GenerateVideoToolDeps> = {},
@@ -236,6 +244,7 @@ export function buildCourseAllowlist(
     ...DSL_COURSE_TOOL_NAMES,
     ...GENERATION_TOOL_NAMES,
     ...(walkthroughToolEnabled() ? [WALKTHROUGH_TOOL_NAME] : []),
+    ...(clipToolEnabled() ? [CLIP_TOOL_NAME] : []),
     IMPORT_PPTX_TOOL_NAME,
     GENERATE_IMAGE_TOOL_NAME,
     ...(hasConfiguredVideoGeneration(videoDeps) ? [GENERATE_VIDEO_TOOL_NAME] : []),

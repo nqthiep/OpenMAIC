@@ -6,6 +6,7 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { clipEntryHash } from '@/lib/clips/hash';
 import { entryContentHash } from '@/lib/tutor/catalog/hash';
 import { panelVerdict, parseReview, reviewPath } from '@/lib/tutor/review-schema';
 import type { SubjectPack } from '@/lib/widgets/types';
@@ -42,14 +43,16 @@ export function makeDiskReviewLoader(roots: () => string[] = defaultReviewRoots)
 export const diskReviewLoader: ReviewLoader = makeDiskReviewLoader();
 
 /** Stored shape: `{ "contentHash": "…", "reviews": [r1, r2] }` (the stored `verdict`, if any, is ignored). */
-function isReleased(
-  pack: SubjectPack,
-  entry: SubjectPack['walkthroughs'][number],
+function isReleasedAs(
+  subject: string,
+  id: string,
+  rev: number,
+  hash: string,
   load: ReviewLoader,
 ): boolean {
   let stored: unknown;
   try {
-    const raw = load(pack.id, entry.id, entry.entryRev);
+    const raw = load(subject, id, rev);
     if (raw === null) return false;
     stored = JSON.parse(raw);
   } catch {
@@ -57,21 +60,29 @@ function isReleased(
   }
   if (!stored || typeof stored !== 'object') return false;
   const { contentHash, reviews } = stored as { contentHash?: unknown; reviews?: unknown };
-  if (contentHash !== entryContentHash(entry)) return false;
+  if (contentHash !== hash) return false;
   if (!Array.isArray(reviews) || reviews.length !== 2) return false;
   const [r1, r2] = reviews.map((r) => parseReview(JSON.stringify(r)));
   if (!r1 || !r2) return false;
-  if (r1.entryId !== entry.id || r1.entryRev !== entry.entryRev) return false;
+  if (r1.entryId !== id || r1.entryRev !== rev) return false;
   return panelVerdict(r1, r2) === 'pass';
 }
 
-/** The packs with only the entries that have a passing review for their exact entryRev. */
+/** The packs with only the entries (walkthroughs and clips) that have a passing review for their exact revision. */
 export function releasedPacks(
   packs: readonly SubjectPack[],
   loadReview: ReviewLoader = diskReviewLoader,
 ): SubjectPack[] {
   return packs.map((pack) => ({
     ...pack,
-    walkthroughs: pack.walkthroughs.filter((e) => isReleased(pack, e, loadReview)),
+    walkthroughs: pack.walkthroughs.filter((e) =>
+      isReleasedAs(pack.id, e.id, e.entryRev, entryContentHash(e), loadReview),
+    ),
+    // a clip needs the same signed panel review, for its templateRev and its current content
+    ...(pack.clips && {
+      clips: pack.clips.filter((c) =>
+        isReleasedAs(pack.id, c.id, c.engine.templateRev, clipEntryHash(c), loadReview),
+      ),
+    }),
   }));
 }
