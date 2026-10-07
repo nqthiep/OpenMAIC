@@ -77,5 +77,9 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 <!-- BEGIN GENERATED: clip-ids -->
 | clipId | Title | presetId | Chapters | Curriculum topics |
 | --- | --- | --- | --- | --- |
+| `alg-identity-area` | Algebraic identities as areas | `sum-3-2`, `sum-1-1`, `diff-5-2`, `diff-9-1` | `figure`, `decompose`, `rearrange`, `formula` | `alg-identities` |
 | `amgm-semicircle` | AM–GM on a semicircle | `two-eight`, `equal`, `far`, `nine-sixteen` | `setup`, `height`, `compare`, `equality` | `inequality-basic` |
+| `cs-projection` | Cauchy–Schwarz by projection | `generic`, `parallel`, `perpendicular`, `opposite` | `vectors`, `projection`, `inequality`, `equality` | `inequality-classic` |
+| `figurate-sums` | Sums with dots: odd and triangular numbers | `odd-4`, `odd-2`, `natural-5`, `natural-10` | `dots`, `grow`, `count`, `induction` | `induction` |
+| `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `curve`, `secant`, `limit`, `tangent` | `derivative-graphs` |
 <!-- END GENERATED: clip-ids -->

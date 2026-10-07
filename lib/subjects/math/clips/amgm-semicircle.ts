@@ -4,45 +4,31 @@
  * Deterministic and browser-safe: no Intl/Date/Math.random (ADR 0006); Math.sqrt is allowed.
  * Curriculum topic `inequality-basic` follows the Phase 3 SCHEMA §7 outline [Inference]; 3-R1 is not done.
  */
-import { clipKeyParts, lookupClipAsset } from '@/lib/clips/assets';
+import { defineClip, hints3 as hints, m } from '@/lib/clips/define';
 import type { ClipEntry, ClipModule } from '@/lib/clips/types';
-import type { Messages } from '@/lib/tutor/catalog/types';
 
 type In = { a: number; b: number };
 
-const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
-const hints = (a: string, b: string, c: string, ea: string, eb: string, ec: string) =>
-  [m(a, ea), m(b, eb), m(c, ec)] as const;
-
-const base = {
-  id: 'amgm-semicircle',
-  engine: { name: 'manim-ce', version: '0.21.0', templateRev: 1 },
-  inputSpec: {
-    kind: 'record',
-    fields: { a: { kind: 'int', range: [1, 20] }, b: { kind: 'int', range: [1, 20] } },
-  },
-  bakedText: false,
+const inputSpec = {
+  kind: 'record',
+  fields: { a: { kind: 'int', range: [1, 20] }, b: { kind: 'int', range: [1, 20] } },
 } as const;
 
 /** half the sum, and the height of the perpendicular at C: h² = ab (altitude on the hypotenuse) */
 const radius = (i: In): number => (i.a + i.b) / 2;
 const height = (i: In): number => Math.sqrt(i.a * i.b);
 
-export const amgmSemicircleEntry: ClipEntry<In> = {
-  id: base.id,
-  kind: 'template',
+export const amgmSemicircleEntry: ClipEntry<In> = defineClip<In>({
+  id: 'amgm-semicircle',
   curriculumTopics: ['inequality-basic'],
   title: m('AM–GM bằng nửa đường tròn', 'AM–GM on a semicircle'),
-  inputSpec: base.inputSpec,
+  inputSpec,
   presets: [
     { id: 'two-eight', label: m('a = 2, b = 8', 'a = 2, b = 8'), input: { a: 2, b: 8 } },
     { id: 'equal', label: m('a = b = 4', 'a = b = 4'), input: { a: 4, b: 4 } },
     { id: 'far', label: m('a = 1, b = 20', 'a = 1, b = 20'), input: { a: 1, b: 20 } },
     { id: 'nine-sixteen', label: m('a = 9, b = 16', 'a = 9, b = 16'), input: { a: 9, b: 16 } },
   ],
-  engine: base.engine,
-  render: { w: 1280, h: 720, fps: 30 },
-  silent: true,
   chapters: [
     {
       id: 'setup',
@@ -115,9 +101,6 @@ export const amgmSemicircleEntry: ClipEntry<In> = {
     // h = sqrt(ab) <= r, and the two are equal exactly when a = b
     return h <= r + 1e-9 && Math.abs(h - r) < 1e-9 === (i.a === i.b);
   },
-  bakedText: base.bakedText,
-  cacheKeyInput: (i, locale) => clipKeyParts(base, i, locale),
-  asset: (i, locale) => lookupClipAsset(base, i, locale),
   sheet: {
     chapters: [
       {
@@ -210,7 +193,7 @@ export const amgmSemicircleEntry: ClipEntry<In> = {
       },
     ],
   },
-};
+});
 
 /** The numbers the scene writes to manifest.json (h rounded to 3 decimals), computed straight from the formulas. */
 export function expectedDisplay(i: Readonly<In>): Record<string, number> {
