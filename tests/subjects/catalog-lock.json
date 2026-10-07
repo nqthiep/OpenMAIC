@@ -213,6 +213,28 @@
       }
     }
   },
+  "curve-sketching": {
+    "entryRev": 1,
+    "contentHash": "e6755e0d4dbf453b",
+    "framesHash": {
+      "cubic": {
+        "vi-VN": "1311adeaeff3e64a",
+        "en-US": "15286a49022efb51"
+      },
+      "square": {
+        "vi-VN": "5fb60af8e9d80a96",
+        "en-US": "d1b93cf22e7df45f"
+      },
+      "pure-cubic": {
+        "vi-VN": "c11fb3c14951bd27",
+        "en-US": "6cab4a75f20e1116"
+      },
+      "neg-cubic": {
+        "vi-VN": "02c55866564abf4b",
+        "en-US": "811a125a8d913b01"
+      }
+    }
+  },
   "dfs": {
     "entryRev": 1,
     "contentHash": "494fc73ca5ed104d",
@@ -936,6 +958,28 @@
       "single": {
         "vi-VN": "30778a7415f14eb4",
         "en-US": "2bd929d238079745"
+      }
+    }
+  },
+  "triangle-altitude": {
+    "entryRev": 1,
+    "contentHash": "6435ef9f1a6727f6",
+    "framesHash": {
+      "acute": {
+        "vi-VN": "50d38c5b8906617a",
+        "en-US": "48d1eb2df1cc2871"
+      },
+      "obtuse": {
+        "vi-VN": "9477b54ae68d266f",
+        "en-US": "28f3e00aac7b0516"
+      },
+      "right": {
+        "vi-VN": "34059cb5dec051ce",
+        "en-US": "a2c7a949d8b5dd43"
+      },
+      "isosceles": {
+        "vi-VN": "9a87b408844b10f9",
+        "en-US": "4766b6ffabe0ab38"
       }
     }
   },

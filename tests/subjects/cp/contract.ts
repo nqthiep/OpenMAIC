@@ -59,7 +59,7 @@ export const beatOf = (f: AnyFrame): string[] =>
 function numbersIn(x: unknown, out: Set<number>): void {
   if (typeof x === 'number') out.add(x);
   else if (typeof x === 'string')
-    for (const d of x.match(/-?\d+/g) ?? []) out.add(Number(d)); // string vars such as '1, 3, 0'
+    for (const d of x.replace(/−/g, '-').match(/-?\d+/g) ?? []) out.add(Number(d)); // string vars such as '1, 3, 0' or '−6x + 6'
   else if (Array.isArray(x)) x.forEach((v) => numbersIn(v, out));
   else if (x && typeof x === 'object') Object.values(x).forEach((v) => numbersIn(v, out));
 }

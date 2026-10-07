@@ -204,6 +204,22 @@ describe.skipIf(!REQUIRED)('geometry visualizer (browser)', () => {
     await pw(widget.locator('.wtx-circle')).toHaveClass(/wtx-g3/);
     await pw(widget.locator('.wtx-line')).toHaveCount(1); // p = q line skipped
     await pw(widget.locator('.wtx-line')).toHaveClass(/wt-hl-compare/);
+    // highlighted lines and circle outlines are not filled (the shell's wt-hl-* sets a fill); points are
+    expect(await widget.locator('.wtx-line').evaluate((e) => getComputedStyle(e).fill)).toBe(
+      'none',
+    );
+    expect(
+      await widget
+        .locator('.wtx-seg')
+        .first()
+        .evaluate((e) => getComputedStyle(e).fill),
+    ).toBe('none');
+    expect(
+      await widget
+        .locator('.wtx-pt')
+        .nth(2)
+        .evaluate((e) => getComputedStyle(e).fill),
+    ).not.toBe('none');
     await pw(widget.locator('.wtx-arc')).toHaveCount(1); // collinear angle skipped
     await pw(widget.locator('.wtx-arc')).toHaveClass(/wtx-g0/);
     await pw(widget.locator('.wtx-angle')).toHaveText('α');

@@ -66,6 +66,8 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | walkthroughId | Title | presetId | Curriculum topics |
 | --- | --- | --- | --- |
 | `cauchy-schwarz` | The Cauchy–Schwarz inequality (two pairs) | `generic`, `proportional`, `zero`, `negative` | `inequality-classic` |
+| `curve-sketching` | Sketching a polynomial graph (degree at most 3) | `cubic`, `square`, `pure-cubic`, `neg-cubic` | `derivative-graphs` |
+| `triangle-altitude` | The three altitudes of a triangle and the orthocenter | `acute`, `obtuse`, `right`, `isosceles` | `triangle-geometry` |
 <!-- END GENERATED: walkthrough-ids -->
 
 ## Clip có sẵn

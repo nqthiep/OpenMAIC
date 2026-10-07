@@ -224,6 +224,13 @@ describe.skipIf(!REQUIRED)('functionPlotter visualizer (browser)', () => {
     // f is one polyline, g is two (it breaks at the NaN point)
     await pw(widget.locator('.wtp-curve')).toHaveCount(3);
     await pw(widget.locator('.wtp-curve').first()).toHaveClass(/wtp-g2/);
+    // a highlighted curve is an outline: the shell's wt-hl-* fill must not paint the area under it
+    expect(
+      await widget
+        .locator('.wtp-curve')
+        .nth(1)
+        .evaluate((e) => getComputedStyle(e).fill),
+    ).toBe('none');
     await pw(widget.locator('.wtp-curve').nth(1)).toHaveClass(/wt-hl-compare/);
     await pw(widget.locator('.wtp-curve').nth(2)).toHaveClass(/wt-hl-compare/);
     await pw(widget.locator('.wtp-mark')).toHaveCount(1); // 'out' is outside the frame

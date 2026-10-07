@@ -43,6 +43,8 @@ const CSS = `
 :where(.wtp-curve){stroke:var(--wt-fg,#1f2937);stroke-width:2.5;fill:none;stroke-linejoin:round}
 :where(.wtp-vline){stroke:var(--wt-acc,#2563eb);stroke-width:1.5;stroke-dasharray:5 3;fill:none}
 :where(.wtp-mark){fill:var(--wt-fg,#1f2937);stroke:var(--wt-bg,#fff);stroke-width:1.5}
+/* a highlighted curve or line must not fill the area under it (the shell's wt-hl-* kinds set a fill) */
+.wtp polyline,.wtp line{fill:none}
 .wtp-g0,.wtp-g1,.wtp-g2,.wtp-g3,.wtp-g4,.wtp-g5{fill-opacity:.35}
 ${groupRules('light')}
 @media (prefers-color-scheme:dark){${groupRules('dark')}}

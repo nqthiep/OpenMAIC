@@ -462,6 +462,6 @@ export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
     },
   ],
   maxFrames: 20,
-  maxBytes: 600_000,
+  maxBytes: 520_000,
   run,
 };

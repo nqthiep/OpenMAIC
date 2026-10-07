@@ -42,6 +42,8 @@ const CSS = `
 :where(.wtx-dashed){stroke-dasharray:6 4}
 :where(.wtx-circle){stroke:var(--wt-fg,#1f2937);stroke-width:2;fill:none}
 :where(.wtx-arc){stroke:var(--wt-mut,#6b7280);stroke-width:1.5;fill:none}
+/* a highlighted line, arc or circle outline must not be filled (the shell's wt-hl-* kinds set a fill); a group colour may */
+.wtx line,.wtx path.wtx-arc,.wtx circle.wtx-circle:not([class*=wtx-g]){fill:none}
 .wtx-g0,.wtx-g1,.wtx-g2,.wtx-g3,.wtx-g4,.wtx-g5{fill-opacity:.35}
 ${groupRules('light')}
 @media (prefers-color-scheme:dark){${groupRules('dark')}}
