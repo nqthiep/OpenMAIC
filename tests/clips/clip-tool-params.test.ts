@@ -233,8 +233,10 @@ describe('generate_clip_scenes with params', () => {
       [refs.first, 'done', '/api/clips/0.mp4'],
       [refs.second, 'done', '/api/clips/2.mp4'],
     ]);
-    expect(Object.keys(k.recorded)).toEqual(['sha256:server']);
-    expect(k.recorded['sha256:server'].chapters.map((c) => c.id)).toEqual(['first', 'second']);
+    // remembered under the app's own cache key, so the next request with the same parameters is a hit
+    const key = clipAssetKey(registry.findClip('unbuilt-clip')!, { a: 2, b: 3 }, 'vi-VN');
+    expect(Object.keys(k.recorded)).toEqual([key]);
+    expect(k.recorded[key].chapters.map((c) => c.id)).toEqual(['first', 'second']);
     expect(k.stored).toContain('0.mp4:bytes-of-first');
     expect(k.stored).toContain('1.png:bytes-of-first.png');
     expect(client.download).toHaveBeenCalledWith('job-1', 'manifest', 'sess-1');

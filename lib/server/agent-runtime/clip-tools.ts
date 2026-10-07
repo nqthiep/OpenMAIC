@@ -365,7 +365,8 @@ export function buildClipTool(deps: CourseToolDeps & ClipRenderDeps, seams: Clip
         ...(deps.sessionId ? { sessionId: deps.sessionId } : {}),
         toolCallId: callId,
         jobId: submitted.jobId,
-        cacheKey: submitted.cacheKey,
+        // remembered under the app's own key (the service's key depends on its image digest), the one the lookup uses
+        cacheKey: key,
         refs,
         client,
         owner,

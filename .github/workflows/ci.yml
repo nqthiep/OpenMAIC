@@ -270,6 +270,9 @@ jobs:
       - name: Gates and allowlist
         run: python3 -m pytest manim/qa -q
 
+      - name: Render service (card 3C-01, 3C-02)
+        run: python3 -m pytest manim/service -q
+
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
