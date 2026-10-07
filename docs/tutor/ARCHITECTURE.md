@@ -299,7 +299,7 @@ Host chỉ nhận `widget-state` sau `ready`. Host kẹp lại, lưu store, và 
 | `tree` | 2 | `{ nodes:{id,label,parent?,note?,edgeLabel?}[] }` (rừng, tối đa 31 node) | id node | cây gọi đệ quy, DSU, segment tree, DP cây, trie; `note` dưới node, `edgeLabel` trên cạnh tới cha |
 | `graph` | 2 | `{ nodes:{id,label?,x?,y?}[], edges:{from,to,weight?,directed?,kind?,label?}[] }` | id node / `"A-B"` | toạ độ từ entry hoặc vòng tròn; `label` thay id (ví dụ `A (d=3)`), `edge.label` cạnh luồng `3/5`; panel phụ cho heap/stack/queue |
 | `grid` | 2 | `{ rows, cols, cells, rowLabels?, colLabels?, arrows?:{from,to}[] }` | `"r,c"` | DP lưới (thay `dpTable`), bàn cờ, sàng; tối đa 16 × 13, nhãn ≤ 8 ký tự; `arrows` là phụ thuộc DP (khoá `"r,c"`) |
-| `geometry` | 3B | `{ points, segments, circles?, angles? }` | id đối tượng | dùng chung Tin (`t4-geometry`) và Toán |
+| `geometry` | 3B | `{ bounds:{xmin,xmax,ymin,ymax}, points:{id,x,y,label?}[], segments?:{id,from,to,dashed?}[], lines?:{id,through:[id,id]}[], circles?:{id,center,r}[], angles?:{id,at,from,to,label?}[] }` | id đối tượng (điểm, đoạn, đường, tròn, góc; id không trùng giữa các loại) | dùng chung Tin (`t4-geometry`) và Toán; trục y hướng lên, một tỉ lệ cho cả hai trục; `lines` kéo dài hết khung; `r` theo đơn vị thế giới; tối đa 40 điểm, 60 đoạn, 12 đường/tròn/góc, nhãn ≤ 8 ký tự; đối tượng tham chiếu điểm không có bị bỏ |
 | `functionPlotter` | 3B | `{ curves:{id,points}[], marks?, bounds }` | id | mẫu tính ở server từ hệ số đa thức; không parser/`eval` |
 | `proofOutline` | 3B | `{ nodes: ProofNode[] }` | id node | cây logic + KaTeX |
 

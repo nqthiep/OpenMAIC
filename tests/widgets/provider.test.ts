@@ -428,11 +428,11 @@ describe('walkthrough provider: build', () => {
       ),
     ).toThrow(/input/);
     const p = createWalkthroughProvider({
-      findWalkthrough: () => ({ ...bs, visualizer: 'geometry' }),
+      findWalkthrough: () => ({ ...bs, visualizer: 'hologram' }),
       getLabels: getTutorLabels,
     });
     expect(() => p.build({ id: 'binary-search' }, { locale: 'vi-VN' })).toThrow(
-      /no runtime for visualizer "geometry"/,
+      /no runtime for visualizer "hologram"/,
     );
   });
 
