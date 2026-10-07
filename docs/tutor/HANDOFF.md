@@ -1,7 +1,7 @@
 # Handoff: SubjectTutor, trạng thái và việc tiếp theo
 
-- **Trạng thái**: Living document, chụp ngày 2026-10-06; cập nhật khi bàn giao tiếp
-- **Ngày**: 2026-10-06
+- **Trạng thái**: Living document, chụp ngày 2026-10-07; cập nhật khi bàn giao tiếp
+- **Ngày**: 2026-10-07
 - **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 144 commit chưa push so với `origin/it-math`. Chưa push gì sau lần push đầu tiên của tài liệu.
 - **Người nhận**: agent hoặc người tiếp quản. Đọc hết file này trước khi làm gì.
 
@@ -96,12 +96,45 @@ Chưa làm và vì sao:
 - Model free qua API: chỉ `longcat-2.5-preview-free` (Go) và `space-bunny-free` (Zen `https://opencode.ai/zen/v1`) dùng được; các model free khác bị chặn ("only within OpenCode"). Cả hai là model suy luận: cần `TUTOR_REVIEW_MAX_OUTPUT_TOKENS=64000`, `TUTOR_REVIEW_TIMEOUT_MS=900000`; longcat vẫn hết giờ 15 phút trên entry thật, nên không dùng làm gate.
 - Khuyến nghị khi làm lại: một model Go có hạn mức (ví dụ `glm-5.3` hoặc `kimi-k3`) làm reviewer thứ hai cùng `deepseek-v4-pro`; chạy mỗi entry một lần, tuần tự theo lô.
 
+## 3b. Trạng thái Phase 3 (cập nhật 2026-10-07, phiên 3)
+
+Đã làm (tất cả là mã TypeScript/Python chạy được và có test; **không cần Manim**; chưa dựng clip nào):
+
+| Nhóm | Task | Nội dung |
+| --- | --- | --- |
+| Hạ tầng clip | `3A-01`, `3A-02`, `3A-03` | `lib/clips/{types,validate,cache-key,registry,provider,describe,name,hash,assets,define,manifest,render-plan,render-pipeline}.ts`; tool `generate_clip_scenes` (`lib/server/agent-runtime/clip-tools.ts`); mỗi chapter một slide, `speech(before) → play_video → speech(after)` |
+| Tích hợp | `I-08` (phần chính) | provider clip trong `widgetRegistry`; tool chỉ có trong bộ công cụ khi **đã dựng ít nhất một clip** (`registry.prebuiltIds()`); cổng review cho clip (file `lib/subjects/<môn>/reviews/<clipId>@<templateRev>.json`, hash `clipEntryHash`); `buildStateContext` mô tả slide clip từ `entry.sheet` (`3B-QA`) |
+| Skill | `3A-12`, `3A-13` | `skills/agent-runtime/olympiad-math/`, tên skill ở 12 locale; khối id sinh **theo từng pack/skill** (`scripts/generate-skill-catalog.ts`) |
+| Visualizer | `3B-V1`, `3B-V2`, `3B-V3`, `3B-K1` (+ quyết định `3B-Q8`) | `geometry`, `functionPlotter`, `proofOutline`; KaTeX dựng trên server (`walkthrough-data.math` + CSS có 10 font nhúng ~230 KB, chỉ thêm khi entry có công thức; `pnpm gen:tutor-katex`); chốt Q8 ở `phase-3-olympiad-math/SCHEMA.md` §8 |
+| Walkthrough Toán | `3B-W1..W3` | `lib/subjects/math/catalog/{cauchy-schwarz,triangle-altitude,curve-sketching}.ts`; pack `math` (`lib/subjects/math/pack.ts`); `graham-scan` (`2E-05`, `I-12`) trên `geometry` |
+| Mẫu clip (nửa TS) | `3A-T1..T3`, `3B-T1..T14`, `3D-T1..T4` | **21 mẫu** ở `lib/subjects/math/clips/*.ts` (+ `index.ts`), mỗi mẫu một test `tests/clips/<id>.test.ts` qua hợp đồng chung `tests/clips/clip-contract.ts` và một oracle độc lập |
+| Cổng QA | `3A-05`, `3A-06` | `manim/qa/{allowlist,check_video,check_bbox,check_ssim}.py`, 45 test pytest chạy trên video ffmpeg tổng hợp; job CI `manim-qa` |
+| Dựng | `3A-07` | `scripts/render-clips.ts` (`pnpm render:clips --plan` in 84 job), `lib/clips/generated/asset-index.json` (rỗng), kiểm manifest |
+
+Lệch so với card (đều ghi ở comment đầu file và test):
+
+- `secant-tangent`: ngưỡng `|slope(0.01) − f'| < 0.1` của card **sai** trong miền input (c = [0,0,3,3], x0 = 2 cho ≈ 0.21); thay bằng đồng nhất thức đúng + ngưỡng 0.25.
+- `render-clips` là file `.ts` chạy bằng `tsx`, không phải `.mjs`.
+- `concurrency-dynamic`: đỉnh C chạy theo `C + t·(B − A)` (song song AB) để tam giác không bao giờ suy biến.
+- Hợp đồng clip: chỉ các cặp chapter đầy đủ phải có câu hỏi dự đoán; với số chapter lẻ thì chapter cuối được miễn.
+- Eslint cấm trig/`Date`/`Math.random`/`toLocaleString` cũng áp cho `lib/subjects/**/clips/**`.
+
+Chưa làm và vì sao (Phase 3):
+
+| Việc | Lý do |
+| --- | --- |
+| Mọi mẫu Manim `.py` (`3A-M*`, `3B-M*`, `3D-M*`), `3A-04` (`manim/Dockerfile`, `_base.py`), `3A-08` | cần Manim CE 0.21.0, TeX Live, Docker image đã ghim; máy này chưa có `manim`, `latex` |
+| Spike `3-S1..S5`, `3-R1`, `3B-00` (curriculum Toán) | cần Manim/Docker và nghiên cứu nguồn; `3-R1` không được bịa nguồn |
+| `3C-*` (manim-service, sandbox, client, route asset, cờ, nhánh bất đồng bộ) | cần image dịch vụ; chưa làm |
+| Mọi hội đồng review LLM cho entry Toán và clip, `3A-17`, `3B-E1` | cần LLM thật, xem mục "Gate review LLM" |
+| `3-S3` (slide video do tool dựng, export MP4/ZIP, import) | chưa kiểm; `3A-02/03` làm theo thiết kế trong ARCHITECTURE §8b [Unverified] |
+
 ## 4. Việc tiếp theo (theo thứ tự)
 
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: 3-0 và 3A không chờ G1 (xem `tasks/phase-3.md`); `2E-05` làm sau `3B-V1`.
+4. Phase 3: phần mã đã làm (mục 3b). Còn lại cần Manim/Docker hoặc LLM: cài `manim` + `latex`, rồi `3A-04` (image ghim), spike `3-S1/S2/S4`, mẫu `.py` (`3A-M1..3`), chạy `pnpm render:clips`; `3C-*` sau đó.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)
