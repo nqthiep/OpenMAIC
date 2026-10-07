@@ -252,6 +252,24 @@ jobs:
         env:
           TUTOR_IMPL_CHECK: '1'
 
+  # Manim clip QA gates (card 3A-05) and the AST allowlist (card 3A-06). The gates run on synthetic videos made by
+  # ffmpeg, so no Manim or LaTeX is needed. ubuntu-latest has python3 and apt provides ffmpeg.
+  manim-qa:
+    name: Manim QA gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install ffmpeg and the Python test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          python3 -m pip install numpy pillow pytest
+
+      - name: Gates and allowlist
+        run: python3 -m pytest manim/qa -q
+
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
