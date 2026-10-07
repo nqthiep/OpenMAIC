@@ -83,9 +83,12 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `convex-chord` | The chord of a convex graph (Jensen) | `x2-mid`, `abs-skew`, `x4`, `t-zero` | `graph`, `chord`, `point`, `inequality` | `inequality-classic` |
 | `cs-projection` | Cauchy–Schwarz by projection | `generic`, `parallel`, `perpendicular`, `opposite` | `vectors`, `projection`, `inequality`, `equality` | `inequality-classic` |
 | `figurate-sums` | Sums with dots: odd and triangular numbers | `odd-4`, `odd-2`, `natural-5`, `natural-10` | `dots`, `grow`, `count`, `induction` | `induction` |
+| `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `square`, `cut`, `repeat`, `sum` | `sequences-limits` |
 | `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `base`, `shift-h`, `scale`, `shift-k` | `quadratic-vieta` |
 | `inscribed-angle` | The inscribed angle | `arc-100`, `arc-60`, `arc-180`, `arc-300` | `circle`, `central`, `inscribed`, `cyclic` | `circle-angles` |
 | `limit-epsilon` | The limit of a sequence: the ε-band and N | `inv-0.2`, `inv-0.05`, `n1-0.1`, `alt-0.25` | `sequence`, `band`, `find-n`, `shrink` | `sequences-limits` |
+| `pythagoras-dissection` | The Pythagorean theorem by dissection | `three-four`, `equal`, `thin`, `six-eight` | `triangles`, `big-square`, `rearrange`, `conclude` | `triangle-geometry` |
+| `riemann-integral` | Riemann sums and the integral | `x2-4`, `x2-16`, `const`, `cubic` | `area`, `rectangles`, `refine`, `limit` | `integral` |
 | `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `curve`, `secant`, `limit`, `tangent` | `derivative-graphs` |
 | `tiling-coloring` | A chessboard with two cells removed, and dominoes | `n8-opposite`, `n4-opposite`, `n6-adjacent`, `n8-adjacent` | `board`, `color`, `count`, `conclude` | `pigeonhole-invariants` |
 <!-- END GENERATED: clip-ids -->
