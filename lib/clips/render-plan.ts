@@ -21,8 +21,8 @@ export interface RenderJob {
 export const templatePath = (clipId: string): string =>
   `manim/templates/${clipId.replace(/-/g, '_')}.py`;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- modules with different inputs share one list
 export function planRenders(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- modules with different inputs share one list
   modules: readonly ClipModule<any>[],
   index: Readonly<Record<string, ClipAsset>>,
   only?: string,
