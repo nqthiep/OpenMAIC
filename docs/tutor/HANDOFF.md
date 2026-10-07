@@ -83,11 +83,24 @@ Chưa làm và vì sao:
 | Phase 3 | cần Docker/Manim/LaTeX (máy này có `docker` và `ffmpeg`, không có `manim`, `latex`) và LLM tác giả; 3B trở đi chờ G1 |
 | Review ba góc của Phase 2 (an ninh/server, host/runtime/a11y, nội dung/catalog/provider) | chưa làm; việc kế tiếp |
 
+### Gate review LLM: đã thử một phần, CHƯA đạt (cập nhật 2026-10-07)
+
+**Việc phải làm sau (không bỏ):** chạy hội đồng review hai provider cho cả 38 entry cp, ghi file thật vào `lib/subjects/cp/reviews/`, sửa lỗi thật, rồi chạy `2-G2`/G1 và các eval còn lại (`eval:tutor-qa`, `sim-learner`, `tutor-moderation`, calibration `--calibrate`).
+
+Đã làm và học được:
+
+- DeepSeek trực tiếp (`api.deepseek.com`): `deepseek-v4-flash` là bí danh của V4.1 Flash; tắt thinking bằng route `{"model":..., "thinking":{"enabled":false}}`. Key hết số dư giữa chừng.
+- Panel một provider (`--allow-same-provider`) đã chạy 19/38 entry, kết quả ở `docs/tutor/review-runs/2026-10-06-deepseek/` (KHÔNG phải file gate; README ở đó giải thích). Lỗi thật tìm được: `two-pointers` (đã sửa, entryRev 2). 7 file chưa triage: `hash-count`, `segment-tree`, `lcs`, `bfs`, `dfs`, `fib-recursion-tree`, `nim-grundy`.
+- `eval:tutor-lesson` thật (generator flash, judge pro): FAIL, 1/6 kịch bản đạt; đây là LLM sinh bài giảng thô, không đo catalog.
+- OpenCode Go cần header `x-opencode-session`: có trong nhánh (`lib/ai/providers.ts`, đặt `OPENCODE_GO_SESSION` trong `.env.local`; cổng mở cho mọi provider kiểu `openai` có base URL `https://opencode.ai/zen/go`, mở rộng so với PR #1593).
+- Model free qua API: chỉ `longcat-2.5-preview-free` (Go) và `space-bunny-free` (Zen `https://opencode.ai/zen/v1`) dùng được; các model free khác bị chặn ("only within OpenCode"). Cả hai là model suy luận: cần `TUTOR_REVIEW_MAX_OUTPUT_TOKENS=64000`, `TUTOR_REVIEW_TIMEOUT_MS=900000`; longcat vẫn hết giờ 15 phút trên entry thật, nên không dùng làm gate.
+- Khuyến nghị khi làm lại: một model Go có hạn mức (ví dụ `glm-5.3` hoặc `kimi-k3`) làm reviewer thứ hai cùng `deepseek-v4-pro`; chạy mỗi entry một lần, tuần tự theo lô.
+
 ## 4. Việc tiếp theo (theo thứ tự)
 
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
-3. Khi có khoá API: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
+3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
 4. Phase 3: 3-0 và 3A không chờ G1 (xem `tasks/phase-3.md`); `2E-05` làm sau `3B-V1`.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
