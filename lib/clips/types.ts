@@ -65,3 +65,10 @@ export interface ClipModule<I = unknown> {
   readonly entry: ClipEntry<I>;
   expectedDisplay(input: Readonly<I>): Record<string, number>;
 }
+
+/**
+ * Heterogeneous clip entries: `invariants`/`check`/`asset` take the entry's input, so entries with
+ * different `I` only fit one array under the widened type (same trick as `AnyWalkthroughEntry`).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- widening for contravariant methods; each entry stays typed at its definition
+export type AnyClipEntry = ClipEntry<any>;

@@ -3,6 +3,7 @@
  * Type-only module: no runtime code.
  */
 import type { Action, InteractiveContent, Scene, SlideContent } from '@openmaic/dsl';
+import type { AnyClipEntry } from '@/lib/clips/types';
 import type { Locale, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 
 /**
@@ -57,6 +58,5 @@ export interface SubjectPack {
   readonly id: string;
   readonly skillId: string;
   readonly walkthroughs: readonly AnyWalkthroughEntry[];
-  /** `ClipEntry` arrives with Phase 3. */
-  readonly clips?: readonly unknown[];
+  readonly clips?: readonly AnyClipEntry[];
 }
