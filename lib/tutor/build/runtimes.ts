@@ -3,6 +3,7 @@ import { RUNTIME_FUNCTION_PLOTTER } from './generated/runtime-function-plotter';
 import { RUNTIME_GEOMETRY } from './generated/runtime-geometry';
 import { RUNTIME_GRAPH } from './generated/runtime-graph';
 import { RUNTIME_GRID } from './generated/runtime-grid';
+import { RUNTIME_PROOF_OUTLINE } from './generated/runtime-proof-outline';
 import { RUNTIME_TREE } from './generated/runtime-tree';
 
 /** Bảng runtime theo visualizer (D6). Visualizer mới: sinh file rồi thêm một dòng vào đây. */
@@ -12,6 +13,7 @@ const RUNTIMES: Record<string, string> = {
   geometry: RUNTIME_GEOMETRY,
   graph: RUNTIME_GRAPH,
   grid: RUNTIME_GRID,
+  proofOutline: RUNTIME_PROOF_OUTLINE,
   tree: RUNTIME_TREE,
 };
 

@@ -67,6 +67,8 @@ export interface WalkthroughData {
     };
   };
   labels: Record<string, string>;
+  /** Công thức dựng sẵn trên server: `tex` của mỗi `\\( tex \\)` → HTML KaTeX; chỉ có khi entry có công thức. */
+  math?: Record<string, string>;
 }
 
 /** Id DOM tĩnh do builder sinh (ARCHITECTURE §6). */

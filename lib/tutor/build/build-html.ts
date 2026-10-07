@@ -13,6 +13,8 @@ export interface BuildWalkthroughInput {
   runtimeJs: string;
   /** Kết quả `renderShell(...)`. */
   shell: string;
+  /** CSS thêm sau shell, chỉ khi entry có công thức (CSS KaTeX nhúng font): entry không có công thức thì bỏ trống. */
+  extraCss?: string;
 }
 
 /** Nhúng được vào `<script type="application/json">`: thoát `<` và hai dấu ngắt dòng của JS. */
@@ -27,6 +29,7 @@ export function buildWalkthroughHtml({
   data,
   runtimeJs,
   shell,
+  extraCss,
 }: BuildWalkthroughInput): string {
   if (/<\/script/i.test(runtimeJs) || runtimeJs.includes('<!--')) {
     throw new Error('runtimeJs chứa "</script" hoặc "<!--": không thể nhúng vào <script> an toàn');
@@ -39,6 +42,7 @@ export function buildWalkthroughHtml({
     cspMetaTag(),
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<style>${SHELL_CSS}</style>`,
+    ...(extraCss ? [`<style>${extraCss}</style>`] : []),
     '</head>',
     '<body>',
     shell,

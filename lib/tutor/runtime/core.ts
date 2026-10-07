@@ -33,6 +33,7 @@ import {
   renderVars,
 } from './panels';
 import { buildPrediction, resolvePredict, type Prediction } from './predict';
+import { setRichText, type MathTable } from './rich-text';
 
 const FLASH_MS = 1500;
 const LOAD_ERROR = 'Walkthrough data could not be loaded.';
@@ -119,6 +120,10 @@ function boot(visualizer: VisualizerRenderer): void {
     return;
   }
   const { config, data, presets } = loaded;
+  /** `\( tex \)` → server-rendered KaTeX HTML; only string values are kept (the table is data, not code) */
+  const math: MathTable | undefined = isRecord(data.math)
+    ? Object.fromEntries(Object.entries(data.math).filter(([, v]) => typeof v === 'string'))
+    : undefined;
 
   // --- trạng thái ---
   let preset = config.presetId;
@@ -240,7 +245,11 @@ function boot(visualizer: VisualizerRenderer): void {
   function paintFrame(index: number): void {
     const frame = data.sets[preset].frames[index];
     const meta: Record<string, unknown> = isRecord(frame?.meta) ? frame.meta : {};
-    refs.explanation.textContent = typeof meta.explanation === 'string' ? meta.explanation : '';
+    setRichText(
+      refs.explanation,
+      typeof meta.explanation === 'string' ? meta.explanation : '',
+      math,
+    );
     if (refs.vars) renderVars(refs.vars, meta.vars);
     if (refs.aux) renderAux(refs.aux, meta.aux);
     paintCode(index);
@@ -373,7 +382,7 @@ function boot(visualizer: VisualizerRenderer): void {
   // --- khởi tạo ---
   refs.explanation.setAttribute('aria-live', 'polite');
   try {
-    visualizer.mount(refs.visualizer, config);
+    visualizer.mount(refs.visualizer, { ...config, math, labels: data.labels });
   } catch (e) {
     console.error(e);
   }

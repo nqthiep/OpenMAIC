@@ -12,6 +12,7 @@ import type { Messages } from '@/lib/tutor/catalog/types';
 import { steps } from '@/lib/tutor/engine/generate';
 import type { Frame } from '@/lib/tutor/engine/types';
 import { buildWalkthroughHtml, htmlBytes } from '@/lib/tutor/build/build-html';
+import { buildMathTable, katexCss } from '@/lib/tutor/build/katex';
 import { getRuntimeJs } from '@/lib/tutor/build/runtimes';
 import { renderShell } from '@/lib/tutor/build/shell';
 import type {
@@ -69,6 +70,16 @@ const EXTRA_LABELS: Readonly<Record<string, Messages>> = {
   code: { 'vi-VN': 'Mã', 'en-US': 'Code' },
   correct: { 'vi-VN': 'Đúng rồi!', 'en-US': 'Correct!' },
   incorrect: { 'vi-VN': 'Chưa đúng.', 'en-US': 'Not quite.' },
+};
+
+/** Kind labels of the `proofOutline` visualizer; added to a page only when its entry uses that visualizer. */
+const PROOF_LABELS: Readonly<Record<string, Messages>> = {
+  'proof.given': { 'vi-VN': 'Cho', 'en-US': 'Given' },
+  'proof.goal': { 'vi-VN': 'Cần chứng minh', 'en-US': 'To prove' },
+  'proof.have': { 'vi-VN': 'Có', 'en-US': 'We have' },
+  'proof.because': { 'vi-VN': 'Do', 'en-US': 'Because' },
+  'proof.therefore': { 'vi-VN': 'Suy ra', 'en-US': 'Hence' },
+  'proof.done': { 'vi-VN': 'Đã xong', 'en-US': 'Done' },
 };
 
 type TutorStrings = Readonly<Record<string, string>>;
@@ -269,7 +280,13 @@ export function createWalkthroughProvider(
       const built = new Map(entry.presets.map((p) => [p.id, buildPreset(entry, p, locale)]));
       const current = built.get(presetId)!;
       const t = (m: Messages) => msg(m, locale);
-      const labels = { ...getTutorLabels(locale), ...deps.getLabels(locale) };
+      const labels = {
+        ...getTutorLabels(locale),
+        ...(entry.visualizer === 'proofOutline'
+          ? Object.fromEntries(Object.entries(PROOF_LABELS).map(([k, v]) => [k, msg(v, locale)]))
+          : {}),
+        ...deps.getLabels(locale),
+      };
       const title = t(entry.title);
       const plainBeats = (beats: readonly BeatRef[]): BeatRef[] =>
         beats.map(({ id, occurrence, frame }) => ({ id, occurrence, frame }));
@@ -331,11 +348,20 @@ export function createWalkthroughProvider(
         },
         labels,
       };
+      // formulas (`\\( tex \\)` in a frame's explanation or state) are rendered here, once per distinct tex
+      const math = buildMathTable(
+        Object.values(data.sets).flatMap((set) =>
+          set.frames.map((frame) => [frame.meta.explanation, frame.state]),
+        ),
+      );
+      const hasMath = Object.keys(math).length > 0;
+      if (hasMath) data.math = { ...math };
 
       const html = buildWalkthroughHtml({
         config,
         data,
         runtimeJs,
+        ...(hasMath ? { extraCss: katexCss() } : {}),
         // custom input UI arrives with 1d (ADR 0013 decision 9)
         shell: renderShell({ title, labels, customInput: false, lang: locale, panels }),
       });

@@ -1,5 +1,10 @@
 # Review-panel run, 2026-10-06 (DeepSeek only, same provider)
 
+- **Trạng thái**: Tham khảo — kết quả thô của một lần chạy chưa đạt cổng review (không phải file gate)
+- **Ngày**: 2026-10-06
+
+> **Tóm tắt:** 19 trong 38 entry cp được review bằng một panel cùng provider DeepSeek, không độc lập theo ADR 0014; 3 pass, 16 fail; một lỗi thật (`two-pointers`) đã sửa.
+
 Raw output of `eval/tutor-review/runner.ts <id> --allow-same-provider` for 19 of the 38 cp entries.
 Stored here, not in `lib/subjects/cp/reviews/`, because it does NOT satisfy ADR 0014 decision 8:
 

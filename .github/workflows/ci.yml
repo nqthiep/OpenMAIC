@@ -134,6 +134,7 @@ jobs:
         run: |
           python3 docs/tutor/tools/check_docs.py
           node scripts/generate-tutor-runtime.mjs --check
+          node scripts/generate-tutor-katex.mjs --check
           pnpm exec tsx scripts/generate-skill-catalog.ts --check
 
       # Keep these sequential. Running root vitest alongside the storage
@@ -350,6 +351,11 @@ jobs:
 
       - name: Walkthrough FunctionPlotter visualizer Chromium tests
         run: pnpm exec vitest run tests/tutor/runtime/function-plotter.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
+      - name: Walkthrough ProofOutline visualizer Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/proof-outline.browser.test.ts
         env:
           TUTOR_BROWSER: '1'
 
