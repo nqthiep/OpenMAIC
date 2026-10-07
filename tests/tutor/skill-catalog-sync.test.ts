@@ -69,7 +69,7 @@ describe('olympiad-math SKILL.md', () => {
     expect(extractWalkthroughIdBlock(skillMd) ?? '').not.toContain('cauchy-schwarz');
   });
 
-  it('clip id block matches the math pack (empty table until a clip is released)', () => {
+  it('clip id block matches the math pack', () => {
     expect(extractClipIdBlock(mathMd)).toBe(renderClipIdBlock(MATH));
   });
 
@@ -102,7 +102,10 @@ describe('every pack has its skill with the generated blocks', () => {
 
 describe('clip id block', () => {
   it('renders a header-only table without clips, and one sorted row per clip', () => {
-    expect(renderClipIdBlock(MATH).split('\n')).toHaveLength(2);
+    expect(
+      renderClipIdBlock([{ id: 'x', skillId: 'x', walkthroughs: [] }]).split('\n'),
+    ).toHaveLength(2);
+    expect(renderClipIdBlock(MATH)).toContain('`amgm-semicircle`');
     const clipPack = {
       id: 'x',
       skillId: 'x',
