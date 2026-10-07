@@ -16,6 +16,7 @@ import { dsuEntry } from '@/lib/subjects/cp/catalog/dsu';
 import { euclidGcdEntry } from '@/lib/subjects/cp/catalog/euclid-gcd';
 import { fenwickEntry } from '@/lib/subjects/cp/catalog/fenwick';
 import { fibRecursionTreeEntry } from '@/lib/subjects/cp/catalog/fib-recursion-tree';
+import { grahamScanEntry } from '@/lib/subjects/cp/catalog/graham-scan';
 import { hashCountEntry } from '@/lib/subjects/cp/catalog/hash-count';
 import { hldEntry } from '@/lib/subjects/cp/catalog/hld';
 import { kmpEntry } from '@/lib/subjects/cp/catalog/kmp';
@@ -82,5 +83,6 @@ export const cpPack: SubjectPack = {
     tarjanEntry,
     digitDpEntry,
     nimGrundyEntry,
+    grahamScanEntry,
   ],
 };

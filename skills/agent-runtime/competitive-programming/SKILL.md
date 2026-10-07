@@ -104,6 +104,7 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `euclid-gcd` | Euclid's algorithm (greatest common divisor) | `basic`, `coprime`, `b-zero`, `equal`, `a-less` | `t2-number-basics` |
 | `fenwick` | The binary indexed tree (Fenwick) | `n8-q7`, `n8-q8`, `n4-q1`, `n8-q5` | `t3-fenwick` |
 | `fib-recursion-tree` | The recursion tree of Fibonacci | `plain-5`, `memo-5`, `base-0`, `base-1`, `memo-6` | `t1-recursion` |
+| `graham-scan` | Graham scan: the convex hull of a point set | `classic`, `collinear`, `triangle`, `square-inside` | `t4-geometry` |
 | `hash-count` | Counting frequencies with a hash table | `repeat`, `all-same`, `distinct`, `single` | `t1-hash` |
 | `hld` | Heavy-light decomposition | `binary`, `caterpillar`, `path`, `star` | `t4-tree-advanced` |
 | `kmp` | KMP: finding a pattern in a text | `twice`, `none`, `whole`, `periodic` | `t4-string-advanced` |

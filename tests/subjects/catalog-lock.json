@@ -431,6 +431,28 @@
       }
     }
   },
+  "graham-scan": {
+    "entryRev": 1,
+    "contentHash": "4ec839171a5b6163",
+    "framesHash": {
+      "classic": {
+        "vi-VN": "5c79677691e5a6e2",
+        "en-US": "19339a890e6dbd98"
+      },
+      "collinear": {
+        "vi-VN": "caa3b96fd2825a43",
+        "en-US": "14971889536e8616"
+      },
+      "triangle": {
+        "vi-VN": "3087a05ffc73d6e4",
+        "en-US": "f70dc0f53e279f44"
+      },
+      "square-inside": {
+        "vi-VN": "4506b69a4f5e155b",
+        "en-US": "7e77bef1599a2441"
+      }
+    }
+  },
   "hash-count": {
     "entryRev": 1,
     "contentHash": "298ae0da28355aaf",
