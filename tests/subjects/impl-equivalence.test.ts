@@ -31,8 +31,11 @@ const entries = SUBJECT_PACKS.flatMap((p) => p.walkthroughs);
 const ENABLED = process.env.TUTOR_IMPL_CHECK === '1';
 const TIMEOUT_MS = 10_000;
 
+// an entry without code (a math proof or construction) has `impl` empty and nothing to compile
+const hasImpl = (e: (typeof entries)[number]) => e.code.impl.cpp.length + e.code.impl.py.length > 0;
+
 describe('impl harness coverage', () => {
-  it.each(entries.map((e) => e.id))('entry %s has a harness', (id) => {
+  it.each(entries.filter(hasImpl).map((e) => e.id))('entry %s has a harness', (id) => {
     expect(harnesses[id], `missing tests/subjects/cp/impl/${id}.ts`).toBeDefined();
   });
 });
@@ -45,22 +48,25 @@ function run(cmd: string, args: string[], input = '') {
   return r.stdout.trim();
 }
 
-describe.skipIf(!ENABLED).each(entries.filter((e) => harnesses[e.id]))('impl $id', (entry) => {
-  const h = harnesses[entry.id];
-  const { cpp, py } = entry.code.impl;
-  let dir = '';
-  beforeAll(() => {
-    dir = mkdtempSync(join(tmpdir(), `impl-${entry.id}-`));
-    writeFileSync(join(dir, 'main.cpp'), [...h.cppPrelude, ...cpp, ...h.cppMain].join('\n'));
-    writeFileSync(join(dir, 'main.py'), [...py, ...h.pyMain].join('\n'));
-    run('g++', ['-std=c++17', '-O2', '-o', join(dir, 'main'), join(dir, 'main.cpp')]);
-  }, 60_000);
-  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+describe.skipIf(!ENABLED).each(entries.filter((e) => hasImpl(e) && harnesses[e.id]))(
+  'impl $id',
+  (entry) => {
+    const h = harnesses[entry.id];
+    const { cpp, py } = entry.code.impl;
+    let dir = '';
+    beforeAll(() => {
+      dir = mkdtempSync(join(tmpdir(), `impl-${entry.id}-`));
+      writeFileSync(join(dir, 'main.cpp'), [...h.cppPrelude, ...cpp, ...h.cppMain].join('\n'));
+      writeFileSync(join(dir, 'main.py'), [...py, ...h.pyMain].join('\n'));
+      run('g++', ['-std=c++17', '-O2', '-o', join(dir, 'main'), join(dir, 'main.cpp')]);
+    }, 60_000);
+    afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-  it.each(entry.presets.map((p) => [p.id, p.input] as const))('preset %s', (_id, input) => {
-    const want = h.expected(input as never);
-    const stdin = h.stdin(input as never);
-    expect(run(join(dir, 'main'), [], stdin), 'C++').toBe(want);
-    expect(run('python3', [join(dir, 'main.py')], stdin), 'Python').toBe(want);
-  });
-});
+    it.each(entry.presets.map((p) => [p.id, p.input] as const))('preset %s', (_id, input) => {
+      const want = h.expected(input as never);
+      const stdin = h.stdin(input as never);
+      expect(run(join(dir, 'main'), [], stdin), 'C++').toBe(want);
+      expect(run('python3', [join(dir, 'main.py')], stdin), 'Python').toBe(want);
+    });
+  },
+);

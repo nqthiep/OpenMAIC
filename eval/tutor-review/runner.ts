@@ -59,9 +59,10 @@ import { MIN_CLEAN, exitCode, formatReport, score } from './score';
 import type { Outcome, Sample } from './score';
 import { seedErrors } from './seed-errors';
 
-/** Panel stages per subject; only `cp` has them in LLM_STAGES today. */
+/** Panel stages per subject (LLM_STAGES). */
 const PANELS: Readonly<Record<string, readonly [LlmStage, LlmStage]>> = {
   cp: ['tutor-review-cp', 'tutor-review-cp-2'],
+  math: ['tutor-review-math', 'tutor-review-math-2'],
 };
 const LOCALE = 'vi-VN';
 /** Primary locale of the clean variants, alternating; the other locale is always shown side by side. */

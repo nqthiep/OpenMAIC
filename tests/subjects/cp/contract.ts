@@ -47,6 +47,10 @@ export interface Contract<I> {
   allow?: number[];
   /** `pitfalls` must carry a `cpp` and a `py` note on top of the generic one */
   langPitfalls?: boolean;
+  /** subject of the entry; default 'cp' */
+  subject?: string;
+  /** a math entry: `impl` is empty, `map` is empty and there are no per-language pitfalls */
+  noImpl?: boolean;
 }
 
 export const beatOf = (f: AnyFrame): string[] =>
@@ -68,7 +72,7 @@ export function entryContract<I>(c: Contract<I>): void {
 
   describe(`${entry.id} contract: static fields`, () => {
     it('matches the card', () => {
-      expect(entry.subject).toBe('cp');
+      expect(entry.subject).toBe(c.subject ?? 'cp');
       expect(entry.entryRev).toBeGreaterThanOrEqual(1);
       expect(entry.visualizer).toBe(c.visualizer);
       expect(entry.curriculumTopics).toEqual(c.topics);
@@ -139,7 +143,7 @@ export function entryContract<I>(c: Contract<I>): void {
     });
   });
 
-  describe(`${entry.id} contract: code maps`, () => {
+  describe.skipIf(c.noImpl)(`${entry.id} contract: code maps`, () => {
     it.each([
       ['cpp', entry.code.map.cpp, entry.code.impl.cpp],
       ['py', entry.code.map.py, entry.code.impl.py],
@@ -221,7 +225,7 @@ export function entryContract<I>(c: Contract<I>): void {
       const p = entry.pitfalls ?? [];
       expect(p.length).toBeGreaterThan(0);
       expect(p.some((x) => x.lang === undefined)).toBe(true);
-      if (c.langPitfalls !== false) {
+      if (c.langPitfalls !== false && !c.noImpl) {
         expect(p.some((x) => x.lang === 'cpp')).toBe(true);
         expect(p.some((x) => x.lang === 'py')).toBe(true);
       }

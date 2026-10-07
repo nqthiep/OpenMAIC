@@ -12,6 +12,7 @@ Dạy một ý tưởng hoặc một chứng minh Toán theo hướng **thấy h
 
 - **Không tạo bài luyện code và không dùng widget `code`.** Luyện tập là câu hỏi dự đoán, điền bước chứng minh, chỉ chỗ sai (quiz).
 - **Hình động thì gọi `generate_clip_scenes`** với một `clipId` trong bảng bên dưới. Công cụ chèn mỗi chapter của clip thành một trang, kèm lời thầy dựng sẵn, không gọi LLM. Tham số: `{stageId, afterOrder, clipId, presetId?, locale?}`; các trang phía sau tự dời xuống. Lỗi `invalid-clip-id` hoặc `invalid-preset-id` thì dùng `validIds` / `validPresetIds`; lỗi `clip-not-prebuilt` nghĩa là clip chưa được dựng, chuyển sang slide hoặc `wb_*` và nói rõ với user.
+- **Chứng minh, dựng hình hoặc khảo sát hàm từng bước thì gọi `generate_walkthrough`** với một `walkthroughId` trong bảng "Walkthrough có sẵn". Công cụ dựng trang và lời thầy tất định, không gọi LLM; tham số `{stageId, order, title, walkthroughId, presetId?, locale?}`. Gặp lỗi `invalid-walkthrough-id` hoặc `invalid-preset-id` thì dùng `validIds` / `validPresetIds` trong kết quả. Đừng tự mô phỏng bằng widget `simulation` khi đã có walkthrough cho topic đó.
 - **Mọi định lý có ít nhất một hình minh hoạ** (clip, walkthrough hoặc `wb_*`). Không phát biểu một định lý chỉ bằng chữ.
 - **Mọi bước chứng minh theo bốn phần**: cho (giả thiết đang dùng), có (kết quả đã biết), do (lý do, định lý hoặc phép biến đổi), suy ra (kết luận của bước). Không nhảy bước.
 - **Đừng chứng minh bằng một hình đặc biệt.** Clip chỉ cho trực giác; luôn nói "đây là trực giác, chứng minh chặt ở bước sau".
@@ -57,9 +58,21 @@ Các con số dưới đây là [Inference] cho tới khi có dữ liệu thử:
 
 Skill này chỉ tới agent workbench lúc soạn bài, **không tới chat agent**. Khi học sinh dừng giữa clip, phần trả lời lấy từ `describe()` của clip (chapter, cái đang hiện, công thức, hiểu lầm hay gặp) chứ không đọc chữ trong slide. Bài soạn chỉ cần dùng đúng `generate_clip_scenes` để phần đó chạy được.
 
+## Walkthrough có sẵn
+
+Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts`; không sửa tay giữa hai dấu.
+
+<!-- BEGIN GENERATED: walkthrough-ids -->
+| walkthroughId | Title | presetId | Curriculum topics |
+| --- | --- | --- | --- |
+| `cauchy-schwarz` | The Cauchy–Schwarz inequality (two pairs) | `generic`, `proportional`, `zero`, `negative` | `inequality-classic` |
+<!-- END GENERATED: walkthrough-ids -->
+
 ## Clip có sẵn
 
 Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts`; không sửa tay giữa hai dấu. Chưa có clip nào được phát hành, nên bảng đang trống (task I-08 sinh).
 
 <!-- BEGIN GENERATED: clip-ids -->
+| clipId | Title | presetId | Chapters | Curriculum topics |
+| --- | --- | --- | --- | --- |
 <!-- END GENERATED: clip-ids -->

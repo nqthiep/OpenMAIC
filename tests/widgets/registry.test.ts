@@ -72,6 +72,7 @@ describe('createWidgetRegistry', () => {
   it('the real SUBJECT_PACKS register binary-search without clashes', () => {
     const reg = createWidgetRegistry({ providers: [], packs: SUBJECT_PACKS });
     expect(reg.walkthroughIds()).toContain('binary-search');
-    expect(SUBJECT_PACKS.map((p) => p.id)).toEqual(['cp']);
+    expect(SUBJECT_PACKS.map((p) => p.id)).toEqual(['cp', 'math']);
+    expect(reg.walkthroughIds()).toContain('cauchy-schwarz');
   });
 });
