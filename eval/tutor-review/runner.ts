@@ -197,7 +197,7 @@ async function main(): Promise<number> {
         system: req.system,
         prompt: req.prompt,
         temperature: 0,
-        maxOutputTokens: 4000,
+        maxOutputTokens: REVIEW_MAX_OUTPUT_TOKENS,
         maxRetries: 0,
         abortSignal: req.signal,
       },
@@ -208,9 +208,16 @@ async function main(): Promise<number> {
     return result.text;
   };
   const panelOf = (e: AnyWalkthroughEntry, material: ReviewMaterial): Promise<PanelResult> =>
-    reviewPanel(material, stagesOf(e.subject), routes.get(e.subject)!, llm, undefined, {
-      allowSameProvider,
-    });
+    reviewPanel(
+      material,
+      stagesOf(e.subject),
+      routes.get(e.subject)!,
+      llm,
+      Number(process.env.TUTOR_REVIEW_TIMEOUT_MS) || undefined,
+      {
+        allowSameProvider,
+      },
+    );
 
   if (!calibrate) return reviewOne(entries[0], dryRun, panelOf);
 
@@ -298,6 +305,9 @@ async function main(): Promise<number> {
   console.log(`\n${formatReport(report)}`);
   return exitCode(true, report);
 }
+
+/** Reasoning reviewers spend most of the budget thinking; raise it with TUTOR_REVIEW_MAX_OUTPUT_TOKENS (default 4000); slow ones also need TUTOR_REVIEW_TIMEOUT_MS (default 180000). */
+const REVIEW_MAX_OUTPUT_TOKENS = Number(process.env.TUTOR_REVIEW_MAX_OUTPUT_TOKENS) || 4000;
 
 async function reviewOne(
   entry: AnyWalkthroughEntry,
