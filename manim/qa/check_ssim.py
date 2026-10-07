@@ -73,8 +73,8 @@ def find_black(frames: list[np.ndarray], fps: int) -> list[float]:
     return [i / fps for i, f in enumerate(frames) if float(f.mean()) < BLACK_MEAN]
 
 
-def still_runs(frames: list[np.ndarray], fps: int, eps: float = 0.5) -> list[tuple[float, float]]:
-    """(start, length) in seconds of every run of consecutive frames that do not change (mean abs difference < eps)."""
+def still_runs(frames: list[np.ndarray], fps: int, eps: float = 0.01) -> list[tuple[float, float]]:
+    """(start, length) in seconds of every run of consecutive frames that do not change (mean abs difference < eps; 0.01 of 255: a held picture differs by 0.00-0.005 between samples, slow line drawing by 0.02-1 (measured on the AM-GM clip))."""
     runs: list[tuple[float, float]] = []
     start = 0
     for i in range(1, len(frames) + 1):

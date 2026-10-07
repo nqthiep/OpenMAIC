@@ -1,0 +1,54 @@
+{
+  "clipId": "amgm-semicircle",
+  "engineVersion": "manim-0.21.0",
+  "templateRev": 1,
+  "profile": "qm-720p30",
+  "w": 1280,
+  "h": 720,
+  "fps": 30,
+  "durationSec": 49,
+  "chapters": [
+    {
+      "id": "setup",
+      "file": "setup.mp4",
+      "posterFile": "setup.png",
+      "startSec": 0,
+      "endSec": 10,
+      "sizeBytes": 45027
+    },
+    {
+      "id": "height",
+      "file": "height.mp4",
+      "posterFile": "height.png",
+      "startSec": 10,
+      "endSec": 24,
+      "sizeBytes": 71783
+    },
+    {
+      "id": "compare",
+      "file": "compare.mp4",
+      "posterFile": "compare.png",
+      "startSec": 24,
+      "endSec": 35,
+      "sizeBytes": 78910
+    },
+    {
+      "id": "equality",
+      "file": "equality.mp4",
+      "posterFile": "equality.png",
+      "startSec": 35,
+      "endSec": 49,
+      "sizeBytes": 101542
+    }
+  ],
+  "master": {
+    "file": "master.mp4",
+    "sizeBytes": 269496
+  },
+  "display": {
+    "a": 9,
+    "b": 16,
+    "r": 12.5,
+    "h": 12.0
+  }
+}

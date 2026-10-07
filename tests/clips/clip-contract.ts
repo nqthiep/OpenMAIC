@@ -193,8 +193,12 @@ export function clipContract<I>(c: ClipContract<I>): void {
       }
     });
 
-    it('is not prebuilt yet; with an asset the provider builds one valid slide per chapter', () => {
-      for (const p of entry.presets) expect(entry.asset(p.input, 'vi-VN')).toBeNull();
+    it('a prebuilt preset has every chapter; with an asset the provider builds one valid slide per chapter', () => {
+      for (const p of entry.presets) {
+        const prebuilt = entry.asset(p.input, 'vi-VN');
+        if (prebuilt)
+          expect(prebuilt.chapters.map((c) => c.id)).toEqual(entry.chapters.map((c) => c.id));
+      }
       const asset: ClipAsset = {
         chapters: entry.chapters.map((ch) => ({
           id: ch.id,

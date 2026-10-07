@@ -1,1 +1,106 @@
-{}
+{
+  "sha256:52a795695c476093d1d0c206fd620f654cd70c1735c4e0f033bbc4b036606254": {
+    "chapters": [
+      {
+        "id": "setup",
+        "url": "/clips/amgm-semicircle-68ac9f42cee0/setup.mp4",
+        "poster": "/clips/amgm-semicircle-68ac9f42cee0/setup.png"
+      },
+      {
+        "id": "height",
+        "url": "/clips/amgm-semicircle-68ac9f42cee0/height.mp4",
+        "poster": "/clips/amgm-semicircle-68ac9f42cee0/height.png"
+      },
+      {
+        "id": "compare",
+        "url": "/clips/amgm-semicircle-68ac9f42cee0/compare.mp4",
+        "poster": "/clips/amgm-semicircle-68ac9f42cee0/compare.png"
+      },
+      {
+        "id": "equality",
+        "url": "/clips/amgm-semicircle-68ac9f42cee0/equality.mp4",
+        "poster": "/clips/amgm-semicircle-68ac9f42cee0/equality.png"
+      }
+    ],
+    "master": "/clips/amgm-semicircle-68ac9f42cee0/master.mp4",
+    "manifest": "/clips/amgm-semicircle-68ac9f42cee0/manifest.json"
+  },
+  "sha256:5d9585d8959b3ca83a3710e585629584f2499f52d2b0813bf1a03c904e23a64f": {
+    "chapters": [
+      {
+        "id": "setup",
+        "url": "/clips/amgm-semicircle-40c8306fa34f/setup.mp4",
+        "poster": "/clips/amgm-semicircle-40c8306fa34f/setup.png"
+      },
+      {
+        "id": "height",
+        "url": "/clips/amgm-semicircle-40c8306fa34f/height.mp4",
+        "poster": "/clips/amgm-semicircle-40c8306fa34f/height.png"
+      },
+      {
+        "id": "compare",
+        "url": "/clips/amgm-semicircle-40c8306fa34f/compare.mp4",
+        "poster": "/clips/amgm-semicircle-40c8306fa34f/compare.png"
+      },
+      {
+        "id": "equality",
+        "url": "/clips/amgm-semicircle-40c8306fa34f/equality.mp4",
+        "poster": "/clips/amgm-semicircle-40c8306fa34f/equality.png"
+      }
+    ],
+    "master": "/clips/amgm-semicircle-40c8306fa34f/master.mp4",
+    "manifest": "/clips/amgm-semicircle-40c8306fa34f/manifest.json"
+  },
+  "sha256:e1fcf3a2651eed50416734130f2319e9e1aadbca2bb30ec6d797c675ab4d06d4": {
+    "chapters": [
+      {
+        "id": "setup",
+        "url": "/clips/amgm-semicircle-e3c420c4b603/setup.mp4",
+        "poster": "/clips/amgm-semicircle-e3c420c4b603/setup.png"
+      },
+      {
+        "id": "height",
+        "url": "/clips/amgm-semicircle-e3c420c4b603/height.mp4",
+        "poster": "/clips/amgm-semicircle-e3c420c4b603/height.png"
+      },
+      {
+        "id": "compare",
+        "url": "/clips/amgm-semicircle-e3c420c4b603/compare.mp4",
+        "poster": "/clips/amgm-semicircle-e3c420c4b603/compare.png"
+      },
+      {
+        "id": "equality",
+        "url": "/clips/amgm-semicircle-e3c420c4b603/equality.mp4",
+        "poster": "/clips/amgm-semicircle-e3c420c4b603/equality.png"
+      }
+    ],
+    "master": "/clips/amgm-semicircle-e3c420c4b603/master.mp4",
+    "manifest": "/clips/amgm-semicircle-e3c420c4b603/manifest.json"
+  },
+  "sha256:fa2ecc66a427252e854c96c3e7712029d8d3e41728d029a8cc94518ff84ad499": {
+    "chapters": [
+      {
+        "id": "setup",
+        "url": "/clips/amgm-semicircle-81ef734484ad/setup.mp4",
+        "poster": "/clips/amgm-semicircle-81ef734484ad/setup.png"
+      },
+      {
+        "id": "height",
+        "url": "/clips/amgm-semicircle-81ef734484ad/height.mp4",
+        "poster": "/clips/amgm-semicircle-81ef734484ad/height.png"
+      },
+      {
+        "id": "compare",
+        "url": "/clips/amgm-semicircle-81ef734484ad/compare.mp4",
+        "poster": "/clips/amgm-semicircle-81ef734484ad/compare.png"
+      },
+      {
+        "id": "equality",
+        "url": "/clips/amgm-semicircle-81ef734484ad/equality.mp4",
+        "poster": "/clips/amgm-semicircle-81ef734484ad/equality.png"
+      }
+    ],
+    "master": "/clips/amgm-semicircle-81ef734484ad/master.mp4",
+    "manifest": "/clips/amgm-semicircle-81ef734484ad/manifest.json"
+  }
+}

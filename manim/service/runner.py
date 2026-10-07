@@ -27,7 +27,7 @@ def make_runner(templates_dir: Path, qa_dir: Path, command: str | None = None,
         cmd = command or os.environ.get("MANIM_RENDER_CMD")
         if not cmd:
             raise RuntimeError("MANIM_RENDER_CMD is not set")
-        template = templates_dir / f"{job.template_id}.py"
+        template = templates_dir / f"{job.template_id.replace('-', '_')}.py"
         if not template.is_file():
             raise RuntimeError(f"template file missing: {job.template_id}")
         bad = allowlist.check_source(template.read_text(encoding="utf8"))

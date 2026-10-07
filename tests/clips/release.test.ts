@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { clipEntryHash } from '@/lib/clips/hash';
+import { clipRegistry } from '@/lib/clips';
 import { createClipRegistry } from '@/lib/clips/registry';
 import { buildCourseAllowlist } from '@/lib/server/agent-runtime/course-tools';
 import { mathPack } from '@/lib/subjects/math/pack';
@@ -103,8 +104,10 @@ describe('prebuilt clips and the toolset', () => {
     expect(registry.prebuiltIds()).toEqual(['built']);
   });
 
-  it('generate_clip_scenes is not offered to the agent until a clip has been rendered (the asset index is empty today)', () => {
-    expect(buildCourseAllowlist().has('generate_clip_scenes')).toBe(false);
+  it('generate_clip_scenes is offered to the agent only once a clip has been rendered', () => {
+    expect(buildCourseAllowlist().has('generate_clip_scenes')).toBe(
+      clipRegistry.prebuiltIds().length > 0,
+    );
     expect(buildCourseAllowlist().has('generate_walkthrough')).toBe(true);
   });
 });

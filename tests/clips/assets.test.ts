@@ -10,8 +10,8 @@ const asset: ClipAsset = {
 };
 
 describe('clip asset lookup', () => {
-  it('the shipped index is empty, so nothing is prebuilt yet', () => {
-    expect(Object.keys(CLIP_ASSET_INDEX)).toEqual([]);
+  it('the shipped index holds only content keys, and none of them is the fake entry', () => {
+    for (const k of Object.keys(CLIP_ASSET_INDEX)) expect(k).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(lookupClipAsset(base, { a: 2, b: 3 }, 'vi-VN')).toBeNull();
   });
 
