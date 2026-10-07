@@ -112,7 +112,8 @@ Hai khối JSON trong HTML tự chứa (ARCHITECTURE §6). Trường bắt buộ
 { "clipId": "amgm-semicircle", "contentHash": "sha256:…", "engineVersion": "manim-ce 0.21.0", "templateRev": 1,
   "imageDigest": "sha256:…", "profile": "qm-720p30", "w": 1280, "h": 720, "fps": 30, "durationSec": 30.0,
   "chapters": [ { "id": "dung", "file": "dung.mp4", "posterFile": "dung.png", "startSec": 0, "endSec": 12, "sizeBytes": 800000 } ],
-  "master": { "file": "master.mp4", "sizeBytes": 2400000 } /* tuỳ chọn */ }
+  "master": { "file": "master.mp4", "sizeBytes": 2400000 }, /* tuỳ chọn */
+  "display": { "a": 2, "b": 8, "r": 5, "h": 4 } /* số scene đã vẽ, đúng khoá của expectedDisplay; vitest đối chiếu (sai số 1e-3) */ }
 // clip-sheet.json (cho thầy Q&A) — CI chép từ ClipEntry.sheet (nguồn chính thức nằm trong mã); Q&A đọc ClipEntry.sheet, file này chỉ đi kèm asset khi export
 { "chapters": [{ "id": "dung", "shows": "nửa đường tròn đường kính a+b", "formulas": ["h^2 = ab"],
     "misconceptions": ["h là trung bình cộng"], "hints": ["…", "…"] }] }

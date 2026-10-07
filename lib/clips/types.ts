@@ -28,6 +28,8 @@ export interface ClipSheetChapter {
 export interface ClipAsset {
   readonly master?: string;
   readonly chapters: readonly { id: string; url: string; poster: string }[];
+  /** URL of the clip's manifest.json (the numbers the scene drew, checked against `expectedDisplay`) */
+  readonly manifest?: string;
 }
 
 export interface ClipEntry<I = unknown> {
