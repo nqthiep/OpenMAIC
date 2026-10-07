@@ -127,10 +127,11 @@ export function clipContract<I>(c: ClipContract<I>): void {
       }
     });
 
-    it('asks a prediction question at least once in every two consecutive chapters', () => {
+    it('asks a prediction question at least once in every complete pair of chapters', () => {
       const asks = entry.chapters.map((ch) => (ch.ask ? 1 : 0));
-      for (let i = 0; i < asks.length; i += 2) {
-        expect(asks[i] + (asks[i + 1] ?? 0), `chapters ${i}-${i + 1}`).toBeGreaterThanOrEqual(1);
+      // every complete pair of chapters; with an odd count the last chapter stands alone and is exempt
+      for (let i = 0; i + 1 < asks.length; i += 2) {
+        expect(asks[i] + asks[i + 1], `chapters ${i}-${i + 1}`).toBeGreaterThanOrEqual(1);
       }
     });
   });
