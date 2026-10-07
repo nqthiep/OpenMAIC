@@ -109,6 +109,7 @@ Chưa làm và vì sao:
 | Walkthrough Toán | `3B-W1..W3` | `lib/subjects/math/catalog/{cauchy-schwarz,triangle-altitude,curve-sketching}.ts`; pack `math` (`lib/subjects/math/pack.ts`); `graham-scan` (`2E-05`, `I-12`) trên `geometry` |
 | Mẫu clip (nửa TS) | `3A-T1..T3`, `3B-T1..T14`, `3D-T1..T4` | **21 mẫu** ở `lib/subjects/math/clips/*.ts` (+ `index.ts`), mỗi mẫu một test `tests/clips/<id>.test.ts` qua hợp đồng chung `tests/clips/clip-contract.ts` và một oracle độc lập |
 | Cổng QA | `3A-05`, `3A-06` | `manim/qa/{allowlist,check_video,check_bbox,check_ssim}.py`, 45 test pytest chạy trên video ffmpeg tổng hợp; job CI `manim-qa` |
+| Dịch vụ | `3C-01`, `3C-02`, `3C-05..08` | `manim/service/{spec,jobs,server,runner}.py` (chỉ stdlib; giới hạn hàng đợi/người/toàn cục, TTL, deadline, token so sánh hằng thời gian); `spec.py` cho cùng khoá cache và cùng kết quả kiểm params với TS (`manim/service/fixtures/parity.json`, sinh từ `scripts/export-clip-specs.ts` → `templates.json`; test TS `service-parity` báo lệch); client, route, cờ, nhánh bất đồng bộ ở `lib/clips/service-client.ts`, `app/api/clips`, `clip-tools.ts`; 1358 test pytest (`manim/`), job CI `manim-qa` chạy `manim/service` |
 | Dựng | `3A-07` | `scripts/render-clips.ts` (`pnpm render:clips --plan` in 84 job), `lib/clips/generated/asset-index.json` (rỗng), kiểm manifest |
 
 Lệch so với card (đều ghi ở comment đầu file và test):
@@ -125,7 +126,7 @@ Chưa làm và vì sao (Phase 3):
 | --- | --- |
 | Mọi mẫu Manim `.py` (`3A-M*`, `3B-M*`, `3D-M*`), `3A-04` (`manim/Dockerfile`, `_base.py`), `3A-08` | cần Manim CE 0.21.0, TeX Live, Docker image đã ghim; máy này chưa có `manim`, `latex` |
 | Spike `3-S1..S5`, `3-R1`, `3B-00` (curriculum Toán) | cần Manim/Docker và nghiên cứu nguồn; `3-R1` không được bịa nguồn |
-| `3C-*` (manim-service, sandbox, client, route asset, cờ, nhánh bất đồng bộ) | cần image dịch vụ; chưa làm |
+| `3C-03` (build/chạy image dịch vụ), `3C-04` (sandbox, red-team), `3C-09` | `manim/service/Dockerfile` và `docker-compose.yml` đã viết nhưng **[Unverified] chưa build/chạy** (Docker daemon tắt); cách ly mạng của renderer chưa cưỡng chế; red-team cần image thật |
 | Mọi hội đồng review LLM cho entry Toán và clip, `3A-17`, `3B-E1` | cần LLM thật, xem mục "Gate review LLM" |
 | `3-S3` (slide video do tool dựng, export MP4/ZIP, import) | chưa kiểm; `3A-02/03` làm theo thiết kế trong ARCHITECTURE §8b [Unverified] |
 

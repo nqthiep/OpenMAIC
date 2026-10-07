@@ -1,0 +1,22 @@
+# [Unverified] never run. Resource caps (OPERATIONS §2). Network isolation of the renderer subprocess is NOT enforced here; the token comes from
+# the environment, never from this file.  docker compose -f manim/service/docker-compose.yml up --build
+services:
+  manim-service:
+    build:
+      context: ../..
+      dockerfile: manim/service/Dockerfile
+    environment:
+      MANIM_SERVICE_TOKEN: ${MANIM_SERVICE_TOKEN:?set MANIM_SERVICE_TOKEN}
+      MANIM_RENDER_CMD: ${MANIM_RENDER_CMD:-}
+    ports:
+      - "127.0.0.1:8080:8080"
+    read_only: true
+    tmpfs:
+      - /work:size=2g,uid=10001
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 4g
+    cpus: 2
+    pids_limit: 256
+    restart: unless-stopped
