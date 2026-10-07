@@ -72,9 +72,10 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 
 ## Clip có sẵn
 
-Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts`; không sửa tay giữa hai dấu. Chưa có clip nào được phát hành, nên bảng đang trống (task I-08 sinh).
+Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts`; không sửa tay giữa hai dấu. Clip chỉ dùng được sau khi đã được dựng (render); chưa dựng thì công cụ trả `clip-not-prebuilt`.
 
 <!-- BEGIN GENERATED: clip-ids -->
 | clipId | Title | presetId | Chapters | Curriculum topics |
 | --- | --- | --- | --- | --- |
+| `amgm-semicircle` | AM–GM on a semicircle | `two-eight`, `equal`, `far`, `nine-sixteen` | `setup`, `height`, `compare`, `equality` | `inequality-basic` |
 <!-- END GENERATED: clip-ids -->
