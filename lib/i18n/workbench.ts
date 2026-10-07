@@ -133,6 +133,7 @@ export const workbenchEn = {
     title: {
       'build-personal-skill': 'Build a personal Skill',
       'competitive-programming': 'Competitive programming',
+      'olympiad-math': 'Olympiad math',
       'curriculum-planner': 'Series planning',
       'stage-dsl': 'Classroom document structure',
       'deep-interactive': 'Deep interactive',
@@ -434,6 +435,7 @@ export const workbenchZh = {
     title: {
       'build-personal-skill': '创建专属 Skill',
       'competitive-programming': '信息学竞赛',
+      'olympiad-math': '数学奥林匹克',
       'curriculum-planner': '系列课规划',
       'stage-dsl': '课堂文档结构',
       'deep-interactive': '深度交互',
