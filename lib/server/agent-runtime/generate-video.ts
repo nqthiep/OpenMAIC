@@ -255,7 +255,7 @@ export function hasConfiguredVideoGeneration(deps: Partial<GenerateVideoToolDeps
  * `appendControlEvent` writes the same log the SSE route replays and fires the
  * transactional NOTIFY that wakes attached streams.
  */
-async function defaultEmitMediaReady(
+export async function defaultEmitMediaReady(
   sessionId: string,
   data: MediaReadyLifecycleData,
 ): Promise<void> {

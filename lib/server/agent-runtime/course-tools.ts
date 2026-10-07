@@ -54,7 +54,7 @@ import {
 import type { SceneTtsInput, SceneTtsSummary } from './scene-tts';
 import { CLIP_TOOL_NAME, buildClipTool } from './clip-tools';
 import { WALKTHROUGH_TOOL_NAME, buildWalkthroughTool } from './walkthrough-tools';
-import { isWidgetProvidersDisabled } from '@/lib/config/feature-flags';
+import { getManimServiceConfig, isWidgetProvidersDisabled } from '@/lib/config/feature-flags';
 import { clipRegistry } from '@/lib/clips';
 import { widgetRegistry } from '@/lib/widgets';
 import type { LoadedSkill } from './skills';
@@ -231,9 +231,15 @@ function walkthroughToolEnabled(): boolean {
   return !isWidgetProvidersDisabled() && widgetRegistry.walkthroughIds().length > 0;
 }
 
-/** generate_clip_scenes exists only with providers on and at least one clip that has been rendered (no empty Type.Union). */
+/**
+ * generate_clip_scenes exists only with providers on and something to insert: a clip that has been rendered, or (with
+ * the manim-service configured) any catalog clip, which can be rendered on demand. Never an empty Type.Union.
+ */
 function clipToolEnabled(): boolean {
-  return !isWidgetProvidersDisabled() && clipRegistry.prebuiltIds().length > 0;
+  if (isWidgetProvidersDisabled()) return false;
+  return getManimServiceConfig()
+    ? clipRegistry.clipIds().length > 0
+    : clipRegistry.prebuiltIds().length > 0;
 }
 
 /** The exact registered tool names of this slice's toolset. */

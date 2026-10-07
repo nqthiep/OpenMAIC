@@ -7,6 +7,7 @@ import type { Action, Scene, SlideContent } from '@openmaic/dsl';
 import { describeClip, clipNameOfScene } from '@/lib/clips/describe';
 import { clipContentHash, clipElementName, parseClipName } from '@/lib/clips/name';
 import type { AnyClipEntry } from '@/lib/clips/types';
+import { validateClipInput } from '@/lib/clips/validate';
 import { msg } from '@/lib/tutor/catalog/messages';
 import type { Messages } from '@/lib/tutor/catalog/types';
 import type { BuildRequest, BuildResult, WidgetContext, WidgetProvider } from '@/lib/widgets/types';
@@ -130,15 +131,23 @@ export function createClipProvider(
 
     build(req: BuildRequest, ctx: WidgetContext): BuildResult {
       const entry = find(req.id);
-      if (req.input !== undefined) throw new Error('clip input is not enabled before 3C');
-      const presetId = req.presetId ?? entry.presets[0].id;
-      const preset = entry.presets.find((p) => p.id === presetId);
-      if (!preset) throw new Error(`unknown presetId "${presetId}" for clip "${entry.id}"`);
+      // a preset, or free parameters (task 3C-08) that must pass the same validation as the render service applies
+      let input: unknown;
+      if (req.input !== undefined) {
+        const checked = validateClipInput(entry, req.input);
+        if (!checked.ok) throw new Error(`invalid-clip-input: ${checked.issues.join('; ')}`);
+        input = checked.value;
+      } else {
+        const presetId = req.presetId ?? entry.presets[0].id;
+        const preset = entry.presets.find((p) => p.id === presetId);
+        if (!preset) throw new Error(`unknown presetId "${presetId}" for clip "${entry.id}"`);
+        input = preset.input;
+      }
       const { locale } = ctx;
-      const asset = entry.asset(preset.input, locale);
+      const asset = entry.asset(input as never, locale);
       if (asset === null) throw new Error('clip-not-prebuilt');
       const t = (m: Messages) => msg(m, locale);
-      const hash = clipContentHash(entry, preset.input, locale);
+      const hash = clipContentHash(entry, input, locale);
 
       const content: SlideContent[] = [];
       const actions: Action[][] = [];

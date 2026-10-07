@@ -78,9 +78,15 @@ describe('clip provider build', () => {
     expect(() => provider.build({ id: clip.id, presetId: 'zzz' }, { locale: 'vi-VN' })).toThrow(
       'unknown presetId',
     );
+    // free parameters (task 3C-08) go through the same validation as a render request
     expect(() =>
-      provider.build({ id: clip.id, input: { a: 1, b: 1 } }, { locale: 'vi-VN' }),
-    ).toThrow();
+      provider.build({ id: clip.id, input: { a: 99, b: 1 } }, { locale: 'vi-VN' }),
+    ).toThrow(/invalid-clip-input/);
+    expect(() =>
+      provider.build({ id: clip.id, input: 'not an object' }, { locale: 'vi-VN' }),
+    ).toThrow(/invalid-clip-input/);
+    const free = provider.build({ id: clip.id, input: { a: 1, b: 1 } }, { locale: 'vi-VN' });
+    expect(free.content).toHaveLength(clip.chapters.length);
   });
 
   it('throws clip-not-prebuilt when the asset is missing', () => {
