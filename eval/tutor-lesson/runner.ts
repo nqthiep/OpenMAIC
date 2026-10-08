@@ -30,7 +30,7 @@
  * scenarios, scenario set below section 6 coverage, same model for both roles).
  */
 
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
@@ -113,6 +113,18 @@ async function main(): Promise<number> {
   if (samples < MIN_SAMPLES) throw new Error(`--samples must be at least ${MIN_SAMPLES}`);
 
   const file = parseScenarios(readFileSync(join(getCurrentDir(), 'scenarios.json'), 'utf8'));
+  // the math scenarios (card 3B-E1) are a second file, read when it exists
+  const mathFile = join(getCurrentDir(), 'scenarios-math.json');
+  if (existsSync(mathFile)) {
+    const math = parseScenarios(readFileSync(mathFile, 'utf8'));
+    if (math.locale !== file.locale)
+      throw new Error('scenarios-math.json: locale differs from scenarios.json');
+    const taken = new Set(file.scenarios.map((x) => x.id));
+    for (const sc of math.scenarios) {
+      if (taken.has(sc.id)) throw new Error(`scenarios-math.json: duplicate id ${sc.id}`);
+      file.scenarios.push({ ...sc, subject: 'math' });
+    }
+  }
   const gaps = coverageProblems(file.scenarios);
   if (gaps.length > 0) {
     console.error(`Scenarios: ${gaps.join('; ')}.`);
@@ -126,7 +138,7 @@ async function main(): Promise<number> {
 
   console.log('=== Tutor lesson eval ===');
   console.log(
-    `Scenarios: ${scenarios.length} of ${file.scenarios.length} (ts10 ${scenarios.filter((s) => s.track === 'ts10').length}, hsg ${scenarios.filter((s) => s.track === 'hsg').length}, exam-problem ${scenarios.filter((s) => s.kind === 'exam-problem').length}); locale ${file.locale}; ${samples} samples each`,
+    `Scenarios: ${scenarios.length} of ${file.scenarios.length} (ts10 ${scenarios.filter((s) => s.track === 'ts10').length}, hsg ${scenarios.filter((s) => s.track === 'hsg').length}, exam-problem ${scenarios.filter((s) => s.kind === 'exam-problem').length}, math ${scenarios.filter((s) => s.subject === 'math').length}); locale ${file.locale}; ${samples} samples each`,
   );
   console.log(`Ids: ${scenarios.map((s) => s.id).join(', ')}`);
   if (limit !== undefined) console.log(`Partial run: --limit ${limit} scenarios.`);

@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  buildJudgeSystem,
+  buildGeneratorSystem,
   CRITERIA,
   coverageProblems,
   exitCode,
@@ -81,5 +84,28 @@ describe('eval:tutor-lesson scoring', () => {
     expect(exitCode(true, score(run))).toBe(1);
     expect(exitCode(false)).toBe(2);
     expect(exitCode(true)).toBe(0);
+  });
+});
+
+describe('math scenarios (card 3B-E1)', () => {
+  const math = parseScenarios(
+    readFileSync(join(process.cwd(), 'eval/tutor-lesson/scenarios-math.json'), 'utf8'),
+  );
+
+  it('has at least 3 scenarios, all parse, and the topics are real curriculum ids', () => {
+    expect(math.scenarios.length).toBeGreaterThanOrEqual(3);
+    const curriculum = readFileSync(
+      join(process.cwd(), 'skills/agent-runtime/olympiad-math/references/curriculum/index.json'),
+      'utf8',
+    );
+    for (const s of math.scenarios) expect(curriculum, s.id).toContain(`"${s.topicId}"`);
+  });
+
+  it('math prompts talk about mathematics, informatics prompts are unchanged', () => {
+    expect(buildGeneratorSystem('vi-VN', 'math')).toContain('olympiad mathematics');
+    expect(buildGeneratorSystem('vi-VN', 'math')).not.toContain('brute force');
+    expect(buildGeneratorSystem('vi-VN')).toContain('competitive programming');
+    expect(buildJudgeSystem('math')).toContain('olympiad mathematics');
+    expect(buildJudgeSystem()).toContain('competitive programming');
   });
 });

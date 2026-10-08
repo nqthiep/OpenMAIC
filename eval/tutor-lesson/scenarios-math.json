@@ -1,0 +1,97 @@
+{
+  "locale": "vi-VN",
+  "scenarios": [
+    {
+      "id": "math-hsg-cauchy-schwarz",
+      "subject": "math",
+      "track": "hsg",
+      "kind": "concept",
+      "topicId": "m2-inequality-classic",
+      "requirement": "Dạy em chứng minh bất đẳng thức Cauchy–Schwarz cho hai cặp số thực (a, b), (c, d), có hình minh hoạ và nói rõ khi nào dấu bằng xảy ra.",
+      "prerequisites": [
+        "bất đẳng thức bình phương không âm",
+        "khai triển hằng đẳng thức",
+        "tích vô hướng của hai vectơ trong mặt phẳng"
+      ],
+      "materialFacts": [
+        "Với mọi số thực a, b, c, d: (a² + b²)(c² + d²) ≥ (ac + bd)².",
+        "Đồng nhất thức Lagrange: (a² + b²)(c² + d²) = (ac + bd)² + (ad − bc)².",
+        "Dấu bằng xảy ra khi và chỉ khi ad = bc (hai vectơ (a, b) và (c, d) cùng phương).",
+        "Hình học: |u · v| ≤ |u||v|, với u = (a, b), v = (c, d); độ dài hình chiếu của v lên đường thẳng chứa u bằng |u · v| / |u| và không vượt quá |v|."
+      ]
+    },
+    {
+      "id": "math-hsg-curve-x3-3x",
+      "subject": "math",
+      "track": "hsg",
+      "kind": "exam-problem",
+      "topicId": "m3-derivative-graphs",
+      "requirement": "Dạy khảo sát và vẽ đồ thị hàm số bậc ba từng bước: miền xác định, đạo hàm, cực trị, điểm uốn, giao điểm với trục.",
+      "problem": "Khảo sát sự biến thiên và vẽ đồ thị hàm số y = x³ − 3x.",
+      "prerequisites": ["đạo hàm của đa thức", "dấu của tam thức bậc hai", "đồ thị hàm số"],
+      "materialFacts": [
+        "y′ = 3x² − 3 = 3(x − 1)(x + 1), nên y′ = 0 tại x = −1 và x = 1.",
+        "y′ > 0 khi x < −1 hoặc x > 1; y′ < 0 khi −1 < x < 1.",
+        "Hàm đạt cực đại tại x = −1 với y = 2 và cực tiểu tại x = 1 với y = −2.",
+        "y″ = 6x, đổi dấu tại x = 0, nên (0, 0) là điểm uốn.",
+        "Hàm lẻ nên đồ thị đối xứng qua gốc toạ độ; đồ thị cắt trục Ox tại x = 0 và x = ±√3."
+      ]
+    },
+    {
+      "id": "math-ts10-amgm",
+      "subject": "math",
+      "track": "ts10",
+      "kind": "concept",
+      "topicId": "m1-inequality-basic",
+      "requirement": "Dạy bất đẳng thức AM–GM cho hai số không âm cho học sinh lớp 9, kèm hình nửa đường tròn và điều kiện dấu bằng.",
+      "prerequisites": [
+        "hằng đẳng thức (a − b)²",
+        "căn bậc hai",
+        "tam giác vuông và đường cao ứng với cạnh huyền"
+      ],
+      "materialFacts": [
+        "Với a, b ≥ 0: (a + b)/2 ≥ √(ab).",
+        "Chứng minh: a + b − 2√(ab) = (√a − √b)² ≥ 0.",
+        "Dấu bằng xảy ra khi và chỉ khi a = b.",
+        "Trên nửa đường tròn đường kính a + b, đường cao h hạ từ điểm chia đường kính thành đoạn a và b thoả h² = ab, còn bán kính là (a + b)/2 và h ≤ bán kính.",
+        "Ví dụ: a = 2, b = 8 thì (a + b)/2 = 5 còn √(ab) = 4."
+      ]
+    },
+    {
+      "id": "math-ts10-triangle-altitudes",
+      "subject": "math",
+      "track": "ts10",
+      "kind": "concept",
+      "topicId": "m1-triangle-geometry",
+      "requirement": "Dạy chứng minh ba đường cao của tam giác đồng quy tại trực tâm và vị trí của trực tâm với tam giác nhọn, vuông, tù.",
+      "prerequisites": [
+        "đường cao của tam giác",
+        "hình bình hành và đường thẳng song song",
+        "đường trung trực của đoạn thẳng"
+      ],
+      "materialFacts": [
+        "Ba đường cao của một tam giác đồng quy tại một điểm gọi là trực tâm.",
+        "Qua mỗi đỉnh kẻ đường thẳng song song với cạnh đối diện; ba đường thẳng đó tạo tam giác lớn hơn, mà ba đường cao của tam giác ban đầu là ba đường trung trực của tam giác lớn đó, nên đồng quy.",
+        "Tam giác nhọn: trực tâm nằm trong tam giác.",
+        "Tam giác vuông: trực tâm trùng với đỉnh góc vuông.",
+        "Tam giác tù: trực tâm nằm ngoài tam giác."
+      ]
+    },
+    {
+      "id": "math-ts10-euclid-gcd",
+      "subject": "math",
+      "track": "ts10",
+      "kind": "exam-problem",
+      "topicId": "m2-euclid-diophantine",
+      "requirement": "Dạy thuật toán Euclid tìm ƯCLN và cách viết ƯCLN dưới dạng tổ hợp tuyến tính, có hình lát hình vuông.",
+      "problem": "Tìm ƯCLN(48, 18) bằng thuật toán Euclid và tìm số nguyên x, y sao cho 48x + 18y = ƯCLN(48, 18).",
+      "prerequisites": ["phép chia có dư", "ước chung", "hình chữ nhật và hình vuông"],
+      "materialFacts": [
+        "48 = 2·18 + 12; 18 = 1·12 + 6; 12 = 2·6 + 0, nên ƯCLN(48, 18) = 6.",
+        "ƯCLN(a, b) = ƯCLN(b, a mod b).",
+        "Thế ngược: 6 = 18 − 12 = 18 − (48 − 2·18) = 3·18 − 1·48, nên x = −1, y = 3 thoả 48x + 18y = 6.",
+        "Hình chữ nhật 48 × 18 lát bằng hình vuông cạnh 18 hai lần dư hình chữ nhật 18 × 12; cạnh hình vuông cuối cùng là 6."
+      ]
+    }
+  ]
+}

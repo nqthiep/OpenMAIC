@@ -36,8 +36,14 @@ export type Track = (typeof TRACKS)[number];
 export const KINDS = ['concept', 'exam-problem'] as const;
 export type Kind = (typeof KINDS)[number];
 
+/** `informatics` (the default) or `math` (card 3B-E1): only the wording of the two prompts changes. */
+export const SUBJECTS = ['informatics', 'math'] as const;
+export type Subject = (typeof SUBJECTS)[number];
+
 export interface Scenario {
   id: string;
+  /** Absent means informatics. */
+  subject?: Subject;
   track: Track;
   kind: Kind;
   topicId: string;
@@ -80,6 +86,8 @@ export function parseScenarios(raw: string): ScenarioFile {
     if (!isStr(s.id) || ids.has(s.id)) fail(at, 'id must be a unique non-empty string');
     ids.add(s.id);
     if (!(TRACKS as readonly unknown[]).includes(s.track)) fail(at, 'track must be ts10 or hsg');
+    if (s.subject !== undefined && !(SUBJECTS as readonly unknown[]).includes(s.subject))
+      fail(at, 'subject must be informatics or math');
     if (!(KINDS as readonly unknown[]).includes(s.kind))
       fail(at, 'kind must be concept or exam-problem');
     if (!isStr(s.topicId) || !isStr(s.requirement))
@@ -202,13 +210,20 @@ export interface Lesson {
   scenes: Scene[];
 }
 
-export function buildGeneratorSystem(locale: string): string {
+export function buildGeneratorSystem(locale: string, subject: Subject = 'informatics'): string {
+  const math = subject === 'math';
   return [
-    'You are a teacher of competitive programming for Vietnamese students (grades 8-12) who prepare for the selective-school entrance exam (ts10) or for the provincial/national olympiad (hsg).',
+    math
+      ? 'You are a teacher of olympiad mathematics for Vietnamese students (grades 8-12) who prepare for the selective-school entrance exam (ts10) or for the provincial/national olympiad (hsg).'
+      : 'You are a teacher of competitive programming for Vietnamese students (grades 8-12) who prepare for the selective-school entrance exam (ts10) or for the provincial/national olympiad (hsg).',
     'Write ONE lesson draft as a script for an AI teacher. Follow this recipe (ADR 0008):',
     '- 6 to 8 scenes. Scene 1 is a "slide". Between 1 and 3 scenes are "interactive" (a step-by-step visualizer where the student predicts, then changes the input). The others are "slide" or "quiz". No scene asks the student to write or run code.',
-    '- Flow: the problem and its limits with a small example; brute force and its bottleneck; the key observation (state it in at most 2 sentences); idea, invariant and why it is correct; a hand-run on a small input; complexity; pitfalls; a short check; a summary. Fold these into the scenes.',
-    '- Explain WHY the method is correct, give at least one worked numeric example and one edge case.',
+    math
+      ? '- Flow: the problem with a small example; intuition from a figure (an animated figure counts as an "interactive" scene); the statement with its conditions and the equality case; the proof step by step (given, known, because, therefore; never prove by one special figure); a worked example; variants and common mistakes; a short check; a summary. Fold these into the scenes.'
+      : '- Flow: the problem and its limits with a small example; brute force and its bottleneck; the key observation (state it in at most 2 sentences); idea, invariant and why it is correct; a hand-run on a small input; complexity; pitfalls; a short check; a summary. Fold these into the scenes.',
+    math
+      ? '- Explain WHY the statement is true, give at least one worked numeric example and one edge or equality case.'
+      : '- Explain WHY the method is correct, give at least one worked numeric example and one edge case.',
     "- Define every term before its first use. Use only concepts from the student's prerequisites, or define them.",
     '- In a scene with a visual, each teacher line that talks about the picture sets "pointsAt" to the exact element or step of that scene\'s "visual" it refers to.',
     '- Ask prediction questions that WAIT for the student ("waitsForAnswer": true, with the "expectedAnswer"): at least one for every 3 scenes.',
@@ -317,9 +332,9 @@ export interface Verdict {
   reason: string;
 }
 
-export function buildJudgeSystem(): string {
+export function buildJudgeSystem(subject: Subject = 'informatics'): string {
   return [
-    'You are a strict reviewer of lesson drafts for Vietnamese students (grades 8-12) in competitive programming. A draft is the script an AI teacher will follow.',
+    `You are a strict reviewer of lesson drafts for Vietnamese students (grades 8-12) in ${subject === 'math' ? 'olympiad mathematics' : 'competitive programming'}. A draft is the script an AI teacher will follow.`,
     'You get: the brief, the student prerequisites, the material facts (ground truth), and the draft as JSON.',
     'Score on this rubric. Scores are 1 to 5 in steps of 0.5; the anchors below are for 1, 3 and 5.',
     '- "correct" and "factErrors": list every claim in the draft that contradicts a material fact or is false (wrong mathematics, wrong algorithm behaviour, wrong complexity, wrong worked example, a wrong "expectedAnswer"). "correct" is true only when the list is empty.',
@@ -450,7 +465,7 @@ export async function evaluate(
     let o: SampleOutcome;
     try {
       const g = await opts.generate({
-        system: buildGeneratorSystem(opts.locale),
+        system: buildGeneratorSystem(opts.locale, scenario.subject),
         prompt: buildGeneratorPrompt(scenario),
       });
       add(generator, g);
@@ -461,7 +476,7 @@ export async function evaluate(
         const issues = recipeIssues(lesson);
         const predictOk = waitingPredictions(lesson) >= predictionsNeeded(lesson);
         const j = await opts.judge({
-          system: buildJudgeSystem(),
+          system: buildJudgeSystem(scenario.subject),
           prompt: buildJudgePrompt(scenario, lesson),
         });
         add(judgeTokens, j);
