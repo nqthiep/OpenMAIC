@@ -29,3 +29,8 @@ out/
 
 # SVG arc helper (vendored declaration)
 lib/export/svg-arc-to-cubic-bezier.d.ts
+
+# Generated and content-hashed: a reformat would change the bytes the names and the parity tests rely on
+public/clips/
+manim/service/templates.json
+manim/service/fixtures/
