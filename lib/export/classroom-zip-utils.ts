@@ -8,6 +8,7 @@ import { resolveAudioBlob } from '@/lib/media/resolve-audio-bytes';
 import { fetchMediaUrl } from '@/lib/media/fetch-media-url';
 import { mapWithConcurrency } from '@/lib/utils/concurrency';
 import { resolveStoredBytes } from '@/lib/media/resolve-stored-bytes';
+import { isClipAssetUrl } from '@/lib/clips/asset-url';
 import { canonicalArchiveMedia } from '@/lib/video-export/archive-media';
 
 // ─── Export: Collect Media ─────────────────────────────────────
@@ -185,6 +186,18 @@ export async function collectAudioFiles(
  * no bytes and ships no empty file. The ZIP predates the response validation
  * the other export paths added, so it keeps its historical lax fetch policy.
  */
+/** The bytes of a clip asset of this app (immutable, same origin); null when it cannot be fetched. */
+async function fetchClipAsset(url: string): Promise<Blob | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return blob.size > 0 ? blob : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function collectMediaFiles(
   stageId: string,
   entries: readonly AssetManifestEntry[],
@@ -193,10 +206,11 @@ export async function collectMediaFiles(
   for (const [index, entry] of entries.entries()) {
     const ref = entry.ref;
     const record = await db.mediaFiles.get(mediaFileKey(stageId, ref)).catch(() => undefined);
-    const blob = await resolveStoredBytes(ref, {
-      record,
-      fetchPolicy: { requireOk: false, requireNonEmpty: true },
-    });
+    const blob =
+      (await resolveStoredBytes(ref, {
+        record,
+        fetchPolicy: { requireOk: false, requireNonEmpty: true },
+      })) ?? (isClipAssetUrl(ref) ? await fetchClipAsset(ref) : null);
     // Referenced but with bytes nowhere (pending generation, pruned, failed):
     // the archive simply lacks the file, as it did when no row existed.
     if (!blob) continue;
