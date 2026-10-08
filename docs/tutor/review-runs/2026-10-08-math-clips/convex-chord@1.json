@@ -1,0 +1,84 @@
+{
+  "entryId": "convex-chord",
+  "entryRev": 1,
+  "contentHash": "6b0937ebbb18c235",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "convex-chord",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "frame 3 narration (all presets)",
+          "problem": "clip states the general Jensen inequality from specific examples without noting the picture is intuition, not a formal proof",
+          "fix": "add a phrase like 'từ hình ta thấy...' or 'đó là trực giác' to signal that the picture illustrates rather than proves the general statement"
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "convex-chord",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 3,
+        "sinhDong": 3
+      },
+      "factErrors": [
+        "Beat point, câu AFTER (lặp ở cả bốn preset, rõ ràng ở t-zero): “dây cung ngay phía trên” / “straight above” sai ở t=0 và t=1 vì hai điểm trùng nhau; vars của t-zero là 9=9. Phải nói “ở trên hoặc chạm” / “at or above”."
+      ],
+      "issues": [
+        {
+          "where": "graph BEFORE và các hint của graph",
+          "problem": "Hình dạng “chiếc bát” chỉ là trực giác, không phải tiêu chí đủ để nhận ra hàm lồi; clip chưa đưa ra định nghĩa hình học chính xác trong lời giảng.",
+          "fix": "Nói rõ: với mọi x₁,x₂ thuộc khoảng miền và mọi t∈[0,1], f(tx₁+(1−t)x₂)≤tf(x₁)+(1−t)f(x₂); sau đó nói các hình bát chỉ minh họa tiêu chí này."
+        },
+        {
+          "where": "Các bước dự đoán chord và point trong script",
+          "problem": "setState chưa hiện dây cung hoặc cặp điểm thẳng đứng rồi câu hỏi mới được nói, nên câu trả lời đã có thể nhìn thấy; riêng câu hỏi của beat point cũng không được đưa vào lời thoại trước khi câu AFTER tiết lộ đáp án.",
+          "fix": "Hỏi dự đoán khi mới cho thấy đồ thị và hai x-coordinate, che phần so sánh cao, rồi mới tiết lộ dây cung/cặp điểm và đáp án."
+        },
+        {
+          "where": "Các hint của beat point",
+          "problem": "Các hint chỉ xác định vị trí của x(t), chưa giúp học sinh trả lời câu hỏi về vị trí theo phương thẳng đứng của điểm trên dây cung.",
+          "fix": "Escalate từ việc xác định t=0,1 đến so sánh hai độ cao ở một giá trị t nội tại, rồi mới kết luận dây cung ở trên hoặc chạm đồ thị."
+        },
+        {
+          "where": "Kết luận ở beat inequality",
+          "problem": "Bốn bộ preset cố định chỉ minh họa cơ chế dây cung; clip không nói rõ đây là hình ảnh trực quan chứ không phải bằng chứng chứng minh Jensen cho mọi hàm lồi.",
+          "fix": "Ghi rõ đây là minh họa, rồi phát biểu điều kiện tổng quát cho mọi x₁,x₂ trong khoảng miền và mọi t∈[0,1], hoặc dùng bất đẳng thức đó làm định nghĩa hình học của tính lồi."
+        },
+        {
+          "where": "Toàn bộ lời thoại và các preset",
+          "problem": "Clip có dữ liệu số nhưng không giảng thích một phép tính cụ thể, nên mối nối giữa hình ảnh và công thức chưa đủ cụ thể.",
+          "fix": "Làm rõ ít nhất một ví dụ: với x², x₁=-2, x₂=2, t=0,5 thì x=0, độ cao đồ thị là 0 và độ cao dây cung là 4; với t=0, hai độ cao cùng bằng 9."
+        },
+        {
+          "where": "Misconception về dấu bằng ở beat inequality",
+          "problem": "Việc nói dấu bằng còn xảy ra ở hai đầu mút là đúng, nhưng chưa đầy đủ đối với một hàm lồi tổng quát: dấu bằng còn có thể xảy ra với t nội tại nếu hàm tuyến tính trên cả đoạn [x₁,x₂].",
+          "fix": "Bổ sung điều kiện này, đồng thời nói rõ các ví dụ x² và x⁴ không có dấu bằng với t nội tại trên đoạn đã chọn."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

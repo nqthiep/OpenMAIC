@@ -1,0 +1,91 @@
+{
+  "entryId": "amgm-semicircle",
+  "entryRev": 1,
+  "contentHash": "43b0ad3cf3d8d437",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "amgm-semicircle",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "frame 0 (setup), all presets",
+          "problem": "The condition that a and b are positive is never stated in the main narration; it only appears in the misconception text. For a rigorous proof of AM-GM, the hypothesis a, b > 0 should be explicit.",
+          "fix": "Add a brief phrase such as 'Giả sử a và b là các số dương' (Suppose a and b are positive) in the setup beat narration."
+        },
+        {
+          "where": "frame 1 (height), all presets",
+          "problem": "The geometric mean theorem (altitude rule) is invoked without being named in the main teacher line; only the hint names it. Students may not recognise which theorem justifies h² = ab.",
+          "fix": "In the AFTER line, briefly name the theorem: 'theo định lý đường cao trong tam giác vuông' (by the altitude theorem in a right triangle)."
+        },
+        {
+          "where": "frame 2 (compare), all presets",
+          "problem": "The claim that every point of the semicircle is at most r above AB is stated without justification. While intuitively clear, a one-line reason would strengthen the argument.",
+          "fix": "Add a short justification, e.g. 'vì nửa đường tròn nằm trong hình vuông (hoặc hình tròn) bán kính r' (since the semicircle lies within the circle of radius r)."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "amgm-semicircle",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 3,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "beats.compare, Vietnamese explanation (all presets, frame 2): it calls CD a chord. Since C is an interior point of the diameter segment AB, not a point on the circumference, CD is not a chord; the English alt calls it only a segment, so the locales differ in meaning.",
+        "frame index 3 for two-eight, far and nine-sixteen: the state says C reaches the centre and h=r while vars retain the unequal pairs (2,8), (1,20) and (9,16), for which h<r. The endpoint would instead have pairs (5,5), (10.5,10.5) and (12.5,12.5).",
+        "frame index 3 for the equal preset: the state says h increases up to r, although a=b=4 already puts C at the centre and gives h=r=4, so no increase occurs."
+      ],
+      "issues": [
+        {
+          "where": "beats.height, narrationExample và các frame index 1",
+          "problem": "Lời giảng nén hai bước quan trọng: vì sao tam giác ABD vuông tại D và vì sao đường cao CD có bình phương bằng ab.",
+          "fix": "Nói rõ: D nằm trên nửa đường tròn đường kính AB nên ∠ADB=90°; CD là đường cao trên cạnh huyền AB, với AC=a, CB=b, nên theo định lý đường cao h²=AC·CB=ab."
+        },
+        {
+          "where": "beats.setup, narration và frame index 0",
+          "problem": "Điều kiện a,b>0 không được nói thẳng trong phần mở đầu mà chỉ xuất hiện trong ghi chú sai lầm.",
+          "fix": "Thêm ngay khi dựng hình: Giả sử a,b là hai độ dài dương, và AC=a, CB=b."
+        },
+        {
+          "where": "script của cả bốn preset",
+          "problem": "Các preset có số cụ thể nhưng lời giảng không diễn giải bất kỳ ví dụ số nào, nên người xem không được xác nhận trực tiếp các bước bằng số.",
+          "fix": "Thêm ví dụ a=2,b=8: AB=10, r=5, h=√16=4, do đó 4<5; dấu bằng không xảy ra vì 2≠8."
+        },
+        {
+          "where": "beats.height.ask",
+          "problem": "Câu hỏi hỏi vị trí làm h lớn nhất nhưng phần giả định rằng C được di chuyển trên AB chưa được nói, và các hint của beat này chỉ dẫn đến h²=ab chứ chưa trả lời câu hỏi.",
+          "fix": "Nói trước câu hỏi rằng giữ AB cố định và cho C di động, hoặc chuyển câu hỏi xuống sau bước so sánh chiều cao với bán kính."
+        },
+        {
+          "where": "chuyển từ beats.compare sang beats.equality",
+          "problem": "Câu “Đây chính là bất đẳng thức AM-GM” để người nghe tự thay h=√(ab) và r=(a+b)/2.",
+          "fix": "Kết luận rõ: vì h=√(ab), r=(a+b)/2 nên h≤r chính là √(ab)≤(a+b)/2, và h=r khi và chỉ khi a=b."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

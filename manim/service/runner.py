@@ -86,7 +86,7 @@ def make_runner(templates_dir: Path, qa_dir: Path, command: str | None = None, p
             raise RuntimeError(f"renderer exited {proc.returncode}: {(err or '').strip()[-300:]}")
         manifest = out_dir / "manifest.json"
         if not manifest.is_file():
-            raise RuntimeError("renderer wrote no manifest.json")
+            raise RuntimeError(f"renderer wrote no manifest.json: {(err or '').strip()[-300:]}")
         problems = check_video.check_clip(manifest)
         layout = out_dir / "layout.json"
         if layout.is_file():

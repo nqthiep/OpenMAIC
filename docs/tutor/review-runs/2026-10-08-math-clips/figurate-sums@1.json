@@ -1,0 +1,94 @@
+{
+  "entryId": "figurate-sums",
+  "entryRev": 1,
+  "contentHash": "4a1b08c656d61e0c",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "figurate-sums",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Grow beat hint 1 (both locales): 'Chữ L thêm vào hình vuông k × k' / 'How many dots does the L add to a k × k square?' is wrong: adding an L-shaped gnomon to a k×k square produces 2k+1 dots, not 2k−1. The calculation 2k−1 corresponds to adding the kth layer to a (k−1)×(k−1) square. Hint 1 should read 'thêm vào hình vuông (k−1) × (k−1)' / 'add to a (k−1) × (k−1) square'."
+      ],
+      "issues": [
+        {
+          "where": "Grow beat hint 3 (Vietnamese)",
+          "problem": "Vậy 2k − 1 chấm, và hình mới là (k)² cộng thêm thành cạnh k is garbled; 'cộng thêm thành cạnh k' is confusing and does not clearly state the result.",
+          "fix": "Replace with 'Vậy 2k − 1 chấm, và hình mới là hình vuông cạnh k' (So 2k−1 dots, and the new figure is a square of side k)."
+        },
+        {
+          "where": "Count beat narration (both locales)",
+          "problem": "nửa hình chữ nhật n nhân n cộng một / half a rectangle n by n plus one is ambiguous and could be misread as (n²+1)/2 instead of n(n+1)/2.",
+          "fix": "Replace with 'nửa hình chữ nhật n × (n+1)' / 'half a rectangle n by (n+1)' to match the state field and remove ambiguity."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "figurate-sums",
+      "entryRev": 1,
+      "scores": {
+        "dung": 2,
+        "roRang": 3,
+        "chiTiet": 2,
+        "deHieu": 2,
+        "trucQuan": 3,
+        "sinhDong": 3
+      },
+      "factErrors": [
+        "beats.grow, hints 1–3: từ hình vuông k×k, lớp L phải có 2k+1 chấm và tạo hình vuông cạnh k+1; 2k−1 và cạnh k chỉ đúng khi lớp mới là lớp thứ k bắt đầu từ hình vuông (k−1)×(k−1).",
+        "beats.induction, phần AFTER và toàn bộ chuỗi: không có bước cơ sở n=1, nên mới chứng minh được phép chuyển từ k sang k+1, chưa chứng minh công thức cho mọi n.",
+        "beats.induction, hint 3: với cách viết công thức đang hiển thị, số hạng k+1 phải được cộng vào tổng ở vế trái của k²+(2k+1)=(k+1)², không phải vào vế phải.",
+        "Các công thức tổng quát không nêu miền n∈ℤ>0 và k∈ℤ>0; điều này cần thiết để các hàng, lớp và phép quy nạp có ý nghĩa."
+      ],
+      "issues": [
+        {
+          "where": "beats.grow dùng chung cho natural-5 và natural-10",
+          "problem": "Các hint chỉ giải nhánh số lẻ bằng lớp L; nhánh tự nhiên không được trả lời. Sau khi có k hàng tự nhiên, lớp kế tiếp có k+1 chấm.",
+          "fix": "Thêm hint riêng cho nhánh tự nhiên và làm rõ hai chỉ số k theo vai trò: số hàng hiện có và số thứ tự của lớp mới."
+        },
+        {
+          "where": "Frame count của natural-5 và natural-10",
+          "problem": "Caption duy nhất vẫn là công thức của tổng số lẻ, nên không khớp với tổng đang được minh họa; với n=5 và n=10, caption không trực tiếp nêu tổng 15 và 55.",
+          "fix": "Hiển thị caption động theo preset: 1+3+⋯+(2n−1)=n² cho số lẻ và 1+2+⋯+n=n(n+1)/2 cho số tự nhiên."
+        },
+        {
+          "where": "beats.count",
+          "problem": "Câu hỏi dự đoán hỏi tổng sau khi thêm một lớp, nhưng các hint chỉ dừng ở công thức của tổng hiện tại và không tính tổng mới.",
+          "fix": "Thêm bước cuối: với số lẻ, n²+(2n+1)=(n+1)²; với số tự nhiên, n(n+1)/2+(n+1)=(n+1)(n+2)/2."
+        },
+        {
+          "where": "Các lời thoại và caption",
+          "problem": "Không có ví dụ số được giáo viên nói ra, nên học sinh không thấy trực tiếp 1+3+5+7=16 và 1+2+3+4+5=15 cùng trường hợp cơ sở.",
+          "fix": "Chèn ít nhất một ví dụ cho mỗi nhánh và kiểm tra rõ trường hợp cơ sở n=1."
+        },
+        {
+          "where": "Frame count và beats.induction",
+          "problem": "Cách diễn đạt “n nhân n cộng một”/“n by n plus one” không có ngoặc, dễ bị hiểu thành n²+1; “lớp thứ k cộng một” cũng mơ hồ.",
+          "fix": "Viết rõ hình chữ nhật n×(n+1), quy ước n là số hàng, k≥1, và nói “lớp thứ k+1” thay vì “lớp thứ k cộng một”."
+        },
+        {
+          "where": "Frame count, narrationExample",
+          "problem": "Câu “cho công thức ngay” có thể khiến hình vẽ một trường hợp đặc biệt được hiểu là lập luận cho mọi n.",
+          "fix": "Nói rõ phần hình học là trực quan hóa/cách dựng, rồi dùng quy nạp đầy đủ để chứng minh mọi n."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}
