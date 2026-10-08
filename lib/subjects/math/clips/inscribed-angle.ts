@@ -20,7 +20,7 @@ const inscribed = (arc: number): number => arc / 2;
 
 export const inscribedAngleEntry: ClipEntry<In> = defineClip<In>({
   id: 'inscribed-angle',
-  curriculumTopics: ['circle-angles'],
+  curriculumTopics: ['m1-circle-angles'],
   title: m('Góc nội tiếp', 'The inscribed angle'),
   inputSpec,
   presets: [

@@ -32,7 +32,7 @@ export function failAt(kind: Kind): number {
 
 export const inductionFallacyEntry: ClipEntry<In> = defineClip<In>({
   id: 'induction-fallacy',
-  curriculumTopics: ['induction'],
+  curriculumTopics: ['m2-induction'],
   title: m('Nguỵ biện quy nạp', 'Fallacies of induction'),
   inputSpec,
   presets: [

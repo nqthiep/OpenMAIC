@@ -130,7 +130,7 @@ export const MOVE_STEPS = [-0.5, -0.25, 0.25, 0.5, 0.75] as const;
 
 export const concurrencyDynamicEntry: ClipEntry<In> = defineClip<In>({
   id: 'concurrency-dynamic',
-  curriculumTopics: ['triangle-geometry'],
+  curriculumTopics: ['m1-triangle-geometry'],
   title: m('Các đường đồng quy khi đỉnh chạy', 'Concurrent lines while a vertex moves'),
   inputSpec,
   check: (i) => {

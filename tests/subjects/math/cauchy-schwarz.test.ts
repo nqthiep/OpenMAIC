@@ -38,7 +38,7 @@ entryContract<In>({
   subject: 'math',
   noImpl: true,
   visualizer: 'proofOutline',
-  topics: ['inequality-classic'],
+  topics: ['m2-inequality-classic'],
   maxFrames: 20,
   presets: ['generic', 'proportional', 'zero', 'negative'],
   beats: ['start', 'given', 'expand', 'lagrange', 'conclude', 'equality', 'done'],

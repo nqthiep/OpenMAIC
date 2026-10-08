@@ -20,7 +20,7 @@ const inputSpec = {
 
 export const algIdentityAreaEntry: ClipEntry<In> = defineClip<In>({
   id: 'alg-identity-area',
-  curriculumTopics: ['alg-identities'],
+  curriculumTopics: ['m1-alg-identities'],
   title: m('Hằng đẳng thức bằng diện tích', 'Algebraic identities as areas'),
   inputSpec,
   check: (i) =>

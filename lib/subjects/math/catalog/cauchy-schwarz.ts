@@ -1,8 +1,8 @@
 /**
  * Walkthrough entry: the Cauchy–Schwarz inequality for two pairs, proved step by step with Lagrange's identity
  * (card 3B-W1, SCHEMA Phase 3 §4). Deterministic and browser-safe: no Intl/Date/Math.random (ADR 0006).
- * Curriculum topic `inequality-classic` follows the Phase 3 SCHEMA §7 outline [Inference]; the math curriculum
- * research (3-R1) is not done yet.
+ * Curriculum topic `m2-inequality-classic` follows the Phase 3 SCHEMA §7 outline [Inference];
+ * see docs/tutor/curriculum/curriculum-math-vn.json (its sources are [Unverified]).
  */
 import { fill, msg } from '@/lib/tutor/catalog/messages';
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
@@ -403,7 +403,7 @@ export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
   entryRev: 1,
   subject: 'math',
   visualizer: 'proofOutline',
-  curriculumTopics: ['inequality-classic'],
+  curriculumTopics: ['m2-inequality-classic'],
   title: m(
     'Bất đẳng thức Cauchy–Schwarz (hai cặp số)',
     'The Cauchy–Schwarz inequality (two pairs)',

@@ -46,7 +46,7 @@ entryContract<In>({
   subject: 'math',
   noImpl: true,
   visualizer: 'functionPlotter',
-  topics: ['derivative-graphs'],
+  topics: ['m3-derivative-graphs'],
   maxFrames: 20,
   presets: ['cubic', 'square', 'pure-cubic', 'neg-cubic'],
   beats: ['start', 'derivative', 'roots', 'sign', 'extrema', 'inflection', 'sketch', 'done'],

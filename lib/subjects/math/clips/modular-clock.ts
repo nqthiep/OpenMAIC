@@ -30,7 +30,7 @@ export function powerCycle(i: In): { powers: number[]; start: number; period: nu
 
 export const modularClockEntry: ClipEntry<In> = defineClip<In>({
   id: 'modular-clock',
-  curriculumTopics: ['modular-arith'],
+  curriculumTopics: ['m2-modular-arith'],
   title: m('Nhân modulo trên mặt đồng hồ', 'Multiplication modulo n on a clock'),
   inputSpec,
   check: (i) => (i.a >= i.n ? ['a-not-less-than-n'] : []),

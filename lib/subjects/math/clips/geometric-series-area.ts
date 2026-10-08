@@ -33,7 +33,7 @@ const round4 = (x: number): number => Math.round(x * 10000) / 10000;
 
 export const geometricSeriesAreaEntry: ClipEntry<In> = defineClip<In>({
   id: 'geometric-series-area',
-  curriculumTopics: ['sequences-limits'],
+  curriculumTopics: ['m3-sequences-limits'],
   title: m('Chuỗi hình học bằng diện tích', 'A geometric series as areas'),
   inputSpec,
   presets: [

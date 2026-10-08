@@ -26,7 +26,7 @@ const closed = (i: In): number => (i.series === 'odd' ? i.n * i.n : (i.n * (i.n 
 
 export const figurateSumsEntry: ClipEntry<In> = defineClip<In>({
   id: 'figurate-sums',
-  curriculumTopics: ['induction'],
+  curriculumTopics: ['m2-induction'],
   title: m('Tổng bằng chấm: số lẻ và số tam giác', 'Sums with dots: odd and triangular numbers'),
   inputSpec,
   presets: [

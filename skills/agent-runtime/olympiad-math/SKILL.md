@@ -65,9 +65,9 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 <!-- BEGIN GENERATED: walkthrough-ids -->
 | walkthroughId | Title | presetId | Curriculum topics |
 | --- | --- | --- | --- |
-| `cauchy-schwarz` | The Cauchy–Schwarz inequality (two pairs) | `generic`, `proportional`, `zero`, `negative` | `inequality-classic` |
-| `curve-sketching` | Sketching a polynomial graph (degree at most 3) | `cubic`, `square`, `pure-cubic`, `neg-cubic` | `derivative-graphs` |
-| `triangle-altitude` | The three altitudes of a triangle and the orthocenter | `acute`, `obtuse`, `right`, `isosceles` | `triangle-geometry` |
+| `cauchy-schwarz` | The Cauchy–Schwarz inequality (two pairs) | `generic`, `proportional`, `zero`, `negative` | `m2-inequality-classic` |
+| `curve-sketching` | Sketching a polynomial graph (degree at most 3) | `cubic`, `square`, `pure-cubic`, `neg-cubic` | `m3-derivative-graphs` |
+| `triangle-altitude` | The three altitudes of a triangle and the orthocenter | `acute`, `obtuse`, `right`, `isosceles` | `m1-triangle-geometry` |
 <!-- END GENERATED: walkthrough-ids -->
 
 ## Clip có sẵn
@@ -77,25 +77,25 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 <!-- BEGIN GENERATED: clip-ids -->
 | clipId | Title | presetId | Chapters | Curriculum topics |
 | --- | --- | --- | --- | --- |
-| `alg-identity-area` | Algebraic identities as areas | `sum-3-2`, `sum-1-1`, `diff-5-2`, `diff-9-1` | `figure`, `decompose`, `rearrange`, `formula` | `alg-identities` |
-| `amgm-semicircle` | AM–GM on a semicircle | `two-eight`, `equal`, `far`, `nine-sixteen` | `setup`, `height`, `compare`, `equality` | `inequality-basic` |
-| `concurrency-dynamic` | Concurrent lines while a vertex moves | `acute-ortho`, `obtuse-ortho`, `right-ortho`, `scalene-centroid`, `acute-circum` | `triangle`, `lines`, `meet`, `move`, `special` | `triangle-geometry` |
-| `convex-chord` | The chord of a convex graph (Jensen) | `x2-mid`, `abs-skew`, `x4`, `t-zero` | `graph`, `chord`, `point`, `inequality` | `inequality-classic` |
-| `cs-projection` | Cauchy–Schwarz by projection | `generic`, `parallel`, `perpendicular`, `opposite` | `vectors`, `projection`, `inequality`, `equality` | `inequality-classic` |
-| `euclid-rectangle` | The Euclidean algorithm with squares | `48-18`, `equal`, `coprime`, `one` | `rectangle`, `squares`, `repeat`, `gcd` | `euclid-diophantine` |
-| `figurate-sums` | Sums with dots: odd and triangular numbers | `odd-4`, `odd-2`, `natural-5`, `natural-10` | `dots`, `grow`, `count`, `induction` | `induction` |
-| `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `square`, `cut`, `repeat`, `sum` | `sequences-limits` |
-| `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `base`, `shift-h`, `scale`, `shift-k` | `quadratic-vieta` |
-| `inclusion-exclusion` | Inclusion–exclusion for three sets | `generic`, `empty-center`, `disjoint`, `nested` | `venn`, `add`, `subtract`, `add-back` | `counting-advanced` |
-| `induction-fallacy` | Fallacies of induction | `colors-4`, `colors-8`, `base-3`, `base-6` | `claim`, `step`, `crack`, `fix` | `induction` |
-| `inscribed-angle` | The inscribed angle | `arc-100`, `arc-60`, `arc-180`, `arc-300` | `circle`, `central`, `inscribed`, `cyclic` | `circle-angles` |
-| `lattice-paths` | Lattice paths and Pascal’s triangle | `2-2`, `3-2`, `1-6`, `4-4` | `grid`, `paths`, `pascal`, `binomial` | `counting-advanced` |
-| `limit-epsilon` | The limit of a sequence: the ε-band and N | `inv-0.2`, `inv-0.05`, `n1-0.1`, `alt-0.25` | `sequence`, `band`, `find-n`, `shrink` | `sequences-limits` |
-| `modular-clock` | Multiplication modulo n on a clock | `n10-a2`, `n7-a3`, `n12-a5`, `n5-a4` | `clock`, `multiply`, `powers`, `cycle` | `modular-arith` |
-| `plane-transform` | Plane transformations and complex multiplication | `rotate90`, `reflect-x`, `homothety2`, `mult-i` | `shape`, `transform`, `invariants`, `complex` | `vector-transform-complex` |
-| `power-of-point` | The power of a point | `outside`, `inside`, `on-circle`, `far` | `circle`, `secant-1`, `secant-2`, `tangent` | `circle-power` |
-| `pythagoras-dissection` | The Pythagorean theorem by dissection | `three-four`, `equal`, `thin`, `six-eight` | `triangles`, `big-square`, `rearrange`, `conclude` | `triangle-geometry` |
-| `riemann-integral` | Riemann sums and the integral | `x2-4`, `x2-16`, `const`, `cubic` | `area`, `rectangles`, `refine`, `limit` | `integral` |
-| `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `curve`, `secant`, `limit`, `tangent` | `derivative-graphs` |
-| `tiling-coloring` | A chessboard with two cells removed, and dominoes | `n8-opposite`, `n4-opposite`, `n6-adjacent`, `n8-adjacent` | `board`, `color`, `count`, `conclude` | `pigeonhole-invariants` |
+| `alg-identity-area` | Algebraic identities as areas | `sum-3-2`, `sum-1-1`, `diff-5-2`, `diff-9-1` | `figure`, `decompose`, `rearrange`, `formula` | `m1-alg-identities` |
+| `amgm-semicircle` | AM–GM on a semicircle | `two-eight`, `equal`, `far`, `nine-sixteen` | `setup`, `height`, `compare`, `equality` | `m1-inequality-basic` |
+| `concurrency-dynamic` | Concurrent lines while a vertex moves | `acute-ortho`, `obtuse-ortho`, `right-ortho`, `scalene-centroid`, `acute-circum` | `triangle`, `lines`, `meet`, `move`, `special` | `m1-triangle-geometry` |
+| `convex-chord` | The chord of a convex graph (Jensen) | `x2-mid`, `abs-skew`, `x4`, `t-zero` | `graph`, `chord`, `point`, `inequality` | `m2-inequality-classic` |
+| `cs-projection` | Cauchy–Schwarz by projection | `generic`, `parallel`, `perpendicular`, `opposite` | `vectors`, `projection`, `inequality`, `equality` | `m2-inequality-classic` |
+| `euclid-rectangle` | The Euclidean algorithm with squares | `48-18`, `equal`, `coprime`, `one` | `rectangle`, `squares`, `repeat`, `gcd` | `m2-euclid-diophantine` |
+| `figurate-sums` | Sums with dots: odd and triangular numbers | `odd-4`, `odd-2`, `natural-5`, `natural-10` | `dots`, `grow`, `count`, `induction` | `m2-induction` |
+| `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `square`, `cut`, `repeat`, `sum` | `m3-sequences-limits` |
+| `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `base`, `shift-h`, `scale`, `shift-k` | `m1-quadratic-vieta` |
+| `inclusion-exclusion` | Inclusion–exclusion for three sets | `generic`, `empty-center`, `disjoint`, `nested` | `venn`, `add`, `subtract`, `add-back` | `m3-counting-advanced` |
+| `induction-fallacy` | Fallacies of induction | `colors-4`, `colors-8`, `base-3`, `base-6` | `claim`, `step`, `crack`, `fix` | `m2-induction` |
+| `inscribed-angle` | The inscribed angle | `arc-100`, `arc-60`, `arc-180`, `arc-300` | `circle`, `central`, `inscribed`, `cyclic` | `m1-circle-angles` |
+| `lattice-paths` | Lattice paths and Pascal’s triangle | `2-2`, `3-2`, `1-6`, `4-4` | `grid`, `paths`, `pascal`, `binomial` | `m3-counting-advanced` |
+| `limit-epsilon` | The limit of a sequence: the ε-band and N | `inv-0.2`, `inv-0.05`, `n1-0.1`, `alt-0.25` | `sequence`, `band`, `find-n`, `shrink` | `m3-sequences-limits` |
+| `modular-clock` | Multiplication modulo n on a clock | `n10-a2`, `n7-a3`, `n12-a5`, `n5-a4` | `clock`, `multiply`, `powers`, `cycle` | `m2-modular-arith` |
+| `plane-transform` | Plane transformations and complex multiplication | `rotate90`, `reflect-x`, `homothety2`, `mult-i` | `shape`, `transform`, `invariants`, `complex` | `m3-vector-transform-complex` |
+| `power-of-point` | The power of a point | `outside`, `inside`, `on-circle`, `far` | `circle`, `secant-1`, `secant-2`, `tangent` | `m2-circle-power` |
+| `pythagoras-dissection` | The Pythagorean theorem by dissection | `three-four`, `equal`, `thin`, `six-eight` | `triangles`, `big-square`, `rearrange`, `conclude` | `m1-triangle-geometry` |
+| `riemann-integral` | Riemann sums and the integral | `x2-4`, `x2-16`, `const`, `cubic` | `area`, `rectangles`, `refine`, `limit` | `m4-integral` |
+| `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `curve`, `secant`, `limit`, `tangent` | `m3-derivative-graphs` |
+| `tiling-coloring` | A chessboard with two cells removed, and dominoes | `n8-opposite`, `n4-opposite`, `n6-adjacent`, `n8-adjacent` | `board`, `color`, `count`, `conclude` | `m2-pigeonhole-invariants` |
 <!-- END GENERATED: clip-ids -->

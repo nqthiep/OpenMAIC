@@ -50,7 +50,7 @@ export function apply(mode: Mode, [x, y]: Pt): Pt {
 
 export const planeTransformEntry: ClipEntry<In> = defineClip<In>({
   id: 'plane-transform',
-  curriculumTopics: ['vector-transform-complex'],
+  curriculumTopics: ['m3-vector-transform-complex'],
   title: m('Phép biến hình và nhân số phức', 'Plane transformations and complex multiplication'),
   inputSpec,
   check: (i) => (area2(vertices(i)) === 0 ? ['degenerate-triangle'] : []),

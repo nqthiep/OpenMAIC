@@ -2,7 +2,8 @@
  * Clip template: the AM–GM inequality on a semicircle (card 3A-T1, SCHEMA Phase 3 §3 row 1). TypeScript half only:
  * the entry, the pure invariant and the numbers the scene must write to manifest.json. The Manim scene is task 3A-M1.
  * Deterministic and browser-safe: no Intl/Date/Math.random (ADR 0006); Math.sqrt is allowed.
- * Curriculum topic `inequality-basic` follows the Phase 3 SCHEMA §7 outline [Inference]; 3-R1 is not done.
+ * Curriculum topic `m1-inequality-basic` follows the Phase 3 SCHEMA §7 outline [Inference];
+ * see docs/tutor/curriculum/curriculum-math-vn.json (its sources are [Unverified]).
  */
 import { defineClip, hints3 as hints, m } from '@/lib/clips/define';
 import type { ClipEntry, ClipModule } from '@/lib/clips/types';
@@ -20,7 +21,7 @@ const height = (i: In): number => Math.sqrt(i.a * i.b);
 
 export const amgmSemicircleEntry: ClipEntry<In> = defineClip<In>({
   id: 'amgm-semicircle',
-  curriculumTopics: ['inequality-basic'],
+  curriculumTopics: ['m1-inequality-basic'],
   title: m('AM–GM bằng nửa đường tròn', 'AM–GM on a semicircle'),
   inputSpec,
   presets: [

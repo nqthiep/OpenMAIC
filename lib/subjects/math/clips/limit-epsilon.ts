@@ -43,7 +43,7 @@ export function smallestN(i: In, limit = 1000): number | null {
 
 export const limitEpsilonEntry: ClipEntry<In> = defineClip<In>({
   id: 'limit-epsilon',
-  curriculumTopics: ['sequences-limits'],
+  curriculumTopics: ['m3-sequences-limits'],
   title: m('Giới hạn của dãy: dải ε và số N', 'The limit of a sequence: the ε-band and N'),
   inputSpec,
   presets: [

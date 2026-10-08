@@ -72,7 +72,7 @@ entryContract<In>({
   subject: 'math',
   noImpl: true,
   visualizer: 'geometry',
-  topics: ['triangle-geometry'],
+  topics: ['m1-triangle-geometry'],
   maxFrames: 20,
   presets: ['acute', 'obtuse', 'right', 'isosceles'],
   beats: ['start', 'altitude-a', 'altitude-b', 'predict-meet', 'altitude-c', 'orthocenter', 'done'],

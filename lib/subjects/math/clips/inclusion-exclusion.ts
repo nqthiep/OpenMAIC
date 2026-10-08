@@ -43,7 +43,7 @@ export function unionByFormula(r: readonly number[]): number {
 
 export const inclusionExclusionEntry: ClipEntry<In> = defineClip<In>({
   id: 'inclusion-exclusion',
-  curriculumTopics: ['counting-advanced'],
+  curriculumTopics: ['m3-counting-advanced'],
   title: m('Bao hàm – loại trừ cho ba tập', 'Inclusion–exclusion for three sets'),
   inputSpec,
   presets: [

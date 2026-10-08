@@ -48,7 +48,7 @@ export function secantThrough(
 
 export const powerOfPointEntry: ClipEntry<In> = defineClip<In>({
   id: 'power-of-point',
-  curriculumTopics: ['circle-power'],
+  curriculumTopics: ['m2-circle-power'],
   title: m('Phương tích của một điểm', 'The power of a point'),
   inputSpec,
   presets: [

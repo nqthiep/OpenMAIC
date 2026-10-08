@@ -52,7 +52,7 @@ export function maxAbsDerivative(c: readonly number[], a: number, b: number): nu
 
 export const riemannIntegralEntry: ClipEntry<In> = defineClip<In>({
   id: 'riemann-integral',
-  curriculumTopics: ['integral'],
+  curriculumTopics: ['m4-integral'],
   title: m('Tổng Riemann và tích phân', 'Riemann sums and the integral'),
   inputSpec,
   check: (i) => (i.a >= i.b ? ['a-not-less-than-b'] : []),

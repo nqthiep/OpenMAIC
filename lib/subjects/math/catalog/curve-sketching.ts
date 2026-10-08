@@ -2,7 +2,8 @@
  * Walkthrough entry: sketching a polynomial of degree at most 3 with its derivative (card 3B-W3).
  * Deterministic and browser-safe: no Intl/Date/Math.random and no Math.pow (ADR 0006); points are computed
  * with Horner's rule and the plotter only joins them. Roots of f' use the quadratic formula (Math.sqrt is allowed).
- * Curriculum topic `derivative-graphs` follows the Phase 3 SCHEMA §7 outline [Inference]; 3-R1 is not done.
+ * Curriculum topic `m3-derivative-graphs` follows the Phase 3 SCHEMA §7 outline [Inference];
+ * see docs/tutor/curriculum/curriculum-math-vn.json (its sources are [Unverified]).
  */
 import { fill, msg } from '@/lib/tutor/catalog/messages';
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
@@ -489,7 +490,7 @@ export const curveSketchingEntry: WalkthroughEntry<In, S> = {
   entryRev: 1,
   subject: 'math',
   visualizer: 'functionPlotter',
-  curriculumTopics: ['derivative-graphs'],
+  curriculumTopics: ['m3-derivative-graphs'],
   title: m(
     'Khảo sát và vẽ đồ thị đa thức (bậc không quá 3)',
     'Sketching a polynomial graph (degree at most 3)',

@@ -18,7 +18,7 @@ const c2 = (i: In): number => i.a * i.a + i.b * i.b;
 
 export const pythagorasDissectionEntry: ClipEntry<In> = defineClip<In>({
   id: 'pythagoras-dissection',
-  curriculumTopics: ['triangle-geometry'],
+  curriculumTopics: ['m1-triangle-geometry'],
   title: m('Định lý Pythagore bằng cắt ghép', 'The Pythagorean theorem by dissection'),
   inputSpec,
   presets: [

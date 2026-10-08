@@ -30,7 +30,7 @@ export const SAMPLE_X = [-2, -1, 0, 1, 2] as const;
 
 export const graphTransformEntry: ClipEntry<In> = defineClip<In>({
   id: 'graph-transform',
-  curriculumTopics: ['quadratic-vieta'],
+  curriculumTopics: ['m1-quadratic-vieta'],
   title: m('Biến đổi đồ thị: y = a·f(x − h) + k', 'Transforming a graph: y = a·f(x − h) + k'),
   inputSpec,
   check: (i) => (i.a === 0 ? ['a-is-zero'] : []),

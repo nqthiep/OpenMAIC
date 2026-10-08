@@ -89,7 +89,7 @@ export function isValidTiling(i: In, tiling: readonly Domino[]): boolean {
 
 export const tilingColoringEntry: ClipEntry<In> = defineClip<In>({
   id: 'tiling-coloring',
-  curriculumTopics: ['pigeonhole-invariants'],
+  curriculumTopics: ['m2-pigeonhole-invariants'],
   title: m('Bàn cờ bỏ hai ô và lát domino', 'A chessboard with two cells removed, and dominoes'),
   inputSpec,
   presets: [

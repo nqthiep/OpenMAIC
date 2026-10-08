@@ -2,7 +2,8 @@
  * Walkthrough entry: the three altitudes of a triangle meet at the orthocenter (card 3B-W2).
  * Deterministic and browser-safe: no Intl/Date/Math.random (ADR 0006). State holds the exact floating-point
  * coordinates (IEEE division of integers, same on every engine); the vars table shows them rounded.
- * Curriculum topic `triangle-geometry` follows the Phase 3 SCHEMA §7 outline [Inference]; 3-R1 is not done.
+ * Curriculum topic `m1-triangle-geometry` follows the Phase 3 SCHEMA §7 outline [Inference];
+ * see docs/tutor/curriculum/curriculum-math-vn.json (its sources are [Unverified]).
  */
 import { fill, msg } from '@/lib/tutor/catalog/messages';
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
@@ -398,7 +399,7 @@ export const triangleAltitudeEntry: WalkthroughEntry<In, S> = {
   entryRev: 1,
   subject: 'math',
   visualizer: 'geometry',
-  curriculumTopics: ['triangle-geometry'],
+  curriculumTopics: ['m1-triangle-geometry'],
   title: m(
     'Ba đường cao của tam giác và trực tâm',
     'The three altitudes of a triangle and the orthocenter',

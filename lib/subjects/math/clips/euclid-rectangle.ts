@@ -30,7 +30,7 @@ export function cuts(i: In): { side: number; count: number }[] {
 
 export const euclidRectangleEntry: ClipEntry<In> = defineClip<In>({
   id: 'euclid-rectangle',
-  curriculumTopics: ['euclid-diophantine'],
+  curriculumTopics: ['m2-euclid-diophantine'],
   title: m('Thuật toán Euclid bằng lát hình vuông', 'The Euclidean algorithm with squares'),
   inputSpec,
   presets: [

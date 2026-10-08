@@ -30,7 +30,7 @@ const round4 = (x: number): number => Math.round(x * 10000) / 10000;
 
 export const secantTangentEntry: ClipEntry<In> = defineClip<In>({
   id: 'secant-tangent',
-  curriculumTopics: ['derivative-graphs'],
+  curriculumTopics: ['m3-derivative-graphs'],
   title: m('Từ cát tuyến đến tiếp tuyến', 'From the secant to the tangent'),
   inputSpec,
   check: (i) => (i.c[i.c.length - 1] === 0 ? ['leading-coefficient-zero'] : []),

@@ -35,7 +35,7 @@ export function binomial(total: number, k: number): number {
 
 export const latticePathsEntry: ClipEntry<In> = defineClip<In>({
   id: 'lattice-paths',
-  curriculumTopics: ['counting-advanced'],
+  curriculumTopics: ['m3-counting-advanced'],
   title: m('Đường đi trên lưới và tam giác Pascal', 'Lattice paths and Pascal’s triangle'),
   inputSpec,
   presets: [

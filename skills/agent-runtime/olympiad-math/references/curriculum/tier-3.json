@@ -1,0 +1,252 @@
+{
+  "exit_skills": [],
+  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+  "grade_band": "Lớp 10–11 [Unverified]",
+  "id": "tier-3",
+  "name_en": "Advanced",
+  "name_vi": "Nâng cao",
+  "order": 3,
+  "prerequisites": ["tier-2"],
+  "topics": [
+    {
+      "clip_ids": [],
+      "difficulty": 3,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-polynomials",
+      "interactive_ideas": [],
+      "name_en": "Polynomials",
+      "name_vi": "Đa thức",
+      "pitfalls": ["Nhầm số nghiệm với bậc khi có nghiệm bội", "Quên nghiệm phức"],
+      "prerequisites": ["m2-equations-systems"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Phép chia đa thức và định lý Bézout",
+        "Nghiệm và phân tích nhân tử",
+        "Hệ thức Viète bậc cao",
+        "Đa thức nguyên và nghiệm hữu tỉ"
+      ],
+      "typical_problems": [
+        {
+          "level": 3,
+          "name": "Tìm dư của P(x) khi chia cho x − a",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 3,
+          "name": "Chứng minh đa thức bậc n có tối đa n nghiệm",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["geometric-series-area", "limit-epsilon"],
+      "difficulty": 3,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-sequences-limits",
+      "interactive_ideas": ["Clip Manim `geometric-series-area`", "Clip Manim `limit-epsilon`"],
+      "name_en": "Sequences and limits",
+      "name_vi": "Dãy số và giới hạn",
+      "pitfalls": [
+        "Nhầm \"gần hơn\" với \"hội tụ\": cần mọi số hạng sau N",
+        "Giới hạn của dãy đan dấu"
+      ],
+      "prerequisites": ["m2-induction"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Định nghĩa giới hạn bằng ε–N",
+        "Dãy đơn điệu bị chặn",
+        "Giới hạn của tổng và tích",
+        "Tổng cấp số nhân và chuỗi hình học"
+      ],
+      "typical_problems": [
+        {
+          "level": 3,
+          "name": "Chứng minh lim 1/n = 0 bằng ε–N",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 3,
+          "name": "Tính tổng 1/2 + 1/4 + 1/8 + ⋯",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["secant-tangent"],
+      "difficulty": 3,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-derivative-graphs",
+      "interactive_ideas": ["Clip Manim `secant-tangent`", "Walkthrough `curve-sketching`"],
+      "name_en": "Derivatives and graphs",
+      "name_vi": "Đạo hàm và khảo sát hàm số",
+      "pitfalls": ["Cho f′(x₀) = 0 là có cực trị (có thể là điểm uốn)", "Quên xét dấu f′ hai bên"],
+      "prerequisites": ["m3-sequences-limits"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Đạo hàm là hệ số góc tiếp tuyến",
+        "Cực trị và tính đơn điệu",
+        "Khảo sát hàm bậc ba",
+        "Biến đổi đồ thị y = a·f(x − h) + k"
+      ],
+      "typical_problems": [
+        {
+          "level": 3,
+          "name": "Khảo sát y = x³ − 3x",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 3,
+          "name": "Tìm tiếp tuyến của y = x² tại x = 1",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": ["curve-sketching"]
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 4,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-inequality-advanced",
+      "interactive_ideas": [],
+      "name_en": "Advanced inequalities",
+      "name_vi": "Bất đẳng thức nâng cao",
+      "pitfalls": [
+        "Chuẩn hoá khi bất đẳng thức không đồng bậc",
+        "Dồn biến không kiểm soát được hướng thay đổi"
+      ],
+      "prerequisites": ["m2-inequality-classic"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Kỹ thuật SOS và phân tích bình phương",
+        "Chuẩn hoá và đồng bậc",
+        "Dồn biến",
+        "Bất đẳng thức Schur"
+      ],
+      "typical_problems": [
+        {
+          "level": 4,
+          "name": "Chứng minh a³+b³+c³ ≥ 3abc cho a, b, c ≥ 0",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 4,
+          "name": "Chứng minh bất đẳng thức Nesbitt",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 4,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-number-theory-adv",
+      "interactive_ideas": [],
+      "name_en": "Advanced number theory",
+      "name_vi": "Số học nâng cao",
+      "pitfalls": [
+        "Dùng định lý Euler khi các số không nguyên tố cùng nhau",
+        "Nhầm cấp với phi(n)"
+      ],
+      "prerequisites": ["m2-modular-arith", "m2-euclid-diophantine"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Định lý Euler và hàm phi",
+        "Định lý phần dư Trung Hoa",
+        "Cấp của một phần tử",
+        "Phương trình Pell [Unverified: mức độ trong đề thi]"
+      ],
+      "typical_problems": [
+        {
+          "level": 4,
+          "name": "Tìm hai chữ số cuối của 7^2024",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 4,
+          "name": "Giải hệ đồng dư x ≡ 2 (mod 3), x ≡ 3 (mod 5)",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["inclusion-exclusion", "lattice-paths"],
+      "difficulty": 4,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-counting-advanced",
+      "interactive_ideas": ["Clip Manim `inclusion-exclusion`", "Clip Manim `lattice-paths`"],
+      "name_en": "Advanced counting",
+      "name_vi": "Đếm nâng cao",
+      "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
+      "prerequisites": ["m1-counting-basic", "m2-pigeonhole-invariants"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Nguyên lý bao hàm – loại trừ",
+        "Đường đi trên lưới và hệ số nhị thức",
+        "Quan hệ Pascal",
+        "Song ánh và đếm hai cách"
+      ],
+      "typical_problems": [
+        {
+          "level": 4,
+          "name": "Đếm số đường đi từ (0,0) đến (4,4) trên lưới",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 4,
+          "name": "Đếm số nguyên ≤ 100 chia hết cho 2, 3 hoặc 5",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["plane-transform"],
+      "difficulty": 4,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m3-vector-transform-complex",
+      "interactive_ideas": ["Clip Manim `plane-transform`"],
+      "name_en": "Vectors, transformations and complex numbers",
+      "name_vi": "Vector, phép biến hình và số phức",
+      "pitfalls": ["Nhầm chiều quay", "Quên phép đối xứng đảo định hướng"],
+      "prerequisites": ["m1-triangle-geometry"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Phép quay, đối xứng, vị tự",
+        "Số phức và phép nhân với i",
+        "Tích vô hướng và Cauchy–Schwarz",
+        "Biểu diễn hình học của phép biến hình"
+      ],
+      "typical_problems": [
+        {
+          "level": 4,
+          "name": "Tìm ảnh của điểm (1,2) qua phép quay 90°",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 4,
+          "name": "Chứng minh phép vị tự nhân diện tích với k²",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    }
+  ]
+}

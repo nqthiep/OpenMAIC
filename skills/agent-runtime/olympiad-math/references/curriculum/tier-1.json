@@ -1,0 +1,250 @@
+{
+  "exit_skills": [],
+  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+  "grade_band": "Lớp 8–9 (thi vào 10 chuyên Toán) [Unverified]",
+  "id": "tier-1",
+  "name_en": "Foundation",
+  "name_vi": "Cơ sở",
+  "order": 1,
+  "prerequisites": [],
+  "topics": [
+    {
+      "clip_ids": ["alg-identity-area"],
+      "difficulty": 1,
+      "est_scenes": 6,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-alg-identities",
+      "interactive_ideas": ["Clip Manim `alg-identity-area`"],
+      "name_en": "Algebraic identities",
+      "name_vi": "Hằng đẳng thức và biến đổi đại số",
+      "pitfalls": ["Quên hạng tử 2ab khi khai triển (a+b)²", "Nhầm dấu khi khai triển (a−b)³"],
+      "prerequisites": [],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Bình phương của tổng và hiệu",
+        "Hiệu hai bình phương",
+        "Lập phương của tổng và hiệu",
+        "Phân tích đa thức thành nhân tử"
+      ],
+      "typical_problems": [
+        {
+          "level": 1,
+          "name": "Phân tích a⁴ − b⁴ thành nhân tử",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 1,
+          "name": "Tính 101² − 99² không dùng máy tính",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 1,
+      "est_scenes": 6,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-divisibility-primes",
+      "interactive_ideas": [],
+      "name_en": "Divisibility and primes",
+      "name_vi": "Chia hết và số nguyên tố",
+      "pitfalls": ["Coi 1 là số nguyên tố", "Chỉ thử chia đến n thay vì căn n rồi kết luận sai"],
+      "prerequisites": [],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Dấu hiệu chia hết cho 2, 3, 5, 9, 11",
+        "Ước và bội, ƯCLN và BCNN",
+        "Số nguyên tố và phân tích ra thừa số nguyên tố",
+        "Sàng Eratosthenes"
+      ],
+      "typical_problems": [
+        {
+          "level": 1,
+          "name": "Chứng minh tích ba số nguyên liên tiếp chia hết cho 6",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 1,
+          "name": "Tìm số ước của 360",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["amgm-semicircle"],
+      "difficulty": 2,
+      "est_scenes": 7,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-inequality-basic",
+      "interactive_ideas": ["Clip Manim `amgm-semicircle`"],
+      "name_en": "Basic inequalities",
+      "name_vi": "Bất đẳng thức cơ bản",
+      "pitfalls": ["Áp dụng AM–GM cho số âm", "Quên kiểm tra dấu bằng có xảy ra được hay không"],
+      "prerequisites": ["m1-alg-identities"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Bình phương luôn không âm",
+        "Bất đẳng thức AM–GM cho hai số không âm",
+        "Điều kiện xảy ra dấu bằng",
+        "Chứng minh bằng biến đổi tương đương"
+      ],
+      "typical_problems": [
+        {
+          "level": 2,
+          "name": "Chứng minh a² + b² ≥ 2ab",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 2,
+          "name": "Chứng minh a + 1/a ≥ 2 với a > 0",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["graph-transform"],
+      "difficulty": 2,
+      "est_scenes": 7,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-quadratic-vieta",
+      "interactive_ideas": ["Clip Manim `graph-transform`"],
+      "name_en": "Quadratics and Vieta",
+      "name_vi": "Phương trình bậc hai và định lý Viète",
+      "pitfalls": ["Dùng Viète khi biệt thức âm", "Quên điều kiện a ≠ 0"],
+      "prerequisites": ["m1-alg-identities"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Biệt thức và số nghiệm",
+        "Định lý Viète thuận",
+        "Đồ thị parabol và nghiệm",
+        "Tìm tham số theo điều kiện nghiệm"
+      ],
+      "typical_problems": [
+        {
+          "level": 2,
+          "name": "Tìm m để phương trình có hai nghiệm cùng dấu",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 2,
+          "name": "Tính x₁² + x₂² theo các hệ số",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["concurrency-dynamic", "pythagoras-dissection"],
+      "difficulty": 2,
+      "est_scenes": 7,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-triangle-geometry",
+      "interactive_ideas": [
+        "Clip Manim `concurrency-dynamic`",
+        "Clip Manim `pythagoras-dissection`",
+        "Walkthrough `triangle-altitude`"
+      ],
+      "name_en": "Triangle geometry",
+      "name_vi": "Hình học tam giác",
+      "pitfalls": [
+        "Suy từ một hình đặc biệt (tam giác nhọn) cho mọi tam giác",
+        "Nhầm trực tâm nằm trong tam giác khi tam giác tù"
+      ],
+      "prerequisites": [],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Đường cao, trung tuyến, phân giác, trung trực",
+        "Điểm đồng quy: trực tâm, trọng tâm, tâm đường tròn ngoại và nội tiếp",
+        "Tam giác đồng dạng",
+        "Định lý Pythagore và đảo"
+      ],
+      "typical_problems": [
+        {
+          "level": 2,
+          "name": "Chứng minh ba đường cao đồng quy",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 2,
+          "name": "Tìm vị trí trực tâm của tam giác vuông",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": ["triangle-altitude"]
+    },
+    {
+      "clip_ids": ["inscribed-angle"],
+      "difficulty": 2,
+      "est_scenes": 7,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-circle-angles",
+      "interactive_ideas": ["Clip Manim `inscribed-angle`"],
+      "name_en": "Angles and circles",
+      "name_vi": "Góc với đường tròn",
+      "pitfalls": ["Nhầm cung lớn với cung nhỏ khi chắn góc", "Xét điểm nằm ở cung sai"],
+      "prerequisites": ["m1-triangle-geometry"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Góc nội tiếp và góc ở tâm",
+        "Góc nội tiếp cùng chắn một cung",
+        "Tứ giác nội tiếp",
+        "Góc tạo bởi tiếp tuyến và dây cung"
+      ],
+      "typical_problems": [
+        {
+          "level": 2,
+          "name": "Chứng minh tứ giác có hai góc đối bù nhau thì nội tiếp",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 2,
+          "name": "Tính góc nội tiếp chắn cung 100°",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 1,
+      "est_scenes": 6,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m1-counting-basic",
+      "interactive_ideas": [],
+      "name_en": "Basic counting",
+      "name_vi": "Đếm cơ bản",
+      "pitfalls": ["Đếm trùng khi các trường hợp giao nhau", "Nhầm thứ tự có hay không quan trọng"],
+      "prerequisites": [],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Quy tắc cộng và quy tắc nhân",
+        "Hoán vị và chỉnh hợp",
+        "Tổ hợp",
+        "Đếm bằng bù trừ đơn giản"
+      ],
+      "typical_problems": [
+        {
+          "level": 1,
+          "name": "Có bao nhiêu số có ba chữ số khác nhau",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 1,
+          "name": "Chọn 3 bạn từ 10 bạn",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "exit_skills": [],
+  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+  "grade_band": "Lớp 11–12 [Unverified]",
+  "id": "tier-4",
+  "name_en": "Specialist",
+  "name_vi": "Chuyên sâu",
+  "order": 4,
+  "prerequisites": ["tier-3"],
+  "topics": [
+    {
+      "clip_ids": [],
+      "difficulty": 5,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-functional-equations",
+      "interactive_ideas": [],
+      "name_en": "Functional equations",
+      "name_vi": "Phương trình hàm",
+      "pitfalls": [
+        "Kết luận từ vài giá trị thế mà không kiểm tra lại",
+        "Quên điều kiện miền xác định"
+      ],
+      "prerequisites": ["m3-polynomials"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Thế giá trị đặc biệt",
+        "Tính đơn ánh, toàn ánh",
+        "Phương trình Cauchy",
+        "Quy nạp trên số nguyên"
+      ],
+      "typical_problems": [
+        {
+          "level": 5,
+          "name": "Tìm f: ℝ → ℝ thoả f(x+y) = f(x) + f(y) và f liên tục",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 5,
+          "name": "Tìm f thoả f(f(x)) = x + 1 [Unverified: nghiệm tồn tại]",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": ["riemann-integral"],
+      "difficulty": 4,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-integral",
+      "interactive_ideas": ["Clip Manim `riemann-integral`"],
+      "name_en": "Integrals",
+      "name_vi": "Tích phân",
+      "pitfalls": ["Quên dấu của diện tích khi hàm âm", "Nhầm tổng Riemann trái và phải"],
+      "prerequisites": ["m3-derivative-graphs", "m3-sequences-limits"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Diện tích dưới đồ thị",
+        "Tổng Riemann",
+        "Nguyên hàm và công thức Newton–Leibniz",
+        "Ước lượng tích phân"
+      ],
+      "typical_problems": [
+        {
+          "level": 4,
+          "name": "Tính ∫₀² x² dx bằng định nghĩa",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 4,
+          "name": "Ước lượng tích phân bằng tổng Riemann với n = 16",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 5,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-limits-mvt",
+      "interactive_ideas": [],
+      "name_en": "Limits and the mean value theorem",
+      "name_vi": "Giới hạn nâng cao và định lý giá trị trung bình",
+      "pitfalls": [
+        "Áp dụng định lý khi hàm không khả vi trên toàn khoảng",
+        "Quên điều kiện liên tục trên đoạn đóng"
+      ],
+      "prerequisites": ["m3-derivative-graphs"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Định lý Rolle và Lagrange",
+        "Hình học của định lý giá trị trung bình",
+        "Quy tắc L’Hôpital",
+        "Bất đẳng thức từ định lý giá trị trung bình"
+      ],
+      "typical_problems": [
+        {
+          "level": 5,
+          "name": "Chứng minh e^x ≥ 1 + x",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 5,
+          "name": "Chứng minh |sin a − sin b| ≤ |a − b|",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 5,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-projective-inversion",
+      "interactive_ideas": [],
+      "name_en": "Projective geometry and inversion",
+      "name_vi": "Hình học xạ ảnh và phép nghịch đảo",
+      "pitfalls": ["Quên điểm ở vô cực", "Nhầm ảnh của đường tròn đi qua tâm nghịch đảo"],
+      "prerequisites": ["m2-circle-power"],
+      "primary_medium": "manim",
+      "subtopics": [
+        "Phép nghịch đảo và ảnh của đường tròn",
+        "Tỉ số kép",
+        "Đối cực",
+        "Định lý Desargues và Pappus [Unverified: mức độ trong đề thi]"
+      ],
+      "typical_problems": [
+        {
+          "level": 5,
+          "name": "Chứng minh ảnh của đường thẳng qua O là chính nó",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 5,
+          "name": "Dùng nghịch đảo chứng minh định lý Ptolemy",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 5,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-number-theory-olympiad",
+      "interactive_ideas": [],
+      "name_en": "Olympiad number theory",
+      "name_vi": "Số học Olympic",
+      "pitfalls": ["Dùng bổ đề nâng số mũ khi không đủ điều kiện", "Nhầm ký hiệu Legendre"],
+      "prerequisites": ["m3-number-theory-adv"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Bổ đề nâng số mũ",
+        "Căn nguyên thuỷ",
+        "Phương trình Diophante bậc cao",
+        "Luật thuận nghịch bậc hai [Unverified: mức độ trong đề thi]"
+      ],
+      "typical_problems": [
+        {
+          "level": 5,
+          "name": "Tìm mọi nghiệm nguyên của x² − 2y² = 1",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 5,
+          "name": "Chứng minh có vô hạn số nguyên tố dạng 4k + 3",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 5,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-combinatorics-olympiad",
+      "interactive_ideas": [],
+      "name_en": "Olympiad combinatorics",
+      "name_vi": "Tổ hợp Olympic",
+      "pitfalls": ["Đếm hai cách mà hai vế không cùng đối tượng", "Bỏ qua trường hợp biên"],
+      "prerequisites": ["m3-counting-advanced"],
+      "primary_medium": "slide",
+      "subtopics": [
+        "Hàm sinh",
+        "Đếm hai cách",
+        "Đồ thị và Ramsey cơ bản",
+        "Phương pháp xác suất [Unverified: mức độ trong đề thi]"
+      ],
+      "typical_problems": [
+        {
+          "level": 5,
+          "name": "Chứng minh trong 6 người có 3 người đôi một quen hoặc đôi một lạ",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 5,
+          "name": "Đếm số cách lát hình chữ nhật bằng domino",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    },
+    {
+      "clip_ids": [],
+      "difficulty": 5,
+      "est_scenes": 8,
+      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "id": "m4-games-invariants",
+      "interactive_ideas": [],
+      "name_en": "Games and invariants",
+      "name_vi": "Trò chơi và bất biến",
+      "pitfalls": ["Nhầm người đi trước với người thắng", "Quên xét mọi nước đi của đối thủ"],
+      "prerequisites": ["m2-pigeonhole-invariants"],
+      "primary_medium": "walkthrough",
+      "subtopics": [
+        "Vị trí thắng và vị trí thua",
+        "Đối xứng chiến lược",
+        "Cây trò chơi",
+        "Bất biến trong trò chơi"
+      ],
+      "typical_problems": [
+        {
+          "level": 5,
+          "name": "Trò chơi Nim với một đống",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        },
+        {
+          "level": 5,
+          "name": "Trò chơi bốc sỏi theo bội của 3 hoặc 4",
+          "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
+        }
+      ],
+      "vn_sources": [],
+      "walkthrough_ids": []
+    }
+  ]
+}

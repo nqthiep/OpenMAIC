@@ -30,7 +30,7 @@ const rhs = (i: In): number => i.t * f(i.f, i.x1) + (1 - i.t) * f(i.f, i.x2);
 
 export const convexChordEntry: ClipEntry<In> = defineClip<In>({
   id: 'convex-chord',
-  curriculumTopics: ['inequality-classic'],
+  curriculumTopics: ['m2-inequality-classic'],
   title: m('Dây cung trên đồ thị lồi (Jensen)', 'The chord of a convex graph (Jensen)'),
   inputSpec,
   check: (i) => (i.x1 === i.x2 ? ['x1-equals-x2'] : []),

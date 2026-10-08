@@ -26,7 +26,7 @@ const round3 = (x: number): number => Math.round(x * 1000) / 1000;
 
 export const csProjectionEntry: ClipEntry<In> = defineClip<In>({
   id: 'cs-projection',
-  curriculumTopics: ['inequality-classic'],
+  curriculumTopics: ['m2-inequality-classic'],
   title: m('Cauchy–Schwarz bằng hình chiếu', 'Cauchy–Schwarz by projection'),
   inputSpec,
   check: (i) => [
