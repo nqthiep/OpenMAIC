@@ -5,7 +5,7 @@
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 import type { Emit, HighlightKind, RunContext } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';
-import { Figure, curvePieces, framePut, type FigState } from '@/lib/subjects/math/figure';
+import { Figure, curvePieces, frac, framePut, type FigState } from '@/lib/subjects/math/figure';
 
 type Fn = 'x2' | 'abs' | 'x4';
 /** t = tn/10, so every number on the page is an exact integer */
@@ -190,20 +190,20 @@ const EX = {
     'Join A = (x₁, f(x₁)) = ({x1}, {f1}) to B = (x₂, f(x₂)) = ({x2}, {f2}) with a straight segment: the chord AB.',
   ),
   point: m(
-    't = {tn}/10: điểm trộn M có hoành độ {xn}/10. Đồ thị cao {gn}/{d}, dây cung cao {cn}/{d}.',
-    't = {tn}/10: the mixture M has abscissa {xn}/10. The graph is {gn}/{d} high, the chord {cn}/{d} high.',
+    't = {tf}: điểm trộn M có hoành độ {xf}. Đồ thị cao {gf}, dây cung cao {cf}.',
+    't = {tf}: the mixture M has abscissa {xf}. The graph is {gf} high, the chord {cf} high.',
   ),
   below: m(
-    'Tại t = {tn}/10, đồ thị cao {gn}/{d} còn dây cung cao {cn}/{d}; vì {gn} < {cn} nên đồ thị nằm dưới dây cung.',
-    'At t = {tn}/10 the graph is {gn}/{d} high and the chord {cn}/{d} high; since {gn} < {cn} the graph is below the chord.',
+    'Tại t = {tf}, đồ thị cao {gf} còn dây cung cao {cf}; vì {gf} < {cf} nên đồ thị nằm dưới dây cung.',
+    'At t = {tf} the graph is {gf} high and the chord {cf} high; since {gf} < {cf} the graph is below the chord.',
   ),
   equal: m(
-    'Tại t = {tn}/10, đồ thị cao {gn}/{d} và dây cung cũng cao {cn}/{d}: hai điểm trùng nhau, đây là dấu bằng của bất đẳng thức.',
-    'At t = {tn}/10 the graph is {gn}/{d} high and the chord is also {cn}/{d} high: the two points coincide, the equality case.',
+    'Tại t = {tf}, đồ thị cao {gf} và dây cung cũng cao {cf}: hai điểm trùng nhau, đây là dấu bằng của bất đẳng thức.',
+    'At t = {tf} the graph is {gf} high and the chord is also {cf} high: the two points coincide, the equality case.',
   ),
   done: m(
-    'Với t = {tn}/10 và với mọi t trong [0, 1], đồ thị không cao hơn dây cung: đó là bất đẳng thức Jensen cho hàm lồi.',
-    'For t = {tn}/10 and for every t in [0, 1] the graph is no higher than the chord: that is Jensen for a convex function.',
+    'Với t = {tf} và với mọi t trong [0, 1], đồ thị không cao hơn dây cung: đó là bất đẳng thức Jensen cho hàm lồi.',
+    'For t = {tf} and for every t in [0, 1] the graph is no higher than the chord: that is Jensen for a convex function.',
   ),
 };
 
@@ -232,6 +232,13 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     const X = s * x1 + (10 - s) * x2;
     return { X, g: f(X), c: (D / 10) * (s * f1 + (10 - s) * f2) };
   };
+  /** the same numbers as reduced fractions: t = s/10, x = X/10, the heights g/D and c/D */
+  const fracs = (s: number, X: number, g: number, c: number) => ({
+    tf: frac(s, 10),
+    xf: frac(X, 10),
+    gf: frac(g, D),
+    cf: frac(c, D),
+  });
   const base = (): Figure => {
     const fig = new Figure(bounds)
       .anchor('ax0', [lo, 0])
@@ -273,11 +280,18 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   SCRUB.forEach((s, idx) => {
     const { X, g, c } = at(s);
     const { fig, same } = mixed(s);
-    put(EX.point, 3, fig, { tn: s, xn: X, gn: g, cn: c, d: D }, idx === 0 ? 'point' : undefined, {
-      M: 'active',
-      G: 'active',
-      ...(same ? {} : { C: 'result', gap: 'group-1' }),
-    });
+    put(
+      EX.point,
+      3,
+      fig,
+      { tn: s, xn: X, gn: g, cn: c, d: D, ...fracs(s, X, g, c) },
+      idx === 0 ? 'point' : undefined,
+      {
+        M: 'active',
+        G: 'active',
+        ...(same ? {} : { C: 'result', gap: 'group-1' }),
+      },
+    );
   });
   const { X, g, c } = at(tn);
   const { fig, same } = mixed(tn);
@@ -286,13 +300,20 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     G: 'active',
     ...(same ? {} : { C: 'result', gap: 'group-1' }),
   };
-  put(same ? EX.equal : EX.below, 4, fig, { tn, xn: X, gn: g, cn: c, d: D }, 'inequality', marks);
-  put(EX.done, 4, fig, { tn }, 'done', marks);
+  put(
+    same ? EX.equal : EX.below,
+    4,
+    fig,
+    { tn, xn: X, gn: g, cn: c, d: D, ...fracs(tn, X, g, c) },
+    'inequality',
+    marks,
+  );
+  put(EX.done, 4, fig, { tn, tf: frac(tn, 10) }, 'done', marks);
 }
 
 export const convexChordEntry: WalkthroughEntry<In, S> = {
   id: 'convex-chord',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-inequality-classic'],

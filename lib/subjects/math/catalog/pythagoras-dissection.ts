@@ -5,7 +5,7 @@
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 import type { Emit, RunContext } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';
-import { Figure, framePut, type FigState, type Pt } from '@/lib/subjects/math/figure';
+import { Figure, frac, framePut, type FigState, type Pt } from '@/lib/subjects/math/figure';
 
 type In = { a: number; b: number };
 type S = FigState;
@@ -163,8 +163,8 @@ const beatDefs: readonly BeatDef[] = [
 
 const EX = {
   start: m(
-    'Bốn tam giác vuông giống hệt nhau: hai cạnh góc vuông a = {a}, b = {b}, cạnh huyền c. Diện tích mỗi tam giác là ab/2 = {ab}/2.',
-    'Four identical right triangles: legs a = {a}, b = {b}, hypotenuse c. Each triangle has area ab/2 = {ab}/2.',
+    'Bốn tam giác vuông giống hệt nhau: hai cạnh góc vuông a = {a}, b = {b}, cạnh huyền c. Diện tích mỗi tam giác là ab/2 = {half}.',
+    'Four identical right triangles: legs a = {a}, b = {b}, hypotenuse c. Each triangle has area ab/2 = {half}.',
   ),
   big: m(
     'Đặt bốn tam giác vào hình vuông cạnh a + b = {s}, cạnh huyền hướng vào trong. Ở giữa còn một hình vuông nghiêng cạnh c.',
@@ -188,7 +188,17 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   const { a, b } = input;
   const s = a + b;
   const g = 1.2;
-  const nums = { a, b, ab: a * b, s, a2: a * a, b2: b * b, c2: a * a + b * b, s2: s * s };
+  const nums = {
+    a,
+    b,
+    ab: a * b,
+    half: frac(a * b, 2),
+    s,
+    a2: a * a,
+    b2: b * b,
+    c2: a * a + b * b,
+    s2: s * s,
+  };
   const put = framePut(emit, ctx.locale);
   const bounds = {
     xmin: -1,
@@ -275,7 +285,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const pythagorasDissectionEntry: WalkthroughEntry<In, S> = {
   id: 'pythagoras-dissection',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-triangle-geometry'],

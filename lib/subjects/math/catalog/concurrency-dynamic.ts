@@ -400,7 +400,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   };
   /** the special position: an obtuse triangle (the orthocenter and the circumcenter are outside) of the smallest picture; C far to the right otherwise */
   const outs = Array.from({ length: 17 }, (_, i) => i - 8).filter(
-    (k) => whereIs(center, ...scaled(k)) === 'out',
+    (k) => k !== 0 && !ks.includes(k) && whereIs(center, ...scaled(k)) === 'out',
   );
   const specialK =
     outs.length > 0 ? outs.reduce((best, k) => (extent(k) < extent(best) ? k : best)) : 8;
@@ -472,7 +472,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const concurrencyDynamicEntry: WalkthroughEntry<In, S> = {
   id: 'concurrency-dynamic',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-triangle-geometry'],

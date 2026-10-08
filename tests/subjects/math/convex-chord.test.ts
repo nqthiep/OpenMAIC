@@ -48,7 +48,7 @@ entryContract<In>({
   beats: ['start', 'chord', 'point', 'inequality', 'done'],
   required: ['start', 'done'],
   pseudoLines: 4,
-  vars: ['fname', 'x1', 'x2', 'f1', 'f2', 'tn', 'xn', 'gn', 'cn', 'd'],
+  vars: ['fname', 'x1', 'x2', 'f1', 'f2', 'tn', 'xn', 'gn', 'cn', 'd', 'tf', 'xf', 'gf', 'cf'],
   pointers: [],
   allow: [10],
   extra: FAMILY.slice(0, 30),

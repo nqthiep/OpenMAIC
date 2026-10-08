@@ -214,72 +214,72 @@
     }
   },
   "cauchy-schwarz": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "01530ffabb7569f5",
     "framesHash": {
       "generic": {
-        "vi-VN": "e701adf4dd79d7bd",
-        "en-US": "a09989c59c322d09"
+        "vi-VN": "631a0298ed224ded",
+        "en-US": "08f061bcbfce1682"
       },
       "proportional": {
-        "vi-VN": "d9daf1e6afb0c161",
-        "en-US": "6e28b9275e9650bc"
+        "vi-VN": "510cae8ab41442f0",
+        "en-US": "2440a00bff0af660"
       },
       "zero": {
-        "vi-VN": "f3429d04e6d860b7",
-        "en-US": "04d076c309602890"
+        "vi-VN": "0b4f13f1067d5c5e",
+        "en-US": "cd337324caf2d830"
       },
       "negative": {
-        "vi-VN": "e130ada0ca800a67",
-        "en-US": "6acf452dd18e36ff"
+        "vi-VN": "a4a7bb2c351be53a",
+        "en-US": "055cf655a0d2cdbd"
       }
     }
   },
   "concurrency-dynamic": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "9264feed581ae3e6",
     "framesHash": {
       "acute-ortho": {
-        "vi-VN": "a414e1cee6d1434c",
-        "en-US": "bd6a670036782f13"
+        "vi-VN": "81c6f1badbc0385e",
+        "en-US": "1dcf0165d5e832d2"
       },
       "obtuse-ortho": {
-        "vi-VN": "382bd0726bd06852",
-        "en-US": "889b96a9540181ed"
+        "vi-VN": "3d52bd710d0296c9",
+        "en-US": "216a92541d1b76ba"
       },
       "right-ortho": {
-        "vi-VN": "c031711f31fa9bb1",
-        "en-US": "c568ccd908003033"
+        "vi-VN": "ef1c309d7b2e705b",
+        "en-US": "ea9f45c21f67bb79"
       },
       "scalene-centroid": {
         "vi-VN": "e47d2e55af28b2e1",
         "en-US": "6ab77138a362ae96"
       },
       "acute-circum": {
-        "vi-VN": "951e0fa47d3e3d91",
-        "en-US": "176918136c9d1788"
+        "vi-VN": "a1dbd0084cae213b",
+        "en-US": "81d18cf324465301"
       }
     }
   },
   "convex-chord": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "eca493ea7b9e4f02",
     "framesHash": {
       "x2-mid": {
-        "vi-VN": "2968d3f6e610e9fb",
-        "en-US": "763db53e8d92e144"
+        "vi-VN": "2f08f1b66f8d5cc1",
+        "en-US": "36e4f232eb4af41c"
       },
       "abs-skew": {
-        "vi-VN": "7bd08a73d9fe882d",
-        "en-US": "78ddb6c7eb92f1fb"
+        "vi-VN": "e52ecc11febfacb2",
+        "en-US": "9a1425f35490340d"
       },
       "x4": {
-        "vi-VN": "e3ee381e704e2799",
-        "en-US": "04b2381b21729fe8"
+        "vi-VN": "4b69689b8a597b89",
+        "en-US": "cacf26d604794181"
       },
       "t-zero": {
-        "vi-VN": "99c307a5f2e7aada",
-        "en-US": "49b6e6571465a4cc"
+        "vi-VN": "534decb0c78c16c2",
+        "en-US": "c0bb07b16f569816"
       }
     }
   },
@@ -328,24 +328,24 @@
     }
   },
   "curve-sketching": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "e6755e0d4dbf453b",
     "framesHash": {
       "cubic": {
-        "vi-VN": "1311adeaeff3e64a",
-        "en-US": "15286a49022efb51"
+        "vi-VN": "d1a825b9636e1c72",
+        "en-US": "e42cd883a0c11cdc"
       },
       "square": {
-        "vi-VN": "5fb60af8e9d80a96",
-        "en-US": "d1b93cf22e7df45f"
+        "vi-VN": "40cf0ee9bf805bd1",
+        "en-US": "c43af3d0f5b727da"
       },
       "pure-cubic": {
-        "vi-VN": "c11fb3c14951bd27",
-        "en-US": "6cab4a75f20e1116"
+        "vi-VN": "1931aa66913ef7db",
+        "en-US": "2231d0b86055ac48"
       },
       "neg-cubic": {
-        "vi-VN": "02c55866564abf4b",
-        "en-US": "811a125a8d913b01"
+        "vi-VN": "3542446462b54357",
+        "en-US": "e9ac1da64fb6a8f7"
       }
     }
   },
@@ -634,20 +634,20 @@
     }
   },
   "geometric-series-area": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "b44c25d4cebe44f2",
     "framesHash": {
       "half": {
-        "vi-VN": "339dbe8422379e64",
-        "en-US": "a70aa8ad7ae14797"
+        "vi-VN": "10a0520ad881006d",
+        "en-US": "faac1b103eb3ffac"
       },
       "third": {
-        "vi-VN": "0b14ff24ffa614dd",
-        "en-US": "7981ad484e0f03c5"
+        "vi-VN": "a215a8a48dd45b97",
+        "en-US": "022383c1b0a41e76"
       },
       "quarter": {
-        "vi-VN": "0ce976ae67a87ada",
-        "en-US": "4fcc70bd7c1065ce"
+        "vi-VN": "e4d50a9d85af4fbf",
+        "en-US": "95dcd14da1240db8"
       }
     }
   },
@@ -1034,24 +1034,24 @@
     }
   },
   "modular-clock": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "49047e665457ed09",
     "framesHash": {
       "n10-a2": {
-        "vi-VN": "8c96714738f749c1",
-        "en-US": "f21b8adbb95010a8"
+        "vi-VN": "6b31c2654579404a",
+        "en-US": "044dfb6ab6519b37"
       },
       "n7-a3": {
-        "vi-VN": "942836c5454bed3f",
-        "en-US": "2d2e69057710af8d"
+        "vi-VN": "52e5cdab96ce1858",
+        "en-US": "9e6ca69abb8e4ac8"
       },
       "n12-a5": {
-        "vi-VN": "87b96e53c98f6b63",
-        "en-US": "59525bcab72952db"
+        "vi-VN": "160c2f1b45468d45",
+        "en-US": "e066a4289b007a80"
       },
       "n5-a4": {
-        "vi-VN": "da7df5e32abfbe9c",
-        "en-US": "d3b131f37f3f33b5"
+        "vi-VN": "097854cd33d5f493",
+        "en-US": "14febb906e0bdea6"
       }
     }
   },
@@ -1170,24 +1170,24 @@
     }
   },
   "pythagoras-dissection": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "e2ea43f6977483f3",
     "framesHash": {
       "three-four": {
-        "vi-VN": "a1027b3882b9fb72",
-        "en-US": "3cc8458acd6c870e"
+        "vi-VN": "51af0546d7a02b56",
+        "en-US": "3b592bbfb1c785a8"
       },
       "equal": {
-        "vi-VN": "3f9a67d2260d4124",
-        "en-US": "bb5afe0161526940"
+        "vi-VN": "5783b201fac05173",
+        "en-US": "1f1f232c251da375"
       },
       "thin": {
-        "vi-VN": "28e0b5aba2706b37",
-        "en-US": "9fb8dedb18865fca"
+        "vi-VN": "f67f554dd27c7051",
+        "en-US": "9881a7d9db1b605e"
       },
       "six-eight": {
-        "vi-VN": "17423f1678f21594",
-        "en-US": "1bc97a15cffd0860"
+        "vi-VN": "5a15422e250f368d",
+        "en-US": "3f2d2f72199b16d8"
       }
     }
   },

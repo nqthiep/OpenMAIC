@@ -65,12 +65,12 @@ const EX = {
     'f′(x) = 0 has no root, or f′ is a non-zero constant, so f has no critical point: the graph only rises or only falls.',
   ),
   signChange: m(
-    'Xét điểm tới hạn x₀. Ở bên trái và bên phải của nó, f′ mang dấu khác nhau: f′ đổi dấu tại x₀.',
-    'Look at the critical point x₀. To its left and to its right f′ has different signs: f′ changes sign at x₀.',
+    'Xét điểm tới hạn x{ci}: bên trái nó f′ mang dấu {sl}, bên phải mang dấu {sr}, nên f′ đổi dấu tại x{ci}.',
+    'Look at the critical point x{ci}: to its left f′ has the sign {sl}, to its right {sr}, so f′ changes sign at x{ci}.',
   ),
   signNone: m(
-    'Qua nghiệm kép, f′ không đổi dấu: f vẫn tăng (hoặc vẫn giảm) hai bên, nên đây không phải cực trị.',
-    'Across a double root f′ does not change sign: f keeps rising (or keeps falling), so this is not an extremum.',
+    'Qua nghiệm kép x{ci}, f′ không đổi dấu: f vẫn tăng (hoặc vẫn giảm) hai bên, nên đây không phải cực trị.',
+    'Across the double root x{ci} f′ does not change sign: f keeps rising (or keeps falling), so this is not an extremum.',
   ),
   extremaSome: m(
     'Điểm tới hạn mà f′ đổi dấu là cực trị. Đổi từ dương sang âm là cực đại, từ âm sang dương là cực tiểu. Có {ne} cực trị.',
@@ -429,10 +429,11 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   );
 
   critical.forEach((k, i) => {
-    const vars = { x0: r2(k.x), sl: k.sl, sr: k.sr };
+    const ci = '₁₂'[i] ?? '';
+    const vars = { x0: r2(k.x), sl: k.sl, sr: k.sr, ci };
     const marks: Record<string, HighlightKind> = { df: 'compare', [`x${i + 1}`]: 'active' };
     if (k.kind === 'none') {
-      put(EX.signNone, 4, { x0: r2(k.x) }, undefined, [fCurve, dfCurve], [], vlines, marks);
+      put(EX.signNone, 4, { x0: r2(k.x), ci }, undefined, [fCurve, dfCurve], [], vlines, marks);
     } else {
       put(EX.signChange, 4, vars, 'sign', [fCurve, dfCurve], [], vlines, marks);
     }
@@ -487,7 +488,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const curveSketchingEntry: WalkthroughEntry<In, S> = {
   id: 'curve-sketching',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'functionPlotter',
   curriculumTopics: ['m3-derivative-graphs'],

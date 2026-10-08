@@ -45,7 +45,7 @@ entryContract<In>({
   beats: ['start', 'multiply', 'powers', 'cycle', 'done'],
   required: ['start', 'done'],
   pseudoLines: 4,
-  vars: ['n', 'n1', 'a', 'g', 'd', 't', 'v', 'tail', 'period'],
+  vars: ['n', 'n1', 'a', 'g', 'd', 't', 'v', 'pw', 'tail', 'period'],
   pointers: [],
   allow: [],
   extra: ALL.slice(0, 40),

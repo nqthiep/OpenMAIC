@@ -52,7 +52,7 @@ entryContract<In>({
   beats: ['start', 'derivative', 'roots', 'sign', 'extrema', 'inflection', 'sketch', 'done'],
   required: ['start', 'done'],
   pseudoLines: 7,
-  vars: ['deg', 'f', 'fp', 'fpp', 'nr', 'r1', 'r2', 'x0', 'sl', 'sr', 'ne', 'ni', 'xi', 'yi'],
+  vars: ['deg', 'f', 'fp', 'fpp', 'nr', 'r1', 'r2', 'x0', 'sl', 'sr', 'ci', 'ne', 'ni', 'xi', 'yi'],
   pointers: [],
   allow: [1],
   extra: SAMPLE.slice(0, 30),

@@ -41,8 +41,8 @@ const EX = {
     'The difference of the sides, right minus left, is {d}. It is the square of which expression?',
   ),
   reveal: m(
-    'Khai triển rút gọn cho hiệu = (a₁b₂ − a₂b₁)². Với số đã chọn, a₁b₂ − a₂b₁ = {k}, và {k}² = {d}.',
-    'Expanding and simplifying gives the difference = (a₁b₂ − a₂b₁)². With these numbers a₁b₂ − a₂b₁ = {k}, and {k}² = {d}.',
+    'Khai triển rút gọn cho hiệu = (a₁b₂ − a₂b₁)². Với số đã chọn, a₁b₂ − a₂b₁ = {k}, và ({k})² = {d}.',
+    'Expanding and simplifying gives the difference = (a₁b₂ − a₂b₁)². With these numbers a₁b₂ − a₂b₁ = {k}, and ({k})² = {d}.',
   ),
   conclude: m(
     'Bình phương không âm, nên hiệu {d} ≥ 0. Vậy vế trái {L} ≤ vế phải {R}.',
@@ -400,7 +400,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
   id: 'cauchy-schwarz',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'proofOutline',
   curriculumTopics: ['m2-inequality-classic'],

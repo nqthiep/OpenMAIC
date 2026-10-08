@@ -39,6 +39,13 @@ export interface FigState {
 /** The greatest common divisor of two integers (never negative). */
 export const gcd = (x: number, y: number): number => (y === 0 ? Math.abs(x) : gcd(y, x % y));
 
+/** The digits of `n` as superscripts: 2 → "²", 12 → "¹²". */
+export const sup = (n: number): string =>
+  String(n)
+    .split('')
+    .map((d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[Number(d)] ?? d)
+    .join('');
+
 /** The fraction p/q in lowest terms as text with a minus sign and no decimal point: "7/4", "−3", "0". */
 export function frac(p: number, q: number): string {
   const g = gcd(p, q) || 1;

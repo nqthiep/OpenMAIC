@@ -25,7 +25,7 @@ entryContract<In>({
   beats: ['start', 'big-square', 'rearrange', 'conclude', 'done'],
   required: ['start', 'done'],
   pseudoLines: 4,
-  vars: ['a', 'b', 'ab', 's', 'a2', 'b2', 'c2', 's2'],
+  vars: ['a', 'b', 'ab', 'half', 's', 'a2', 'b2', 'c2', 's2'],
   pointers: [],
   extra: [
     { a: 9, b: 9 },

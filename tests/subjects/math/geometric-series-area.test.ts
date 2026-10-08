@@ -23,7 +23,7 @@ entryContract<In>({
   beats: ['start', 'cut', 'repeat', 'sum', 'done'],
   required: ['start', 'done'],
   pseudoLines: 4,
-  vars: ['d', 'k', 'pw', 'dm1'],
+  vars: ['d', 'k', 'pw', 'sup', 'dm1', 'rs'],
   pointers: [],
   bad: [{ r: '1/5' }, { r: 0.5 }, { r: '' }, {}, null],
   predict: {
@@ -59,7 +59,7 @@ describe('geometric-series-area: the pieces are the series', () => {
           expect(polygonBox(f, `p${k}`)[0]).toBeCloseTo(polygonBox(f, `p${k - 1}`)[2], 2);
       }
       const sum = gen(i).find((f) => beatOf(f).includes('sum'))!;
-      expect(sum.meta.vars).toEqual({ dm1: d - 1 });
+      expect(sum.meta.vars).toEqual({ dm1: d - 1, rs: d === 2 ? '1' : `1/${d - 1}` });
       const mark = sum.state.points.find((p) => p.id === 'll')!;
       expect(mark.label).toBe(`1/${d - 1}`);
       expect(mark.x).toBeCloseTo(8 / (d - 1), 2);
@@ -71,7 +71,9 @@ describe('geometric-series-area: the pieces are the series', () => {
       const d = D[i.r];
       const pieces = gen(i).filter((f) => f.meta.vars && 'pw' in f.meta.vars);
       expect(pieces).toHaveLength(4);
-      pieces.forEach((f, idx) => expect(f.meta.vars).toEqual({ k: idx + 2, pw: d ** (idx + 2) }));
+      pieces.forEach((f, idx) =>
+        expect(f.meta.vars).toEqual({ k: idx + 2, pw: d ** (idx + 2), sup: '²³⁴⁵'[idx] }),
+      );
     }
   });
 });

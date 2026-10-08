@@ -5,7 +5,7 @@
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 import type { Emit, HighlightKind, RunContext } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';
-import { Figure, framePut, type FigState } from '@/lib/subjects/math/figure';
+import { Figure, frac, framePut, sup, type FigState } from '@/lib/subjects/math/figure';
 
 type Ratio = '1/2' | '1/3' | '1/4';
 type In = { r: Ratio };
@@ -172,16 +172,16 @@ const EX = {
     'The first piece has area r = 1/{d}. What is left of the square has area 1 − 1/{d}.',
   ),
   piece: m(
-    'Mảnh thứ {k} có diện tích r^{k} = 1/{pw}, bằng r lần mảnh trước. Thanh bên dưới là tổng các mảnh đã cắt.',
-    'Piece number {k} has area r^{k} = 1/{pw}, which is r times the one before. The bar below is the total of the pieces so far.',
+    'Mảnh thứ {k} có diện tích r{sup} = 1/{pw}, bằng r lần mảnh trước. Thanh bên dưới là tổng các mảnh đã cắt.',
+    'Piece number {k} has area r{sup} = 1/{pw}, which is r times the one before. The bar below is the total of the pieces so far.',
   ),
   sum: m(
-    'Tổng các mảnh tiến tới r/(1 − r) = 1/{dm1} (vạch đứt) và không bao giờ vượt qua nó.',
-    'The total of the pieces approaches r/(1 − r) = 1/{dm1} (the dashed line) and never passes it.',
+    'Tổng các mảnh tiến tới r/(1 − r) = {rs} (vạch đứt) và không bao giờ vượt qua nó.',
+    'The total of the pieces approaches r/(1 − r) = {rs} (the dashed line) and never passes it.',
   ),
   done: m(
-    'Vậy r + r² + r³ + … = r/(1 − r) = 1/{dm1} với r = 1/{d}. Với r = 1/2 đó là cả hình vuông.',
-    'So r + r² + r³ + … = r/(1 − r) = 1/{dm1} for r = 1/{d}. For r = 1/2 that is the whole square.',
+    'Vậy r + r² + r³ + … = r/(1 − r) = {rs} với r = 1/{d}. Với r = 1/2 đó là cả hình vuông.',
+    'So r + r² + r³ + … = r/(1 − r) = {rs} for r = 1/{d}. For r = 1/2 that is the whole square.',
   ),
 };
 
@@ -223,20 +223,26 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   let pw = d;
   for (let k = 2; k <= PIECES; k++) {
     pw *= d;
-    put(EX.piece, 3, fig(k), { k, pw }, k === 2 ? 'repeat' : undefined, marks(k));
+    put(EX.piece, 3, fig(k), { k, pw, sup: sup(k) }, k === 2 ? 'repeat' : undefined, marks(k));
   }
   const limit = fig(PIECES)
     .anchor('l0', [limitX, -2], undefined)
     .anchor('l1', [limitX, L + 0.4], undefined)
     .seg('limit', 'l0', 'l1', { dashed: true })
     .anchor('ll', [limitX, L + 0.9], `1/${d - 1}`, true);
-  put(EX.sum, 4, limit, { dm1: d - 1 }, 'sum', { ...marks(PIECES), limit: 'result' });
-  put(EX.done, 4, limit, { d, dm1: d - 1 }, 'done', { ...marks(PIECES), limit: 'result' });
+  put(EX.sum, 4, limit, { dm1: d - 1, rs: frac(1, d - 1) }, 'sum', {
+    ...marks(PIECES),
+    limit: 'result',
+  });
+  put(EX.done, 4, limit, { d, dm1: d - 1, rs: frac(1, d - 1) }, 'done', {
+    ...marks(PIECES),
+    limit: 'result',
+  });
 }
 
 export const geometricSeriesAreaEntry: WalkthroughEntry<In, S> = {
   id: 'geometric-series-area',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m3-sequences-limits'],

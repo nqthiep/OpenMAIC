@@ -361,6 +361,12 @@ jobs:
         env:
           TUTOR_BROWSER: '1'
 
+      # Every preset of every catalog walkthrough (informatics and math), frames sampled or all of them: renders, no error.
+      - name: Catalog sweep Chromium tests
+        run: pnpm exec vitest run tests/tutor/runtime/catalog-sweep.browser.test.ts
+        env:
+          TUTOR_BROWSER: '1'
+
       # runner.* is only valid in step contexts (not job-level env).
       - name: Materialize Hyperframes lint samples
         run: pnpm exec vitest run tests/video-export/e2e-materialize.test.ts

@@ -10,6 +10,7 @@ import {
   circlePoint,
   gcd,
   framePut,
+  sup,
   type FigState,
   type Pt,
 } from '@/lib/subjects/math/figure';
@@ -189,8 +190,8 @@ const EX = {
     'Each point k jumps to {a}·k modulo {n}. Only {d} different points are reached, because the gcd of {a} and {n} is {g}.',
   ),
   powers: m(
-    'Luỹ thừa thứ {t}: {a}^{t} ≡ {v} (mod {n}). Mũi tên nối kết quả trước với kết quả này.',
-    'The power number {t}: {a}^{t} ≡ {v} (mod {n}). The arrow joins the previous result to this one.',
+    'Luỹ thừa thứ {t}: {pw} ≡ {v} (mod {n}). Mũi tên nối kết quả trước với kết quả này.',
+    'The power number {t}: {pw} ≡ {v} (mod {n}). The arrow joins the previous result to this one.',
   ),
   cyclePure: m(
     'Các luỹ thừa của {a} modulo {n} quay về điểm xuất phát sau {period} bước: chu kỳ là {period}, còn n − 1 = {n1}.',
@@ -282,7 +283,14 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     const fig = clock();
     const marks = chain(fig, t, (k) => (k === t ? 'active' : 'result'));
     marks[`c${s[t]}`] = 'active';
-    put(EX.powers, 3, fig, { ...base, t, v: s[t] }, t === 1 ? 'powers' : undefined, marks);
+    put(
+      EX.powers,
+      3,
+      fig,
+      { ...base, t, v: s[t], pw: `${a}${sup(t)}` },
+      t === 1 ? 'powers' : undefined,
+      marks,
+    );
   }
   const loop = clock();
   const loopMarks = chain(loop, s.length - 1, (k) => (k > tail ? 'active' : 'muted'));
@@ -293,7 +301,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const modularClockEntry: WalkthroughEntry<In, S> = {
   id: 'modular-clock',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-modular-arith'],
