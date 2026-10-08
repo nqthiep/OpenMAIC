@@ -182,7 +182,7 @@
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-counting-advanced",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `inclusion-exclusion`"],
       "name_en": "Advanced counting",
       "name_vi": "Đếm nâng cao",
       "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
@@ -207,7 +207,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["inclusion-exclusion"]
     },
     {
       "difficulty": 4,

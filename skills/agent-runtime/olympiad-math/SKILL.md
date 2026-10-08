@@ -64,12 +64,15 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `alg-identity-area` | Algebraic identities as areas | `sum-3-2`, `sum-1-1`, `diff-5-2`, `diff-9-1` | `m1-alg-identities` |
 | `amgm-semicircle` | AM–GM on a semicircle | `two-eight`, `equal`, `far`, `nine-sixteen` | `m1-inequality-basic` |
 | `cauchy-schwarz` | The Cauchy–Schwarz inequality (two pairs) | `generic`, `proportional`, `zero`, `negative` | `m2-inequality-classic` |
+| `concurrency-dynamic` | Concurrent lines while a vertex moves | `acute-ortho`, `obtuse-ortho`, `right-ortho`, `scalene-centroid`, `acute-circum` | `m1-triangle-geometry` |
 | `convex-chord` | The chord of a convex graph (Jensen) | `x2-mid`, `abs-skew`, `x4`, `t-zero` | `m2-inequality-classic` |
 | `cs-projection` | Cauchy–Schwarz by projection | `generic`, `parallel`, `perpendicular`, `opposite` | `m2-inequality-classic` |
 | `curve-sketching` | Sketching a polynomial graph (degree at most 3) | `cubic`, `square`, `pure-cubic`, `neg-cubic` | `m3-derivative-graphs` |
 | `euclid-rectangle` | The Euclidean algorithm with squares | `48-18`, `equal`, `coprime`, `one` | `m2-euclid-diophantine` |
+| `figurate-sums` | Sums with dots: odd and triangular numbers | `odd-4`, `odd-2`, `natural-5`, `natural-10` | `m2-induction` |
 | `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `m3-sequences-limits` |
 | `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `m1-quadratic-vieta` |
+| `inclusion-exclusion` | Inclusion–exclusion for three sets | `generic`, `empty-center`, `disjoint`, `nested` | `m3-counting-advanced` |
 | `inscribed-angle` | The inscribed angle | `arc-100`, `arc-60`, `arc-180`, `arc-300` | `m1-circle-angles` |
 | `plane-transform` | Plane transformations and complex multiplication | `rotate90`, `reflect-x`, `homothety2`, `mult-i` | `m3-vector-transform-complex` |
 | `power-of-point` | The power of a point | `outside`, `inside`, `on-circle`, `far` | `m2-circle-power` |

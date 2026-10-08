@@ -235,6 +235,32 @@
       }
     }
   },
+  "concurrency-dynamic": {
+    "entryRev": 1,
+    "contentHash": "9264feed581ae3e6",
+    "framesHash": {
+      "acute-ortho": {
+        "vi-VN": "a414e1cee6d1434c",
+        "en-US": "bd6a670036782f13"
+      },
+      "obtuse-ortho": {
+        "vi-VN": "382bd0726bd06852",
+        "en-US": "889b96a9540181ed"
+      },
+      "right-ortho": {
+        "vi-VN": "c031711f31fa9bb1",
+        "en-US": "c568ccd908003033"
+      },
+      "scalene-centroid": {
+        "vi-VN": "e47d2e55af28b2e1",
+        "en-US": "6ab77138a362ae96"
+      },
+      "acute-circum": {
+        "vi-VN": "951e0fa47d3e3d91",
+        "en-US": "176918136c9d1788"
+      }
+    }
+  },
   "convex-chord": {
     "entryRev": 1,
     "contentHash": "eca493ea7b9e4f02",
@@ -585,6 +611,28 @@
       }
     }
   },
+  "figurate-sums": {
+    "entryRev": 1,
+    "contentHash": "340e45fa00f24b2b",
+    "framesHash": {
+      "odd-4": {
+        "vi-VN": "44c9ee60b22b5380",
+        "en-US": "8eb33006bfb47baa"
+      },
+      "odd-2": {
+        "vi-VN": "70c021be29574ad7",
+        "en-US": "a069d65fec113c5c"
+      },
+      "natural-5": {
+        "vi-VN": "1e3d2572496fb236",
+        "en-US": "317cc67b15d5ebfa"
+      },
+      "natural-10": {
+        "vi-VN": "4ffa8909274c230c",
+        "en-US": "47a032a4ff5df9d3"
+      }
+    }
+  },
   "geometric-series-area": {
     "entryRev": 1,
     "contentHash": "b44c25d4cebe44f2",
@@ -688,6 +736,28 @@
       "star": {
         "vi-VN": "ff495b5bb866128f",
         "en-US": "e0606aac78be725d"
+      }
+    }
+  },
+  "inclusion-exclusion": {
+    "entryRev": 1,
+    "contentHash": "5215db25238ddeca",
+    "framesHash": {
+      "generic": {
+        "vi-VN": "b7fde4809aceb384",
+        "en-US": "0130e94140e39795"
+      },
+      "empty-center": {
+        "vi-VN": "b4dec96f7b0fa66d",
+        "en-US": "58e3c69d2855e14f"
+      },
+      "disjoint": {
+        "vi-VN": "fa9e6b9809f0e640",
+        "en-US": "80787162df98f9bc"
+      },
+      "nested": {
+        "vi-VN": "fdbea19c410fefc7",
+        "en-US": "3442b3040fe43033"
       }
     }
   },

@@ -207,12 +207,13 @@
             "Nhầm trực tâm nằm trong tam giác khi tam giác tù"
           ],
           "interactive_ideas": [
+            "Walkthrough `concurrency-dynamic`",
             "Walkthrough `pythagoras-dissection`",
             "Walkthrough `triangle-altitude`"
           ],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": ["pythagoras-dissection", "triangle-altitude"]
+          "walkthrough_ids": ["concurrency-dynamic", "pythagoras-dissection", "triangle-altitude"]
         },
         {
           "id": "m1-circle-angles",
@@ -537,10 +538,10 @@
             "Quên kiểm tra cơ sở quy nạp",
             "Bước quy nạp không đúng với mọi k (bắt đầu từ k nhỏ)"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `figurate-sums`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["figurate-sums"]
         }
       ]
     },
@@ -753,10 +754,10 @@
             }
           ],
           "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `inclusion-exclusion`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["inclusion-exclusion"]
         },
         {
           "id": "m3-vector-transform-complex",

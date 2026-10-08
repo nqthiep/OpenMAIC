@@ -227,7 +227,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-induction",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `figurate-sums`"],
       "name_en": "Mathematical induction",
       "name_vi": "Quy nạp toán học",
       "pitfalls": [
@@ -255,7 +255,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["figurate-sums"]
     }
   ]
 }
