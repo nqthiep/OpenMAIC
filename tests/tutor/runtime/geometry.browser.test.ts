@@ -98,6 +98,22 @@ const frames: Frame<unknown>[] = [
         { id: 'sq', pts: ['a', 'b', 'c', 'd'] },
         { id: 'bad', pts: ['a', 'b', 'zz'] }, // unknown vertex: skipped
         { id: 'two', pts: ['a', 'b'] }, // not a polygon: skipped
+        {
+          id: 'inline',
+          xy: [
+            [6, 3],
+            [9, 3],
+            [9, 5],
+          ],
+        }, // its own vertices, no points needed
+        {
+          id: 'badxy',
+          xy: [
+            [6, 3],
+            [9, 3],
+            ['x', 5],
+          ],
+        }, // a bad vertex: skipped
       ],
       polylines: [
         {
@@ -232,8 +248,8 @@ describe.skipIf(!REQUIRED)('geometry visualizer (browser)', () => {
   it('frame 3: filled polygons, a curve, an arrow head; hidden anchors draw no dot but keep their centred label', async () => {
     await load();
     await show(3);
-    await pw(widget.locator('.wtx-poly')).toHaveCount(1);
-    await pw(widget.locator('.wtx-poly')).toHaveClass(/wtx-g1/);
+    await pw(widget.locator('.wtx-poly')).toHaveCount(2);
+    await pw(widget.locator('.wtx-poly').first()).toHaveClass(/wtx-g1/);
     await pw(widget.locator('polyline.wtx-curve')).toHaveCount(1);
     await pw(widget.locator('.wtx-arrowhead')).toHaveCount(1);
     await pw(widget.locator('.wtx-seg')).toHaveCount(1);
@@ -244,7 +260,7 @@ describe.skipIf(!REQUIRED)('geometry visualizer (browser)', () => {
     ).toBe('none');
     await pw(widget.locator('.wtx')).toHaveAttribute(
       'aria-label',
-      'points: o (7, 1), p (9, 4); segments: op; polygons: sq (group-1); polylines: f',
+      'points: o (7, 1), p (9, 4); segments: op; polygons: sq (group-1), inline; polylines: f',
     );
   });
 

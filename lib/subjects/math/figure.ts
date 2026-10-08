@@ -4,6 +4,10 @@
  * three decimals so the frame data stays small and `-0` never appears). Every call to `snapshot` returns a fresh object, so a
  * frame can never be changed by a later one.
  */
+import { fill, msg } from '@/lib/tutor/catalog/messages';
+import type { Messages } from '@/lib/tutor/catalog/types';
+import type { Emit, HighlightKind } from '@/lib/tutor/engine/types';
+
 export type Pt = readonly [number, number];
 
 export interface Bounds {
@@ -28,7 +32,7 @@ export interface FigState {
   lines: { id: string; through: [string, string] }[];
   circles: { id: string; center: string; r: number }[];
   angles: { id: string; at: string; from: string; to: string; label?: string }[];
-  polygons: { id: string; pts: string[] }[];
+  polygons: { id: string; pts?: string[]; xy?: [number, number][] }[];
   polylines: { id: string; xy: [number, number][]; dashed?: boolean }[];
 }
 
@@ -116,17 +120,22 @@ export class Figure {
     });
     return this;
   }
-  /** A rectangle as four anchors and one polygon: `id` is the polygon, the anchors are `${id}.0` .. `${id}.3`. */
+  /** A filled polygon with its own vertices (no points are added to the figure). */
+  poly(id: string, xy: readonly Pt[]): this {
+    this.s.polygons.push({
+      id,
+      xy: xy.map((p) => [round3(p[0]), round3(p[1])] as [number, number]),
+    });
+    return this;
+  }
+  /** An axis-aligned rectangle as one polygon. */
   rect(id: string, x0: number, y0: number, x1: number, y1: number): this {
-    const ids = [0, 1, 2, 3].map((k) => `${id}.${k}`);
-    const corners: Pt[] = [
+    return this.poly(id, [
       [x0, y0],
       [x1, y0],
       [x1, y1],
       [x0, y1],
-    ];
-    corners.forEach((c, k) => this.anchor(ids[k], c));
-    return this.polygon(id, ids);
+    ]);
   }
   snapshot(): FigState {
     return structuredClone(this.s);
@@ -176,4 +185,30 @@ export function upperSemicircle(c: Pt, r: number, n = 16): Pt[] {
   }
   pts[2 * n] = [c[0] - r, c[1]]; // the end is exact
   return pts;
+}
+
+/**
+ * `put(text, codeLine, figure, vars, beat?, marks?)`: one frame of a figure walkthrough. The explanation is `text` in the frame's
+ * locale with the `{vars}` filled; `base` highlights apply to every frame, `marks` to this one; `beat` becomes the frame's tag.
+ */
+export function framePut(
+  emit: Emit<FigState>,
+  locale: string,
+  base: Readonly<Record<string, HighlightKind>> = {},
+) {
+  return (
+    text: Messages,
+    codeLine: number,
+    fig: Figure,
+    vars: Record<string, number | string>,
+    beat?: string,
+    marks: Readonly<Record<string, HighlightKind>> = {},
+  ): void =>
+    emit(fig.snapshot(), {
+      explanation: fill(msg(text, locale), vars),
+      codeLine,
+      highlights: { ...base, ...marks },
+      vars,
+      ...(beat ? { tags: [`beat:${beat}`] } : {}),
+    });
 }

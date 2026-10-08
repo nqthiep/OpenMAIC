@@ -13,7 +13,7 @@
       "est_scenes": 6,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-alg-identities",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `alg-identity-area`"],
       "name_en": "Algebraic identities",
       "name_vi": "Hằng đẳng thức và biến đổi đại số",
       "pitfalls": ["Quên hạng tử 2ab khi khai triển (a+b)²", "Nhầm dấu khi khai triển (a−b)³"],
@@ -38,7 +38,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["alg-identity-area"]
     },
     {
       "difficulty": 1,
@@ -141,7 +141,10 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-triangle-geometry",
-      "interactive_ideas": ["Walkthrough `triangle-altitude`"],
+      "interactive_ideas": [
+        "Walkthrough `pythagoras-dissection`",
+        "Walkthrough `triangle-altitude`"
+      ],
       "name_en": "Triangle geometry",
       "name_vi": "Hình học tam giác",
       "pitfalls": [
@@ -169,7 +172,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["triangle-altitude"]
+      "walkthrough_ids": ["pythagoras-dissection", "triangle-altitude"]
     },
     {
       "difficulty": 2,

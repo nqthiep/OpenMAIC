@@ -69,10 +69,10 @@
             }
           ],
           "pitfalls": ["Quên hạng tử 2ab khi khai triển (a+b)²", "Nhầm dấu khi khai triển (a−b)³"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `alg-identity-area`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["alg-identity-area"]
         },
         {
           "id": "m1-divisibility-primes",
@@ -206,10 +206,13 @@
             "Suy từ một hình đặc biệt (tam giác nhọn) cho mọi tam giác",
             "Nhầm trực tâm nằm trong tam giác khi tam giác tù"
           ],
-          "interactive_ideas": ["Walkthrough `triangle-altitude`"],
+          "interactive_ideas": [
+            "Walkthrough `pythagoras-dissection`",
+            "Walkthrough `triangle-altitude`"
+          ],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": ["triangle-altitude"]
+          "walkthrough_ids": ["pythagoras-dissection", "triangle-altitude"]
         },
         {
           "id": "m1-circle-angles",
@@ -425,10 +428,10 @@
             "Bỏ qua điều kiện ƯCLN(a,b) chia hết c",
             "Chỉ tìm một nghiệm riêng mà quên họ nghiệm"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `euclid-rectangle`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["euclid-rectangle"]
         },
         {
           "id": "m2-circle-power",
@@ -609,10 +612,10 @@
             "Nhầm \"gần hơn\" với \"hội tụ\": cần mọi số hạng sau N",
             "Giới hạn của dãy đan dấu"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `geometric-series-area`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["geometric-series-area"]
         },
         {
           "id": "m3-derivative-graphs",

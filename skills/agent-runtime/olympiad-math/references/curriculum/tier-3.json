@@ -45,7 +45,7 @@
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-sequences-limits",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `geometric-series-area`"],
       "name_en": "Sequences and limits",
       "name_vi": "Dãy số và giới hạn",
       "pitfalls": [
@@ -73,7 +73,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["geometric-series-area"]
     },
     {
       "difficulty": 3,

@@ -4,7 +4,7 @@
  * `createElementNS`; dữ liệu vào DOM chỉ qua `textContent`/`setAttribute`.
  * State: `{ bounds, points, segments?, lines?, circles?, angles?, polygons?, polylines? }`. Khoá `highlights` là id của
  * đối tượng (điểm, đoạn, đường thẳng, đường tròn, góc, đa giác, đường gấp khúc); id nên khác nhau giữa các loại.
- * Mở rộng (ADR 0015, hình tương tác thay clip): `polygons` `{id, pts: [id điểm]}` tô màu; `polylines` `{id, xy: [[x,y]…], dashed?}`
+ * Mở rộng (ADR 0015, hình tương tác thay clip): `polygons` `{id, pts: [id điểm]}` hoặc `{id, xy: [[x,y]…]}` tô màu; `polylines` `{id, xy: [[x,y]…], dashed?}`
  * cho đường cong lấy mẫu; `segments[].arrow` vẽ mũi tên ở đầu `to`; điểm có `hidden` (không vẽ chấm), `at: 'center'`
  * (nhãn căn giữa tại điểm), `r` (bán kính chấm, px).
  * Kind: `active|compare|result|visited|muted` (lớp `wt-hl-*` của shell) và `group-0..5` (lớp `wtx-g0..5`,
@@ -340,9 +340,24 @@ export const geometryVisualizer: VisualizerRenderer = {
     const add = (g: SVGGElement, el: SVGElement) => g.appendChild(el);
 
     for (const g of polygons) {
-      const ids = Array.isArray(g.pts) ? g.pts : [];
-      const vs = ids.map((id) => byId.get(String(id))).filter((p): p is PointObj => !!p);
-      if (vs.length < 3 || vs.length !== ids.length) continue;
+      // vertices: inline coordinates `xy`, or ids of points of the figure
+      let vs: { x: number; y: number }[] = [];
+      if (Array.isArray(g.xy)) {
+        for (const q of g.xy.slice(0, MAX_PATH_POINTS)) {
+          const x = Array.isArray(q) ? num(q[0]) : NaN;
+          const y = Array.isArray(q) ? num(q[1]) : NaN;
+          if (Number.isNaN(x) || Number.isNaN(y)) {
+            vs = [];
+            break;
+          }
+          vs.push({ x, y });
+        }
+      } else {
+        const ids = Array.isArray(g.pts) ? g.pts : [];
+        const found = ids.map((id) => byId.get(String(id))).filter((p): p is PointObj => !!p);
+        vs = found.length === ids.length ? found : [];
+      }
+      if (vs.length < 3) continue;
       drawn.polygons.push(String(g.id));
       add(
         under,

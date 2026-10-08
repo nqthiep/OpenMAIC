@@ -118,7 +118,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-euclid-diophantine",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `euclid-rectangle`"],
       "name_en": "Euclid and Diophantine equations",
       "name_vi": "Thuật toán Euclid và phương trình Diophante",
       "pitfalls": [
@@ -146,7 +146,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["euclid-rectangle"]
     },
     {
       "difficulty": 3,

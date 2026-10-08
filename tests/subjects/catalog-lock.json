@@ -47,6 +47,28 @@
       }
     }
   },
+  "alg-identity-area": {
+    "entryRev": 1,
+    "contentHash": "57c3bd5722e46d92",
+    "framesHash": {
+      "sum-3-2": {
+        "vi-VN": "2361dbee926b6ba6",
+        "en-US": "23bd9f30349c8d98"
+      },
+      "sum-1-1": {
+        "vi-VN": "bd7b1033bfc520d4",
+        "en-US": "c24b77edce8d2aed"
+      },
+      "diff-5-2": {
+        "vi-VN": "908db2653306376f",
+        "en-US": "b4cc84b39c3d76db"
+      },
+      "diff-9-1": {
+        "vi-VN": "3f0be62fd69f1a70",
+        "en-US": "74e3bdc529ad164d"
+      }
+    }
+  },
   "amgm-semicircle": {
     "entryRev": 1,
     "contentHash": "08bbe06442abbe77",
@@ -471,6 +493,28 @@
       }
     }
   },
+  "euclid-rectangle": {
+    "entryRev": 1,
+    "contentHash": "437b3d18edeb440f",
+    "framesHash": {
+      "48-18": {
+        "vi-VN": "0739356d32d768d6",
+        "en-US": "75647f88f90e9933"
+      },
+      "equal": {
+        "vi-VN": "ed0f3145813abf92",
+        "en-US": "c9ea19c7a4cc113c"
+      },
+      "coprime": {
+        "vi-VN": "d8ccf74c96262e10",
+        "en-US": "a730c52538e312ef"
+      },
+      "one": {
+        "vi-VN": "2eee408cc2b1b989",
+        "en-US": "154b06ecad7fef9e"
+      }
+    }
+  },
   "fenwick": {
     "entryRev": 1,
     "contentHash": "6666c484e1657f5c",
@@ -516,6 +560,24 @@
       "memo-6": {
         "vi-VN": "1a9e780fbdc1209d",
         "en-US": "65f2ac5ffd7c5dd9"
+      }
+    }
+  },
+  "geometric-series-area": {
+    "entryRev": 1,
+    "contentHash": "b44c25d4cebe44f2",
+    "framesHash": {
+      "half": {
+        "vi-VN": "339dbe8422379e64",
+        "en-US": "a70aa8ad7ae14797"
+      },
+      "third": {
+        "vi-VN": "0b14ff24ffa614dd",
+        "en-US": "7981ad484e0f03c5"
+      },
+      "quarter": {
+        "vi-VN": "0ce976ae67a87ada",
+        "en-US": "4fcc70bd7c1065ce"
       }
     }
   },
@@ -836,6 +898,28 @@
       "n1": {
         "vi-VN": "ee90047f3b1627bb",
         "en-US": "fe82560387f33aba"
+      }
+    }
+  },
+  "pythagoras-dissection": {
+    "entryRev": 1,
+    "contentHash": "e2ea43f6977483f3",
+    "framesHash": {
+      "three-four": {
+        "vi-VN": "a1027b3882b9fb72",
+        "en-US": "3cc8458acd6c870e"
+      },
+      "equal": {
+        "vi-VN": "3f9a67d2260d4124",
+        "en-US": "bb5afe0161526940"
+      },
+      "thin": {
+        "vi-VN": "28e0b5aba2706b37",
+        "en-US": "9fb8dedb18865fca"
+      },
+      "six-eight": {
+        "vi-VN": "17423f1678f21594",
+        "en-US": "1bc97a15cffd0860"
       }
     }
   },
