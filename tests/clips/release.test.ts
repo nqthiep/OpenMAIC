@@ -3,7 +3,7 @@ import { clipEntryHash } from '@/lib/clips/hash';
 import { clipRegistry } from '@/lib/clips';
 import { createClipRegistry } from '@/lib/clips/registry';
 import { buildCourseAllowlist } from '@/lib/server/agent-runtime/course-tools';
-import { mathPack } from '@/lib/subjects/math/pack';
+import { mathClipPack as mathPack } from './_clip-pack';
 import { releasedPacks, type ReviewLoader } from '@/lib/subjects/release';
 import { amgmSemicircleEntry as amgm } from '@/lib/subjects/math/clips/amgm-semicircle';
 import type { Review } from '@/lib/tutor/review-schema';

@@ -69,15 +69,16 @@ describe('olympiad-math SKILL.md', () => {
     expect(extractWalkthroughIdBlock(skillMd) ?? '').not.toContain('cauchy-schwarz');
   });
 
-  it('clip id block matches the math pack', () => {
-    expect(extractClipIdBlock(mathMd)).toBe(renderClipIdBlock(MATH));
+  it('the math skill has no clip block and does not teach the clip tool (ADR 0015)', () => {
+    expect(extractClipIdBlock(mathMd)).toBeNull();
+    expect(MATH.flatMap((p) => p.clips ?? [])).toHaveLength(0);
+    expect(mathMd).not.toContain('generate_clip_scenes');
   });
 
   it('has the frontmatter, the Chinese title and the tool names it teaches', () => {
     expect(mathMd).toMatch(/^---\nname: olympiad-math\n/);
     expect(mathMd).toMatch(/\ntitle: "[^"]*[一-鿿]/);
     expect(mathMd).toContain('generate_walkthrough');
-    expect(mathMd).toContain('generate_clip_scenes');
   });
 
   it('outline-constraints.json warns only and has no page cap', () => {
@@ -105,7 +106,6 @@ describe('clip id block', () => {
     expect(
       renderClipIdBlock([{ id: 'x', skillId: 'x', walkthroughs: [] }]).split('\n'),
     ).toHaveLength(2);
-    expect(renderClipIdBlock(MATH)).toContain('`amgm-semicircle`');
     const clipPack = {
       id: 'x',
       skillId: 'x',
@@ -120,9 +120,11 @@ describe('clip id block', () => {
   });
 
   it('replaces only the clip block, round-trips, and throws without markers', () => {
-    expect(replaceClipIdBlock(mathMd, renderClipIdBlock(MATH))).toBe(mathMd);
-    expect(extractClipIdBlock(replaceClipIdBlock(mathMd, 'X'))).toBe('X');
-    expect(extractWalkthroughIdBlock(replaceClipIdBlock(mathMd, 'X'))).toBe(
+    // the math skill carries no clip block any more (ADR 0015), so the round trip runs on a text that has the markers
+    const md = `${mathMd}\n<!-- BEGIN GENERATED: clip-ids -->\nold\n<!-- END GENERATED: clip-ids -->\n`;
+    expect(replaceClipIdBlock(md, 'old')).toBe(md);
+    expect(extractClipIdBlock(replaceClipIdBlock(md, 'X'))).toBe('X');
+    expect(extractWalkthroughIdBlock(replaceClipIdBlock(md, 'X'))).toBe(
       extractWalkthroughIdBlock(mathMd),
     );
     expect(() => replaceClipIdBlock('none', 'X')).toThrow();

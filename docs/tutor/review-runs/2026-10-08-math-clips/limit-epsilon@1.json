@@ -1,0 +1,83 @@
+{
+  "entryId": "limit-epsilon",
+  "entryRev": 1,
+  "contentHash": "68a3097afc7a6008",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "limit-epsilon",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "frame 2, all presets",
+          "problem": "The formula N = ⌊1/ε⌋ + 1 is shown for all presets without explaining why it works for all three sequences (1/n, (n+1)/n, (−1)ⁿ/n). While the formula is correct for all three (since |a_n − L| = 1/n in all cases), students might be confused about why the same formula applies to different sequences.",
+          "fix": "Add a brief note that for all three sequences, |a_n − L| = 1/n, so the same formula applies. Or derive the formula for each sequence separately."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "limit-epsilon",
+      "entryRev": 1,
+      "scores": {
+        "dung": 2,
+        "roRang": 4,
+        "chiTiet": 2,
+        "deHieu": 3,
+        "trucQuan": 3,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Beat “sequence”, BEFORE in all four presets: “giá trị đi lên”/“the value goes up” is false; 1/n and (n+1)/n decrease toward their limits, while (−1)^n/n oscillates.",
+        "Beat “band”, AFTER for inv-0.05 and n1-0.1: “a few first terms” is numerically misleading; the strict condition first holds at n=21 and n=11, so respectively 20 and 10 initial terms are not inside.",
+        "Beat “shrink”, AFTER and its second hint: “the narrower the band, the larger N” is false as a strict implication; the least valid N is only nondecreasing and can stay equal, for example ε=0.20 and ε=0.19 both give N=6.",
+        "The find-n hint and the closing definition omit necessary conditions: the derivation uses ε>0, and convergence requires that for every ε>0 there exists a natural number N. The unrestricted claim is false, for example at ε=0 for 1/n.",
+        "The closing generalization presents ε→0⇒N→∞ as part of the general meaning of convergence. It is true for these four formulas but is not required in general; an eventually constant sequence has bounded least valid N."
+      ],
+      "issues": [
+        {
+          "where": "beats.find-n and every find-n script",
+          "problem": "The calculation is written only for 1/n and is never connected explicitly to the other active presets; none of N=6, 21, 11, 5 is stated in the teacher narration.",
+          "fix": "Use |a_n−L|=1/n for all four active sequences, then calculate 1/n<ε separately for ε=0.20, 0.05, 0.10, and 0.25 to obtain N=6, 21, 11, and 5."
+        },
+        {
+          "where": "beat find-n, formula N=⌊1/ε⌋+1",
+          "problem": "The strict boundary and the reason for the extra 1 are not explained.",
+          "fix": "State that ε>0 and 1/n<ε is equivalent to n>1/ε. If 1/ε is an integer, equality is excluded, so N=1/ε+1; for ε=0.20, a₅=0.20 lies on the excluded boundary and N=6."
+        },
+        {
+          "where": "beat find-n, AFTER, and beat shrink",
+          "problem": "A finite cluster of plotted dots alone cannot prove that every later index remains inside the band.",
+          "fix": "Add the algebraic argument that each active sequence has |a_n−L|=1/n, which decreases with n; once it is below ε, all later deviations remain below ε."
+        },
+        {
+          "where": "beat shrink and its animation",
+          "problem": "No intermediate width-and-index values are named, so the claimed rightward motion of N cannot be checked quantitatively from the words.",
+          "fix": "Label checkpoints such as ε=0.20, 0.10, 0.05 with N=6, 11, 21 for 1/n."
+        },
+        {
+          "where": "state.formulas in every preset",
+          "problem": "All three sequence formulas are listed for every frame, so the active preset is not visually isolated.",
+          "fix": "Display only the active formula and its deviation |a_n−L|; show the other formulas only in a clearly labelled alternatives menu."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

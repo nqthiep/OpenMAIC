@@ -17,7 +17,7 @@
 | [0004](0004-three-phase-plan.md) | Kế hoạch triển khai | 1a–1c → G1 → 1d ‖ Tin 2A–2E ‖ Toán 3-0 → 3A–3D; S1/S2/S4 song song 1a | Đổi API base khi hai môn đã dùng | Accepted |
 | [0005](0005-widget-hosting-model.md) | Tích hợp và mở rộng | HTML tự chứa + registry `WidgetProvider`/`SubjectPack` trên vỏ `simulation`; không đổi package (một phần bị 0011 thay) | Upstream nhận → E2; consumer ngoài → E4 | Accepted |
 | [0006](0006-deterministic-trace-catalog.md) | Nguồn nội dung walkthrough | Hàm thuần sinh dữ kiện; lời thầy kịch bản theo beat từng preset; LLM chỉ chọn `id + preset`; `InputSpec`; C++ + Python | >20% speech trượt khi bật lời do LLM | Accepted |
-| [0007](0007-manim-and-math-visualization.md) | Trực quan hoá Toán | Manim hướng chính: M3 trên M1; phân bổ Z; clip câm, lời riêng; mỗi chapter một slide; `manim-service` cứng hoá | <5 topic cần chuyển động / render chậm / tiếng Việt hỏng | Accepted |
+| [0007](0007-manim-and-math-visualization.md) | Trực quan hoá Toán | Manim hướng chính: M3 trên M1; phân bổ Z; clip câm, lời riêng; mỗi chapter một slide; `manim-service` cứng hoá | <5 topic cần chuyển động / render chậm / tiếng Việt hỏng | Accepted; phần trực quan hoá Toán **Superseded by [0015](0015-math-interactive-web-ui-not-video.md)** |
 | [0008](0008-lesson-blueprint-hard-problems.md) | Cách dạy bài khó | Blueprint 12 giai đoạn; preset + nhập input (sau preset); dự đoán + luyện không editor; thang gợi ý; C++/Python đọc hiểu; rubric | Tính nặng không chạy được ở client → (4) | Accepted |
 | [0009](0009-teacher-qa-awareness.md) | Thầy trả lời theo vị trí | Digest (bước 0) + `widget-state` sau `widget-ready`; chữ từ catalog; clip: `clip-sheet` L0, `currentTime` L1 | Cần thầy Q&A nhảy frame | Accepted |
 | [0010](0010-no-student-code-enforcement.md) | Chặn code editor | **Mặc định chặn** (`OPENMAIC_ALLOW_CODE_WIDGET` để mở); chặn nhiều lớp: hiển thị, ghi, sinh, CSP | Cần `code` ở nơi khác → chính sách theo gói | Accepted |
@@ -25,6 +25,7 @@
 | [0012](0012-audience-scope-pedagogy-gates.md) | Đối tượng, MVP, cổng sư phạm | Hai luồng `ts10`/`hsg` xen kẽ; bài giải đề; C++ + Python; MVP 1a–1c + G1 | G1 trượt 2 vòng → xem lại blueprint | Accepted |
 | [0013](0013-provider-scene-lifecycle.md) | Vòng đời scene do provider sở hữu | `widget-ready` + gửi lại trạng thái cuối; beat theo preset; `entryRev`; khoá `patch_stage`; một nguồn chữ | Vẫn mất lệnh sau `ready` → ack từng message | Accepted |
 | [0014](0014-llm-roles-and-learner-data.md) | Vai trò con người và dữ liệu học sinh | LLM riêng cho từng vai trò: lọc nội dung (fail-closed), hội đồng giáo viên Tin/Toán, tác giả Manim, học sinh mô phỏng; bộ hiệu chuẩn; lưu dữ liệu học sinh trong kho runtime | Hiệu chuẩn dưới ngưỡng 2 lần; số đo thật lệch mô phỏng | Accepted |
+| [0015](0015-math-interactive-web-ui-not-video.md) | Minh hoạ Toán | Walkthrough tương tác SVG/DOM tự viết, thanh trượt, dự đoán; không clip Manim, không thư viện đồ hoạ ngoài; mã clip giữ nhưng tắt | ≥ 2 topic cần kéo điểm tự do/3D → ADR thư viện; cần hoạt hoạ điện ảnh → mp4 riêng | Accepted |
 
 Quy ước trích dẫn: "ADR NNNN §k" nghĩa là **mục k của phần Decision/Quyết định** trong ADR đó (ví dụ ADR 0013 §2 = quyết định 2: bắt tay).
 

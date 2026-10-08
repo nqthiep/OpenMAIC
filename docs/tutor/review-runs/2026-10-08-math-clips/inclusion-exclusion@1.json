@@ -1,0 +1,70 @@
+{
+  "entryId": "inclusion-exclusion",
+  "entryRev": 1,
+  "contentHash": "2a34f72cc41fae24",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "inclusion-exclusion",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "inclusion-exclusion",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 3,
+        "trucQuan": 3,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Beat add, ask and first two hints (all presets): saying that an element in both A and B is counted twice omits the condition that it is not in C; an element in all three sets is counted three times, as the next hint itself states.",
+        "Preset disjoint, beats add through add-back: the narration says the sum over-counts and that the middle is over-subtracted and added back, but r=[3,2,4,0,0,0,0] makes every intersection empty and gives 3+2+4=|A∪B∪C|=9; this preset has no overcount to subtract or restore.",
+        "Beat add-back misconception: the Vietnamese text refers to exactly two minus signs, but the displayed three-set formula has three pairwise subtraction terms; the English alt omits the claim exactly two, so the two locales do not have the same meaning."
+      ],
+      "issues": [
+        {
+          "where": "All presets, beats add through add-back",
+          "problem": "The animation supplies numerical cardinalities, but the narration never substitutes them, checks the final equality, or states the resulting union size.",
+          "fix": "Add a preset-specific calculation; for example, for generic write 7+5+8−2−3−2+1=14, and give analogous calculations for the other presets."
+        },
+        {
+          "where": "Preset empty-center, beats subtract and add-back",
+          "problem": "The triple intersection has size 0, but the phrases over-subtracted and add it back are not qualified, so learners may infer that positive elements are being restored.",
+          "fix": "State explicitly that A∩B∩C is empty, so the correction term adds 0; the coefficient argument still explains the general formula."
+        },
+        {
+          "where": "Preset disjoint, beats venn through add-back",
+          "problem": "The seven formal Venn cells and the over-count story can obscure that only three cells are nonempty and no intersection term changes the sum.",
+          "fix": "Distinguish formal membership cells from nonempty regions and branch the narration: all intersections are empty, there is no overcount, and the formula reduces to 3+2+4=9."
+        },
+        {
+          "where": "Beat subtract, AFTER line",
+          "problem": "The phrase regions of two sets is ambiguous because the triple region also lies in every pair of sets; the claim applies only to elements in exactly two sets.",
+          "fix": "Say that each region belonging to exactly two sets and not the third is counted 2−1=1 time."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "entryId": "lattice-paths",
+  "entryRev": 1,
+  "contentHash": "787248063e4b993f",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "lattice-paths",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beat:pascal, frame 2",
+          "problem": "The recurrence N(r,c) = N(r-1,c) + N(r,c-1) is stated without explicitly mentioning the boundary conditions (first row and first column are all 1s), which are needed for a complete definition.",
+          "fix": "Add a brief note that points on the bottom row or left column have exactly one path to them, so their value is 1."
+        },
+        {
+          "where": "beat:binomial, frame 3",
+          "problem": "The general formula C(m+n, n) is given but no specific numeric computation is shown in the text (e.g., substituting m=2, n=2 to get C(4,2)=6).",
+          "fix": "Include a concrete substitution example, such as 'for the 2×2 grid this gives C(4,2) = 6', to connect the general formula to the specific case."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "lattice-paths",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Beat “pascal” (mọi preset), CAPTION/AFTER và công thức N(r,c): quy tắc tổng hai điểm trước được khẳng định cho “mỗi điểm”, nhưng điểm xuất phát và các điểm biên không có hai điểm trước trên lưới; quy ước giá trị bằng 0 bên ngoài lưới chưa được nêu."
+      ],
+      "issues": [
+        {
+          "where": "Beat “pascal”, công thức N(r,c)",
+          "problem": "Ký hiệu N, toạ độ gốc, miền của r,c và các giá trị biên chưa được định nghĩa, nên công thức không tự đủ để kiểm tra.",
+          "fix": "Lấy điểm xuất phát là (0,0), nêu N(0,0)=1 và N(r,0)=N(0,c)=1; chỉ dùng N(r,c)=N(r-1,c)+N(r,c-1) khi r,c≥1, hoặc quy ước các giá trị bên ngoài lưới bằng 0 nhưng vẫn nêu điều kiện tại điểm xuất phát."
+        },
+        {
+          "where": "Beat “paths”, chuyển sang câu AFTER",
+          "problem": "Sau khi chỉ vẽ “vài” đường, narration khẳng định điều đúng cho mọi đường nhưng không nêu rõ lý do; các ví dụ riêng lẻ không tự chứng minh mệnh đề chung.",
+          "fix": "Nói rõ rằng đi từ hoành độ 0 đến m bắt buộc có m bước phải, còn đi từ tung độ 0 đến n bắt buộc có n bước lên; các đường vẽ chỉ minh hoạ trực quan."
+        },
+        {
+          "where": "Beat “binomial” và câu hỏi ban đầu",
+          "problem": "Công thức được nêu nhưng không preset nào được thay số, nên câu hỏi “có bao nhiêu đường” chưa được giải đáp bằng ví dụ số cụ thể trong lời giảng.",
+          "fix": "Thêm ví dụ như lưới 2×2 cho C(4,2)=6; có thể kết thúc bằng các giá trị 3×2: C(5,2)=10, 1×6: C(7,6)=7 và 4×4: C(8,4)=70."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

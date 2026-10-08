@@ -8,6 +8,7 @@ import { buildClipReviewMaterial } from '@/lib/clips/review-material';
 import { buildReviewPrompt, buildReviewSystem } from '@/lib/tutor/review-schema';
 import { mathClipModules } from '@/lib/subjects/math/clips';
 import { mathPack } from '@/lib/subjects/math/pack';
+import { mathClipPack } from '../clips/_clip-pack';
 import { buildReviewMaterial } from '@/lib/tutor/review-schema';
 
 describe('math review material', () => {
@@ -105,7 +106,7 @@ describe('a clip through the panel with fake reviewers', () => {
     });
     const loader = (_s: string, id: string, rev: number) =>
       id === mod.entry.id && rev === mod.entry.engine.templateRev ? stored : null;
-    const released = releasedPacks([mathPack], loader)[0];
+    const released = releasedPacks([mathClipPack], loader)[0];
     expect(released.clips?.map((c) => c.id)).toEqual([mod.entry.id]);
   });
 });
