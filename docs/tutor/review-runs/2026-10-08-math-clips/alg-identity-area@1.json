@@ -1,0 +1,75 @@
+{
+  "entryId": "alg-identity-area",
+  "entryRev": 1,
+  "contentHash": "4cda16fa5475e877",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "alg-identity-area",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "alg-identity-area",
+      "entryRev": 1,
+      "scores": {
+        "dung": 2,
+        "roRang": 3,
+        "chiTiet": 2,
+        "deHieu": 2,
+        "trucQuan": 2,
+        "sinhDong": 3
+      },
+      "factErrors": [
+        "Frame `rearrange` áp dụng cho các preset `sum-3-2` và `sum-1-1` làm các phần của hình vuông cạnh a+b trở thành hình chữ nhật (a+b)(a−b) mà vẫn giữ nguyên diện tích; điều này sai: 25 không thể bằng 5·1=5 và 4 không thể bằng 2·0=0.",
+        "Frame `formula` của `diff-5-2` và `diff-9-1` dùng caption `(a+b)²=a²+2ab+b²`, không phải đẳng thức thu được từ phần diện tích còn lại; caption đúng phải là `a²−b²=(a+b)(a−b)`, tức 25−4=21=7·3 và 81−1=80=10·8.",
+        "Mạch hình học tuyên bố đẳng thức đúng với mọi a,b nhưng chỉ dùng các preset số và không nêu điều kiện của hình: phần dư a²−b² là hình chữ L khác 0 khi 0<b<a; với a=b=1 không còn hình chữ L và (a+b)(a−b)=0. Cần giới hạn phép hình học hoặc chứng minh bằng đẳng thức để mở rộng đến mọi số."
+      ],
+      "issues": [
+        {
+          "where": "CAPTION của frame `decompose` trong cả hai locale",
+          "problem": "`a² · ab · ab · b²` dễ bị đọc là tích ba diện tích thay vì tổng của bốn miền.",
+          "fix": "Dùng `a² + ab + ab + b²`, hoặc dùng dấu phẩy/gạch để ghi rõ đây là danh sách nhãn của bốn phần."
+        },
+        {
+          "where": "`beats[decompose].ask` và thứ tự script",
+          "problem": "Câu hỏi hỏi có bao nhiêu hình chữ nhật a·b xuất hiện sau lời dẫn đã nói rõ là có hai hình chữ nhật, nên học sinh không còn gì để dự đoán.",
+          "fix": "Đặt câu hỏi trước lời dẫn và trước khi đường chia xuất hiện; chỉ nói đáp án ở phần sau."
+        },
+        {
+          "where": "Lời kể và caption của frame `formula`",
+          "problem": "Các giá trị trong `vars` không được kiểm tra bằng một ví dụ số, nên clip không trực tiếp chứng minh equality bằng số.",
+          "fix": "Thêm ví dụ ngắn: 25=9+6+6+4; 4=1+1+1+1; 25−4=21=7·3; 81−1=80=10·8."
+        },
+        {
+          "where": "Frame `rearrange` và frame `formula` dành cho hiệu hai bình phương",
+          "problem": "Lời nói về “hình ban đầu” có thể bị hiểu là toàn bộ hình vuông cạnh a, trong khi b² đã bị cắt bỏ trước khi ghép.",
+          "fix": "Nói rõ diện tích được so sánh là phần còn lại a²−b² trước và sau khi dịch chuyển; bản gốc đầy đủ có diện tích a²."
+        },
+        {
+          "where": "`beats[figure]` và `beats[decompose]` ở cả hai locale",
+          "problem": "Cụm “hình vuông a bình phương” và “the square a squared” không tự nhiên, có thể bị hiểu là cạnh dài a² thay vì hình vuông cạnh a.",
+          "fix": "Dùng “hình vuông cạnh a, diện tích a²”, “hình vuông cạnh b, diện tích b²” và tương ứng “an a-by-a square” trong tiếng Anh."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

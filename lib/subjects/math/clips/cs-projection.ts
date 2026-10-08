@@ -54,8 +54,8 @@ export const csProjectionEntry: ClipEntry<In> = defineClip<In>({
       endSec: 10,
       label: m('Hai vectơ', 'Two vectors'),
       before: m(
-        'Ta vẽ hai vectơ u và v xuất phát từ gốc toạ độ. Ta muốn so tích vô hướng của chúng với tích hai độ dài.',
-        'We draw two vectors u and v from the origin. We want to compare their dot product with the product of the two lengths.',
+        'Ta vẽ hai vectơ u và v khác không, xuất phát từ gốc toạ độ. Ta muốn so tích vô hướng của chúng với tích hai độ dài.',
+        'We draw two non-zero vectors u and v from the origin. We want to compare their dot product with the product of the two lengths.',
       ),
       after: m(
         'Nhớ rằng độ dài của u là căn của ux bình phương cộng uy bình phương.',
@@ -87,8 +87,8 @@ export const csProjectionEntry: ClipEntry<In> = defineClip<In>({
       endSec: 37,
       label: m('Bất đẳng thức', 'The inequality'),
       before: m(
-        'Hình chiếu là một cạnh góc vuông của tam giác có v làm cạnh huyền. Cạnh góc vuông không dài hơn cạnh huyền.',
-        'The projection is a leg of a right triangle whose hypotenuse is v. A leg is never longer than the hypotenuse.',
+        'Hình chiếu là một cạnh góc vuông của tam giác có v làm cạnh huyền, tam giác này suy biến khi hình chiếu bằng 0 hoặc dài bằng v. Cạnh góc vuông không dài hơn cạnh huyền.',
+        'The projection is a leg of a right triangle whose hypotenuse is v, and the triangle degenerates when the projection is 0 or as long as v. A leg is never longer than the hypotenuse.',
       ),
       after: m(
         'Vậy giá trị tuyệt đối của u chấm v chia cho độ dài u nhỏ hơn hoặc bằng độ dài v. Nhân hai vế với độ dài u ta được bất đẳng thức.',
@@ -106,14 +106,14 @@ export const csProjectionEntry: ClipEntry<In> = defineClip<In>({
       endSec: 48,
       label: m('Dấu bằng', 'Equality'),
       before: m(
-        'Ta quay v dần về phía đường thẳng của u và xem hình chiếu so với v.',
-        'We turn v gradually toward the line of u and watch the projection against v.',
+        'Ta quay v dần về phía đường thẳng của u và xem hình chiếu so với v. Nếu hai vectơ đã song song thì v lắc ra rồi quay về.',
+        'We turn v gradually toward the line of u and watch the projection against v. If the vectors are already parallel, v swings out and comes back.',
       ),
       after: m(
-        'Khi v song song với u, hình chiếu dài bằng v và dấu bằng xảy ra. Điều kiện là tích chéo ux nhân vy trừ uy nhân vx bằng 0.',
-        'When v is parallel to u the projection is as long as v and equality holds. The condition is the cross product ux times vy minus uy times vx equals 0.',
+        'Khi v song song với u, cùng hay ngược hướng, hình chiếu dài bằng v và dấu bằng xảy ra. Điều kiện là tích chéo ux nhân vy trừ uy nhân vx bằng 0.',
+        'When v is parallel to u, in the same or the opposite direction, the projection is as long as v and equality holds. The condition is the cross product ux times vy minus uy times vx equals 0.',
       ),
-      caption: m('u ∥ v ⇔ dấu =', 'u ∥ v ⇔ equality'),
+      caption: m('u, v ≠ 0: u ∥ v ⇔ dấu =', 'u, v ≠ 0: u ∥ v ⇔ ='),
     },
   ],
   invariants: (i) => {
