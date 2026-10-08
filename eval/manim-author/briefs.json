@@ -1,0 +1,122 @@
+[
+  {
+    "id": "b-alg-identity-area",
+    "clipId": "alg-identity-area",
+    "presetId": "sum-3-2",
+    "text": "Dựng clip \"Hằng đẳng thức bằng diện tích\" gồm 4 chương. Chương 1: hình vuông cạnh a + b (hoặc cạnh a). Chương 2: hình vuông chia thành a², ab, ab, b² (hoặc cắt bỏ góc b²). Chương 3: các phần được di chuyển và ghép thành hình chữ nhật (a + b) × (a − b) cho hiệu hai bình phương. Chương 4: hai cách đọc diện tích cạnh nhau và dấu bằng."
+  },
+  {
+    "id": "b-concurrency-dynamic",
+    "clipId": "concurrency-dynamic",
+    "presetId": "acute-ortho",
+    "text": "Dựng clip \"Các đường đồng quy khi đỉnh chạy\" gồm 5 chương. Chương 1: tam giác ABC, đỉnh C có mũi tên chỉ hướng chạy song song với AB. Chương 2: ba đường cao, trung tuyến, trung trực hoặc phân giác tuỳ chọn. Chương 3: chỗ giao được phóng to: ba đường qua một điểm. Chương 4: C trượt song song với AB; ba đường và tâm trượt theo. Chương 5: vị trí đặc biệt: tâm ngoài tam giác hoặc trùng với đỉnh góc vuông."
+  },
+  {
+    "id": "b-convex-chord",
+    "clipId": "convex-chord",
+    "presetId": "x2-mid",
+    "text": "Dựng clip \"Dây cung trên đồ thị lồi (Jensen)\" gồm 4 chương. Chương 1: đồ thị hình bát của x², |x| hoặc x⁴ với hai điểm x₁, x₂ trên trục. Chương 2: đoạn thẳng nối hai điểm của đồ thị. Chương 3: điểm trộn trên trục và hai điểm thẳng đứng: một trên đồ thị, một trên dây cung. Chương 4: hai độ cao cạnh nhau với dấu ≤ ở giữa."
+  },
+  {
+    "id": "b-cs-projection",
+    "clipId": "cs-projection",
+    "presetId": "generic",
+    "text": "Dựng clip \"Cauchy–Schwarz bằng hình chiếu\" gồm 4 chương. Chương 1: hai vectơ u và v vẽ từ gốc toạ độ. Chương 2: hình chiếu của v lên đường thẳng chứa u, chân đường vuông góc. Chương 3: tam giác vuông có v làm cạnh huyền và hình chiếu làm cạnh góc vuông. Chương 4: v quay tới song song với u; hình chiếu dài dần tới độ dài v."
+  },
+  {
+    "id": "b-euclid-rectangle",
+    "clipId": "euclid-rectangle",
+    "presetId": "48-18",
+    "text": "Dựng clip \"Thuật toán Euclid bằng lát hình vuông\" gồm 4 chương. Chương 1: hình chữ nhật a × b. Chương 2: các hình vuông cạnh bằng cạnh ngắn được cắt khỏi hình chữ nhật. Chương 3: hình chữ nhật còn lại được cắt tiếp, các hình vuông nhỏ dần. Chương 4: hình vuông cuối cùng được tô sáng với cạnh bằng gcd."
+  },
+  {
+    "id": "b-figurate-sums",
+    "clipId": "figurate-sums",
+    "presetId": "odd-4",
+    "text": "Dựng clip \"Tổng bằng chấm: số lẻ và số tam giác\" gồm 4 chương. Chương 1: các hàng chấm 1, 3, 5, … hoặc 1, 2, 3, …. Chương 2: chữ L (gnomon) ôm hình vuông, hoặc hai bậc thang ghép thành hình chữ nhật. Chương 3: hình vuông cạnh n hoặc nửa hình chữ nhật n × (n + 1). Chương 4: từ hình ở bước k thêm lớp k + 1 được hình ở bước k + 1."
+  },
+  {
+    "id": "b-geometric-series-area",
+    "clipId": "geometric-series-area",
+    "presetId": "half",
+    "text": "Dựng clip \"Chuỗi hình học bằng diện tích\" gồm 4 chương. Chương 1: hình vuông đơn vị. Chương 2: một phần diện tích r được cắt ra khỏi hình vuông. Chương 3: các mảnh r, r², r³, … nối tiếp nhau, mỗi mảnh nhỏ hơn mảnh trước. Chương 4: các mảnh lấp hình vuông và tổng riêng tiến tới giới hạn."
+  },
+  {
+    "id": "b-graph-transform",
+    "clipId": "graph-transform",
+    "presetId": "shift",
+    "text": "Dựng clip \"Biến đổi đồ thị: y = a·f(x − h) + k\" gồm 4 chương. Chương 1: đồ thị gốc của x², |x| hoặc x³ và điểm đánh dấu tại gốc. Chương 2: đồ thị trượt ngang, điểm đánh dấu từ 0 tới h. Chương 3: đồ thị co giãn theo chiều dọc và lật nếu a âm. Chương 4: đồ thị trượt dọc, điểm đánh dấu tại (h, k)."
+  },
+  {
+    "id": "b-inclusion-exclusion",
+    "clipId": "inclusion-exclusion",
+    "presetId": "generic",
+    "text": "Dựng clip \"Bao hàm – loại trừ cho ba tập\" gồm 4 chương. Chương 1: ba vòng tròn A, B, C với số phần tử ghi trong bảy miền. Chương 2: ba vòng tròn được tô sáng, các miền chồng nhau có màu đậm hơn. Chương 3: ba phần giao đôi bị gạch đi, miền giữa trở nên trống. Chương 4: miền giữa được tô sáng trở lại với dấu cộng."
+  },
+  {
+    "id": "b-induction-fallacy",
+    "clipId": "induction-fallacy",
+    "presetId": "colors-4",
+    "text": "Dựng clip \"Nguỵ biện quy nạp\" gồm 4 chương. Chương 1: phát biểu cần chứng minh hiện trên màn hình cùng nhãn \"chứng minh bằng quy nạp\". Chương 2: hai nhóm k con (hoặc phép biến đổi từ k lên k + 1) được vẽ chồng lên nhau. Chương 3: trường hợp k = 1 → 2 được phóng to: hai nhóm một con không có phần chung; hoặc n = 1 được thử và cho kết quả sai. Chương 4: hai ô \"cơ sở\" và \"bước quy nạp\" cùng được đánh dấu tích."
+  },
+  {
+    "id": "b-inscribed-angle",
+    "clipId": "inscribed-angle",
+    "presetId": "arc-100",
+    "text": "Dựng clip \"Góc nội tiếp\" gồm 4 chương. Chương 1: đường tròn tâm O, hai điểm A, B chia thành cung nhỏ và cung lớn. Chương 2: góc AOB ở tâm với hai bán kính OA, OB. Chương 3: điểm P chạy trên cung còn lại, góc APB giữ nguyên số đo bằng nửa góc ở tâm. Chương 4: tứ giác APBQ nội tiếp, hai góc đối ở P và Q."
+  },
+  {
+    "id": "b-lattice-paths",
+    "clipId": "lattice-paths",
+    "presetId": "2-2",
+    "text": "Dựng clip \"Đường đi trên lưới và tam giác Pascal\" gồm 4 chương. Chương 1: lưới m × n với điểm xuất phát và điểm đích ở hai góc đối. Chương 2: vài đường đi tô màu khác nhau từ góc xuất phát tới góc đích. Chương 3: số ở mỗi điểm lưới, mỗi số là tổng của số bên trái và số bên dưới. Chương 4: số ở góc đích và công thức tổ hợp cạnh đó."
+  },
+  {
+    "id": "b-limit-epsilon",
+    "clipId": "limit-epsilon",
+    "presetId": "inv-0.2",
+    "text": "Dựng clip \"Giới hạn của dãy: dải ε và số N\" gồm 4 chương. Chương 1: các chấm a₁, a₂, … trên một đường thẳng, dồn về L. Chương 2: dải ngang từ L − ε đến L + ε quanh L. Chương 3: một đường đứng ở N: bên phải nó mọi chấm đều trong dải. Chương 4: dải hẹp dần, đường đứng N dịch sang phải."
+  },
+  {
+    "id": "b-modular-clock",
+    "clipId": "modular-clock",
+    "presetId": "n10-a2",
+    "text": "Dựng clip \"Nhân modulo trên mặt đồng hồ\" gồm 4 chương. Chương 1: n điểm đều nhau trên vòng tròn, đánh số 0 tới n − 1. Chương 2: các dây nối k tới a·k mod n. Chương 3: dãy a, a², a³, … mod n được ghi và nối bằng các mũi tên. Chương 4: đoạn lặp được tô sáng cùng độ dài của nó."
+  },
+  {
+    "id": "b-plane-transform",
+    "clipId": "plane-transform",
+    "presetId": "rotate90",
+    "text": "Dựng clip \"Phép biến hình và nhân số phức\" gồm 4 chương. Chương 1: tam giác ABC trên lưới toạ độ. Chương 2: tam giác ảnh A′B′C′ cạnh tam giác ABC. Chương 3: độ dài các cạnh và diện tích của hai tam giác ghi cạnh nhau. Chương 4: điểm x + iy được nhân với i và quay một góc vuông."
+  },
+  {
+    "id": "b-power-of-point",
+    "clipId": "power-of-point",
+    "presetId": "outside",
+    "text": "Dựng clip \"Phương tích của một điểm\" gồm 4 chương. Chương 1: đường tròn tâm O, điểm P ở một trong ba vị trí. Chương 2: đường thẳng qua P cắt đường tròn tại A và B, các đoạn PA, PB được đo. Chương 3: đường thẳng quay quanh P; tích hiển thị cạnh đó không đổi. Chương 4: cát tuyến thành tiếp tuyến PT; hoặc dòng \"không có tiếp tuyến\" khi P không ở ngoài."
+  },
+  {
+    "id": "b-pythagoras-dissection",
+    "clipId": "pythagoras-dissection",
+    "presetId": "three-four",
+    "text": "Dựng clip \"Định lý Pythagore bằng cắt ghép\" gồm 4 chương. Chương 1: bốn tam giác vuông bằng nhau với cạnh a, b, c. Chương 2: hình vuông cạnh a + b chứa bốn tam giác và một hình vuông nghiêng ở giữa. Chương 3: bốn tam giác xếp thành hai hình chữ nhật, phần trống là hai hình vuông a² và b². Chương 4: hai cách xếp cạnh nhau, phần trống được tô màu."
+  },
+  {
+    "id": "b-riemann-integral",
+    "clipId": "riemann-integral",
+    "presetId": "x2-4",
+    "text": "Dựng clip \"Tổng Riemann và tích phân\" gồm 4 chương. Chương 1: vùng giữa đồ thị và trục hoành từ a đến b. Chương 2: n hình chữ nhật có chiều cao f tại đầu bên trái mỗi đoạn. Chương 3: n tăng từ 4 lên 8 rồi 16; các hình chữ nhật mỏng dần. Chương 4: Lₙ tiến tới giá trị của tích phân tính từ nguyên hàm."
+  },
+  {
+    "id": "b-secant-tangent",
+    "clipId": "secant-tangent",
+    "presetId": "square-at-1",
+    "text": "Dựng clip \"Từ cát tuyến đến tiếp tuyến\" gồm 4 chương. Chương 1: đồ thị đa thức trên hệ trục, điểm P tại x₀. Chương 2: điểm Q ở x₀ + 1, đường thẳng PQ. Chương 3: h giảm 1, 0,5, 0,1, 0,01; cát tuyến xoay dần. Chương 4: tiếp tuyến tại P với hệ số góc f′(x₀)."
+  },
+  {
+    "id": "b-tiling-coloring",
+    "clipId": "tiling-coloring",
+    "presetId": "n8-opposite",
+    "text": "Dựng clip \"Bàn cờ bỏ hai ô và lát domino\" gồm 4 chương. Chương 1: bàn cờ n × n với hai ô bị bỏ và một domino. Chương 2: các ô tô đen trắng xen kẽ, hai ô bị bỏ được đánh dấu. Chương 3: số ô đen và ô trắng còn lại ghi bên cạnh bàn cờ. Chương 4: hai số đếm khác nhau và dấu gạch, hoặc một cách lát hoàn chỉnh."
+  }
+]
