@@ -3,7 +3,7 @@
 # (docker --cpus), plus the image size and the cold start. Build the image first: docker build -f manim/Dockerfile -t manim-service .
 # Usage: docker.sh [image]   Prints one line per measurement.
 IMAGE="${1:-manim-service:real}"
-echo "image $IMAGE size=$(docker image inspect "$IMAGE" --format '{{.Size}}' | awk '{printf "%.0f MB", $1/1048576}') (uncompressed layers as the daemon reports them)"
+echo "image $IMAGE: $(docker images "$IMAGE" --format "{{.Size}}") on disk, $(docker image inspect "$IMAGE" --format "{{.Size}}" | awk "{printf \"%.0f MB\", \$1/1048576}") of compressed content"
 start=$(date +%s)
 docker run --rm --entrypoint python3 "$IMAGE" -c "import manim" >/dev/null 2>&1
 echo "cold start (container start + import manim): $(( $(date +%s) - start )) s"
