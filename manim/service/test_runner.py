@@ -66,3 +66,31 @@ def test_cancel_kills_the_renderer(tmp_path):
     threading.Timer(0.3, ev.set).start()
     with pytest.raises(RuntimeError, match="cancelled"):
         runnermod.make_runner(tdir, QA, command="sleep 30", poll_s=0.05)(job(), out, ev)
+
+
+def test_environment_is_minimal_and_tex_is_locked_down(tmp_path, monkeypatch):
+    monkeypatch.setenv("MANIM_SERVICE_TOKEN", "s3cret")
+    monkeypatch.setenv("SOME_OTHER_SECRET", "hunter2")
+    tdir, out = setup(tmp_path)
+    cmd = 'env | sort > "$CLIP_OUT/env.txt"; exit 0'
+    with pytest.raises(RuntimeError, match="no manifest"):
+        runnermod.make_runner(tdir, QA, command=cmd)(job(), out, threading.Event())
+    env = (out / "env.txt").read_text()
+    assert "s3cret" not in env and "hunter2" not in env and "SOME_OTHER_SECRET" not in env
+    assert "shell_escape=f" in env and "openin_any=p" in env and "openout_any=p" in env
+    assert "CLIP_PARAMS=" in env
+
+
+def test_cancel_kills_the_whole_process_group(tmp_path):
+    """The renderer forks children (TeX, ffmpeg): a cancel must take them too, not only the shell."""
+    import subprocess
+    import time
+    tdir, out = setup(tmp_path)
+    marker = f"redteam-child-{tmp_path.name}"
+    ev = threading.Event()
+    threading.Timer(0.5, ev.set).start()
+    with pytest.raises(RuntimeError, match="cancelled"):
+        runnermod.make_runner(tdir, QA, command=f"sleep 60 & exec -a {marker} sleep 61", poll_s=0.05)(job(), out, ev)
+    time.sleep(0.3)
+    alive = subprocess.run(["pgrep", "-f", "sleep 6[01]"], capture_output=True, text=True).stdout.split()
+    assert alive == [], f"children of the renderer survived a cancel: {alive}"

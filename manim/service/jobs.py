@@ -165,6 +165,12 @@ class JobManager:
             job.finished = self.clock()
             job.cancelled.set()  # the runner is told to stop; the deadline is reported through the poll
 
+    def _deadline(self, job: Job) -> None:
+        with self.lock:
+            if job.status == "running":
+                job.status, job.error, job.finished = "failed", "deadline", self.clock()
+                job.cancelled.set()
+
     def _expire(self) -> None:
         now = self.clock()
         for jid in list(self.jobs):
@@ -187,12 +193,19 @@ class JobManager:
                     break
             else:
                 return False
+        # the deadline is enforced here, by the worker, and not only when somebody polls the status: a job that never ends is
+        # told to stop (the runner kills its process group) even if nobody asks about it
+        watchdog = threading.Timer(self.limits.deadline_ms / 1000, self._deadline, args=(job,))
+        watchdog.daemon = True
+        watchdog.start()
         try:
             job.out_dir.mkdir(parents=True, exist_ok=True)
             self.runner(job, job.out_dir, job.cancelled)
             outcome, error = "succeeded", None
         except Exception as e:  # noqa: BLE001 - a runner failure is a failed job, never a crashed worker
             outcome, error = "failed", str(e)[:500] or e.__class__.__name__
+        finally:
+            watchdog.cancel()
         with self.lock:
             self._check_deadline(job)  # a runner that ignored the deadline still ends as failed
             if job.status == "running":  # not cancelled or timed out meanwhile

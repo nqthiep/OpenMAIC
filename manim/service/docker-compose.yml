@@ -4,7 +4,7 @@ services:
   manim-service:
     build:
       context: ../..
-      dockerfile: manim/service/Dockerfile
+      dockerfile: manim/Dockerfile
     environment:
       MANIM_SERVICE_TOKEN: ${MANIM_SERVICE_TOKEN:?set MANIM_SERVICE_TOKEN}
       MANIM_RENDER_CMD: ${MANIM_RENDER_CMD:-}

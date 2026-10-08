@@ -192,3 +192,20 @@ def test_http_flow(http):
     assert http("GET", f"/render/{sub['jobId']}/download?chapter=zzz")[0] == 404
     assert http("DELETE", f"/render/{sub['jobId']}")[0] == 204
     assert http("GET", "/render/missing")[0] == 404
+
+
+def test_deadline_stops_a_job_nobody_asks_about(tmp_path):
+    """An endless render is told to stop by the worker's own watchdog, with no status poll and no clock tricks."""
+    stopped = threading.Event()
+
+    def endless(job, out, cancelled):
+        if cancelled.wait(5):
+            stopped.set()
+
+    m = manager(endless, tmp_path, deadline_ms=200)
+    j = m.submit("u", body())
+    t = threading.Thread(target=m.run_one)
+    t.start()
+    assert stopped.wait(3), "the runner was never told to stop"
+    t.join(3)
+    assert j.status == "failed" and j.error == "deadline"
