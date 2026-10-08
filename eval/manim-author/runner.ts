@@ -8,12 +8,13 @@
  * Needs MODEL_ROUTES='{"manim-author":"<provider:model>"}', MANIM_PY (a python with manim; default python3) and latex on PATH.
  * --dry-run  print the plan and the prompt sizes; no model call, no render
  * --limit N  the first N briefs (a partial run cannot pass)
+ * --out DIR  write, for each solved brief, DIR/<clipId>.py and DIR/<clipId>.gates.json (what scripts/manim-author-pr.mjs reads)
  * --replay   answer each brief with the committed template of its clip instead of calling a model: a smoke test of the
  *            loop, the sandbox render and the gates. It measures nothing about the model and needs no route.
  * The rendered files go to a temporary directory; nothing is written to the repository.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -42,6 +43,7 @@ async function main(): Promise<number> {
     options: {
       'dry-run': { type: 'boolean', default: false },
       replay: { type: 'boolean', default: false },
+      out: { type: 'string' },
       limit: { type: 'string' },
       only: { type: 'string' },
     },
@@ -122,9 +124,11 @@ async function main(): Promise<number> {
     const preset = mod.entry.presets.find((p) => p.id === brief.presetId)!;
     const work = mkdtempSync(path.join(tmpdir(), `author-${brief.id}-`));
     let n = 0;
+    let lastCode = '';
     const check: Check = async (code) => {
       const file = path.join(work, `${mod.entry.id.replace(/-/g, '_')}-${++n}.py`);
       writeFileSync(file, code);
+      lastCode = code;
       const result = await runRenderJob({
         entry: mod.entry,
         job: {
@@ -163,6 +167,17 @@ async function main(): Promise<number> {
     current = brief.clipId;
     const r = await authorOne(brief, mod, { llm, check, example });
     results.push(r);
+    if (values.out && r.solvedAt !== null) {
+      mkdirSync(values.out, { recursive: true });
+      const file = path.join(values.out, `${mod.entry.id.replace(/-/g, '_')}.py`);
+      writeFileSync(file, lastCode);
+      // allowlist, render + QA and the manifest check passed (that is what a successful round means); the two reviews are
+      // separate steps and stay null until they have run
+      writeFileSync(
+        path.join(values.out, `${mod.entry.id}.gates.json`),
+        `${JSON.stringify({ clipId: mod.entry.id, briefId: brief.id, rounds: r.solvedAt, allowlist: true, render: true, manifest: true, mathReview: null, codeReview: null }, null, 2)}\n`,
+      );
+    }
     console.log(
       `${brief.id}: ${r.solvedAt === null ? 'NOT SOLVED' : `solved in round ${r.solvedAt}`}`,
     );

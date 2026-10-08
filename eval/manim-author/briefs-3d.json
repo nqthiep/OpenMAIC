@@ -1,0 +1,53 @@
+{
+  "note": "3D-01. Briefs for the Manim topics of the math curriculum that have no clip yet. Drafted from the curriculum, not yet reviewed by the math panel (card 3A-17); parameters are proposals. The author loop (runner.ts) needs a ClipEntry for each (a card T) before it can run on them.",
+  "briefs": [
+    {
+      "id": "d-mvt-chord-tangent",
+      "topicId": "m4-limits-mvt",
+      "proposedClipId": "mvt-chord-tangent",
+      "takeaway": "Với f khả vi trên [a, b], có điểm c trong (a, b) để tiếp tuyến tại c song song với dây cung nối (a, f(a)) và (b, f(b)); khi đó f′(c) = (f(b) − f(a)) / (b − a).",
+      "misconception": "Cho rằng c luôn là trung điểm của [a, b]: điều đó chỉ đúng với hàm bậc hai.",
+      "proposedParams": [
+        {
+          "name": "c",
+          "kind": "int-array",
+          "len": [3, 4],
+          "range": [-3, 3],
+          "meaning": "hệ số của đa thức, bậc tăng dần"
+        },
+        { "name": "a", "kind": "int", "range": [-3, 1] },
+        { "name": "b", "kind": "int", "range": [-1, 3] }
+      ],
+      "chapters": [
+        "đồ thị và dây cung",
+        "tiếp tuyến trượt dọc đồ thị",
+        "hệ số góc bằng nhau",
+        "điểm c không phải trung điểm"
+      ]
+    },
+    {
+      "id": "d-inversion-circle",
+      "topicId": "m4-projective-inversion",
+      "proposedClipId": "inversion-circle",
+      "takeaway": "Phép nghịch đảo tâm O, bán kính r đưa điểm P thành P′ trên tia OP với OP · OP′ = r²; đường tròn không qua O được đưa thành một đường tròn, đường tròn qua O được đưa thành một đường thẳng.",
+      "misconception": "Cho rằng ảnh của mọi đường tròn đều là đường tròn: đường tròn đi qua tâm nghịch đảo có ảnh là đường thẳng.",
+      "proposedParams": [
+        { "name": "r", "kind": "int", "range": [1, 5], "meaning": "bán kính nghịch đảo" },
+        { "name": "cx", "kind": "int", "range": [-4, 4] },
+        { "name": "cy", "kind": "int", "range": [-4, 4] },
+        {
+          "name": "R",
+          "kind": "int",
+          "range": [1, 4],
+          "meaning": "bán kính đường tròn cần nghịch đảo"
+        }
+      ],
+      "chapters": [
+        "điểm và ảnh của nó",
+        "một điểm chạy trên đường tròn",
+        "ảnh là đường tròn",
+        "đường tròn qua tâm cho đường thẳng"
+      ]
+    }
+  ]
+}

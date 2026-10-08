@@ -137,3 +137,27 @@ describe('math curriculum (card 3-R1 / 3B-00)', () => {
     for (const [name, content] of Object.entries(fresh)) expect(readOut(name), name).toBe(content);
   });
 });
+
+describe('3D briefs (card 3D-01)', () => {
+  const { briefs } = JSON.parse(
+    readFileSync(join(process.cwd(), 'eval/manim-author/briefs-3d.json'), 'utf8'),
+  ) as { briefs: { id: string; topicId: string; proposedClipId: string; chapters: string[] }[] };
+
+  it('there is a brief for every manim topic that has no clip yet, and only for those', () => {
+    const uncovered = all
+      .filter((t) => t.primary_medium === 'manim' && t.clip_ids.length === 0)
+      .map((t) => t.id)
+      .sort();
+    expect(briefs.map((b) => b.topicId).sort()).toEqual(uncovered);
+  });
+
+  it('proposed clip ids are new and every brief names at least two chapters', () => {
+    for (const b of briefs) {
+      expect(
+        mathClipModules.some((m) => m.entry.id === b.proposedClipId),
+        b.id,
+      ).toBe(false);
+      expect(b.chapters.length, b.id).toBeGreaterThanOrEqual(2);
+    }
+  });
+});

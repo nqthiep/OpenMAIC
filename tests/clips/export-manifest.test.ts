@@ -37,7 +37,7 @@ describe('clip slides in the asset manifest (export, S3)', () => {
   it('every scripted play_video targets a video element of its own slide', () => {
     for (const s of scenes) {
       const videos = (
-        s.content as { canvas: { elements: { id: string; type: string }[] } }
+        s.content as unknown as { canvas: { elements: { id: string; type: string }[] } }
       ).canvas.elements.filter((e) => e.type === 'video');
       const plays = (s.actions as { type: string; elementId?: string }[]).filter(
         (a) => a.type === 'play_video',
