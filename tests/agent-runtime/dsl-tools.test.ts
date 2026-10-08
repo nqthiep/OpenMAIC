@@ -28,7 +28,6 @@ import { withPlainJsonDocumentWrites } from '@/lib/document-store/plain-json-sto
 import { createOwnerBoundDocumentStore } from '@/lib/persistence/owner-bound-document-store';
 import { ensureStageMetaSchema } from '@/lib/persistence/stage-meta';
 import { validateAppScene, validateAppStage } from '@/lib/document-store/validators';
-import { clipRegistry } from '@/lib/clips';
 import type {
   InteractiveContent,
   PBLContent,
@@ -1202,7 +1201,6 @@ describe('DSL course-tool wiring', () => {
     expect(tool(tools, 'grep_stage')).not.toHaveProperty('executionMode');
     expect(new Set(names)).toEqual(
       new Set([
-        ...(clipRegistry.prebuiltIds().length > 0 ? ['generate_clip_scenes'] : []),
         'generate_scene',
         'generate_walkthrough',
         'list_scenes',

@@ -175,15 +175,3 @@ export function isWidgetProvidersDisabled(): boolean {
 export function isReviewRequired(): boolean {
   return readBoolean(process.env.OPENMAIC_REQUIRE_REVIEW);
 }
-
-/**
- * Server-only configuration of the `manim-service` (INTERFACES §6, OPERATIONS §2): the address and the shared token.
- * Both must be set; with either missing the on-demand clip render is off and `generate_clip_scenes{params}` answers
- * `clip-render-unavailable`, while the pre-rendered clips keep playing (the kill-switch is to unset the URL).
- */
-export function getManimServiceConfig(): { url: string; token: string } | null {
-  const url = process.env.MANIM_SERVICE_URL?.trim();
-  const token = process.env.MANIM_SERVICE_TOKEN?.trim();
-  if (!url || !token) return null;
-  return { url: url.replace(/\/+$/, ''), token };
-}

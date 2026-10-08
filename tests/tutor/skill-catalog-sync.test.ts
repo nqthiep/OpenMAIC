@@ -3,16 +3,12 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { SUBJECT_PACKS } from '@/lib/subjects';
 import {
-  extractClipIdBlock,
   extractWalkthroughIdBlock,
-  renderClipIdBlock,
   renderWalkthroughIdBlock,
-  replaceClipIdBlock,
   replaceWalkthroughIdBlock,
 } from '@/lib/subjects/skill-block';
 import { msg } from '@/lib/tutor/catalog/messages';
 import type { SubjectPack } from '@/lib/widgets/types';
-import { fakeAny } from '../clips/_fake-clip';
 
 const SKILL_DIR = join(process.cwd(), 'skills/agent-runtime/competitive-programming');
 const skillMd = readFileSync(join(SKILL_DIR, 'SKILL.md'), 'utf8');
@@ -69,9 +65,8 @@ describe('olympiad-math SKILL.md', () => {
     expect(extractWalkthroughIdBlock(skillMd) ?? '').not.toContain('cauchy-schwarz');
   });
 
-  it('the math skill has no clip block and does not teach the clip tool (ADR 0015)', () => {
-    expect(extractClipIdBlock(mathMd)).toBeNull();
-    expect(MATH.flatMap((p) => p.clips ?? [])).toHaveLength(0);
+  it('the math skill teaches the walkthrough tool and has no clip block (ADR 0015)', () => {
+    expect(mathMd).not.toContain('clip-ids');
     expect(mathMd).not.toContain('generate_clip_scenes');
   });
 
@@ -98,37 +93,6 @@ describe('every pack has its skill with the generated blocks', () => {
       'utf8',
     );
     expect(extractWalkthroughIdBlock(md)).toBe(renderWalkthroughIdBlock(packsOf(skillId)));
-  });
-});
-
-describe('clip id block', () => {
-  it('renders a header-only table without clips, and one sorted row per clip', () => {
-    expect(
-      renderClipIdBlock([{ id: 'x', skillId: 'x', walkthroughs: [] }]).split('\n'),
-    ).toHaveLength(2);
-    const clipPack = {
-      id: 'x',
-      skillId: 'x',
-      walkthroughs: [],
-      clips: [fakeAny({ id: 'b-clip' }), fakeAny({ id: 'a-clip' })],
-    };
-    const rows = renderClipIdBlock([clipPack]).split('\n');
-    expect(rows).toHaveLength(4);
-    expect(rows[2]).toContain('`a-clip`');
-    expect(rows[2]).toContain('`first`, `second`');
-    expect(renderClipIdBlock([clipPack], 'vi-VN')).toContain('Clip thử');
-  });
-
-  it('replaces only the clip block, round-trips, and throws without markers', () => {
-    // the math skill carries no clip block any more (ADR 0015), so the round trip runs on a text that has the markers
-    const md = `${mathMd}\n<!-- BEGIN GENERATED: clip-ids -->\nold\n<!-- END GENERATED: clip-ids -->\n`;
-    expect(replaceClipIdBlock(md, 'old')).toBe(md);
-    expect(extractClipIdBlock(replaceClipIdBlock(md, 'X'))).toBe('X');
-    expect(extractWalkthroughIdBlock(replaceClipIdBlock(md, 'X'))).toBe(
-      extractWalkthroughIdBlock(mathMd),
-    );
-    expect(() => replaceClipIdBlock('none', 'X')).toThrow();
-    expect(extractClipIdBlock('none')).toBeNull();
   });
 });
 

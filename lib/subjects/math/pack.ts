@@ -53,5 +53,4 @@ export const mathPack: SubjectPack = {
     euclidRectangleEntry,
     geometricSeriesAreaEntry,
   ],
-  // The Manim clips (lib/subjects/math/clips) are switched off, ADR 0015: the minh hoạ are walkthroughs now.
 };

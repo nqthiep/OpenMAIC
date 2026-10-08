@@ -12,7 +12,6 @@
     "gen:video-export-katex": "node scripts/generate-video-export-katex.mjs",
     "gen:tutor-runtime": "node scripts/generate-tutor-runtime.mjs",
     "check:tutor-runtime": "node scripts/generate-tutor-runtime.mjs --check",
-    "render:clips": "tsx scripts/render-clips.ts",
     "gen:tutor-katex": "node scripts/generate-tutor-katex.mjs",
     "check:tutor-katex": "node scripts/generate-tutor-katex.mjs --check",
     "gen:video-export-noto-cjk": "node scripts/generate-video-export-noto-cjk.mjs",

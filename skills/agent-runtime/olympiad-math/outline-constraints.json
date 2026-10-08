@@ -1,5 +1,5 @@
 {
-  "$comment": "Warn-only: checkScenesAgainstSkill reports after write and ignores requiredWidgetOutlineFields (ADR 0005). Widget `code` is blocked by default (ADR 0010); math clips come from the generate_clip_scenes tool (ADR 0011). No sceneCount: the repo forbids page caps in skill constraints (tests/agent-runtime/skills.test.ts); the 6-8 scene recipe lives in SKILL.md.",
+  "$comment": "Warn-only: checkScenesAgainstSkill reports after write and ignores requiredWidgetOutlineFields (ADR 0005). Widget `code` is blocked by default (ADR 0010); math pictures come from the generate_walkthrough tool (ADR 0011, ADR 0015). No sceneCount: the repo forbids page caps in skill constraints (tests/agent-runtime/skills.test.ts); the 6-8 scene recipe lives in SKILL.md.",
   "allowedTypes": ["slide", "quiz", "interactive"],
   "firstSceneType": "slide"
 }

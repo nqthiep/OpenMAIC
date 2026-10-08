@@ -170,12 +170,6 @@ export function buildStateContext(storeState: StatelessChatRequest['storeState']
       if (currentScene.content.type === 'slide') {
         const elements = currentScene.content.canvas.elements;
         lines.push(`Current slide elements (${elements.length}):\n${summarizeElements(elements)}`);
-        // A slide made by generate_clip_scenes (its video is named `clip:<id>@<hash>#<chapter>`): what the clip
-        // shows comes from the catalog's `sheet`, never from the slide text, which anyone could have edited.
-        const clipText = widgetRegistry
-          .providerForScene(currentScene as unknown as Scene)
-          ?.describe(currentScene as unknown as Scene);
-        if (clipText) lines.push(clipText);
       }
 
       // Interactive scene claimed by a widget provider: the provider's catalog-derived text

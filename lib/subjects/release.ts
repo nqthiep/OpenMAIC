@@ -6,7 +6,6 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { clipEntryHash } from '@/lib/clips/hash';
 import { entryContentHash } from '@/lib/tutor/catalog/hash';
 import { panelVerdict, parseReview, reviewPath } from '@/lib/tutor/review-schema';
 import type { SubjectPack } from '@/lib/widgets/types';
@@ -68,7 +67,7 @@ function isReleasedAs(
   return panelVerdict(r1, r2) === 'pass';
 }
 
-/** The packs with only the entries (walkthroughs and clips) that have a passing review for their exact revision. */
+/** The packs with only the entries (walkthroughs) that have a passing review for their exact revision. */
 export function releasedPacks(
   packs: readonly SubjectPack[],
   loadReview: ReviewLoader = diskReviewLoader,
@@ -78,11 +77,5 @@ export function releasedPacks(
     walkthroughs: pack.walkthroughs.filter((e) =>
       isReleasedAs(pack.id, e.id, e.entryRev, entryContentHash(e), loadReview),
     ),
-    // a clip needs the same signed panel review, for its templateRev and its current content
-    ...(pack.clips && {
-      clips: pack.clips.filter((c) =>
-        isReleasedAs(pack.id, c.id, c.engine.templateRev, clipEntryHash(c), loadReview),
-      ),
-    }),
   }));
 }

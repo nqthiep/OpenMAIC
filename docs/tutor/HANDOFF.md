@@ -113,10 +113,10 @@ Chưa làm và vì sao:
 | Quy ước chung | `customInput: false` (lát 1d chưa mở): tương tác = preset + bước/phát/tua + dự đoán; "thanh trượt" = chuỗi khung tua được. Tham số thập phân đổi thành số nguyên (`tn` = t tính bằng phần mười, `e` = ε tính bằng 1/20) để mọi con số trên màn hình là phân số chính xác; đường tròn bằng hằng số xoay, không dùng `sin/cos`; PA², PB² là phân số chính xác thay cho độ dài vô tỉ |
 | Skill | `skills/agent-runtime/olympiad-math/SKILL.md` viết lại: không còn tool/khối clip; bảng walkthrough sinh từ catalog (`pnpm exec tsx scripts/generate-skill-catalog.ts`) |
 | Curriculum Toán | `docs/tutor/curriculum/curriculum-math-vn.json` + `references/curriculum/*` (28 topic, id `m<tier>-<tên>`): `primary_medium` walkthrough 18 / slide 10 / manim 0, danh sách `walkthrough_ids`; mọi tên kỳ thi, lớp, trọng số, nguồn vẫn là **[Unverified]**, `vn_sources` rỗng (3-R1 cần nguồn thật) |
-| Review Toán (hạ tầng) | prompt reviewer **riêng cho Toán** (`buildMathReviewSystem` trong `lib/tutor/review-schema.ts`); `eval/tutor-review/{seed-errors-math,clip-runner}.ts` (111 lỗi gieo + 43 biến thể sạch; hiện chạy trên mã clip lưu trữ) |
+| Review Toán (hạ tầng) | prompt reviewer **riêng cho Toán** (`buildMathReviewSystem` trong `lib/tutor/review-schema.ts`); bộ lỗi gieo và biến thể sạch cho Toán (111 + 43, `seed-errors-math.ts`) và `clip-runner.ts` chạy trên clip **đã bị xoá cùng mã video**: muốn calibration hội đồng Toán phải viết lại cho walkthrough (còn ở thẻ `manim-clips-final`) |
 | CI | các bước kiểm `split-curriculum-math`, `make-briefs` vẫn có; workflow `manim-author.yml` đã gỡ |
 
-Mã video **lưu trữ, tắt** (giữ nguyên, không ai gọi trong sản phẩm; thẻ git `manim-clips-final` trỏ tới bản cuối còn chạy được): `lib/clips/**`, `lib/subjects/math/clips/**` (21 mẫu TS), `manim/**` (21 mẫu Python, cổng QA, dịch vụ, Dockerfile, spike S1/S2/S4, red-team), `eval/manim-author/**`, `scripts/render-clips.ts`, `scripts/manim-author-pr.mjs`. `mathPack` không còn `clips`, `public/clips` đã gỡ, nên `generate_clip_scenes` không xuất hiện. Job CI `manim-qa` vẫn chạy pytest trên mã lưu trữ. **Quyết định còn để ngỏ cho chủ dự án:** xoá hẳn mã video hay giữ lại.
+Mã video **đã xoá (2026-10-09, theo yêu cầu của chủ dự án)**: `lib/clips/**`, `lib/subjects/math/clips/**` (21 mẫu TS), `manim/**` (21 mẫu Python, cổng QA, dịch vụ, Dockerfile, spike S1/S2/S4, red-team), `eval/manim-author/**`, `scripts/{render-clips.ts,manim-author-pr.mjs,export-clip-specs.ts}`, `app/api/clips`, `lib/server/agent-runtime/{clip-tools,clip-render}.ts`, tests của chúng, job CI `manim-qa`, biến `MANIM_*` trong `.env.example`, vai LLM `manim-author`, nhà cung cấp clip trong `widgetRegistry`, phần clip của cổng release, ZIP và `buildStateContext`. Thẻ git `manim-clips-final` trỏ tới bản cuối còn chạy được (`git checkout manim-clips-final`); các tham chiếu `lib/clips`, `manim/` trong tài liệu thiết kế là lịch sử.
 
 Kết quả đo còn dùng được từ nhánh video (ghi ở ADR 0015, RISKS S1–S5): image Manim 0.21.0 ghim dựng được và render qua HTTP cho khung hình giống hệt bản native arm64; red-team thử đầu tiên tìm ra TeX đọc được `/etc/passwd` và fork bomb làm dịch vụ ngừng trả lời (chưa vá, không còn cần vì hướng này đã đóng).
 
@@ -136,18 +136,17 @@ Chưa làm và vì sao (Phase 3):
 
 | Việc | Lý do |
 | --- | --- |
-| Hội đồng review Toán cho 24 walkthrough, rồi calibration (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; `clip-runner.ts --calibrate` còn chạy trên mã lưu trữ, cần chuyển sang walkthrough |
+| Hội đồng review Toán cho 24 walkthrough, rồi calibration (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; cần viết lại bộ lỗi gieo và runner calibration cho walkthrough Toán (bản cũ cho clip nằm ở thẻ `manim-clips-final`) |
 | Nghiên cứu nguồn cho curriculum Toán (đề cương thi, lớp, trọng số, tài liệu) | cần nguồn thật; khung hiện là [Inference] |
 | Xem từng walkthrough mới bằng mắt trong ứng dụng thật và e2e riêng | đã chụp ảnh từ iframe headless cho từng entry khi viết; chưa chạy e2e trình duyệt cho entry mới |
 | Nhập số tự do (`customInput`) cho Toán | lát 1d chưa mở (cổng `1d-00`) |
-| Xoá hay giữ mã video | chờ chủ dự án quyết |
 
 ## 4. Việc tiếp theo (theo thứ tự)
 
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: 24 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration, nghiên cứu nguồn curriculum (`3-R1`), xem bằng mắt/e2e entry mới; chủ dự án quyết xoá hay giữ mã video lưu trữ.
+4. Phase 3: 24 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration, nghiên cứu nguồn curriculum (`3-R1`), xem bằng mắt/e2e entry mới; viết lại bộ lỗi gieo cho walkthrough Toán để calibration hội đồng.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)

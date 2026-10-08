@@ -2,7 +2,6 @@
  * The app's widget registry: the `walkthrough` provider over every subject pack (ADR 0013 decision 1).
  * Server-side only: the provider hashes with node:crypto.
  */
-import { createClipProvider } from '@/lib/clips/provider';
 import { isReviewRequired } from '@/lib/config/feature-flags';
 import { SUBJECT_PACKS } from '@/lib/subjects';
 import { releasedPacks } from '@/lib/subjects/release';
@@ -12,15 +11,13 @@ import type { SubjectPack } from '@/lib/widgets/types';
 
 /** A provider + registry over `packs` (a factory so the release filter is testable). */
 export function createAppWidgetRegistry(packs: readonly SubjectPack[]) {
-  const clips = new Map(packs.flatMap((p) => p.clips ?? []).map((c) => [c.id, c]));
-  const clipProvider = createClipProvider({ findClip: (id) => clips.get(id) });
   const provider = createWalkthroughProvider({
     // the registry builds the id map; looked up lazily because the provider is an input to it
     findWalkthrough: (id) => registry.findWalkthrough(id),
     getLabels: getTutorLabels,
   });
   const registry: WidgetRegistry = createWidgetRegistry({
-    providers: [provider, clipProvider],
+    providers: [provider],
     packs,
   });
   return { provider, registry };

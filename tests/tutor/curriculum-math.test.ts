@@ -45,9 +45,9 @@ describe('math curriculum (card 3-R1 / 3B-00)', () => {
     expect(byId.size).toBe(28);
   });
 
-  it('the media split: SCHEMA §7 counted 17 animated, 10 slide, 1 walkthrough; with ADR 0015 the animated ones are walkthroughs', () => {
+  it('the media split: SCHEMA §7 counted 17 animated, 10 slide, 1 walkthrough; with ADR 0015 the animated ones are walkthroughs (no topic uses video)', () => {
     const count = (m: string) => all.filter((t) => t.primary_medium === m).length;
-    expect([count('manim'), count('slide'), count('walkthrough')]).toEqual([0, 10, 18]);
+    expect([count('slide'), count('walkthrough')]).toEqual([10, 18]);
   });
 
   it('prerequisites exist, are acyclic and never point to a higher tier', () => {

@@ -30,7 +30,7 @@
 
 1. Mọi minh hoạ Toán là **walkthrough** (`WalkthroughEntry`) chạy trên `geometry`, `functionPlotter`, `proofOutline`, `grid`, `graph` và các visualizer mới cần thiết, viết bằng SVG/DOM tự viết, không dependency.
 2. Mỗi clip hiện có được **chuyển thành walkthrough** giữ `inputSpec`, hint, hiểu lầm và công thức; đổi tham số bằng thanh trượt; có câu hỏi dự đoán.
-3. **Tắt** clip: gói `math` không còn `clips`, tool `generate_clip_scenes` không vào bộ công cụ, `public/clips` và chỉ mục asset bị xoá khỏi cây làm việc. Mã (`lib/clips`, `manim/`, mẫu, service, eval) **giữ** trong repo để đối chiếu và khôi phục; `git checkout manim-clips-final` trả lại hệ thống clip đầy đủ.
+3. **Xoá** clip: gói `math` không còn `clips`, tool `generate_clip_scenes`, route `app/api/clips`, nhà cung cấp clip trong `widgetRegistry`, `public/clips`, `lib/clips`, 21 mẫu `lib/subjects/math/clips`, `manim/` (mẫu, cổng QA, dịch vụ, Dockerfile, spike), `eval/manim-author`, `render-clips` và job CI `manim-qa` đã bị gỡ khỏi cây làm việc (2026-10-09, theo yêu cầu của chủ dự án). Toàn bộ vẫn nằm trong lịch sử git: `git checkout manim-clips-final` trả lại hệ thống clip đầy đủ.
 4. Service `manim-service`, vòng LLM tác giả Manim (3A-08), luồng CI "brief → PR" (3D-02) và red-team (3C-04) **dừng**; không phát triển thêm.
 5. Thư viện đồ hoạ ngoài chỉ vào bằng ADR riêng (xem điều kiện đổi).
 

@@ -3,7 +3,6 @@
  * Type-only module: no runtime code.
  */
 import type { Action, InteractiveContent, Scene, SlideContent } from '@openmaic/dsl';
-import type { AnyClipEntry } from '@/lib/clips/types';
 import type { Locale, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 
 /**
@@ -42,9 +41,9 @@ export interface WidgetContext {
 }
 
 export interface WidgetProvider {
-  /** 'walkthrough' | 'clip' */
+  /** 'walkthrough' */
   readonly id: string;
-  /** By `widgetConfig.kind` / name 'clip:'. */
+  /** By `widgetConfig.kind`. */
   claimsScene(scene: Scene): boolean;
   build(req: BuildRequest, ctx: WidgetContext): BuildResult;
   actions(scene: Scene, ctx: WidgetContext): Action[];
@@ -58,5 +57,4 @@ export interface SubjectPack {
   readonly id: string;
   readonly skillId: string;
   readonly walkthroughs: readonly AnyWalkthroughEntry[];
-  readonly clips?: readonly AnyClipEntry[];
 }

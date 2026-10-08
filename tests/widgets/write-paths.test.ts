@@ -21,11 +21,6 @@ const CLASSIFIED: Record<string, Classified> = {
     planned: true,
     why: 'walkthrough tool writes scenes',
   },
-  'lib/server/agent-runtime/clip-tools.ts': {
-    layer: 'L2-tool',
-    planned: true,
-    why: 'clip tool writes scenes',
-  },
 
   // --- L2: agent-runtime tools that write scenes/documents ---
   'lib/server/agent-runtime/document-writes.ts': {

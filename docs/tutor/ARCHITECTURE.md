@@ -5,7 +5,7 @@
 - **Người sở hữu**: Chủ dự án (kiến trúc)
 - **Liên quan**: [REQUIREMENTS](REQUIREMENTS.md), [INTERFACES](INTERFACES.md), [DATA-MODEL](DATA-MODEL.md), [SECURITY](SECURITY.md), [OPERATIONS](OPERATIONS.md), [NFR](NFR.md), [decisions/](decisions/README.md)
 
-> **Tóm tắt:** SubjectTutor thêm Chuyên Tin và Chuyên Toán vào OpenMAIC bằng **widget HTML tự chứa** (walkthrough) và **clip Manim** (Toán; *từ 2026-10-08 Toán dùng walkthrough tương tác thay clip, ADR 0015: các phần về clip và `manim/` là lịch sử, mã được giữ nhưng tắt*).
+> **Tóm tắt:** SubjectTutor thêm Chuyên Tin và Chuyên Toán vào OpenMAIC bằng **widget HTML tự chứa** (walkthrough) và **clip Manim** (Toán; *từ 2026-10-08 Toán dùng walkthrough tương tác thay clip, ADR 0015: các phần về clip và `manim/` là lịch sử, mã đã xoá khỏi cây làm việc (2026-10-09; còn ở thẻ `manim-clips-final`)*).
 > - **Chỉ có ở đường agent** (workbench): scene do **tool tất định** tạo (`generate_walkthrough`, `generate_clip_scenes`).
 > - Provider ở **tầng app** nhận scene theo nội dung, trên vỏ `simulation`.
 > - **Không đổi package, không thêm dependency.**

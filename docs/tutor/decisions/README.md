@@ -25,7 +25,7 @@
 | [0012](0012-audience-scope-pedagogy-gates.md) | Đối tượng, MVP, cổng sư phạm | Hai luồng `ts10`/`hsg` xen kẽ; bài giải đề; C++ + Python; MVP 1a–1c + G1 | G1 trượt 2 vòng → xem lại blueprint | Accepted |
 | [0013](0013-provider-scene-lifecycle.md) | Vòng đời scene do provider sở hữu | `widget-ready` + gửi lại trạng thái cuối; beat theo preset; `entryRev`; khoá `patch_stage`; một nguồn chữ | Vẫn mất lệnh sau `ready` → ack từng message | Accepted |
 | [0014](0014-llm-roles-and-learner-data.md) | Vai trò con người và dữ liệu học sinh | LLM riêng cho từng vai trò: lọc nội dung (fail-closed), hội đồng giáo viên Tin/Toán, tác giả Manim, học sinh mô phỏng; bộ hiệu chuẩn; lưu dữ liệu học sinh trong kho runtime | Hiệu chuẩn dưới ngưỡng 2 lần; số đo thật lệch mô phỏng | Accepted |
-| [0015](0015-math-interactive-web-ui-not-video.md) | Minh hoạ Toán | Walkthrough tương tác SVG/DOM tự viết, thanh trượt, dự đoán; không clip Manim, không thư viện đồ hoạ ngoài; mã clip giữ nhưng tắt | ≥ 2 topic cần kéo điểm tự do/3D → ADR thư viện; cần hoạt hoạ điện ảnh → mp4 riêng | Accepted |
+| [0015](0015-math-interactive-web-ui-not-video.md) | Minh hoạ Toán | Walkthrough tương tác SVG/DOM tự viết, thanh trượt, dự đoán; không clip Manim, không thư viện đồ hoạ ngoài; mã clip đã xoá (còn ở thẻ git `manim-clips-final`) | ≥ 2 topic cần kéo điểm tự do/3D → ADR thư viện; cần hoạt hoạ điện ảnh → mp4 riêng | Accepted |
 
 Quy ước trích dẫn: "ADR NNNN §k" nghĩa là **mục k của phần Decision/Quyết định** trong ADR đó (ví dụ ADR 0013 §2 = quyết định 2: bắt tay).
 

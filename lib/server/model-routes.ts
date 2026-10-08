@@ -157,7 +157,6 @@ export const LLM_STAGES = [
   'tutor-review-math',
   'tutor-review-math-2',
   'tutor-review-code',
-  'manim-author',
   'sim-learner',
   'tutor-analyst',
 ] as const;

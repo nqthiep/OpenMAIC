@@ -671,7 +671,7 @@ const eslintConfig = defineConfig([
   // no-restricted-syntax: flat config replaces options per rule key, so setting it
   // here would drop the AI SDK dynamic-import ban above for these files.
   {
-    files: ['lib/subjects/**/catalog/**/*.{ts,tsx}', 'lib/subjects/**/clips/**/*.{ts,tsx}'],
+    files: ['lib/subjects/**/catalog/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-globals': [
         'error',

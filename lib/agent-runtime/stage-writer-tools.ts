@@ -22,7 +22,6 @@ export const STAGE_WRITER_TOOL_NAMES: ReadonlySet<string> = new Set([
   'set_roster',
   'generate_scene',
   'generate_walkthrough',
-  'generate_clip_scenes',
   'generate_actions',
   'duplicate_scene',
   'import_pptx',
