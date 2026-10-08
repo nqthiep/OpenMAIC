@@ -691,6 +691,28 @@
       }
     }
   },
+  "inscribed-angle": {
+    "entryRev": 1,
+    "contentHash": "42a23b9308d37d03",
+    "framesHash": {
+      "arc-100": {
+        "vi-VN": "d7affb7001ca78e3",
+        "en-US": "6bd980991dd226ff"
+      },
+      "arc-60": {
+        "vi-VN": "c6eed6f3600e14e3",
+        "en-US": "0a8300c7496319fa"
+      },
+      "arc-180": {
+        "vi-VN": "e1779235b56b3723",
+        "en-US": "ceef35d1262e3a49"
+      },
+      "arc-300": {
+        "vi-VN": "7700b51c0deedca8",
+        "en-US": "7b0f2b9c2c8b91d0"
+      }
+    }
+  },
   "kmp": {
     "entryRev": 1,
     "contentHash": "b3b0dea4e7d4afdb",
@@ -916,6 +938,50 @@
       "empty": {
         "vi-VN": "0f74739522b73845",
         "en-US": "19aa69d3757d32af"
+      }
+    }
+  },
+  "plane-transform": {
+    "entryRev": 1,
+    "contentHash": "fea8ddc5e8ce8686",
+    "framesHash": {
+      "rotate90": {
+        "vi-VN": "166e2c7d5434ab4a",
+        "en-US": "a0d50aac5d73a08e"
+      },
+      "reflect-x": {
+        "vi-VN": "b7f5ade9c862f13b",
+        "en-US": "dd425e9eb66e3090"
+      },
+      "homothety2": {
+        "vi-VN": "93be6ee2cbadd64d",
+        "en-US": "e6cea780e28afd31"
+      },
+      "mult-i": {
+        "vi-VN": "4c778134b1b17746",
+        "en-US": "7ff67aa511d0d7fe"
+      }
+    }
+  },
+  "power-of-point": {
+    "entryRev": 1,
+    "contentHash": "08671defe2188352",
+    "framesHash": {
+      "outside": {
+        "vi-VN": "56c62efce5f0463c",
+        "en-US": "6ae8ba1eb38a7e87"
+      },
+      "inside": {
+        "vi-VN": "143235e1814b4a16",
+        "en-US": "4a26a984d8e2498c"
+      },
+      "on-circle": {
+        "vi-VN": "5c8cb18b16f7f906",
+        "en-US": "4a2ce8408bbc99b8"
+      },
+      "far": {
+        "vi-VN": "98a6e9c9346aa509",
+        "en-US": "516339b879d3c25b"
       }
     }
   },

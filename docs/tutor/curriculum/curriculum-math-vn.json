@@ -241,10 +241,10 @@
             }
           ],
           "pitfalls": ["Nhầm cung lớn với cung nhỏ khi chắn góc", "Xét điểm nằm ở cung sai"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `inscribed-angle`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["inscribed-angle"]
         },
         {
           "id": "m1-counting-basic",
@@ -467,10 +467,10 @@
             "Quên dấu của phương tích khi điểm nằm trong đường tròn",
             "Dùng độ dài thay cho độ dài có hướng"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `power-of-point`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["power-of-point"]
         },
         {
           "id": "m2-pigeonhole-invariants",
@@ -785,10 +785,10 @@
             }
           ],
           "pitfalls": ["Nhầm chiều quay", "Quên phép đối xứng đảo định hướng"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `plane-transform`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["plane-transform"]
         }
       ]
     },

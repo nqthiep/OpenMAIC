@@ -70,6 +70,9 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `euclid-rectangle` | The Euclidean algorithm with squares | `48-18`, `equal`, `coprime`, `one` | `m2-euclid-diophantine` |
 | `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `m3-sequences-limits` |
 | `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `m1-quadratic-vieta` |
+| `inscribed-angle` | The inscribed angle | `arc-100`, `arc-60`, `arc-180`, `arc-300` | `m1-circle-angles` |
+| `plane-transform` | Plane transformations and complex multiplication | `rotate90`, `reflect-x`, `homothety2`, `mult-i` | `m3-vector-transform-complex` |
+| `power-of-point` | The power of a point | `outside`, `inside`, `on-circle`, `far` | `m2-circle-power` |
 | `pythagoras-dissection` | The Pythagorean theorem by dissection | `three-four`, `equal`, `thin`, `six-eight` | `m1-triangle-geometry` |
 | `riemann-integral` | Riemann sums and the integral | `x2-4`, `x2-16`, `const`, `cubic` | `m4-integral` |
 | `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `m3-derivative-graphs` |

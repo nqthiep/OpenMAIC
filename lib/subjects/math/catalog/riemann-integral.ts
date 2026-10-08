@@ -5,7 +5,7 @@
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 import type { Emit, HighlightKind, RunContext } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';
-import { Figure, curvePieces, framePut, type FigState } from '@/lib/subjects/math/figure';
+import { Figure, curvePieces, frac, framePut, type FigState } from '@/lib/subjects/math/figure';
 
 type In = { c: number[]; a: number; b: number; n: 4 | 8 | 16 };
 type S = FigState;
@@ -195,15 +195,6 @@ const EX = {
     'The Riemann sum Lₙ approaches the integral I = F(b) − F(a) = {V}, also the signed area between the graph and the horizontal axis.',
   ),
 };
-
-const gcd = (x: number, y: number): number => (y === 0 ? Math.abs(x) : gcd(y, x % y));
-/** the fraction p/q in lowest terms as text ("7/4", "−3", "0") */
-function frac(p: number, q: number): string {
-  const g = gcd(p, q) || 1;
-  const [num, den] = [p / g, q / g];
-  const sign = num * den < 0 ? '−' : '';
-  return `${sign}${Math.abs(num)}${Math.abs(den) === 1 ? '' : `/${Math.abs(den)}`}`;
-}
 
 /** a fraction object as text */
 const fr = (g: { num: number; den: number }): string => frac(g.num, g.den);

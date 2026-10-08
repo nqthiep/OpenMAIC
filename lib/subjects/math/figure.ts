@@ -36,6 +36,17 @@ export interface FigState {
   polylines: { id: string; xy: [number, number][]; dashed?: boolean }[];
 }
 
+/** The greatest common divisor of two integers (never negative). */
+export const gcd = (x: number, y: number): number => (y === 0 ? Math.abs(x) : gcd(y, x % y));
+
+/** The fraction p/q in lowest terms as text with a minus sign and no decimal point: "7/4", "−3", "0". */
+export function frac(p: number, q: number): string {
+  const g = gcd(p, q) || 1;
+  const [num, den] = [p / g, q / g];
+  const sign = num * den < 0 ? '−' : '';
+  return `${sign}${Math.abs(num)}${Math.abs(den) === 1 ? '' : `/${Math.abs(den)}`}`;
+}
+
 const round3 = (x: number): number => {
   const v = Math.round(x * 1000) / 1000;
   return v === 0 ? 0 : v;

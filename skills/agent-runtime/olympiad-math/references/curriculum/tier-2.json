@@ -157,7 +157,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-circle-power",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `power-of-point`"],
       "name_en": "Power of a point",
       "name_vi": "Phương tích và trục đẳng phương",
       "pitfalls": [
@@ -185,7 +185,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["power-of-point"]
     },
     {
       "difficulty": 3,

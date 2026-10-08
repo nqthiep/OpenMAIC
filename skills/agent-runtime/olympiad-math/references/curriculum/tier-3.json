@@ -214,7 +214,7 @@
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-vector-transform-complex",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `plane-transform`"],
       "name_en": "Vectors, transformations and complex numbers",
       "name_vi": "Vector, phép biến hình và số phức",
       "pitfalls": ["Nhầm chiều quay", "Quên phép đối xứng đảo định hướng"],
@@ -239,7 +239,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["plane-transform"]
     }
   ]
 }

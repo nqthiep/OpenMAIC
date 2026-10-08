@@ -179,7 +179,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-circle-angles",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `inscribed-angle`"],
       "name_en": "Angles and circles",
       "name_vi": "Góc với đường tròn",
       "pitfalls": ["Nhầm cung lớn với cung nhỏ khi chắn góc", "Xét điểm nằm ở cung sai"],
@@ -204,7 +204,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["inscribed-angle"]
     },
     {
       "difficulty": 1,
