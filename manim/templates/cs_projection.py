@@ -26,9 +26,9 @@ class CsProjection(ClipScene):
         turn = -theta if abs(theta) <= math.pi / 2 else -(theta - math.copysign(math.pi, theta))
         if abs(turn) < 1e-9:
             turn = 0.0
-        rim = [uh * nv, -uh * nv, np.array([-uh[1], uh[0]]) * nv, np.array([uh[1], -uh[0]]) * nv]
+        rim = [np.array([nv, 0.0]), np.array([-nv, 0.0]), np.array([0.0, nv]), np.array([0.0, -nv])]  # v turns on this circle
         foot0 = uh * (dot / nu)
-        view = View([(0, 0), tuple(u), tuple(v), tuple(foot0)] + [tuple(r) for r in rim], box=(0.0, -0.2, 9.5, 5.2), cap=1.5)
+        view = View([(0, 0), tuple(u), tuple(v), tuple(foot0)] + [tuple(r) for r in rim], box=(0.0, -0.2, 8.6, 4.0), cap=1.5)
         S = lambda q: view(q[0], q[1])
         ang = ValueTracker(0.0)
 
@@ -49,7 +49,7 @@ class CsProjection(ClipScene):
             if kind == "v":
                 return Arrow(o, S(vn), buff=0, color=GREEN_D, stroke_width=7)
             if kind == "vlabel":
-                return tex("v", 44, GREEN_D, "v").move_to(S(vn) + P(0.35, 0.3))
+                return tex("v", 44, GREEN_D, "v").move_to(S(vn) + P(0.4, -0.5))
             if kind == "perp":
                 if np.linalg.norm(fn) < 1e-6:  # v is perpendicular to u: the foot is the origin, the dashes lie on v itself
                     return Line(S(vn), o, color=RED_D, stroke_width=9)
@@ -63,7 +63,7 @@ class CsProjection(ClipScene):
             return Polygon(o, S(vn), S(fn), color=YELLOW_D, stroke_width=3, fill_color=YELLOW_D, fill_opacity=0.35)
 
         arrow_u = Arrow(o, S(u), buff=0, color=BLUE_D, stroke_width=7)
-        lu = tex("u", 44, BLUE_D, "u").move_to(S(u) + P(0.35, 0.3))
+        lu = tex("u", 44, BLUE_D, "u").move_to(S(u) + P(0.4, 0.5))
         arrow_v, lv = build("v"), build("vlabel")
         self.sequence("vectors", [([Create(arrow_u), Write(lu)], 3), ([Create(arrow_v), Write(lv)], 3)], hold=3)
 

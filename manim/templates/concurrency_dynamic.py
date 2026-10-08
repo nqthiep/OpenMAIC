@@ -66,7 +66,7 @@ class ConcurrencyDynamic(ClipScene):
 
         samples = [-t_move, 0, t_move, t_special]
         pts = [A, B] + [C_at(t) for t in samples] + [center_of(kind, A, B, C_at(t)) for t in samples]
-        view = View(pts, box=(0.0, -0.2, 10.0, 5.2), cap=1.3)
+        view = View(pts, box=(0.0, -0.6, 10.0, 4.4), cap=1.3)
         zoom = ValueTracker(1.0)  # about the center of the first position; used by the "meet" chapter
         cpt = view(*center_of(kind, A, B, C0))
 

@@ -84,7 +84,9 @@ class ClipScene(Scene):
                 if not isinstance(mob, (Text, MathTex, Tex)) or id(mob) in seen:
                     continue
                 seen.add(id(mob))
-                if mob.get_fill_opacity() < 0.05 and mob.get_stroke_opacity() < 0.05:
+                # the container has no points of its own: its visibility is that of its glyphs
+                glyphs = mob.family_members_with_points() or [mob]
+                if max(max(g.get_fill_opacity(), g.get_stroke_opacity()) for g in glyphs) < 0.05:
                     continue
                 kind = "Text" if isinstance(mob, Text) else "MathTex"
                 x0, x1 = float(mob.get_left()[0]), float(mob.get_right()[0])
