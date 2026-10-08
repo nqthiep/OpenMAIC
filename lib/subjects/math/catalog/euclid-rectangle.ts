@@ -2,7 +2,6 @@
  * Walkthrough entry: The Euclidean algorithm with squares (ADR 0015; replaces the clip of the same id). Deterministic and browser-safe (ADR 0006).
  * Curriculum topic `m2-euclid-diophantine`.
  */
-import { fill, msg } from '@/lib/tutor/catalog/messages';
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 import type { Emit, HighlightKind, RunContext } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';

@@ -64,11 +64,14 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `alg-identity-area` | Algebraic identities as areas | `sum-3-2`, `sum-1-1`, `diff-5-2`, `diff-9-1` | `m1-alg-identities` |
 | `amgm-semicircle` | AM–GM on a semicircle | `two-eight`, `equal`, `far`, `nine-sixteen` | `m1-inequality-basic` |
 | `cauchy-schwarz` | The Cauchy–Schwarz inequality (two pairs) | `generic`, `proportional`, `zero`, `negative` | `m2-inequality-classic` |
+| `convex-chord` | The chord of a convex graph (Jensen) | `x2-mid`, `abs-skew`, `x4`, `t-zero` | `m2-inequality-classic` |
 | `cs-projection` | Cauchy–Schwarz by projection | `generic`, `parallel`, `perpendicular`, `opposite` | `m2-inequality-classic` |
 | `curve-sketching` | Sketching a polynomial graph (degree at most 3) | `cubic`, `square`, `pure-cubic`, `neg-cubic` | `m3-derivative-graphs` |
 | `euclid-rectangle` | The Euclidean algorithm with squares | `48-18`, `equal`, `coprime`, `one` | `m2-euclid-diophantine` |
 | `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `m3-sequences-limits` |
+| `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `m1-quadratic-vieta` |
 | `pythagoras-dissection` | The Pythagorean theorem by dissection | `three-four`, `equal`, `thin`, `six-eight` | `m1-triangle-geometry` |
+| `riemann-integral` | Riemann sums and the integral | `x2-4`, `x2-16`, `const`, `cubic` | `m4-integral` |
 | `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `m3-derivative-graphs` |
 | `triangle-altitude` | The three altitudes of a triangle and the orthocenter | `acute`, `obtuse`, `right`, `isosceles` | `m1-triangle-geometry` |
 <!-- END GENERATED: walkthrough-ids -->

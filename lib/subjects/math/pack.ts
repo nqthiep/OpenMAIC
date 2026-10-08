@@ -7,6 +7,9 @@ import { triangleAltitudeEntry } from '@/lib/subjects/math/catalog/triangle-alti
 import { euclidRectangleEntry } from '@/lib/subjects/math/catalog/euclid-rectangle';
 import { geometricSeriesAreaEntry } from '@/lib/subjects/math/catalog/geometric-series-area';
 import { pythagorasDissectionEntry } from '@/lib/subjects/math/catalog/pythagoras-dissection';
+import { riemannIntegralEntry } from '@/lib/subjects/math/catalog/riemann-integral';
+import { graphTransformEntry } from '@/lib/subjects/math/catalog/graph-transform';
+import { convexChordEntry } from '@/lib/subjects/math/catalog/convex-chord';
 import { secantTangentEntry } from '@/lib/subjects/math/catalog/secant-tangent';
 import type { SubjectPack } from '@/lib/widgets/types';
 
@@ -20,6 +23,9 @@ export const mathPack: SubjectPack = {
     amgmSemicircleEntry,
     csProjectionEntry,
     secantTangentEntry,
+    convexChordEntry,
+    graphTransformEntry,
+    riemannIntegralEntry,
     algIdentityAreaEntry,
     pythagorasDissectionEntry,
     euclidRectangleEntry,

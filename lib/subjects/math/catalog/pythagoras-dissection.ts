@@ -2,9 +2,8 @@
  * Walkthrough entry: The Pythagorean theorem by dissection (ADR 0015; replaces the clip of the same id). Deterministic and browser-safe (ADR 0006).
  * Curriculum topic `m1-triangle-geometry`.
  */
-import { fill, msg } from '@/lib/tutor/catalog/messages';
 import type { BeatDef, Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
-import type { Emit, HighlightKind, RunContext } from '@/lib/tutor/engine/types';
+import type { Emit, RunContext } from '@/lib/tutor/engine/types';
 import type { InputSpec } from '@/lib/tutor/input-spec';
 import { Figure, framePut, type FigState, type Pt } from '@/lib/subjects/math/figure';
 

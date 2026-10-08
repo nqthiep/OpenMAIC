@@ -171,10 +171,10 @@
             }
           ],
           "pitfalls": ["Dùng Viète khi biệt thức âm", "Quên điều kiện a ≠ 0"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `graph-transform`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["graph-transform"]
         },
         {
           "id": "m1-triangle-geometry",
@@ -323,10 +323,14 @@
             "Quên điều kiện dấu bằng của Cauchy–Schwarz (hai vector cùng phương)",
             "Dùng Jensen cho hàm không lồi"
           ],
-          "interactive_ideas": ["Walkthrough `cauchy-schwarz`", "Walkthrough `cs-projection`"],
+          "interactive_ideas": [
+            "Walkthrough `cauchy-schwarz`",
+            "Walkthrough `convex-chord`",
+            "Walkthrough `cs-projection`"
+          ],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": ["cauchy-schwarz", "cs-projection"]
+          "walkthrough_ids": ["cauchy-schwarz", "convex-chord", "cs-projection"]
         },
         {
           "id": "m2-equations-systems",
@@ -860,10 +864,10 @@
             }
           ],
           "pitfalls": ["Quên dấu của diện tích khi hàm âm", "Nhầm tổng Riemann trái và phải"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `riemann-integral`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["riemann-integral"]
         },
         {
           "id": "m4-limits-mvt",

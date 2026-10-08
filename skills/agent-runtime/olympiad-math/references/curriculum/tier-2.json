@@ -13,7 +13,11 @@
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-inequality-classic",
-      "interactive_ideas": ["Walkthrough `cauchy-schwarz`", "Walkthrough `cs-projection`"],
+      "interactive_ideas": [
+        "Walkthrough `cauchy-schwarz`",
+        "Walkthrough `convex-chord`",
+        "Walkthrough `cs-projection`"
+      ],
       "name_en": "Classical inequalities",
       "name_vi": "Bất đẳng thức cổ điển",
       "pitfalls": [
@@ -41,7 +45,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["cauchy-schwarz", "cs-projection"]
+      "walkthrough_ids": ["cauchy-schwarz", "convex-chord", "cs-projection"]
     },
     {
       "difficulty": 2,

@@ -109,7 +109,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-quadratic-vieta",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `graph-transform`"],
       "name_en": "Quadratics and Vieta",
       "name_vi": "Phương trình bậc hai và định lý Viète",
       "pitfalls": ["Dùng Viète khi biệt thức âm", "Quên điều kiện a ≠ 0"],
@@ -134,7 +134,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["graph-transform"]
     },
     {
       "difficulty": 2,
