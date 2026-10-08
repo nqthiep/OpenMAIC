@@ -94,14 +94,14 @@ Mức: **C**ao / **V**ừa / **T**hấp. *Trigger* = tín hiệu để hành đ�
 | Q8 | KaTeX dựng sẵn trên server (CSS + font inline), qua export | công thức đúng ở HTML/MP4/ZIP; CSS + font ≤ ~300 KB | Phase 3B (walkthrough Toán) | Chưa làm |
 | Q9 | Engine chờ dự đoán: tạm dừng/tua, resume, chat mở giữa chừng, silent mode | không treo; hết giờ 20 s luôn đi tiếp | Lát 1c | Chưa làm |
 | Q10 | CSP cho widget LLM: tỉ lệ widget mẫu bị vỡ (≥ 30 widget, 6 chủ đề) | ≤ 10% vỡ thì bật | Lát 1b (cho widget LLM) | Chưa làm |
-| Q11 | Slide clip do tool dựng qua `validateScene`, render, export | không lỗi | Phase 3A | Chưa làm |
+| Q11 | Slide clip do tool dựng qua `validateScene`, render, export | không lỗi | Phase 3A | **Một phần (2026-10-08):** mọi slide clip qua `validateScene` (tests/clips/clip-contract.ts); `enumerateAssetManifest` liệt kê đúng một video và một poster mỗi chapter (tests/clips/export-manifest.test.ts). Chưa làm: render và export/import ZIP trên trình duyệt |
 | Q12 | Liệt kê chính xác mọi route/hàm ghi scene cho `write-paths.test.ts` | danh sách đủ, test xanh | Lát 1b | Chưa làm |
 | Q13 | Resume scene walkthrough: coi `widget_setState` tuyệt đối là "dựng lại được" trong `lib/playback` | resume đúng beat | Backlog sau 1c | Chưa làm |
 | S1 | Image Manim + hiệu năng: kích thước giải nén, khởi động lạnh, render 3 cảnh × 15/30/60 s × (720p30, 1080p60) × (2, 4 vCPU) | 30 s@720p30 ≤ 3 phút (2 vCPU); RSS ≤ 2 GiB; MP4 ≤ 15 MB/30 s | Đợt 3A; **chạy song song 1a** | Chưa làm |
 | S2 | Tiếng Việt: 200 chuỗi có dấu qua `Text`, `MathTex`, `MathTypst` | 0 ô vuông; 0 va chạm dấu ở 50 cụm; LaTeX biên dịch 100% | Đợt 3A; **song song 1a** | Chưa làm |
-| S3 | Tích hợp slide video: adopt, export MP4/ZIP, import máy sạch, tua, độ trễ speech→clip | không lỗi; ZIP tăng ≈ tổng MP4; trễ ≤ 0,5 s | Đợt 3A (cần 1b) | Chưa làm |
-| S4 | Tất định: render 2 lần, 2 kiến trúc | giống 100% hoặc SSIM ≥ 0,99 | Đợt 3A; **song song 1a** | Chưa làm |
-| S5 | Kiểm kê topic Toán cần chuyển động liên tục | ≥ 5 topic | Đợt 3B | Chờ curriculum Toán (R19) |
+| S3 | Tích hợp slide video: adopt, export MP4/ZIP, import máy sạch, tua, độ trễ speech→clip | không lỗi; ZIP tăng ≈ tổng MP4; trễ ≤ 0,5 s | Đợt 3A (cần 1b) | **Một phần:** phần không cần trình duyệt đã kiểm (xem Q11). Còn: adopt vào pool, ZIP trọn vòng, tua, độ trễ: cần trình duyệt thật |
+| S4 | Tất định: render 2 lần, 2 kiến trúc | giống 100% hoặc SSIM ≥ 0,99 | Đợt 3A; **song song 1a** | **Một phần (2026-10-08):** 2 lần trên arm64 (Apple M5, Manim 0.21.0, không Docker): 100% khung giống và file MP4 giống từng byte (`manim/spikes/s4/RESULT.md`). Chưa làm: trong image ghim, amd64 |
+| S5 | Kiểm kê topic Toán cần chuyển động liên tục | ≥ 5 topic | Đợt 3B | **Làm trên khung (2026-10-08):** 17/28 topic `primary_medium: manim` (≥ 5), 10 slide, 1 walkthrough (`docs/tutor/curriculum/curriculum-math-vn.json`, đếm bằng test). Khung là [Inference] từ SCHEMA §7 và nguồn [Unverified]; hội đồng chưa duyệt (R19) |
 | S6 | Sandbox: red-team container cứng hoá + tiến trình con, có canary | 0 thoát; canary không bị đọc; kill ≤ timeout + 5 s | Đợt 3C | Chưa làm |
 | S7 | Clip widget (chỉ nếu cần): `blob:`/URL trong iframe null-origin, cookie, seek | phát và seek được | Tuỳ chọn | Chưa làm |
 | S8 | `generate_clip_scenes{params}`: placeholder, timeout→failed, trúng cache, gộp job | không placeholder mãi | Đợt 3C | Chưa làm |
