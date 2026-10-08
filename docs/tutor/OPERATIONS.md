@@ -37,7 +37,7 @@ flowchart TB
 | `postgres` | Đã có (profile) | **Có** (agent runtime cần `DATABASE_URL`, `lib/config/feature-flags.ts:18-25`) | Chứa tài liệu lớp học, runtime rows, asset (khi dùng kho server) |
 | `render-service` | Đã có (profile `video-export`) | Không | Export MP4; vắng mặt → tải ZIP |
 | Pipeline dựng clip (CI) | Đề xuất (3A) | Chỉ cho Toán | Ngoài Dockerfile ứng dụng; xem §3 |
-| `manim-service` | Đề xuất (3C) | Không | Render theo yêu cầu; vắng mặt → chỉ clip dựng sẵn |
+| `manim-service` | **Mã đã có** (`manim/service/`, 2026-10-08); image `manim/service/Dockerfile` và `docker-compose.yml` viết nhưng **[Unverified] chưa build/chạy** | Không | Render theo yêu cầu; vắng mặt → chỉ clip dựng sẵn |
 
 ## 2. Cấu hình
 
@@ -53,7 +53,7 @@ flowchart TB
 | `OPENMAIC_TUTOR_MODERATION` | không đặt = **tắt** | Boolean (`true`/`1`). **Tắt: chat `/api/chat` không được lọc, kể cả khi đã cấu hình route `tutor-moderation`.** Bật: mọi lượt chat qua bộ lọc, **fail-closed** (thiếu route `tutor-moderation` → chat bị chặn bằng câu an toàn). Chỉ phủ `/api/chat` (SECURITY §6) | Đã có |
 | `OPENMAIC_REQUIRE_REVIEW` | không đặt = tắt (mọi entry) | Boolean (`true`/`1`). Bật: chỉ entry có file review đạt ở đúng `entryRev` (`lib/subjects/<môn>/reviews/<id>@<entryRev>.json`). **Bật mà không có file review → không lộ walkthrough nào.** `next.config.ts` đưa `lib/subjects/*/reviews/**` vào bản standalone (`outputFileTracingIncludes`); `release.ts` tìm file theo `process.cwd()` rồi theo đường dẫn của module. Sau build Docker, kiểm `ls .next/standalone/lib/subjects/*/reviews` [Unverified: chưa chạy build Docker] | Đã có |
 | `MODEL_ROUTES` (thêm stage, ADR 0014) | không đặt | Model cho từng vai trò LLM: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `manim-author`, `sim-learner`, `tutor-analyst`. **Thiếu route thì tính năng phụ thuộc tắt** (thiếu `tutor-moderation` → chat học sinh bị chặn). Khuyến nghị hai nhà cung cấp khác model dạy | Đề xuất (biến đã có: `lib/server/model-routes.ts:132-168`) |
-| `MANIM_SERVICE_URL`, `MANIM_SERVICE_TOKEN` | không đặt | Địa chỉ + token của `manim-service`; không đặt → render theo yêu cầu tắt (`clip-render-unavailable`) | Đề xuất |
+| `MANIM_SERVICE_URL`, `MANIM_SERVICE_TOKEN` | không đặt | Địa chỉ + token của `manim-service`; không đặt → render theo yêu cầu tắt (`clip-render-unavailable`) | **Đã có** (`getManimServiceConfig`, `.env.example`) |
 | `MANIM_MAX_CONCURRENCY`, `MANIM_MAX_QUEUE`, `MANIM_MAX_JOBS_PER_USER`, `MANIM_MAX_GLOBAL`, `MANIM_JOB_TTL_MS`, `MANIM_JOB_DEADLINE_MS` | tính theo §8 | Số job chạy đồng thời (= số worker); số job chờ; giới hạn mỗi owner; **tổng job đang chờ + đang chạy** toàn dịch vụ; TTL; hạn tối đa mỗi job | Đề xuất |
 | `RENDER_SERVICE_URL` | không đặt | Bật export MP4 một chạm; container render nằm trên mạng `render` (`internal: true`) | Đã có |
 | `RENDER_MAX_QUEUE` (20), `RENDER_MAX_JOBS_PER_USER` (1), `RENDER_JOB_TTL_MS` (1 800 000), `RENDER_JOB_DEADLINE_MS` (2 700 000) | như trong ngoặc | Tham khảo; **không chép** cho `MANIM_*` (thời gian job khác) | Đã có |
@@ -210,6 +210,7 @@ Ví dụ truy vấn (với `jq` trên log JSON): `jq -c 'select(.event=="code_wi
 7. `OPENMAIC_TUTOR_MODERATION=true` (nếu triển khai cho học sinh): gửi một tin vi phạm vào chat → nhận câu an toàn, agent không chạy; bỏ route `tutor-moderation` → chat vẫn bị chặn (fail-closed). Nhớ: cờ tắt = chat **không lọc**.
 8. `OPENMAIC_REQUIRE_REVIEW=true`: workbench chỉ liệt kê entry có file review; trong container chạy `ls lib/subjects/*/reviews` (thư mục standalone) phải thấy các file review, nếu không thì **không walkthrough nào được lộ**.
 9. `OPENMAIC_DISABLE_WIDGET_PROVIDERS` là boolean: đặt `true` rồi hỏi agent tạo walkthrough → tool không còn; bỏ đặt → trở lại.
+10. Manim cục bộ (không cần Docker; xem `manim/README.md`): `python3 -m pytest manim -q` xanh; `pnpm exec tsx scripts/render-clips.ts --plan` liệt kê job; với `MANIM_RENDER_CMD` đặt, `pnpm exec tsx scripts/render-clips.ts --out-dir /tmp/clips --only <clipId>` ra `ok` cho mọi preset (cổng allowlist, video, bbox, frame, manifest). `public/clips` giữ ≤ 10 thư mục (test `tests/clips/prebuilt-assets.test.ts`). Service: `MANIM_SERVICE_TOKEN=x python3 manim/service/server.py` rồi `GET /health` (header `x-manim-token`) trả `templateRevs`.
 
 ## 10. Phát hành, rollback và kill-switch
 
