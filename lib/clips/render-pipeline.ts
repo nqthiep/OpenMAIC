@@ -35,6 +35,8 @@ export interface PipelineOptions {
   /** the directory assets are placed in (`public/clips`), and the URL prefix they are served under */
   outDir: string;
   urlBase?: string;
+  /** development renders into a scratch directory: no `public/clips` budget */
+  unlimited?: boolean;
   /** the repository root, where `manim/qa/*.py` live */
   repoRoot: string;
   python?: string;
@@ -142,7 +144,10 @@ export async function runRenderJob(opts: PipelineOptions): Promise<PipelineResul
       (n, f) => n + (statSync(join(workDir, f)).isFile() ? statSync(join(workDir, f)).size : 0),
       0,
     );
-    if (usage.clips + 1 > MAX_PUBLIC_CLIPS || usage.bytes + incoming > MAX_PUBLIC_BYTES) {
+    if (
+      !opts.unlimited &&
+      (usage.clips + 1 > MAX_PUBLIC_CLIPS || usage.bytes + incoming > MAX_PUBLIC_BYTES)
+    ) {
       return {
         ok: false,
         problems: [

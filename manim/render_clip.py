@@ -62,29 +62,28 @@ def main() -> int:
         masters = list(Path(media).rglob("master.mp4"))
         if len(masters) != 1:
             raise SystemExit("the scene produced no master.mp4")
-        ffmpeg("-i", str(masters[0]), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", str(FPS), "-an",
-               "-movflags", "+faststart", str(out / "master.mp4"))
+        master = Path(media) / "full.mp4"
+        ffmpeg("-i", str(masters[0]), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", str(FPS), "-an", str(master))
 
-    chapters = []
-    for m in scene.marks:
-        cid, a, b = m["id"], m["startSec"], m["endSec"]
-        ffmpeg("-i", str(out / "master.mp4"), "-ss", f"{a:.4f}", "-t", f"{b - a:.4f}", "-c:v", "libx264",
-               "-pix_fmt", "yuv420p", "-r", str(FPS), "-an", "-movflags", "+faststart", str(out / f"{cid}.mp4"))
-        # the poster is the picture shortly before the end of the chapter, when its drawing is complete
-        ffmpeg("-ss", f"{max(b - 0.5, a):.4f}", "-i", str(out / "master.mp4"), "-frames:v", "1", str(out / f"{cid}.png"))
-        chapters.append({"id": cid, "file": f"{cid}.mp4", "posterFile": f"{cid}.png", "startSec": a, "endSec": b,
-                         "sizeBytes": (out / f"{cid}.mp4").stat().st_size})
+        chapters = []
+        for m in scene.marks:
+            cid, a, b = m["id"], m["startSec"], m["endSec"]
+            ffmpeg("-i", str(master), "-ss", f"{a:.4f}", "-t", f"{b - a:.4f}", "-c:v", "libx264",
+                   "-pix_fmt", "yuv420p", "-r", str(FPS), "-an", "-movflags", "+faststart", str(out / f"{cid}.mp4"))
+            # the poster is the picture shortly before the end of the chapter, when its drawing is complete
+            ffmpeg("-ss", f"{max(b - 0.5, a):.4f}", "-i", str(master), "-frames:v", "1", str(out / f"{cid}.png"))
+            chapters.append({"id": cid, "file": f"{cid}.mp4", "posterFile": f"{cid}.png", "startSec": a, "endSec": b,
+                             "sizeBytes": (out / f"{cid}.mp4").stat().st_size})
 
     (out / "layout.json").write_text(json.dumps({"frame": {"w": 14.2222, "h": 8.0}, "keyframes": scene.keyframes}))
     manifest = {
-        "clipId": os.environ.get("CLIP_ID") or template.stem,
+        "clipId": os.environ.get("CLIP_ID") or template.stem.replace("_", "-"),
         "engineVersion": f"manim-{__version__}",
         "templateRev": cls.TEMPLATE_REV,
         "profile": PROFILE,
         "w": W, "h": H, "fps": FPS,
         "durationSec": scene.marks[-1]["endSec"],
         "chapters": chapters,
-        "master": {"file": "master.mp4", "sizeBytes": (out / "master.mp4").stat().st_size},
         "display": scene.display,
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2))

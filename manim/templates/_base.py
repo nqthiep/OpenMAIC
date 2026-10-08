@@ -39,6 +39,22 @@ class ClipScene(Scene):
     def now(self) -> float:
         return float(self.renderer.time)
 
+    def sequence(self, chapter_id: str, steps: list, hold: float = 2.0) -> None:
+        """Plays `steps` one after another, dividing the time up to the closing hold in proportion to their weights, then
+        ends the chapter. A step is `(animations, weight)`; `animations` is one animation or a list played together."""
+        cid, start, end = self.CHAPTERS[self._chapter_i]
+        if cid != chapter_id:
+            raise ValueError(f"chapter {chapter_id} is played, but {cid} is next in the plan")
+        budget = end - hold - self.now()
+        if budget <= 0:
+            raise ValueError(f"chapter {cid} has no time left for its steps")
+        total = sum(w for _, w in steps)
+        for anims, w in steps:
+            anims = anims() if callable(anims) else anims  # a step may be built lazily, after the earlier steps ran
+            anims = anims if isinstance(anims, (list, tuple)) else [anims]
+            self.play(*anims, run_time=max(budget * w / total, 2 / FPS))
+        self.chapter_end(chapter_id)
+
     def chapter_end(self, chapter_id: str) -> None:
         """Holds the last picture until the planned end of the chapter, then marks the boundary."""
         cid, start, end = self.CHAPTERS[self._chapter_i]
@@ -96,3 +112,54 @@ class ClipScene(Scene):
         """Names a text object in layout.json (so a QA message says which label is wrong)."""
         mob.label_id = label_id
         return mob
+
+
+# --- helpers shared by the templates ---------------------------------------------------------------------------------
+import numpy as np  # noqa: E402
+from manim import Line as _Line  # noqa: E402
+
+
+def P(x: float, y: float = 0.0) -> np.ndarray:
+    return np.array([float(x), float(y), 0.0])
+
+
+def tex(s: str, size: float = 40, color=WHITE, tag: str | None = None):
+    """A MathTex that the layout gate can name."""
+    m = MathTex(s, font_size=size, color=color)
+    if tag:
+        m.label_id = tag
+    return m
+
+
+class View:
+    """Maps problem coordinates to scene units: uniform scale and offset so that `points` fit in the box
+    (cx, cy, w, h); `cap` limits the scale so a small figure is not blown up."""
+
+    def __init__(self, points, box=(0.0, -0.2, 11.0, 5.4), cap: float = 1.2, y_up: bool = True):
+        xs, ys = [p[0] for p in points], [p[1] for p in points]
+        x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+        dx, dy = max(x1 - x0, 1e-9), max(y1 - y0, 1e-9)
+        self.s = min(box[2] / dx, box[3] / dy, cap)
+        self.ox = box[0] - self.s * (x0 + x1) / 2
+        self.oy = box[1] - self.s * (y0 + y1) / 2
+
+    def __call__(self, x: float, y: float = 0.0) -> np.ndarray:
+        return P(self.ox + self.s * x, self.oy + self.s * y)
+
+
+def line_in_box(p, d, box=(-6.5, 6.5, -3.4, 3.0)):
+    """The two ends of the line through scene point `p` with direction `d`, clipped to the box (x0, x1, y0, y1)."""
+    x0, x1, y0, y1 = box
+    ts = []
+    for k, (lo, hi) in enumerate(((x0, x1), (y0, y1))):
+        if abs(d[k]) > 1e-12:
+            ts += [(lo - p[k]) / d[k], (hi - p[k]) / d[k]]
+    pts = []
+    for t in ts:
+        q = np.array([p[0] + t * d[0], p[1] + t * d[1]])
+        if x0 - 1e-6 <= q[0] <= x1 + 1e-6 and y0 - 1e-6 <= q[1] <= y1 + 1e-6:
+            pts.append((t, q))
+    if len(pts) < 2:
+        return P(p[0], p[1]), P(p[0], p[1])
+    pts.sort(key=lambda a: a[0])
+    return P(*pts[0][1]), P(*pts[-1][1])

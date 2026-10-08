@@ -4,6 +4,7 @@
  *
  *   pnpm exec tsx scripts/render-clips.ts --plan              print the jobs, render nothing
  *   pnpm exec tsx scripts/render-clips.ts [--only <clipId>]   render the missing presets
+ *   ... --out-dir <dir>   development: render every preset into <dir>, with no budget and without touching the index
  *
  * The renderer is the command in MANIM_RENDER_CMD (a shell command run once per job inside the pinned image, with no
  * network). It receives CLIP_ID, CLIP_PRESET, CLIP_PARAMS (JSON), CLIP_TEMPLATE and CLIP_OUT in its environment and must
@@ -25,7 +26,8 @@ const indexFile = path.join(repoRoot, 'lib/clips/generated/asset-index.json');
 const args = process.argv.slice(2);
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : undefined;
 
-const jobs = planRenders(mathClipModules, CLIP_ASSET_INDEX, only);
+const outDirArg = args.includes('--out-dir') ? args[args.indexOf('--out-dir') + 1] : undefined;
+const jobs = planRenders(mathClipModules, outDirArg ? {} : CLIP_ASSET_INDEX, only);
 if (args.includes('--plan')) {
   console.log(
     jobs.length === 0
@@ -67,12 +69,15 @@ async function main(): Promise<number> {
       job,
       render,
       workDir: mkdtempSync(path.join(tmpdir(), `clip-${job.clipId}-`)),
-      outDir: path.join(repoRoot, 'public/clips'),
+      outDir: outDirArg ?? path.join(repoRoot, 'public/clips'),
+      unlimited: Boolean(outDirArg),
       repoRoot,
     });
     if (result.ok && result.asset) {
-      index = withAsset(index, job.cacheKey, result.asset);
-      writeFileSync(indexFile, `${JSON.stringify(index, null, 2)}\n`);
+      if (!outDirArg) {
+        index = withAsset(index, job.cacheKey, result.asset);
+        writeFileSync(indexFile, `${JSON.stringify(index, null, 2)}\n`);
+      }
       console.log(`ok   ${job.clipId}/${job.presetId}`);
     } else {
       failed++;
