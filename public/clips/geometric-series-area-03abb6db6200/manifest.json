@@ -1,0 +1,48 @@
+{
+  "clipId": "geometric-series-area",
+  "engineVersion": "manim-0.21.0",
+  "templateRev": 1,
+  "profile": "qm-720p30",
+  "w": 1280,
+  "h": 720,
+  "fps": 30,
+  "durationSec": 46,
+  "chapters": [
+    {
+      "id": "square",
+      "file": "square.mp4",
+      "posterFile": "square.png",
+      "startSec": 0,
+      "endSec": 9,
+      "sizeBytes": 20280
+    },
+    {
+      "id": "cut",
+      "file": "cut.mp4",
+      "posterFile": "cut.png",
+      "startSec": 9,
+      "endSec": 21,
+      "sizeBytes": 44847
+    },
+    {
+      "id": "repeat",
+      "file": "repeat.mp4",
+      "posterFile": "repeat.png",
+      "startSec": 21,
+      "endSec": 35,
+      "sizeBytes": 64137
+    },
+    {
+      "id": "sum",
+      "file": "sum.mp4",
+      "posterFile": "sum.png",
+      "startSec": 35,
+      "endSec": 46,
+      "sizeBytes": 52576
+    }
+  ],
+  "display": {
+    "limit": 1.0,
+    "s5": 0.9688
+  }
+}

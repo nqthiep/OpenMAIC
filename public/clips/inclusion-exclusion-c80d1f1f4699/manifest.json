@@ -1,0 +1,50 @@
+{
+  "clipId": "inclusion-exclusion",
+  "engineVersion": "manim-0.21.0",
+  "templateRev": 1,
+  "profile": "qm-720p30",
+  "w": 1280,
+  "h": 720,
+  "fps": 30,
+  "durationSec": 45,
+  "chapters": [
+    {
+      "id": "venn",
+      "file": "venn.mp4",
+      "posterFile": "venn.png",
+      "startSec": 0,
+      "endSec": 9,
+      "sizeBytes": 74510
+    },
+    {
+      "id": "add",
+      "file": "add.mp4",
+      "posterFile": "add.png",
+      "startSec": 9,
+      "endSec": 20,
+      "sizeBytes": 141258
+    },
+    {
+      "id": "subtract",
+      "file": "subtract.mp4",
+      "posterFile": "subtract.png",
+      "startSec": 20,
+      "endSec": 33,
+      "sizeBytes": 100289
+    },
+    {
+      "id": "add-back",
+      "file": "add-back.mp4",
+      "posterFile": "add-back.png",
+      "startSec": 33,
+      "endSec": 45,
+      "sizeBytes": 110353
+    }
+  ],
+  "display": {
+    "union": 14,
+    "A": 7,
+    "B": 5,
+    "C": 8
+  }
+}

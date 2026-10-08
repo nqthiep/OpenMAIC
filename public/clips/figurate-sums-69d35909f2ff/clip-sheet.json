@@ -1,0 +1,128 @@
+{
+  "chapters": [
+    {
+      "id": "dots",
+      "shows": {
+        "vi-VN": "các hàng chấm 1, 3, 5, … hoặc 1, 2, 3, …",
+        "en-US": "rows of dots 1, 3, 5, … or 1, 2, 3, …"
+      },
+      "formulas": [
+        "\\(1 + 3 + 5 + \\dots + (2n - 1)\\)",
+        "\\(1 + 2 + \\dots + n\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng đúng với vài n đầu là đã chứng minh xong: phải chứng minh cho mọi n.",
+          "en-US": "Thinking that truth for the first few n already proves it: it must be proved for every n."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Hàng thứ k có bao nhiêu chấm?",
+          "en-US": "How many dots are in row k?"
+        },
+        {
+          "vi-VN": "Số lẻ: 2k − 1 chấm; số tự nhiên: k chấm.",
+          "en-US": "Odd numbers: 2k − 1 dots; natural numbers: k dots."
+        },
+        {
+          "vi-VN": "Tổng n hàng là số chấm của cả hình.",
+          "en-US": "The sum of n rows is the number of dots of the whole figure."
+        }
+      ]
+    },
+    {
+      "id": "grow",
+      "shows": {
+        "vi-VN": "chữ L (gnomon) ôm hình vuông, hoặc hai bậc thang ghép thành hình chữ nhật",
+        "en-US": "an L (gnomon) around the square, or two staircases forming a rectangle"
+      },
+      "formulas": [
+        "\\(2k - 1\\)",
+        "\\(2 \\cdot (1 + 2 + \\dots + n) = n(n + 1)\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng lớp mới luôn có k chấm: với số lẻ lớp thứ k có 2k − 1 chấm.",
+          "en-US": "Thinking the new layer always has k dots: for odd numbers layer k has 2k − 1 dots."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Chữ L thêm vào hình vuông k × k có bao nhiêu chấm?",
+          "en-US": "How many dots does the L add to a k × k square?"
+        },
+        {
+          "vi-VN": "Một hàng k cộng một cột k, nhưng chấm góc đếm hai lần.",
+          "en-US": "One row of k plus one column of k, but the corner is counted twice."
+        },
+        {
+          "vi-VN": "Vậy 2k − 1 chấm, và hình mới là (k)² cộng thêm thành cạnh k.",
+          "en-US": "So 2k − 1 dots, and the new square has side k."
+        }
+      ]
+    },
+    {
+      "id": "count",
+      "shows": {
+        "vi-VN": "hình vuông cạnh n hoặc nửa hình chữ nhật n × (n + 1)",
+        "en-US": "a square of side n or half of an n × (n + 1) rectangle"
+      },
+      "formulas": [
+        "\\(1 + 3 + \\dots + (2n - 1) = n^2\\)",
+        "\\(1 + 2 + \\dots + n = \\frac{n(n + 1)}{2}\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Quên chia đôi ở số tam giác: hình chữ nhật n × (n + 1) gồm hai lần tổng.",
+          "en-US": "Forgetting to halve for triangular numbers: the n × (n + 1) rectangle holds twice the sum."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Hình vuông cạnh n có bao nhiêu chấm?",
+          "en-US": "How many dots does a square of side n have?"
+        },
+        {
+          "vi-VN": "n nhân n, tức n².",
+          "en-US": "n times n, that is n²."
+        },
+        {
+          "vi-VN": "Số tam giác là nửa của hình chữ nhật n × (n + 1): n(n + 1)/2.",
+          "en-US": "A triangular number is half of the n × (n + 1) rectangle: n(n + 1)/2."
+        }
+      ]
+    },
+    {
+      "id": "induction",
+      "shows": {
+        "vi-VN": "từ hình ở bước k thêm lớp k + 1 được hình ở bước k + 1",
+        "en-US": "from the figure at step k, adding layer k + 1 gives the figure at step k + 1"
+      },
+      "formulas": [
+        "\\(k^2 + (2k + 1) = (k + 1)^2\\)",
+        "\\(\\frac{k(k + 1)}{2} + (k + 1) = \\frac{(k + 1)(k + 2)}{2}\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng bước quy nạp đã đủ mà không cần bước cơ sở: cả hai đều cần.",
+          "en-US": "Thinking the induction step is enough without the base case: both are needed."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Bước quy nạp chứng minh điều gì?",
+          "en-US": "What does the induction step prove?"
+        },
+        {
+          "vi-VN": "Rằng nếu công thức đúng với k thì đúng với k + 1.",
+          "en-US": "That if the formula holds for k it holds for k + 1."
+        },
+        {
+          "vi-VN": "Cộng thêm số hạng thứ k + 1 vào vế phải và kiểm đúng dạng công thức với k + 1.",
+          "en-US": "Add the (k + 1)th term to the right side and check it matches the formula for k + 1."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "clipId": "figurate-sums",
+  "engineVersion": "manim-0.21.0",
+  "templateRev": 1,
+  "profile": "qm-720p30",
+  "w": 1280,
+  "h": 720,
+  "fps": 30,
+  "durationSec": 48,
+  "chapters": [
+    {
+      "id": "dots",
+      "file": "dots.mp4",
+      "posterFile": "dots.png",
+      "startSec": 0,
+      "endSec": 10,
+      "sizeBytes": 114790
+    },
+    {
+      "id": "grow",
+      "file": "grow.mp4",
+      "posterFile": "grow.png",
+      "startSec": 10,
+      "endSec": 23,
+      "sizeBytes": 123885
+    },
+    {
+      "id": "count",
+      "file": "count.mp4",
+      "posterFile": "count.png",
+      "startSec": 23,
+      "endSec": 36,
+      "sizeBytes": 114738
+    },
+    {
+      "id": "induction",
+      "file": "induction.mp4",
+      "posterFile": "induction.png",
+      "startSec": 36,
+      "endSec": 48,
+      "sizeBytes": 85085
+    }
+  ],
+  "display": {
+    "n": 4,
+    "sum": 16
+  }
+}

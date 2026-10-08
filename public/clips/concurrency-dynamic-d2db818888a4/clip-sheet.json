@@ -1,0 +1,156 @@
+{
+  "chapters": [
+    {
+      "id": "triangle",
+      "shows": {
+        "vi-VN": "tam giác ABC, đỉnh C có mũi tên chỉ hướng chạy song song với AB",
+        "en-US": "the triangle ABC, with an arrow on C showing it runs parallel to AB"
+      },
+      "formulas": [
+        "\\(A,\\ B,\\ C\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng khi C chạy thì tam giác vẫn đồng dạng với ban đầu: hình dạng thay đổi, chỉ chiều cao giữ nguyên.",
+          "en-US": "Thinking the triangle stays similar to the first one as C moves: the shape changes, only the height is kept."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "C chạy song song với AB thì điều gì không đổi?",
+          "en-US": "If C runs parallel to AB, what stays the same?"
+        },
+        {
+          "vi-VN": "Khoảng cách từ C tới AB, tức chiều cao.",
+          "en-US": "The distance from C to AB, the height."
+        },
+        {
+          "vi-VN": "Nên diện tích không đổi và tam giác không bao giờ suy biến.",
+          "en-US": "So the area is constant and the triangle never degenerates."
+        }
+      ]
+    },
+    {
+      "id": "lines",
+      "shows": {
+        "vi-VN": "ba đường cao, trung tuyến, trung trực hoặc phân giác tuỳ chọn",
+        "en-US": "the three altitudes, medians, perpendicular bisectors or angle bisectors, as chosen"
+      },
+      "formulas": [
+        "\\(a_1x + b_1y = c_1\\)",
+        "\\(a_2x + b_2y = c_2\\)",
+        "\\(a_3x + b_3y = c_3\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng ba đường thẳng bất kỳ luôn đồng quy: thường chúng tạo thành một tam giác nhỏ.",
+          "en-US": "Thinking any three lines are concurrent: usually they form a small triangle."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Mỗi đường được định nghĩa bởi tính chất nào?",
+          "en-US": "Which property defines each line?"
+        },
+        {
+          "vi-VN": "Đường cao vuông góc với cạnh, trung tuyến qua trung điểm, trung trực vuông góc tại trung điểm, phân giác chia đôi góc.",
+          "en-US": "An altitude is perpendicular to a side, a median passes through a midpoint, a perpendicular bisector is perpendicular at the midpoint, a bisector halves an angle."
+        },
+        {
+          "vi-VN": "Mỗi tâm đúng với một loại đường; ba đường cùng loại đồng quy.",
+          "en-US": "Each center goes with one kind of line; three lines of the same kind are concurrent."
+        }
+      ]
+    },
+    {
+      "id": "meet",
+      "shows": {
+        "vi-VN": "chỗ giao được phóng to: ba đường qua một điểm",
+        "en-US": "the crossing zoomed in: three lines through one point"
+      },
+      "formulas": [
+        "\\(\\det \\begin{pmatrix} a_1 & b_1 & c_1 \\\\ a_2 & b_2 & c_2 \\\\ a_3 & b_3 & c_3 \\end{pmatrix} = 0\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng tâm là giao của hai đường và đường thứ ba chỉ gần đúng đi qua: nó đi qua chính xác.",
+          "en-US": "Thinking the center is where two lines meet and the third only roughly passes there: it passes exactly."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Hai đường cắt nhau tại một điểm; đường thứ ba có đi qua điểm đó không?",
+          "en-US": "Two lines meet at one point; does the third pass through it?"
+        },
+        {
+          "vi-VN": "Có, đây là một định lý chứ không phải trùng hợp.",
+          "en-US": "Yes, this is a theorem, not a coincidence."
+        },
+        {
+          "vi-VN": "Điều đó được chứng minh cho mọi tam giác, kể cả tam giác tù.",
+          "en-US": "It is proved for every triangle, obtuse ones too."
+        }
+      ]
+    },
+    {
+      "id": "move",
+      "shows": {
+        "vi-VN": "C trượt song song với AB; ba đường và tâm trượt theo",
+        "en-US": "C sliding parallel to AB; the three lines and the center sliding with it"
+      },
+      "formulas": [
+        "\\(C(t) = C + t\\,(B - A)\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng tâm luôn nằm trong tam giác: trực tâm và tâm ngoại tiếp có thể nằm ngoài.",
+          "en-US": "Thinking the center always lies inside the triangle: the orthocenter and the circumcenter may lie outside."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Khi C chạy, những gì thay đổi và những gì không?",
+          "en-US": "As C moves, what changes and what does not?"
+        },
+        {
+          "vi-VN": "Hình dạng và vị trí tâm thay đổi; tính đồng quy thì không.",
+          "en-US": "The shape and the position of the center change; the concurrency does not."
+        },
+        {
+          "vi-VN": "Tâm có thể ra ngoài tam giác, nhưng ba đường vẫn gặp nhau.",
+          "en-US": "The center may leave the triangle, but the three lines still meet."
+        }
+      ]
+    },
+    {
+      "id": "special",
+      "shows": {
+        "vi-VN": "vị trí đặc biệt: tâm ngoài tam giác hoặc trùng với đỉnh góc vuông",
+        "en-US": "a special position: the center outside the triangle or at the right-angle vertex"
+      },
+      "formulas": [
+        "\\(H = A\\)"
+      ],
+      "misconceptions": [
+        {
+          "vi-VN": "Nghĩ rằng trực tâm luôn nằm trong tam giác: chỉ với tam giác nhọn; tam giác vuông cho trực tâm tại đỉnh, tam giác tù cho trực tâm ngoài.",
+          "en-US": "Thinking the orthocenter is always inside the triangle: only for an acute one; a right triangle puts it at a vertex, an obtuse one outside."
+        }
+      ],
+      "hints": [
+        {
+          "vi-VN": "Trực tâm của tam giác vuông ở đâu?",
+          "en-US": "Where is the orthocenter of a right triangle?"
+        },
+        {
+          "vi-VN": "Tại đỉnh góc vuông, vì hai cạnh góc vuông đã là hai đường cao.",
+          "en-US": "At the right-angle vertex, since the two legs are already two altitudes."
+        },
+        {
+          "vi-VN": "Với tam giác tù, các đường cao gặp nhau trên phần kéo dài, nên ngoài tam giác.",
+          "en-US": "In an obtuse triangle the altitudes meet on their extensions, outside the triangle."
+        }
+      ]
+    }
+  ]
+}

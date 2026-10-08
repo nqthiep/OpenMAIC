@@ -165,3 +165,27 @@ def line_in_box(p, d, box=(-6.5, 6.5, -3.4, 3.0)):
         return P(p[0], p[1]), P(p[0], p[1])
     pts.sort(key=lambda a: a[0])
     return P(*pts[0][1]), P(*pts[-1][1])
+
+
+def plot(f, x0: float, x1: float, S, ymax_scene: float = 3.2, ymin_scene: float = -3.4, color=BLUE_D, width: float = 7, steps: int = 400):
+    """The graph of `f` on [x0, x1] as polylines in scene coordinates (`S(x, y)` maps problem to scene units); the curve is
+    cut where it leaves the vertical window [ymin_scene, ymax_scene], so a steep branch does not run off the picture."""
+    from manim import VMobject, VGroup
+    pieces, cur = [], []
+    for i in range(steps + 1):
+        x = x0 + (x1 - x0) * i / steps
+        q = S(x, f(x))
+        if ymin_scene <= q[1] <= ymax_scene:
+            cur.append(q)
+        elif cur:
+            pieces.append(cur)
+            cur = []
+    if cur:
+        pieces.append(cur)
+    group = VGroup()
+    for pts in pieces:
+        if len(pts) > 1:
+            m = VMobject(color=color, stroke_width=width)
+            m.set_points_as_corners(pts)
+            group.add(m)
+    return group

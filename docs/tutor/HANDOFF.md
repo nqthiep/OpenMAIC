@@ -110,9 +110,13 @@ Chưa làm và vì sao:
 | Mẫu clip (nửa TS) | `3A-T1..T3`, `3B-T1..T14`, `3D-T1..T4` | **21 mẫu** ở `lib/subjects/math/clips/*.ts` (+ `index.ts`), mỗi mẫu một test `tests/clips/<id>.test.ts` qua hợp đồng chung `tests/clips/clip-contract.ts` và một oracle độc lập |
 | Cổng QA | `3A-05`, `3A-06` | `manim/qa/{allowlist,check_video,check_bbox,check_ssim}.py`, 45 test pytest chạy trên video ffmpeg tổng hợp; job CI `manim-qa` |
 | Dịch vụ | `3C-01`, `3C-02`, `3C-05..08` | `manim/service/{spec,jobs,server,runner}.py` (chỉ stdlib; giới hạn hàng đợi/người/toàn cục, TTL, deadline, token so sánh hằng thời gian); `spec.py` cho cùng khoá cache và cùng kết quả kiểm params với TS (`manim/service/fixtures/parity.json`, sinh từ `scripts/export-clip-specs.ts` → `templates.json`; test TS `service-parity` báo lệch); client, route, cờ, nhánh bất đồng bộ ở `lib/clips/service-client.ts`, `app/api/clips`, `clip-tools.ts`; 1358 test pytest (`manim/`), job CI `manim-qa` chạy `manim/service` |
+| Mẫu Manim | `3A-M*`, `3B-M*`, `3D-M*` | **21 mẫu** `manim/templates/<id>.py` + `_base.py` + `manim/render_clip.py`; cài Manim 0.21.0 + TinyTeX theo `manim/README.md` (đã chạy trên máy này, 2026-10-08). **84/84 preset qua đủ cổng** (allowlist, video, bbox, frame, so số hiển thị với TS). `public/clips` giữ **10 thư mục** (preset đầu của 10 clip, 7,5 MB: giới hạn NFR-P8 tính mỗi preset là một clip); phần còn lại chỉ dựng được qua manim-service hoặc `render-clips --out-dir` |
 | Dựng | `3A-07` | `scripts/render-clips.ts` (`pnpm render:clips --plan` in 84 job), `lib/clips/generated/asset-index.json` (rỗng), kiểm manifest |
 
 Lệch so với card (đều ghi ở comment đầu file và test):
+
+- Cổng `check_ssim`: ngưỡng "đứng yên" hạ từ 0,5 xuống 0,01 (đo: ảnh giữ 0-0,005, vẽ chậm ≥ 0,02). Cổng bbox trước đó **trống** (đọc độ mờ của vỏ MathTex), đã sửa trong `_base.py`; các mẫu đã sửa theo lỗi chồng chữ nó tìm ra.
+- Mẫu tối đa 12 chữ trên màn hình: bảng số (lattice, modular-clock) dùng một MathTex nhiều phần cho mỗi hàng.
 
 - `secant-tangent`: ngưỡng `|slope(0.01) − f'| < 0.1` của card **sai** trong miền input (c = [0,0,3,3], x0 = 2 cho ≈ 0.21); thay bằng đồng nhất thức đúng + ngưỡng 0.25.
 - `render-clips` là file `.ts` chạy bằng `tsx`, không phải `.mjs`.
@@ -124,7 +128,7 @@ Chưa làm và vì sao (Phase 3):
 
 | Việc | Lý do |
 | --- | --- |
-| Mọi mẫu Manim `.py` (`3A-M*`, `3B-M*`, `3D-M*`), `3A-04` (`manim/Dockerfile`, `_base.py`), `3A-08` | cần Manim CE 0.21.0, TeX Live, Docker image đã ghim; máy này chưa có `manim`, `latex` |
+| `3A-04` (image Docker ghim), `3A-08` (vòng manim-author), spike `3-S1` (Docker, 2/4 vCPU), `3-S2` (tiếng Việt, cần xelatex/Typst), `3-S4` phần amd64 | cần Docker chạy; `3-S4` trên arm64 đã làm (`manim/spikes/s4/RESULT.md`) |
 | Spike `3-S1..S5`, `3-R1`, `3B-00` (curriculum Toán) | cần Manim/Docker và nghiên cứu nguồn; `3-R1` không được bịa nguồn |
 | `3C-03` (build/chạy image dịch vụ), `3C-04` (sandbox, red-team), `3C-09` | `manim/service/Dockerfile` và `docker-compose.yml` đã viết nhưng **[Unverified] chưa build/chạy** (Docker daemon tắt); cách ly mạng của renderer chưa cưỡng chế; red-team cần image thật |
 | Mọi hội đồng review LLM cho entry Toán và clip, `3A-17`, `3B-E1` | cần LLM thật, xem mục "Gate review LLM" |
@@ -135,7 +139,7 @@ Chưa làm và vì sao (Phase 3):
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: phần mã đã làm (mục 3b). Còn lại cần Manim/Docker hoặc LLM: cài `manim` + `latex`, rồi `3A-04` (image ghim), spike `3-S1/S2/S4`, mẫu `.py` (`3A-M1..3`), chạy `pnpm render:clips`; `3C-*` sau đó.
+4. Phase 3: phần mã đã làm (mục 3b). Mẫu Manim đã xong (mục 3b). Còn lại cần Docker hoặc LLM: `3A-04` (image ghim, build `manim/service/Dockerfile`), spike `3-S1/S2`, `3C-04` (sandbox), vòng `3A-08`, cổng review hai provider.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)

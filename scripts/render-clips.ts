@@ -4,6 +4,8 @@
  *
  *   pnpm exec tsx scripts/render-clips.ts --plan              print the jobs, render nothing
  *   pnpm exec tsx scripts/render-clips.ts [--only <clipId>]   render the missing presets
+ *   ... --first-preset    only the first preset of each clip (what ships in public/clips: NFR-P8 allows 10 such directories)
+ *   ... --max-clips <k>   with --first-preset, the first k clips in catalog order (default 10)
  *   ... --out-dir <dir>   development: render every preset into <dir>, with no budget and without touching the index
  *
  * The renderer is the command in MANIM_RENDER_CMD (a shell command run once per job inside the pinned image, with no
@@ -27,7 +29,16 @@ const args = process.argv.slice(2);
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : undefined;
 
 const outDirArg = args.includes('--out-dir') ? args[args.indexOf('--out-dir') + 1] : undefined;
-const jobs = planRenders(mathClipModules, outDirArg ? {} : CLIP_ASSET_INDEX, only);
+const maxClips = args.includes('--max-clips') ? Number(args[args.indexOf('--max-clips') + 1]) : 10;
+const planned = planRenders(mathClipModules, outDirArg ? {} : CLIP_ASSET_INDEX, only);
+const jobs = args.includes('--first-preset')
+  ? planned
+      .filter(
+        (j) =>
+          j.presetId === mathClipModules.find((m) => m.entry.id === j.clipId)!.entry.presets[0].id,
+      )
+      .slice(0, maxClips)
+  : planned;
 if (args.includes('--plan')) {
   console.log(
     jobs.length === 0

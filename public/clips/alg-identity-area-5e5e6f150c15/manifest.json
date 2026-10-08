@@ -1,0 +1,50 @@
+{
+  "clipId": "alg-identity-area",
+  "engineVersion": "manim-0.21.0",
+  "templateRev": 1,
+  "profile": "qm-720p30",
+  "w": 1280,
+  "h": 720,
+  "fps": 30,
+  "durationSec": 46,
+  "chapters": [
+    {
+      "id": "figure",
+      "file": "figure.mp4",
+      "posterFile": "figure.png",
+      "startSec": 0,
+      "endSec": 10,
+      "sizeBytes": 23441
+    },
+    {
+      "id": "decompose",
+      "file": "decompose.mp4",
+      "posterFile": "decompose.png",
+      "startSec": 10,
+      "endSec": 22,
+      "sizeBytes": 84665
+    },
+    {
+      "id": "rearrange",
+      "file": "rearrange.mp4",
+      "posterFile": "rearrange.png",
+      "startSec": 22,
+      "endSec": 36,
+      "sizeBytes": 161276
+    },
+    {
+      "id": "formula",
+      "file": "formula.mp4",
+      "posterFile": "formula.png",
+      "startSec": 36,
+      "endSec": 46,
+      "sizeBytes": 62460
+    }
+  ],
+  "display": {
+    "total": 25,
+    "a2": 9,
+    "ab": 6,
+    "b2": 4
+  }
+}
