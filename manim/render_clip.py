@@ -20,7 +20,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "templates"))
 
-W, H, FPS = 1280, 720, 30
+# the profile of every shipped clip; the SPIKE_* variables exist only for the performance spike (manim/spikes/s1)
+W, H, FPS = int(os.environ.get("SPIKE_W", 1280)), int(os.environ.get("SPIKE_H", 720)), int(os.environ.get("SPIKE_FPS", 30))
 PROFILE = "qm-720p30"
 
 
