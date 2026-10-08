@@ -45,7 +45,7 @@
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-sequences-limits",
-      "interactive_ideas": ["Walkthrough `geometric-series-area`"],
+      "interactive_ideas": ["Walkthrough `geometric-series-area`", "Walkthrough `limit-epsilon`"],
       "name_en": "Sequences and limits",
       "name_vi": "Dãy số và giới hạn",
       "pitfalls": [
@@ -73,7 +73,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["geometric-series-area"]
+      "walkthrough_ids": ["geometric-series-area", "limit-epsilon"]
     },
     {
       "difficulty": 3,
@@ -182,7 +182,7 @@
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-counting-advanced",
-      "interactive_ideas": ["Walkthrough `inclusion-exclusion`"],
+      "interactive_ideas": ["Walkthrough `inclusion-exclusion`", "Walkthrough `lattice-paths`"],
       "name_en": "Advanced counting",
       "name_vi": "Đếm nâng cao",
       "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
@@ -207,7 +207,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["inclusion-exclusion"]
+      "walkthrough_ids": ["inclusion-exclusion", "lattice-paths"]
     },
     {
       "difficulty": 4,

@@ -398,10 +398,10 @@
             "Chia hai vế của đồng dư cho số không nguyên tố cùng nhau với modulo",
             "Quên chu kỳ bắt đầu từ lũy thừa nào"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `modular-clock`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["modular-clock"]
         },
         {
           "id": "m2-euclid-diophantine",
@@ -503,10 +503,10 @@
             "Chọn \"lồng\" không đúng nên không áp dụng được",
             "Bất biến không thực sự giữ qua mọi phép biến đổi"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `tiling-coloring`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["tiling-coloring"]
         },
         {
           "id": "m2-induction",
@@ -538,10 +538,10 @@
             "Quên kiểm tra cơ sở quy nạp",
             "Bước quy nạp không đúng với mọi k (bắt đầu từ k nhỏ)"
           ],
-          "interactive_ideas": ["Walkthrough `figurate-sums`"],
+          "interactive_ideas": ["Walkthrough `figurate-sums`", "Walkthrough `induction-fallacy`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": ["figurate-sums"]
+          "walkthrough_ids": ["figurate-sums", "induction-fallacy"]
         }
       ]
     },
@@ -617,10 +617,13 @@
             "Nhầm \"gần hơn\" với \"hội tụ\": cần mọi số hạng sau N",
             "Giới hạn của dãy đan dấu"
           ],
-          "interactive_ideas": ["Walkthrough `geometric-series-area`"],
+          "interactive_ideas": [
+            "Walkthrough `geometric-series-area`",
+            "Walkthrough `limit-epsilon`"
+          ],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": ["geometric-series-area"]
+          "walkthrough_ids": ["geometric-series-area", "limit-epsilon"]
         },
         {
           "id": "m3-derivative-graphs",
@@ -754,10 +757,10 @@
             }
           ],
           "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
-          "interactive_ideas": ["Walkthrough `inclusion-exclusion`"],
+          "interactive_ideas": ["Walkthrough `inclusion-exclusion`", "Walkthrough `lattice-paths`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "walkthrough_ids": ["inclusion-exclusion"]
+          "walkthrough_ids": ["inclusion-exclusion", "lattice-paths"]
         },
         {
           "id": "m3-vector-transform-complex",

@@ -9,8 +9,13 @@ import { figurateSumsEntry } from '@/lib/subjects/math/catalog/figurate-sums';
 import { geometricSeriesAreaEntry } from '@/lib/subjects/math/catalog/geometric-series-area';
 import { pythagorasDissectionEntry } from '@/lib/subjects/math/catalog/pythagoras-dissection';
 import { inclusionExclusionEntry } from '@/lib/subjects/math/catalog/inclusion-exclusion';
+import { inductionFallacyEntry } from '@/lib/subjects/math/catalog/induction-fallacy';
 import { inscribedAngleEntry } from '@/lib/subjects/math/catalog/inscribed-angle';
 import { concurrencyDynamicEntry } from '@/lib/subjects/math/catalog/concurrency-dynamic';
+import { latticePathsEntry } from '@/lib/subjects/math/catalog/lattice-paths';
+import { limitEpsilonEntry } from '@/lib/subjects/math/catalog/limit-epsilon';
+import { modularClockEntry } from '@/lib/subjects/math/catalog/modular-clock';
+import { tilingColoringEntry } from '@/lib/subjects/math/catalog/tiling-coloring';
 import { planeTransformEntry } from '@/lib/subjects/math/catalog/plane-transform';
 import { powerOfPointEntry } from '@/lib/subjects/math/catalog/power-of-point';
 import { riemannIntegralEntry } from '@/lib/subjects/math/catalog/riemann-integral';
@@ -38,6 +43,11 @@ export const mathPack: SubjectPack = {
     concurrencyDynamicEntry,
     figurateSumsEntry,
     inclusionExclusionEntry,
+    inductionFallacyEntry,
+    latticePathsEntry,
+    limitEpsilonEntry,
+    modularClockEntry,
+    tilingColoringEntry,
     algIdentityAreaEntry,
     pythagorasDissectionEntry,
     euclidRectangleEntry,

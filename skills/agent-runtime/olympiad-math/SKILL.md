@@ -73,11 +73,16 @@ Bảng sinh từ catalog bằng `pnpm exec tsx scripts/generate-skill-catalog.ts
 | `geometric-series-area` | A geometric series as areas | `half`, `third`, `quarter` | `m3-sequences-limits` |
 | `graph-transform` | Transforming a graph: y = a·f(x − h) + k | `shift`, `stretch`, `reflect`, `identity` | `m1-quadratic-vieta` |
 | `inclusion-exclusion` | Inclusion–exclusion for three sets | `generic`, `empty-center`, `disjoint`, `nested` | `m3-counting-advanced` |
+| `induction-fallacy` | Fallacies of induction | `colors-4`, `colors-8`, `base-3`, `base-6` | `m2-induction` |
 | `inscribed-angle` | The inscribed angle | `arc-100`, `arc-60`, `arc-180`, `arc-300` | `m1-circle-angles` |
+| `lattice-paths` | Lattice paths and Pascal’s triangle | `2-2`, `3-2`, `1-6`, `4-4` | `m3-counting-advanced` |
+| `limit-epsilon` | The limit of a sequence: the ε-band and N | `inv-0.2`, `inv-0.05`, `n1-0.1`, `alt-0.25` | `m3-sequences-limits` |
+| `modular-clock` | Multiplication modulo n on a clock | `n10-a2`, `n7-a3`, `n12-a5`, `n5-a4` | `m2-modular-arith` |
 | `plane-transform` | Plane transformations and complex multiplication | `rotate90`, `reflect-x`, `homothety2`, `mult-i` | `m3-vector-transform-complex` |
 | `power-of-point` | The power of a point | `outside`, `inside`, `on-circle`, `far` | `m2-circle-power` |
 | `pythagoras-dissection` | The Pythagorean theorem by dissection | `three-four`, `equal`, `thin`, `six-eight` | `m1-triangle-geometry` |
 | `riemann-integral` | Riemann sums and the integral | `x2-4`, `x2-16`, `const`, `cubic` | `m4-integral` |
 | `secant-tangent` | From the secant to the tangent | `square-at-1`, `cubic-at-0`, `stationary`, `quad-at-minus-1` | `m3-derivative-graphs` |
+| `tiling-coloring` | A chessboard with two cells removed, and dominoes | `n8-opposite`, `n4-opposite`, `n6-adjacent`, `n8-adjacent` | `m2-pigeonhole-invariants` |
 | `triangle-altitude` | The three altitudes of a triangle and the orthocenter | `acute`, `obtuse`, `right`, `isosceles` | `m1-triangle-geometry` |
 <!-- END GENERATED: walkthrough-ids -->

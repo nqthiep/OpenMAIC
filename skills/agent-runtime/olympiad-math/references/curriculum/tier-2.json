@@ -87,7 +87,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-modular-arith",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `modular-clock`"],
       "name_en": "Modular arithmetic",
       "name_vi": "Số học đồng dư",
       "pitfalls": [
@@ -115,7 +115,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["modular-clock"]
     },
     {
       "difficulty": 3,
@@ -192,7 +192,7 @@
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-pigeonhole-invariants",
-      "interactive_ideas": [],
+      "interactive_ideas": ["Walkthrough `tiling-coloring`"],
       "name_en": "Pigeonhole and invariants",
       "name_vi": "Nguyên lý Dirichlet và bất biến",
       "pitfalls": [
@@ -220,14 +220,14 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["tiling-coloring"]
     },
     {
       "difficulty": 3,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-induction",
-      "interactive_ideas": ["Walkthrough `figurate-sums`"],
+      "interactive_ideas": ["Walkthrough `figurate-sums`", "Walkthrough `induction-fallacy`"],
       "name_en": "Mathematical induction",
       "name_vi": "Quy nạp toán học",
       "pitfalls": [
@@ -255,7 +255,7 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["figurate-sums"]
+      "walkthrough_ids": ["figurate-sums", "induction-fallacy"]
     }
   ]
 }

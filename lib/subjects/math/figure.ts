@@ -52,6 +52,30 @@ const round3 = (x: number): number => {
   return v === 0 ? 0 : v;
 };
 
+/** cos 1° and sin 1°: the circle at whole degrees comes from rotating by these, so the catalog needs no trigonometry */
+const COS1 = 0.9998476951563913;
+const SIN1 = 0.01745240643728351;
+const UNIT: Pt[] = (() => {
+  const out: Pt[] = [[1, 0]];
+  for (let i = 1; i < 360; i++) {
+    const [x, y] = out[i - 1];
+    out.push([x * COS1 - y * SIN1, x * SIN1 + y * COS1]);
+  }
+  return out;
+})();
+/** The point of the circle with radius `r` and centre O at `deg` degrees (any real number, counted counter-clockwise from the x axis). */
+export function circlePoint(deg: number, r: number): Pt {
+  const d = ((deg % 360) + 360) % 360;
+  const i = Math.floor(d);
+  const f = d - i;
+  const [x0, y0] = UNIT[i];
+  const [x1, y1] = UNIT[(i + 1) % 360];
+  const x = x0 + f * (x1 - x0);
+  const y = y0 + f * (y1 - y0);
+  const len = Math.sqrt(x * x + y * y);
+  return [(r * x) / len, (r * y) / len];
+}
+
 /** A box that holds every point, with `pad` world units around it. */
 export function boundsOf(points: readonly Pt[], pad = 1): Bounds {
   const xs = points.map((p) => p[0]);
