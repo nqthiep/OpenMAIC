@@ -14,7 +14,7 @@
 | 21 mẫu Manim dựng được, 84/84 preset qua cổng QA, nhưng chỉ 10 preset (7,5 MB) vào được `public/clips` vì trần 10 thư mục / 30 MB của NFR-P8. | `manim/templates/`, `tests/clips/prebuilt-assets.test.ts` |
 | Hạ tầng đi kèm: image 2,33 GB (TeX Live), service, sandbox, hàng đợi. Red-team thử đầu tiên tìm ra TeX đọc được `/etc/passwd` và fork bomb làm service ngừng trả lời. | `manim/Dockerfile`, `manim/service/redteam/` |
 | Cổng bố cục chữ của clip đã chạy rỗng (đọc độ mờ của vỏ `MathTex`) và chỉ lộ ra khi tự kiểm; hội đồng review chỉ đọc chữ và số, không thấy hình. | `manim/templates/_base.py`, `lib/clips/review-material.ts` |
-| Xuất ZIP lớp học không chứa video clip (URL tĩnh không được đóng gói) cho tới khi sửa `collectMediaFiles`. | `e2e/tests/clip-export-roundtrip.spec.ts` |
+| Xuất ZIP lớp học không chứa video clip (URL tĩnh không được đóng gói) cho tới khi sửa `collectMediaFiles`. | e2e `clip-export-roundtrip` (còn ở thẻ `manim-clips-final`) |
 | Đổi tham số tự do cần render lại 14–60 s trên 2 vCPU; học sinh chỉ chọn preset. | `manim/spikes/s1/RESULT.md` |
 | Walkthrough Toán (3 entry) đã có thanh trượt (`customInput`), frame là dữ liệu thuần kiểm bằng test có oracle, vài trăm KB, chữ là DOM/SVG, KaTeX dựng ở server. | `lib/subjects/math/catalog/`, `lib/tutor/runtime/visualizers/` |
 

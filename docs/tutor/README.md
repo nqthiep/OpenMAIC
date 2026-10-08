@@ -10,7 +10,7 @@
 > - **không code editor** (mặc định chặn toàn ứng dụng); interactive + visualizer để dễ hiểu;
 > - phục vụ cả học sinh **thi vào 10 chuyên Tin** và **HSG**; dễ thêm môn.
 >
-> Tin dùng walkthrough SVG: dữ kiện do hàm thuần sinh, có test; code chỉ-đọc C++ và Python. Toán dùng **Manim làm hướng chính**: clip câm, lời thầy riêng. Không đổi package `@openmaic/*`, không thêm npm dependency. Bắt đầu ở [REQUIREMENTS](REQUIREMENTS.md).
+> Tin dùng walkthrough SVG: dữ kiện do hàm thuần sinh, có test; code chỉ-đọc C++ và Python. Toán dùng **walkthrough tương tác** (từ 2026-10-08, [ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md); bản gốc dùng clip Manim câm, nay chỉ là mã lưu trữ). Không đổi package `@openmaic/*`, không thêm npm dependency. Bắt đầu ở [REQUIREMENTS](REQUIREMENTS.md).
 
 ## 1. Mục tiêu và phạm vi
 
@@ -84,7 +84,7 @@ Chỉ có ước lượng cỡ S/M/L ([ADR 0004](decisions/0004-three-phase-plan
 3. **Dữ kiện do hàm thuần sinh, có test; lời thầy kịch bản tất định** theo beat của từng preset. LLM chỉ chọn `walkthroughId` + `presetId` qua tool `generate_walkthrough`; từ 1d có thể cấp `input` (ADR 0006, 0011, 0013).
 4. **Widget là HTML tự chứa trong iframe sandbox + CSP**, không phải component React của host; host và iframe bắt tay `widget-ready` (ADR 0005, 0013).
 5. **Mở rộng bằng gói môn học**: thêm môn dùng lại phương tiện có sẵn = thêm thư mục + một dòng đăng ký; thêm **loại phương tiện** mới cần ADR. **Không đổi package publish** (ADR 0005).
-6. **Không thêm npm dependency**; trực quan bằng SVG/DOM tự viết (ADR 0002). **Manim là hướng chính cho Toán** (user xác nhận): mẫu tham số hoá, clip câm + lời thầy riêng, mỗi chapter một slide. LLM chỉ chọn `clipId` + `presetId`/`params`, không viết mã Manim chạy trên server (ADR 0007).
+6. **Không thêm npm dependency**; trực quan bằng SVG/DOM tự viết (ADR 0002). ~~Manim là hướng chính cho Toán~~ **đã thay bằng walkthrough tương tác (ADR 0015, 2026-10-08)**: 21 mẫu clip đã viết lại thành walkthrough cùng id; mã Manim giữ nhưng tắt (ADR 0007 phần trực quan hoá Toán bị thay thế). LLM chỉ chọn `walkthroughId` + `presetId`, không viết mã chạy trên server.
 7. **Tái dùng kênh và tiền lệ có sẵn**: `SET_WIDGET_STATE`, `HIGHLIGHT_ELEMENT`, `__maicInteractive`, cách đăng ký tool như `generate_video` ([INTERFACES](INTERFACES.md)).
 8. **Quyết định bằng SWOT**: mỗi ADR có bảng S/W/O/T và trigger đổi quyết định.
 9. **Không cần người thật để vận hành quy trình** (ADR 0014): bộ lọc nội dung, hội đồng giáo viên Tin/Toán, tác giả Manim và học sinh thử đều là **LLM riêng** (khác nhà cung cấp với model dạy), mỗi vai trò có bộ hiệu chuẩn. Kiểm tất định vẫn là cổng cứng. Dữ liệu học sinh được lưu để đo việc học thật.

@@ -1,0 +1,78 @@
+{
+  "entryId": "dijkstra",
+  "entryRev": 1,
+  "contentHash": "607a57881e16407f",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "dijkstra",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "dijkstra",
+      "entryRev": 1,
+      "scores": {
+        "dung": 2,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 3,
+        "trucQuan": 4,
+        "sinhDong": 3
+      },
+      "factErrors": [
+        "beats.done and the scripts: dist[v] is a numeric shortest-path distance, not “the shortest path”; all locales state the latter.",
+        "beats.pop narration: the minimum heap item is not always an unsettled node with an optimal distance; classic frames 13→14 show stale item (14,F) being extracted after F was settled at 11. This is true only after the stale check.",
+        "beats.settle narration: the claim that every alternative path to u must pass through a farther node is false; an alternative path may pass through already-settled vertices closer than u. Correctness needs the first-unsettled-vertex/cut argument.",
+        "code.pseudo line 1: it does not initialize dist[v] to infinity for v != s, although the frame explanations and both implementations rely on that initialization.",
+        "code.cpp and code.py: the hard-coded INF=10^9 is valid only if every finite shortest distance is below 10^9; otherwise reachable vertices are indistinguishable from unreachable ones, and the C++ expression dist[u]+w can also overflow.",
+        "beats.done complexity: the lazy heap can contain Θ(m) entries, so O((n+m) log n) requires an unstated simple-graph bound m=O(n²); for unrestricted parallel edges the safe bound is O((n+m) log(n+m))."
+      ],
+      "issues": [
+        {
+          "where": "beats.start and all start frames",
+          "problem": "The scope repeatedly says positive weights, while the misconception correctly states the actual condition is non-negative; this may make students think zero-weight edges are invalid.",
+          "fix": "Use non-negative weights consistently and optionally add a zero-weight example to show that ties do not invalidate Dijkstra."
+        },
+        {
+          "where": "beats.done complexity narration and hints",
+          "problem": "The symbols n and m are used without being defined for grade 8-9 students.",
+          "fix": "State before the formula that n is the number of vertices and m is the number of edges or directed arcs."
+        },
+        {
+          "where": "script prediction questions",
+          "problem": "Most presets do not give two distinguishable options: with one heap item both descriptions are true, and in the classic example (7,B) is both the smallest item and the earliest-inserted item.",
+          "fix": "Before asking, ensure the heap contains at least two items whose minimum d and earliest insertion differ, or ask students to name the actual pair."
+        },
+        {
+          "where": "script pop reveal sequence",
+          "problem": "The prediction is asked while candidates are visible, but after setState switches to the pop frame the extracted pair has already disappeared from the heap, so the following answer is not visually marked there.",
+          "fix": "Reveal a frame containing d, u and the extracted pair, or delay the answer until the following settle frame."
+        },
+        {
+          "where": "state graph representation",
+          "problem": "Some traversals, such as F→E and C→B, oppose the stored from/to direction without declaring that the graph is undirected.",
+          "fix": "Mark the examples explicitly as undirected and ensure the renderer ignores direction, or add the reverse arcs if the graph is directed."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "entryId": "triangle-altitude",
+  "entryRev": 1,
+  "contentHash": "6435ef9f1a6727f6",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "triangle-altitude",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "triangle-altitude",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 2,
+        "deHieu": 3,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "At predict-meet/altitude-c/done, the universal claim that the three altitudes are concurrent is concluded from four fixed coordinate examples; these figures verify only those cases, and no general proof or explicit “illustration only” qualification is supplied.",
+        "In the altitude-a misconception, the correction says that in an obtuse triangle the foot lies on an extension of BC without the necessary condition. Exactly two altitude feet are outside; the foot from the obtuse vertex is on the opposite segment. In the supplied obtuse preset, Ha=(6/17,24/17) is on segment BC."
+      ],
+      "issues": [
+        {
+          "where": "Beat start narration",
+          "problem": "The initial definition says an altitude is dropped to the opposite side, although in an obtuse triangle its foot may lie on an extension of that side.",
+          "fix": "Define an altitude from the outset as the line through a vertex perpendicular to the line containing the opposite side."
+        },
+        {
+          "where": "Frames altitude-a, altitude-b, and altitude-c",
+          "problem": "The foot and orthocenter coordinates are announced without any calculation, so students are not shown how the values or the concurrence in each example are obtained.",
+          "fix": "Work at least one exact example using projection, slopes, or vector equations, then explain that the other displayed coordinates are rounded calculations."
+        },
+        {
+          "where": "Beat altitude-a, hint 3",
+          "problem": "The dot product is introduced without definition and may exceed the prerequisite level of the lesson.",
+          "fix": "Define the vectors and the zero-dot-product criterion, or replace this hint with a compass-and-straightedge or coordinate-slope method."
+        },
+        {
+          "where": "Scripts between frames 2 and 3",
+          "problem": "The same yes/no prediction is asked twice in immediate succession, weakening the pause for student reasoning.",
+          "fix": "Ask once after frame 2, wait for a response, then reveal H in frame 3 without repeating the question."
+        },
+        {
+          "where": "Right preset, frames 2–5",
+          "problem": "A, H, Hb, and Hc all have coordinates (0,0), so their labels, segments, and highlights can overlap and obscure the important right-triangle edge case.",
+          "fix": "Use leader lines or offset labels for the coincident points and distinguish the corresponding altitude lines by color or line style."
+        },
+        {
+          "where": "Done narration in all scripts",
+          "problem": "It invites students to drag a vertex, but the walkthrough provides only fixed preset frames and no specified dragging control.",
+          "fix": "Add an actual dynamic vertex control, or change the invitation to an exercise using paper or separate geometry software."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

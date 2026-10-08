@@ -5,7 +5,9 @@
 - **Người sở hữu**: Chủ dự án
 - **Liên quan**: [../CONTENT-DESIGN](../CONTENT-DESIGN.md), [../OPERATIONS](../OPERATIONS.md), [../SECURITY](../SECURITY.md), [../RISKS](../RISKS.md), ADR 0005, 0007, 0009, 0011, 0012
 
-> **Tóm tắt:** Chuyên Toán với **Manim là hướng chính**. Gồm:
+> **ĐÃ THAY THẾ MỘT PHẦN (2026-10-08, [ADR 0015](../decisions/0015-math-interactive-web-ui-not-video.md)):** minh hoạ Toán **không còn dùng clip Manim (video)**; cả 21 mẫu của §3 đã được viết lại thành **walkthrough tương tác** cùng id (`lib/subjects/math/catalog/<id>.ts`, test `tests/subjects/math/<id>.test.ts`): hình dựng bằng visualizer `geometry`, lời thầy theo bước, câu hỏi dự đoán, đổi biến thể bằng preset và tua khung. Các phần nói về clip, `generate_clip_scenes`, `manim/`, cổng QA video, dịch vụ render và cache clip (§2 hàng "Manim clip", §3, §5 mục clip, §6, §9–§12) là **lịch sử thiết kế**; mã tương ứng được giữ nhưng tắt (thẻ `manim-clips-final`). Cái còn hiệu lực: blueprint 8 giai đoạn (§4 trừ chỗ nói "clip" thì đọc là "walkthrough"), curriculum, hội đồng review Toán, quy tắc nội dung (chữ trong hình ngắn, một ý mỗi mẫu).
+
+> **Tóm tắt:** (bản gốc 2026-09-30, đã bị ADR 0015 thay một phần) Chuyên Toán với **Manim là hướng chính**. Gồm:
 > - 21 mẫu clip tham số hoá, chia Lô A/B/C; clip câm, lời thầy chạy riêng; mỗi chapter một slide do tool `generate_clip_scenes` tạo.
 > - 3 walkthrough SVG cho phần thủ tục (đợt 3B).
 > - Blueprint Toán, cổng QA + hội đồng LLM Toán ký; mẫu do LLM tác giả viết offline (ADR 0014).
@@ -35,7 +37,9 @@
 
 Vai trò mới của 5 walkthrough cũ: `cauchy-schwarz` (proofOutline) **giữ**; `curve-sketching` **giữ** (thế mạnh `customInput`, sau lát 1d); `triangle-altitude` **giữ** cho dựng hình từng bước (clip `concurrency-dynamic` là chính); `cauchy-schwarz-2d` và `am-gm` **chuyển sang clip** (`cs-projection`, `amgm-semicircle`), walkthrough hạ xuống "lab" tuỳ chọn, không làm ở đợt đầu. Visualizer `geometry` vẫn cần (dựng hình + Tin `t4-geometry`).
 
-## 3. Catalog clip Manim (21 mẫu đề xuất; đợt đầu 8)
+## 3. Catalog clip Manim (21 mẫu đề xuất; đợt đầu 8) — nay là 21 walkthrough cùng id (ADR 0015)
+
+> Bảng dưới là thiết kế gốc của clip. Mỗi `id` trong bảng hiện là một walkthrough tương tác; số giây (`s`) và độ khó S/M/L không còn áp dụng.
 
 Độ khó viết (S/M/L) và giá trị sư phạm (GT 1–5) là [Inference]. `s` = độ dài (giây, tổng các chapter). Tham số đặc tả bằng `InputSpec` (ADR 0006; thêm kind `enum`). Mỗi mẫu có 3–5 preset (→ 63–105 clip).
 

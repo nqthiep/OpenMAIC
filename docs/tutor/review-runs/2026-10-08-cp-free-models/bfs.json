@@ -1,0 +1,66 @@
+{
+  "entryId": "bfs",
+  "entryRev": 1,
+  "contentHash": "5663c1e6d7115303",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "openai:longcat-2.5-preview-free",
+      "entryId": "bfs",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "openrouter:space-bunny-free",
+      "entryId": "bfs",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 3,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "code.cpp và code.py, pseudocode dòng 4 và map dòng 4: vòng lặp chỉ duyệt adj[u] theo thứ tự sẵn có, không bảo đảm chỉ số tăng như pseudocode, các frame và hint tuyên bố.",
+        "script của tree, cycle, disconnected và two-paths: câu hỏi dự đoán được phát trước setState của frame cần xem; lần hỏi thứ hai còn diễn ra tại frame B trong khi lời tiếp theo nói về C, và các frame kết quả như tree frame 3 cũng bị bỏ qua.",
+        "script.tree.totalBeats=27, nhưng preset tree có 28 frame gắn tag beat, kể cả beat:done.",
+        "script tree, cycle và two-paths khai truncated=true, narratedBeats=12 nhưng lại kể beat:done ở cuối thay vì 12 beat đầu; nhiều beat ở giữa không được kể."
+      ],
+      "issues": [
+        {
+          "where": "beat done và các frame kết thúc",
+          "problem": "n, m, count và far xuất hiện mà chưa được định nghĩa hoặc chỉ rõ cách suy ra từ d.",
+          "fix": "Nói rõ n là số đỉnh, m là số cạnh, count là số phần tử d[v] khác -1 và far là max d[v] trên các đỉnh có thể tới được; hoặc tính chúng rõ ràng nếu đây là kết quả cần trả về."
+        },
+        {
+          "where": "Các frame sử dụng highlights",
+          "problem": "Các trạng thái active, compare, visited, result và muted chưa có chú giải, khiến học sinh phải tự đoán ý nghĩa màu sắc.",
+          "fix": "Thêm chú giải ngắn cố định cho từng trạng thái và đặc biệt làm rõ visited được đánh dấu ngay khi enqueue, chưa nhất thiết là đã xử lý xong."
+        },
+        {
+          "where": "Phần định nghĩa đầu vào của hàm BFS",
+          "problem": "Không nói rõ đỉnh được đánh số 0 đến n-1, s phải hợp lệ, adj là đồ thị có hướng hay không hướng, và thứ tự adj[u] có được bảo đảm tăng hay không.",
+          "fix": "Nêu rõ các giả định đầu vào; nếu không yêu cầu duyệt theo chỉ số tăng thì sửa pseudocode và frame, còn nếu yêu cầu thì cung cấp điều kiện adj tăng hoặc bước sắp xếp và cập nhật phân tích độ phức tạp."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

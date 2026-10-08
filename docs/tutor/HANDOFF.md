@@ -1,9 +1,11 @@
 # Handoff: SubjectTutor, trạng thái và việc tiếp theo
 
-- **Trạng thái**: Living document, chụp ngày 2026-10-07; cập nhật khi bàn giao tiếp
-- **Ngày**: 2026-10-07
+- **Trạng thái**: Living document, chụp ngày 2026-10-07 (Phase 3 cập nhật 2026-10-08); cập nhật khi bàn giao tiếp
+- **Ngày**: 2026-10-08
 - **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 144 commit chưa push so với `origin/it-math`. Chưa push gì sau lần push đầu tiên của tài liệu.
 - **Người nhận**: agent hoặc người tiếp quản. Đọc hết file này trước khi làm gì.
+
+> **Cập nhật 2026-10-08:** Toán chuyển sang web UI (ADR 0015): 24 walkthrough tương tác thay cho 21 clip Manim; xem mục 3b.
 
 > **Tóm tắt:** Phase 1 xong, đã review và sửa. Phase 2 đã triển khai **mã** cho 4 visualizer (`array` nhiều chế độ, `tree`, `graph`, `grid`), eval `tutor-lesson`, và 37 entry catalog (đợt 2A 9, 2B 12, 2C 8, 2D 4, 2E 4; `graham-scan` chờ visualizer `geometry` của Phase 3). Chưa làm: review LLM từng entry và cổng G2 (cần khoá API), review ba góc của Phase 2, lát 1d (chặn bởi cổng 1d-00), Phase 3.
 
@@ -18,7 +20,7 @@ Tài liệu thiết kế nằm ở `docs/tutor/`. Đọc theo thứ tự:
 1. `README.md`, `REQUIREMENTS.md`, `ARCHITECTURE.md`
 2. `INTERFACES.md` (hợp đồng; khi card lệch INTERFACES thì INTERFACES thắng)
 3. `DATA-MODEL.md`, `SECURITY.md`, `TEST-STRATEGY.md`, `OPERATIONS.md`
-4. `decisions/0001…0014` (ADR)
+4. `decisions/0001…0015` (ADR)
 5. `tasks/README.md` (cách giao việc, **Luật chung §3**, bảng đợt §7), `tasks/phase-1.md`, `phase-2.md`, `phase-3.md` (212 task, mỗi card có Sở hữu / Phụ thuộc / Xong khi)
 6. `REVIEW-2026-09-29.md` (nhật ký các vòng review; vòng 9–11 là Phase 1)
 
@@ -96,56 +98,56 @@ Chưa làm và vì sao:
 - Model free qua API: chỉ `longcat-2.5-preview-free` (Go) và `space-bunny-free` (Zen `https://opencode.ai/zen/v1`) dùng được; các model free khác bị chặn ("only within OpenCode"). Cả hai là model suy luận: cần `TUTOR_REVIEW_MAX_OUTPUT_TOKENS=64000`, `TUTOR_REVIEW_TIMEOUT_MS=900000`; longcat vẫn hết giờ 15 phút trên entry thật, nên không dùng làm gate.
 - Khuyến nghị khi làm lại: một model Go có hạn mức (ví dụ `glm-5.3` hoặc `kimi-k3`) làm reviewer thứ hai cùng `deepseek-v4-pro`; chạy mỗi entry một lần, tuần tự theo lô.
 
-## 3b. Trạng thái Phase 3 (cập nhật 2026-10-07, phiên 3)
+## 3b. Trạng thái Phase 3 (cập nhật 2026-10-08, phiên 4): minh hoạ Toán bằng web UI
 
-Đã làm (tất cả là mã TypeScript/Python chạy được và có test; **không cần Manim**; chưa dựng clip nào):
+**Quyết định mới nhất của chủ dự án: chuyển sang web UI, không dùng clip Manim (video)** → [ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md). Cả 21 mẫu clip đã được viết lại thành walkthrough tương tác cùng id; clip tắt trong sản phẩm. Không thêm thư viện đồ hoạ ngoài (ADR 0002, iframe tự chứa).
 
-| Nhóm | Task | Nội dung |
-| --- | --- | --- |
-| Hạ tầng clip | `3A-01`, `3A-02`, `3A-03` | `lib/clips/{types,validate,cache-key,registry,provider,describe,name,hash,assets,define,manifest,render-plan,render-pipeline}.ts`; tool `generate_clip_scenes` (`lib/server/agent-runtime/clip-tools.ts`); mỗi chapter một slide, `speech(before) → play_video → speech(after)` |
-| Tích hợp | `I-08` (phần chính) | provider clip trong `widgetRegistry`; tool chỉ có trong bộ công cụ khi **đã dựng ít nhất một clip** (`registry.prebuiltIds()`); cổng review cho clip (file `lib/subjects/<môn>/reviews/<clipId>@<templateRev>.json`, hash `clipEntryHash`); `buildStateContext` mô tả slide clip từ `entry.sheet` (`3B-QA`) |
-| Skill | `3A-12`, `3A-13` | `skills/agent-runtime/olympiad-math/`, tên skill ở 12 locale; khối id sinh **theo từng pack/skill** (`scripts/generate-skill-catalog.ts`) |
-| Visualizer | `3B-V1`, `3B-V2`, `3B-V3`, `3B-K1` (+ quyết định `3B-Q8`) | `geometry`, `functionPlotter`, `proofOutline`; KaTeX dựng trên server (`walkthrough-data.math` + CSS có 10 font nhúng ~230 KB, chỉ thêm khi entry có công thức; `pnpm gen:tutor-katex`); chốt Q8 ở `phase-3-olympiad-math/SCHEMA.md` §8 |
-| Walkthrough Toán | `3B-W1..W3` | `lib/subjects/math/catalog/{cauchy-schwarz,triangle-altitude,curve-sketching}.ts`; pack `math` (`lib/subjects/math/pack.ts`); `graham-scan` (`2E-05`, `I-12`) trên `geometry` |
-| Mẫu clip (nửa TS) | `3A-T1..T3`, `3B-T1..T14`, `3D-T1..T4` | **21 mẫu** ở `lib/subjects/math/clips/*.ts` (+ `index.ts`), mỗi mẫu một test `tests/clips/<id>.test.ts` qua hợp đồng chung `tests/clips/clip-contract.ts` và một oracle độc lập |
-| Cổng QA | `3A-05`, `3A-06` | `manim/qa/{allowlist,check_video,check_bbox,check_ssim}.py`, 45 test pytest chạy trên video ffmpeg tổng hợp; job CI `manim-qa` |
-| Curriculum Toán | `3-R1` (khung), `3B-00` | `docs/tutor/curriculum/curriculum-math-vn.json`: 28 topic = 4 tier × 7 từ SCHEMA §7, id `m<tier>-<tên>` (clip và walkthrough đã đổi sang id này); mọi tên kỳ thi, lớp, trọng số, nguồn là **[Unverified]**, `vn_sources` rỗng; nội dung toán (subtopics, pitfalls) do người soạn viết, chưa có hội đồng duyệt. Tách vào `skills/agent-runtime/olympiad-math/references/curriculum/` bằng `scripts/split-curriculum-math.ts`; `tests/tutor/curriculum-math.test.ts` |
-| Eval Toán | `3B-E1`, `3A-17` (dữ liệu), `3D-01` | 5 scenario Toán (`eval/tutor-lesson/scenarios-math.json`, prompt theo môn); `eval/tutor-review/{seed-errors-math,clip-runner}.ts`: 111 lỗi gieo (6 loại) + 43 biến thể sạch, review hai provider cho clip (ghi `lib/subjects/math/reviews/<clip>@<templateRev>.json`); `lib/clips/review-material.ts`; prompt reviewer **riêng cho Toán** (trước đó Toán dùng prompt Tin: bắt chấm code C++); `eval/manim-author/briefs-3d.json` |
-| Vòng LLM tác giả | `3A-08`, `3D-02` | `eval/manim-author/{author,runner,make-briefs}.ts`, `briefs.json` (20 brief): prompt, vòng sửa ≤ 3, RSR@1/@3, token; cổng thật (allowlist, render, QA, manifest) qua `runRenderJob`; `--replay` chạy toàn bộ vòng với template đã commit (không cần model); `scripts/manim-author-pr.mjs` + `.github/workflows/manim-author.yml` (mỗi mẫu một PR, tự gộp chỉ khi cả 5 cổng `true`; **[Unverified] chưa chạy trên GitHub**) |
-| e2e | `I-08` (S3 một phần) | `e2e/tests/clip-slides.spec.ts`: ứng dụng thật, slide clip, video tải từ `public/clips` và dài đúng; `tests/clips/{prebuilt-assets,export-manifest}.test.ts` |
-| Dịch vụ | `3C-01`, `3C-02`, `3C-05..08` | `manim/service/{spec,jobs,server,runner}.py` (chỉ stdlib; giới hạn hàng đợi/người/toàn cục, TTL, deadline, token so sánh hằng thời gian); `spec.py` cho cùng khoá cache và cùng kết quả kiểm params với TS (`manim/service/fixtures/parity.json`, sinh từ `scripts/export-clip-specs.ts` → `templates.json`; test TS `service-parity` báo lệch); client, route, cờ, nhánh bất đồng bộ ở `lib/clips/service-client.ts`, `app/api/clips`, `clip-tools.ts`; 1358 test pytest (`manim/`), job CI `manim-qa` chạy `manim/service` |
-| Mẫu Manim | `3A-M*`, `3B-M*`, `3D-M*` | **21 mẫu** `manim/templates/<id>.py` + `_base.py` + `manim/render_clip.py`; cài Manim 0.21.0 + TinyTeX theo `manim/README.md` (đã chạy trên máy này, 2026-10-08). **84/84 preset qua đủ cổng** (allowlist, video, bbox, frame, so số hiển thị với TS). `public/clips` giữ **10 thư mục** (preset đầu của 10 clip, 7,5 MB: giới hạn NFR-P8 tính mỗi preset là một clip); phần còn lại chỉ dựng được qua manim-service hoặc `render-clips --out-dir` |
-| Dựng | `3A-07` | `scripts/render-clips.ts` (`pnpm render:clips --plan` in 84 job), `lib/clips/generated/asset-index.json` (rỗng), kiểm manifest |
+Đã làm (mã TypeScript chạy được, có test và oracle độc lập):
 
-Lệch so với card (đều ghi ở comment đầu file và test):
+| Nhóm | Nội dung |
+| --- | --- |
+| Quyết định | `decisions/0015-…md` + dòng trong `decisions/README.md`; SCHEMA Phase 3 có biển báo "đã thay thế một phần"; RISKS/OPERATIONS cập nhật |
+| Visualizer `geometry` | mở rộng: đa giác (đỉnh theo id điểm hoặc toạ độ nội tuyến `xy`), polyline lấy mẫu cho đường cong, mũi tên, điểm ẩn và nhãn căn giữa, mô tả aria; giới hạn `MAX_*` (160 điểm, 120 đoạn, 140 đa giác, 12 polyline ≤ 200 điểm); runtime sinh lại (`pnpm gen:tutor-runtime`); `tests/tutor/runtime/geometry-layout.test.ts`, `geometry.browser.test.ts` |
+| Bộ dựng hình | `lib/subjects/math/figure.ts`: `Figure` (điểm, đoạn, đường, tròn, góc, đa giác, polyline, hình chữ nhật), `boundsOf`, `curvePieces`, `upperSemicircle`, `circlePoint` (vòng tròn theo độ, hằng số xoay 1°, không lượng giác), `gcd`/`frac` (phân số chính xác, không số thập phân), `framePut` |
+| Walkthrough Toán | **24 entry** ở `lib/subjects/math/catalog/*.ts` (pack `math`): 3 có trước (`cauchy-schwarz`, `triangle-altitude`, `curve-sketching`) + 21 chuyển từ clip. Mỗi entry một `tests/subjects/math/<id>.test.ts`: hợp đồng chung `tests/subjects/cp/contract.ts` (beat đầu `start`, cuối `done`, 5–10 beat, 3 gợi ý + hiểu lầm mỗi beat, dự đoán `choice` có `answer()`, số nguyên trong lời giảng phải đến từ input/state/vars, ≤ 160 ký tự) cộng oracle độc lập từng entry (đếm đường đi bằng duyệt hết, tập hợp phần tử thật cho bao hàm–loại trừ, giải hệ tuyến tính cho các tâm tam giác, góc bằng `acos`/`atan2`, luỹ thừa bằng số nguyên lớn…) |
+| Quy ước chung | `customInput: false` (lát 1d chưa mở): tương tác = preset + bước/phát/tua + dự đoán; "thanh trượt" = chuỗi khung tua được. Tham số thập phân đổi thành số nguyên (`tn` = t tính bằng phần mười, `e` = ε tính bằng 1/20) để mọi con số trên màn hình là phân số chính xác; đường tròn bằng hằng số xoay, không dùng `sin/cos`; PA², PB² là phân số chính xác thay cho độ dài vô tỉ |
+| Skill | `skills/agent-runtime/olympiad-math/SKILL.md` viết lại: không còn tool/khối clip; bảng walkthrough sinh từ catalog (`pnpm exec tsx scripts/generate-skill-catalog.ts`) |
+| Curriculum Toán | `docs/tutor/curriculum/curriculum-math-vn.json` + `references/curriculum/*` (28 topic, id `m<tier>-<tên>`): `primary_medium` walkthrough 18 / slide 10 / manim 0, danh sách `walkthrough_ids`; mọi tên kỳ thi, lớp, trọng số, nguồn vẫn là **[Unverified]**, `vn_sources` rỗng (3-R1 cần nguồn thật) |
+| Review Toán (hạ tầng) | prompt reviewer **riêng cho Toán** (`buildMathReviewSystem` trong `lib/tutor/review-schema.ts`); `eval/tutor-review/{seed-errors-math,clip-runner}.ts` (111 lỗi gieo + 43 biến thể sạch; hiện chạy trên mã clip lưu trữ) |
+| CI | các bước kiểm `split-curriculum-math`, `make-briefs` vẫn có; workflow `manim-author.yml` đã gỡ |
 
-- Cổng `check_ssim`: ngưỡng "đứng yên" hạ từ 0,5 xuống 0,01 (đo: ảnh giữ 0-0,005, vẽ chậm ≥ 0,02). Cổng bbox trước đó **trống** (đọc độ mờ của vỏ MathTex), đã sửa trong `_base.py`; các mẫu đã sửa theo lỗi chồng chữ nó tìm ra.
-- Mẫu tối đa 12 chữ trên màn hình: bảng số (lattice, modular-clock) dùng một MathTex nhiều phần cho mỗi hàng.
+Mã video **lưu trữ, tắt** (giữ nguyên, không ai gọi trong sản phẩm; thẻ git `manim-clips-final` trỏ tới bản cuối còn chạy được): `lib/clips/**`, `lib/subjects/math/clips/**` (21 mẫu TS), `manim/**` (21 mẫu Python, cổng QA, dịch vụ, Dockerfile, spike S1/S2/S4, red-team), `eval/manim-author/**`, `scripts/render-clips.ts`, `scripts/manim-author-pr.mjs`. `mathPack` không còn `clips`, `public/clips` đã gỡ, nên `generate_clip_scenes` không xuất hiện. Job CI `manim-qa` vẫn chạy pytest trên mã lưu trữ. **Quyết định còn để ngỏ cho chủ dự án:** xoá hẳn mã video hay giữ lại.
 
-- `secant-tangent`: ngưỡng `|slope(0.01) − f'| < 0.1` của card **sai** trong miền input (c = [0,0,3,3], x0 = 2 cho ≈ 0.21); thay bằng đồng nhất thức đúng + ngưỡng 0.25.
-- `render-clips` là file `.ts` chạy bằng `tsx`, không phải `.mjs`.
-- `concurrency-dynamic`: đỉnh C chạy theo `C + t·(B − A)` (song song AB) để tam giác không bao giờ suy biến.
-- Hợp đồng clip: chỉ các cặp chapter đầy đủ phải có câu hỏi dự đoán; với số chapter lẻ thì chapter cuối được miễn.
-- Eslint cấm trig/`Date`/`Math.random`/`toLocaleString` cũng áp cho `lib/subjects/**/clips/**`.
+Kết quả đo còn dùng được từ nhánh video (ghi ở ADR 0015, RISKS S1–S5): image Manim 0.21.0 ghim dựng được và render qua HTTP cho khung hình giống hệt bản native arm64; red-team thử đầu tiên tìm ra TeX đọc được `/etc/passwd` và fork bomb làm dịch vụ ngừng trả lời (chưa vá, không còn cần vì hướng này đã đóng).
+
+Review bằng model free (kết luận: không dùng được làm cổng):
+
+- `longcat-2.5-preview-free` bị upstream từ chối `temperature: 0` ("0 is not greater or equal to 0.1") nên hội đồng hai provider không đủ hai review; `space-bunny-free` chạy được nhưng một reviewer không đủ để ghi file cổng. Vì vậy **chưa có file review nào** trong `lib/subjects/math/reviews/`. Bản ghi từng phần nằm ở `docs/tutor/review-runs/2026-10-08-math-clips/` và `…-cp-free-models/` (không phải file cổng). Những lỗi chữ thật mà hai model free tìm ra lúc đó đã được sửa trong các walkthrough.
+
+Lệch so với card/kế hoạch cũ:
+
+- 7 clip đầu (`amgm-semicircle`, `cs-projection`, `secant-tangent`, `alg-identity-area`, `pythagoras-dissection`, `euclid-rectangle`, `geometric-series-area`) và 14 clip sau chuyển nguyên id; vài entry đổi hình dạng input cho gọn số học: `convex-chord` (`tn` thay `t`), `limit-epsilon` (`e` thay `eps`).
+- `secant-tangent`: ngưỡng `|slope(0.01) − f'| < 0.1` của card cũ sai trong miền input; walkthrough dùng độ dốc chính xác ở h = 1, 1/2, 1/4, 1/8 như phân số.
+- `concurrency-dynamic`: đỉnh C chạy theo `C + (k/4)(B − A)`, k = −2…3 và một vị trí đặc biệt (tam giác tù thì tâm ra ngoài); hai điểm neo của mỗi đường được đẩy ra xa cỡ cạnh tam giác để làm tròn 3 chữ số không làm lệch đường.
+- `limit-epsilon`: trục n được co theo tỉ lệ khung hình (renderer giữ tỉ lệ 1:1 giữa hai trục).
+- Dữ liệu hình được làm tròn 3 chữ số thập phân: test hình học dùng dung sai 6e-4 (toạ độ) và 0,3–0,4° (góc), không so bằng.
 
 Chưa làm và vì sao (Phase 3):
 
 | Việc | Lý do |
 | --- | --- |
-| `3A-04` (image Docker ghim), spike `3-S1` (Docker, 2/4 vCPU), `3-S2` (tiếng Việt: cần xelatex hoặc Typst), `3-S4` trong image và amd64 | cần Docker chạy / máy amd64; `3-S4` trên arm64 đã làm (`manim/spikes/s4/RESULT.md`) |
-| `3C-03` (build/chạy image dịch vụ), `3C-04` (sandbox, red-team), `3C-09` | `manim/service/Dockerfile` và `docker-compose.yml` đã viết nhưng **[Unverified] chưa build/chạy** (Docker daemon tắt); cách ly mạng của renderer chưa cưỡng chế; red-team cần image thật |
-| Số đo S9 (RSR@3 ≥ 90%, đúng-toán ≥ 90%), `3D-03` | cần model viết mã đủ mạnh; vòng và 20 brief đã sẵn sàng (`pnpm exec tsx eval/manim-author/runner.ts`) |
-| Calibration hội đồng Toán (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; `clip-runner.ts --calibrate` đã sẵn sàng (308 lần gọi). Hai model free đã thử cho review từng clip (xem "Review thật bằng model free") |
+| Hội đồng review Toán cho 24 walkthrough, rồi calibration (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; `clip-runner.ts --calibrate` còn chạy trên mã lưu trữ, cần chuyển sang walkthrough |
 | Nghiên cứu nguồn cho curriculum Toán (đề cương thi, lớp, trọng số, tài liệu) | cần nguồn thật; khung hiện là [Inference] |
-| `3-S3` phần trình duyệt: adopt vào pool, ZIP trọn vòng, tua, độ trễ | cần chạy trình duyệt với IndexedDB; phần liệt kê asset và phát clip trong app đã kiểm |
-| Chỉ 10 trong 84 preset nằm trong `public/clips` | giới hạn NFR-P8 (≤ 10 thư mục, 30 MB); phần còn lại cần manim-service hoặc volume |
+| Xem từng walkthrough mới bằng mắt trong ứng dụng thật và e2e riêng | đã chụp ảnh từ iframe headless cho từng entry khi viết; chưa chạy e2e trình duyệt cho entry mới |
+| Nhập số tự do (`customInput`) cho Toán | lát 1d chưa mở (cổng `1d-00`) |
+| Xoá hay giữ mã video | chờ chủ dự án quyết |
 
 ## 4. Việc tiếp theo (theo thứ tự)
 
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: mã và 21 mẫu Manim đã xong (mục 3b). Còn lại cần Docker hoặc model mạnh: `3A-04` (image ghim, build `manim/service/Dockerfile`), spike `3-S1/S2`, `3C-04` (sandbox), chạy thật vòng `3A-08` và calibration hội đồng Toán, rồi sửa nội dung theo review (xem "Review thật bằng model free").
+4. Phase 3: 24 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration, nghiên cứu nguồn curriculum (`3-R1`), xem bằng mắt/e2e entry mới; chủ dự án quyết xoá hay giữ mã video lưu trữ.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)
