@@ -173,8 +173,8 @@ export const tilingColoringEntry: ClipEntry<In> = defineClip<In>({
         'Each domino covers one black and one white cell. If a tiling exists the two counts must be equal.',
       ),
       after: m(
-        'Nếu hai số khác nhau thì không thể lát được; nếu bằng nhau, ta tìm được một cách lát cụ thể.',
-        'If the two counts differ no tiling is possible; if they match, we can show an explicit tiling.',
+        'Nếu hai số khác nhau thì không thể lát được; nếu bằng nhau, có thể lát được và ta đi tìm một cách lát.',
+        'If the two counts differ no tiling is possible; if they match, a tiling may exist and we look for one.',
       ),
     },
   ],

@@ -33,10 +33,10 @@ class ModularClock(ClipScene):
         self.sequence("clock", [([Create(ring)], 3), ([LaggedStart(*[FadeIn(d_) for d_ in dots], lag_ratio=0.1)], 3), ([Write(nums)], 2)], hold=2.5)
 
         # a -> a^2 -> a^3 ... mod n as arrows between the points of the ring
-        order = powers + [powers[start]]
+        order = [1 % n] + powers + [powers[start]]  # the walk starts at 1, so the first arrow is 1 -> a
         arrows = [Arrow(at(order[i]), at(order[i + 1]), buff=0.12, color=YELLOW_D, stroke_width=5, max_tip_length_to_length_ratio=0.25)
                   for i in range(len(order) - 1) if order[i] != order[i + 1]]
-        marks = {v: Dot(at(v), color=YELLOW_D, radius=0.15) for v in set(powers)}
+        marks = {v: Dot(at(v), color=YELLOW_D, radius=0.15) for v in set(order)}
         cap = tex(rf"x \mapsto {a}x \bmod {n}", 44, tag="caption").to_corner(UP + LEFT, buff=0.5)
         steps = [([Write(cap)], 2)]
         per = [(lambda ar=ar: [Create(ar)], 1.0) for ar in arrows]

@@ -37,8 +37,8 @@ export const amgmSemicircleEntry: ClipEntry<In> = defineClip<In>({
       endSec: 10,
       label: m('Dựng hình', 'The figure'),
       before: m(
-        'Ta lấy một đoạn AB dài a cộng b, và một điểm C chia nó thành hai đoạn a và b. Ta vẽ nửa đường tròn đường kính AB.',
-        'Take a segment AB of length a plus b, and a point C that cuts it into pieces a and b. We draw the semicircle on the diameter AB.',
+        'Cho hai số dương a và b, một đoạn AB dài a cộng b và một điểm C chia nó thành hai đoạn a và b. Ta vẽ nửa đường tròn đường kính AB.',
+        'Take two positive numbers a and b, a segment AB of length a plus b, and a point C that cuts it into pieces a and b. We draw the semicircle on the diameter AB.',
       ),
       after: m(
         'Nhớ rằng đường kính AB bằng a cộng b, nên bán kính là một nửa của nó.',
@@ -70,7 +70,7 @@ export const amgmSemicircleEntry: ClipEntry<In> = defineClip<In>({
       endSec: 35,
       label: m('So với bán kính', 'Against the radius'),
       before: m(
-        'Bán kính r bằng a cộng b chia hai. Đoạn CD là một dây dựng từ C lên nửa đường tròn.',
+        'Bán kính r bằng a cộng b chia hai. Đoạn CD dựng từ C lên nửa đường tròn.',
         'The radius r is a plus b over two. The segment CD rises from C to the semicircle.',
       ),
       after: m(

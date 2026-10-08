@@ -71,8 +71,8 @@ export const limitEpsilonEntry: ClipEntry<In> = defineClip<In>({
       endSec: 10,
       label: m('Dãy số', 'The sequence'),
       before: m(
-        'Ta vẽ các số hạng của dãy trên một đường thẳng đứng, mỗi chấm là một số hạng.',
-        'We plot the terms of the sequence on a vertical line, each dot a term.',
+        'Ta vẽ các số hạng của dãy: chỉ số n chạy ngang, giá trị đi lên, mỗi chấm là một số hạng.',
+        'We plot the terms of the sequence: the index n runs across, the value goes up, each dot a term.',
       ),
       after: m('Các chấm dồn dần về một giá trị L.', 'The dots crowd toward one value L.'),
     },

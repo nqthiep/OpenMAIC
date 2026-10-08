@@ -82,8 +82,8 @@ export const geometricSeriesAreaEntry: ClipEntry<In> = defineClip<In>({
       endSec: 35,
       label: m('Lặp lại', 'Repeating'),
       before: m(
-        'Từ phần còn lại ta lại cắt một phần theo cùng tỉ lệ r, rồi lại như vậy mãi.',
-        'From the remainder we cut a part in the same ratio r, and so on again and again.',
+        'Rồi ta cắt thêm một mảnh có diện tích r lần mảnh vừa cắt, và cứ thế mãi.',
+        'Then we cut a piece that is r times as large as the one just cut, and so on again and again.',
       ),
       after: m(
         'Mỗi mảnh mới có diện tích bằng r lần mảnh trước.',
@@ -98,12 +98,12 @@ export const geometricSeriesAreaEntry: ClipEntry<In> = defineClip<In>({
       endSec: 46,
       label: m('Tổng', 'The sum'),
       before: m(
-        'Các mảnh cắt ra lấp dần hình vuông, và tổng diện tích của chúng không bao giờ vượt quá phần đã lấy hết.',
-        'The pieces gradually fill up the square, and their total area never passes the whole that was taken.',
+        'Ta cộng dần các mảnh, và tổng diện tích của chúng tiến tới một giá trị nhưng không bao giờ vượt quá nó.',
+        'We add the pieces one by one, and their total area approaches one value and never passes it.',
       ),
       after: m(
-        'Tổng vô hạn của các mảnh bằng r chia một trừ r.',
-        'The infinite total of the pieces equals r over one minus r.',
+        'Tổng vô hạn của các mảnh bằng r chia một trừ r; với r bằng một phần hai đó là cả hình vuông.',
+        'The infinite total of the pieces equals r over one minus r; for r equal to one half that is the whole square.',
       ),
       caption: m('Σ = r / (1 − r)', 'Σ = r / (1 − r)'),
     },

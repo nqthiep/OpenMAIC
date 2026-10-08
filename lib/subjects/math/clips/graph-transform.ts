@@ -96,8 +96,8 @@ export const graphTransformEntry: ClipEntry<In> = defineClip<In>({
       endSec: 33,
       label: m('Co giãn và lật', 'Stretch and flip'),
       before: m(
-        'Ta nhân giá trị của hàm với a. Giá trị a lớn hơn một làm đồ thị cao lên, a nhỏ hơn một làm nó thấp xuống.',
-        'We multiply the value of the function by a. An a above one makes the graph taller, an a below one makes it flatter.',
+        'Ta nhân giá trị của hàm với a. Khi a lớn hơn một về độ lớn, đồ thị cao lên và dốc hơn.',
+        'We multiply the value of the function by a. When a is bigger than one in size, the graph grows taller and steeper.',
       ),
       after: m(
         'Nếu a âm, đồ thị còn bị lật qua trục ngang.',

@@ -56,14 +56,14 @@ export const algIdentityAreaEntry: ClipEntry<In> = defineClip<In>({
       endSec: 22,
       label: m('Chia nhỏ', 'Cutting it up'),
       before: m(
-        'Ta chia hình vuông cạnh a cộng b thành bốn phần: hình vuông a bình phương, hai hình chữ nhật a nhân b, và hình vuông b bình phương. Với hiệu hai bình phương ta cắt bỏ góc b bình phương.',
-        'We cut the square of side a plus b into four parts: the square a squared, two rectangles a times b, and the square b squared. For the difference we cut away the corner b squared.',
+        'Ta kẻ hai đường song song với các cạnh để chia hình vuông cạnh a cộng b thành bốn phần: hai hình vuông và hai hình chữ nhật. Với hiệu hai bình phương ta cắt bỏ góc b bình phương.',
+        'We draw two lines parallel to the sides to cut the square of side a plus b into four parts: two squares and two rectangles. For the difference we cut away the corner b squared.',
       ),
       after: m(
-        'Mỗi phần có diện tích dễ đọc ngay từ hình.',
-        'Each part has an area we can read straight from the picture.',
+        'Hai hình vuông có diện tích a bình phương và b bình phương, hai hình chữ nhật cùng có diện tích a nhân b.',
+        'The squares have areas a squared and b squared, and the two rectangles each have area a times b.',
       ),
-      caption: m('a² · ab · ab · b²', 'a² · ab · ab · b²'),
+      caption: m('a² + ab + ab + b²', 'a² + ab + ab + b²'),
       ask: m(
         'Theo em, trong hình vuông cạnh a cộng b có mấy hình chữ nhật a nhân b?',
         'How many a-by-b rectangles are there in the square of side a plus b?',

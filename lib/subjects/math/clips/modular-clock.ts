@@ -68,12 +68,12 @@ export const modularClockEntry: ClipEntry<In> = defineClip<In>({
       endSec: 21,
       label: m('Nhân với a', 'Multiplying by a'),
       before: m(
-        'Từ mỗi điểm k ta kẻ một dây tới a nhân k lấy số dư khi chia cho n.',
-        'From each point k we draw a chord to a times k, taken modulo n.',
+        'Ta bắt đầu từ điểm 1 và nhân với a nhiều lần: từ mỗi điểm x ta kẻ một mũi tên tới a nhân x lấy số dư khi chia cho n.',
+        'We start at the point 1 and keep multiplying by a: from each point x we draw an arrow to a times x, taken modulo n.',
       ),
       after: m(
-        'Mỗi dây cho biết điểm k bị nhân với a sẽ nhảy tới đâu.',
-        'Each chord shows where the point k lands when multiplied by a.',
+        'Mỗi mũi tên cho biết một điểm bị nhân với a sẽ nhảy tới đâu.',
+        'Each arrow shows where a point lands when multiplied by a.',
       ),
       caption: m('k → a·k mod n', 'k → a·k mod n'),
       ask: m(
