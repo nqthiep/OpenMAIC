@@ -49,7 +49,7 @@
           "difficulty": 1,
           "est_scenes": 6,
           "prerequisites": [],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Bình phương của tổng và hiệu",
             "Hiệu hai bình phương",
@@ -69,10 +69,9 @@
             }
           ],
           "pitfalls": ["Quên hạng tử 2ab khi khai triển (a+b)²", "Nhầm dấu khi khai triển (a−b)³"],
-          "interactive_ideas": ["Clip Manim `alg-identity-area`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["alg-identity-area"],
           "walkthrough_ids": []
         },
         {
@@ -108,7 +107,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -118,7 +116,7 @@
           "difficulty": 2,
           "est_scenes": 7,
           "prerequisites": ["m1-alg-identities"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Bình phương luôn không âm",
             "Bất đẳng thức AM–GM cho hai số không âm",
@@ -141,11 +139,10 @@
             "Áp dụng AM–GM cho số âm",
             "Quên kiểm tra dấu bằng có xảy ra được hay không"
           ],
-          "interactive_ideas": ["Clip Manim `amgm-semicircle`"],
+          "interactive_ideas": ["Walkthrough `amgm-semicircle`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["amgm-semicircle"],
-          "walkthrough_ids": []
+          "walkthrough_ids": ["amgm-semicircle"]
         },
         {
           "id": "m1-quadratic-vieta",
@@ -174,10 +171,9 @@
             }
           ],
           "pitfalls": ["Dùng Viète khi biệt thức âm", "Quên điều kiện a ≠ 0"],
-          "interactive_ideas": ["Clip Manim `graph-transform`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["graph-transform"],
           "walkthrough_ids": []
         },
         {
@@ -187,7 +183,7 @@
           "difficulty": 2,
           "est_scenes": 7,
           "prerequisites": [],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Đường cao, trung tuyến, phân giác, trung trực",
             "Điểm đồng quy: trực tâm, trọng tâm, tâm đường tròn ngoại và nội tiếp",
@@ -210,14 +206,9 @@
             "Suy từ một hình đặc biệt (tam giác nhọn) cho mọi tam giác",
             "Nhầm trực tâm nằm trong tam giác khi tam giác tù"
           ],
-          "interactive_ideas": [
-            "Clip Manim `concurrency-dynamic`",
-            "Clip Manim `pythagoras-dissection`",
-            "Walkthrough `triangle-altitude`"
-          ],
+          "interactive_ideas": ["Walkthrough `triangle-altitude`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["concurrency-dynamic", "pythagoras-dissection"],
           "walkthrough_ids": ["triangle-altitude"]
         },
         {
@@ -227,7 +218,7 @@
           "difficulty": 2,
           "est_scenes": 7,
           "prerequisites": ["m1-triangle-geometry"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Góc nội tiếp và góc ở tâm",
             "Góc nội tiếp cùng chắn một cung",
@@ -247,10 +238,9 @@
             }
           ],
           "pitfalls": ["Nhầm cung lớn với cung nhỏ khi chắn góc", "Xét điểm nằm ở cung sai"],
-          "interactive_ideas": ["Clip Manim `inscribed-angle`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["inscribed-angle"],
           "walkthrough_ids": []
         },
         {
@@ -286,7 +276,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         }
       ]
@@ -308,7 +297,7 @@
           "difficulty": 3,
           "est_scenes": 8,
           "prerequisites": ["m1-inequality-basic"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Cauchy–Schwarz",
             "Bất đẳng thức tam giác",
@@ -331,15 +320,10 @@
             "Quên điều kiện dấu bằng của Cauchy–Schwarz (hai vector cùng phương)",
             "Dùng Jensen cho hàm không lồi"
           ],
-          "interactive_ideas": [
-            "Clip Manim `convex-chord`",
-            "Clip Manim `cs-projection`",
-            "Walkthrough `cauchy-schwarz`"
-          ],
+          "interactive_ideas": ["Walkthrough `cauchy-schwarz`", "Walkthrough `cs-projection`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["convex-chord", "cs-projection"],
-          "walkthrough_ids": ["cauchy-schwarz"]
+          "walkthrough_ids": ["cauchy-schwarz", "cs-projection"]
         },
         {
           "id": "m2-equations-systems",
@@ -374,7 +358,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -384,7 +367,7 @@
           "difficulty": 3,
           "est_scenes": 7,
           "prerequisites": ["m1-divisibility-primes"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Đồng dư và các phép toán",
             "Luỹ thừa theo modulo và chu kỳ",
@@ -407,10 +390,9 @@
             "Chia hai vế của đồng dư cho số không nguyên tố cùng nhau với modulo",
             "Quên chu kỳ bắt đầu từ lũy thừa nào"
           ],
-          "interactive_ideas": ["Clip Manim `modular-clock`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["modular-clock"],
           "walkthrough_ids": []
         },
         {
@@ -420,7 +402,7 @@
           "difficulty": 3,
           "est_scenes": 7,
           "prerequisites": ["m1-divisibility-primes"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Thuật toán Euclid tìm ƯCLN",
             "Đẳng thức Bézout",
@@ -443,10 +425,9 @@
             "Bỏ qua điều kiện ƯCLN(a,b) chia hết c",
             "Chỉ tìm một nghiệm riêng mà quên họ nghiệm"
           ],
-          "interactive_ideas": ["Clip Manim `euclid-rectangle`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["euclid-rectangle"],
           "walkthrough_ids": []
         },
         {
@@ -456,7 +437,7 @@
           "difficulty": 3,
           "est_scenes": 7,
           "prerequisites": ["m1-circle-angles"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Phương tích của một điểm với đường tròn",
             "Hai cát tuyến và cát tuyến–tiếp tuyến",
@@ -479,10 +460,9 @@
             "Quên dấu của phương tích khi điểm nằm trong đường tròn",
             "Dùng độ dài thay cho độ dài có hướng"
           ],
-          "interactive_ideas": ["Clip Manim `power-of-point`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["power-of-point"],
           "walkthrough_ids": []
         },
         {
@@ -492,7 +472,7 @@
           "difficulty": 3,
           "est_scenes": 7,
           "prerequisites": ["m1-counting-basic"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Nguyên lý Dirichlet cơ bản và tổng quát",
             "Tô màu bàn cờ",
@@ -515,10 +495,9 @@
             "Chọn \"lồng\" không đúng nên không áp dụng được",
             "Bất biến không thực sự giữ qua mọi phép biến đổi"
           ],
-          "interactive_ideas": ["Clip Manim `tiling-coloring`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["tiling-coloring"],
           "walkthrough_ids": []
         },
         {
@@ -528,7 +507,7 @@
           "difficulty": 3,
           "est_scenes": 7,
           "prerequisites": ["m1-alg-identities"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Cơ sở quy nạp và bước quy nạp",
             "Quy nạp mạnh",
@@ -551,10 +530,9 @@
             "Quên kiểm tra cơ sở quy nạp",
             "Bước quy nạp không đúng với mọi k (bắt đầu từ k nhỏ)"
           ],
-          "interactive_ideas": ["Clip Manim `figurate-sums`", "Clip Manim `induction-fallacy`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["figurate-sums", "induction-fallacy"],
           "walkthrough_ids": []
         }
       ]
@@ -599,7 +577,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -609,7 +586,7 @@
           "difficulty": 3,
           "est_scenes": 8,
           "prerequisites": ["m2-induction"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Định nghĩa giới hạn bằng ε–N",
             "Dãy đơn điệu bị chặn",
@@ -632,10 +609,9 @@
             "Nhầm \"gần hơn\" với \"hội tụ\": cần mọi số hạng sau N",
             "Giới hạn của dãy đan dấu"
           ],
-          "interactive_ideas": ["Clip Manim `geometric-series-area`", "Clip Manim `limit-epsilon`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["geometric-series-area", "limit-epsilon"],
           "walkthrough_ids": []
         },
         {
@@ -645,7 +621,7 @@
           "difficulty": 3,
           "est_scenes": 8,
           "prerequisites": ["m3-sequences-limits"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Đạo hàm là hệ số góc tiếp tuyến",
             "Cực trị và tính đơn điệu",
@@ -668,11 +644,10 @@
             "Cho f′(x₀) = 0 là có cực trị (có thể là điểm uốn)",
             "Quên xét dấu f′ hai bên"
           ],
-          "interactive_ideas": ["Clip Manim `secant-tangent`", "Walkthrough `curve-sketching`"],
+          "interactive_ideas": ["Walkthrough `curve-sketching`", "Walkthrough `secant-tangent`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["secant-tangent"],
-          "walkthrough_ids": ["curve-sketching"]
+          "walkthrough_ids": ["curve-sketching", "secant-tangent"]
         },
         {
           "id": "m3-inequality-advanced",
@@ -707,7 +682,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -743,7 +717,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -753,7 +726,7 @@
           "difficulty": 4,
           "est_scenes": 8,
           "prerequisites": ["m1-counting-basic", "m2-pigeonhole-invariants"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Nguyên lý bao hàm – loại trừ",
             "Đường đi trên lưới và hệ số nhị thức",
@@ -773,10 +746,9 @@
             }
           ],
           "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
-          "interactive_ideas": ["Clip Manim `inclusion-exclusion`", "Clip Manim `lattice-paths`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["inclusion-exclusion", "lattice-paths"],
           "walkthrough_ids": []
         },
         {
@@ -786,7 +758,7 @@
           "difficulty": 4,
           "est_scenes": 8,
           "prerequisites": ["m1-triangle-geometry"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Phép quay, đối xứng, vị tự",
             "Số phức và phép nhân với i",
@@ -806,10 +778,9 @@
             }
           ],
           "pitfalls": ["Nhầm chiều quay", "Quên phép đối xứng đảo định hướng"],
-          "interactive_ideas": ["Clip Manim `plane-transform`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["plane-transform"],
           "walkthrough_ids": []
         }
       ]
@@ -857,7 +828,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -867,7 +837,7 @@
           "difficulty": 4,
           "est_scenes": 8,
           "prerequisites": ["m3-derivative-graphs", "m3-sequences-limits"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Diện tích dưới đồ thị",
             "Tổng Riemann",
@@ -887,10 +857,9 @@
             }
           ],
           "pitfalls": ["Quên dấu của diện tích khi hàm âm", "Nhầm tổng Riemann trái và phải"],
-          "interactive_ideas": ["Clip Manim `riemann-integral`"],
+          "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": ["riemann-integral"],
           "walkthrough_ids": []
         },
         {
@@ -900,7 +869,7 @@
           "difficulty": 5,
           "est_scenes": 8,
           "prerequisites": ["m3-derivative-graphs"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Định lý Rolle và Lagrange",
             "Hình học của định lý giá trị trung bình",
@@ -926,7 +895,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -936,7 +904,7 @@
           "difficulty": 5,
           "est_scenes": 8,
           "prerequisites": ["m2-circle-power"],
-          "primary_medium": "manim",
+          "primary_medium": "walkthrough",
           "subtopics": [
             "Phép nghịch đảo và ảnh của đường tròn",
             "Tỉ số kép",
@@ -959,7 +927,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -992,7 +959,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -1025,7 +991,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         },
         {
@@ -1058,7 +1023,6 @@
           "interactive_ideas": [],
           "vn_sources": [],
           "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
-          "clip_ids": [],
           "walkthrough_ids": []
         }
       ]

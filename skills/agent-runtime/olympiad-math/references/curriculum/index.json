@@ -54,7 +54,7 @@
       "name_en": "Algebraic identities",
       "name_vi": "Hằng đẳng thức và biến đổi đại số",
       "prerequisites": [],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 1
     },
     {
@@ -72,7 +72,7 @@
       "name_en": "Basic inequalities",
       "name_vi": "Bất đẳng thức cơ bản",
       "prerequisites": ["m1-alg-identities"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 1
     },
     {
@@ -90,7 +90,7 @@
       "name_en": "Triangle geometry",
       "name_vi": "Hình học tam giác",
       "prerequisites": [],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 1
     },
     {
@@ -99,7 +99,7 @@
       "name_en": "Angles and circles",
       "name_vi": "Góc với đường tròn",
       "prerequisites": ["m1-triangle-geometry"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 1
     },
     {
@@ -117,7 +117,7 @@
       "name_en": "Classical inequalities",
       "name_vi": "Bất đẳng thức cổ điển",
       "prerequisites": ["m1-inequality-basic"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 2
     },
     {
@@ -135,7 +135,7 @@
       "name_en": "Modular arithmetic",
       "name_vi": "Số học đồng dư",
       "prerequisites": ["m1-divisibility-primes"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 2
     },
     {
@@ -144,7 +144,7 @@
       "name_en": "Euclid and Diophantine equations",
       "name_vi": "Thuật toán Euclid và phương trình Diophante",
       "prerequisites": ["m1-divisibility-primes"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 2
     },
     {
@@ -153,7 +153,7 @@
       "name_en": "Power of a point",
       "name_vi": "Phương tích và trục đẳng phương",
       "prerequisites": ["m1-circle-angles"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 2
     },
     {
@@ -162,7 +162,7 @@
       "name_en": "Pigeonhole and invariants",
       "name_vi": "Nguyên lý Dirichlet và bất biến",
       "prerequisites": ["m1-counting-basic"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 2
     },
     {
@@ -171,7 +171,7 @@
       "name_en": "Mathematical induction",
       "name_vi": "Quy nạp toán học",
       "prerequisites": ["m1-alg-identities"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 2
     },
     {
@@ -189,7 +189,7 @@
       "name_en": "Sequences and limits",
       "name_vi": "Dãy số và giới hạn",
       "prerequisites": ["m2-induction"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 3
     },
     {
@@ -198,7 +198,7 @@
       "name_en": "Derivatives and graphs",
       "name_vi": "Đạo hàm và khảo sát hàm số",
       "prerequisites": ["m3-sequences-limits"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 3
     },
     {
@@ -225,7 +225,7 @@
       "name_en": "Advanced counting",
       "name_vi": "Đếm nâng cao",
       "prerequisites": ["m1-counting-basic", "m2-pigeonhole-invariants"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 3
     },
     {
@@ -234,7 +234,7 @@
       "name_en": "Vectors, transformations and complex numbers",
       "name_vi": "Vector, phép biến hình và số phức",
       "prerequisites": ["m1-triangle-geometry"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 3
     },
     {
@@ -252,7 +252,7 @@
       "name_en": "Integrals",
       "name_vi": "Tích phân",
       "prerequisites": ["m3-derivative-graphs", "m3-sequences-limits"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 4
     },
     {
@@ -261,7 +261,7 @@
       "name_en": "Limits and the mean value theorem",
       "name_vi": "Giới hạn nâng cao và định lý giá trị trung bình",
       "prerequisites": ["m3-derivative-graphs"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 4
     },
     {
@@ -270,7 +270,7 @@
       "name_en": "Projective geometry and inversion",
       "name_vi": "Hình học xạ ảnh và phép nghịch đảo",
       "prerequisites": ["m2-circle-power"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "tier": 4
     },
     {

@@ -9,7 +9,6 @@
   "prerequisites": ["tier-2"],
   "topics": [
     {
-      "clip_ids": [],
       "difficulty": 3,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -42,12 +41,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["geometric-series-area", "limit-epsilon"],
       "difficulty": 3,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-sequences-limits",
-      "interactive_ideas": ["Clip Manim `geometric-series-area`", "Clip Manim `limit-epsilon`"],
+      "interactive_ideas": [],
       "name_en": "Sequences and limits",
       "name_vi": "Dãy số và giới hạn",
       "pitfalls": [
@@ -55,7 +53,7 @@
         "Giới hạn của dãy đan dấu"
       ],
       "prerequisites": ["m2-induction"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Định nghĩa giới hạn bằng ε–N",
         "Dãy đơn điệu bị chặn",
@@ -78,17 +76,16 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["secant-tangent"],
       "difficulty": 3,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-derivative-graphs",
-      "interactive_ideas": ["Clip Manim `secant-tangent`", "Walkthrough `curve-sketching`"],
+      "interactive_ideas": ["Walkthrough `curve-sketching`", "Walkthrough `secant-tangent`"],
       "name_en": "Derivatives and graphs",
       "name_vi": "Đạo hàm và khảo sát hàm số",
       "pitfalls": ["Cho f′(x₀) = 0 là có cực trị (có thể là điểm uốn)", "Quên xét dấu f′ hai bên"],
       "prerequisites": ["m3-sequences-limits"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Đạo hàm là hệ số góc tiếp tuyến",
         "Cực trị và tính đơn điệu",
@@ -108,10 +105,9 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["curve-sketching"]
+      "walkthrough_ids": ["curve-sketching", "secant-tangent"]
     },
     {
-      "clip_ids": [],
       "difficulty": 4,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -147,7 +143,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 4,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -183,17 +178,16 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["inclusion-exclusion", "lattice-paths"],
       "difficulty": 4,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-counting-advanced",
-      "interactive_ideas": ["Clip Manim `inclusion-exclusion`", "Clip Manim `lattice-paths`"],
+      "interactive_ideas": [],
       "name_en": "Advanced counting",
       "name_vi": "Đếm nâng cao",
       "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
       "prerequisites": ["m1-counting-basic", "m2-pigeonhole-invariants"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Nguyên lý bao hàm – loại trừ",
         "Đường đi trên lưới và hệ số nhị thức",
@@ -216,17 +210,16 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["plane-transform"],
       "difficulty": 4,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m3-vector-transform-complex",
-      "interactive_ideas": ["Clip Manim `plane-transform`"],
+      "interactive_ideas": [],
       "name_en": "Vectors, transformations and complex numbers",
       "name_vi": "Vector, phép biến hình và số phức",
       "pitfalls": ["Nhầm chiều quay", "Quên phép đối xứng đảo định hướng"],
       "prerequisites": ["m1-triangle-geometry"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Phép quay, đối xứng, vị tự",
         "Số phức và phép nhân với i",

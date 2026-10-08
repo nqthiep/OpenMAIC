@@ -9,16 +9,11 @@
   "prerequisites": ["tier-1"],
   "topics": [
     {
-      "clip_ids": ["convex-chord", "cs-projection"],
       "difficulty": 3,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-inequality-classic",
-      "interactive_ideas": [
-        "Clip Manim `convex-chord`",
-        "Clip Manim `cs-projection`",
-        "Walkthrough `cauchy-schwarz`"
-      ],
+      "interactive_ideas": ["Walkthrough `cauchy-schwarz`", "Walkthrough `cs-projection`"],
       "name_en": "Classical inequalities",
       "name_vi": "Bất đẳng thức cổ điển",
       "pitfalls": [
@@ -26,7 +21,7 @@
         "Dùng Jensen cho hàm không lồi"
       ],
       "prerequisites": ["m1-inequality-basic"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Cauchy–Schwarz",
         "Bất đẳng thức tam giác",
@@ -46,10 +41,9 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": ["cauchy-schwarz"]
+      "walkthrough_ids": ["cauchy-schwarz", "cs-projection"]
     },
     {
-      "clip_ids": [],
       "difficulty": 2,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -85,12 +79,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["modular-clock"],
       "difficulty": 3,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-modular-arith",
-      "interactive_ideas": ["Clip Manim `modular-clock`"],
+      "interactive_ideas": [],
       "name_en": "Modular arithmetic",
       "name_vi": "Số học đồng dư",
       "pitfalls": [
@@ -98,7 +91,7 @@
         "Quên chu kỳ bắt đầu từ lũy thừa nào"
       ],
       "prerequisites": ["m1-divisibility-primes"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Đồng dư và các phép toán",
         "Luỹ thừa theo modulo và chu kỳ",
@@ -121,12 +114,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["euclid-rectangle"],
       "difficulty": 3,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-euclid-diophantine",
-      "interactive_ideas": ["Clip Manim `euclid-rectangle`"],
+      "interactive_ideas": [],
       "name_en": "Euclid and Diophantine equations",
       "name_vi": "Thuật toán Euclid và phương trình Diophante",
       "pitfalls": [
@@ -134,7 +126,7 @@
         "Chỉ tìm một nghiệm riêng mà quên họ nghiệm"
       ],
       "prerequisites": ["m1-divisibility-primes"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Thuật toán Euclid tìm ƯCLN",
         "Đẳng thức Bézout",
@@ -157,12 +149,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["power-of-point"],
       "difficulty": 3,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-circle-power",
-      "interactive_ideas": ["Clip Manim `power-of-point`"],
+      "interactive_ideas": [],
       "name_en": "Power of a point",
       "name_vi": "Phương tích và trục đẳng phương",
       "pitfalls": [
@@ -170,7 +161,7 @@
         "Dùng độ dài thay cho độ dài có hướng"
       ],
       "prerequisites": ["m1-circle-angles"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Phương tích của một điểm với đường tròn",
         "Hai cát tuyến và cát tuyến–tiếp tuyến",
@@ -193,12 +184,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["tiling-coloring"],
       "difficulty": 3,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-pigeonhole-invariants",
-      "interactive_ideas": ["Clip Manim `tiling-coloring`"],
+      "interactive_ideas": [],
       "name_en": "Pigeonhole and invariants",
       "name_vi": "Nguyên lý Dirichlet và bất biến",
       "pitfalls": [
@@ -206,7 +196,7 @@
         "Bất biến không thực sự giữ qua mọi phép biến đổi"
       ],
       "prerequisites": ["m1-counting-basic"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Nguyên lý Dirichlet cơ bản và tổng quát",
         "Tô màu bàn cờ",
@@ -229,12 +219,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["figurate-sums", "induction-fallacy"],
       "difficulty": 3,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m2-induction",
-      "interactive_ideas": ["Clip Manim `figurate-sums`", "Clip Manim `induction-fallacy`"],
+      "interactive_ideas": [],
       "name_en": "Mathematical induction",
       "name_vi": "Quy nạp toán học",
       "pitfalls": [
@@ -242,7 +231,7 @@
         "Bước quy nạp không đúng với mọi k (bắt đầu từ k nhỏ)"
       ],
       "prerequisites": ["m1-alg-identities"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Cơ sở quy nạp và bước quy nạp",
         "Quy nạp mạnh",

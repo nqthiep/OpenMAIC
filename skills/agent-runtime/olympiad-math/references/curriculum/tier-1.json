@@ -9,17 +9,16 @@
   "prerequisites": [],
   "topics": [
     {
-      "clip_ids": ["alg-identity-area"],
       "difficulty": 1,
       "est_scenes": 6,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-alg-identities",
-      "interactive_ideas": ["Clip Manim `alg-identity-area`"],
+      "interactive_ideas": [],
       "name_en": "Algebraic identities",
       "name_vi": "Hằng đẳng thức và biến đổi đại số",
       "pitfalls": ["Quên hạng tử 2ab khi khai triển (a+b)²", "Nhầm dấu khi khai triển (a−b)³"],
       "prerequisites": [],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Bình phương của tổng và hiệu",
         "Hiệu hai bình phương",
@@ -42,7 +41,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 1,
       "est_scenes": 6,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -75,17 +73,16 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["amgm-semicircle"],
       "difficulty": 2,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-inequality-basic",
-      "interactive_ideas": ["Clip Manim `amgm-semicircle`"],
+      "interactive_ideas": ["Walkthrough `amgm-semicircle`"],
       "name_en": "Basic inequalities",
       "name_vi": "Bất đẳng thức cơ bản",
       "pitfalls": ["Áp dụng AM–GM cho số âm", "Quên kiểm tra dấu bằng có xảy ra được hay không"],
       "prerequisites": ["m1-alg-identities"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Bình phương luôn không âm",
         "Bất đẳng thức AM–GM cho hai số không âm",
@@ -105,15 +102,14 @@
         }
       ],
       "vn_sources": [],
-      "walkthrough_ids": []
+      "walkthrough_ids": ["amgm-semicircle"]
     },
     {
-      "clip_ids": ["graph-transform"],
       "difficulty": 2,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-quadratic-vieta",
-      "interactive_ideas": ["Clip Manim `graph-transform`"],
+      "interactive_ideas": [],
       "name_en": "Quadratics and Vieta",
       "name_vi": "Phương trình bậc hai và định lý Viète",
       "pitfalls": ["Dùng Viète khi biệt thức âm", "Quên điều kiện a ≠ 0"],
@@ -141,16 +137,11 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["concurrency-dynamic", "pythagoras-dissection"],
       "difficulty": 2,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-triangle-geometry",
-      "interactive_ideas": [
-        "Clip Manim `concurrency-dynamic`",
-        "Clip Manim `pythagoras-dissection`",
-        "Walkthrough `triangle-altitude`"
-      ],
+      "interactive_ideas": ["Walkthrough `triangle-altitude`"],
       "name_en": "Triangle geometry",
       "name_vi": "Hình học tam giác",
       "pitfalls": [
@@ -158,7 +149,7 @@
         "Nhầm trực tâm nằm trong tam giác khi tam giác tù"
       ],
       "prerequisites": [],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Đường cao, trung tuyến, phân giác, trung trực",
         "Điểm đồng quy: trực tâm, trọng tâm, tâm đường tròn ngoại và nội tiếp",
@@ -181,17 +172,16 @@
       "walkthrough_ids": ["triangle-altitude"]
     },
     {
-      "clip_ids": ["inscribed-angle"],
       "difficulty": 2,
       "est_scenes": 7,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m1-circle-angles",
-      "interactive_ideas": ["Clip Manim `inscribed-angle`"],
+      "interactive_ideas": [],
       "name_en": "Angles and circles",
       "name_vi": "Góc với đường tròn",
       "pitfalls": ["Nhầm cung lớn với cung nhỏ khi chắn góc", "Xét điểm nằm ở cung sai"],
       "prerequisites": ["m1-triangle-geometry"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Góc nội tiếp và góc ở tâm",
         "Góc nội tiếp cùng chắn một cung",
@@ -214,7 +204,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 1,
       "est_scenes": 6,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",

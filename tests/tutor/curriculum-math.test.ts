@@ -6,7 +6,6 @@ import {
   MATH_CURRICULUM_SRC,
   splitCurriculum,
 } from '@/scripts/split-curriculum-math';
-import { mathClipModules } from '@/lib/subjects/math/clips';
 import { mathPack } from '@/lib/subjects/math/pack';
 
 const root = process.cwd();
@@ -20,13 +19,12 @@ type Topic = {
   name_en: string;
   prerequisites: string[];
   primary_medium: string;
-  clip_ids: string[];
   walkthrough_ids: string[];
   vn_sources: string[];
   exam_relevance: string;
 };
 type Index = {
-  topics: (Omit<Topic, 'clip_ids' | 'walkthrough_ids' | 'vn_sources' | 'exam_relevance'> & {
+  topics: (Omit<Topic, 'walkthrough_ids' | 'vn_sources' | 'exam_relevance'> & {
     tier: number;
   })[];
   sequencing: Record<string, string[] | string>;
@@ -47,9 +45,9 @@ describe('math curriculum (card 3-R1 / 3B-00)', () => {
     expect(byId.size).toBe(28);
   });
 
-  it('the media split is the one SCHEMA §7 counts: 17 manim, 10 slide, 1 walkthrough', () => {
+  it('the media split: SCHEMA §7 counted 17 animated, 10 slide, 1 walkthrough; with ADR 0015 the animated ones are walkthroughs', () => {
     const count = (m: string) => all.filter((t) => t.primary_medium === m).length;
-    expect([count('manim'), count('slide'), count('walkthrough')]).toEqual([17, 10, 1]);
+    expect([count('manim'), count('slide'), count('walkthrough')]).toEqual([0, 10, 18]);
   });
 
   it('prerequisites exist, are acyclic and never point to a higher tier', () => {
@@ -69,37 +67,19 @@ describe('math curriculum (card 3-R1 / 3B-00)', () => {
     for (const id of byId.keys()) visit(id);
   });
 
-  it('every clip and walkthrough of the math pack names a topic of the curriculum, and the curriculum lists it back', () => {
-    const entries = [
-      ...mathClipModules.map((m) => ({
-        id: m.entry.id,
-        topics: m.entry.curriculumTopics,
-        key: 'clip_ids' as const,
-      })),
-      ...mathPack.walkthroughs.map((w) => ({
-        id: w.id,
-        topics: w.curriculumTopics,
-        key: 'walkthrough_ids' as const,
-      })),
-    ];
-    expect(entries.length).toBeGreaterThanOrEqual(24);
-    for (const e of entries)
-      for (const topic of e.topics) {
-        expect(byId.has(topic), `${e.id} -> ${topic}`).toBe(true);
-        expect(byId.get(topic)![e.key], `${topic} lists ${e.id}`).toContain(e.id);
+  it('every walkthrough of the math pack names a topic of the curriculum, and the curriculum lists it back', () => {
+    expect(mathPack.walkthroughs.length).toBeGreaterThanOrEqual(3);
+    for (const w of mathPack.walkthroughs)
+      for (const topic of w.curriculumTopics) {
+        expect(byId.has(topic), `${w.id} -> ${topic}`).toBe(true);
+        expect(byId.get(topic)!.walkthrough_ids, `${topic} lists ${w.id}`).toContain(w.id);
       }
-    for (const t of all) {
-      for (const id of t.clip_ids)
-        expect(
-          mathClipModules.some((m) => m.entry.id === id),
-          id,
-        ).toBe(true);
+    for (const t of all)
       for (const id of t.walkthrough_ids)
         expect(
           mathPack.walkthroughs.some((w) => w.id === id),
           id,
         ).toBe(true);
-    }
   });
 
   it('claims no source: vn_sources is empty and exam relevance is marked [Unverified]', () => {
@@ -135,29 +115,5 @@ describe('math curriculum (card 3-R1 / 3B-00)', () => {
       'tier-4.json',
     ]);
     for (const [name, content] of Object.entries(fresh)) expect(readOut(name), name).toBe(content);
-  });
-});
-
-describe('3D briefs (card 3D-01)', () => {
-  const { briefs } = JSON.parse(
-    readFileSync(join(process.cwd(), 'eval/manim-author/briefs-3d.json'), 'utf8'),
-  ) as { briefs: { id: string; topicId: string; proposedClipId: string; chapters: string[] }[] };
-
-  it('there is a brief for every manim topic that has no clip yet, and only for those', () => {
-    const uncovered = all
-      .filter((t) => t.primary_medium === 'manim' && t.clip_ids.length === 0)
-      .map((t) => t.id)
-      .sort();
-    expect(briefs.map((b) => b.topicId).sort()).toEqual(uncovered);
-  });
-
-  it('proposed clip ids are new and every brief names at least two chapters', () => {
-    for (const b of briefs) {
-      expect(
-        mathClipModules.some((m) => m.entry.id === b.proposedClipId),
-        b.id,
-      ).toBe(false);
-      expect(b.chapters.length, b.id).toBeGreaterThanOrEqual(2);
-    }
   });
 });

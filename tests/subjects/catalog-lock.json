@@ -47,6 +47,28 @@
       }
     }
   },
+  "amgm-semicircle": {
+    "entryRev": 1,
+    "contentHash": "08bbe06442abbe77",
+    "framesHash": {
+      "two-eight": {
+        "vi-VN": "bf8b3341e59f9d59",
+        "en-US": "49be76b4e9fabee5"
+      },
+      "equal": {
+        "vi-VN": "84b7d3ba62d368b5",
+        "en-US": "aa379f2b1623235b"
+      },
+      "far": {
+        "vi-VN": "e94ceb05a987d04d",
+        "en-US": "2fec171f7d8cc7c3"
+      },
+      "nine-sixteen": {
+        "vi-VN": "bae444e3a0c48aa8",
+        "en-US": "cd360a3d6c094c89"
+      }
+    }
+  },
   "bfs": {
     "entryRev": 1,
     "contentHash": "5663c1e6d7115303",
@@ -210,6 +232,28 @@
       "parallel-like": {
         "vi-VN": "6ebc315abbb2fcd4",
         "en-US": "8c32a1a80e72cff6"
+      }
+    }
+  },
+  "cs-projection": {
+    "entryRev": 1,
+    "contentHash": "7cd3c73041ce8d7e",
+    "framesHash": {
+      "generic": {
+        "vi-VN": "ac9fb6cccb12558e",
+        "en-US": "37c3822e02007390"
+      },
+      "parallel": {
+        "vi-VN": "268114ddbeee993c",
+        "en-US": "0d7fe3c07e7c50e8"
+      },
+      "perpendicular": {
+        "vi-VN": "1774265ef9c0abe9",
+        "en-US": "dc51600244b85633"
+      },
+      "opposite": {
+        "vi-VN": "de8d83b655b6ac40",
+        "en-US": "f811c8c10fb51e9f"
       }
     }
   },
@@ -814,6 +858,28 @@
       "n2": {
         "vi-VN": "c03daf682c1a9dbf",
         "en-US": "99a523aafbddfc12"
+      }
+    }
+  },
+  "secant-tangent": {
+    "entryRev": 1,
+    "contentHash": "956650cba9ade511",
+    "framesHash": {
+      "square-at-1": {
+        "vi-VN": "c00557c72702826b",
+        "en-US": "f55f7d45594b6512"
+      },
+      "cubic-at-0": {
+        "vi-VN": "85da389b30bbe7f4",
+        "en-US": "f1e7f2ce6354033a"
+      },
+      "stationary": {
+        "vi-VN": "423a137425dcd9f2",
+        "en-US": "d0261810d62a2e98"
+      },
+      "quad-at-minus-1": {
+        "vi-VN": "ee0a614b50156c89",
+        "en-US": "048328c85cb17502"
       }
     }
   },

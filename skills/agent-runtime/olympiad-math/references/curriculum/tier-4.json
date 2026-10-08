@@ -9,7 +9,6 @@
   "prerequisites": ["tier-3"],
   "topics": [
     {
-      "clip_ids": [],
       "difficulty": 5,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -45,17 +44,16 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": ["riemann-integral"],
       "difficulty": 4,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
       "id": "m4-integral",
-      "interactive_ideas": ["Clip Manim `riemann-integral`"],
+      "interactive_ideas": [],
       "name_en": "Integrals",
       "name_vi": "Tích phân",
       "pitfalls": ["Quên dấu của diện tích khi hàm âm", "Nhầm tổng Riemann trái và phải"],
       "prerequisites": ["m3-derivative-graphs", "m3-sequences-limits"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Diện tích dưới đồ thị",
         "Tổng Riemann",
@@ -78,7 +76,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 5,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -91,7 +88,7 @@
         "Quên điều kiện liên tục trên đoạn đóng"
       ],
       "prerequisites": ["m3-derivative-graphs"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Định lý Rolle và Lagrange",
         "Hình học của định lý giá trị trung bình",
@@ -114,7 +111,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 5,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -124,7 +120,7 @@
       "name_vi": "Hình học xạ ảnh và phép nghịch đảo",
       "pitfalls": ["Quên điểm ở vô cực", "Nhầm ảnh của đường tròn đi qua tâm nghịch đảo"],
       "prerequisites": ["m2-circle-power"],
-      "primary_medium": "manim",
+      "primary_medium": "walkthrough",
       "subtopics": [
         "Phép nghịch đảo và ảnh của đường tròn",
         "Tỉ số kép",
@@ -147,7 +143,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 5,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -180,7 +175,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 5,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
@@ -213,7 +207,6 @@
       "walkthrough_ids": []
     },
     {
-      "clip_ids": [],
       "difficulty": 5,
       "est_scenes": 8,
       "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
