@@ -109,6 +109,10 @@ Chưa làm và vì sao:
 | Walkthrough Toán | `3B-W1..W3` | `lib/subjects/math/catalog/{cauchy-schwarz,triangle-altitude,curve-sketching}.ts`; pack `math` (`lib/subjects/math/pack.ts`); `graham-scan` (`2E-05`, `I-12`) trên `geometry` |
 | Mẫu clip (nửa TS) | `3A-T1..T3`, `3B-T1..T14`, `3D-T1..T4` | **21 mẫu** ở `lib/subjects/math/clips/*.ts` (+ `index.ts`), mỗi mẫu một test `tests/clips/<id>.test.ts` qua hợp đồng chung `tests/clips/clip-contract.ts` và một oracle độc lập |
 | Cổng QA | `3A-05`, `3A-06` | `manim/qa/{allowlist,check_video,check_bbox,check_ssim}.py`, 45 test pytest chạy trên video ffmpeg tổng hợp; job CI `manim-qa` |
+| Curriculum Toán | `3-R1` (khung), `3B-00` | `docs/tutor/curriculum/curriculum-math-vn.json`: 28 topic = 4 tier × 7 từ SCHEMA §7, id `m<tier>-<tên>` (clip và walkthrough đã đổi sang id này); mọi tên kỳ thi, lớp, trọng số, nguồn là **[Unverified]**, `vn_sources` rỗng; nội dung toán (subtopics, pitfalls) do người soạn viết, chưa có hội đồng duyệt. Tách vào `skills/agent-runtime/olympiad-math/references/curriculum/` bằng `scripts/split-curriculum-math.ts`; `tests/tutor/curriculum-math.test.ts` |
+| Eval Toán | `3B-E1`, `3A-17` (dữ liệu), `3D-01` | 5 scenario Toán (`eval/tutor-lesson/scenarios-math.json`, prompt theo môn); `eval/tutor-review/{seed-errors-math,clip-runner}.ts`: 111 lỗi gieo (6 loại) + 43 biến thể sạch, review hai provider cho clip (ghi `lib/subjects/math/reviews/<clip>@<templateRev>.json`); `lib/clips/review-material.ts`; prompt reviewer **riêng cho Toán** (trước đó Toán dùng prompt Tin: bắt chấm code C++); `eval/manim-author/briefs-3d.json` |
+| Vòng LLM tác giả | `3A-08`, `3D-02` | `eval/manim-author/{author,runner,make-briefs}.ts`, `briefs.json` (20 brief): prompt, vòng sửa ≤ 3, RSR@1/@3, token; cổng thật (allowlist, render, QA, manifest) qua `runRenderJob`; `--replay` chạy toàn bộ vòng với template đã commit (không cần model); `scripts/manim-author-pr.mjs` + `.github/workflows/manim-author.yml` (mỗi mẫu một PR, tự gộp chỉ khi cả 5 cổng `true`; **[Unverified] chưa chạy trên GitHub**) |
+| e2e | `I-08` (S3 một phần) | `e2e/tests/clip-slides.spec.ts`: ứng dụng thật, slide clip, video tải từ `public/clips` và dài đúng; `tests/clips/{prebuilt-assets,export-manifest}.test.ts` |
 | Dịch vụ | `3C-01`, `3C-02`, `3C-05..08` | `manim/service/{spec,jobs,server,runner}.py` (chỉ stdlib; giới hạn hàng đợi/người/toàn cục, TTL, deadline, token so sánh hằng thời gian); `spec.py` cho cùng khoá cache và cùng kết quả kiểm params với TS (`manim/service/fixtures/parity.json`, sinh từ `scripts/export-clip-specs.ts` → `templates.json`; test TS `service-parity` báo lệch); client, route, cờ, nhánh bất đồng bộ ở `lib/clips/service-client.ts`, `app/api/clips`, `clip-tools.ts`; 1358 test pytest (`manim/`), job CI `manim-qa` chạy `manim/service` |
 | Mẫu Manim | `3A-M*`, `3B-M*`, `3D-M*` | **21 mẫu** `manim/templates/<id>.py` + `_base.py` + `manim/render_clip.py`; cài Manim 0.21.0 + TinyTeX theo `manim/README.md` (đã chạy trên máy này, 2026-10-08). **84/84 preset qua đủ cổng** (allowlist, video, bbox, frame, so số hiển thị với TS). `public/clips` giữ **10 thư mục** (preset đầu của 10 clip, 7,5 MB: giới hạn NFR-P8 tính mỗi preset là một clip); phần còn lại chỉ dựng được qua manim-service hoặc `render-clips --out-dir` |
 | Dựng | `3A-07` | `scripts/render-clips.ts` (`pnpm render:clips --plan` in 84 job), `lib/clips/generated/asset-index.json` (rỗng), kiểm manifest |
@@ -128,18 +132,20 @@ Chưa làm và vì sao (Phase 3):
 
 | Việc | Lý do |
 | --- | --- |
-| `3A-04` (image Docker ghim), `3A-08` (vòng manim-author), spike `3-S1` (Docker, 2/4 vCPU), `3-S2` (tiếng Việt, cần xelatex/Typst), `3-S4` phần amd64 | cần Docker chạy; `3-S4` trên arm64 đã làm (`manim/spikes/s4/RESULT.md`) |
-| Spike `3-S1..S5`, `3-R1`, `3B-00` (curriculum Toán) | cần Manim/Docker và nghiên cứu nguồn; `3-R1` không được bịa nguồn |
+| `3A-04` (image Docker ghim), spike `3-S1` (Docker, 2/4 vCPU), `3-S2` (tiếng Việt: cần xelatex hoặc Typst), `3-S4` trong image và amd64 | cần Docker chạy / máy amd64; `3-S4` trên arm64 đã làm (`manim/spikes/s4/RESULT.md`) |
 | `3C-03` (build/chạy image dịch vụ), `3C-04` (sandbox, red-team), `3C-09` | `manim/service/Dockerfile` và `docker-compose.yml` đã viết nhưng **[Unverified] chưa build/chạy** (Docker daemon tắt); cách ly mạng của renderer chưa cưỡng chế; red-team cần image thật |
-| Mọi hội đồng review LLM cho entry Toán và clip, `3A-17`, `3B-E1` | cần LLM thật, xem mục "Gate review LLM" |
-| `3-S3` (slide video do tool dựng, export MP4/ZIP, import) | chưa kiểm; `3A-02/03` làm theo thiết kế trong ARCHITECTURE §8b [Unverified] |
+| Số đo S9 (RSR@3 ≥ 90%, đúng-toán ≥ 90%), `3D-03` | cần model viết mã đủ mạnh; vòng và 20 brief đã sẵn sàng (`pnpm exec tsx eval/manim-author/runner.ts`) |
+| Calibration hội đồng Toán (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; `clip-runner.ts --calibrate` đã sẵn sàng (308 lần gọi). Hai model free đã thử cho review từng clip (xem "Review thật bằng model free") |
+| Nghiên cứu nguồn cho curriculum Toán (đề cương thi, lớp, trọng số, tài liệu) | cần nguồn thật; khung hiện là [Inference] |
+| `3-S3` phần trình duyệt: adopt vào pool, ZIP trọn vòng, tua, độ trễ | cần chạy trình duyệt với IndexedDB; phần liệt kê asset và phát clip trong app đã kiểm |
+| Chỉ 10 trong 84 preset nằm trong `public/clips` | giới hạn NFR-P8 (≤ 10 thư mục, 30 MB); phần còn lại cần manim-service hoặc volume |
 
 ## 4. Việc tiếp theo (theo thứ tự)
 
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: phần mã đã làm (mục 3b). Mẫu Manim đã xong (mục 3b). Còn lại cần Docker hoặc LLM: `3A-04` (image ghim, build `manim/service/Dockerfile`), spike `3-S1/S2`, `3C-04` (sandbox), vòng `3A-08`, cổng review hai provider.
+4. Phase 3: mã và 21 mẫu Manim đã xong (mục 3b). Còn lại cần Docker hoặc model mạnh: `3A-04` (image ghim, build `manim/service/Dockerfile`), spike `3-S1/S2`, `3C-04` (sandbox), chạy thật vòng `3A-08` và calibration hội đồng Toán, rồi sửa nội dung theo review (xem "Review thật bằng model free").
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)

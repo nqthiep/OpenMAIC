@@ -136,6 +136,9 @@ jobs:
           node scripts/generate-tutor-runtime.mjs --check
           node scripts/generate-tutor-katex.mjs --check
           pnpm exec tsx scripts/generate-skill-catalog.ts --check
+          pnpm exec tsx scripts/split-curriculum.ts --check
+          pnpm exec tsx scripts/split-curriculum-math.ts --check
+          pnpm exec tsx eval/manim-author/make-briefs.ts --check
 
       # Keep these sequential. Running root vitest alongside the storage
       # package on a 4-core runner made 5s-timeout tests flake (CPU
