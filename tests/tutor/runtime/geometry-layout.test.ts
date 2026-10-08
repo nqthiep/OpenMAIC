@@ -128,7 +128,7 @@ describe('angleArc', () => {
 });
 
 describe('readPoints / describeGeometry', () => {
-  it('drops bad ids, duplicate ids and non-finite coordinates; caps at MAX_POINTS; clips labels to 8', () => {
+  it('drops bad ids, duplicate ids and non-finite coordinates; caps at MAX_POINTS; clips labels to 10', () => {
     const pts = readPoints([
       { id: 'A', x: 1, y: 2 },
       { id: 'A', x: 9, y: 9 },
@@ -139,10 +139,44 @@ describe('readPoints / describeGeometry', () => {
       null,
     ]);
     expect(pts.map((p) => p.id)).toEqual(['A', 'C']);
-    expect(pts[1].label).toBe('averyve…');
-    const many = Array.from({ length: 100 }, (_, i) => ({ id: `p${i}`, x: i, y: i }));
+    expect(pts[1].label).toBe('averyvery…');
+    const many = Array.from({ length: 300 }, (_, i) => ({ id: `p${i}`, x: i, y: i }));
     expect(readPoints(many)).toHaveLength(MAX_POINTS);
     expect(readPoints('x')).toEqual([]);
+  });
+
+  it('reads the display options of a point: hidden, centred label, dot radius clamped to 1.5..9', () => {
+    const [a, b, c, d] = readPoints([
+      { id: 'a', x: 0, y: 0, hidden: true, label: '5', at: 'center' },
+      { id: 'b', x: 1, y: 1, r: 100 },
+      { id: 'c', x: 2, y: 2, r: 0.1 },
+      { id: 'd', x: 3, y: 3, hidden: true },
+    ]);
+    expect([a.hidden, a.center, a.label, a.r]).toEqual([true, true, '5', 4.5]);
+    expect([b.hidden, b.center, b.r]).toEqual([false, false, 9]);
+    expect(c.r).toBe(1.5);
+    expect(d.label).toBe(''); // a hidden point with no label shows nothing at all
+  });
+
+  it('describes polygons and polylines, and leaves hidden points out of the point list', () => {
+    const points = readPoints([
+      { id: 'A', x: 0, y: 0 },
+      { id: 'v', x: 1, y: 1, hidden: true },
+    ]);
+    expect(
+      describeGeometry(
+        {
+          points,
+          segments: [],
+          lines: [],
+          circles: [],
+          angles: [],
+          polygons: ['sq'],
+          polylines: ['f'],
+        },
+        { sq: 'group-2' },
+      ),
+    ).toBe('points: A (0, 0); polygons: sq (group-2); polylines: f');
   });
 
   it('describes objects by kind with the highlight kind, and ignores unknown kinds', () => {

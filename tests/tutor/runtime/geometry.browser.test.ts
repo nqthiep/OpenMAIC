@@ -81,6 +81,40 @@ const frames: Frame<unknown>[] = [
     state: { bounds: { xmin: 5, xmax: 5, ymin: 0, ymax: 1 }, points: [{ id: 'P', x: 5, y: 5 }] },
     meta: { index: 2, explanation: 'khung suy biến dùng khung mặc định' },
   },
+  {
+    // ADR 0015: polygons, a sampled curve, an arrow, hidden anchors with a centred label
+    state: {
+      bounds: { xmin: 0, xmax: 10, ymin: 0, ymax: 6 },
+      points: [
+        { id: 'a', x: 1, y: 1, hidden: true },
+        { id: 'b', x: 5, y: 1, hidden: true },
+        { id: 'c', x: 5, y: 5, hidden: true },
+        { id: 'd', x: 1, y: 5, hidden: true },
+        { id: 'n', x: 3, y: 3, hidden: true, at: 'center', label: '42' },
+        { id: 'o', x: 7, y: 1 },
+        { id: 'p', x: 9, y: 4 },
+      ],
+      polygons: [
+        { id: 'sq', pts: ['a', 'b', 'c', 'd'] },
+        { id: 'bad', pts: ['a', 'b', 'zz'] }, // unknown vertex: skipped
+        { id: 'two', pts: ['a', 'b'] }, // not a polygon: skipped
+      ],
+      polylines: [
+        {
+          id: 'f',
+          xy: [
+            [6, 1],
+            [7, 2],
+            [8, 2.5],
+            [9, 5],
+          ],
+        },
+        { id: 'short', xy: [[1, 1]] }, // one point: skipped
+      ],
+      segments: [{ id: 'op', from: 'o', to: 'p', arrow: true }],
+    },
+    meta: { index: 3, explanation: 'đa giác, đường cong, mũi tên', highlights: { sq: 'group-1' } },
+  },
 ];
 
 const config: WalkthroughWidgetConfig = {
@@ -192,7 +226,26 @@ describe.skipIf(!REQUIRED)('geometry visualizer (browser)', () => {
       'points: A (1, 1), B (9, 1), C (4, 5); segments: AB, AC',
     );
     const labels = await widget.locator('.wtx text').allTextContents();
-    expect(labels).toEqual(['A', 'B', 'averyve…']);
+    expect(labels).toEqual(['A', 'B', 'averyvery…']);
+  });
+
+  it('frame 3: filled polygons, a curve, an arrow head; hidden anchors draw no dot but keep their centred label', async () => {
+    await load();
+    await show(3);
+    await pw(widget.locator('.wtx-poly')).toHaveCount(1);
+    await pw(widget.locator('.wtx-poly')).toHaveClass(/wtx-g1/);
+    await pw(widget.locator('polyline.wtx-curve')).toHaveCount(1);
+    await pw(widget.locator('.wtx-arrowhead')).toHaveCount(1);
+    await pw(widget.locator('.wtx-seg')).toHaveCount(1);
+    await pw(widget.locator('.wtx-pt')).toHaveCount(2); // only o and p have a dot
+    await pw(widget.locator('.wtx text.wtx-center')).toHaveText('42');
+    expect(
+      await widget.locator('polyline.wtx-curve').evaluate((e) => getComputedStyle(e).fill),
+    ).toBe('none');
+    await pw(widget.locator('.wtx')).toHaveAttribute(
+      'aria-label',
+      'points: o (7, 1), p (9, 4); segments: op; polygons: sq (group-1); polylines: f',
+    );
   });
 
   it('frame 1: highlight kinds, lines reach the frame edge, circle radius in world units, one angle', async () => {

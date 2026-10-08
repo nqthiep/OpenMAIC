@@ -2,23 +2,30 @@
  * Visualizer `geometry` (ARCHITECTURE §8; task 3B-V1): điểm, đoạn, đường thẳng, đường tròn, góc trên mặt
  * phẳng toạ độ (trục y hướng lên). Chạy trong iframe null-origin: không Node API. SVG dựng bằng
  * `createElementNS`; dữ liệu vào DOM chỉ qua `textContent`/`setAttribute`.
- * State: `{ bounds, points, segments?, lines?, circles?, angles? }`. Khoá `highlights` là id của đối tượng
- * (điểm, đoạn, đường thẳng, đường tròn, góc); id nên khác nhau giữa các loại.
+ * State: `{ bounds, points, segments?, lines?, circles?, angles?, polygons?, polylines? }`. Khoá `highlights` là id của
+ * đối tượng (điểm, đoạn, đường thẳng, đường tròn, góc, đa giác, đường gấp khúc); id nên khác nhau giữa các loại.
+ * Mở rộng (ADR 0015, hình tương tác thay clip): `polygons` `{id, pts: [id điểm]}` tô màu; `polylines` `{id, xy: [[x,y]…], dashed?}`
+ * cho đường cong lấy mẫu; `segments[].arrow` vẽ mũi tên ở đầu `to`; điểm có `hidden` (không vẽ chấm), `at: 'center'`
+ * (nhãn căn giữa tại điểm), `r` (bán kính chấm, px).
  * Kind: `active|compare|result|visited|muted` (lớp `wt-hl-*` của shell) và `group-0..5` (lớp `wtx-g0..5`,
  * cùng bảng màu và mẫu nét với `grid`, nên không phân biệt chỉ bằng màu).
- * Giới hạn: 40 điểm, 60 đoạn, 12 đường thẳng, 12 đường tròn, 12 góc (phần thừa bị bỏ); nhãn cắt ở 8 ký tự.
+ * Giới hạn: 160 điểm, 120 đoạn, 12 đường thẳng, 12 đường tròn, 12 góc, 140 đa giác, 12 đường gấp khúc ≤ 200 điểm
+ * (phần thừa bị bỏ); nhãn cắt ở 10 ký tự.
  */
 import type { VisualizerRenderer } from '@/lib/tutor/protocol/widget-data';
 import { GROUP_PALETTE, clip } from '@/lib/tutor/runtime/visualizers/grid';
 import { isRecord } from '@/lib/tutor/runtime/layout';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-export const MAX_POINTS = 40;
-export const MAX_SEGMENTS = 60;
+export const MAX_POINTS = 160;
+export const MAX_SEGMENTS = 120;
 export const MAX_LINES = 12;
 export const MAX_CIRCLES = 12;
 export const MAX_ANGLES = 12;
-export const MAX_LABEL = 8;
+export const MAX_POLYGONS = 140;
+export const MAX_POLYLINES = 12;
+export const MAX_PATH_POINTS = 200;
+export const MAX_LABEL = 10;
 const VIEW_W = 480;
 const VIEW_H_MIN = 160;
 const VIEW_H_MAX = 420;
@@ -42,9 +49,14 @@ const CSS = `
 :where(.wtx-dashed){stroke-dasharray:6 4}
 :where(.wtx-circle){stroke:var(--wt-fg,#1f2937);stroke-width:2;fill:none}
 :where(.wtx-arc){stroke:var(--wt-mut,#6b7280);stroke-width:1.5;fill:none}
+:where(.wtx-poly){stroke:var(--wt-fg,#1f2937);stroke-width:1.5;fill:var(--wt-fg,#1f2937);fill-opacity:.06;stroke-linejoin:round}
+:where(.wtx-curve){stroke:var(--wt-acc,#2563eb);stroke-width:2.5;fill:none;stroke-linejoin:round;stroke-linecap:round}
+:where(.wtx-arrowhead){fill:var(--wt-fg,#1f2937);stroke:var(--wt-fg,#1f2937);stroke-width:1}
+.wtx text.wtx-center{text-anchor:middle}
 /* a highlighted line, arc or circle outline must not be filled (the shell's wt-hl-* kinds set a fill); a group colour may */
-.wtx line,.wtx path.wtx-arc,.wtx circle.wtx-circle:not([class*=wtx-g]){fill:none}
+.wtx line,.wtx path.wtx-arc,.wtx polyline,.wtx circle.wtx-circle:not([class*=wtx-g]){fill:none}
 .wtx-g0,.wtx-g1,.wtx-g2,.wtx-g3,.wtx-g4,.wtx-g5{fill-opacity:.35}
+.wtx polyline[class*=wtx-g]{fill:none}
 ${groupRules('light')}
 @media (prefers-color-scheme:dark){${groupRules('dark')}}
 `.trim();
@@ -179,6 +191,12 @@ interface PointObj {
   x: number;
   y: number;
   label: string;
+  /** no dot is drawn (a label-only anchor, or a vertex of a polygon) */
+  hidden: boolean;
+  /** the label is centred on the point instead of sitting at its upper right */
+  center: boolean;
+  /** radius of the dot in px */
+  r: number;
 }
 
 function list(x: unknown, max: number): Record<string, unknown>[] {
@@ -195,7 +213,15 @@ export function readPoints(raw: unknown): PointObj[] {
     const y = num(p.y);
     if (!id || seen.has(id) || Number.isNaN(x) || Number.isNaN(y)) continue;
     seen.add(id);
-    out.push({ id, x, y, label: clip(typeof p.label === 'string' ? p.label : id, MAX_LABEL) });
+    out.push({
+      id,
+      x,
+      y,
+      label: clip(typeof p.label === 'string' ? p.label : p.hidden === true ? '' : id, MAX_LABEL),
+      hidden: p.hidden === true,
+      center: p.at === 'center',
+      r: Math.min(Math.max(num(p.r) || 4.5, 1.5), 9),
+    });
     if (out.length >= MAX_POINTS) break;
   }
   return out;
@@ -209,6 +235,8 @@ export function describeGeometry(
     lines: string[];
     circles: string[];
     angles: string[];
+    polygons?: string[];
+    polylines?: string[];
   }>,
   highlights: Readonly<Record<string, unknown>>,
 ): string {
@@ -219,11 +247,15 @@ export function describeGeometry(
   const parts: string[] = [];
   if (counts.points.length) {
     parts.push(
-      `points: ${counts.points.map((p) => `${tag(p.id)} (${r2(p.x)}, ${r2(p.y)})`).join(', ')}`,
+      `points: ${counts.points
+        .filter((p) => !p.hidden)
+        .map((p) => `${tag(p.id)} (${r2(p.x)}, ${r2(p.y)})`)
+        .join(', ')}`,
     );
   }
-  for (const k of ['segments', 'lines', 'circles', 'angles'] as const) {
-    if (counts[k].length) parts.push(`${k}: ${counts[k].map(tag).join(', ')}`);
+  for (const k of ['segments', 'lines', 'circles', 'angles', 'polygons', 'polylines'] as const) {
+    const ids = counts[k] ?? [];
+    if (ids.length) parts.push(`${k}: ${ids.map(tag).join(', ')}`);
   }
   return parts.join('; ');
 }
@@ -292,17 +324,34 @@ export const geometryVisualizer: VisualizerRenderer = {
     const lines = list(state.lines, MAX_LINES).filter((s) => str(s.id));
     const circles = list(state.circles, MAX_CIRCLES).filter((s) => str(s.id));
     const angles = list(state.angles, MAX_ANGLES).filter((s) => str(s.id));
+    const polygons = list(state.polygons, MAX_POLYGONS).filter((s) => str(s.id));
+    const polylines = list(state.polylines, MAX_POLYLINES).filter((s) => str(s.id));
 
     const drawn = {
       segments: [] as string[],
       lines: [] as string[],
       circles: [] as string[],
       angles: [] as string[],
+      polygons: [] as string[],
+      polylines: [] as string[],
     };
     const under = svgEl(doc, 'g');
     const over = svgEl(doc, 'g');
     const add = (g: SVGGElement, el: SVGElement) => g.appendChild(el);
 
+    for (const g of polygons) {
+      const ids = Array.isArray(g.pts) ? g.pts : [];
+      const vs = ids.map((id) => byId.get(String(id))).filter((p): p is PointObj => !!p);
+      if (vs.length < 3 || vs.length !== ids.length) continue;
+      drawn.polygons.push(String(g.id));
+      add(
+        under,
+        svgEl(doc, 'polygon', {
+          class: kindClass('wtx-poly', hl[String(g.id)]),
+          points: vs.map((p) => `${f(X(p.x))},${f(Y(p.y))}`).join(' '),
+        }),
+      );
+    }
     for (const c of circles) {
       const center = byId.get(String(c.center));
       const r = num(c.r);
@@ -315,6 +364,27 @@ export const geometryVisualizer: VisualizerRenderer = {
           cx: f(X(center.x)),
           cy: f(Y(center.y)),
           r: f(r * scr.scale),
+        }),
+      );
+    }
+    for (const pl of polylines) {
+      const xy = (Array.isArray(pl.xy) ? pl.xy : []).slice(0, MAX_PATH_POINTS);
+      const pts: string[] = [];
+      for (const q of xy) {
+        const x = Array.isArray(q) ? num(q[0]) : NaN;
+        const y = Array.isArray(q) ? num(q[1]) : NaN;
+        if (!Number.isNaN(x) && !Number.isNaN(y)) pts.push(`${f(X(x))},${f(Y(y))}`);
+      }
+      if (pts.length < 2) continue;
+      drawn.polylines.push(String(pl.id));
+      add(
+        under,
+        svgEl(doc, 'polyline', {
+          class: kindClass(
+            pl.dashed === true ? 'wtx-curve wtx-dashed' : 'wtx-curve',
+            hl[String(pl.id)],
+          ),
+          points: pts.join(' '),
         }),
       );
     }
@@ -351,6 +421,27 @@ export const geometryVisualizer: VisualizerRenderer = {
           y2: f(Y(q.y)),
         }),
       );
+      if (s.arrow === true) {
+        // the head: a small triangle at the `to` end, along the segment (screen coordinates)
+        const x1 = X(p.x);
+        const y1 = Y(p.y);
+        const x2 = X(q.x);
+        const y2 = Y(q.y);
+        const len = Math.hypot(x2 - x1, y2 - y1);
+        if (len > 1) {
+          const ux = (x2 - x1) / len;
+          const uy = (y2 - y1) / len;
+          const h = Math.min(11, len * 0.6);
+          const w = h * 0.45;
+          add(
+            under,
+            svgEl(doc, 'polygon', {
+              class: kindClass('wtx-arrowhead', hl[String(s.id)]),
+              points: `${f(x2)},${f(y2)} ${f(x2 - ux * h - uy * w)},${f(y2 - uy * h + ux * w)} ${f(x2 - ux * h + uy * w)},${f(y2 - uy * h - ux * w)}`,
+            }),
+          );
+        }
+      }
     }
     for (const a of angles) {
       const at = byId.get(String(a.at));
@@ -375,16 +466,23 @@ export const geometryVisualizer: VisualizerRenderer = {
       }
     }
     for (const p of points) {
-      add(
-        over,
-        svgEl(doc, 'circle', {
-          class: kindClass('wtx-pt', hl[p.id]),
-          cx: f(X(p.x)),
-          cy: f(Y(p.y)),
-          r: '4.5',
-        }),
-      );
-      const t = svgEl(doc, 'text', { x: f(X(p.x) + 8), y: f(Y(p.y) - 8) });
+      if (!p.hidden) {
+        add(
+          over,
+          svgEl(doc, 'circle', {
+            class: kindClass('wtx-pt', hl[p.id]),
+            cx: f(X(p.x)),
+            cy: f(Y(p.y)),
+            r: f(p.r),
+          }),
+        );
+      }
+      if (p.label === '') continue;
+      const t = svgEl(doc, 'text', {
+        class: p.center ? 'wtx-center' : '',
+        x: f(X(p.x) + (p.center ? 0 : 8)),
+        y: f(Y(p.y) - (p.center ? 0 : 8)),
+      });
       t.textContent = p.label;
       add(over, t);
     }
