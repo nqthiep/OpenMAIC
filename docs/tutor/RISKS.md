@@ -96,6 +96,7 @@ Mức: **C**ao / **V**ừa / **T**hấp. *Trigger* = tín hiệu để hành đ�
 | 2026-09-30 | Chặn widget `code` **toàn ứng dụng** |
 | 2026-09-30 | Nhập input tuỳ chỉnh (lát 1d) **sau khi** phần chọn preset chạy ổn |
 | 2026-10-08 | Toán dùng **walkthrough tương tác (web UI), không video/Manim**; mã Manim xoá 2026-10-09 (ADR 0015) |
+| 2026-10-09 | **Dữ kiện thi cử và curriculum**: giữ dữ kiện đã kiểm trong snapshot có ngày kiểm và nguồn. Tìm kiếm web tự động chỉ dùng để gợi ý cập nhật; người duyệt xác nhận rồi mới ghi vào curriculum (không tự cập nhật từ kết quả tìm kiếm) |
 | 2026-09-30 | Tính năng **chỉ có khi bật workbench** (ADR 0011) |
 | 2026-09-30 | Đối tượng: **cả hai**, thi vào 10 chuyên Tin và HSG (ADR 0012) |
 | 2026-09-30 | Code chỉ-đọc: **C++ và Python** (ADR 0008, 0012) |

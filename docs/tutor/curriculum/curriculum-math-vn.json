@@ -1175,6 +1175,7 @@
   "provenance": {
     "note_vi": "Khung 28 chủ đề lấy từ SCHEMA Phase 3 §7 [Inference]. Nội dung toán trong subtopics, pitfalls, typical_problems do người soạn viết từ kiến thức toán phổ thông, không chép từ tài liệu nào. Từ 2026-10-09 (card 3-R1): `sources` và `vn_sources` ghi các nguồn đã đọc thật (kèm cách kiểm ở `how_checked`); `exam_profile` chỉ nêu điều đọc được trong các nguồn đó.",
     "checked_on": "2026-10-09",
+    "update_policy": "Dữ kiện trong file là snapshot có ngày kiểm và nguồn. Tìm kiếm tự động chỉ gợi ý cập nhật; người duyệt xác nhận trước khi sửa file (quyết định chủ dự án, 2026-10-09).",
     "review_status": "Đã đối chiếu vị trí chủ đề với văn bản chương trình môn Toán 2018 và đọc quy chế thi từ các trang pháp luật của bên thứ ba; chưa đọc bản gốc trên cổng của Bộ; chưa có hội đồng LLM Toán duyệt; chưa rà soát bản quyền.",
     "review_needed_vi": [
       "Đối chiếu bản gốc của Thông tư 17/2023, 23/2025 và 30/2024 trên cổng văn bản của Bộ (hiện chỉ có trang của bên thứ ba).",
