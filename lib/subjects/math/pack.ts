@@ -15,7 +15,10 @@ import { concurrencyDynamicEntry } from '@/lib/subjects/math/catalog/concurrency
 import { latticePathsEntry } from '@/lib/subjects/math/catalog/lattice-paths';
 import { limitEpsilonEntry } from '@/lib/subjects/math/catalog/limit-epsilon';
 import { modularClockEntry } from '@/lib/subjects/math/catalog/modular-clock';
+import { subtractionGameEntry } from '@/lib/subjects/math/catalog/subtraction-game';
 import { tilingColoringEntry } from '@/lib/subjects/math/catalog/tiling-coloring';
+import { inversionCircleEntry } from '@/lib/subjects/math/catalog/inversion-circle';
+import { mvtLagrangeEntry } from '@/lib/subjects/math/catalog/mvt-lagrange';
 import { planeTransformEntry } from '@/lib/subjects/math/catalog/plane-transform';
 import { powerOfPointEntry } from '@/lib/subjects/math/catalog/power-of-point';
 import { riemannIntegralEntry } from '@/lib/subjects/math/catalog/riemann-integral';
@@ -48,6 +51,9 @@ export const mathPack: SubjectPack = {
     limitEpsilonEntry,
     modularClockEntry,
     tilingColoringEntry,
+    mvtLagrangeEntry,
+    inversionCircleEntry,
+    subtractionGameEntry,
     algIdentityAreaEntry,
     pythagorasDissectionEntry,
     euclidRectangleEntry,

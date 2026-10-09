@@ -926,12 +926,12 @@
             "Áp dụng định lý khi hàm không khả vi trên toàn khoảng",
             "Quên điều kiện liên tục trên đoạn đóng"
           ],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `mvt-lagrange`"],
           "vn_sources": [
             "gdpt2018-toan: Lớp 11 — Giới hạn. Hàm số liên tục; định lí Rolle, Lagrange không có trong chương trình"
           ],
           "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["mvt-lagrange"]
         },
         {
           "id": "m4-projective-inversion",
@@ -960,10 +960,10 @@
             }
           ],
           "pitfalls": ["Quên điểm ở vô cực", "Nhầm ảnh của đường tròn đi qua tâm nghịch đảo"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `inversion-circle`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phép nghịch đảo) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["inversion-circle"]
         },
         {
           "id": "m4-number-theory-olympiad",
@@ -1058,10 +1058,10 @@
             }
           ],
           "pitfalls": ["Nhầm người đi trước với người thắng", "Quên xét mọi nước đi của đối thủ"],
-          "interactive_ideas": [],
+          "interactive_ideas": ["Walkthrough `subtraction-game`"],
           "vn_sources": [],
           "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (trò chơi chiến thắng, bất biến) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
-          "walkthrough_ids": []
+          "walkthrough_ids": ["subtraction-game"]
         }
       ]
     }

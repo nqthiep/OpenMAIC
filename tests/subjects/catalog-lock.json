@@ -805,6 +805,28 @@
       }
     }
   },
+  "inversion-circle": {
+    "entryRev": 1,
+    "contentHash": "2c5e2f0e83e6bf99",
+    "framesHash": {
+      "r2-d1": {
+        "vi-VN": "ecb389ac3ed801f4",
+        "en-US": "47a38dc15c569df0"
+      },
+      "r3-d2": {
+        "vi-VN": "9cd0b17ca68509a9",
+        "en-US": "9805c581a2ce205b"
+      },
+      "r3-d1": {
+        "vi-VN": "f39c70722fd00943",
+        "en-US": "83356bf47ae7403b"
+      },
+      "r2-d3": {
+        "vi-VN": "3a351c210ed38d09",
+        "en-US": "49a5424b885a5525"
+      }
+    }
+  },
   "kmp": {
     "entryRev": 1,
     "contentHash": "b3b0dea4e7d4afdb",
@@ -1052,6 +1074,28 @@
       "n5-a4": {
         "vi-VN": "097854cd33d5f493",
         "en-US": "14febb906e0bdea6"
+      }
+    }
+  },
+  "mvt-lagrange": {
+    "entryRev": 1,
+    "contentHash": "aeee97ef72e5e0b2",
+    "framesHash": {
+      "square": {
+        "vi-VN": "af5e7c1599c4566d",
+        "en-US": "354b9db7a407f9db"
+      },
+      "cubic-two": {
+        "vi-VN": "633c3325cac46d90",
+        "en-US": "d1824caa122b5a42"
+      },
+      "cubic-one": {
+        "vi-VN": "b4d31d9328b58170",
+        "en-US": "8caff210158f916b"
+      },
+      "quad-skew": {
+        "vi-VN": "14b3a6b0f0d7b130",
+        "en-US": "19f58e8491341ee9"
       }
     }
   },
@@ -1376,6 +1420,28 @@
       "n4": {
         "vi-VN": "011fe148be9733b0",
         "en-US": "e75678bcadb221c1"
+      }
+    }
+  },
+  "subtraction-game": {
+    "entryRev": 1,
+    "contentHash": "f5d0e459901f4d19",
+    "framesHash": {
+      "n10-k3": {
+        "vi-VN": "4b74225f76529ff5",
+        "en-US": "2640c39035d9d8f9"
+      },
+      "n12-k3": {
+        "vi-VN": "1761e9596694c172",
+        "en-US": "3537194c53e79ea8"
+      },
+      "n7-k2": {
+        "vi-VN": "22dd1fc6e0aa2768",
+        "en-US": "9231d5c6a4592908"
+      },
+      "n20-k4": {
+        "vi-VN": "630b2b3c74f56fa1",
+        "en-US": "62c3d7e8c5e592b8"
       }
     }
   },

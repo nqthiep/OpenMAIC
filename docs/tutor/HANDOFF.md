@@ -5,7 +5,7 @@
 - **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 144 commit chưa push so với `origin/it-math`. Chưa push gì sau lần push đầu tiên của tài liệu.
 - **Người nhận**: agent hoặc người tiếp quản. Đọc hết file này trước khi làm gì.
 
-> **Cập nhật 2026-10-08:** Toán chuyển sang web UI (ADR 0015): 24 walkthrough tương tác thay cho 21 clip Manim; xem mục 3b.
+> **Cập nhật 2026-10-08:** Toán chuyển sang web UI (ADR 0015): 27 walkthrough tương tác thay cho 21 clip Manim; xem mục 3b.
 
 > **Tóm tắt:** Phase 1 xong, đã review và sửa. Phase 2 đã triển khai **mã** cho 4 visualizer (`array` nhiều chế độ, `tree`, `graph`, `grid`), eval `tutor-lesson`, và 37 entry catalog (đợt 2A 9, 2B 12, 2C 8, 2D 4, 2E 4; `graham-scan` chờ visualizer `geometry` của Phase 3). Chưa làm: review LLM từng entry và cổng G2 (cần khoá API), review ba góc của Phase 2, lát 1d (chặn bởi cổng 1d-00), Phase 3.
 
@@ -109,7 +109,7 @@ Chưa làm và vì sao:
 | Quyết định | `decisions/0015-…md` + dòng trong `decisions/README.md`; SCHEMA Phase 3 có biển báo "đã thay thế một phần"; RISKS/OPERATIONS cập nhật |
 | Visualizer `geometry` | mở rộng: đa giác (đỉnh theo id điểm hoặc toạ độ nội tuyến `xy`), polyline lấy mẫu cho đường cong, mũi tên, điểm ẩn và nhãn căn giữa, mô tả aria; giới hạn `MAX_*` (160 điểm, 120 đoạn, 140 đa giác, 12 polyline ≤ 200 điểm); runtime sinh lại (`pnpm gen:tutor-runtime`); `tests/tutor/runtime/geometry-layout.test.ts`, `geometry.browser.test.ts` |
 | Bộ dựng hình | `lib/subjects/math/figure.ts`: `Figure` (điểm, đoạn, đường, tròn, góc, đa giác, polyline, hình chữ nhật), `boundsOf`, `curvePieces`, `upperSemicircle`, `circlePoint` (vòng tròn theo độ, hằng số xoay 1°, không lượng giác), `gcd`/`frac` (phân số chính xác, không số thập phân), `framePut` |
-| Walkthrough Toán | **24 entry** ở `lib/subjects/math/catalog/*.ts` (pack `math`): 3 có trước (`cauchy-schwarz`, `triangle-altitude`, `curve-sketching`) + 21 chuyển từ clip. Mỗi entry một `tests/subjects/math/<id>.test.ts`: hợp đồng chung `tests/subjects/cp/contract.ts` (beat đầu `start`, cuối `done`, 5–10 beat, 3 gợi ý + hiểu lầm mỗi beat, dự đoán `choice` có `answer()`, số nguyên trong lời giảng phải đến từ input/state/vars, ≤ 160 ký tự) cộng oracle độc lập từng entry (đếm đường đi bằng duyệt hết, tập hợp phần tử thật cho bao hàm–loại trừ, giải hệ tuyến tính cho các tâm tam giác, góc bằng `acos`/`atan2`, luỹ thừa bằng số nguyên lớn…) |
+| Walkthrough Toán | **27 entry** ở `lib/subjects/math/catalog/*.ts` (pack `math`): 3 có trước (`cauchy-schwarz`, `triangle-altitude`, `curve-sketching`) + 21 chuyển từ clip + 3 viết mới cho ba chủ đề `walkthrough` còn thiếu (`mvt-lagrange` cho `m4-limits-mvt`, `inversion-circle` cho `m4-projective-inversion`, `subtraction-game` cho `m4-games-invariants`); mọi chủ đề `walkthrough` của curriculum đều có entry. Mỗi entry một `tests/subjects/math/<id>.test.ts`: hợp đồng chung `tests/subjects/cp/contract.ts` (beat đầu `start`, cuối `done`, 5–10 beat, 3 gợi ý + hiểu lầm mỗi beat, dự đoán `choice` có `answer()`, số nguyên trong lời giảng phải đến từ input/state/vars, ≤ 160 ký tự) cộng oracle độc lập từng entry (đếm đường đi bằng duyệt hết, tập hợp phần tử thật cho bao hàm–loại trừ, giải hệ tuyến tính cho các tâm tam giác, góc bằng `acos`/`atan2`, luỹ thừa bằng số nguyên lớn…) |
 | Quy ước chung | `customInput: false` (lát 1d chưa mở): tương tác = preset + bước/phát/tua + dự đoán; "thanh trượt" = chuỗi khung tua được. Tham số thập phân đổi thành số nguyên (`tn` = t tính bằng phần mười, `e` = ε tính bằng 1/20) để mọi con số trên màn hình là phân số chính xác; đường tròn bằng hằng số xoay, không dùng `sin/cos`; PA², PB² là phân số chính xác thay cho độ dài vô tỉ |
 | Skill | `skills/agent-runtime/olympiad-math/SKILL.md` viết lại: không còn tool/khối clip; bảng walkthrough sinh từ catalog (`pnpm exec tsx scripts/generate-skill-catalog.ts`) |
 | Curriculum Toán | `docs/tutor/curriculum/curriculum-math-vn.json` + `references/curriculum/*` (28 topic, id `m<tier>-<tên>`): `primary_medium` walkthrough 18 / slide 10 / manim 0, danh sách `walkthrough_ids`; mọi tên kỳ thi, lớp, trọng số, nguồn vẫn là **[Unverified]**, `vn_sources` rỗng (3-R1 cần nguồn thật) |
@@ -136,7 +136,7 @@ Chưa làm và vì sao (Phase 3):
 
 | Việc | Lý do |
 | --- | --- |
-| Hội đồng review Toán cho 24 walkthrough, rồi calibration (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; cần viết lại bộ lỗi gieo và runner calibration cho walkthrough Toán (bản cũ cho clip nằm ở thẻ `manim-clips-final`) |
+| Hội đồng review Toán cho 27 walkthrough, rồi calibration (≥ 90% bắt lỗi, ≤ 10% chặn nhầm) | cần hai model mạnh trên hai provider; cần viết lại bộ lỗi gieo và runner calibration cho walkthrough Toán (bản cũ cho clip nằm ở thẻ `manim-clips-final`) |
 | Nghiên cứu nguồn cho curriculum Toán (đề cương thi, lớp, trọng số, tài liệu) | cần nguồn thật; khung hiện là [Inference] |
 | Xem từng walkthrough mới bằng mắt trong ứng dụng thật và e2e riêng | đã chụp ảnh từ iframe headless cho từng entry khi viết; chưa chạy e2e trình duyệt cho entry mới |
 | Nhập số tự do (`customInput`) cho Toán | lát 1d chưa mở (cổng `1d-00`) |
@@ -146,7 +146,7 @@ Chưa làm và vì sao (Phase 3):
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: 24 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration, nghiên cứu nguồn curriculum (`3-R1`), xem bằng mắt/e2e entry mới; viết lại bộ lỗi gieo cho walkthrough Toán để calibration hội đồng.
+4. Phase 3: 27 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration, nghiên cứu nguồn curriculum (`3-R1`), xem bằng mắt/e2e entry mới; viết lại bộ lỗi gieo cho walkthrough Toán để calibration hội đồng.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)
