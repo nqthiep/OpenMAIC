@@ -151,6 +151,23 @@ async function check(
 }
 
 /**
+ * Lọc một đoạn chữ lẻ (đường không phải chat: chấm bài tự luận). Trả câu an toàn của thầy khi bị
+ * chặn hoặc lọc lỗi (fail-closed), `null` khi cho qua. `localeHint` như `languageDirective`.
+ */
+export async function screenText(
+  text: string,
+  direction: 'in' | 'out',
+  localeHint: string | undefined,
+  deps: ChatModerationDeps = {},
+): Promise<string | null> {
+  const locale = pickLocale(localeHint);
+  const verdict = await check(deps.moderate ?? moderate, text, direction, locale);
+  if (verdict.allow) return null;
+  logBlocked(direction, verdict);
+  return safeMessage(verdict.categories, locale);
+}
+
+/**
  * Lọc các chữ vào, tối đa `INPUT_CONCURRENCY` lời gọi cùng lúc, dừng phát lời gọi mới khi đã có
  * một tin bị chặn. Trả verdict chặn của tin đứng đầu (theo thứ tự), hoặc null nếu tất cả qua.
  * Chi phí: tới 10 lời gọi lọc/request (~ceil(10/3) lượt song song, mỗi lượt ≤ 5 s timeout);

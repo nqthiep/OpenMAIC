@@ -26,7 +26,7 @@ const ASKED_TRANSITIONS = 2;
 const EX = {
   start: m(
     'Chu trình ngắn nhất từ đỉnh 0, qua mọi đỉnh đúng một lần rồi về 0 ({n} đỉnh). dp[mask][v] = chi phí ít nhất, đã thăm các đỉnh của mask, đang ở v.',
-    'The shortest tour from node 0 through every node once and back to 0 ({n} nodes). dp[mask][v] = the least cost, visited the nodes of mask, standing at v.',
+    'The shortest tour from node 0 through every node once and back to 0 ({n|node|nodes}). dp[mask][v] = the least cost, visited the nodes of mask, standing at v.',
   ),
   base: m(
     'Khởi tạo: mọi trạng thái hợp lệ là ∞, chỉ dp[0001][0] = 0 (mới ở đỉnh 0, đã thăm {0}). Hàng là mặt nạ nhị phân (bit v = đã thăm v).',
@@ -50,7 +50,7 @@ const EX = {
   ),
   done: m(
     'Chu trình ngắn nhất qua {n} đỉnh có chi phí {best}. Có 2^n·n trạng thái, mỗi trạng thái n bước: O(2^n·n²), tốt hơn n!.',
-    'The shortest tour through {n} nodes costs {best}. There are 2^n·n states, each with n moves: O(2^n·n²), far better than n!.',
+    'The shortest tour through {n|node|nodes} costs {best}. There are 2^n·n states, each with n moves: O(2^n·n²), far better than n!.',
   ),
 };
 
@@ -61,7 +61,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Bài người bán hàng: thăm {n} đỉnh đúng một lần rồi về nơi xuất phát với chi phí ít nhất. Thử mọi thứ tự là (n − 1)!; DP trên mặt nạ nhớ tập đỉnh đã thăm nên chỉ O(2^n·n²).',
-      'The travelling salesman: visit {n} nodes exactly once and return to the start at least cost. Trying every order is (n − 1)!; a bitmask DP remembers the set of visited nodes, so only O(2^n·n²).',
+      'The travelling salesman: visit {n|node|nodes} exactly once and return to the start at least cost. Trying every order is (n − 1)!; a bitmask DP remembers the set of visited nodes, so only O(2^n·n²).',
     ),
     hints: [
       m(
@@ -315,7 +315,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const dpBitmaskEntry: WalkthroughEntry<In, S> = {
   id: 'dp-bitmask',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t4-dp-bitmask'],

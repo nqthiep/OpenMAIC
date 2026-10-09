@@ -40,7 +40,7 @@ const EX = {
   ),
   done: m(
     'Xong: f({n}) = {val}. Cây có {calls} node, mỗi node là một lần gọi hàm.',
-    'Done: f({n}) = {val}. The tree has {calls} nodes, one per function call.',
+    'Done: f({n}) = {val}. The tree has {calls|node|nodes}, one per function call.',
   ),
 };
 
@@ -204,7 +204,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'f({n}) = {val}, với {calls} node trên cây. Không nhớ thì số node tăng gần gấp 1,6 lần mỗi khi n tăng 1; có nhớ thì chỉ khoảng 2n.',
-      'f({n}) = {val}, with {calls} nodes in the tree. Without memo the tree grows by about 1.6 times per step of n; with memo it has about 2n nodes.',
+      'f({n}) = {val}, with {calls|node|nodes} in the tree. Without memo the tree grows by about 1.6 times per step of n; with memo it has about 2n nodes.',
     ),
     hints: [
       m('Cây lớn hay nhỏ so với n?', 'Is the tree big or small compared with n?'),
@@ -310,7 +310,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const fibRecursionTreeEntry: WalkthroughEntry<In, S> = {
   id: 'fib-recursion-tree',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t1-recursion'],

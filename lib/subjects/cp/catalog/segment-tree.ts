@@ -17,7 +17,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Cây đoạn cho {n} số: mỗi nút ứng với một đoạn [l, r] và lưu tổng của nó. Gốc là [0, {last}]; con của nút k là 2k và 2k + 1.',
-    'A segment tree for {n} numbers: each node covers a range [l, r] and stores its sum. The root is [0, {last}]; node k has children 2k and 2k + 1.',
+    'A segment tree for {n|number|numbers}: each node covers a range [l, r] and stores its sum. The root is [0, {last}]; node k has children 2k and 2k + 1.',
   ),
   buildLeaves: m(
     'Dựng từ dưới lên, trước hết các lá: lá [i, i] lưu chính a[i].',
@@ -49,7 +49,7 @@ const EX = {
   ),
   done: m(
     'Tổng a[{ql}..{qr}] = {acc}, gộp từ {parts} nút; mỗi truy vấn chỉ thăm O(log n) nút.',
-    'The sum of a[{ql}..{qr}] = {acc}, combined from {parts} nodes; each query visits only O(log n) nodes.',
+    'The sum of a[{ql}..{qr}] = {acc}, combined from {parts|node|nodes}; each query visits only O(log n) nodes.',
   ),
 };
 
@@ -60,7 +60,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Cây đoạn lưu tổng của các đoạn "đẹp": nửa mảng, một phần tư, … đến từng phần tử. Nhờ đó một truy vấn tổng đoạn chỉ cần O(log n) nút. Mảng có {n} số.',
-      'A segment tree stores the sums of "nice" ranges: half the array, a quarter, …, down to single elements. So a range-sum query needs only O(log n) nodes. The array has {n} numbers.',
+      'A segment tree stores the sums of "nice" ranges: half the array, a quarter, …, down to single elements. So a range-sum query needs only O(log n) nodes. The array has {n|number|numbers}.',
     ),
     hints: [
       m(
@@ -243,7 +243,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Tổng a[{ql}..{qr}] = {acc}, ghép từ {parts} nút. Một truy vấn thăm tối đa khoảng 4·log₂ n nút, nên O(log n); dựng cây O(n).',
-      'The sum of a[{ql}..{qr}] = {acc}, assembled from {parts} nodes. A query visits at most about 4·log₂ n nodes, so O(log n); the build is O(n).',
+      'The sum of a[{ql}..{qr}] = {acc}, assembled from {parts|node|nodes}. A query visits at most about 4·log₂ n nodes, so O(log n); the build is O(n).',
     ),
     hints: [
       m(
@@ -385,7 +385,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const segmentTreeEntry: WalkthroughEntry<In, S> = {
   id: 'segment-tree',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t3-segment-tree'],

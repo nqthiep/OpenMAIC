@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { binarySearchEntry as entry } from '@/lib/subjects/cp/catalog/binary-search';
-import { fill, hasRequiredLocales, msg, unresolved } from '@/lib/tutor/catalog/messages';
+import {
+  fill,
+  hasRequiredLocales,
+  msg,
+  unresolved,
+  placeholderName,
+} from '@/lib/tutor/catalog/messages';
 import type { Messages } from '@/lib/tutor/catalog/types';
 import { validateInput } from '@/lib/tutor/catalog/validate';
 import { steps } from '@/lib/tutor/engine/generate';
@@ -39,7 +45,7 @@ const WIDE: In[] = [
 describe('binarySearchEntry static fields', () => {
   it('matches SCHEMA §4.1', () => {
     expect(entry.id).toBe('binary-search');
-    expect(entry.entryRev).toBe(2);
+    expect(entry.entryRev).toBe(3);
     expect(entry.subject).toBe('cp');
     expect(entry.visualizer).toBe('array');
     expect(entry.curriculumTopics).toEqual(['t2-binary-search']);
@@ -402,7 +408,7 @@ describe('texts', () => {
     for (const b of entry.beatDefs)
       for (const l of LOCALES)
         for (const tok of unresolved(msg(b.narration, l)))
-          expect(VAR_NAMES, `${b.id}/${l}`).toContain(tok.slice(1, -1));
+          expect(VAR_NAMES, `${b.id}/${l}`).toContain(placeholderName(tok));
   });
 
   it('fill(narration, vars) leaves no {…} at any beat of any preset, both locales', () => {

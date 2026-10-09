@@ -20,7 +20,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Có {n} phần tử nên có {total} mặt nạ bit từ 0 đến {last}: mỗi mặt nạ là một tập con. Đếm các tập có tổng bằng {target}.',
-    'There are {n} items, so {total} bit masks from 0 to {last}: each mask is one subset. Count the subsets whose sum is {target}.',
+    'There are {n|item|items}, so {total} bit masks from 0 to {last}: each mask is one subset. Count the subsets whose sum is {target}.',
   ),
   test: m(
     'Mặt nạ mask = {mask}. Bit i = {i} của nó, (mask >> {i}) & 1, đang bật hay tắt?',
@@ -40,7 +40,7 @@ const EX = {
   ),
   done: m(
     'Có {count} tập con có tổng {target} trong {total} tập con.',
-    'There are {count} subsets with sum {target} out of {total}.',
+    'There are {count|subset|subsets} with sum {target} out of {total}.',
   ),
 };
 
@@ -51,7 +51,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Mỗi tập con của {n} phần tử tương ứng với một số nguyên từ 0 đến {last}: bit i bật nghĩa là phần tử a[i] được chọn. Ta duyệt cả {total} mặt nạ.',
-      'Each subset of {n} items matches an integer from 0 to {last}: bit i set means a[i] is picked. We go through all {total} masks.',
+      'Each subset of {n|item|items} matches an integer from 0 to {last}: bit i set means a[i] is picked. We go through all {total|mask|masks}.',
     ),
     hints: [
       m(
@@ -107,7 +107,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kiểm tra một bit', 'Test one bit'),
     narration: m(
       'Để biết a[{i}] có được chọn không, ta dịch mask = {mask} sang phải {i} bit rồi lấy bit thấp nhất: (mask >> {i}) & 1.',
-      'To know whether a[{i}] is picked, shift mask = {mask} right by {i} bits and take the lowest bit: (mask >> {i}) & 1.',
+      'To know whether a[{i}] is picked, shift mask = {mask} right by {i|bit|bits} and take the lowest bit: (mask >> {i}) & 1.',
     ),
     ask: {
       text: m('Theo em, bit i của mask này bật hay tắt?', 'Is bit i of this mask on or off?'),
@@ -148,7 +148,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Khớp target', 'A match'),
     narration: m(
       'Tổng {sum} đúng bằng target = {target}: tập con này được đếm. Đã có {count} tập thoả.',
-      'The sum {sum} equals target = {target}: this subset is counted. {count} subsets match so far.',
+      'The sum {sum} equals target = {target}: this subset is counted. {count|subset|subsets} match so far.',
     ),
     hints: [
       m('Khi nào ta tăng biến đếm?', 'When do we raise the counter?'),
@@ -174,7 +174,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Có {count} tập con có tổng {target} trong {total}. Duyệt mặt nạ tốn cỡ 2^n·n, dùng được khi n nhỏ (khoảng 20).',
-      'There are {count} subsets with sum {target} out of {total}. Walking the masks costs about 2^n·n, usable for small n (about 20).',
+      'There are {count|subset|subsets} with sum {target} out of {total}. Walking the masks costs about 2^n·n, usable for small n (about 20).',
     ),
     hints: [
       m(
@@ -267,7 +267,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const bitSubsetsEntry: WalkthroughEntry<In, S> = {
   id: 'bit-subsets',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-bitwise'],

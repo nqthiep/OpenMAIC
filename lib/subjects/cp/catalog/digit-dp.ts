@@ -25,7 +25,7 @@ const EX = {
   ),
   row: m(
     'Hàng {r}: g[{r}][t] = Σ g[{r1}][t − c] với c = 0..9: chữ số đầu tiên chọn c, {r1} chữ số còn lại tổng t − c.',
-    'Row {r}: g[{r}][t] = Σ g[{r1}][t − c] for c = 0..9: the first digit picks c and the remaining {r1} digits sum to t − c.',
+    'Row {r}: g[{r}][t] = Σ g[{r1}][t − c] for c = 0..9: the first digit picks c and the remaining {r1|digit|digits} sum to t − c.',
   ),
   digit: m(
     'Vị trí {i} của {n} (chữ số {di}), đã dùng tổng {pre}. Nếu còn bám sát N (tight), chữ số ở đây được chọn tối đa bằng bao nhiêu?',
@@ -37,7 +37,7 @@ const EX = {
   ),
   brkNone: m(
     'Chọn c = {c} < {di}: tổng cần cho {rem} chữ số sau là {need} < 0: không có cách nào. Tổng đếm = {ans}.',
-    'Pick c = {c} < {di}: the sum needed for the later {rem} digits is {need} < 0: no way. Count = {ans}.',
+    'Pick c = {c} < {di}: the sum needed for the later {rem|digit|digits} is {need} < 0: no way. Count = {ans}.',
   ),
   next: m(
     'Giữ chữ số {di} bằng N (vẫn tight): tổng đã dùng thành {pre}.',
@@ -49,7 +49,7 @@ const EX = {
   ),
   done: m(
     'Có {ans} số trong [0, {n}] với tổng chữ số {s}. Chỉ cần bảng cỡ (số chữ số) × S thay vì duyệt N số.',
-    'There are {ans} numbers in [0, {n}] with digit sum {s}. A table of (number of digits) × S replaces visiting N numbers.',
+    'There are {ans|number|numbers} in [0, {n}] with digit sum {s}. A table of (number of digits) × S replaces visiting N numbers.',
   ),
 };
 
@@ -293,7 +293,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const digitDpEntry: WalkthroughEntry<In, S> = {
   id: 'digit-dp',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t4-dp-digit'],

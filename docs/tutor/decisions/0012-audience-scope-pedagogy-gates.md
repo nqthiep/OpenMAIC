@@ -77,7 +77,7 @@
 6. **Cổng sư phạm** (sửa 2026-10-01 theo ADR 0014: không mời người; mọi vai trò do LLM đảm nhận):
    - **G1** (sau 1c, trên bài `binary-search` và bài giải đề nhỏ `bs-answer-mini`):
      - Hội đồng LLM "giáo viên chuyên Tin" (`tutor-review-cp` + `tutor-review-cp-2`) chấm theo rubric ADR 0008: mỗi tiêu chí ≥ 4/5, không lỗi "Đúng".
-     - **Học sinh mô phỏng** (`sim-learner`, 6 persona): bài kiểm tra 5 câu trước và sau khi "học" bản ghi bài giảng. Ngưỡng **áp dụng**: điểm sau – điểm trước ≥ 20 điểm %, và ≥ 70% persona chấm "dễ hiểu" ≥ 4/5. [Inference] Đây là tín hiệu thay thế, không đo việc học thật.
+     - **Học sinh mô phỏng** (`sim-learner`, 6 persona): bài kiểm tra 5 câu trước và sau khi "học" bản ghi bài giảng. Ngưỡng **áp dụng** (cách đo đã đổi khi cài đặt: so với nhóm đối chứng làm cùng bài sau mà không học, xem `eval/sim-learner/score.ts`): điểm hơn đối chứng ≥ 20 điểm %, và ≥ 70% persona chấm "dễ hiểu" ≥ 4/5. [Inference] Đây là tín hiệu thay thế, không đo việc học thật.
      - Bộ hiệu chuẩn của hội đồng và của học sinh mô phỏng đạt ngưỡng (ADR 0014 quyết định 7).
    - **G2** (cuối 2A): như G1, trên bài giải đề `bs-answer`.
    - **Sau phát hành:** số đo từ học sinh thật (dữ liệu lưu trữ, ADR 0014 quyết định 6) thay dần học sinh mô phỏng.

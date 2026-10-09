@@ -180,7 +180,7 @@ const EX = {
   ),
   band: m(
     'Dải từ L − ε đến L + ε với ε = {eps}: {out} số hạng đầu nằm ngoài dải (cam), sau đó có vẻ chúng đều vào trong (xanh).',
-    'The band from L − ε to L + ε with ε = {eps}: the first {out} terms lie outside it (orange), after that they all seem to be inside (green).',
+    'The band from L − ε to L + ε with ε = {eps}: the first {out|term|terms} lie outside it (orange), after that they all seem to be inside (green).',
   ),
   findN: m(
     'Vì |aₙ − L| = 1/n, số hạng thứ n nằm trong dải khi 1/n < {eps}, tức n > {bound}. Vậy N = {N}: từ số hạng thứ {N} không còn số hạng nào ngoài dải.',

@@ -46,7 +46,7 @@ const EX = {
   ),
   done: m(
     'Queue rỗng: đã thăm {count} trong {n} đỉnh từ {s}; lớp xa nhất có d = {far}.',
-    'The queue is empty: visited {count} of {n} nodes from {s}; the farthest layer has d = {far}.',
+    'The queue is empty: visited {count} of {n|node|nodes} from {s}; the farthest layer has d = {far}.',
   ),
 };
 
@@ -348,7 +348,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const bfsEntry: WalkthroughEntry<In, S> = {
   id: 'bfs',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t3-graph-traversal'],

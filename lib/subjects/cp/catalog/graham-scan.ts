@@ -53,7 +53,7 @@ const EX = {
   ),
   done: m(
     'Hết điểm. Ngăn xếp là bao lồi với {h} đỉnh, đi ngược chiều kim đồng hồ bắt đầu từ P{k}.',
-    'No points left. The stack is the hull with {h} vertices, counter-clockwise from P{k}.',
+    'No points left. The stack is the hull with {h|vertex|vertices}, counter-clockwise from P{k}.',
   ),
 };
 
@@ -64,7 +64,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Hãy tưởng tượng căng một sợi dây quanh {n} chiếc đinh. Sợi dây là bao lồi. Graham scan tìm nó bằng cách sắp điểm theo góc rồi bỏ những điểm làm dây lõm vào.',
-      'Imagine stretching a rope around {n} nails. The rope is the convex hull. Graham scan finds it by sorting the points by angle and dropping those that make the rope dent inward.',
+      'Imagine stretching a rope around {n|nail|nails}. The rope is the convex hull. Graham scan finds it by sorting the points by angle and dropping those that make the rope dent inward.',
     ),
     hints: [
       m(
@@ -210,7 +210,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Ngăn xếp giờ là bao lồi với {h} đỉnh, đi ngược chiều kim đồng hồ từ P{k}. Mỗi điểm vào ngăn xếp một lần và ra nhiều nhất một lần; sắp xếp chiếm O(n log n).',
-      'The stack is now the hull with {h} vertices, counter-clockwise from P{k}. Each point is pushed once and popped at most once; sorting costs O(n log n).',
+      'The stack is now the hull with {h|vertex|vertices}, counter-clockwise from P{k}. Each point is pushed once and popped at most once; sorting costs O(n log n).',
     ),
     hints: [
       m(
@@ -374,7 +374,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const grahamScanEntry: WalkthroughEntry<In, S> = {
   id: 'graham-scan',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'geometry',
   curriculumTopics: ['t4-geometry'],

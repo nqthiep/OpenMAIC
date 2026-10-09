@@ -19,7 +19,7 @@ const ASKED_HEAVY = 2;
 const EX = {
   start: m(
     'Cây {n} đỉnh, gốc A. Ta muốn xử lý đường đi giữa hai đỉnh nhanh bằng cách chia cây thành ít chuỗi dọc. Cần biết kích thước cây con trước.',
-    'A tree of {n} nodes rooted at A. To handle a path between two nodes fast we split the tree into a few vertical chains. First we need subtree sizes.',
+    'A tree of {n|node|nodes} rooted at A. To handle a path between two nodes fast we split the tree into a few vertical chains. First we need subtree sizes.',
   ),
   sizes: m(
     'size[x] = 1 + tổng size của các con: số đỉnh trong cây con của x (ghi dưới mỗi đỉnh). Gốc có size {n}.',
@@ -35,7 +35,7 @@ const EX = {
   ),
   chains: m(
     'Nối các cạnh nặng thành {k} chuỗi, mỗi chuỗi một màu; mỗi đỉnh thuộc đúng một chuỗi. Đầu chuỗi (head) là đỉnh trên cùng.',
-    'Joining heavy edges gives {k} chains, one colour each; every node is in exactly one chain. The head of a chain is its top node.',
+    'Joining heavy edges gives {k|chain|chains}, one colour each; every node is in exactly one chain. The head of a chain is its top node.',
   ),
   query: m(
     'Đường {a}–{b} gồm các đoạn thuộc chuỗi. Đoạn {i}: từ {x} lên đầu chuỗi {h}, rồi nhảy sang cha {p}.',
@@ -58,7 +58,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Phân tách nặng–nhẹ chia cây {n} đỉnh thành các chuỗi sao cho mọi đường đi chỉ cắt qua rất ít chuỗi. Nhờ đó truy vấn trên đường đi thành vài truy vấn trên đoạn.',
-      'Heavy-light decomposition splits a tree of {n} nodes into chains so that any path crosses very few chains. A path query becomes a few range queries.',
+      'Heavy-light decomposition splits a tree of {n|node|nodes} into chains so that any path crosses very few chains. A path query becomes a few range queries.',
     ),
     hints: [
       m(
@@ -154,7 +154,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Các chuỗi', 'The chains'),
     narration: m(
       'Nối các cạnh nặng ta được {k} chuỗi. Mỗi đỉnh thuộc đúng một chuỗi; đỉnh trên cùng của chuỗi là head. Các cạnh còn lại là cạnh nhẹ.',
-      'Joining heavy edges gives {k} chains. Every node is in exactly one chain; the top node is its head. The remaining edges are light.',
+      'Joining heavy edges gives {k|chain|chains}. Every node is in exactly one chain; the top node is its head. The remaining edges are light.',
     ),
     hints: [
       m(
@@ -350,7 +350,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const hldEntry: WalkthroughEntry<In, S> = {
   id: 'hld',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t4-tree-advanced'],

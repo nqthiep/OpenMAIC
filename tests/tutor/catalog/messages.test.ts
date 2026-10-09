@@ -29,6 +29,14 @@ describe('fill', () => {
   it('only treats {identifier} as a placeholder', () => {
     expect(fill('{1a} { a } {a-b} {}', { a: 1, '1a': 2 })).toBe('{1a} { a } {a-b} {}');
   });
+  it('writes the count with the matching English noun: {n|node|nodes}', () => {
+    expect(fill('{n|node|nodes}', { n: 1 })).toBe('1 node');
+    expect(fill('{n|node|nodes}', { n: 0 })).toBe('0 nodes');
+    expect(fill('{n|node|nodes}', { n: 3 })).toBe('3 nodes');
+    expect(fill('{n|node|nodes}')).toBe('{n|node|nodes}');
+    expect(fill('{n|node|nodes}', { m: 1 })).toBe('{n|node|nodes}');
+    expect(unresolved(fill('{n|match|matches} {m}', { n: 1, m: 2 }))).toEqual([]);
+  });
   it('is safe with "$" in values and prototype names', () => {
     expect(fill('{a}', { a: '$&$1' })).toBe('$&$1');
     expect(fill('{constructor} {toString}', { x: 1 })).toBe('{constructor} {toString}');

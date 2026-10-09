@@ -20,7 +20,7 @@ const EX = {
   ),
   insert: m(
     'Chèn mẫu {k} "{p}" vào trie: mỗi ký tự là một cạnh, nút cuối được đánh dấu là kết thúc mẫu (tô sáng). Trie có {nodes} nút.',
-    'Insert pattern {k} "{p}" into the trie: each character is an edge and the last node is marked as a pattern end (highlighted). The trie has {nodes} nodes.',
+    'Insert pattern {k} "{p}" into the trie: each character is an edge and the last node is marked as a pattern end (highlighted). The trie has {nodes|node|nodes}.',
   ),
   ask: m(
     'Nút "{x}": liên kết thất bại trỏ về đâu? Đó là nút ứng với hậu tố dài nhất của "{x}" cũng là một tiền tố trong trie.',
@@ -36,11 +36,11 @@ const EX = {
   ),
   out: m(
     'Khớp mẫu {k} "{p}" kết thúc ở vị trí {i}. Đã có {count} lần khớp.',
-    'Pattern {k} "{p}" matches, ending at position {i}. So far {count} matches.',
+    'Pattern {k} "{p}" matches, ending at position {i}. So far {count|match|matches}.',
   ),
   done: m(
     'Quét xong {n} ký tự: {count} lần khớp. Một lượt quét tìm mọi mẫu cùng lúc: O(độ dài text + tổng độ dài mẫu + số khớp).',
-    'Scanned {n} characters: {count} matches. One pass finds all patterns at once: O(text length + total pattern length + matches).',
+    'Scanned {n|character|characters}: {count|match|matches}. One pass finds all patterns at once: O(text length + total pattern length + matches).',
   ),
 };
 
@@ -203,7 +203,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Một lượt quét {n} ký tự cho {count} lần khớp của mọi mẫu. Chi phí tuyến tính theo độ dài text cộng tổng độ dài mẫu cộng số khớp.',
-      'One pass over {n} characters found {count} matches of all patterns. The cost is linear in the text length plus the total pattern length plus the matches.',
+      'One pass over {n|character|characters} found {count|match|matches} of all patterns. The cost is linear in the text length plus the total pattern length plus the matches.',
     ),
     hints: [
       m('Chi phí phụ thuộc vào số mẫu không?', 'Does the cost depend on the number of patterns?'),
@@ -365,7 +365,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const ahoCorasickEntry: WalkthroughEntry<In, S> = {
   id: 'aho-corasick',
-  entryRev: 1,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t4-string-advanced'],

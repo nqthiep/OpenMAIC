@@ -6,7 +6,7 @@ import type { Scene, SlideContent } from '@/lib/types/stage';
 export const CONTENT_BLOCKED_HINT =
   'Generated text was blocked by the content filter. Rewrite the page without the flagged material, or retry later if the filter is unavailable.';
 const CHUNK_CHARS = 4000;
-const SLIDE_TEXT_TYPES = new Set(['text', 'shape', 'table']);
+const SLIDE_TEXT_TYPES = new Set(['text', 'shape', 'table', 'latex', 'code']);
 
 export interface ContentBlocked {
   error: 'content-blocked';
@@ -20,7 +20,7 @@ export interface SceneModerationDeps {
 }
 
 /**
- * Student-visible text of a scene (pure): slide text/table/shape text, quiz question, options and
+ * Student-visible text of a scene (pure): slide text/table/shape/latex/code text, quiz question, options and
  * explanation, speech lines. Interactive html is skipped (also for walkthroughs); a walkthrough's
  * title and speech are still moderated: the `kind` flag is data and not a trust boundary.
  */

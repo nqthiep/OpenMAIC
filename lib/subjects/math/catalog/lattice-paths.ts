@@ -177,11 +177,11 @@ const beatDefs: readonly BeatDef[] = [
 const EX = {
   start: m(
     'Lưới {m} × {n} ô: ta đi từ góc dưới trái A tới góc trên phải B, mỗi bước chỉ sang phải hoặc đi lên. Có bao nhiêu đường đi?',
-    'A grid of {m} × {n} cells: we walk from the bottom-left corner A to the top-right corner B, each step right or up. How many paths are there?',
+    'A grid of {m} × {n|cell|cells}: we walk from the bottom-left corner A to the top-right corner B, each step right or up. How many paths are there?',
   ),
   paths: m(
     'Đường {j}: {m} bước sang phải và {n} bước đi lên, theo một thứ tự riêng, tổng {mn} bước. Mọi đường đều dài như nhau.',
-    'Path {j}: {m} steps right and {n} steps up in an order of its own, {mn} steps in all. Every path is equally long.',
+    'Path {j}: {m|step|steps} right and {n|step|steps} up in an order of its own, {mn|step|steps} in all. Every path is equally long.',
   ),
   pascal0: m(
     'Ghi số đường đi từ A tới mỗi điểm. Hàng dưới cùng: chỉ có một đường đi thẳng, nên toàn số 1.',
@@ -193,11 +193,11 @@ const EX = {
   ),
   binomial: m(
     'Chọn {n} bước đi lên trong tổng {mn} bước: C({mn}, {n}) = {ways}, đúng bằng số ở góc đích B.',
-    'Choose which {n} of the {mn} steps go up: C({mn}, {n}) = {ways}, exactly the number at the corner B.',
+    'Choose which {n} of the {mn|step|steps} go up: C({mn}, {n}) = {ways}, exactly the number at the corner B.',
   ),
   done: m(
     'Có {ways} đường đi trên lưới {m} × {n}, bằng C({mn}, {n}).',
-    'There are {ways} paths on the {m} × {n} grid, equal to C({mn}, {n}).',
+    'There are {ways|path|paths} on the {m} × {n} grid, equal to C({mn}, {n}).',
   ),
 };
 
@@ -296,7 +296,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const latticePathsEntry: WalkthroughEntry<In, S> = {
   id: 'lattice-paths',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m3-counting-advanced'],

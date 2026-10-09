@@ -108,7 +108,7 @@
    - **Đường phục vụ không đổi:** chỉ mẫu đã commit chạy trong `manim-service`; LLM **không** viết Manim khi phục vụ.
 5. **Cổng G1/G2** (thay đổi ADR 0012 quyết định 6):
    - **(a)** Hội đồng `tutor-review-cp` đạt.
-   - **(b)** **Học sinh mô phỏng:** 6 persona (lớp 8/9; yếu/khá/giỏi; học C++ hoặc Python) làm bài kiểm tra 5 câu trước, "học" bằng bản ghi bài giảng (transcript lời thầy + mô tả frame), rồi làm bài sau. Ngưỡng: điểm sau – điểm trước ≥ 20 điểm %, và ≥ 70% persona chấm "dễ hiểu" ≥ 4/5. Đây là tín hiệu thay thế [Inference].
+   - **(b)** **Học sinh mô phỏng:** 6 persona (lớp 8/9; yếu/khá/giỏi; học C++ hoặc Python) làm bài kiểm tra 5 câu trước, "học" bằng bản ghi bài giảng (transcript lời thầy + mô tả frame), rồi làm bài sau. Ngưỡng: điểm hơn nhóm đối chứng (cùng bài sau, không học) ≥ 20 điểm % (cài đặt thay cho "sau – trước"), và ≥ 70% persona chấm "dễ hiểu" ≥ 4/5. Đây là tín hiệu thay thế [Inference].
    - **(c)** Sau khi phát hành, **số đo thật** từ dữ liệu học sinh (quyết định 6) được theo dõi liên tục bằng `tutor-analyst`: tỉ lệ đúng quiz, tỉ lệ đúng câu dự đoán, số lần xin gợi ý mức 3, đánh giá "dễ hiểu" trong app.
    - Các ngưỡng trên là **giá trị áp dụng**, không còn chờ chủ dự án chốt.
 6. **Lưu dữ liệu học sinh** (DATA-MODEL §8, INTERFACES §8.3):

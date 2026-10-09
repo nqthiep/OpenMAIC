@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   createQuizLayoutProbe: vi.fn(),
   emitHyperframes: vi.fn(),
   packageVideoZip: vi.fn(),
+  resolveCodeWidgetAllowed: vi.fn(),
   stageState: vi.fn(),
   toSrt: vi.fn(),
   toVtt: vi.fn(),
@@ -24,6 +25,9 @@ vi.mock('@/lib/store', () => ({
 }));
 vi.mock('@/lib/document-store', () => ({
   accessDocument: mocks.accessDocument,
+}));
+vi.mock('@/lib/hooks/use-code-widget-allowed', () => ({
+  resolveCodeWidgetAllowed: mocks.resolveCodeWidgetAllowed,
 }));
 vi.mock('@/lib/video-export-app/timeline-deps', () => ({
   createVideoTimelineDeps: mocks.createVideoTimelineDeps,
@@ -87,6 +91,28 @@ describe('compileSubtitles Quiz timing', () => {
 afterAll(() => {
   if (originalEnv === undefined) delete process.env[ENV_KEY];
   else process.env[ENV_KEY] = originalEnv;
+});
+
+describe('student-code widget policy in the export', () => {
+  it('asks the server and passes the answer to the timeline deps; subtitles never package HTML', async () => {
+    mocks.accessDocument.mockResolvedValue(undefined);
+    mocks.resolveCodeWidgetAllowed.mockResolvedValue(true);
+    await buildExportZip({ resolution: '720p', locale: 'en-US' });
+    expect(mocks.createVideoTimelineDeps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ codeAllowed: true }),
+    );
+
+    mocks.resolveCodeWidgetAllowed.mockResolvedValue(false);
+    await buildExportZip({ resolution: '720p', locale: 'en-US' });
+    expect(mocks.createVideoTimelineDeps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ codeAllowed: false }),
+    );
+
+    mocks.resolveCodeWidgetAllowed.mockClear();
+    mocks.compileVideoTimeline.mockReturnValue({ diagnostics: [], subtitles: [] });
+    await compileSubtitles({ resolution: '720p', locale: 'en-US' });
+    expect(mocks.resolveCodeWidgetAllowed).not.toHaveBeenCalled();
+  });
 });
 
 describe('buildExportZip CTA boundary', () => {

@@ -190,11 +190,11 @@ const EX = {
   ),
   right: m(
     'Thay x bằng x − {h}: y = {eq}. Đồ thị dời {h} đơn vị sang phải; O tới ({h}, 0), Q tới ({qx}, 1).',
-    'Replace x by x − {h}: y = {eq}. The graph moves {h} units to the right; O goes to ({h}, 0), Q to ({qx}, 1).',
+    'Replace x by x − {h}: y = {eq}. The graph moves {h|unit|units} to the right; O goes to ({h}, 0), Q to ({qx}, 1).',
   ),
   left: m(
     'Thay x bằng x + {n}: y = {eq}. Đồ thị dời {n} đơn vị sang trái; O tới ({h}, 0), Q tới ({qx}, 1).',
-    'Replace x by x + {n}: y = {eq}. The graph moves {n} units to the left; O goes to ({h}, 0), Q to ({qx}, 1).',
+    'Replace x by x + {n}: y = {eq}. The graph moves {n|unit|units} to the left; O goes to ({h}, 0), Q to ({qx}, 1).',
   ),
   noShiftH: m(
     'h = 0: đồ thị không dời theo chiều ngang, y = {eq}.',
@@ -211,15 +211,15 @@ const EX = {
   ),
   flip: m(
     'Nhân giá trị với {a}: y = {eq}. Đồ thị bị lật qua trục ngang và kéo giãn {n} lần; Q xuống độ cao {qy}.',
-    'Multiply the values by {a}: y = {eq}. The graph is flipped over the horizontal axis and stretched {n} times; Q drops to height {qy}.',
+    'Multiply the values by {a}: y = {eq}. The graph is flipped over the horizontal axis and stretched {n|time|times}; Q drops to height {qy}.',
   ),
   up: m(
     'Cộng {k} vào mọi giá trị: y = {eq}. Đồ thị dời {k} đơn vị lên trên; O tới ({h}, {k}).',
-    'Add {k} to every value: y = {eq}. The graph moves {k} units up; O goes to ({h}, {k}).',
+    'Add {k} to every value: y = {eq}. The graph moves {k|unit|units} up; O goes to ({h}, {k}).',
   ),
   down: m(
     'Trừ {n} khỏi mọi giá trị: y = {eq}. Đồ thị dời {n} đơn vị xuống dưới; O tới ({h}, {k}).',
-    'Subtract {n} from every value: y = {eq}. The graph moves {n} units down; O goes to ({h}, {k}).',
+    'Subtract {n} from every value: y = {eq}. The graph moves {n|unit|units} down; O goes to ({h}, {k}).',
   ),
   noShiftK: m(
     'k = 0: đồ thị không dời theo chiều dọc, y = {eq}.',
@@ -358,7 +358,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const graphTransformEntry: WalkthroughEntry<In, S> = {
   id: 'graph-transform',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-quadratic-vieta'],

@@ -24,7 +24,7 @@ const EX = {
   ),
   path: m(
     'BFS trong đồ thị dư tìm được đường tăng luồng {path} (dài {len} cạnh, ít cạnh nhất).',
-    'BFS in the residual graph found the augmenting path {path} ({len} edges, the fewest).',
+    'BFS in the residual graph found the augmenting path {path} ({len|edge|edges}, the fewest).',
   ),
   ask: m(
     'Đường tăng luồng {path}. Mỗi cạnh còn dư một lượng; có thể đẩy thêm bao nhiêu dọc đường này?',
@@ -44,7 +44,7 @@ const EX = {
   ),
   done: m(
     'Luồng lớn nhất là {total}, bằng sức chứa lát cắt nhỏ nhất, sau {rounds} lần tăng.',
-    'The maximum flow is {total}, equal to the minimum cut capacity, after {rounds} augmentations.',
+    'The maximum flow is {total}, equal to the minimum cut capacity, after {rounds|augmentation|augmentations}.',
   ),
 };
 
@@ -340,7 +340,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const maxFlowEntry: WalkthroughEntry<In, S> = {
   id: 'max-flow',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t4-flow-matching'],

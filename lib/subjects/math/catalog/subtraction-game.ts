@@ -211,11 +211,11 @@ const beatDefs: readonly BeatDef[] = [
 const EX = {
   start: m(
     'Đống n = {n} que; mỗi lượt lấy 1 tới {k} que, ai lấy que cuối cùng thì thắng. Bảng có {w} cột, số ghi là số que còn lại.',
-    'A pile of n = {n} sticks; each turn takes 1 to {k} sticks, whoever takes the last stick wins. The table has {w} columns, each number is the sticks left.',
+    'A pile of n = {n|stick|sticks}; each turn takes 1 to {k|stick|sticks}, whoever takes the last stick wins. The table has {w|column|columns}, each number is the sticks left.',
   ),
   rule: m(
     'Từ {n} que có thể lấy 1 tới {k} que, đi tới một trong các vị trí {lo}, …, {hi} (các mũi tên).',
-    'From {n} sticks one can take 1 to {k}, moving to one of the positions {lo}, …, {hi} (the arrows).',
+    'From {n|stick|sticks} one can take 1 to {k}, moving to one of the positions {lo}, …, {hi} (the arrows).',
   ),
   lab0: m(
     'Vị trí 0: hết que, người đến lượt không đi được nên THUA.',
@@ -223,7 +223,7 @@ const EX = {
   ),
   labWin: m(
     'Vị trí {p}: lấy {j} que tới vị trí thua {tt}, nên {p} là vị trí THẮNG.',
-    'Position {p}: taking {j} sticks reaches the losing position {tt}, so {p} is a WINNING position.',
+    'Position {p}: taking {j|stick|sticks} reaches the losing position {tt}, so {p} is a WINNING position.',
   ),
   labLose: m(
     'Vị trí {p}: mọi nước đi tới {lo}, …, {hi} đều là vị trí thắng, nên {p} là vị trí THUA.',
@@ -235,15 +235,15 @@ const EX = {
   ),
   stratFirst: m(
     'n = {n} không chia hết cho {w}: người đi trước lấy {r0} que để về {cur}, bội của {w}, rồi giữ tổng mỗi vòng bằng {w}.',
-    'n = {n} is not divisible by {w}: the first player takes {r0} sticks to reach {cur}, a multiple of {w}, then keeps each round at {w} in all.',
+    'n = {n} is not divisible by {w}: the first player takes {r0|stick|sticks} to reach {cur}, a multiple of {w}, then keeps each round at {w} in all.',
   ),
   stratSecond: m(
     'n = {n} chia hết cho {w}: người đi trước đang ở vị trí thua. Đối phương lấy {x} que, người thứ hai lấy {y}: về {cur}, bội của {w}.',
-    'n = {n} is divisible by {w}: the first player is on a losing position. The opponent takes {x} sticks, the second player takes {y}: back to {cur}, a multiple of {w}.',
+    'n = {n} is divisible by {w}: the first player is on a losing position. The opponent takes {x|stick|sticks}, the second player takes {y}: back to {cur}, a multiple of {w}.',
   ),
   stratStep: m(
     'Sau {mv} nước đi còn {cur} que, vẫn là bội của {w}: mỗi vòng đối phương lấy {x}, người thắng lấy {y}, tổng {w}.',
-    'After {mv} moves {cur} sticks are left, still a multiple of {w}: each round the opponent takes {x}, the winner takes {y}, {w} in all.',
+    'After {mv} moves {cur|stick|sticks} are left, still a multiple of {w}: each round the opponent takes {x}, the winner takes {y}, {w} in all.',
   ),
   stratEnd: m(
     'Còn 0 que sau {mv} nước đi: người thắng lấy que cuối cùng.',
@@ -251,7 +251,7 @@ const EX = {
   ),
   doneFirst: m(
     'n = {n} = {q}·{w} + {r0}: người đi trước thắng bằng cách lấy {r0} que, rồi luôn trả về bội của {w}.',
-    'n = {n} = {q}·{w} + {r0}: the first player wins by taking {r0} sticks, then always returning to a multiple of {w}.',
+    'n = {n} = {q}·{w} + {r0}: the first player wins by taking {r0|stick|sticks}, then always returning to a multiple of {w}.',
   ),
   doneSecond: m(
     'n = {n} = {q}·{w}: là bội của {w}, người đi trước ở vị trí thua và người đi sau thắng bằng cách luôn trả về bội của {w}.',
@@ -379,7 +379,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const subtractionGameEntry: WalkthroughEntry<In, S> = {
   id: 'subtraction-game',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m4-games-invariants'],

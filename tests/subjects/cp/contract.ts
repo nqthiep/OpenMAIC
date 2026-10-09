@@ -4,7 +4,13 @@
  * the oracle and the beat-order checks that depend on its algorithm.
  */
 import { describe, expect, it } from 'vitest';
-import { fill, hasRequiredLocales, msg, unresolved } from '@/lib/tutor/catalog/messages';
+import {
+  fill,
+  hasRequiredLocales,
+  msg,
+  unresolved,
+  placeholderName,
+} from '@/lib/tutor/catalog/messages';
 import type { Messages, WalkthroughEntry } from '@/lib/tutor/catalog/types';
 import { validateInput } from '@/lib/tutor/catalog/validate';
 import { steps } from '@/lib/tutor/engine/generate';
@@ -276,7 +282,7 @@ export function entryContract<I>(c: Contract<I>): void {
       for (const b of entry.beatDefs)
         for (const l of LOCALES)
           for (const tok of unresolved(msg(b.narration, l)))
-            expect(c.vars, `${b.id}/${l}`).toContain(tok.slice(1, -1));
+            expect(c.vars, `${b.id}/${l}`).toContain(placeholderName(tok));
       for (const p of entry.presets) {
         for (const l of LOCALES) {
           for (const f of gen(p.input as I, l)) {

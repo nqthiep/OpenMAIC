@@ -15,7 +15,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Sắp xếp {n} số bằng quick sort: chọn pivot, chia mảng thành phần ≤ pivot và phần > pivot, rồi sắp từng phần.',
-    'Sort {n} numbers with quick sort: pick a pivot, split the array into ≤ pivot and > pivot, then sort each part.',
+    'Sort {n|number|numbers} with quick sort: pick a pivot, split the array into ≤ pivot and > pivot, then sort each part.',
   ),
   pick: m(
     'Đoạn [{lo}, {hi}]: chọn pivot = a[{hi}] = {pivot} (phần tử cuối). i = {i} đứng ngay trước đoạn.',
@@ -43,7 +43,7 @@ const EX = {
   ),
   done: m(
     'Mọi đoạn đã còn không quá một phần tử: mảng {n} số đã sắp xếp tăng dần.',
-    'Every range now has at most one element: the array of {n} numbers is sorted increasingly.',
+    'Every range now has at most one element: the array of {n|number|numbers} is sorted increasingly.',
   ),
 };
 
@@ -54,7 +54,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Quick sort chia để trị: chọn một pivot, đưa số nhỏ sang trái, số lớn sang phải, rồi sắp từng phần. Mảng có {n} số.',
-      'Quick sort divides and conquers: pick a pivot, move small numbers left and large ones right, then sort each part. The array has {n} numbers.',
+      'Quick sort divides and conquers: pick a pivot, move small numbers left and large ones right, then sort each part. The array has {n|number|numbers}.',
     ),
     hints: [
       m(
@@ -234,7 +234,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Mảng {n} số đã sắp xếp. Chia cân thì O(n log n); nhưng nếu pivot luôn là số lớn nhất hay nhỏ nhất (như mảng đã sắp) thì tới O(n²).',
-      'The array of {n} numbers is sorted. With balanced splits it is O(n log n); if the pivot is always the largest or smallest (as on a sorted array) it degrades to O(n²).',
+      'The array of {n|number|numbers} is sorted. With balanced splits it is O(n log n); if the pivot is always the largest or smallest (as on a sorted array) it degrades to O(n²).',
     ),
     hints: [
       m('Số lần so sánh phụ thuộc vào điều gì?', 'What does the number of comparisons depend on?'),
@@ -354,7 +354,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const quickSortEntry: WalkthroughEntry<In, S> = {
   id: 'quick-sort',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-sorting', 't2-divide-conquer'],

@@ -15,7 +15,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Đếm số lần xuất hiện của từng ký tự trong xâu {n} ký tự bằng một bảng đếm (khoá là ký tự). Lúc đầu bảng rỗng.',
-    'Count how often each character occurs in a string of {n} characters with a count table (the key is the character). The table starts empty.',
+    'Count how often each character occurs in a string of {n|character|characters} with a count table (the key is the character). The table starts empty.',
   ),
   read: m(
     'Đọc s[{i}] = {c}. Ký tự này đã có trong bảng đếm chưa?',
@@ -31,11 +31,11 @@ const EX = {
   ),
   max: m(
     'Duyệt bảng tìm số đếm lớn nhất: {best} xuất hiện {cnt} lần. Khi hoà lấy chữ cái nhỏ nhất.',
-    'Scan the table for the biggest count: {best} occurs {cnt} times. On a tie take the smallest letter.',
+    'Scan the table for the biggest count: {best} occurs {cnt|time|times}. On a tie take the smallest letter.',
   ),
   done: m(
     'Ký tự nhiều nhất là {best}, xuất hiện {cnt} lần (trong {distinct} ký tự khác nhau).',
-    'The most frequent character is {best}, occurring {cnt} times (out of {distinct} distinct characters).',
+    'The most frequent character is {best}, occurring {cnt|time|times} (out of {distinct} distinct characters).',
   ),
 };
 
@@ -46,7 +46,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Ta cần biết mỗi ký tự trong xâu {n} ký tự xuất hiện bao nhiêu lần. Bảng đếm lưu cặp (ký tự, số lần) và tra cứu rất nhanh.',
-      'We want to know how many times each character occurs in a string of {n} characters. A count table stores (character, count) pairs and looks them up very fast.',
+      'We want to know how many times each character occurs in a string of {n|character|characters}. A count table stores (character, count) pairs and looks them up very fast.',
     ),
     hints: [
       m(
@@ -189,7 +189,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Kết quả: {best} xuất hiện {cnt} lần, trong {distinct} ký tự khác nhau. Mỗi ký tự chỉ đọc một lần nên cả quá trình là O(n).',
-      'Result: {best} occurs {cnt} times, among {distinct} distinct characters. Each character is read once, so the whole job is O(n).',
+      'Result: {best} occurs {cnt|time|times}, among {distinct} distinct characters. Each character is read once, so the whole job is O(n).',
     ),
     hints: [
       m('Mỗi ký tự được đọc bao nhiêu lần?', 'How many times is each character read?'),
@@ -277,7 +277,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const hashCountEntry: WalkthroughEntry<In, S> = {
   id: 'hash-count',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-hash'],

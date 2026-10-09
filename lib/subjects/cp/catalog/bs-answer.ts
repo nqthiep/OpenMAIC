@@ -105,7 +105,7 @@ function run(
     {
       explanation: t(
         `Có ${h.length} cây, cần ít nhất m = ${m} mét gỗ. Tìm H nguyên lớn nhất để tổng gỗ cưa được không ít hơn m.`,
-        `There are ${h.length} trees and at least m = ${m} meters of wood are needed. Find the largest integer H whose total wood is at least m.`,
+        `There are ${h.length} ${h.length === 1 ? 'tree' : 'trees'} and at least m = ${m} ${m === 1 ? 'meter' : 'meters'} of wood are needed. Find the largest integer H whose total wood is at least m.`,
       ),
       codeLine: 1,
       vars: { n: h.length, m, top },
@@ -151,7 +151,7 @@ function run(
   put(Hold, {
     explanation: t(
       `Cưa ở H = ${Hold} được ${gotOld} mét. Nếu nâng H lên một đơn vị thì tổng gỗ thay đổi thế nào?`,
-      `Cutting at H = ${Hold} gives ${gotOld} meters. If we raise H by one, how does the total wood change?`,
+      `Cutting at H = ${Hold} gives ${gotOld} ${gotOld === 1 ? 'meter' : 'meters'}. If we raise H by one, how does the total wood change?`,
     ),
     codeLine: 1,
     vars: { H: Hold, got: gotOld, m, top },
@@ -206,7 +206,7 @@ function run(
       {
         explanation: t(
           `Cưa ở H = ${mid}: được ${got} mét, ${ok ? 'đủ' : 'chưa đủ'} m = ${m}.`,
-          `Cut at H = ${mid}: ${got} meters, ${ok ? 'enough' : 'not enough'} for m = ${m}.`,
+          `Cut at H = ${mid}: ${got} ${got === 1 ? 'meter' : 'meters'}, ${ok ? 'enough' : 'not enough'} for m = ${m}.`,
         ),
         codeLine: 5,
         vars: { lo, hi, mid, got, m },
@@ -254,7 +254,7 @@ function run(
     {
       explanation: t(
         `lo = hi = ${lo}: H lớn nhất là ${lo}, được ${got} mét, đủ m = ${m}.`,
-        `lo = hi = ${lo}: the largest H is ${lo}, giving ${got} meters, enough for m = ${m}.`,
+        `lo = hi = ${lo}: the largest H is ${lo}, giving ${got} ${got === 1 ? 'meter' : 'meters'}, enough for m = ${m}.`,
       ),
       codeLine: 7,
       vars: { lo, hi, got, m },
@@ -266,7 +266,7 @@ function run(
 
 export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
   id: 'bs-answer',
-  entryRev: 1,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],
@@ -365,7 +365,7 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
         'vi-VN':
           'Có {n} cây, cần ít nhất m = {m} mét gỗ. Máy cưa ở độ cao H lấy phần thân cao hơn H của mỗi cây. Ta tìm H nguyên lớn nhất vẫn đủ gỗ; cây cao nhất là {top}.',
         'en-US':
-          'There are {n} trees and at least m = {m} meters of wood are needed. A saw at height H takes the part of each tree above H. We want the largest integer H that still gives enough wood; the tallest tree is {top}.',
+          'There are {n|tree|trees} and at least m = {m|meter|meters} of wood are needed. A saw at height H takes the part of each tree above H. We want the largest integer H that still gives enough wood; the tallest tree is {top}.',
       },
       hints: [
         {
@@ -401,7 +401,7 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
         'vi-VN':
           'Vét cạn: thử H lần lượt {tried}, từ cây cao nhất ({top}) hạ dần. Ở H = {H} được {got} mét, cần m = {m}. Thử từng H thế này quá chậm khi h rất lớn.',
         'en-US':
-          'Brute force: try H = {tried}, going down from the tallest tree ({top}). At H = {H} we get {got} meters and need m = {m}. Trying every H like this is too slow when h is huge.',
+          'Brute force: try H = {tried}, going down from the tallest tree ({top}). At H = {H} we get {got|meter|meters} and need m = {m}. Trying every H like this is too slow when h is huge.',
       },
       hints: [
         {
@@ -435,7 +435,7 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
         'vi-VN':
           'Cưa ở H = {H} được {got} mét. Nâng H lên thì mỗi cây cao hơn H mất bớt gỗ, nên gỗ chỉ giảm hoặc giữ nguyên: một H đủ gỗ thì mọi H thấp hơn cũng đủ.',
         'en-US':
-          'Cutting at H = {H} gives {got} meters. Raising H makes every tree taller than H lose wood, so the total never grows: if some H has enough wood then every lower H does too.',
+          'Cutting at H = {H} gives {got|meter|meters}. Raising H makes every tree taller than H lose wood, so the total never grows: if some H has enough wood then every lower H does too.',
       },
       ask: {
         text: {
@@ -551,7 +551,7 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
         'vi-VN':
           'Cưa ở H = {mid} được {got} mét, so với m = {m}. Đủ gỗ thì đáp án ≥ mid nên lo = mid; thiếu gỗ thì đáp án < mid nên hi = mid − 1.',
         'en-US':
-          'Cutting at H = {mid} gives {got} meters, compared with m = {m}. Enough wood: the answer is ≥ mid, so lo = mid. Not enough: the answer is < mid, so hi = mid − 1.',
+          'Cutting at H = {mid} gives {got|meter|meters}, compared with m = {m}. Enough wood: the answer is ≥ mid, so lo = mid. Not enough: the answer is < mid, so hi = mid − 1.',
       },
       ask: {
         text: {
@@ -643,7 +643,7 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
       narration: {
         'vi-VN': 'Khi lo = hi = {lo}, đó là H lớn nhất: cưa ở đó được {got} mét, đủ m = {m}.',
         'en-US':
-          'When lo = hi = {lo}, that is the largest H: cutting there gives {got} meters, enough for m = {m}.',
+          'When lo = hi = {lo}, that is the largest H: cutting there gives {got|meter|meters}, enough for m = {m}.',
       },
       hints: [
         {

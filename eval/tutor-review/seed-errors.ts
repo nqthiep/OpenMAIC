@@ -309,7 +309,7 @@ export function seedErrors(entry: AnyWalkthroughEntry, locale = 'vi-VN'): Mutant
   // 2. Narration: one placeholder swapped for another variable of the same beat. The pair is the
   //    first one whose swap changes the filled narration on some frame of the beat.
   const names = (s: string) => [
-    ...new Set([...s.matchAll(/\{([A-Za-z_]\w*)\}/g)].map((m) => m[1])),
+    ...new Set([...s.matchAll(/\{([A-Za-z_]\w*)(?:\|[^{}]*)?\}/g)].map((m) => m[1])),
   ];
   const swappable = entry.beatDefs.flatMap((b, i) =>
     names(Object.values(b.narration).join(' ')).length >= 2 ? [{ b, i }] : [],

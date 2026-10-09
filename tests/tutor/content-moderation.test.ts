@@ -77,15 +77,24 @@ const quiz = {
 } as unknown as Scene;
 
 describe('extractVisibleText', () => {
-  it('collects slide text, table cells, shape text and speech; skips other element kinds', () => {
+  it('collects slide text, table cells, shape, latex and code text and speech; skips images', () => {
     const scene = slideScene('Hello', [
       { id: 'sh', type: 'shape', text: { content: '<p>Shape words</p>' } },
       { id: 'tb', type: 'table', data: [[{ text: 'A1' }, { text: 'B1' }]] },
       { id: 'lx', type: 'latex', latex: 'x^2' },
+      { id: 'cd', type: 'code', lines: [{ content: '// bad words' }, { content: 'x = 1' }] },
       { id: 'im', type: 'image', src: 'https://x/y.png' },
     ]);
     const text = extractVisibleText(scene);
-    expect(text).toEqual(['Title', 'Hello', 'Shape words', 'A1 | B1', 'Spoken line']);
+    expect(text).toEqual([
+      'Title',
+      'Hello',
+      'Shape words',
+      'A1 | B1',
+      'x^2',
+      '// bad words\nx = 1',
+      'Spoken line',
+    ]);
   });
 
   it('collects quiz question, options and explanation', () => {

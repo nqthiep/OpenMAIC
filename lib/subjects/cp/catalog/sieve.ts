@@ -37,7 +37,7 @@ const EX = {
   ),
   done: m(
     'Có {count} số nguyên tố ≤ {n} (các ô sáng màu).',
-    'There are {count} primes ≤ {n} (the highlighted cells).',
+    'There are {count|prime|primes} ≤ {n} (the highlighted cells).',
   ),
 };
 
@@ -166,7 +166,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Có {count} số nguyên tố ≤ {n}. Sàng tốn khoảng n log log n phép gạch, nhanh hơn nhiều so với thử chia từng số.',
-      'There are {count} primes ≤ {n}. The sieve costs about n log log n crossings, far faster than trial division of each number.',
+      'There are {count|prime|primes} ≤ {n}. The sieve costs about n log log n crossings, far faster than trial division of each number.',
     ),
     hints: [
       m(
@@ -267,7 +267,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const sieveEntry: WalkthroughEntry<In, S> = {
   id: 'sieve',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t2-number-basics'],

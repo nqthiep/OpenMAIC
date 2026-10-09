@@ -133,7 +133,7 @@ Quy tắc test tự bỏ qua theo môi trường: mọi test cần trình duyệ
 | `eval:tutor-qa` | Đúng; Bám frame; Gợi ý trước; Dùng hiểu lầm đúng | Đúng 100% (chặn cổng đợt, không chặn CI); Bám frame ≥ 90%; Gợi ý trước ≥ 80%; Dùng hiểu lầm đúng: theo dõi, chưa đặt ngưỡng | A/B có/không `describe()` trong ngữ cảnh; **bỏ** `leads_with_answer` (mâu thuẫn "gợi ý trước") |
 | `eval:tutor-review` (hiệu chuẩn) | hội đồng bắt lỗi cài sẵn | bắt ≥ 90%; chặn nhầm ≤ 10% | ≥ 30 entry cài lỗi + ≥ 10 entry đúng |
 | `eval:tutor-moderation` (hiệu chuẩn) | chặn độc hại / chặn nhầm | ≥ 99% / ≤ 2% | ≥ 100 mẫu độc hại + ≥ 200 mẫu giáo dục, có thuật ngữ Tin học dễ nhầm và mẫu tiêm prompt |
-| `eval:sim-learner` (hiệu chuẩn + G1/G2) | điểm tăng; phân biệt bài tốt/kém | +20 điểm %, ≥ 70% "dễ hiểu"; bài kém thấp hơn ≥ 10 điểm % | 6 persona |
+| `eval:sim-learner` (hiệu chuẩn + G1/G2) | điểm hơn nhóm đối chứng không học; phân biệt bài tốt/kém | hơn đối chứng ≥ 20 điểm %, ≥ 70% "dễ hiểu"; bài kém thấp hơn ≥ 10 điểm % | 6 persona |
 
 ## 7. Chạy cục bộ
 

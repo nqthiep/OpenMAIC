@@ -31,7 +31,7 @@ const EX = {
   ),
   doneHit: m(
     'Trả về chỉ số {mid} sau {steps} lần so sánh với phần tử giữa.',
-    'Return index {mid} after {steps} comparisons with the middle element.',
+    'Return index {mid} after {steps|comparison|comparisons} with the middle element.',
   ),
   right: m(
     'a[{mid}] = {amid} nhỏ hơn target = {target}, nên target ở bên phải. Bỏ nửa trái: lo = {lo}.',
@@ -47,7 +47,7 @@ const EX = {
   ),
   doneMiss: m(
     'Trả về −1 sau {steps} lần so sánh với phần tử giữa.',
-    'Return −1 after {steps} comparisons with the middle element.',
+    'Return −1 after {steps|comparison|comparisons} with the middle element.',
   ),
 };
 
@@ -242,7 +242,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Xong sau {steps} lần so sánh. Mỗi lần loại một nửa khoảng tìm, nên với n phần tử chỉ cần cỡ log₂ n lần.',
-      'Done after {steps} comparisons. Each one drops half of the range, so n elements need only about log₂ n of them.',
+      'Done after {steps|comparison|comparisons}. Each one drops half of the range, so n elements need only about log₂ n of them.',
     ),
     hints: [
       m('Vòng lặp dừng vì lý do nào?', 'Why did the loop stop?'),
@@ -325,7 +325,7 @@ const SORTED = [3, 8, 12, 17, 25, 31, 40, 52, 66, 79];
 
 export const binarySearchEntry: WalkthroughEntry<In, S> = {
   id: 'binary-search',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],

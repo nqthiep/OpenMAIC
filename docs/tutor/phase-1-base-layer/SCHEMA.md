@@ -238,7 +238,7 @@ tests/widgets/  tests/tutor/  tests/subjects/cp/
 
 **G1 (cổng sư phạm, ADR 0012 §6)**
 - [ ] Hội đồng LLM Tin (`tutor-review-cp` + `-2`, hai nhà cung cấp) chấm `binary-search` và `bs-answer-mini` theo rubric ADR 0008: mọi tiêu chí ≥ 4/5, không lỗi "Đúng"; review JSON commit ở `lib/subjects/cp/reviews/`.
-- [ ] Học sinh mô phỏng (`sim-learner`, 6 persona): điểm sau – điểm trước ≥ 20 điểm %, ≥ 70% persona chấm "dễ hiểu" ≥ 4/5.
+- [ ] Học sinh mô phỏng (`sim-learner`, 6 persona): điểm sau khi học hơn nhóm đối chứng không học ≥ 20 điểm %, ≥ 70% persona chấm "dễ hiểu" ≥ 4/5.
 - [ ] Bộ hiệu chuẩn đạt: hội đồng bắt ≥ 90% lỗi cài sẵn; bộ lọc chặn ≥ 99% mẫu độc hại, chặn nhầm ≤ 2%; mô phỏng phân biệt bài tốt/kém (ADR 0014 quyết định 7).
 
 **1d** (chỉ khi cổng ADR 0012 §7 đạt)

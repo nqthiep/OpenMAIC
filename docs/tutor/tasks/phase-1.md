@@ -1369,7 +1369,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 **Làm**
 1. 6 persona (lớp 8/9; yếu/khá/giỏi; C++/Python).
 2. `transcript.ts`: dựng bản ghi bài giảng từ `provider.actions()` (lời thầy + mô tả frame).
-3. Runner: bài kiểm tra 5 câu trước → "học" → bài sau. Ngưỡng: tăng ≥ 20 điểm %, ≥ 70% persona chấm "dễ hiểu" ≥ 4/5.
+3. Runner: bài kiểm tra 5 câu trước → "học" → bài sau. Ngưỡng: hơn nhóm đối chứng (cùng bài sau, không học) ≥ 20 điểm %, ≥ 70% persona chấm "dễ hiểu" ≥ 4/5.
 4. Chế độ `--calibrate`: bài cố ý kém (bỏ bước, sai thứ tự) phải tăng thấp hơn ≥ 10 điểm %.
 
 **Xong khi:** `--dry-run` xanh.

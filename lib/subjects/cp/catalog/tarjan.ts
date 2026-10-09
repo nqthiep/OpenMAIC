@@ -20,7 +20,7 @@ const ASKED_BACK = 2;
 const EX = {
   start: m(
     'Tìm các thành phần liên thông mạnh của đồ thị có hướng {n} đỉnh: nhóm đỉnh đi được tới nhau. Nhãn đỉnh là disc/low; stack giữ các đỉnh chưa gán thành phần.',
-    'Find the strongly connected components of a directed graph of {n} nodes: groups reaching each other. Labels are disc/low; the stack holds unassigned nodes.',
+    'Find the strongly connected components of a directed graph of {n|node|nodes}: groups reaching each other. Labels are disc/low; the stack holds unassigned nodes.',
   ),
   visit: m(
     'Thăm {u}: disc = low = {d} (thứ tự thăm). Đẩy {u} lên stack. Sau đó xét các cạnh đi ra từ {u}.',
@@ -59,7 +59,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Hai đỉnh thuộc cùng một thành phần liên thông mạnh khi đi được từ đỉnh này tới đỉnh kia và ngược lại. Tarjan tìm mọi thành phần trong một lượt DFS với disc, low và một stack. Có {n} đỉnh.',
-      'Two nodes are in the same strongly connected component when each can reach the other. Tarjan finds all components in one DFS with disc, low and a stack. There are {n} nodes.',
+      'Two nodes are in the same strongly connected component when each can reach the other. Tarjan finds all components in one DFS with disc, low and a stack. There are {n|node|nodes}.',
     ),
     hints: [
       m(
@@ -200,7 +200,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Mọi đỉnh đã được gán vào {k} thành phần. Một lượt DFS, mỗi cạnh xét một lần: O(n + m). Co mỗi thành phần thành một đỉnh ta được một đồ thị không chu trình.',
-      'Every node is assigned to one of {k} components. One DFS, each edge examined once: O(n + m). Contracting each component to a node gives an acyclic graph.',
+      'Every node is assigned to one of {k|component|components}. One DFS, each edge examined once: O(n + m). Contracting each component to a node gives an acyclic graph.',
     ),
     hints: [
       m('Có bao nhiêu lượt DFS?', 'How many DFS passes are there?'),
@@ -343,7 +343,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const tarjanEntry: WalkthroughEntry<In, S> = {
   id: 'tarjan',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t3-scc-bridges'],

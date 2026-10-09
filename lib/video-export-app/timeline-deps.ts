@@ -216,12 +216,14 @@ export async function createVideoTimelineDeps(input: {
   skipGeometry?: boolean;
   /** Skip HTML inlining for subtitle-only compilation. */
   skipInteractiveHtml?: boolean;
+  /** Server policy for the student-code widget; anything but `true` packages its static fallback only. */
+  codeAllowed?: boolean;
 }): Promise<VideoTimelineDeps> {
-  const { stage, scenes, skipGeometry = false, skipInteractiveHtml = false } = input;
+  const { stage, scenes, skipGeometry = false, skipInteractiveHtml = false, codeAllowed } = input;
 
   const interactiveHtml = skipInteractiveHtml
     ? emptyPreparedInteractiveHtmlSet()
-    : await prepareInteractiveHtmlScenes(scenes);
+    : await prepareInteractiveHtmlScenes(scenes, { codeAllowed });
 
   // The standardized asset manifest names exactly the media references this
   // document holds. Video compilation consumes audio only through speech

@@ -7,10 +7,13 @@ let cached: boolean | undefined;
 let inflight = false;
 const listeners = new Set<() => void>();
 
-function probe() {
-  if (cached !== undefined || inflight) return;
+let pending: Promise<void> | undefined;
+
+function probe(): Promise<void> {
+  if (cached !== undefined) return Promise.resolve();
+  if (inflight && pending) return pending;
   inflight = true;
-  fetch('/api/widgets/policy')
+  pending = fetch('/api/widgets/policy')
     .then((response) => (response.ok ? response.json() : null))
     .then((body) => {
       if (typeof body?.codeWidgetAllowed !== 'boolean') return;
@@ -23,6 +26,13 @@ function probe() {
     .finally(() => {
       inflight = false;
     });
+  return pending;
+}
+
+/** Non-hook form for export code: resolves `true` only when the server said so. */
+export async function resolveCodeWidgetAllowed(): Promise<boolean> {
+  await probe();
+  return cached === true;
 }
 
 function subscribe(notify: () => void) {
@@ -37,7 +47,9 @@ function subscribe(notify: () => void) {
  * `undefined` = not answered yet or probe failed; callers must treat it as blocked.
  */
 export function useCodeWidgetAllowed(): boolean | undefined {
-  useEffect(probe, []);
+  useEffect(() => {
+    void probe();
+  }, []);
   return useSyncExternalStore(
     subscribe,
     () => cached,

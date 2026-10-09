@@ -10,6 +10,8 @@ import { callLLM } from '@/lib/ai/llm';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { isTutorModerationEnabled } from '@/lib/config/feature-flags';
+import { screenText } from '@/lib/tutor/chat-moderation';
 const log = createLogger('Quiz Grade');
 
 interface GradeRequest {
@@ -41,6 +43,13 @@ export async function POST(req: NextRequest) {
     // Validate points is a positive finite number
     if (!points || !Number.isFinite(points) || points <= 0) {
       return apiError('INVALID_REQUEST', 400, 'points must be a positive number');
+    }
+
+    // Tutor content filter (ADR 0014): the student's free-text answer goes in, the feedback comes out.
+    const moderated = isTutorModerationEnabled();
+    if (moderated) {
+      const blockedIn = await screenText(userAnswer, 'in', language);
+      if (blockedIn) return apiSuccess({ score: 0, comment: blockedIn });
     }
 
     // Resolve model from request headers/body
@@ -100,6 +109,11 @@ ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${
           ? '已作答，请参考标准答案。'
           : 'Answer received. Please refer to the standard answer.',
       };
+    }
+
+    if (moderated && gradeResult.comment) {
+      const blockedOut = await screenText(gradeResult.comment, 'out', language);
+      if (blockedOut) gradeResult.comment = blockedOut;
     }
 
     return apiSuccess({ ...gradeResult });

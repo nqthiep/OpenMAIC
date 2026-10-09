@@ -146,7 +146,7 @@ def parse_ranges(spec):
 # Neo nội dung cho các tham chiếu mà thiết kế dựa vào (R24). Khoá: "path:a" hoặc "path:a-b".
 ANCHORS = {
     "lib/server/agent-runtime/skills.ts:227": "constraints: null",
-    "components/scene-renderers/InteractiveIframeHost.tsx:370": 'sandbox="allow-scripts allow-forms allow-popups"',
+    "components/scene-renderers/InteractiveIframeHost.tsx:388": 'sandbox="allow-scripts allow-forms allow-popups"',
     "components/scene-renderers/InteractiveIframeHost.tsx:236-238": "postMessage",
     "lib/store/interactive-iframe-pool.ts:21": "IFRAME_POOL_CAP = 3",
     "lib/orchestration/prompt-builder.ts:194": "TOTAL speech text around",

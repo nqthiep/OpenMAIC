@@ -22,7 +22,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Tìm dãy con tăng ngặt dài nhất của {n} số. dp[i] = độ dài dãy tăng dài nhất kết thúc đúng tại a[i].',
-    'Find the longest strictly increasing subsequence of {n} numbers. dp[i] = the length of the longest increasing run ending exactly at a[i].',
+    'Find the longest strictly increasing subsequence of {n|number|numbers}. dp[i] = the length of the longest increasing run ending exactly at a[i].',
   ),
   init: m(
     'Mỗi số tự nó là một dãy tăng dài 1, nên lúc đầu dp[i] = 1 cho mọi i.',
@@ -58,7 +58,7 @@ const EX = {
   ),
   done: m(
     'Dãy tăng ngặt dài nhất có {best} phần tử: {seq}.',
-    'The longest strictly increasing subsequence has {best} elements: {seq}.',
+    'The longest strictly increasing subsequence has {best|element|elements}: {seq}.',
   ),
 };
 
@@ -69,7 +69,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Dãy con tăng ngặt giữ thứ tự, có thể bỏ phần tử, và mỗi số lớn hơn số trước. Ta tính dp[i] cho từng i, rồi lấy lớn nhất. Có {n} số.',
-      'A strictly increasing subsequence keeps order, may skip elements, and each number exceeds the previous one. We compute dp[i] for every i, then take the maximum. There are {n} numbers.',
+      'A strictly increasing subsequence keeps order, may skip elements, and each number exceeds the previous one. We compute dp[i] for every i, then take the maximum. There are {n|number|numbers}.',
     ),
     hints: [
       m(
@@ -212,7 +212,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Dãy tăng ngặt dài nhất có {best} phần tử. Hai vòng lặp lồng nhau cho O(n²) thời gian; có cách O(n log n) bằng tìm kiếm nhị phân.',
-      'The longest strictly increasing subsequence has {best} elements. Two nested loops give O(n²) time; an O(n log n) method with binary search exists.',
+      'The longest strictly increasing subsequence has {best|element|elements}. Two nested loops give O(n²) time; an O(n log n) method with binary search exists.',
     ),
     hints: [
       m('Có bao nhiêu cặp (j, i)?', 'How many pairs (j, i) are there?'),
@@ -327,7 +327,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const lisEntry: WalkthroughEntry<In, S> = {
   id: 'lis',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t3-dp-basic'],

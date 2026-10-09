@@ -49,7 +49,7 @@ const EX = {
   ),
   done: m(
     'Có {count} lần xuất hiện. Mỗi ký tự text được xét một lần và j chỉ lùi bằng số lần nó đã tăng: O(n + m).',
-    'There are {count} occurrences. Each text character is read once and j falls back only as often as it grew: O(n + m).',
+    'There are {count|occurrence|occurrences}. Each text character is read once and j falls back only as often as it grew: O(n + m).',
   ),
 };
 
@@ -215,7 +215,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Tìm thấy {count} lần. j tăng tối đa n lần và mỗi lần lùi giảm j, nên tổng số lần lùi không quá n: O(n + m) kể cả bước dựng fail.',
-      'Found {count} times. j grows at most n times and each fall lowers j, so falls total at most n: O(n + m) including building fail.',
+      'Found {count|time|times}. j grows at most n times and each fall lowers j, so falls total at most n: O(n + m) including building fail.',
     ),
     hints: [
       m('Vì sao tổng số lần lùi bị chặn?', 'Why is the total number of falls bounded?'),
@@ -347,7 +347,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const kmpEntry: WalkthroughEntry<In, S> = {
   id: 'kmp',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t4-string-advanced'],

@@ -21,11 +21,11 @@ const EDGE = {
 const EX = {
   start: m(
     'Liệt kê mọi tập con của {n} phần tử bằng đệ quy: với mỗi phần tử ta hoặc lấy hoặc bỏ. Bắt đầu từ tập rỗng.',
-    'List every subset of {n} items by recursion: for each item we either take it or skip it. We start from the empty set.',
+    'List every subset of {n|item|items} by recursion: for each item we either take it or skip it. We start from the empty set.',
   ),
   choose: m(
     'Ở nút {set}: đã quyết định {i} phần tử đầu. Xét a[{i}] = {ai}: cho nó vào tập hay không?',
-    'At node {set}: the first {i} items are decided. Look at a[{i}] = {ai}: does it go into the set or not?',
+    'At node {set}: the first {i|item|items} are decided. Look at a[{i}] = {ai}: does it go into the set or not?',
   ),
   backtrack: m(
     'Nhánh lấy a[{i}] = {ai} đã xong. Quay lui: bỏ {ai} khỏi tập, quay về nút {set}.',
@@ -37,11 +37,11 @@ const EX = {
   ),
   leaf: m(
     'Đã quyết định cả {n} phần tử: {set} là một tập con. Tới giờ đã có {count} tập con.',
-    'All {n} items are decided: {set} is one subset. So far there are {count} subsets.',
+    'All {n|item|items} are decided: {set} is one subset. So far there are {count|subset|subsets}.',
   ),
   done: m(
     '{n} phần tử cho {count} tập con: mỗi phần tử thêm vào làm số tập con gấp đôi.',
-    '{n} items give {count} subsets: each item added doubles the number of subsets.',
+    '{n|item|items} give {count|subset|subsets}: each item added doubles the number of subsets.',
   ),
 };
 
@@ -52,7 +52,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Mỗi nút của cây là một trạng thái: đã quyết định một số phần tử đầu và đang giữ một tập. Ta liệt kê tập con của {n} phần tử.',
-      'Each node of the tree is a state: some leading items are decided and a set is held. We list the subsets of {n} items.',
+      'Each node of the tree is a state: some leading items are decided and a set is held. We list the subsets of {n|item|items}.',
     ),
     hints: [
       m(
@@ -201,7 +201,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       '{n} phần tử cho {count} tập con vì mỗi phần tử có hai lựa chọn độc lập: 2 × 2 × … × 2 = 2^n. Cây có đúng 2^(n+1) − 1 nút.',
-      '{n} items give {count} subsets because each item has two independent choices: 2 × 2 × … × 2 = 2^n. The tree has exactly 2^(n+1) − 1 nodes.',
+      '{n|item|items} give {count|subset|subsets} because each item has two independent choices: 2 × 2 × … × 2 = 2^n. The tree has exactly 2^(n+1) − 1 nodes.',
     ),
     hints: [
       m('Có bao nhiêu tập con?', 'How many subsets are there?'),
@@ -324,7 +324,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const subsetGenEntry: WalkthroughEntry<In, S> = {
   id: 'subset-gen',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t2-brute-force'],

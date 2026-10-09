@@ -177,32 +177,32 @@ const beatDefs: readonly BeatDef[] = [
 const EX = {
   startOdd: m(
     'Xếp các chấm thành n = {n} hàng: hàng thứ nhất một chấm, mỗi hàng sau nhiều hơn hàng trước 2 chấm, hàng cuối có {last} chấm.',
-    'Arrange the dots in n = {n} rows: one dot in the first row, each row 2 dots more than the one before, {last} dots in the last row.',
+    'Arrange the dots in n = {n|row|rows}: one dot in the first row, each row 2 dots more than the one before, {last|dot|dots} in the last row.',
   ),
   startNat: m(
     'Xếp các chấm thành n = {n} hàng: hàng thứ nhất một chấm, mỗi hàng sau nhiều hơn hàng trước một chấm, hàng cuối có {last} chấm.',
-    'Arrange the dots in n = {n} rows: one dot in the first row, each row one dot more than the one before, {last} dots in the last row.',
+    'Arrange the dots in n = {n|row|rows}: one dot in the first row, each row one dot more than the one before, {last|dot|dots} in the last row.',
   ),
   growOdd1: m('Lớp 1 chỉ là một chấm: tổng 1 = 1².', 'Layer 1 is just one dot: the sum is 1 = 1².'),
   growOdd: m(
     'Lớp {k}: một chữ L ôm quanh hình vuông {km} × {km}, thêm {add} chấm; tổng {tot} = {k}².',
-    'Layer {k}: an L wrapped around the {km} × {km} square adds {add} dots; the sum is {tot} = {k}².',
+    'Layer {k}: an L wrapped around the {km} × {km} square adds {add|dot|dots}; the sum is {tot} = {k}².',
   ),
   growNat: m(
     'Hàng {k} thêm {add} chấm vào bậc thang; sau {k} hàng có tất cả {tot} chấm.',
-    'Row {k} adds {add} dots to the staircase; after {k} rows there are {tot} dots in all.',
+    'Row {k} adds {add|dot|dots} to the staircase; after {k|row|rows} there are {tot|dot|dots} in all.',
   ),
   countOdd: m(
     'Các lớp ghép thành hình vuông {n} × {n} có {tot} chấm, nên tổng các số lẻ từ 1 đến {last} bằng {tot} = {n}².',
-    'The layers fit into the {n} × {n} square of {tot} dots, so the sum of the odd numbers from 1 to {last} is {tot} = {n}².',
+    'The layers fit into the {n} × {n} square of {tot|dot|dots}, so the sum of the odd numbers from 1 to {last} is {tot} = {n}².',
   ),
   countNat: m(
     'Hai bậc thang ghép thành hình chữ nhật {n} × {n1} = {rect} chấm; mỗi bậc thang là một nửa, tức {tot} chấm.',
-    'Two staircases fit into the {n} × {n1} = {rect} rectangle; each staircase is half of it, that is {tot} dots.',
+    'Two staircases fit into the {n} × {n1} = {rect} rectangle; each staircase is half of it, that is {tot|dot|dots}.',
   ),
   indOdd1: m(
     'Giả sử đúng với k = {k}: tổng bằng {k}² = {sk}. Thêm lớp k + 1 = {k1} gồm {add} chấm.',
-    'Suppose it holds for k = {k}: the sum is {k}² = {sk}. Add layer k + 1 = {k1} with {add} dots.',
+    'Suppose it holds for k = {k}: the sum is {k}² = {sk}. Add layer k + 1 = {k1} with {add|dot|dots}.',
   ),
   indOdd2: m(
     'Tổng mới {sk} + {add} = {tot} = {k1}²: công thức đúng với k + 1.',
@@ -210,11 +210,11 @@ const EX = {
   ),
   indNat1: m(
     'Giả sử đúng với k = {k}: tổng bằng {sk} chấm. Thêm hàng k + 1 = {k1} gồm {add} chấm.',
-    'Suppose it holds for k = {k}: the sum is {sk} dots. Add row k + 1 = {k1} with {add} dots.',
+    'Suppose it holds for k = {k}: the sum is {sk|dot|dots}. Add row k + 1 = {k1} with {add|dot|dots}.',
   ),
   indNat2: m(
     'Tổng mới {sk} + {add} = {tot} chấm, đúng bằng công thức với k + 1 = {k1}.',
-    'The new sum {sk} + {add} = {tot} dots, exactly the formula for k + 1 = {k1}.',
+    'The new sum {sk} + {add} = {tot|dot|dots}, exactly the formula for k + 1 = {k1}.',
   ),
   doneOdd: m(
     'Tổng {n} số lẻ đầu tiên bằng {tot} = {n}², đúng với mọi n nhờ bước quy nạp.',
@@ -332,7 +332,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const figurateSumsEntry: WalkthroughEntry<In, S> = {
   id: 'figurate-sums',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-induction'],

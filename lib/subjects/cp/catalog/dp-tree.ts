@@ -37,7 +37,7 @@ export function isTree(n: number, edges: readonly number[][]): boolean {
 const EX = {
   start: m(
     'Chọn các đỉnh của cây {n} đỉnh sao cho không hai đỉnh kề nhau cùng được chọn và tổng trọng số lớn nhất. Gốc là A; nhãn hiện trọng số w.',
-    'Pick nodes of a tree with {n} nodes so that no two adjacent nodes are both picked and the total weight is largest. The root is A; labels show the weight w.',
+    'Pick nodes of a tree with {n|node|nodes} so that no two adjacent nodes are both picked and the total weight is largest. The root is A; labels show the weight w.',
   ),
   down: m(
     'Đi xuống {u} (w = {wu}). Muốn tính cho {u} ta cần kết quả của các con của nó trước.',
@@ -72,7 +72,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Tập độc lập là tập đỉnh không có hai đỉnh kề nhau. Ta muốn tập có tổng trọng số lớn nhất trên một cây {n} đỉnh. Vét cạn 2^n tập thì chậm; DP trên cây làm theo từng cây con.',
-      'An independent set has no two adjacent nodes. We want the one of largest total weight on a tree of {n} nodes. Trying all 2^n sets is slow; tree DP works subtree by subtree.',
+      'An independent set has no two adjacent nodes. We want the one of largest total weight on a tree of {n|node|nodes}. Trying all 2^n sets is slow; tree DP works subtree by subtree.',
     ),
     hints: [
       m('Nếu chọn một đỉnh, các đỉnh nào bị cấm?', 'If we pick a node, which nodes are forbidden?'),
@@ -323,7 +323,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const dpTreeEntry: WalkthroughEntry<In, S> = {
   id: 'dp-tree',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t4-dp-tree'],

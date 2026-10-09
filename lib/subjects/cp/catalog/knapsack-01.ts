@@ -24,7 +24,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Túi chứa tối đa {cap}, có {n} món (nhãn hàng: món:khối lượng/giá trị). dp[i][c] = giá trị lớn nhất khi chỉ dùng i món đầu với sức chứa c.',
-    'The bag holds at most {cap} and there are {n} items (row label: item:weight/value). dp[i][c] = the best value using the first i items with capacity c.',
+    'The bag holds at most {cap} and there are {n|item|items} (row label: item:weight/value). dp[i][c] = the best value using the first i items with capacity c.',
   ),
   base: m(
     'Hàng 0: chưa dùng món nào nên dp[0][c] = 0 với mọi sức chứa c.',
@@ -71,7 +71,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Túi chứa tối đa {cap}, có {n} món, mỗi món chỉ lấy một lần hoặc không. Thử mọi tập món thì 2^n; quy hoạch động dùng bảng dp thay thế.',
-      'The bag holds at most {cap} and there are {n} items, each taken once or not at all. Trying every set costs 2^n; dynamic programming uses a table instead.',
+      'The bag holds at most {cap} and there are {n|item|items}, each taken once or not at all. Trying every set costs 2^n; dynamic programming uses a table instead.',
     ),
     hints: [
       m(
@@ -414,7 +414,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const knapsack01Entry: WalkthroughEntry<In, S> = {
   id: 'knapsack-01',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t3-dp-basic'],

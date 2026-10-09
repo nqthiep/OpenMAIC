@@ -212,6 +212,8 @@ interface PooledIframeProps {
 function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
   const { t } = useI18n();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  /** The latest `HIGHLIGHT_ELEMENT` asked before the walkthrough said `widget-ready`. */
+  const pendingHighlight = useRef<Record<string, unknown> | null>(null);
   const registerIframe = useWidgetIframeStore((s) => s.registerIframe);
   const getSendMessage = useWidgetIframeStore((s) => s.getSendMessage);
   const pickTarget = useCanvasStore.use.pickTarget();
@@ -246,6 +248,13 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
           // a question asked now would be lost (one-shot): keep it for `widget-ready`, the engine is waiting for its answer
           if (msg.state.predict)
             useWidgetRuntimeState.getState().holdPredict(sceneId, msg.state.predict.beatId);
+          return;
+        }
+      }
+      if (walkthroughId && type === 'HIGHLIGHT_ELEMENT') {
+        // a flash sent before the page listens would be dropped: keep the latest one for `widget-ready`
+        if (!useWidgetRuntimeState.getState().byScene[sceneId]?.ready) {
+          pendingHighlight.current = payload;
           return;
         }
       }
@@ -295,6 +304,14 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
             iframeRef.current?.contentWindow?.postMessage({ type, ...payload }, '*'),
           walkthroughPresetsOf(useStageStore.getState().scenes.find((x) => x.id === sceneId)),
         );
+        if (d.kind === 'widget-ready' && pendingHighlight.current) {
+          const held = pendingHighlight.current;
+          pendingHighlight.current = null;
+          iframeRef.current?.contentWindow?.postMessage(
+            { type: 'HIGHLIGHT_ELEMENT', ...held },
+            '*',
+          );
+        }
         return;
       }
       if (d.kind === 'runtime-error') {
@@ -315,6 +332,7 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
   // Same for the walkthrough handshake: a fresh document is not ready yet and has no
   // learner state (`desired` is kept and re-sent on its `widget-ready`).
   useEffect(() => {
+    pendingHighlight.current = null;
     useSceneRuntimeErrors.getState().clearScene(sceneId);
     useWidgetRuntimeState.getState().resetIframe(sceneId);
   }, [sceneId, entry.srcDoc]);

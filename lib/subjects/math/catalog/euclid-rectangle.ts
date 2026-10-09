@@ -190,11 +190,11 @@ const EX = {
   ),
   cut: m(
     'Cắt {q} hình vuông cạnh {y} khỏi hình chữ nhật {x} × {y}: {x} = {q}·{y} + {r}.',
-    'Cut {q} squares of side {y} from the {x} × {y} rectangle: {x} = {q}·{y} + {r}.',
+    'Cut {q|square|squares} of side {y} from the {x} × {y} rectangle: {x} = {q}·{y} + {r}.',
   ),
   cutEnd: m(
     'Cắt {q} hình vuông cạnh {y}: {x} = {q}·{y} + 0, không còn dư nên thuật toán dừng.',
-    'Cut {q} squares of side {y}: {x} = {q}·{y} + 0, nothing is left over, so the algorithm stops.',
+    'Cut {q|square|squares} of side {y}: {x} = {q}·{y} + 0, nothing is left over, so the algorithm stops.',
   ),
   gcd: m(
     'Hình vuông cuối cùng có cạnh {g}. Nó lát khít hình chữ nhật trước đó, và cứ thế ngược lên: {g} = ƯCLN({a}, {b}).',
@@ -202,7 +202,7 @@ const EX = {
   ),
   done: m(
     'Vậy ƯCLN({a}, {b}) = {g}: cạnh của hình vuông cuối cùng. Đã cắt tất cả {n} hình vuông.',
-    'So gcd({a}, {b}) = {g}: the side of the last square. {n} squares were cut in all.',
+    'So gcd({a}, {b}) = {g}: the side of the last square. {n|square|squares} were cut in all.',
   ),
 };
 
@@ -310,7 +310,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const euclidRectangleEntry: WalkthroughEntry<In, S> = {
   id: 'euclid-rectangle',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-euclid-diophantine'],

@@ -20,7 +20,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     '{n} khách xếp hàng theo thứ tự đề cho; khách thứ k phải đợi tổng thời gian phục vụ của những người đứng trước. Tổng thời gian chờ hiện tại là {total}.',
-    '{n} customers queue in the given order; customer k waits for the total service time of those before. The current total waiting time is {total}.',
+    '{n|customer|customers} queue in the given order; customer k waits for the total service time of those before. The current total waiting time is {total}.',
   ),
   brute: m(
     'Thử mọi cách xếp: có {perms} thứ tự (n!), mỗi thứ tự tính trong O(n). Tổng chờ nhỏ nhất tìm được là {best}.',
@@ -55,7 +55,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Đề bài', 'The task'),
     narration: m(
       'Một quầy phục vụ {n} khách; khách k cần t[k] phút. Thời gian chờ của khách là tổng thời gian phục vụ những người đứng trước. Ta chọn thứ tự để tổng chờ nhỏ nhất.',
-      'One counter serves {n} customers; customer k needs t[k] minutes. A customer’s waiting time is the total service time of those before. We choose the order that minimises the total wait.',
+      'One counter serves {n|customer|customers}; customer k needs t[k] minutes. A customer’s waiting time is the total service time of those before. We choose the order that minimises the total wait.',
     ),
     hints: [
       m(
@@ -83,7 +83,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Vét cạn', 'Brute force'),
     narration: m(
       'Thử mọi hoán vị của {n} khách cho {perms} thứ tự; mỗi thứ tự tính tổng chờ trong O(n). Với n ≤ 8 thì được, nhưng n! tăng cực nhanh.',
-      'Trying every permutation of {n} customers gives {perms} orders, each costing O(n). Fine for n ≤ 8, but n! explodes.',
+      'Trying every permutation of {n|customer|customers} gives {perms} orders, each costing O(n). Fine for n ≤ 8, but n! explodes.',
     ),
     hints: [
       m('Có bao nhiêu thứ tự xếp n khách?', 'How many orders are there for n customers?'),
@@ -108,7 +108,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Lập luận đổi chỗ', 'The exchange argument'),
     narration: m(
       'Xét hai khách kề nhau cần {x} rồi {y} phút, {x} > {y}. Khách thứ hai đợi thêm {x}. Nếu đổi chỗ, khách thứ hai đợi thêm {y} (ít hơn), còn mọi khách khác không đổi.',
-      'Take two neighbours needing {x} then {y} minutes, {x} > {y}. The second one waits an extra {x}. After swapping, the second waits an extra {y} (less), and everyone else is unchanged.',
+      'Take two neighbours needing {x} then {y|minute|minutes}, {x} > {y}. The second one waits an extra {x}. After swapping, the second waits an extra {y} (less), and everyone else is unchanged.',
     ),
     ask: {
       text: m(
@@ -175,7 +175,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Cộng dồn thời gian chờ', 'Accumulate waiting'),
     narration: m(
       'Khách {k} chờ {w} phút, chính là tổng thời gian phục vụ của các khách trước. Cộng thời gian chờ của từng khách ta được tổng {total} (tới đây).',
-      'Customer {k} waits {w} minutes, the total service time of the customers before. Adding each customer’s wait gives the total {total} (so far).',
+      'Customer {k} waits {w|minute|minutes}, the total service time of the customers before. Adding each customer’s wait gives the total {total} (so far).',
     ),
     hints: [
       m('Thời gian chờ của khách k tính từ đâu?', 'How is the wait of customer k computed?'),
@@ -351,7 +351,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const minTotalWaitEntry: WalkthroughEntry<In, S> = {
   id: 'min-total-wait',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t3-greedy'],

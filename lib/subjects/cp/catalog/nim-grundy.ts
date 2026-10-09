@@ -23,11 +23,11 @@ const ASK_AT = [3, 4];
 const EX = {
   start: m(
     'Trò chơi: {k} đống, mỗi lượt lấy 1, 2 hoặc 3 viên từ MỘT đống; ai không đi được thì thua. Ta tính g(x) cho x = 0..7 rồi ghép các đống bằng xor.',
-    'The game: {k} piles, each turn takes 1, 2 or 3 stones from ONE pile; a player who cannot move loses. We compute g(x) for x = 0..7 then combine piles with xor.',
+    'The game: {k|pile|piles}, each turn takes 1, 2 or 3 stones from ONE pile; a player who cannot move loses. We compute g(x) for x = 0..7 then combine piles with xor.',
   ),
   askMex: m(
     'g({x}): từ {x} viên đi được tới các đống {opts}, có g là {set}. g({x}) = mex của tập này bằng bao nhiêu?',
-    'g({x}): from {x} stones one can reach the sizes {opts}, with g values {set}. What is g({x}), the mex of this set?',
+    'g({x}): from {x|stone|stones} one can reach the sizes {opts}, with g values {set}. What is g({x}), the mex of this set?',
   ),
   mex: m(
     'g({x}) = mex{set} = {g}: số tự nhiên nhỏ nhất KHÔNG có trong tập.',
@@ -43,7 +43,7 @@ const EX = {
   ),
   move: m(
     'Nước thắng: lấy {t} viên từ đống {p} (còn {np}): g đổi từ {gp} thành {gn} nên xor về 0. Đối thủ rơi vào thế thua.',
-    'The winning move: take {t} stones from pile {p} (leaving {np}): g changes from {gp} to {gn} so the xor becomes 0. The opponent is in a losing position.',
+    'The winning move: take {t|stone|stones} from pile {p} (leaving {np}): g changes from {gp} to {gn} so the xor becomes 0. The opponent is in a losing position.',
   ),
   done: m(
     'Kết luận: người đi trước {res}. Mọi trò chơi công bằng theo lượt đều quy về một đống nim qua g.',
@@ -58,7 +58,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Mỗi đống là một trò chơi nhỏ; định lý Sprague–Grundy gán cho nó một số g, và tổng nhiều đống thắng hay thua do xor các g quyết định. Ở đây có {k} đống.',
-      'Each pile is a small game; the Sprague–Grundy theorem gives it a number g, and whether a sum of piles is won or lost is decided by the xor of the g values. Here there are {k} piles.',
+      'Each pile is a small game; the Sprague–Grundy theorem gives it a number g, and whether a sum of piles is won or lost is decided by the xor of the g values. Here there are {k|pile|piles}.',
     ),
     hints: [
       m(
@@ -303,7 +303,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const nimGrundyEntry: WalkthroughEntry<In, S> = {
   id: 'nim-grundy',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t4-game-theory'],

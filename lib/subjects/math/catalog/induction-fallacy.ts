@@ -176,7 +176,7 @@ const beatDefs: readonly BeatDef[] = [
 const EX = {
   hStart: m(
     'Phát biểu "chứng minh bằng quy nạp": trong một đàn {n} con ngựa, mọi con đều cùng màu. Phát biểu này sai; ta tìm chỗ hỏng.',
-    'The claim "proved by induction": in a herd of {n} horses, every horse has the same colour. The claim is false; we look for the flaw.',
+    'The claim "proved by induction": in a herd of {n|horse|horses}, every horse has the same colour. The claim is false; we look for the flaw.',
   ),
   hStep1: m(
     'Bước quy nạp từ k = {k} lên {n}: bỏ con cuối, {k} con còn lại cùng màu theo giả thiết.',
@@ -184,11 +184,11 @@ const EX = {
   ),
   hStep2: m(
     'Bỏ con đầu: {k} con còn lại cũng cùng màu. Hai nhóm chung {ov} con (đậm), nên mọi con cùng màu. Nghe có vẻ trôi chảy.',
-    'Leave out the first horse: the other {k} also have one colour. The two groups share {ov} horses (dark), so all have one colour. It sounds smooth.',
+    'Leave out the first horse: the other {k} also have one colour. The two groups share {ov|horse|horses} (dark), so all have one colour. It sounds smooth.',
   ),
   hCrack: m(
     'Thử bước nhỏ nhất, k = 1 lên 2: hai nhóm là con 1 và con 2, chung {ov} con. Không có gì nối màu hai nhóm lại.',
-    'Try the smallest step, k = 1 to 2: the two groups are horse 1 and horse 2, sharing {ov} horses. Nothing ties the two colours together.',
+    'Try the smallest step, k = 1 to 2: the two groups are horse 1 and horse 2, sharing {ov|horse|horses}. Nothing ties the two colours together.',
   ),
   hFix: m(
     'Bước 1 lên 2 hỏng nên cả chuỗi sụp đổ, dù mọi bước từ k = 2 trở lên đều ổn. Hai con có thể khác màu.',

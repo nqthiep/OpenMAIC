@@ -21,7 +21,7 @@ const edgeKey = (a: number, b: number): string =>
 const EX = {
   start: m(
     'Tìm cây khung nhỏ nhất của đồ thị {n} đỉnh, {m} cạnh có trọng số: nối mọi đỉnh liên thông bằng các cạnh có tổng trọng số nhỏ nhất. DSU: mỗi đỉnh một tập.',
-    'Find a minimum spanning tree of the graph with {n} nodes and {m} weighted edges: connect every connected node with the smallest total weight. DSU: each node alone.',
+    'Find a minimum spanning tree of the graph with {n|node|nodes} and {m} weighted edges: connect every connected node with the smallest total weight. DSU: each node alone.',
   ),
   sort: m(
     'Sắp các cạnh tăng dần theo trọng số, rồi xét lần lượt từ cạnh nhẹ nhất. Cạnh trùng trọng số giữ thứ tự ban đầu.',
@@ -41,11 +41,11 @@ const EX = {
   ),
   doneTree: m(
     'Đủ {taken} cạnh (n − 1) nên dừng sớm: cây khung nhỏ nhất có tổng trọng số {total}.',
-    'We have {taken} edges (n − 1), so we stop early: the minimum spanning tree has total weight {total}.',
+    'We have {taken|edge|edges} (n − 1), so we stop early: the minimum spanning tree has total weight {total}.',
   ),
   doneForest: m(
     'Hết cạnh: chọn {taken} cạnh, còn {comps} thành phần liên thông (rừng khung nhỏ nhất), tổng trọng số {total}.',
-    'Out of edges: {taken} edges chosen, {comps} connected components remain (a minimum spanning forest), total weight {total}.',
+    'Out of edges: {taken|edge|edges} chosen, {comps} connected components remain (a minimum spanning forest), total weight {total}.',
   ),
 };
 
@@ -56,7 +56,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Cây khung nối mọi đỉnh bằng n − 1 cạnh mà không có chu trình. Kruskal xây nó bằng cách luôn thử cạnh nhẹ nhất còn lại. Đồ thị có {n} đỉnh và {m} cạnh.',
-      'A spanning tree connects all nodes with n − 1 edges and no cycle. Kruskal builds it by always trying the lightest remaining edge. The graph has {n} nodes and {m} edges.',
+      'A spanning tree connects all nodes with n − 1 edges and no cycle. Kruskal builds it by always trying the lightest remaining edge. The graph has {n|node|nodes} and {m|edge|edges}.',
     ),
     hints: [
       m(
@@ -84,7 +84,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Sắp xếp cạnh', 'Sort the edges'),
     narration: m(
       'Ta sắp {m} cạnh theo trọng số tăng dần, nên mỗi lần xét ta luôn có cạnh nhẹ nhất chưa xét. Việc sắp xếp chiếm O(m log m).',
-      'We sort the {m} edges by increasing weight, so each time we hold the lightest edge not yet looked at. Sorting costs O(m log m).',
+      'We sort the {m|edge|edges} by increasing weight, so each time we hold the lightest edge not yet looked at. Sorting costs O(m log m).',
     ),
     hints: [
       m('Vì sao cần sắp xếp các cạnh trước?', 'Why must the edges be sorted first?'),
@@ -196,7 +196,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Tổng trọng số là {total} với {taken} cạnh. Kruskal dừng khi đủ n − 1 cạnh hoặc hết cạnh; độ phức tạp O(m log m) do bước sắp xếp.',
-      'The total weight is {total} with {taken} edges. Kruskal stops at n − 1 edges or when edges run out; the cost is O(m log m) from sorting.',
+      'The total weight is {total} with {taken|edge|edges}. Kruskal stops at n − 1 edges or when edges run out; the cost is O(m log m) from sorting.',
     ),
     hints: [
       m('Khi nào ta có thể dừng sớm?', 'When can we stop early?'),
@@ -323,7 +323,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const kruskalEntry: WalkthroughEntry<In, S> = {
   id: 'kruskal',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t4-mst'],

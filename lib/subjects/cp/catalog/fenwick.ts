@@ -18,7 +18,7 @@ const low = (i: number): number => i & -i;
 const EX = {
   start: m(
     'Cây Fenwick cho {n} số (chỉ số từ 1). Nút i lưu tổng của a trên khoảng (i − lowbit(i), i]; cha của i là i + lowbit(i). Ban đầu mọi nút là 0.',
-    'A Fenwick tree for {n} numbers (indices from 1). Node i stores the sum of a over (i − lowbit(i), i]; the parent of i is i + lowbit(i). All nodes start at 0.',
+    'A Fenwick tree for {n|number|numbers} (indices from 1). Node i stores the sum of a over (i − lowbit(i), i]; the parent of i is i + lowbit(i). All nodes start at 0.',
   ),
   lowbit: m(
     'Thêm a[{i}] = {ai}. Trước hết lowbit({i}) = {i} & {ni}: nó bằng bao nhiêu?',
@@ -42,7 +42,7 @@ const EX = {
   ),
   done: m(
     'Tổng a[1..{q}] = {sum}, gộp từ {steps} nút: số bước chỉ bằng số bit 1 của {q}, tối đa log₂ n.',
-    'The sum a[1..{q}] = {sum}, combined from {steps} nodes: the step count equals the number of 1-bits of {q}, at most log₂ n.',
+    'The sum a[1..{q}] = {sum}, combined from {steps|node|nodes}: the step count equals the number of 1-bits of {q}, at most log₂ n.',
   ),
 };
 
@@ -53,7 +53,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Cây Fenwick cần ít mã hơn cây đoạn nhưng trả lời tổng tiền tố cũng trong O(log n). Mỗi nút phụ trách một khoảng có độ dài bằng bit thấp nhất của chỉ số. Có {n} số.',
-      'A Fenwick tree needs less code than a segment tree yet also answers prefix sums in O(log n). Each node is responsible for a range whose length is the lowest set bit of its index. There are {n} numbers.',
+      'A Fenwick tree needs less code than a segment tree yet also answers prefix sums in O(log n). Each node is responsible for a range whose length is the lowest set bit of its index. There are {n|number|numbers}.',
     ),
     hints: [
       m(
@@ -281,7 +281,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const fenwickEntry: WalkthroughEntry<In, S> = {
   id: 'fenwick',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t3-fenwick'],

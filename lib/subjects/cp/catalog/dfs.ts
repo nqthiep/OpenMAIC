@@ -26,7 +26,7 @@ const EX = {
   ),
   visit: m(
     'Thăm {u} và đánh số #{k}. Call stack có {size} đỉnh. Tiếp theo DFS làm gì ở {u}?',
-    'Visit {u} and number it #{k}. The call stack holds {size} nodes. What does DFS do next at {u}?',
+    'Visit {u} and number it #{k}. The call stack holds {size|node|nodes}. What does DFS do next at {u}?',
   ),
   tree: m(
     '{v} chưa thăm: đi từ {u} sang {v}. Cạnh {u}–{v} trở thành cạnh cây của DFS.',
@@ -42,7 +42,7 @@ const EX = {
   ),
   done: m(
     'Xong: DFS thăm {count} trong {n} đỉnh từ {s} qua {tree} cạnh cây.',
-    'Done: DFS visited {count} of {n} nodes from {s} through {tree} tree edges.',
+    'Done: DFS visited {count} of {n|node|nodes} from {s} through {tree} tree edges.',
   ),
 };
 
@@ -202,7 +202,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'DFS thăm {count} đỉnh qua {tree} cạnh cây; đỉnh không nối với {s} không được thăm. Mỗi đỉnh và cạnh xét O(1) lần: O(n + m).',
-      'DFS visited {count} nodes through {tree} tree edges; nodes not connected to {s} are not visited. Each node and edge is handled O(1) times: O(n + m).',
+      'DFS visited {count|node|nodes} through {tree} tree edges; nodes not connected to {s} are not visited. Each node and edge is handled O(1) times: O(n + m).',
     ),
     hints: [
       m('DFS thăm được những đỉnh nào?', 'Which nodes can DFS visit?'),
@@ -319,7 +319,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const dfsEntry: WalkthroughEntry<In, S> = {
   id: 'dfs',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t3-graph-traversal'],

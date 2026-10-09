@@ -191,7 +191,7 @@ const EX = {
   ),
   count: m(
     'Còn lại {black} ô đen và {white} ô trắng, tổng {total} ô. Một cách lát cần {d} domino, mỗi cái phủ một ô mỗi màu.',
-    'There remain {black} black and {white} white cells, {total} in all. A tiling needs {d} dominoes, each covering one cell of each colour.',
+    'There remain {black} black and {white} white cells, {total} in all. A tiling needs {d|domino|dominoes}, each covering one cell of each colour.',
   ),
   concludeNo: m(
     'Hai ô bị bỏ cùng màu đen nên {black} ≠ {white}. Mỗi domino phủ một ô mỗi màu, vậy không thể lát được.',
@@ -207,7 +207,7 @@ const EX = {
   ),
   doneYes: m(
     'Bàn {n} × {n} bỏ hai ô kề lát được bằng {d} domino. Số đếm bằng nhau chỉ là điều kiện cần; ở đây ta đã chỉ ra một cách lát.',
-    'The {n} × {n} board with two adjacent cells removed is tiled by {d} dominoes. Equal counts are only necessary; here we showed a tiling.',
+    'The {n} × {n} board with two adjacent cells removed is tiled by {d|domino|dominoes}. Equal counts are only necessary; here we showed a tiling.',
   ),
 };
 

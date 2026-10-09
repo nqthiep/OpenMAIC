@@ -24,7 +24,7 @@ const EX = {
   ),
   naive: m(
     'Cách chậm: cộng từng phần tử a[{l}..{r}] = {direct}, tốn {count} phép cộng cho MỖI truy vấn, tức O(n).',
-    'The slow way: add up a[{l}..{r}] = {direct}, {count} additions for EVERY query, which is O(n).',
+    'The slow way: add up a[{l}..{r}] = {direct}, {count|addition|additions} for EVERY query, which is O(n).',
   ),
   build: m(
     'Dựng P[{j}] = P[{i}] + a[{i}] = {pi} + {ai} = {pn}.',
@@ -79,7 +79,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Cách chậm', 'The slow way'),
     narration: m(
       'Cộng trực tiếp a[{l}..{r}] = {direct} cần {count} phép cộng. Với q truy vấn dài ta mất O(n·q).',
-      'Adding a[{l}..{r}] directly gives {direct} and takes {count} additions. With q long queries that is O(n·q).',
+      'Adding a[{l}..{r}] directly gives {direct} and takes {count|addition|additions}. With q long queries that is O(n·q).',
     ),
     hints: [
       m(
@@ -299,7 +299,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const prefixSumEntry: WalkthroughEntry<In, S> = {
   id: 'prefix-sum',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-array-prefix'],

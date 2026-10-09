@@ -96,7 +96,7 @@ function allMessages(): { where: string; m: Messages }[] {
 describe('bs-answer-mini: static fields', () => {
   it('matches SCHEMA 4.2', () => {
     expect(entry.id).toBe('bs-answer-mini');
-    expect(entry.entryRev).toBe(2);
+    expect(entry.entryRev).toBe(4);
     expect(entry.subject).toBe('cp');
     expect(entry.visualizer).toBe('array');
     expect(entry.curriculumTopics).toEqual(['t2-binary-search']);

@@ -17,7 +17,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     '{n} đỉnh, ban đầu mỗi đỉnh là một tập riêng (đỉnh nào cũng là gốc). Ta làm {k} phép union(a, b); mỗi tập là một cây, gốc ghi kích thước |S|.',
-    '{n} nodes, each its own set at first (every node is a root). We perform {k} union(a, b) calls; each set is a tree whose root shows its size |S|.',
+    '{n|node|nodes}, each its own set at first (every node is a root). We perform {k} union(a, b) calls; each set is a tree whose root shows its size |S|.',
   ),
   find: m(
     'union({a}, {b}) – bước 1: tìm gốc của {a}. Từ {a} đi lên theo cha cho tới khi gặp một gốc. Cần đi lên mấy bước?',
@@ -41,7 +41,7 @@ const EX = {
   ),
   done: m(
     'Sau {k} phép union còn {sets} tập rời nhau trong {n} đỉnh.',
-    'After {k} unions there are {sets} disjoint sets among the {n} nodes.',
+    'After {k|union|unions} there are {sets} disjoint sets among the {n|node|nodes}.',
   ),
 };
 
@@ -52,7 +52,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Hợp nhất tập (DSU) quản lý các tập rời nhau: hỏi hai đỉnh có cùng tập không và gộp hai tập. Mỗi tập là một cây; gốc là đại diện của tập. Có {n} đỉnh.',
-      'A disjoint set union keeps disjoint sets: it answers whether two nodes share a set and merges two sets. Each set is a tree; the root represents the set. There are {n} nodes.',
+      'A disjoint set union keeps disjoint sets: it answers whether two nodes share a set and merges two sets. Each set is a tree; the root represents the set. There are {n|node|nodes}.',
     ),
     hints: [
       m(
@@ -338,7 +338,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const dsuEntry: WalkthroughEntry<In, S> = {
   id: 'dsu',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t3-dsu'],

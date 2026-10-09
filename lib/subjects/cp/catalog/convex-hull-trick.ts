@@ -22,7 +22,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     '{n} đường y = k·x + m (hàng) và {q} truy vấn x (cột): ô là giá trị k·x + m. Với mỗi x ta cần giá trị nhỏ nhất của cột. Dùng deque giữ các đường còn có ích.',
-    '{n} lines y = k·x + m (rows) and {q} query points x (columns): a cell is k·x + m. For each x we need the column minimum. A deque keeps the lines that still matter.',
+    '{n|line|lines} y = k·x + m (rows) and {q} query points x (columns): a cell is k·x + m. For each x we need the column minimum. A deque keeps the lines that still matter.',
   ),
   ask: m(
     'Thêm đường L{l} (k = {k}, m = {mm}). Deque có từ hai đường trở lên; đường cuối deque, L{b}, còn có ích không hay bị L{l} và L{a} che mất?',
@@ -57,7 +57,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Ta có {n} đường thẳng và {q} điểm x; với mỗi x cần min của k·x + m trên mọi đường. Thử mọi đường cho mỗi x tốn O(n·q); bao lồi giảm còn O(n + q) khi k giảm và x tăng.',
-      'We have {n} lines and {q} points x; for each x we need the minimum of k·x + m over all lines. Trying every line per x costs O(n·q); the hull trick gets O(n + q) when k decreases and x increases.',
+      'We have {n|line|lines} and {q} points x; for each x we need the minimum of k·x + m over all lines. Trying every line per x costs O(n·q); the hull trick gets O(n + q) when k decreases and x increases.',
     ),
     hints: [
       m(
@@ -320,7 +320,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const convexHullTrickEntry: WalkthroughEntry<In, S> = {
   id: 'convex-hull-trick',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t4-dp-optimize'],

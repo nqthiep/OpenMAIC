@@ -22,7 +22,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Đặt {n} quân hậu lên bàn {n} × {n} sao cho không hai hậu nào tấn công nhau (cùng hàng, cột hoặc đường chéo).',
-    'Place {n} queens on an {n} × {n} board so that no two attack each other (same row, column or diagonal).',
+    'Place {n|queen|queens} on an {n} × {n} board so that no two attack each other (same row, column or diagonal).',
   ),
   row: m(
     'Sang hàng {r}: mỗi hàng đặt đúng một hậu, nên thử lần lượt từng cột, bắt đầu từ cột 0.',
@@ -50,7 +50,7 @@ const EX = {
   ),
   solution: m(
     'Đã đặt đủ {n} hậu, không hậu nào tấn công nhau: đây là nghiệm đầu tiên, các hậu ở cột {cols}.',
-    'All {n} queens are placed and none attack each other: this is the first solution, queens in columns {cols}.',
+    'All {n|queen|queens} are placed and none attack each other: this is the first solution, queens in columns {cols}.',
   ),
   doneYes: m(
     'Dừng ở nghiệm đầu tiên sau {attempts} lần thử ô.',
@@ -58,7 +58,7 @@ const EX = {
   ),
   doneNo: m(
     'Hàng 0 đã hết cột: không có cách đặt {n} hậu. Đã thử mọi khả năng sau {attempts} lần thử ô.',
-    'Row 0 ran out of columns: {n} queens cannot be placed. Every possibility was tried in {attempts} cell checks.',
+    'Row 0 ran out of columns: {n|queen|queens} cannot be placed. Every possibility was tried in {attempts} cell checks.',
   ),
 };
 
@@ -69,7 +69,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Bài {n} hậu: đặt {n} quân hậu lên bàn {n} × {n} không tấn công nhau. Ta dùng quay lui: đặt từng hàng, gặp ngõ cụt thì lùi lại.',
-      'The {n}-queens task: place {n} queens on an {n} × {n} board with no attacks. We use backtracking: fill row by row and step back at a dead end.',
+      'The {n}-queens task: place {n|queen|queens} on an {n} × {n} board with no attacks. We use backtracking: fill row by row and step back at a dead end.',
     ),
     hints: [
       m(
@@ -218,7 +218,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Tìm được nghiệm', 'A solution'),
     narration: m(
       'Cả {n} hàng đều có hậu và không hậu nào tấn công nhau: các hậu ở cột {cols} (theo thứ tự hàng). Ta dừng ở nghiệm đầu tiên.',
-      'All {n} rows hold a queen and none attack each other: the queens are in columns {cols} (in row order). We stop at the first solution.',
+      'All {n|row|rows} hold a queen and none attack each other: the queens are in columns {cols} (in row order). We stop at the first solution.',
     ),
     hints: [
       m('Khi nào ta biết đã xong?', 'When do we know we are done?'),
@@ -244,7 +244,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Xong sau {attempts} lần thử ô. Quay lui không thử hết {n}^{n} cách đặt mà bỏ cả nhánh ngay khi một hậu bị chặn: đó là sức mạnh của việc cắt tỉa.',
-      'Done after {attempts} cell checks. Backtracking does not try all {n}^{n} placements; it drops a whole branch as soon as a queen is blocked: that is the power of pruning.',
+      'Done after {attempts} cell checks. Backtracking does not try all {n}^{n|placement|placements}; it drops a whole branch as soon as a queen is blocked: that is the power of pruning.',
     ),
     hints: [
       m(
@@ -358,7 +358,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const nQueensEntry: WalkthroughEntry<In, S> = {
   id: 'n-queens',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t2-backtracking'],

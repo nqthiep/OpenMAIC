@@ -18,7 +18,7 @@ const NEED: Readonly<Record<string, string>> = { ')': '(', ']': '[', '}': '{' };
 const EX = {
   start: m(
     'Xâu có {n} ký tự. Duyệt từng ký tự với một stack (vào sau ra trước); lúc đầu stack rỗng.',
-    'The string has {n} characters. Scan it with a stack (last in, first out); at first the stack is empty.',
+    'The string has {n|character|characters}. Scan it with a stack (last in, first out); at first the stack is empty.',
   ),
   push: m(
     'Ký tự {c} ở vị trí {i} là ngoặc mở: đẩy vào stack. Stack có {size} ký tự.',
@@ -65,7 +65,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Xâu có {n} ký tự gồm ngoặc tròn, vuông, nhọn. Ta dùng một stack để nhớ các ngoặc mở chưa được đóng.',
-      'The string has {n} characters of round, square and curly brackets. We use a stack to remember the opening brackets not closed yet.',
+      'The string has {n|character|characters} of round, square and curly brackets. We use a stack to remember the opening brackets not closed yet.',
     ),
     hints: [
       m(
@@ -330,7 +330,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const stackQueueEntry: WalkthroughEntry<In, S> = {
   id: 'stack-queue',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-stack-queue'],

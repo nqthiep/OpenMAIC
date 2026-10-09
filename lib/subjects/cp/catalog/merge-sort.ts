@@ -20,7 +20,7 @@ const m = (vi: string, en: string): Messages => ({ 'vi-VN': vi, 'en-US': en });
 const EX = {
   start: m(
     'Sắp xếp {n} số bằng merge sort: chia đôi đến khi mỗi đoạn có một phần tử, rồi trộn hai đoạn đã sắp thành một.',
-    'Sort {n} numbers with merge sort: halve until each range has one element, then merge sorted ranges into one.',
+    'Sort {n|number|numbers} with merge sort: halve until each range has one element, then merge sorted ranges into one.',
   ),
   split: m(
     'Chia đoạn [{lo}, {hi}] tại mid = {mid} thành nửa trái [{lo}, {mid}] và nửa phải [{r0}, {hi}].',
@@ -52,7 +52,7 @@ const EX = {
   ),
   done: m(
     'Cả mảng {n} số đã sắp xếp. Mỗi tầng trộn tốn O(n) và có khoảng log n tầng: O(n log n).',
-    'The whole array of {n} numbers is sorted. Each level of merging costs O(n) and there are about log n levels: O(n log n).',
+    'The whole array of {n|number|numbers} is sorted. Each level of merging costs O(n) and there are about log n levels: O(n log n).',
   ),
 };
 
@@ -63,7 +63,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Bắt đầu', 'Start'),
     narration: m(
       'Merge sort chia để trị: chia mảng {n} số làm đôi cho tới khi mỗi đoạn một phần tử, rồi trộn lại theo thứ tự.',
-      'Merge sort divides and conquers: halve the array of {n} numbers until each range holds one element, then merge them back in order.',
+      'Merge sort divides and conquers: halve the array of {n|number|numbers} until each range holds one element, then merge them back in order.',
     ),
     hints: [
       m(
@@ -209,7 +209,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Cả mảng {n} số đã sắp xếp. Chia đôi cho log n tầng, mỗi tầng trộn O(n), nên O(n log n) cho mọi đầu vào, đổi lại cần thêm bộ nhớ phụ O(n).',
-      'The whole array of {n} numbers is sorted. Halving gives log n levels, each merge level costs O(n), so O(n log n) for every input, at the price of O(n) extra memory.',
+      'The whole array of {n|number|numbers} is sorted. Halving gives log n levels, each merge level costs O(n), so O(n log n) for every input, at the price of O(n) extra memory.',
     ),
     hints: [
       m('Có bao nhiêu tầng chia đôi?', 'How many levels of halving are there?'),
@@ -364,7 +364,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const mergeSortEntry: WalkthroughEntry<In, S> = {
   id: 'merge-sort',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-sorting', 't2-divide-conquer'],

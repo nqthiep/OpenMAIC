@@ -35,7 +35,7 @@ const EX = {
   ),
   doneHit: m(
     'Trả về cặp ({i}, {j}) sau {steps} lần so sánh.',
-    'Return the pair ({i}, {j}) after {steps} comparisons.',
+    'Return the pair ({i}, {j}) after {steps|comparison|comparisons}.',
   ),
   miss: m(
     'i = {i} không còn nhỏ hơn j = {j}: hết cặp để thử, không có cặp nào có tổng {target}.',
@@ -43,7 +43,7 @@ const EX = {
   ),
   doneMiss: m(
     'Không có cặp nào, sau {steps} lần so sánh.',
-    'There is no such pair, after {steps} comparisons.',
+    'There is no such pair, after {steps|comparison|comparisons}.',
   ),
 };
 
@@ -206,7 +206,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Xong sau {steps} lần so sánh. Mỗi lần dời loại bớt ít nhất một phần tử, nên tối đa n − 1 lần: O(n).',
-      'Done after {steps} comparisons. Each move rules out at least one element, so at most n − 1 of them: O(n).',
+      'Done after {steps|comparison|comparisons}. Each move rules out at least one element, so at most n − 1 of them: O(n).',
     ),
     hints: [
       m('Vòng lặp dừng vì lý do nào?', 'Why did the loop stop?'),
@@ -287,7 +287,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const twoPointersEntry: WalkthroughEntry<In, S> = {
   id: 'two-pointers',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-array-prefix'],

@@ -179,7 +179,7 @@ const beatDefs: readonly BeatDef[] = [
 const EX = {
   start: m(
     'Mặt đồng hồ chỉ có n = {n} giờ: các số từ 0 đến {n1} nằm đều quanh vòng tròn, đi hết {n1} thì quay về 0.',
-    'A clock with only n = {n} hours: the numbers 0 to {n1} sit evenly around the circle, and after {n1} comes 0 again.',
+    'A clock with only n = {n|hour|hours}: the numbers 0 to {n1} sit evenly around the circle, and after {n1} comes 0 again.',
   ),
   multiply1: m(
     'Nhân với a = {a}: mũi tên đi từ điểm 1 tới điểm {a}, vì {a} × 1 = {a} (mod {n}).',
@@ -195,11 +195,11 @@ const EX = {
   ),
   cyclePure: m(
     'Các luỹ thừa của {a} modulo {n} quay về điểm xuất phát sau {period} bước: chu kỳ là {period}, còn n − 1 = {n1}.',
-    'The powers of {a} modulo {n} come back to the start after {period} steps: the cycle is {period}, while n − 1 = {n1}.',
+    'The powers of {a} modulo {n} come back to the start after {period|step|steps}: the cycle is {period}, while n − 1 = {n1}.',
   ),
   cycleTail: m(
     'Sau {tail} số hạng đầu, các luỹ thừa của {a} modulo {n} đi vào một vòng lặp độ dài {period} (nét đậm); n − 1 = {n1}.',
-    'After the first {tail} terms the powers of {a} modulo {n} enter a loop of length {period} (bold); n − 1 = {n1}.',
+    'After the first {tail|term|terms} the powers of {a} modulo {n} enter a loop of length {period} (bold); n − 1 = {n1}.',
   ),
   done: m(
     'Luỹ thừa của {a} modulo {n} lặp lại với chu kỳ {period}, không nhất thiết bằng n − 1 = {n1}.',
@@ -301,7 +301,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const modularClockEntry: WalkthroughEntry<In, S> = {
   id: 'modular-clock',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-modular-arith'],
