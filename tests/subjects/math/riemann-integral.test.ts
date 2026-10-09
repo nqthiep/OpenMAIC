@@ -171,5 +171,5 @@ describe('riemann-integral: the figure is the mathematics', () => {
         expect(f.state.polygons.length).toBeLessThanOrEqual(140);
       }
     }
-  });
+  }, 60_000);
 });

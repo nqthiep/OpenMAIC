@@ -1,8 +1,8 @@
 # Handoff: SubjectTutor, trạng thái và việc tiếp theo
 
-- **Trạng thái**: Living document, chụp ngày 2026-10-07 (Phase 3 cập nhật 2026-10-08); cập nhật khi bàn giao tiếp
-- **Ngày**: 2026-10-08
-- **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 144 commit chưa push so với `origin/it-math`. Chưa push gì sau lần push đầu tiên của tài liệu.
+- **Trạng thái**: Living document, cập nhật lần cuối 2026-10-09; cập nhật khi bàn giao tiếp
+- **Ngày**: 2026-10-09
+- **Nhánh**: `it-math` (checkout chính `/Users/quangthiep/Projects/OpenMAIC`). Có 245 commit chưa push so với `origin/it-math` (chỉ commit cục bộ theo yêu cầu của chủ dự án). Các worktree `task/*` cũ đã xoá 2026-10-09; `/Users/quangthiep/Projects/tutor-wt/` chỉ còn `mk.sh` và `accept.sh`.
 - **Người nhận**: agent hoặc người tiếp quản. Đọc hết file này trước khi làm gì.
 
 > **Cập nhật 2026-10-08:** Toán chuyển sang web UI (ADR 0015): 27 walkthrough tương tác thay cho 21 clip Manim; xem mục 3b.
@@ -84,6 +84,14 @@ Chưa làm và vì sao:
 | Lát 1d (`1d-00`…`1d-05`), `2-CI1` | cổng `1d-00` cần 20 lần e2e liên tiếp, ≥ 10 lớp dùng thật và G1 đạt (ADR 0012 quyết định 7) |
 | Phase 3 | review LLM và calibration cho 27 walkthrough Toán cần hai model mạnh khác nhà cung cấp (mục 3b); 3B trở đi chờ G1 |
 | Review ba góc của Phase 2 (an ninh/server, host/runtime/a11y, nội dung/catalog/provider) | chưa làm; việc kế tiếp |
+
+### Review thật bằng hai model (2026-10-09)
+
+Cổng OpenCode Go (khoá trong `.env.local`, `DEEPSEEK_BASE_URL=https://opencode.ai/zen/go/v1`) liệt kê nhiều hãng. Cặp chạy được: `deepseek:deepseek-v4-pro` (thinking tắt) và `openai:kimi-k3` (đặt `OPENAI_API_KEY`/`OPENAI_BASE_URL` trỏ cùng cổng, `OPENAI_MODELS=kimi-k3`). `gpt-6-luna` báo "Model does not support this protocol" qua chat completions; `glm-5.3` trả "malformed output". Mỗi entry tốn khoảng 10 phút (kimi-k3 suy luận lâu), `TUTOR_REVIEW_TIMEOUT_MS=900000`, `TUTOR_REVIEW_MAX_OUTPUT_TOKENS=32000`.
+
+Kết quả: chạy 8 entry thì hết hạn mức ("Go usage limit exceeded"). Đạt và đã lưu ở `lib/subjects/cp/reviews/`: `binary-search@3`, `bs-answer-mini@4`, `stack-queue@3` (đừng sửa nội dung ba entry này, file mất hiệu lực theo `contentHash`). Chưa đạt, lưu làm bản ghi ở `docs/tutor/review-runs/2026-10-09-deepseek-kimi/`: `cauchy-schwarz`, `two-pointers`, `prefix-sum`, `merge-sort`, `fib-recursion-tree`; các lỗi thật trong đó đã sửa (entryRev tăng). Reviewer DeepSeek hay ghi mục "đúng" vào `factErrors` làm trượt oan; prompt đã dặn lại. Còn khoảng 58 entry chưa review. Model free duy nhất còn dùng được là `longcat-2.5-preview-free` (một hãng, hay quá giờ): không đủ lập hội đồng hai hãng.
+
+Chạy tiếp khi có hạn mức: `pnpm exec tsx eval/tutor-review/runner.ts <entryId>` với `MODEL_ROUTES` trỏ hai stage `tutor-review-<môn>` và `tutor-review-<môn>-2` tới hai model trên (xem `eval/tutor-review/runner.ts` đầu file); chạy song song tối đa 4 tiến trình.
 
 ### Gate review LLM: đã thử một phần, CHƯA đạt (cập nhật 2026-10-07)
 
@@ -172,13 +180,9 @@ npx vitest run tests/tutor tests/widgets tests/subjects tests/runtime tests/play
 TUTOR_BROWSER=1 npx vitest run tests/tutor
 ```
 
-Kết quả hiện tại: `tsc` sạch, `eslint` 0 lỗi (một cảnh báo `Static` chưa dùng), browser test `tests/tutor` đạt 542/542. Test vitest các thư mục trên đạt, **trừ** các lỗi nền:
+Kết quả 2026-10-09: `tsc` sạch, `eslint` 0 lỗi, `check_docs` 0 vấn đề, `pnpm build` và `docker build` (cờ workbench bật) đều qua. Trên **Node 22** (`fnm install 22`, bản CI dùng) toàn bộ vitest qua; trên **Node 24** có đúng 46 test đỏ ở `tests/runtime/chat-storage.test.ts` (40), `tests/quiz/runtime.test.ts` (4) và `tests/media/server-backed-media-orchestrator.test.ts` (2), cũng đỏ trên `main` nguyên bản và đạt 146/146 dưới Node 22, nên là khác biệt môi trường, không phải lỗi của công việc này.
 
-- `tests/runtime/chat-storage.test.ts` (nhiều test) và `tests/persistence/stage-access-fidelity.test.ts`: **đã kiểm chứng** cũng đỏ trên worktree `base` (nhánh `main`, commit `4685cad`: 43 test đỏ ở hai file này), nên không do công việc này.
-- `tests/persistence/asset-byte-store.test.ts`: đỏ khi chạy cả bộ song song, **đạt 3/3 khi chạy riêng** trên `it-math`. Coi là lỗi phụ thuộc tải; chưa điều tra `[Unverified]`.
-- hai test "cross-owner isolation" trong `tests/agent-runtime/dsl-tools.test.ts` (cột `owner_id` không tồn tại): do agent báo, chưa tự chạy lại trên `main` `[Unverified]`.
-
-`tests/tutor/build/runtime-fresh.test.ts` thỉnh thoảng quá 5 giây khi chạy cả bộ song song (đã nâng timeout 60 giây); chạy riêng thì qua.
+Một số test nặng vượt timeout 5 giây khi cả bộ chạy song song và máy bận (ví dụ `tests/subjects/math/curve-sketching`, `tests/media/media-placeholder-lease-guard`, `tests/workbench/workspace-rail-session-rename`); chạy riêng thì qua. Các test của ta đã được nới timeout 60 giây ở những chỗ đã gặp.
 
 ### Quy tắc nội dung catalog
 
@@ -231,23 +235,23 @@ Nghiệm thu một nhánh: trong worktree chạy eslint và prettier trên file 
 
 | Việc | Vì sao chặn | Task liên quan |
 | --- | --- | --- |
-| Khoá API và tên model chính xác | Cổng G1/G2, mọi eval thật (moderation, review, sim-learner, qa, lesson), hội đồng review LLM ở `I-04`…`I-07`. Chưa có số đo nào, nên các ngưỡng vẫn là mục tiêu thiết kế, không phải kết quả | `0-02`, `0-05`, `1b-26`, `G1-01`, `2-G2` |
-| Dựng image Docker | Bản `pnpm build` standalone đã đóng gói file review (kiểm 2026-10-09); image Docker thì chưa dựng `[Unverified]` | OPERATIONS §2, smoke item 8 |
+| Hạn mức OpenCode Go (khoá trong `.env.local`) | Hội đồng review LLM cho các entry còn lại (xem "Review thật" bên dưới): chạy 2026-10-09 thì cổng báo "Go usage limit exceeded". Cổng G1/G2 và các eval thật khác cũng cần hạn mức | `I-04`…`I-07`, `2-G2`, `G1-01` |
+| Image Docker | Đã dựng 2026-10-09 (`docker build --build-arg NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`); trong container `lib/subjects/cp/reviews/` có đủ 3 file review | OPERATIONS §2 |
 | `node_modules` thật cho Playwright | e2e `e2e/tests/*.spec.ts` chưa chạy; `1c-21` (e2e chờ dự đoán) chưa làm | `1c-21` |
-| Runner CI có `g++`, `python3` | Chưa kiểm chứng | bước `TUTOR_IMPL_CHECK` |
-| Review do người | Bản dịch giao diện chưa ai đọc `[Unverified]`; nội dung bài giải đề P2/P3 và 4 mô-đun 2D là đề xuất của leader `[Inference]`, hội đồng LLM duyệt ở bước tích hợp | `I-05`, `I-06` |
+| Runner CI có `g++`, `python3` | Chưa kiểm chứng trên CI thật `[Unverified]` | bước `TUTOR_IMPL_CHECK` |
+| Review do người | Bản dịch giao diện `subject.tutor.*` (20 khoá × 12 locale) đã được đọc lại 2026-10-09, không thấy lỗi, nhưng chưa có người bản ngữ xem; nội dung bài giải đề P2/P3 và 4 mô-đun 2D là đề xuất của leader `[Inference]` | `I-05`, `I-06` |
 
 ## 7. Vấn đề đã biết, chưa sửa
 
 Lấy từ REVIEW vòng 11 và báo cáo của các agent:
 
-- Xuất video coi widget `code` là bị chặn kể cả khi `OPENMAIC_ALLOW_CODE_WIDGET` bật (chưa nối cờ vào `createVideoTimelineDeps`).
-- Tin nhắn vai assistant trong lịch sử do client gửi chưa bị lọc; route phiên Pi (`/api/agent/sessions/**`) chưa lọc tin học sinh.
-- Cổng sim-learner đổi sang so với nhóm đối chứng không có bài giảng (cần hiệu ≥ 20 điểm so với đối chứng, ≥ 10 so với bản suy giảm). Tài liệu còn nhắc `--calibrate` và cổng hiệu tuyệt đối cũ; cần cập nhật.
+- Đã sửa 2026-10-09: xuất video giờ theo chính sách widget `code` của server; `HIGHLIGHT_ELEMENT` gửi trước `widget-ready` được giữ lại; `/api/quiz-grade` được lọc nội dung; lọc lịch sử chat đã phủ tới 10 tin học sinh gần nhất.
+- Còn lại: route phiên agent của workbench (`app/api/agent/sessions/**`) chưa lọc tin học sinh (cần quyết định của chủ dự án, SECURITY §6); tin vai assistant trong lịch sử do client gửi chưa lọc; `extractVisibleText` chưa đọc `chart` và PBL v2; chưa ghi `tutorLearning` kiểu `moderation`.
+- Cổng sim-learner đo so với nhóm đối chứng không học (tài liệu đã cập nhật khớp mã).
 - `bs-answer-mini` preset `one-tree` có 14 beat; provider cắt còn 12 beat kể và giữ beat `done`.
 - Bộ lọc kiểm duyệt: mẫu "benign" gồm lời hỗ trợ khi học sinh có ý tự hại có thể bị lọc chặn; ghi nhận chứ không xoá mẫu.
 - Replay của `generate_walkthrough` giữ map `(sessionId, callId)` trong bộ nhớ tiến trình (tối đa 1000); sau khi khởi động lại chỉ dựa vào so sánh nội dung giống hệt.
-- Khi người dùng bấm Play lúc đang có câu hỏi dự đoán, tick đi tiếp và câu hỏi bị coi là bỏ qua (không giữ phát).
+- Bấm Play khi đang có câu hỏi dự đoán thì câu hỏi bị coi là bỏ qua và được báo `skipped`: chủ ý, không phải lỗi.
 - Các mã lỗi mới của tool `generate_walkthrough` (`no-document`, `content-blocked`, replay) đã ghi vào INTERFACES §3; hình dạng `lessonKit` mới (`pitfalls: {text, lang?}[]`, `hints: string[]`) đã khớp INTERFACES.
 - `docs/tutor/curriculum/` là nguồn gốc; đổi nó thì chạy lại `npx tsx scripts/split-curriculum.ts`.
 
@@ -261,9 +265,9 @@ Lấy từ REVIEW vòng 11 và báo cáo của các agent:
 
 ```bash
 cd /Users/quangthiep/Projects/OpenMAIC
-git status --short            # chỉ nên thấy docs/tutor/decisions/0006…md (+ HANDOFF.md) và .omo/ chưa theo dõi
+git status --short            # chỉ nên thấy AGENTS.md và CLAUDE.md (sinh bởi next dev, đừng commit)
 git log --oneline -5
-git worktree list             # nhiều worktree task/*; các cái 2-V1…2-V4, 2-E1 còn việc dở
+git worktree list             # chỉ checkout chính
 python3 docs/tutor/tools/check_docs.py
 npx tsc --noEmit
 ```

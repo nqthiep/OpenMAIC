@@ -23,7 +23,7 @@ describe('math review material', () => {
       expect(m.alt?.locale).toBe('en-US');
       expect(buildReviewPrompt(m).length, entry.id).toBeLessThan(160_000);
     }
-  });
+  }, 60_000);
 
   it('math material is reviewed with the math prompt, informatics with the programming one', () => {
     const wk = buildReviewMaterial(mathPack.walkthroughs[0]);
