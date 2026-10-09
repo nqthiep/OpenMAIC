@@ -12,7 +12,7 @@
 
 | Sự thật | Nguồn |
 | --- | --- |
-| Interactive scene = HTML hoàn chỉnh render bằng iframe `srcDoc`, sandbox không `allow-same-origin`. | `packages/@openmaic/dsl/src/interactive.ts`; `components/scene-renderers/InteractiveIframeHost.tsx:365` |
+| Interactive scene = HTML hoàn chỉnh render bằng iframe `srcDoc`, sandbox không `allow-same-origin`. | `packages/@openmaic/dsl/src/interactive.ts`; `components/scene-renderers/InteractiveIframeHost.tsx:370` |
 | `WidgetType` là union đóng 6 giá trị; `isInteractiveContent` và `validateScene` từ chối giá trị lạ. | `packages/@openmaic/dsl/src/interactive.ts:5-26,65-77`; `packages/@openmaic/dsl/src/validate.ts:200-216` |
 | Agent **không có bước outline**: nó tự gọi tool `generate_scene`; tool nhận `widgetType` (5 giá trị) và `widgetOutline: Unknown`. Đường "classic" (`scene-outlines-stream` → `scene-content`) **không nhận skill**. | `lib/server/agent-runtime/generation-tools.ts:44-70`; `lib/server/agent-runtime/course-tools.ts:240` |
 | `outline-constraints.json`: `skillOutlineContext`/`renderConstraints` **không có caller production**; kiểm tra duy nhất là `checkScenesAgainstSkill` **sau khi ghi** scene, chỉ báo `skillViolations`, và bỏ `requiredWidgetOutlineFields`. → `SKILL.md` là kênh chỉ dẫn LLM duy nhất; ràng buộc chỉ là cảnh báo. | `lib/server/agent-runtime/skills.ts:719,879-890`; `lib/server/agent-runtime/generation-tools.ts:458-461` |

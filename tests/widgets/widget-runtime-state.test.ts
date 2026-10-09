@@ -5,6 +5,7 @@ import {
   walkthroughPresetsOf,
 } from '@/components/scene-renderers/InteractiveIframeHost';
 import {
+  holdPredict,
   markReady,
   recordDesiredPayload,
   recordState,
@@ -113,6 +114,23 @@ describe('widget-runtime-state reducers', () => {
     });
   });
 
+  it('recordDesiredPayload keeps a prediction question asked while the iframe is not ready, and not one asked after it was', () => {
+    useWidgetRuntimeState.setState({ byScene: {} });
+    recordDesiredPayload('s1', 'SET_WIDGET_STATE', {
+      state: { preset: 'mid-hit', frame: 2, predict: { beatId: 'b1' } },
+    });
+    expect(useWidgetRuntimeState.getState().byScene.s1.pendingPredict).toEqual({ beatId: 'b1' });
+    expect(useWidgetRuntimeState.getState().markReady('s1', PRESETS)).toEqual(
+      msg({ preset: 'mid-hit', frame: 2, predict: { beatId: 'b1' } }),
+    );
+    expect(useWidgetRuntimeState.getState().byScene.s1.pendingPredict).toBeUndefined();
+    // already ready: the message goes straight to the iframe, nothing is held
+    recordDesiredPayload('s1', 'SET_WIDGET_STATE', {
+      state: { frame: 3, predict: { beatId: 'b2' } },
+    });
+    expect(useWidgetRuntimeState.getState().byScene.s1.pendingPredict).toBeUndefined();
+  });
+
   it('recordState ignores everything before ready', () => {
     const map = setDesired(EMPTY, 's1', DESIRED);
     expect(
@@ -198,9 +216,11 @@ describe('widget-runtime-state reducers', () => {
     expect(map.s1.state).toEqual({ preset: 'mid-hit', frame: 1, prediction });
   });
 
-  it('resetIframe clears ready and state but keeps desired, which markReady returns again', () => {
+  it("resetIframe clears ready and state but keeps desired; markReady returns the learner's last place when there is one", () => {
     let map = setDesired(EMPTY, 's1', DESIRED);
     map = markReady(map, 's1', PRESETS).map;
+    // no widget-state yet: the rebuilt iframe gets what the engine asked for
+    expect(markReady(resetIframe(map, 's1'), 's1', PRESETS).desired).toEqual(DESIRED);
     map = recordState(map, 's1', makeState({ walkthroughId: 'w', preset: 'mid-hit', frame: 2 }));
     expect(map.s1.state).toBeDefined();
 
@@ -211,8 +231,44 @@ describe('widget-runtime-state reducers', () => {
     expect(
       recordState(reset, 's1', makeState({ walkthroughId: 'w', preset: 'mid-hit', frame: 2 })),
     ).toBe(reset);
-    expect(markReady(reset, 's1', PRESETS).desired).toEqual(DESIRED);
+    // the learner had moved to frame 2 after the engine asked for frame 5: the rebuilt iframe goes back to frame 2, paused
+    expect(markReady(reset, 's1', PRESETS).desired).toEqual(
+      msg({ preset: 'mid-hit', frame: 2, playing: false }),
+    );
+    // a newer request from the engine wins over the learner's old place
+    const asked = setDesired(reset, 's1', msg({ frame: 7 }));
+    expect(markReady(asked, 's1', PRESETS).desired).toEqual(
+      msg({ preset: 'mid-hit', frame: 7, playing: false }),
+    );
     expect(resetIframe(EMPTY, 'nope')).toBe(EMPTY);
+  });
+
+  it('the custom input of the student preset is not a place the engine can restore', () => {
+    let map = markReady(EMPTY, 's1', [{ id: 'mid-hit', total: 10 }]).map;
+    map = recordState(
+      map,
+      's1',
+      makeState({ walkthroughId: 'w', preset: 'student', frame: 1, input: [1, 2] }),
+    );
+    expect(markReady(resetIframe(map, 's1'), 's1', PRESETS).desired).toBeUndefined();
+  });
+
+  it('a prediction question asked before the iframe is ready is kept for widget-ready, sent once, and dropped when the engine moves on', () => {
+    let map = setDesired(EMPTY, 's1', msg({ preset: 'mid-hit', frame: 3 }));
+    map = holdPredict(map, 's1', 'b1');
+    const first = markReady(map, 's1', PRESETS);
+    expect(first.desired).toEqual(msg({ preset: 'mid-hit', frame: 3, predict: { beatId: 'b1' } }));
+    // sent once: a rebuild afterwards does not ask again
+    expect(markReady(resetIframe(first.map, 's1'), 's1', PRESETS).desired).toEqual(
+      msg({ preset: 'mid-hit', frame: 3 }),
+    );
+    // the engine asked for the next frame before the iframe came up: the old question is gone
+    const moved = setDesired(holdPredict(map, 's1', 'b1'), 's1', msg({ frame: 4 }));
+    expect(markReady(moved, 's1', PRESETS).desired).toEqual(msg({ preset: 'mid-hit', frame: 4 }));
+    // a question alone (nothing else known) is still delivered
+    expect(markReady(holdPredict(EMPTY, 's2', 'b2'), 's2', PRESETS).desired).toEqual(
+      msg({ predict: { beatId: 'b2' } }),
+    );
   });
 
   it('does not mutate the input map and keeps scenes apart', () => {
@@ -240,7 +296,12 @@ describe('useWidgetRuntimeState store', () => {
     expect(st().byScene.s1.state).toEqual({ preset: 'mid-hit', frame: 3 });
 
     st().resetIframe('s1');
-    expect(st().byScene.s1).toEqual({ ready: false, desired: DESIRED });
+    // the learner's place (frame 3) is kept with what the engine asked for
+    expect(st().byScene.s1).toEqual({
+      ready: false,
+      desired: DESIRED,
+      learner: { preset: 'mid-hit', frame: 3 },
+    });
   });
 });
 

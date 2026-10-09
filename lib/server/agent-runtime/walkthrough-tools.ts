@@ -145,7 +145,12 @@ export function buildWalkthroughTool(deps: CourseToolDeps) {
         if (error instanceof Error && error.message === 'walkthrough-too-large') {
           return fail('walkthrough-too-large', 'The walkthrough page exceeds its size limit.');
         }
-        throw error;
+        // the other errors come from the catalog entry itself (too many formulas, a beat or answer that does not
+        // exist, no runtime): a structured result lets the agent pick another walkthrough instead of crashing
+        return fail(
+          'walkthrough-build-failed',
+          `The walkthrough "${params.walkthroughId}" could not be built: ${error instanceof Error ? error.message : String(error)}.`,
+        );
       }
       const content = built.content;
       const beats =

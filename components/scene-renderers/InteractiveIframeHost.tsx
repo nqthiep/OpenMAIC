@@ -12,6 +12,7 @@ import { useStageStore } from '@/lib/store/stage';
 import { useWidgetRuntimeState } from '@/lib/store/widget-runtime-state';
 import { parseInbound, parseWidgetEvent } from '@/lib/tutor/protocol/messages';
 import type { Scene } from '@/lib/types/stage';
+import { isWalkthroughContent } from '@/lib/widgets/policy';
 import {
   GENUI_LOGICAL_HEIGHT,
   GENUI_LOGICAL_WIDTH,
@@ -71,11 +72,10 @@ export function handleInteractivePickerMessage(
 
 /** `walkthroughId` of a scene whose `widgetConfig.kind === 'walkthrough'`, else null. */
 export function walkthroughIdOf(scene: Scene | undefined): string | null {
-  if (scene?.content.type !== 'interactive') return null;
-  const cfg = scene.content.widgetConfig as { kind?: unknown; walkthroughId?: unknown } | undefined;
-  return cfg?.kind === 'walkthrough' && typeof cfg.walkthroughId === 'string'
-    ? cfg.walkthroughId
-    : null;
+  if (!scene || !isWalkthroughContent(scene.content)) return null;
+  const id = (scene.content as { widgetConfig?: { walkthroughId?: unknown } }).widgetConfig
+    ?.walkthroughId;
+  return typeof id === 'string' ? id : null;
 }
 
 /** `widgetConfig.presets` (id, total) of a walkthrough scene, or undefined when absent. */
@@ -242,7 +242,12 @@ function PooledIframe({ sceneId, entry, visible }: PooledIframeProps) {
         const msg = parseInbound({ type, ...payload });
         if (msg?.type !== 'SET_WIDGET_STATE') return;
         useWidgetRuntimeState.getState().setDesired(sceneId, msg);
-        if (!useWidgetRuntimeState.getState().byScene[sceneId]?.ready) return;
+        if (!useWidgetRuntimeState.getState().byScene[sceneId]?.ready) {
+          // a question asked now would be lost (one-shot): keep it for `widget-ready`, the engine is waiting for its answer
+          if (msg.state.predict)
+            useWidgetRuntimeState.getState().holdPredict(sceneId, msg.state.predict.beatId);
+          return;
+        }
       }
       post(type, payload);
     };

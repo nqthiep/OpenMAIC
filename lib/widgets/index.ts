@@ -23,6 +23,8 @@ export function createAppWidgetRegistry(packs: readonly SubjectPack[]) {
   return { provider, registry };
 }
 
+// The release gate is read ONCE, when this module loads: the flag and the review files under lib/subjects/*/reviews/ are
+// not looked at again, so a new review or a flipped OPENMAIC_REQUIRE_REVIEW takes effect after a restart (OPERATIONS §10).
 const app = createAppWidgetRegistry(
   isReviewRequired() ? releasedPacks(SUBJECT_PACKS) : SUBJECT_PACKS,
 );

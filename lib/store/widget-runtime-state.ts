@@ -8,6 +8,10 @@
  *   kept. Kept when the iframe is rebuilt, so it can be re-sent on the next `widget-ready`.
  * - `ready`/`totals`: set by `widget-ready`, cleared when the iframe is rebuilt.
  * - `state`: last `widget-state` (clamped), cleared when the iframe is rebuilt.
+ * - `learner`: where the learner last was (preset and frame of the last `widget-state`); a rebuilt iframe returns there,
+ *   unless the engine has asked for something newer (`setDesired` forgets it).
+ * - `pendingPredict`: the one prediction question the engine asked while the iframe was not ready yet; it is sent once on
+ *   `widget-ready` (and dropped when the engine moves on), so the engine never waits for a question nobody saw.
  *
  * The reducers are pure (`map in -> map out`) and exported for tests; the store wraps them.
  */
@@ -36,6 +40,8 @@ export interface WidgetSceneRuntime {
   totals?: Record<string, number>;
   desired?: SetWidgetStateMessage;
   state?: WidgetRuntimeSnapshot;
+  learner?: { preset: string; frame: number };
+  pendingPredict?: { beatId: string };
 }
 
 export type WidgetRuntimeMap = Readonly<Record<string, WidgetSceneRuntime>>;
@@ -70,6 +76,8 @@ export function setDesired(
   const cur = map[sceneId] ?? { ready: false };
   const prev = cur.desired?.state ?? {};
   const { preset, frame, panel, speed, playing } = msg.state;
+  // the engine asks for something new: the learner's old place and an old held question no longer apply
+  const { learner: _learner, pendingPredict: _held, ...current } = cur;
   const state: WidgetStatePatch = { ...prev };
   if (preset !== undefined) {
     if (preset !== prev.preset) delete state.frame;
@@ -80,7 +88,17 @@ export function setDesired(
   if (speed !== undefined) state.speed = speed;
   if (playing !== undefined) state.playing = playing;
   if ([preset, frame, panel, speed, playing].every((v) => v === undefined)) return map;
-  return withScene(map, sceneId, { ...cur, desired: { type: 'SET_WIDGET_STATE', state } });
+  return withScene(map, sceneId, { ...current, desired: { type: 'SET_WIDGET_STATE', state } });
+}
+
+/** The engine asked a prediction question while the iframe was not ready: keep it for the next `widget-ready`. */
+export function holdPredict(
+  map: WidgetRuntimeMap,
+  sceneId: string,
+  beatId: string,
+): WidgetRuntimeMap {
+  const cur = map[sceneId] ?? { ready: false };
+  return withScene(map, sceneId, { ...cur, pendingPredict: { beatId } });
 }
 
 /**
@@ -103,10 +121,27 @@ export function markReady(
       if (own) totals[p.id] = own.total;
     }
   }
-  return {
-    map: withScene(map, sceneId, { ...cur, ready: true, totals }),
-    desired: cur?.desired,
-  };
+  // what the iframe must be told: where the engine last asked it to be, or where the learner last was (when that is newer)
+  let desired = cur?.desired;
+  if (cur?.learner) {
+    desired = {
+      type: 'SET_WIDGET_STATE',
+      state: {
+        ...desired?.state,
+        preset: cur.learner.preset,
+        frame: cur.learner.frame,
+        playing: false,
+      },
+    };
+  }
+  if (cur?.pendingPredict) {
+    desired = {
+      type: 'SET_WIDGET_STATE',
+      state: { ...desired?.state, predict: cur.pendingPredict },
+    };
+  }
+  const { pendingPredict: _sent, ...kept } = cur ?? { ready: false };
+  return { map: withScene(map, sceneId, { ...kept, ready: true, totals }), desired };
 }
 
 /**
@@ -132,6 +167,7 @@ export function recordState(
   }
 
   const state: WidgetRuntimeSnapshot = { preset: raw.preset, frame };
+  const learner = student ? cur.learner : { preset: raw.preset, frame };
   if (student && raw.input !== undefined && inputFits(raw.input)) state.input = raw.input;
   if (raw.prediction) {
     state.prediction = {
@@ -140,23 +176,26 @@ export function recordState(
       ...(raw.prediction.skipped === true ? { skipped: true } : {}),
     };
   }
-  return withScene(map, sceneId, { ...cur, state });
+  return withScene(map, sceneId, { ...cur, state, ...(learner ? { learner } : {}) });
 }
 
-/** The iframe was rebuilt (or its `srcDoc` changed): forget `ready` and `state`, keep `desired`. */
+/** The iframe was rebuilt (or its `srcDoc` changed): forget `ready` and `state`, keep `desired`, the learner's place and a held question. */
 export function resetIframe(map: WidgetRuntimeMap, sceneId: string): WidgetRuntimeMap {
   const cur = map[sceneId];
   if (!cur) return map;
-  return withScene(
-    map,
-    sceneId,
-    cur.desired ? { ready: false, desired: cur.desired } : { ready: false },
-  );
+  return withScene(map, sceneId, {
+    ready: false,
+    ...(cur.desired ? { desired: cur.desired } : {}),
+    ...(cur.learner ? { learner: cur.learner } : {}),
+    ...(cur.pendingPredict ? { pendingPredict: cur.pendingPredict } : {}),
+  });
 }
 
 interface WidgetRuntimeStore {
   byScene: WidgetRuntimeMap;
   setDesired: (sceneId: string, msg: SetWidgetStateMessage) => void;
+  /** Keep the prediction question of a request that could not be delivered yet (the iframe is not ready). */
+  holdPredict: (sceneId: string, beatId: string) => void;
   /** Returns the `desired` message to send again, if any. */
   markReady: (
     sceneId: string,
@@ -170,6 +209,8 @@ interface WidgetRuntimeStore {
 export const useWidgetRuntimeState = create<WidgetRuntimeStore>((set, get) => ({
   byScene: {},
   setDesired: (sceneId, msg) => set((s) => ({ byScene: setDesired(s.byScene, sceneId, msg) })),
+  holdPredict: (sceneId, beatId) =>
+    set((s) => ({ byScene: holdPredict(s.byScene, sceneId, beatId) })),
   markReady: (sceneId, presets, configPresets) => {
     const r = markReady(get().byScene, sceneId, presets, configPresets);
     set({ byScene: r.map });
@@ -190,5 +231,10 @@ export function recordDesiredPayload(
 ): void {
   if (type !== 'SET_WIDGET_STATE') return;
   const msg = parseInbound({ type, ...payload });
-  if (msg?.type === 'SET_WIDGET_STATE') useWidgetRuntimeState.getState().setDesired(sceneId, msg);
+  if (msg?.type !== 'SET_WIDGET_STATE') return;
+  const store = useWidgetRuntimeState.getState();
+  store.setDesired(sceneId, msg);
+  if (msg.state.predict && !useWidgetRuntimeState.getState().byScene[sceneId]?.ready) {
+    store.holdPredict(sceneId, msg.state.predict.beatId);
+  }
 }

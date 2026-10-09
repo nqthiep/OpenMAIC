@@ -120,7 +120,7 @@ describe('buildWalkthroughHtml', () => {
     expect(cspMetaTag()).toContain(WALKTHROUGH_CSP);
     expect(html).toContain(cspMetaTag());
     expect(WALKTHROUGH_CSP).toBe(
-      "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'",
+      "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'",
     );
     expect(html).not.toMatch(/<script[^>]*\ssrc=/i);
     expect(html).not.toContain('localStorage');

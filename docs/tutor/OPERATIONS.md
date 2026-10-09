@@ -229,7 +229,7 @@ Ví dụ truy vấn (với `jq` trên log JSON): `jq -c 'select(.event=="code_wi
 | Bỏ đặt `MANIM_SERVICE_URL` | Render clip theo yêu cầu | Chỉ dùng clip dựng sẵn; `generate_clip_scenes{params}` trả `clip-render-unavailable` | Đề xuất |
 | `OPENMAIC_DISABLE_WIDGET_PROVIDERS=true` | Tool `generate_walkthrough`/`generate_clip_scenes` | Agent chỉ còn `generate_scene` (widget LLM); scene đã lưu **vẫn phát** (HTML tự chứa) | Đề xuất |
 | Bỏ đặt `OPENMAIC_TUTOR_MODERATION` | Bộ lọc chat | **Chat không còn được lọc** (không phải fail-closed): chỉ tắt khi sự cố bộ lọc, và thông báo cho người phụ trách | Đã có |
-| Bỏ đặt `OPENMAIC_REQUIRE_REVIEW` | Cổng phát hành | Mọi entry trong `SUBJECT_PACKS` hiện ra, kể cả entry chưa được duyệt | Đã có |
+| Bỏ đặt `OPENMAIC_REQUIRE_REVIEW` | Cổng phát hành | Mọi entry trong `SUBJECT_PACKS` hiện ra, kể cả entry chưa được duyệt. Cờ và file review chỉ được đọc **một lần khi nạp `lib/widgets`**: đổi cờ hoặc thêm file review thì phải khởi động lại server | Đã có |
 | Tắt cờ `NEXT_PUBLIC_*` liên quan hiện có | Tính năng UI của OpenMAIC gốc | Như hiện có | Đã có |
 
 **Rollback:**
