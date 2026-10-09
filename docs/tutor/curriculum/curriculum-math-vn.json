@@ -1150,11 +1150,20 @@
       "lang": "en",
       "checked": "2026-10-09",
       "how_checked": "Đã đọc toàn văn PDF của ban tổ chức IMO: điều 5.1 (hai ngày liên tiếp, mỗi ngày 4 giờ 30 phút, mỗi đề gồm ba bài) và điều 4.2 (đề xuất bài phải phủ nhiều lĩnh vực toán trước đại học, nhiều mức khó). Văn bản này không có danh mục chương trình (syllabus)."
+    },
+    {
+      "id": "vmo-2026-structure",
+      "title": "Về kỳ thi VMO 2026 (tttbooks, đăng 21/01/2026): cấu trúc đề kỳ thi chọn học sinh giỏi quốc gia THPT năm học 2025–2026",
+      "url": "https://tttbooks.com/ve-ky-thi-vmo-2026/",
+      "type": "secondary",
+      "lang": "vi",
+      "checked": "2026-10-09",
+      "how_checked": "Đã đọc trang của một nhà sách (nguồn thứ cấp, không phải Bộ GD&ĐT): đề có 7 bài, ngày 1 có 4 bài (giải tích, đại số, hình học, tổ hợp), ngày 2 có 3 bài (số học, tổ hợp hoặc hình học, đại số); năm học 2024–2025 chỉ có 6 bài. Một trang đề của mathvn.com cho thấy câu 1 là 5 điểm (chỉ đọc phần trích). Chưa có văn bản đề chính thức của Bộ."
     }
   ],
   "exam_profile": {
-    "vmo_format_vi": "Kỳ thi chọn HSG quốc gia THPT, môn Toán: thi viết, hai buổi thi (hai ngày), mỗi buổi 180 phút (Quy chế, Điều 5 khoản 3 điểm a). Nội dung thi nằm trong Chương trình giáo dục phổ thông, nội dung dạy học các môn chuyên cấp THPT (Điều 5 khoản 2). [Unverified] số bài mỗi buổi.",
-    "vmo_sources": ["hsgqg-regulation", "hsgqg-cv7246"],
+    "vmo_format_vi": "Kỳ thi chọn HSG quốc gia THPT, môn Toán: thi viết, hai buổi thi (hai ngày), mỗi buổi 180 phút (Quy chế, Điều 5 khoản 3 điểm a). Nội dung thi nằm trong Chương trình giáo dục phổ thông, nội dung dạy học các môn chuyên cấp THPT (Điều 5 khoản 2). Đề năm học 2025–2026 (VMO 2026) có 7 bài, 4 bài ở ngày 1 và 3 bài ở ngày 2; năm học 2024–2025 có 6 bài (nguồn thứ cấp, chưa đối chiếu văn bản của Bộ; số bài thay đổi theo năm nên [Unverified] cho các năm sau).",
+    "vmo_sources": ["hsgqg-regulation", "hsgqg-cv7246", "vmo-2026-structure"],
     "ts10_chuyen_vi": "Vào lớp 10 trường THPT chuyên: các môn thi chung theo Quy chế và 01 môn thi chuyên; mỗi môn chuyên có 01 đề thi riêng theo chương trình môn học cấp THCS (Thông tư 30/2024/TT-BGDĐT, Điều 13 khoản 1). [Unverified] số môn chuyên, thời gian làm bài, điều kiện dự tuyển và ngày thi của từng tỉnh/trường: do Sở GD&ĐT quyết định, chưa tra từng nơi.",
     "ts10_sources": ["ts10-regulation"],
     "imo_format_en": "IMO: two consecutive days, each paper has three problems and lasts four and a half hours (General Regulations 5.1); problems should cover various fields of pre-university mathematics and varying difficulty (4.2). The General Regulations contain no syllabus.",
@@ -1169,7 +1178,7 @@
     "review_status": "Đã đối chiếu vị trí chủ đề với văn bản chương trình môn Toán 2018 và đọc quy chế thi từ các trang pháp luật của bên thứ ba; chưa đọc bản gốc trên cổng của Bộ; chưa có hội đồng LLM Toán duyệt; chưa rà soát bản quyền.",
     "review_needed_vi": [
       "Đối chiếu bản gốc của Thông tư 17/2023, 23/2025 và 30/2024 trên cổng văn bản của Bộ (hiện chỉ có trang của bên thứ ba).",
-      "Đề thi và thể thức thật: số bài mỗi buổi VMO, chuyên Toán lớp 10 của từng tỉnh/trường, HSG cấp tỉnh, kỳ thi chọn đội tuyển.",
+      "Đề thi và thể thức thật: số bài VMO các năm khác ngoài 2026 và nguồn chính thức của Bộ, chuyên Toán lớp 10 của từng tỉnh/trường, HSG cấp tỉnh, kỳ thi chọn đội tuyển.",
       "Trọng số chủ đề trong đề.",
       "Danh mục tài liệu tiếng Việt (sách chuyên Toán) và giấy phép."
     ],

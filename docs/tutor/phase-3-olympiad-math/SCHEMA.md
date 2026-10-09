@@ -129,7 +129,7 @@ Rubric: CONTENT-DESIGN §6. Judge N=3, đạt khi ≥ 70% mẫu (`EVAL_PASS_THRE
 | T3 Nâng cao (10–11) | sequences-limits, derivative-graphs, counting-advanced, vector-transform-complex | polynomials, inequality-advanced, number-theory-adv |
 | T4 Chuyên sâu (11–12) | integral, limits-mvt, projective-inversion, games-invariants | functional-equations, number-theory-olympiad, combinatorics-olympiad |
 
-Nguồn: 5 nguồn thật (đã thêm 2026-10-09) cho `exam_profile` (đề cương VMO, thi vào 10 chuyên Toán, IMO, chương trình GDPT 2018) và `vn_sources` của 18 topic. **Vẫn `[Unverified]`**: đề VMO từng kỳ, quy chế chuyên-10 từng tỉnh, đối chiếu công báo gốc, trọng số topic trong đề.
+Nguồn: 6 nguồn (đã thêm 2026-10-09; cấu trúc VMO 2026 lấy từ nguồn thứ cấp) cho `exam_profile` (đề cương VMO, thi vào 10 chuyên Toán, IMO, chương trình GDPT 2018) và `vn_sources` của 18 topic. **Vẫn `[Unverified]`**: đề VMO các năm khác và văn bản gốc của Bộ, quy chế chuyên-10 từng tỉnh, đối chiếu công báo gốc, trọng số topic trong đề.
 
 ## 8. Kết quả đo và kiểm
 
