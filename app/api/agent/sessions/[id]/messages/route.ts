@@ -3,7 +3,8 @@ import { AgentSessionAccessError } from '@openmaic/storage';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
+import { isAgentRuntimeConfigured, isTutorModerationEnabled } from '@/lib/config/feature-flags';
+import { screenText } from '@/lib/tutor/chat-moderation';
 import { apiError } from '@/lib/server/api-response';
 import { MAX_SESSION_TEXT_LENGTH } from '@/lib/server/agent-runtime/limits';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
@@ -85,6 +86,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       );
       responseHeaders.forEach((value, name) => response.headers.append(name, value));
       return response;
+    }
+
+    // Tutor content filter (ADR 0014): a follow-up message is screened before it is queued.
+    if (text && isTutorModerationEnabled()) {
+      const blocked = await screenText(text, 'in', undefined);
+      if (blocked) {
+        const response = apiError('CONTENT_SENSITIVE', 422, blocked);
+        responseHeaders.forEach((value, name) => response.headers.append(name, value));
+        return response;
+      }
     }
 
     try {

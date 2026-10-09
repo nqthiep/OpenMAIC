@@ -7,7 +7,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
+import { isAgentRuntimeConfigured, isTutorModerationEnabled } from '@/lib/config/feature-flags';
+import { screenText } from '@/lib/tutor/chat-moderation';
 import { apiError } from '@/lib/server/api-response';
 import { MAX_SESSION_TEXT_LENGTH } from '@/lib/server/agent-runtime/limits';
 import { findSkill, inferSkillIdFromPrompt, listSkills } from '@/lib/server/agent-runtime/skills';
@@ -67,6 +68,11 @@ export async function POST(req: NextRequest) {
       400,
       `prompt exceeds the ${MAX_SESSION_TEXT_LENGTH} character limit`,
     );
+  }
+  // Tutor content filter (ADR 0014): the student's opening message, before any agent runs.
+  if (explicitPrompt && isTutorModerationEnabled()) {
+    const blocked = await screenText(explicitPrompt, 'in', undefined);
+    if (blocked) return apiError('CONTENT_SENSITIVE', 422, blocked);
   }
   if (
     body.materialIds !== undefined &&

@@ -1,5 +1,5 @@
 import { AgentSessionAccessError } from '@openmaic/storage';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const mocks = vi.hoisted(() => ({
@@ -7,12 +7,16 @@ const mocks = vi.hoisted(() => ({
   postUserMessage: vi.fn(),
   bindOwnerMaterialsToSession: vi.fn(),
   scheduleConversationTitle: vi.fn(),
+  moderationEnabled: false,
+  screenText: vi.fn(),
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
   isAgentRuntimeEnabled: () => true,
   isAgentRuntimeConfigured: () => true,
+  isTutorModerationEnabled: () => mocks.moderationEnabled,
 }));
+vi.mock('@/lib/tutor/chat-moderation', () => ({ screenText: mocks.screenText }));
 vi.mock('@/lib/server/agent-runtime/owner', () => ({
   resolveRequestOwnerId: (_request: NextRequest, headers: Headers) => {
     headers.append('Set-Cookie', 'anonymous_id=test; Path=/; HttpOnly');
@@ -51,6 +55,38 @@ beforeEach(() => {
   mocks.getSession.mockResolvedValue({ id: 'session-1', ownerId: 'owner-1', status: 'succeeded' });
   mocks.postUserMessage.mockResolvedValue({ seq: 4, delivery: 'queued', requeued: true });
   mocks.bindOwnerMaterialsToSession.mockResolvedValue([]);
+});
+
+describe('POST agent session message: tutor content filter', () => {
+  beforeEach(() => {
+    mocks.moderationEnabled = true;
+    mocks.screenText.mockReset();
+    mocks.screenText.mockResolvedValue(null);
+  });
+  afterEach(() => {
+    mocks.moderationEnabled = false;
+  });
+
+  it('a blocked message is refused with the safe reply and never queued', async () => {
+    mocks.screenText.mockResolvedValueOnce('safe reply');
+    const response = await call({ text: 'not allowed' });
+    expect(response.status).toBe(422);
+    expect(await response.json()).toMatchObject({
+      errorCode: 'CONTENT_SENSITIVE',
+      error: 'safe reply',
+    });
+    expect(response.headers.get('set-cookie')).toContain('anonymous_id=test');
+    expect(mocks.postUserMessage).not.toHaveBeenCalled();
+  });
+
+  it('an allowed message goes through; an attachment-only message is not screened', async () => {
+    expect((await call({ text: 'hello' })).status).toBe(202);
+    expect(mocks.screenText).toHaveBeenCalledWith('hello', 'in', undefined);
+    mocks.screenText.mockClear();
+    mocks.bindOwnerMaterialsToSession.mockResolvedValue([]);
+    await call({ text: '', materialIds: ['m1'] });
+    expect(mocks.screenText).not.toHaveBeenCalled();
+  });
 });
 
 describe('POST agent session message', () => {

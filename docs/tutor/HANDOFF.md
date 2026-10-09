@@ -245,8 +245,8 @@ Nghiệm thu một nhánh: trong worktree chạy eslint và prettier trên file 
 
 Lấy từ REVIEW vòng 11 và báo cáo của các agent:
 
-- Đã sửa 2026-10-09: xuất video giờ theo chính sách widget `code` của server; `HIGHLIGHT_ELEMENT` gửi trước `widget-ready` được giữ lại; `/api/quiz-grade` được lọc nội dung; lọc lịch sử chat đã phủ tới 10 tin học sinh gần nhất.
-- Còn lại: route phiên agent của workbench (`app/api/agent/sessions/**`) chưa lọc tin học sinh (cần quyết định của chủ dự án, SECURITY §6); tin vai assistant trong lịch sử do client gửi chưa lọc; `extractVisibleText` chưa đọc `chart` và PBL v2; chưa ghi `tutorLearning` kiểu `moderation`.
+- Đã sửa 2026-10-09: lọc nội dung cho route phiên agent của workbench (chủ dự án chọn bật); xuất video giờ theo chính sách widget `code` của server; `HIGHLIGHT_ELEMENT` gửi trước `widget-ready` được giữ lại; `/api/quiz-grade` được lọc nội dung; lọc lịch sử chat đã phủ tới 10 tin học sinh gần nhất.
+- Còn lại: tin vai assistant trong lịch sử do client gửi chưa lọc; `extractVisibleText` chưa đọc `chart` và PBL v2; chưa ghi `tutorLearning` kiểu `moderation`.
 - Cổng sim-learner đo so với nhóm đối chứng không học (tài liệu đã cập nhật khớp mã).
 - `bs-answer-mini` preset `one-tree` có 14 beat; provider cắt còn 12 beat kể và giữ beat `done`.
 - Bộ lọc kiểm duyệt: mẫu "benign" gồm lời hỗ trợ khi học sinh có ý tự hại có thể bị lọc chặn; ghi nhận chứ không xoá mẫu.
