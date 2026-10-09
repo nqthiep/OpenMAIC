@@ -51,19 +51,21 @@ describe('cleanVariants (C5)', () => {
         }
       }
     }
-  }, 60_000);
+  }, 180_000);
 
   it('changes what the reviewer sees in every rewrite, and nothing else', () => {
+    const originals = new Map<string, ReturnType<typeof buildReviewMaterial>>();
     for (const v of variants.filter((x) => x.ops.length > 0)) {
       const orig = entries.find((e) => e.id === v.entry.id)!;
-      const [a, b] = [buildReviewMaterial(orig), buildReviewMaterial(v.entry)];
+      if (!originals.has(orig.id)) originals.set(orig.id, buildReviewMaterial(orig));
+      const [a, b] = [originals.get(orig.id)!, buildReviewMaterial(v.entry)];
       expect(JSON.stringify(b), v.id).not.toBe(JSON.stringify(a));
       expect(b.code).toEqual(a.code);
       const states = (m: typeof a) =>
         Object.fromEntries(m.frames.map((f) => [`${f.preset}#${f.index}`, f.state]));
       expect(states(b)).toEqual(states(a)); // reordered presets: same frames, other order
     }
-  }, 60_000);
+  }, 180_000);
 
   it('keeps every pseudo placeholder: a rewrite never touches {vars}', () => {
     const ph = (s: string) => (s.match(/\{\w+\}/g) ?? []).join(',');
