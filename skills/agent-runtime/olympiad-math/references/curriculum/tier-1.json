@@ -1,7 +1,7 @@
 {
   "exit_skills": [],
-  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
-  "grade_band": "Lớp 8–9 (thi vào 10 chuyên Toán) [Unverified]",
+  "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
+  "grade_band": "Lớp 8–9 (thi vào 10 chuyên Toán)",
   "id": "tier-1",
   "name_en": "Foundation",
   "name_vi": "Cơ sở",
@@ -11,7 +11,7 @@
     {
       "difficulty": 1,
       "est_scenes": 6,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-alg-identities",
       "interactive_ideas": ["Walkthrough `alg-identity-area`"],
       "name_en": "Algebraic identities",
@@ -37,13 +37,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 8, Đại số — Hằng đẳng thức đáng nhớ (bình phương của tổng và hiệu; hiệu hai bình phương; lập phương của tổng và hiệu; tổng và hiệu hai lập phương), phân tích đa thức thành nhân tử"
+      ],
       "walkthrough_ids": ["alg-identity-area"]
     },
     {
       "difficulty": 1,
       "est_scenes": 6,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-divisibility-primes",
       "interactive_ideas": [],
       "name_en": "Divisibility and primes",
@@ -69,13 +71,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 6, Số học — quan hệ chia hết; số nguyên tố, hợp số; ước chung lớn nhất, bội chung nhỏ nhất"
+      ],
       "walkthrough_ids": []
     },
     {
       "difficulty": 2,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-inequality-basic",
       "interactive_ideas": ["Walkthrough `amgm-semicircle`"],
       "name_en": "Basic inequalities",
@@ -101,13 +105,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 9 — Bất đẳng thức (nhận biết bất đẳng thức, tính chất bắc cầu, liên hệ giữa thứ tự với phép cộng và phép nhân); AM–GM không có trong chương trình"
+      ],
       "walkthrough_ids": ["amgm-semicircle"]
     },
     {
       "difficulty": 2,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-quadratic-vieta",
       "interactive_ideas": ["Walkthrough `graph-transform`"],
       "name_en": "Quadratics and Vieta",
@@ -133,13 +139,13 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": ["gdpt2018-toan: Lớp 9 — Phương trình bậc hai một ẩn. Định lí Viète"],
       "walkthrough_ids": ["graph-transform"]
     },
     {
       "difficulty": 2,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-triangle-geometry",
       "interactive_ideas": [
         "Walkthrough `concurrency-dynamic`",
@@ -172,13 +178,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 7 — đường trung trực, đường phân giác, trung tuyến của tam giác; Lớp 8 — tam giác đồng dạng, định lí Pythagore"
+      ],
       "walkthrough_ids": ["concurrency-dynamic", "pythagoras-dissection", "triangle-altitude"]
     },
     {
       "difficulty": 2,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-circle-angles",
       "interactive_ideas": ["Walkthrough `inscribed-angle`"],
       "name_en": "Angles and circles",
@@ -204,13 +212,13 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": ["gdpt2018-toan: Lớp 9 — Góc ở tâm, góc nội tiếp; tứ giác nội tiếp"],
       "walkthrough_ids": ["inscribed-angle"]
     },
     {
       "difficulty": 1,
       "est_scenes": 6,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m1-counting-basic",
       "interactive_ideas": [],
       "name_en": "Basic counting",
@@ -236,7 +244,9 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 10 — Đại số tổ hợp: các quy tắc đếm (quy tắc cộng, quy tắc nhân, chỉnh hợp, hoán vị, tổ hợp)"
+      ],
       "walkthrough_ids": []
     }
   ]

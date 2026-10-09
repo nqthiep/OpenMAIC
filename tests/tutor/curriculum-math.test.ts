@@ -82,11 +82,32 @@ describe('math curriculum (card 3-R1 / 3B-00)', () => {
         ).toBe(true);
   });
 
-  it('claims no source: vn_sources is empty and exam relevance is marked [Unverified]', () => {
-    for (const t of all) {
-      expect(t.vn_sources, t.id).toEqual([]);
-      expect(t.exam_relevance, t.id).toContain('[Unverified]');
+  it('every source is dated and says how it was checked; each topic cites only listed sources and never claims exam weight (3-R1)', () => {
+    const src = JSON.parse(srcText) as {
+      sources: { id: string; title: string; url: string; checked: string; how_checked: string }[];
+      exam_profile: Record<string, unknown>;
+    };
+    expect(src.sources.length).toBeGreaterThanOrEqual(4);
+    const ids = new Set(src.sources.map((x) => x.id));
+    expect(ids.size).toBe(src.sources.length);
+    for (const x of src.sources) {
+      expect(x.url, x.id).toMatch(/^https:\/\//);
+      expect(x.checked, x.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(x.how_checked.length, x.id).toBeGreaterThan(40);
     }
+    for (const key of ['vmo_sources', 'ts10_sources', 'imo_sources', 'gdpt2018_sources'])
+      for (const id of src.exam_profile[key] as string[])
+        expect(ids.has(id), `${key} ${id}`).toBe(true);
+    for (const t of all) {
+      for (const line of t.vn_sources)
+        expect(ids.has(line.split(':')[0]), `${t.id}: ${line}`).toBe(true);
+      // the exam weight of a topic has no source: it stays marked
+      expect(t.exam_relevance, t.id).toContain('[Unverified]');
+      // a topic without a place in the 2018 programme says so
+      if (t.vn_sources.length === 0)
+        expect(t.exam_relevance, t.id).toContain('Ngoài Chương trình GDPT 2018');
+    }
+    expect(all.filter((t) => t.vn_sources.length > 0).length).toBeGreaterThanOrEqual(15);
   });
 
   it('sequencing lists every topic exactly once, and index.json matches the tier files', () => {

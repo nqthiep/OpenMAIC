@@ -1,7 +1,7 @@
 {
   "exit_skills": [],
-  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
-  "grade_band": "Lớp 10–11 [Unverified]",
+  "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
+  "grade_band": "Lớp 10–11",
   "id": "tier-3",
   "name_en": "Advanced",
   "name_vi": "Nâng cao",
@@ -11,7 +11,7 @@
     {
       "difficulty": 3,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m3-polynomials",
       "interactive_ideas": [],
       "name_en": "Polynomials",
@@ -37,13 +37,13 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": ["gdpt2018-toan: Lớp 7 — đa thức một biến; Lớp 8 — đa thức nhiều biến"],
       "walkthrough_ids": []
     },
     {
       "difficulty": 3,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m3-sequences-limits",
       "interactive_ideas": ["Walkthrough `geometric-series-area`", "Walkthrough `limit-epsilon`"],
       "name_en": "Sequences and limits",
@@ -72,13 +72,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 11 — Dãy số. Cấp số cộng. Cấp số nhân; Giới hạn. Hàm số liên tục (giới hạn của dãy số, tổng của cấp số nhân lùi vô hạn); định nghĩa ε–N không có trong chương trình"
+      ],
       "walkthrough_ids": ["geometric-series-area", "limit-epsilon"]
     },
     {
       "difficulty": 3,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m3-derivative-graphs",
       "interactive_ideas": ["Walkthrough `curve-sketching`", "Walkthrough `secant-tangent`"],
       "name_en": "Derivatives and graphs",
@@ -104,13 +106,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 11 — Đạo hàm (khái niệm, ý nghĩa hình học); Lớp 12 — Ứng dụng đạo hàm để khảo sát và vẽ đồ thị của hàm số"
+      ],
       "walkthrough_ids": ["curve-sketching", "secant-tangent"]
     },
     {
       "difficulty": 4,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (bất đẳng thức nâng cao (Cauchy, AM–GM)) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m3-inequality-advanced",
       "interactive_ideas": [],
       "name_en": "Advanced inequalities",
@@ -145,7 +149,7 @@
     {
       "difficulty": 4,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Euler, phần dư Trung Hoa, Bézout) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m3-number-theory-adv",
       "interactive_ideas": [],
       "name_en": "Advanced number theory",
@@ -180,7 +184,7 @@
     {
       "difficulty": 4,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m3-counting-advanced",
       "interactive_ideas": ["Walkthrough `inclusion-exclusion`", "Walkthrough `lattice-paths`"],
       "name_en": "Advanced counting",
@@ -206,13 +210,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 10 — Nhị thức Newton với số mũ không quá 5; Chuyên đề 10.1 — Nhị thức Newton (tam giác Pascal); nguyên lí bao hàm – loại trừ không có trong chương trình"
+      ],
       "walkthrough_ids": ["inclusion-exclusion", "lattice-paths"]
     },
     {
       "difficulty": 4,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m3-vector-transform-complex",
       "interactive_ideas": ["Walkthrough `plane-transform`"],
       "name_en": "Vectors, transformations and complex numbers",
@@ -238,7 +244,9 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 10 — vectơ và các phép toán, tích vô hướng; Chuyên đề 11.1 — Phép biến hình phẳng (phép dời hình, đối xứng trục, đối xứng tâm, tịnh tiến, phép quay); số phức không có trong chương trình"
+      ],
       "walkthrough_ids": ["plane-transform"]
     }
   ]

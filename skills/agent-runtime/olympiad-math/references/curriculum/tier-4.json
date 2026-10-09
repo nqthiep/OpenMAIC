@@ -1,7 +1,7 @@
 {
   "exit_skills": [],
-  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
-  "grade_band": "Lớp 11–12 [Unverified]",
+  "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
+  "grade_band": "Lớp 11–12",
   "id": "tier-4",
   "name_en": "Specialist",
   "name_vi": "Chuyên sâu",
@@ -11,7 +11,7 @@
     {
       "difficulty": 5,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phương trình hàm) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m4-functional-equations",
       "interactive_ideas": [],
       "name_en": "Functional equations",
@@ -46,7 +46,7 @@
     {
       "difficulty": 4,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m4-integral",
       "interactive_ideas": ["Walkthrough `riemann-integral`"],
       "name_en": "Integrals",
@@ -72,13 +72,13 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": ["gdpt2018-toan: Lớp 12 — Nguyên hàm. Tích phân"],
       "walkthrough_ids": ["riemann-integral"]
     },
     {
       "difficulty": 5,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m4-limits-mvt",
       "interactive_ideas": [],
       "name_en": "Limits and the mean value theorem",
@@ -107,13 +107,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 11 — Giới hạn. Hàm số liên tục; định lí Rolle, Lagrange không có trong chương trình"
+      ],
       "walkthrough_ids": []
     },
     {
       "difficulty": 5,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phép nghịch đảo) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m4-projective-inversion",
       "interactive_ideas": [],
       "name_en": "Projective geometry and inversion",
@@ -145,7 +147,7 @@
     {
       "difficulty": 5,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Diophante, căn nguyên thuỷ) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m4-number-theory-olympiad",
       "interactive_ideas": [],
       "name_en": "Olympiad number theory",
@@ -177,7 +179,7 @@
     {
       "difficulty": 5,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m4-combinatorics-olympiad",
       "interactive_ideas": [],
       "name_en": "Olympiad combinatorics",
@@ -203,13 +205,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Chuyên đề 11.3 — Làm quen với một vài yếu tố của Lí thuyết đồ thị (đường đi Euler, Hamilton)"
+      ],
       "walkthrough_ids": []
     },
     {
       "difficulty": 5,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (trò chơi chiến thắng, bất biến) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m4-games-invariants",
       "interactive_ideas": [],
       "name_en": "Games and invariants",

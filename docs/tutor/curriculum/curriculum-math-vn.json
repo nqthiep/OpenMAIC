@@ -2,13 +2,14 @@
   "version": "0.1.0",
   "locale": "vi-VN",
   "subject": "olympiad-math",
-  "title_vi": "Bản đồ chuyên đề Toán — luyện thi Chuyên Toán & HSG Toán [Unverified: tên kỳ thi]",
-  "title_en": "Mathematics Curriculum Map — Vietnamese specialised-math track [Unverified: exam names]",
+  "title_vi": "Bản đồ chuyên đề Toán — luyện thi Chuyên Toán & HSG Toán",
+  "title_en": "Mathematics Curriculum Map — Vietnamese specialised-math track",
   "exam_targets": [
-    "[Unverified] Tuyển sinh lớp 10 chuyên Toán",
+    "Tuyển sinh lớp 10 chuyên Toán (Quy chế: Thông tư 30/2024/TT-BGDĐT, Điều 13 khoản 1; chi tiết do Sở GD&ĐT từng tỉnh quyết định)",
     "[Unverified] HSG Toán cấp tỉnh/TP",
-    "[Unverified] HSG Toán Quốc gia (VMO)",
-    "[Unverified] Chọn đội tuyển"
+    "HSG Toán quốc gia (VMO; Quy chế: Thông tư 17/2023/TT-BGDĐT, sửa đổi bởi Thông tư 23/2025/TT-BGDĐT)",
+    "[Unverified] Chọn đội tuyển Olympic quốc gia (kỳ thi chọn đội tuyển; thể thức chưa xác minh)",
+    "IMO (General Regulations 2025)"
   ],
   "audience": {
     "grades": "8–12",
@@ -37,8 +38,8 @@
       "order": 1,
       "name_vi": "Cơ sở",
       "name_en": "Foundation",
-      "grade_band": "Lớp 8–9 (thi vào 10 chuyên Toán) [Unverified]",
-      "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+      "grade_band": "Lớp 8–9 (thi vào 10 chuyên Toán)",
+      "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
       "prerequisites": [],
       "exit_skills": [],
       "topics": [
@@ -70,8 +71,10 @@
           ],
           "pitfalls": ["Quên hạng tử 2ab khi khai triển (a+b)²", "Nhầm dấu khi khai triển (a−b)³"],
           "interactive_ideas": ["Walkthrough `alg-identity-area`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 8, Đại số — Hằng đẳng thức đáng nhớ (bình phương của tổng và hiệu; hiệu hai bình phương; lập phương của tổng và hiệu; tổng và hiệu hai lập phương), phân tích đa thức thành nhân tử"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["alg-identity-area"]
         },
         {
@@ -105,8 +108,10 @@
             "Chỉ thử chia đến n thay vì căn n rồi kết luận sai"
           ],
           "interactive_ideas": [],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 6, Số học — quan hệ chia hết; số nguyên tố, hợp số; ước chung lớn nhất, bội chung nhỏ nhất"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": []
         },
         {
@@ -140,8 +145,10 @@
             "Quên kiểm tra dấu bằng có xảy ra được hay không"
           ],
           "interactive_ideas": ["Walkthrough `amgm-semicircle`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 9 — Bất đẳng thức (nhận biết bất đẳng thức, tính chất bắc cầu, liên hệ giữa thứ tự với phép cộng và phép nhân); AM–GM không có trong chương trình"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["amgm-semicircle"]
         },
         {
@@ -172,8 +179,8 @@
           ],
           "pitfalls": ["Dùng Viète khi biệt thức âm", "Quên điều kiện a ≠ 0"],
           "interactive_ideas": ["Walkthrough `graph-transform`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": ["gdpt2018-toan: Lớp 9 — Phương trình bậc hai một ẩn. Định lí Viète"],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["graph-transform"]
         },
         {
@@ -211,8 +218,10 @@
             "Walkthrough `pythagoras-dissection`",
             "Walkthrough `triangle-altitude`"
           ],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 7 — đường trung trực, đường phân giác, trung tuyến của tam giác; Lớp 8 — tam giác đồng dạng, định lí Pythagore"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["concurrency-dynamic", "pythagoras-dissection", "triangle-altitude"]
         },
         {
@@ -243,8 +252,8 @@
           ],
           "pitfalls": ["Nhầm cung lớn với cung nhỏ khi chắn góc", "Xét điểm nằm ở cung sai"],
           "interactive_ideas": ["Walkthrough `inscribed-angle`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": ["gdpt2018-toan: Lớp 9 — Góc ở tâm, góc nội tiếp; tứ giác nội tiếp"],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["inscribed-angle"]
         },
         {
@@ -278,8 +287,10 @@
             "Nhầm thứ tự có hay không quan trọng"
           ],
           "interactive_ideas": [],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 10 — Đại số tổ hợp: các quy tắc đếm (quy tắc cộng, quy tắc nhân, chỉnh hợp, hoán vị, tổ hợp)"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": []
         }
       ]
@@ -289,8 +300,8 @@
       "order": 2,
       "name_vi": "Trung cấp",
       "name_en": "Intermediate",
-      "grade_band": "Lớp 9–10 [Unverified]",
-      "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+      "grade_band": "Lớp 9–10",
+      "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
       "prerequisites": ["tier-1"],
       "exit_skills": [],
       "topics": [
@@ -330,7 +341,7 @@
             "Walkthrough `cs-projection`"
           ],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Cauchy, Jensen) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": ["cauchy-schwarz", "convex-chord", "cs-projection"]
         },
         {
@@ -364,8 +375,10 @@
             "Mất nghiệm khi chia hai vế cho biểu thức có thể bằng 0"
           ],
           "interactive_ideas": [],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 9 — hệ hai phương trình bậc nhất hai ẩn; Chuyên đề 10.2 — hệ phương trình bậc nhất ba ẩn"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": []
         },
         {
@@ -400,7 +413,7 @@
           ],
           "interactive_ideas": ["Walkthrough `modular-clock`"],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (đồng dư, Fermat) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": ["modular-clock"]
         },
         {
@@ -434,8 +447,10 @@
             "Chỉ tìm một nghiệm riêng mà quên họ nghiệm"
           ],
           "interactive_ideas": ["Walkthrough `euclid-rectangle`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 6 — ước chung lớn nhất; thuật toán Euclid và phương trình Diophante không có trong chương trình"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["euclid-rectangle"]
         },
         {
@@ -470,7 +485,7 @@
           ],
           "interactive_ideas": ["Walkthrough `power-of-point`"],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phương tích, trục đẳng phương) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": ["power-of-point"]
         },
         {
@@ -505,7 +520,7 @@
           ],
           "interactive_ideas": ["Walkthrough `tiling-coloring`"],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Dirichlet, bất biến, tô màu) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": ["tiling-coloring"]
         },
         {
@@ -539,8 +554,8 @@
             "Bước quy nạp không đúng với mọi k (bắt đầu từ k nhỏ)"
           ],
           "interactive_ideas": ["Walkthrough `figurate-sums`", "Walkthrough `induction-fallacy`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": ["gdpt2018-toan: Chuyên đề lớp 10 (10.1) — Phương pháp quy nạp toán học"],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["figurate-sums", "induction-fallacy"]
         }
       ]
@@ -550,8 +565,8 @@
       "order": 3,
       "name_vi": "Nâng cao",
       "name_en": "Advanced",
-      "grade_band": "Lớp 10–11 [Unverified]",
-      "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+      "grade_band": "Lớp 10–11",
+      "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
       "prerequisites": ["tier-2"],
       "exit_skills": [],
       "topics": [
@@ -583,8 +598,8 @@
           ],
           "pitfalls": ["Nhầm số nghiệm với bậc khi có nghiệm bội", "Quên nghiệm phức"],
           "interactive_ideas": [],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": ["gdpt2018-toan: Lớp 7 — đa thức một biến; Lớp 8 — đa thức nhiều biến"],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": []
         },
         {
@@ -621,8 +636,10 @@
             "Walkthrough `geometric-series-area`",
             "Walkthrough `limit-epsilon`"
           ],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 11 — Dãy số. Cấp số cộng. Cấp số nhân; Giới hạn. Hàm số liên tục (giới hạn của dãy số, tổng của cấp số nhân lùi vô hạn); định nghĩa ε–N không có trong chương trình"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["geometric-series-area", "limit-epsilon"]
         },
         {
@@ -656,8 +673,10 @@
             "Quên xét dấu f′ hai bên"
           ],
           "interactive_ideas": ["Walkthrough `curve-sketching`", "Walkthrough `secant-tangent`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 11 — Đạo hàm (khái niệm, ý nghĩa hình học); Lớp 12 — Ứng dụng đạo hàm để khảo sát và vẽ đồ thị của hàm số"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["curve-sketching", "secant-tangent"]
         },
         {
@@ -692,7 +711,7 @@
           ],
           "interactive_ideas": [],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (bất đẳng thức nâng cao (Cauchy, AM–GM)) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": []
         },
         {
@@ -727,7 +746,7 @@
           ],
           "interactive_ideas": [],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Euler, phần dư Trung Hoa, Bézout) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": []
         },
         {
@@ -758,8 +777,10 @@
           ],
           "pitfalls": ["Quên cộng lại giao ba tập", "Đếm đường đi mà bỏ qua điều kiện cấm"],
           "interactive_ideas": ["Walkthrough `inclusion-exclusion`", "Walkthrough `lattice-paths`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 10 — Nhị thức Newton với số mũ không quá 5; Chuyên đề 10.1 — Nhị thức Newton (tam giác Pascal); nguyên lí bao hàm – loại trừ không có trong chương trình"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["inclusion-exclusion", "lattice-paths"]
         },
         {
@@ -790,8 +811,10 @@
           ],
           "pitfalls": ["Nhầm chiều quay", "Quên phép đối xứng đảo định hướng"],
           "interactive_ideas": ["Walkthrough `plane-transform`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 10 — vectơ và các phép toán, tích vô hướng; Chuyên đề 11.1 — Phép biến hình phẳng (phép dời hình, đối xứng trục, đối xứng tâm, tịnh tiến, phép quay); số phức không có trong chương trình"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["plane-transform"]
         }
       ]
@@ -801,8 +824,8 @@
       "order": 4,
       "name_vi": "Chuyên sâu",
       "name_en": "Specialist",
-      "grade_band": "Lớp 11–12 [Unverified]",
-      "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
+      "grade_band": "Lớp 11–12",
+      "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
       "prerequisites": ["tier-3"],
       "exit_skills": [],
       "topics": [
@@ -838,7 +861,7 @@
           ],
           "interactive_ideas": [],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phương trình hàm) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": []
         },
         {
@@ -869,8 +892,8 @@
           ],
           "pitfalls": ["Quên dấu của diện tích khi hàm âm", "Nhầm tổng Riemann trái và phải"],
           "interactive_ideas": ["Walkthrough `riemann-integral`"],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": ["gdpt2018-toan: Lớp 12 — Nguyên hàm. Tích phân"],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": ["riemann-integral"]
         },
         {
@@ -904,8 +927,10 @@
             "Quên điều kiện liên tục trên đoạn đóng"
           ],
           "interactive_ideas": [],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Lớp 11 — Giới hạn. Hàm số liên tục; định lí Rolle, Lagrange không có trong chương trình"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": []
         },
         {
@@ -937,7 +962,7 @@
           "pitfalls": ["Quên điểm ở vô cực", "Nhầm ảnh của đường tròn đi qua tâm nghịch đảo"],
           "interactive_ideas": [],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phép nghịch đảo) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": []
         },
         {
@@ -969,7 +994,7 @@
           "pitfalls": ["Dùng bổ đề nâng số mũ khi không đủ điều kiện", "Nhầm ký hiệu Legendre"],
           "interactive_ideas": [],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Diophante, căn nguyên thuỷ) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": []
         },
         {
@@ -1000,8 +1025,10 @@
           ],
           "pitfalls": ["Đếm hai cách mà hai vế không cùng đối tượng", "Bỏ qua trường hợp biên"],
           "interactive_ideas": [],
-          "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "vn_sources": [
+            "gdpt2018-toan: Chuyên đề 11.3 — Làm quen với một vài yếu tố của Lí thuyết đồ thị (đường đi Euler, Hamilton)"
+          ],
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
           "walkthrough_ids": []
         },
         {
@@ -1033,7 +1060,7 @@
           "pitfalls": ["Nhầm người đi trước với người thắng", "Quên xét mọi nước đi của đối thủ"],
           "interactive_ideas": [],
           "vn_sources": [],
-          "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+          "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (trò chơi chiến thắng, bất biến) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
           "walkthrough_ids": []
         }
       ]
@@ -1078,19 +1105,75 @@
       "m4-games-invariants"
     ]
   },
-  "sources": [],
+  "sources": [
+    {
+      "id": "gdpt2018-toan",
+      "title": "Chương trình giáo dục phổ thông môn Toán (ban hành kèm Thông tư 32/2018/TT-BGDĐT ngày 26/12/2018 của Bộ trưởng Bộ GD&ĐT)",
+      "url": "https://thuvienphapluat.vn/van-ban/giao-duc/thong-tu-32-2018-tt-bgddt-chuong-trinh-giao-duc-pho-thong-403454.aspx",
+      "type": "regulation",
+      "lang": "vi",
+      "checked": "2026-10-09",
+      "how_checked": "Vị trí các chủ đề theo lớp được tìm trong văn bản toàn văn của chương trình môn Toán (PDF 123 trang do một trường THCS đăng: https://quantri.quangich.com///data/thcsthanhxuan/thcsthanhxuan/attachments/2020_3/3_cttoan_53202020.pdf). Đó là bản sao, không phải bản gốc của Bộ; trang url ở trên là trang tra cứu văn bản của bên thứ ba. Chưa kiểm các lần sửa đổi sau (Thông tư 13/2022, 17/2025)."
+    },
+    {
+      "id": "hsgqg-regulation",
+      "title": "Quy chế thi chọn học sinh giỏi cấp quốc gia (Thông tư 17/2023/TT-BGDĐT ngày 10/10/2023, sửa đổi bởi Thông tư 23/2025/TT-BGDĐT ngày 24/10/2025)",
+      "url": "https://thuviennhadat.vn/phap-luat/noi-dung-thi-ky-thi-chon-hoc-sinh-gioi-quoc-gia-la-gi-675460.html",
+      "type": "regulation",
+      "lang": "vi",
+      "checked": "2026-10-09",
+      "how_checked": "Điều 5 khoản 2 (phạm vi nội dung) và khoản 3 điểm a (hai buổi thi, 180 phút) đọc ở một trang tổng hợp văn bản pháp luật của bên thứ ba và đối chiếu với một trang thứ hai; chưa đọc bản gốc trên cổng văn bản của Bộ. Nội dung sửa đổi của Thông tư 23/2025 chưa đọc."
+    },
+    {
+      "id": "hsgqg-cv7246",
+      "title": "Công văn 7246/BGDĐT-QLCL ngày 10/11/2025: kỳ thi chọn học sinh giỏi quốc gia THPT năm học 2025–2026",
+      "url": "https://luatvietnam.vn/giao-duc/cong-van-7246-bgddt-qlcl-2025-ky-thi-chon-hoc-sinh-gioi-quoc-gia-thpt-nam-hoc-2025-2026-418219-d6.html",
+      "type": "regulation",
+      "lang": "vi",
+      "checked": "2026-10-09",
+      "how_checked": "Đã đọc toàn văn trên trang của bên thứ ba: căn cứ Quy chế (TT 17/2023, sửa đổi bởi TT 23/2025), ngày thi 25 và 26/12/2025 gồm môn Toán, giờ bắt đầu mỗi buổi 08 giờ 00. Văn bản này không nêu số phút làm bài của môn Toán."
+    },
+    {
+      "id": "ts10-regulation",
+      "title": "Quy chế tuyển sinh trung học cơ sở và tuyển sinh trung học phổ thông (Thông tư 30/2024/TT-BGDĐT ngày 30/12/2024, hiệu lực 14/02/2025)",
+      "url": "https://luatvietnam.vn/tin-van-ban-moi/moi-mon-thi-thu-ba-vao-lop-10-khong-chon-mot-mon-qua-3-nam-lien-tiep-186-100635-article.html",
+      "type": "regulation",
+      "lang": "vi",
+      "checked": "2026-10-09",
+      "how_checked": "Điều 13 khoản 1 được trích trong một bài báo pháp luật của bên thứ ba: vào trường THPT chuyên phải thi các môn chung và 01 môn chuyên, mỗi môn chuyên có 01 đề riêng theo chương trình môn học cấp THCS. Chưa đọc toàn văn Thông tư; số môn chuyên, thời gian, điều kiện và ngày thi do Sở GD&ĐT từng tỉnh quyết định."
+    },
+    {
+      "id": "imo-regulations",
+      "title": "IMO General Regulations (current version approved at the IMO 2025)",
+      "url": "https://www.imo-official.org/documents/RegulationsIMO.pdf",
+      "type": "regulation",
+      "lang": "en",
+      "checked": "2026-10-09",
+      "how_checked": "Đã đọc toàn văn PDF của ban tổ chức IMO: điều 5.1 (hai ngày liên tiếp, mỗi ngày 4 giờ 30 phút, mỗi đề gồm ba bài) và điều 4.2 (đề xuất bài phải phủ nhiều lĩnh vực toán trước đại học, nhiều mức khó). Văn bản này không có danh mục chương trình (syllabus)."
+    }
+  ],
   "exam_profile": {
-    "note": "[Unverified] Chưa có đề cương thực tế; mục này để trống tới khi có nguồn (card 3-R1 cần nghiên cứu)."
+    "vmo_format_vi": "Kỳ thi chọn HSG quốc gia THPT, môn Toán: thi viết, hai buổi thi (hai ngày), mỗi buổi 180 phút (Quy chế, Điều 5 khoản 3 điểm a). Nội dung thi nằm trong Chương trình giáo dục phổ thông, nội dung dạy học các môn chuyên cấp THPT (Điều 5 khoản 2). [Unverified] số bài mỗi buổi.",
+    "vmo_sources": ["hsgqg-regulation", "hsgqg-cv7246"],
+    "ts10_chuyen_vi": "Vào lớp 10 trường THPT chuyên: các môn thi chung theo Quy chế và 01 môn thi chuyên; mỗi môn chuyên có 01 đề thi riêng theo chương trình môn học cấp THCS (Thông tư 30/2024/TT-BGDĐT, Điều 13 khoản 1). [Unverified] số môn chuyên, thời gian làm bài, điều kiện dự tuyển và ngày thi của từng tỉnh/trường: do Sở GD&ĐT quyết định, chưa tra từng nơi.",
+    "ts10_sources": ["ts10-regulation"],
+    "imo_format_en": "IMO: two consecutive days, each paper has three problems and lasts four and a half hours (General Regulations 5.1); problems should cover various fields of pre-university mathematics and varying difficulty (4.2). The General Regulations contain no syllabus.",
+    "imo_sources": ["imo-regulations"],
+    "gdpt2018_note_vi": "Vị trí theo lớp trong Chương trình GDPT 2018 được ghi ở `vn_sources` của từng chủ đề. Không thấy trong văn bản chương trình môn Toán (tìm theo từ khoá): đồng dư, số phức, phương tích, nguyên lí Dirichlet, bất đẳng thức Cauchy hoặc AM–GM, định lí Rolle hoặc Lagrange, phép nghịch đảo, bất biến, tô màu. Các chủ đề này là mở rộng ngoài chương trình, thuộc phần bồi dưỡng chuyên.",
+    "gdpt2018_sources": ["gdpt2018-toan"],
+    "note": "Trọng số chủ đề trong đề và nội dung đề tuyển sinh/HSG từng năm chưa có nguồn: [Unverified]."
   },
   "provenance": {
-    "note_vi": "Khung 28 chủ đề lấy từ SCHEMA Phase 3 §7 (đánh dấu [Inference]); nội dung toán trong subtopics, pitfalls, typical_problems do người soạn viết từ kiến thức toán phổ thông, không chép từ tài liệu nào. Mọi tên kỳ thi, khối lớp, trọng số và tài liệu là [Unverified] tới khi có nguồn.",
-    "review_status": "Chưa có hội đồng LLM Toán duyệt; chưa đối chiếu chương trình hiện hành; chưa rà soát bản quyền.",
+    "note_vi": "Khung 28 chủ đề lấy từ SCHEMA Phase 3 §7 [Inference]. Nội dung toán trong subtopics, pitfalls, typical_problems do người soạn viết từ kiến thức toán phổ thông, không chép từ tài liệu nào. Từ 2026-10-09 (card 3-R1): `sources` và `vn_sources` ghi các nguồn đã đọc thật (kèm cách kiểm ở `how_checked`); `exam_profile` chỉ nêu điều đọc được trong các nguồn đó.",
+    "checked_on": "2026-10-09",
+    "review_status": "Đã đối chiếu vị trí chủ đề với văn bản chương trình môn Toán 2018 và đọc quy chế thi từ các trang pháp luật của bên thứ ba; chưa đọc bản gốc trên cổng của Bộ; chưa có hội đồng LLM Toán duyệt; chưa rà soát bản quyền.",
     "review_needed_vi": [
-      "Đề cương thực tế: chuyên Toán 10, HSG tỉnh/TP, VMO, đội tuyển.",
-      "Khối lớp học từng chủ đề (đối chiếu chương trình hiện hành).",
+      "Đối chiếu bản gốc của Thông tư 17/2023, 23/2025 và 30/2024 trên cổng văn bản của Bộ (hiện chỉ có trang của bên thứ ba).",
+      "Đề thi và thể thức thật: số bài mỗi buổi VMO, chuyên Toán lớp 10 của từng tỉnh/trường, HSG cấp tỉnh, kỳ thi chọn đội tuyển.",
       "Trọng số chủ đề trong đề.",
-      "Danh mục tài liệu tiếng Việt và giấy phép."
-    ]
+      "Danh mục tài liệu tiếng Việt (sách chuyên Toán) và giấy phép."
+    ],
+    "estimate_fields": []
   },
   "tracks_def": {
     "_note": "Chưa phân track cho Toán."

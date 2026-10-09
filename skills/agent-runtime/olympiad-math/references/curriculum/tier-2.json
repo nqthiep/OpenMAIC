@@ -1,7 +1,7 @@
 {
   "exit_skills": [],
-  "goal": "[Inference] khung theo SCHEMA Phase 3 §7; chưa đối chiếu chương trình hiện hành",
-  "grade_band": "Lớp 9–10 [Unverified]",
+  "goal": "Khung theo SCHEMA Phase 3 §7 [Inference]; vị trí từng chủ đề trong Chương trình GDPT 2018 đã đối chiếu ở `vn_sources`",
+  "grade_band": "Lớp 9–10",
   "id": "tier-2",
   "name_en": "Intermediate",
   "name_vi": "Trung cấp",
@@ -11,7 +11,7 @@
     {
       "difficulty": 3,
       "est_scenes": 8,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Cauchy, Jensen) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m2-inequality-classic",
       "interactive_ideas": [
         "Walkthrough `cauchy-schwarz`",
@@ -50,7 +50,7 @@
     {
       "difficulty": 2,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m2-equations-systems",
       "interactive_ideas": [],
       "name_en": "Equations and systems",
@@ -79,13 +79,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 9 — hệ hai phương trình bậc nhất hai ẩn; Chuyên đề 10.2 — hệ phương trình bậc nhất ba ẩn"
+      ],
       "walkthrough_ids": []
     },
     {
       "difficulty": 3,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (đồng dư, Fermat) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m2-modular-arith",
       "interactive_ideas": ["Walkthrough `modular-clock`"],
       "name_en": "Modular arithmetic",
@@ -120,7 +122,7 @@
     {
       "difficulty": 3,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m2-euclid-diophantine",
       "interactive_ideas": ["Walkthrough `euclid-rectangle`"],
       "name_en": "Euclid and Diophantine equations",
@@ -149,13 +151,15 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": [
+        "gdpt2018-toan: Lớp 6 — ước chung lớn nhất; thuật toán Euclid và phương trình Diophante không có trong chương trình"
+      ],
       "walkthrough_ids": ["euclid-rectangle"]
     },
     {
       "difficulty": 3,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (phương tích, trục đẳng phương) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m2-circle-power",
       "interactive_ideas": ["Walkthrough `power-of-point`"],
       "name_en": "Power of a point",
@@ -190,7 +194,7 @@
     {
       "difficulty": 3,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn. Ngoài Chương trình GDPT 2018: không thấy từ khoá (Dirichlet, bất biến, tô màu) trong văn bản chương trình môn Toán đã đối chiếu; là phần bồi dưỡng chuyên",
       "id": "m2-pigeonhole-invariants",
       "interactive_ideas": ["Walkthrough `tiling-coloring`"],
       "name_en": "Pigeonhole and invariants",
@@ -225,7 +229,7 @@
     {
       "difficulty": 3,
       "est_scenes": 7,
-      "exam_relevance": "[Unverified] chưa có đề cương thi để đối chiếu",
+      "exam_relevance": "[Unverified] trọng số trong đề chưa có nguồn; vị trí trong Chương trình GDPT 2018 xem vn_sources",
       "id": "m2-induction",
       "interactive_ideas": ["Walkthrough `figurate-sums`", "Walkthrough `induction-fallacy`"],
       "name_en": "Mathematical induction",
@@ -254,7 +258,7 @@
           "source": "[Inference] nêu từ kiến thức toán; chưa gắn nguồn"
         }
       ],
-      "vn_sources": [],
+      "vn_sources": ["gdpt2018-toan: Chuyên đề lớp 10 (10.1) — Phương pháp quy nạp toán học"],
       "walkthrough_ids": ["figurate-sums", "induction-fallacy"]
     }
   ]
