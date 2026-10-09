@@ -7,6 +7,8 @@
 
 > **Tóm tắt:** tính năng **không thêm bảng cơ sở dữ liệu** và **không đổi DSL** của OpenMAIC. Dữ liệu học sinh (ADR 0014) nằm trong kho runtime sẵn có, bằng kind mới `tutorLearning` (§8). Dữ liệu mới nằm ở ba nơi: (1) **mã** (catalog entry, hàm thuần), (2) **scene hiện có** (`InteractiveContent.html` + `widgetConfig` nhẹ, hoặc slide có `PPTVideoElement`), (3) **file dữ liệu** (curriculum, manifest/clip-sheet của clip). Nguồn sự thật của nội dung dạy là catalog trong mã; scene lưu bản sinh ra.
 
+> **ĐÃ THAY THẾ MỘT PHẦN ([ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md), 2026-10-08/09):** các phần nói về clip Manim, `manim-service`, `lib/clips`, tool `generate_clip_scenes` và cổng QA video là lịch sử thiết kế; mã đã xoá khỏi cây làm việc (còn ở thẻ git `manim-clips-final`). Rủi ro và mối đe doạ chỉ gắn với các thành phần đó (sandbox render, TeX/Python do LLM viết, hàng đợi render, dung lượng video) được coi là đã đóng vì thành phần không còn tồn tại.
+
 ## 1. Bản đồ dữ liệu
 
 ```mermaid

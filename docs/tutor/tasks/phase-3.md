@@ -18,6 +18,8 @@
 >
 > Mã Manim do LLM viết, AST allowlist và sandbox của dịch vụ là phần nhạy cảm bảo mật; leader duyệt.
 
+> **ĐÃ THAY THẾ MỘT PHẦN ([ADR 0015](../decisions/0015-math-interactive-web-ui-not-video.md), 2026-10-08/09):** các card clip và Manim (3A-01…3A-08, 3A-T*, 3B-QA, 3B-T*, toàn bộ 3C, 3D-01…3D-T4, spike 3-S1, 3-S2, 3-S3, 3-S4, 3C-04, 3C-09) đã bị thay thế: 21 mẫu clip được viết lại thành walkthrough cùng id, thêm 3 walkthrough cho các chủ đề còn thiếu (`mvt-lagrange`, `inversion-circle`, `subtraction-game`), và mã video đã xoá. Còn hiệu lực: 3-R1 (curriculum, nguồn đã nghiên cứu 2026-10-09), 3B-00, 3B-K1, 3B-V1…V3, 3B-W1…W3, 3B-E1, 3A-12, 3A-13, 3A-17 (hội đồng Toán, chờ model mạnh).
+
 ## 1. Đợt 3-0 — spike và nghiên cứu
 
 ### 3-S1 · Spike S1: image Manim và hiệu năng

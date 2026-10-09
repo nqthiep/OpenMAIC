@@ -12,6 +12,8 @@
 > - **Hiệu quả dạy** kiểm bằng cổng G1/G2 với hội đồng LLM và học sinh mô phỏng, rồi số đo học sinh thật sau phát hành (ADR 0014). Mỗi vai trò LLM có **bộ hiệu chuẩn**.
 > - Cổng CI cứng: `pnpm test`, `pnpm lint`, `pnpm check`, `npx tsc --noEmit`, `pnpm check:i18n-keys`, không đổi package, e2e (job `e2e`).
 
+> **ĐÃ THAY THẾ MỘT PHẦN ([ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md), 2026-10-08/09):** các phần nói về clip Manim, `manim-service`, `lib/clips`, tool `generate_clip_scenes` và cổng QA video là lịch sử thiết kế; mã đã xoá khỏi cây làm việc (còn ở thẻ git `manim-clips-final`). Rủi ro và mối đe doạ chỉ gắn với các thành phần đó (sandbox render, TeX/Python do LLM viết, hàng đợi render, dung lượng video) được coi là đã đóng vì thành phần không còn tồn tại.
+
 ## 1. Nguyên tắc
 
 1. Mọi thứ kiểm được tất định thì **không** dùng LLM để kiểm.

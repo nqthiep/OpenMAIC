@@ -16,6 +16,8 @@
 > - Widget `code` **mặc định bị chặn** ở hiển thị, ghi và sinh.
 > - Server tính lại từ catalog mọi chữ đưa cho thầy.
 
+> **ĐÃ THAY THẾ MỘT PHẦN ([ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md), 2026-10-08/09):** các phần nói về clip Manim, `manim-service`, `lib/clips`, tool `generate_clip_scenes` và cổng QA video là lịch sử thiết kế; mã đã xoá khỏi cây làm việc (còn ở thẻ git `manim-clips-final`). Rủi ro và mối đe doạ chỉ gắn với các thành phần đó (sandbox render, TeX/Python do LLM viết, hàng đợi render, dung lượng video) được coi là đã đóng vì thành phần không còn tồn tại.
+
 ## 1. Phạm vi và tài sản
 
 | Tài sản | Vì sao quan trọng |
