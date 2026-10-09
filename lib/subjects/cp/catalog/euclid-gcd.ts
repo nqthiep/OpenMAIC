@@ -43,7 +43,7 @@ const EX = {
   ),
   done: m(
     'Kết quả: gcd({a0}, {b0}) = {g}, sau {steps} lần lấy dư.',
-    'Result: gcd({a0}, {b0}) = {g}, after {steps} remainder steps.',
+    'Result: gcd({a0}, {b0}) = {g}, after {steps|remainder step|remainder steps}.',
   ),
 };
 
@@ -251,7 +251,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const euclidGcdEntry: WalkthroughEntry<In, S> = {
   id: 'euclid-gcd',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-number-basics'],

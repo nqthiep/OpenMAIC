@@ -21,7 +21,7 @@ const edgeKey = (a: number, b: number): string =>
 const EX = {
   start: m(
     'Tìm cây khung nhỏ nhất của đồ thị {n} đỉnh, {m} cạnh có trọng số: nối mọi đỉnh liên thông bằng các cạnh có tổng trọng số nhỏ nhất. DSU: mỗi đỉnh một tập.',
-    'Find a minimum spanning tree of the graph with {n|node|nodes} and {m} weighted edges: connect every connected node with the smallest total weight. DSU: each node alone.',
+    'Find a minimum spanning tree of the graph with {n|node|nodes} and {m|weighted edge|weighted edges}: connect every connected node with the smallest total weight. DSU: each node alone.',
   ),
   sort: m(
     'Sắp các cạnh tăng dần theo trọng số, rồi xét lần lượt từ cạnh nhẹ nhất. Cạnh trùng trọng số giữ thứ tự ban đầu.',
@@ -323,7 +323,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const kruskalEntry: WalkthroughEntry<In, S> = {
   id: 'kruskal',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t4-mst'],

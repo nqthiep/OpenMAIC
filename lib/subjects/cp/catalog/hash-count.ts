@@ -35,7 +35,7 @@ const EX = {
   ),
   done: m(
     'Ký tự nhiều nhất là {best}, xuất hiện {cnt} lần (trong {distinct} ký tự khác nhau).',
-    'The most frequent character is {best}, occurring {cnt|time|times} (out of {distinct} distinct characters).',
+    'The most frequent character is {best}, occurring {cnt|time|times} (out of {distinct|distinct character|distinct characters}).',
   ),
 };
 
@@ -189,7 +189,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Kết thúc', 'Done'),
     narration: m(
       'Kết quả: {best} xuất hiện {cnt} lần, trong {distinct} ký tự khác nhau. Mỗi ký tự chỉ đọc một lần nên cả quá trình là O(n).',
-      'Result: {best} occurs {cnt|time|times}, among {distinct} distinct characters. Each character is read once, so the whole job is O(n).',
+      'Result: {best} occurs {cnt|time|times}, among {distinct|distinct character|distinct characters}. Each character is read once, so the whole job is O(n).',
     ),
     hints: [
       m('Mỗi ký tự được đọc bao nhiêu lần?', 'How many times is each character read?'),
@@ -277,7 +277,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const hashCountEntry: WalkthroughEntry<In, S> = {
   id: 'hash-count',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-hash'],

@@ -131,7 +131,7 @@ Chung cho cả hai: bình luận ≤ 1 câu và **cùng ngôn ngữ** với lờ
 
 1. **Câu ngắn, gợi mở**: hỏi trước, giải thích sau ("Theo em bước tiếp theo `lo` hay `hi` đổi?"), không đọc lại định nghĩa dài.
 2. **Trỏ vào hình**: "nhìn thanh màu cam", "để ý `mid`"; mỗi câu nói gắn một frame.
-3. **Số trong lời nói phải có trên màn hình** (state hoặc `vars`/`pointers` của frame vừa nhảy tới). Dùng tham số `{mid}`, `{lo}` trong `narration` thay vì viết cứng số. Kiểm tự động.
+3. **Số trong lời nói phải có trên màn hình** (state hoặc `vars`/`pointers` của frame vừa nhảy tới). Dùng tham số `{mid}`, `{lo}` trong `narration` thay vì viết cứng số. Kiểm tự động. Bản en-US viết danh từ đếm được là `{n|node|nodes}` (ra "1 node", "3 nodes"), không bao giờ `{n} nodes`; `tests/subjects/english-plurals.test.ts` bắt lỗi này.
 4. **Thứ tự hành động cho mỗi beat**, trong đó hình luôn xuất hiện trước lời giải thích:
    1. `ask`: câu hỏi dự đoán, nói **trước khi nhảy**, có chờ trả lời nếu có `predict`.
    2. `widget_setState{preset, frame}`: hình xuất hiện.

@@ -1,0 +1,66 @@
+{
+  "entryId": "bs-answer-mini",
+  "entryRev": 4,
+  "contentHash": "c6068f2f6cf72246",
+  "locale": "vi-VN",
+  "verdict": "pass",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "bs-answer-mini",
+      "entryRev": 4,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "openai:kimi-k3",
+      "entryId": "bs-answer-mini",
+      "entryRev": 4,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 4,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beats init và done (narration, cả hai locale)",
+          "problem": "Thuật ngữ \"bất biến\" (invariant) được dùng ngay với học sinh lớp 8-9 mà không có định nghĩa; dù nội dung sau dấu hai chấm tự giải thích, từ chuyên môn này có thể gây lú.",
+          "fix": "Thêm một cụm giải thích ngắn lần đầu xuất hiện, ví dụ: \"Bất biến (điều luôn đúng trong suốt quá trình chặt): lo = 0 luôn đủ gỗ...\"."
+        },
+        {
+          "where": "beat narrow, narration lặp lại ở mọi vòng (script các preset)",
+          "problem": "Lời thoại luôn đọc cả hai nhánh chung chung (\"Đủ gỗ thì... thiếu gỗ thì...\") kể cả khi kết quả kiểm tra đã rõ trên frame; nhánh thực sự xảy ra chỉ có trong explanation của frame, không có trong lời nói.",
+          "fix": "Từ lần lặp thứ hai, đọc cụ thể nhánh đã xảy ra, ví dụ: \"Lần này thiếu gỗ (2 < 7) nên hi = mid − 1 = 17\", giữ rule đầy đủ chỉ ở lần đầu."
+        },
+        {
+          "where": "code.pseudo dòng 4 và các frame check",
+          "problem": "Ký hiệu trần ⌈·⌉ trong pseudocode có thể mới với học sinh lớp 8-9; frame nói \"làm tròn lên\" bằng lời nhưng không nối ký hiệu với công thức code (lo + hi + 1) // 2.",
+          "fix": "Thêm một ghi chú một lần (ví dụ trong hint hoặc pitfall) rằng ⌈(lo+hi)/2⌉ chính là (lo+hi+1)//2 trong code."
+        },
+        {
+          "where": "frames 0-2 của mỗi preset (codeLine = 1)",
+          "problem": "Phần vét cạn không có trong pseudocode (pseudocode chỉ là chặt nhị phân), nhưng frame vét cạn vẫn tô sáng dòng 1; học sinh mở panel code có thể thắc mắc vòng lặp \"thử mọi H\" nằm ở đâu.",
+          "fix": "Hoặc bỏ codeLine ở các frame vét cạn, hoặc ghi chú trong explanation rằng vét cạn chỉ là gọi wood(H) lặp lại, chưa có trong pseudocode."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

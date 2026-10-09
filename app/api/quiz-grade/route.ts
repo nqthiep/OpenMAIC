@@ -36,7 +36,12 @@ export async function POST(req: NextRequest) {
     questionSnippet = question?.substring(0, 60);
     resolvedPoints = points;
 
-    if (!question || !userAnswer) {
+    if (
+      typeof question !== 'string' ||
+      typeof userAnswer !== 'string' ||
+      !question ||
+      !userAnswer
+    ) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'question and userAnswer are required');
     }
 

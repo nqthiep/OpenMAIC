@@ -25,7 +25,7 @@ const EX = {
   ),
   cross: m(
     'Gạch các bội của p = {p} từ p·p = {from} trở đi: có {new} số mới bị gạch.',
-    'Cross out the multiples of p = {p} from p·p = {from} on: {new} new numbers are crossed.',
+    'Cross out the multiples of p = {p} from p·p = {from} on: {new|new number|new numbers} are crossed.',
   ),
   crossNone: m(
     'Gạch các bội của p = {p} từ p·p = {from} trở đi: không có số mới nào bị gạch (đã bị gạch từ trước).',
@@ -267,7 +267,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const sieveEntry: WalkthroughEntry<In, S> = {
   id: 'sieve',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t2-number-basics'],

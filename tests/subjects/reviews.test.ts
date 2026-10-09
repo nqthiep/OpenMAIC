@@ -110,7 +110,8 @@ describe('real loader and the env gate', () => {
   });
 
   it('the disk loader returns null when no review file exists', () => {
-    expect(diskReviewLoader(cpPack.id, entry.id, entry.entryRev)).toBeNull();
+    // a revision nobody has reviewed: real review files may exist for the current ones
+    expect(diskReviewLoader(cpPack.id, entry.id, entry.entryRev + 1000)).toBeNull();
   });
 
   it('the disk loader falls back to the next root when the cwd has no review file', () => {
@@ -140,10 +141,16 @@ describe('real loader and the env gate', () => {
     );
   });
 
-  it('with it set and no review files the registry has zero walkthroughs', async () => {
+  it('with it set the registry only holds entries that have a review file on disk', async () => {
     vi.stubEnv('OPENMAIC_REQUIRE_REVIEW', 'true');
     vi.resetModules();
     const { widgetRegistry } = await import('@/lib/widgets');
-    expect(widgetRegistry.walkthroughIds()).toEqual([]);
+    const released = widgetRegistry.walkthroughIds();
+    const all = SUBJECT_PACKS.flatMap((p) => p.walkthroughs.map((e) => [p.id, e] as const));
+    expect(released.length).toBeLessThan(all.length);
+    for (const id of released) {
+      const [subject, entry] = all.find(([, e]) => e.id === id)!;
+      expect(diskReviewLoader(subject, entry.id, entry.entryRev), id).not.toBeNull();
+    }
   });
 });

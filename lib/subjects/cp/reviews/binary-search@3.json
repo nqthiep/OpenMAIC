@@ -1,0 +1,87 @@
+{
+  "entryId": "binary-search",
+  "entryRev": 3,
+  "contentHash": "07a915463c4484b1",
+  "locale": "vi-VN",
+  "verdict": "pass",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "binary-search",
+      "entryRev": 3,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beats:done narration",
+          "problem": "The narration says 'Xong sau {steps} lần so sánh' but the beat template uses {steps} while the narrationExample fills it correctly. The pluralization is not handled in Vietnamese (always 'lần so sánh'), which is fine, but the English alt uses {steps|comparison|comparisons} while the Vietnamese does not; this is a minor inconsistency in template style, not a factual error.",
+          "fix": "Optionally use a pluralization helper in Vietnamese too, or leave as is since Vietnamese does not require plural forms."
+        },
+        {
+          "where": "script:absent preset",
+          "problem": "The prediction question 'Theo em, bước tiếp theo lo hay hi đổi?' is asked before the first mid is shown (after frame 0), but the answer cannot be determined from frame 0 alone because no comparison has been made yet. The predictBeat is 'mid' and the question is asked before setState frame 2, so the student is asked to predict before seeing a[mid].",
+          "fix": "Move the prediction question to after the mid frame is shown, or rephrase the question to ask what the first step should be rather than which bound changes."
+        },
+        {
+          "where": "script:absent preset",
+          "problem": "The prediction question is repeated before each mid selection, but the answer options are the same each time. This is acceptable but slightly repetitive.",
+          "fix": "Vary the prediction question or only ask it at the first mid to keep engagement."
+        },
+        {
+          "where": "beats:mid hints",
+          "problem": "The third hint gives away the full answer including the equality case, which is appropriate for a close-to-solution hint but may be too revealing for the first prediction.",
+          "fix": "Consider splitting the equality case into a separate hint or keeping it as the final hint only."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "openai:kimi-k3",
+      "entryId": "binary-search",
+      "entryRev": 3,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 4,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "alt.presets[1].label (mid-hit)",
+          "problem": "Hai locale không cùng nghĩa: vi 'Trúng ngay giữa' nói về vị trí giữa mảng, en 'Hit on the first try' nói về việc trúng ngay lần thử đầu. Cả hai đều đúng với preset nhưng không phải cùng một câu.",
+          "fix": "Thống nhất: en đổi thành 'Hit right in the middle' hoặc vi đổi thành 'Trúng ngay lần đầu'."
+        },
+        {
+          "where": "beats.done.narration (và alt.beats.done)",
+          "problem": "Dùng ký hiệu log₂ n với học sinh lớp 8–9 (chưa học logarit) mà không giải thích nghĩa.",
+          "fix": "Thêm một câu giải thích ngắn: log₂ n là số lần chia đôi n cho tới khi còn 1 — ví dụ n = 10 thì cỡ 4 lần, đúng bằng 4 lần so sánh trong preset 'absent'."
+        },
+        {
+          "where": "frames preset=absent index=13",
+          "problem": "codeLine = 7 (return −1) nhưng lời giải thích mô tả điều kiện lặp lo ≤ hi bị sai, tức dòng 2; frame 14 cũng dùng codeLine 7 nên hai frame liên tiếp trỏ cùng một dòng cho hai sự kiện khác nhau.",
+          "fix": "Đặt codeLine = 2 cho frame 13 (lần kiểm tra lo ≤ hi thất bại, thoát vòng lặp) và giữ codeLine = 7 cho frame 14 (return −1)."
+        },
+        {
+          "where": "presets",
+          "problem": "Chưa có preset mảng rỗng (n = 0): hi = n − 1 = −1 ngay từ đầu, vòng lặp không chạy, trả về −1 — edge case học sinh hay quên.",
+          "fix": "Thêm preset 'empty' với mảng rỗng để thấy hi = −1 và thân vòng lặp bị bỏ qua hoàn toàn."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

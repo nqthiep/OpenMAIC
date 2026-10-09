@@ -33,7 +33,7 @@ const EX = {
   ),
   brk: m(
     'Chọn c = {c} < {di}: thoát tight, {rem} chữ số sau tự do cần tổng {need}: g[{rem}][{need}] = {val}. Tổng đếm = {ans}.',
-    'Pick c = {c} < {di}: leave tight, the {rem} later digits are free and need sum {need}: g[{rem}][{need}] = {val}. Count = {ans}.',
+    'Pick c = {c} < {di}: leave tight, the {rem|later digit|later digits} are free and need sum {need}: g[{rem}][{need}] = {val}. Count = {ans}.',
   ),
   brkNone: m(
     'Chọn c = {c} < {di}: tổng cần cho {rem} chữ số sau là {need} < 0: không có cách nào. Tổng đếm = {ans}.',
@@ -153,7 +153,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Thoát tight', 'Leave tight'),
     narration: m(
       'Chọn c nhỏ hơn chữ số {di} của N thì số đã chắc chắn nhỏ hơn N, nên {rem} chữ số sau tự do. Số cách là g[{rem}][tổng còn cần], đọc thẳng từ bảng.',
-      'Choosing c below the digit {di} of N makes the number surely smaller than N, so the {rem} later digits are free. The count is g[{rem}][sum still needed], read straight from the table.',
+      'Choosing c below the digit {di} of N makes the number surely smaller than N, so the {rem|later digit|later digits} are free. The count is g[{rem}][sum still needed], read straight from the table.',
     ),
     hints: [
       m(
@@ -293,7 +293,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const digitDpEntry: WalkthroughEntry<In, S> = {
   id: 'digit-dp',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t4-dp-digit'],

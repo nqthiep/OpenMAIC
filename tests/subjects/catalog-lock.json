@@ -376,8 +376,8 @@
     }
   },
   "digit-dp": {
-    "entryRev": 2,
-    "contentHash": "a4af5ec1525a6916",
+    "entryRev": 3,
+    "contentHash": "56bd5e19fef8ad24",
     "framesHash": {
       "n999-s5": {
         "vi-VN": "c9afb5279c88fc0a",
@@ -393,7 +393,7 @@
       },
       "n345-s12": {
         "vi-VN": "638e73a36b620d21",
-        "en-US": "8a1840c64ad3e68e"
+        "en-US": "4d7a19a3215d7cac"
       }
     }
   },
@@ -516,7 +516,7 @@
     }
   },
   "euclid-gcd": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "bf6078dffa5e395a",
     "framesHash": {
       "basic": {
@@ -533,7 +533,7 @@
       },
       "equal": {
         "vi-VN": "6f17cbf9686b6f10",
-        "en-US": "d35b546e2dfe91b2"
+        "en-US": "a4d403d5d7f11fd4"
       },
       "a-less": {
         "vi-VN": "1c5b772f1cb6bc61",
@@ -696,8 +696,8 @@
     }
   },
   "hash-count": {
-    "entryRev": 3,
-    "contentHash": "a5913b6729c54cc1",
+    "entryRev": 4,
+    "contentHash": "e180902ddca5f1c8",
     "framesHash": {
       "repeat": {
         "vi-VN": "b518bcdc16a88093",
@@ -705,7 +705,7 @@
       },
       "all-same": {
         "vi-VN": "2ef6b7fb3ca8988d",
-        "en-US": "6212bd0a552d5be9"
+        "en-US": "58a9cbb1ef12766e"
       },
       "distinct": {
         "vi-VN": "b7ffca4216508e87",
@@ -713,7 +713,7 @@
       },
       "single": {
         "vi-VN": "c1ceba2c5d6d09a0",
-        "en-US": "73580018737d6527"
+        "en-US": "3d29492eda5a66c7"
       }
     }
   },
@@ -872,7 +872,7 @@
     }
   },
   "kruskal": {
-    "entryRev": 2,
+    "entryRev": 3,
     "contentHash": "a84c565eae520f1b",
     "framesHash": {
       "classic": {
@@ -893,7 +893,7 @@
       },
       "min": {
         "vi-VN": "427f6cc559f76ede",
-        "en-US": "5acca0e93606c069"
+        "en-US": "ea0a2bb7b7767358"
       }
     }
   },
@@ -1012,24 +1012,24 @@
     }
   },
   "merge-sort": {
-    "entryRev": 2,
-    "contentHash": "5079239d555a621a",
+    "entryRev": 3,
+    "contentHash": "b9377a95f1a2f416",
     "framesHash": {
       "random": {
         "vi-VN": "e2691ba49022d958",
-        "en-US": "a80c4fcfd5415dfd"
+        "en-US": "76a778497bed7fe4"
       },
       "reverse": {
         "vi-VN": "25c2ec11a278f17e",
-        "en-US": "7ccd9d38fea9afc3"
+        "en-US": "b6841cf5a01d6767"
       },
       "dups": {
         "vi-VN": "d7552fb78a01383f",
-        "en-US": "20d5017f2a45cbd0"
+        "en-US": "352055a57c23f338"
       },
       "n2": {
         "vi-VN": "583030703e9b7bde",
-        "en-US": "c3681423a38aaed1"
+        "en-US": "6c6606ff97586bed"
       }
     }
   },
@@ -1328,12 +1328,12 @@
     }
   },
   "sieve": {
-    "entryRev": 2,
+    "entryRev": 3,
     "contentHash": "c0142bda1adf6d2e",
     "framesHash": {
       "n30": {
         "vi-VN": "c1885e0d553e4701",
-        "en-US": "3e104069f77ce551"
+        "en-US": "0f164e4ebe56baa4"
       },
       "n2": {
         "vi-VN": "b267c468fdf63058",
@@ -1341,11 +1341,11 @@
       },
       "n49": {
         "vi-VN": "c4a0058dd6591881",
-        "en-US": "aa1146fea955b6d1"
+        "en-US": "2c82d8b10d4560cf"
       },
       "n60": {
         "vi-VN": "2e76799c7c26bbc6",
-        "en-US": "0d968470e8132229"
+        "en-US": "fa4487b54df11cf5"
       }
     }
   },

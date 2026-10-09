@@ -40,11 +40,11 @@ const EX = {
   ),
   restLeft: m(
     'Nửa phải đã hết. Chép nốt {cnt} số còn lại của nửa trái vào tmp; chúng đã sắp xếp sẵn.',
-    'The right half is used up. Copy the {cnt} remaining numbers of the left half into tmp; they are already sorted.',
+    'The right half is used up. Copy the {cnt|remaining number|remaining numbers} of the left half into tmp; they are already sorted.',
   ),
   restRight: m(
     'Nửa trái đã hết. Chép nốt {cnt} số còn lại của nửa phải vào tmp; chúng đã sắp xếp sẵn.',
-    'The left half is used up. Copy the {cnt} remaining numbers of the right half into tmp; they are already sorted.',
+    'The left half is used up. Copy the {cnt|remaining number|remaining numbers} of the right half into tmp; they are already sorted.',
   ),
   merged: m(
     'Chép tmp về a[{lo}..{hi}]: đoạn [{lo}, {hi}] đã sắp xếp tăng dần.',
@@ -155,7 +155,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Chép phần còn lại', 'Copy the rest'),
     narration: m(
       'Một nửa đã hết, nửa còn lại còn {cnt} số đã sắp xếp và đều lớn hơn mọi số đã lấy: chép nguyên vào tmp.',
-      'One half is used up; the other still has {cnt} sorted numbers, all larger than everything taken: copy them as they are.',
+      'One half is used up; the other still has {cnt|sorted number|sorted numbers}, all larger than everything taken: copy them as they are.',
     ),
     hints: [
       m(
@@ -364,7 +364,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const mergeSortEntry: WalkthroughEntry<In, S> = {
   id: 'merge-sort',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-sorting', 't2-divide-conquer'],

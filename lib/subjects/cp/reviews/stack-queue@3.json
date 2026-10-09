@@ -1,0 +1,87 @@
+{
+  "entryId": "stack-queue",
+  "entryRev": 3,
+  "contentHash": "5cf96ce0bf7c68b2",
+  "locale": "vi-VN",
+  "verdict": "pass",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "stack-queue",
+      "entryRev": 3,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beat 'done' / narration",
+          "problem": "The narration says 'Mỗi ký tự vào hoặc ra stack tối đa một lần: O(n)' but does not explain why this implies O(n) (each push/pop is O(1), so total is O(n)).",
+          "fix": "Add a short clause: 'mỗi thao tác push/pop là O(1), nên tổng là O(n)'."
+        },
+        {
+          "where": "beat 'start' / narration",
+          "problem": "The narration says 'ngoặc tròn, vuông, nhọn' (round, square, curly) but the examples use '()', '[]', '{}'. 'Nhọn' usually means angle brackets '<>', which are not used. This could confuse students.",
+          "fix": "Use 'ngoặc nhọn' consistently or say 'ngoặc tròn, vuông, xoắn' to match '{}'."
+        },
+        {
+          "where": "preset 'mismatch' / frame 4",
+          "problem": "The explanation says 'Không khớp: ) cần ( nhưng đỉnh stack là [' but the code line shown is 5, which is the check line. The frame does not show the 'return sai' step explicitly.",
+          "fix": "Consider adding a frame with codeLine 5 and a 'return false' highlight, or clarify that the check fails and the algorithm returns immediately."
+        },
+        {
+          "where": "preset 'unclosed' / frame 6",
+          "problem": "The explanation says 'Hết xâu nhưng stack còn 2 ngoặc mở chưa được đóng' but the vars only show 'size: 2' without 'n' or 'i'. The frame is tagged 'beat:fail' but the narration for 'fail' is generic.",
+          "fix": "Add 'n: 4' and 'i: 3' to vars for consistency with other final frames."
+        },
+        {
+          "where": "preset 'extra-close' / frame 4",
+          "problem": "The explanation asks 'Có ngoặc mở nào để khớp không?' but the frame is tagged 'beat:pop-check' and the narration for pop-check says 'Ngoặc mở nó đóng phải đang ở đỉnh stack'. The question is slightly different from the narration.",
+          "fix": "Align the frame explanation with the pop-check narration, or use a separate beat for the empty-stack case."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "openai:kimi-k3",
+      "entryId": "stack-queue",
+      "entryRev": 3,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "script preset extra-close: speech sau setState frame 4 (beat pop-check)",
+          "problem": "Lời thoại 'Ngoặc mở nó đóng phải đang ở đỉnh stack; ta so hai ký tự' được đọc khi stack đang rỗng (frame 4, size=0): không có đỉnh và không có 'hai ký tự' để so. Frame explanation ghi đúng 'stack đang rỗng' nên lời thoại mẫu và hình không khớp nhau.",
+          "fix": "Thêm biến thể narration của beat pop-check cho trường hợp stack rỗng, ví dụ: 'Ký tự ) ở vị trí 2 là ngoặc đóng nhưng stack rỗng, không có ngoặc mở nào để khớp.'"
+        },
+        {
+          "where": "script presets mismatch, unclosed, extra-close: speech cuối (beat done)",
+          "problem": "Ở các preset xâu sai, câu kết được đọc là 'Xâu hợp lệ khi không có lỗi nào và stack rỗng lúc hết xâu...' trong khi frame đang kết luận 'xâu không hợp lệ'; lời thoại không khẳng định lại xâu này sai nên học sinh dễ lúng túng.",
+          "fix": "Với preset sai, đọc biến thể: 'Xâu này không hợp lệ. Một xâu chỉ hợp lệ khi không có lỗi nào và stack rỗng lúc hết xâu; mỗi ký tự vào/ra stack tối đa một lần: O(n).'"
+        },
+        {
+          "where": "script tất cả preset: speech ask của beat pop-check",
+          "problem": "Câu hỏi dự đoán 'ký tự đóng này có khớp với đỉnh stack không?' được đọc khi frame hiện tại vẫn đang trỏ vào ký tự trước đó (ngoặc mở); cặp được so chỉ được tô sáng ở setState kế tiếp. Đáp án vẫn suy ra được từ xâu và stack đang hiển thị, nhưng con trỏ chưa chỉ vào ký tự đóng được hỏi.",
+          "fix": "Đặt speech ask ngay sau setState có predictBeat, hoặc sửa câu hỏi thành 'ký tự tiếp theo là ngoặc đóng — theo em nó có khớp với đỉnh stack không?'"
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

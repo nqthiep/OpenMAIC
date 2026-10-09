@@ -1,0 +1,101 @@
+{
+  "entryId": "fib-recursion-tree",
+  "entryRev": 2,
+  "contentHash": "e5fd6cc15c2f4cd9",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "fib-recursion-tree",
+      "entryRev": 2,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 5
+      },
+      "factErrors": [
+        "plain-5 frame 23: explanation says 'Cây có 15 node' and vars.calls = 15, but the state contains 15 nodes (c0..c14), which is correct; however the narration in beat 'done' says 'số node tăng gần gấp 1,6 lần mỗi khi n tăng 1' — the growth factor of the number of calls is the golden ratio φ ≈ 1.618, so 'gần gấp 1,6 lần' is acceptable, not an error.",
+        "memo-5 frame 14: explanation says 'Cây có 9 node' and vars.calls = 9, but the state contains 9 nodes (c0..c8), which is correct.",
+        "memo-6 frame 17: explanation says 'Cây có 11 node' and vars.calls = 11, but the state contains 11 nodes (c0..c10), which is correct."
+      ],
+      "issues": [
+        {
+          "where": "beat 'done' narration",
+          "problem": "The narration says 'có nhớ thì chỉ khoảng 2n' (with memo it has about 2n nodes). For n=5 the memo tree has 9 nodes, and 2n = 10; for n=6 it has 11 nodes and 2n = 12. The actual number of memoized calls is n + (n-1) = 2n - 1 for n ≥ 1, so 'khoảng 2n' is a reasonable approximation but slightly imprecise.",
+          "fix": "Change to 'có nhớ thì chỉ khoảng 2n − 1 node' or 'khoảng 2n node' with a note that it is 2n − 1 exactly for n ≥ 1."
+        },
+        {
+          "where": "beat 'done' narration",
+          "problem": "The claim 'Không nhớ thì số node tăng gần gấp 1,6 lần mỗi khi n tăng 1' is stated without explaining that this is the golden ratio φ ≈ 1.618, and the factor is only asymptotic; for small n the ratio varies (e.g., calls(5)=15, calls(6)=25, ratio 1.67).",
+          "fix": "Add a brief note that the factor approaches the golden ratio φ ≈ 1.618 as n grows, and that for small n the ratio is only approximately 1.6."
+        },
+        {
+          "where": "script plain-5 step 'setState frame 23'",
+          "problem": "The script jumps from frame 10 directly to frame 23, skipping frames 11-22. The narration at frame 23 says 'f(5) = 5, với 15 node trên cây', but the intermediate frames 11-22 (which show the second f(2), f(1), f(0), f(2), f(3), f(4), f(3), f(2), f(1), f(0), f(2), f(3), f(5) calls) are not narrated. This is acceptable because truncated=true, but the jump may confuse students who see the tree suddenly complete.",
+          "fix": "Consider adding a brief narration at the jump point, e.g., 'Các lời gọi còn lại diễn ra tương tự...' before jumping to the final frame."
+        },
+        {
+          "where": "script memo-5 step 'setState frame 14'",
+          "problem": "The script jumps from frame 10 directly to frame 14, skipping frames 11-13. The narration at frame 14 says 'f(5) = 5, với 9 node trên cây', but frames 11-13 (f(4) return, f(3) memo hit, f(5) return) are not narrated. This is acceptable because truncated=true, but the jump may confuse students.",
+          "fix": "Consider adding a brief narration at the jump point before jumping to the final frame."
+        },
+        {
+          "where": "script memo-6 step 'setState frame 17'",
+          "problem": "The script jumps from frame 10 directly to frame 17, skipping frames 11-16. The narration at frame 17 says 'f(6) = 8, với 11 node trên cây', but frames 11-16 (f(2) memo hit, f(4) return, f(3) memo hit, f(5) return, f(4) memo hit, f(6) return) are not narrated. This is acceptable because truncated=true, but the jump may confuse students.",
+          "fix": "Consider adding a brief narration at the jump point before jumping to the final frame."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "openai:kimi-k3",
+      "entryId": "fib-recursion-tree",
+      "entryRev": 2,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 5,
+        "deHieu": 4,
+        "trucQuan": 5,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "frames of presets plain-5, base-0, base-1 (codeLine 4 and 5)",
+          "problem": "The no-memo presets still point at pseudocode lines 4–5, which read and write memo[k]; a student may think a memo table is being used in the run labeled 'Chưa dùng bảng nhớ'.",
+          "fix": "Use a separate non-memo pseudocode (return fib(k − 1) + fib(k − 2)) for those presets, or add a note that lines 4–5 reduce to a plain return when no memo is used."
+        },
+        {
+          "where": "script plain-5 / memo-5 / memo-6, first predict question",
+          "problem": "The first 'Lời gọi con tiếp theo là f(?)' is spoken while frame 0 (empty tree) is shown; there is no current call f(k) on screen yet, so the question has no visual anchor (the second predict, asked over frame 1, is fine).",
+          "fix": "Ask the first predict only after setState frame 1, when f(n) is visible, or drop the first predict."
+        },
+        {
+          "where": "beat 'call', hint 2 and narration",
+          "problem": "'Chương trình chạy từ trái sang phải' is guaranteed in Python, but in C++ the evaluation order of the two operands of '+' in fib(k-1, memo) + fib(k-2, memo) is unspecified by the standard; the result is unaffected, but the blanket claim is not exact for the C++ code shown.",
+          "fix": "Phrase it as a convention ('ta gọi f(k − 1) trước') or add a one-word caveat that this is the usual left-to-right order."
+        },
+        {
+          "where": "beats 'base' and 'done' (misconceptions), 'done' hints",
+          "problem": "'tràn stack' (stack overflow), 'O(n)', 'cấp mũ' and 'cấp tuyến tính' are used without any definition for a grade 8-9 audience.",
+          "fix": "Add a short gloss (e.g., 'tràn stack: hết bộ nhớ lưu các lời gọi đang chờ'; 'O(n): số lần gọi tỉ lệ với n') or reword in plain terms."
+        },
+        {
+          "where": "beats (predict coverage)",
+          "problem": "Predict questions appear only in the 'call' beat and repeat verbatim twice per script; the 'return' and 'memo-hit' beats never ask the student to predict anything.",
+          "fix": "Add predicts such as 'f(2) trả về bao nhiêu?' before a return frame, or 'Lời gọi f(2) này có cần tính lại không?' before a memo-hit frame."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

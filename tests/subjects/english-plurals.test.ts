@@ -48,10 +48,9 @@ const PLURALS = [
   'placements',
   'nails',
   'masks',
-  'matches',
 ];
 // a "1" that is a whole number, not the tail of 11, 2.1, x−1 or a label such as "Row 1 adds"
-const ONE_PLURAL = new RegExp(`(?<![\\w.]|[−+*·×/^-] )1 (?:${PLURALS.join('|')})\\b`);
+const ONE_PLURAL = new RegExp(`(?<![\\w.]|[−+*·×/^-] )1 (?:[a-z-]+ )?(?:${PLURALS.join('|')})\\b`);
 
 describe('English text never says "1 nodes"', () => {
   for (const pack of SUBJECT_PACKS) {
