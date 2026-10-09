@@ -197,7 +197,7 @@ async function main(): Promise<number> {
         model: connection.model,
         system: req.system,
         prompt: req.prompt,
-        temperature: 0,
+        temperature: REVIEW_TEMPERATURE,
         maxOutputTokens: REVIEW_MAX_OUTPUT_TOKENS,
         maxRetries: 0,
         abortSignal: req.signal,
@@ -309,6 +309,8 @@ async function main(): Promise<number> {
 
 /** Reasoning reviewers spend most of the budget thinking; raise it with TUTOR_REVIEW_MAX_OUTPUT_TOKENS (default 4000); slow ones also need TUTOR_REVIEW_TIMEOUT_MS (default 180000). */
 const REVIEW_MAX_OUTPUT_TOKENS = Number(process.env.TUTOR_REVIEW_MAX_OUTPUT_TOKENS) || 4000;
+/** 0 by default; a provider that rejects 0 (longcat wants at least 0.1) needs TUTOR_REVIEW_TEMPERATURE=0.1. */
+const REVIEW_TEMPERATURE = Number(process.env.TUTOR_REVIEW_TEMPERATURE) || 0;
 
 async function reviewOne(
   entry: AnyWalkthroughEntry,
