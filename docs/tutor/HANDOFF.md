@@ -91,6 +91,8 @@ Cổng OpenCode Go (khoá trong `.env.local`, `DEEPSEEK_BASE_URL=https://opencod
 
 Kết quả: chạy 8 entry thì hết hạn mức ("Go usage limit exceeded"). Đạt và đã lưu ở `lib/subjects/cp/reviews/`: `binary-search@3`, `bs-answer-mini@4`, `stack-queue@3` (đừng sửa nội dung ba entry này, file mất hiệu lực theo `contentHash`). Chưa đạt, lưu làm bản ghi ở `docs/tutor/review-runs/2026-10-09-deepseek-kimi/`: `cauchy-schwarz`, `two-pointers`, `prefix-sum`, `merge-sort`, `fib-recursion-tree`; các lỗi thật trong đó đã sửa (entryRev tăng). Reviewer DeepSeek hay ghi mục "đúng" vào `factErrors` làm trượt oan; prompt đã dặn lại. Còn khoảng 58 entry chưa review. Model free duy nhất còn dùng được là `longcat-2.5-preview-free` (một hãng, hay quá giờ): không đủ lập hội đồng hai hãng.
 
+Thử hội đồng một model (2026-10-09, tạm, chủ dự án đồng ý): `longcat-2.5-preview-free` đóng cả hai vai bằng `--allow-same-provider`. Entry `euclid-gcd`: một lượt đạt điểm đầy đủ, lượt kia quá 900 giây. Kết quả: không đủ tin cậy để chạy 58 entry (mỗi entry có thể mất tới 30 phút và vẫn không ghi file). Chờ UAT để có hai model thật.
+
 Chạy tiếp khi có hạn mức: `pnpm exec tsx eval/tutor-review/runner.ts <entryId>` với `MODEL_ROUTES` trỏ hai stage `tutor-review-<môn>` và `tutor-review-<môn>-2` tới hai model trên (xem `eval/tutor-review/runner.ts` đầu file); chạy song song tối đa 4 tiến trình.
 
 ### Gate review LLM: đã thử một phần, CHƯA đạt (cập nhật 2026-10-07)
