@@ -82,7 +82,7 @@ Chưa làm và vì sao:
 | Hội đồng review LLM từng entry (`I-04`…`I-07`), `2-G2`, mọi eval thật | cần khoá API và tên model |
 | `2E-05` `graham-scan`, `I-12` | cần visualizer `geometry` (`3B-V1`, Phase 3) |
 | Lát 1d (`1d-00`…`1d-05`), `2-CI1` | cổng `1d-00` cần 20 lần e2e liên tiếp, ≥ 10 lớp dùng thật và G1 đạt (ADR 0012 quyết định 7) |
-| Phase 3 | cần Docker/Manim/LaTeX (máy này có `docker` và `ffmpeg`, không có `manim`, `latex`) và LLM tác giả; 3B trở đi chờ G1 |
+| Phase 3 | review LLM và calibration cho 27 walkthrough Toán cần hai model mạnh khác nhà cung cấp (mục 3b); 3B trở đi chờ G1 |
 | Review ba góc của Phase 2 (an ninh/server, host/runtime/a11y, nội dung/catalog/provider) | chưa làm; việc kế tiếp |
 
 ### Gate review LLM: đã thử một phần, CHƯA đạt (cập nhật 2026-10-07)
@@ -112,17 +112,17 @@ Chưa làm và vì sao:
 | Walkthrough Toán | **27 entry** ở `lib/subjects/math/catalog/*.ts` (pack `math`): 3 có trước (`cauchy-schwarz`, `triangle-altitude`, `curve-sketching`) + 21 chuyển từ clip + 3 viết mới cho ba chủ đề `walkthrough` còn thiếu (`mvt-lagrange` cho `m4-limits-mvt`, `inversion-circle` cho `m4-projective-inversion`, `subtraction-game` cho `m4-games-invariants`); mọi chủ đề `walkthrough` của curriculum đều có entry. Mỗi entry một `tests/subjects/math/<id>.test.ts`: hợp đồng chung `tests/subjects/cp/contract.ts` (beat đầu `start`, cuối `done`, 5–10 beat, 3 gợi ý + hiểu lầm mỗi beat, dự đoán `choice` có `answer()`, số nguyên trong lời giảng phải đến từ input/state/vars, ≤ 160 ký tự) cộng oracle độc lập từng entry (đếm đường đi bằng duyệt hết, tập hợp phần tử thật cho bao hàm–loại trừ, giải hệ tuyến tính cho các tâm tam giác, góc bằng `acos`/`atan2`, luỹ thừa bằng số nguyên lớn…) |
 | Quy ước chung | `customInput: false` (lát 1d chưa mở): tương tác = preset + bước/phát/tua + dự đoán; "thanh trượt" = chuỗi khung tua được. Tham số thập phân đổi thành số nguyên (`tn` = t tính bằng phần mười, `e` = ε tính bằng 1/20) để mọi con số trên màn hình là phân số chính xác; đường tròn bằng hằng số xoay, không dùng `sin/cos`; PA², PB² là phân số chính xác thay cho độ dài vô tỉ |
 | Skill | `skills/agent-runtime/olympiad-math/SKILL.md` viết lại: không còn tool/khối clip; bảng walkthrough sinh từ catalog (`pnpm exec tsx scripts/generate-skill-catalog.ts`) |
-| Curriculum Toán | `docs/tutor/curriculum/curriculum-math-vn.json` + `references/curriculum/*` (28 topic, id `m<tier>-<tên>`): `primary_medium` walkthrough 18 / slide 10 / manim 0, danh sách `walkthrough_ids`; mọi tên kỳ thi, lớp, trọng số, nguồn vẫn là **[Unverified]**, `vn_sources` rỗng (3-R1 cần nguồn thật) |
+| Curriculum Toán | `docs/tutor/curriculum/curriculum-math-vn.json` + `references/curriculum/*` (28 topic, id `m<tier>-<tên>`): `primary_medium` walkthrough 18 / slide 10, danh sách `walkthrough_ids`; 5 nguồn thật (2026-10-09, card `3-R1`) cho `exam_profile` và `vn_sources` của 18 topic; chi tiết thi cử (đề VMO từng kỳ, quy chế chuyên-10 từng tỉnh, công báo gốc) vẫn **[Unverified]** |
 | Review Toán (hạ tầng) | prompt reviewer **riêng cho Toán** (`buildMathReviewSystem` trong `lib/tutor/review-schema.ts`); `eval/tutor-review/runner.ts` đã có hai panel (`cp`, `math`) và `--calibrate` chạy trên cả 67 entry (cp và Toán) bằng bộ lỗi gieo chung `seed-errors.ts` (với Toán áp dụng các loại `explanation`, `narration`, `hint`: walkthrough Toán không có mã C++/Python) và biến thể sạch `clean-variants.ts`; `--dry-run` với bốn route giả cho thấy 1893 mutant, 825 biến thể sạch, 5436 lần gọi. Bộ lỗi gieo riêng cho clip (111 + 43) đã xoá cùng mã video |
-| CI | các bước kiểm `split-curriculum-math`, `make-briefs` vẫn có; workflow `manim-author.yml` đã gỡ |
+| CI | bước kiểm `split-curriculum-math --check` trong job `check`; workflow `manim-author.yml` đã gỡ |
 
-Mã video **đã xoá (2026-10-09, theo yêu cầu của chủ dự án)**: `lib/clips/**`, `lib/subjects/math/clips/**` (21 mẫu TS), `manim/**` (21 mẫu Python, cổng QA, dịch vụ, Dockerfile, spike S1/S2/S4, red-team), `eval/manim-author/**`, `scripts/{render-clips.ts,manim-author-pr.mjs,export-clip-specs.ts}`, `app/api/clips`, `lib/server/agent-runtime/{clip-tools,clip-render}.ts`, tests của chúng, job CI `manim-qa`, biến `MANIM_*` trong `.env.example`, vai LLM `manim-author`, nhà cung cấp clip trong `widgetRegistry`, phần clip của cổng release, ZIP và `buildStateContext`. Thẻ git `manim-clips-final` trỏ tới bản cuối còn chạy được (`git checkout manim-clips-final`); các tham chiếu `lib/clips`, `manim/` trong tài liệu thiết kế là lịch sử.
+Mã video **đã xoá (2026-10-09, theo yêu cầu của chủ dự án)**: `lib/clips/**`, `lib/subjects/math/clips/**` (21 mẫu TS), `manim/**` (21 mẫu Python, cổng QA, dịch vụ, Dockerfile, spike S1/S2/S4, red-team), `eval/manim-author/**`, `scripts/{render-clips.ts,manim-author-pr.mjs,export-clip-specs.ts}`, `app/api/clips`, `lib/server/agent-runtime/{clip-tools,clip-render}.ts`, tests của chúng, job CI `manim-qa`, biến `MANIM_*` trong `.env.example`, vai LLM `manim-author`, nhà cung cấp clip trong `widgetRegistry`, phần clip của cổng release, ZIP và `buildStateContext`. Thẻ git `manim-clips-final` trỏ tới bản cuối còn chạy được (`git checkout manim-clips-final`); tài liệu thiết kế đã được dọn theo (2026-10-09); phần còn nhắc Manim chỉ nằm trong các ADR lịch sử (0002, 0004, 0005, 0007, 0009, 0011, 0012, 0014) và `REVIEW-2026-09-29.md`.
 
-Kết quả đo còn dùng được từ nhánh video (ghi ở ADR 0015, RISKS S1–S5): image Manim 0.21.0 ghim dựng được và render qua HTTP cho khung hình giống hệt bản native arm64; red-team thử đầu tiên tìm ra TeX đọc được `/etc/passwd` và fork bomb làm dịch vụ ngừng trả lời (chưa vá, không còn cần vì hướng này đã đóng).
+Kết quả đo còn dùng được từ nhánh video (ghi ở ADR 0015): image Manim 0.21.0 ghim dựng được và render qua HTTP cho khung hình giống hệt bản native arm64; red-team thử đầu tiên tìm ra TeX đọc được `/etc/passwd` và fork bomb làm dịch vụ ngừng trả lời (chưa vá, không còn cần vì hướng này đã đóng).
 
 Review bằng model free (kết luận: không dùng được làm cổng):
 
-- `longcat-2.5-preview-free` bị upstream từ chối `temperature: 0` ("0 is not greater or equal to 0.1") nên hội đồng hai provider không đủ hai review; `space-bunny-free` chạy được nhưng một reviewer không đủ để ghi file cổng. Vì vậy **chưa có file review nào** trong `lib/subjects/math/reviews/`. Bản ghi từng phần nằm ở `docs/tutor/review-runs/2026-10-08-math-clips/` và `…-cp-free-models/` (không phải file cổng). Những lỗi chữ thật mà hai model free tìm ra lúc đó đã được sửa trong các walkthrough.
+- `longcat-2.5-preview-free` bị upstream từ chối `temperature: 0` ("0 is not greater or equal to 0.1") nên hội đồng hai provider không đủ hai review; `space-bunny-free` chạy được nhưng một reviewer không đủ để ghi file cổng. Vì vậy **chưa có file review nào** trong `lib/subjects/math/reviews/`. Bản ghi từng phần của các entry cp nằm ở `docs/tutor/review-runs/2026-10-08-cp-free-models/` (không phải file cổng); bản ghi Toán (trên bản clip cũ) đã xoá, còn trong lịch sử git. Những lỗi chữ thật mà hai model free tìm ra lúc đó đã được sửa trong các walkthrough.
 
 Lệch so với card/kế hoạch cũ:
 
@@ -146,7 +146,7 @@ Chưa làm và vì sao (Phase 3):
 1. Review Phase 2 ba góc, ghi nhận xét cụ thể vào REVIEW, sửa theo nhận xét.
 2. Xem từng entry trong trình duyệt (visualizer mới chưa được kiểm bằng mắt trên entry thật).
 3. Chạy lại hội đồng review LLM theo mục "Gate review LLM" ở trên: chạy hội đồng review LLM cho mọi entry, ghi file review, chạy cổng G1/G2, rồi mới phát hành.
-4. Phase 3: 27 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration, nghiên cứu nguồn curriculum (`3-R1`), xem bằng mắt/e2e entry mới; viết lại bộ lỗi gieo cho walkthrough Toán để calibration hội đồng.
+4. Phase 3: 27 walkthrough Toán đã xong (mục 3b, ADR 0015). Còn lại cần model mạnh hoặc người: hội đồng review Toán và calibration (hạ tầng và bộ lỗi gieo đã có), kiểm chứng chi tiết thi cử còn `[Unverified]`, xem bằng mắt entry mới.
 5. Lát 1d chỉ khi cổng `1d-00` đạt.
 
 ## 5. Quy trình làm việc đã dùng (nên giữ)
@@ -234,7 +234,6 @@ Nghiệm thu một nhánh: trong worktree chạy eslint và prettier trên file 
 | Khoá API và tên model chính xác | Cổng G1/G2, mọi eval thật (moderation, review, sim-learner, qa, lesson), hội đồng review LLM ở `I-04`…`I-07`. Chưa có số đo nào, nên các ngưỡng vẫn là mục tiêu thiết kế, không phải kết quả | `0-02`, `0-05`, `1b-26`, `G1-01`, `2-G2` |
 | Build Docker standalone | Chưa xác nhận file review có được đóng gói (`next.config.ts` `outputFileTracingIncludes`) `[Unverified]` | OPERATIONS §2, smoke item 8 |
 | `node_modules` thật cho Playwright | e2e `e2e/tests/*.spec.ts` chưa chạy; `1c-21` (e2e chờ dự đoán) chưa làm | `1c-21` |
-| Spike Docker và Manim | Phase 3 | `tasks/phase-3.md` |
 | Runner CI có `g++`, `python3` | Chưa kiểm chứng | bước `TUTOR_IMPL_CHECK` |
 | Review do người | Bản dịch giao diện chưa ai đọc `[Unverified]`; nội dung bài giải đề P2/P3 và 4 mô-đun 2D là đề xuất của leader `[Inference]`, hội đồng LLM duyệt ở bước tích hợp | `I-05`, `I-06` |
 

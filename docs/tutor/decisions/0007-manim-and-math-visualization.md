@@ -4,6 +4,7 @@
 - **Date**: 2026-09-29; viết lại 2026-09-30
 - **Deciders**: User ("Đây là hướng chính" — Manim cho trực quan hoá Toán; lời thầy "giữ riêng" với clip) + Architect panel
 - **Liên quan**: [0005](0005-widget-hosting-model.md), [0009](0009-teacher-qa-awareness.md), [0011](0011-entry-point-workbench-tool.md), [../SECURITY](../SECURITY.md), [../OPERATIONS](../OPERATIONS.md), [../phase-3-olympiad-math/SCHEMA](../phase-3-olympiad-math/SCHEMA.md)
+- **Bị thay thế một phần bởi**: [0015](0015-math-interactive-web-ui-not-video.md) (2026-10-08): phần trực quan hoá Toán bằng clip Manim. Mã Manim đã xoá 2026-10-09, còn ở thẻ git `manim-clips-final`.
 
 > **Tóm tắt:**
 > - **Manim là hướng chính cho Toán**: mẫu tham số hoá (M3) trên nền thư viện dựng sẵn (M1); LLM chỉ chọn `templateId` + `presetId`/`params`.

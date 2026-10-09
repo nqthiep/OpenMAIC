@@ -37,8 +37,6 @@ Kết thúc Phase 1 (tới G1), **một walkthrough thật chạy trọn vòng �
 | **G1** | Cổng sư phạm (ADR 0012 §6, ADR 0014): hội đồng LLM Tin ký + học sinh mô phỏng; bộ hiệu chuẩn đạt | review JSON + eval | — |
 | **1d** | Nhập input tuỳ chỉnh (preset `student`/`llm`, module `run` trong iframe, Q&A tính lại). **Cổng: ADR 0012 §7** | vitest + Playwright | M |
 
-**Song song với 1a:** spike Manim S1, S2, S4 (Phase 3 §8), vì chúng không cần 1b.
-
 ## 2. Thay đổi trong code hiện có (không chạm package)
 
 | File | Thay đổi | Lát |

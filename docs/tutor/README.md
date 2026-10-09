@@ -10,7 +10,7 @@
 > - **không code editor** (mặc định chặn toàn ứng dụng); interactive + visualizer để dễ hiểu;
 > - phục vụ cả học sinh **thi vào 10 chuyên Tin** và **HSG**; dễ thêm môn.
 >
-> Tin dùng walkthrough SVG: dữ kiện do hàm thuần sinh, có test; code chỉ-đọc C++ và Python. Toán dùng **walkthrough tương tác** (từ 2026-10-08, [ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md); bản gốc dùng clip Manim câm, mã clip đã xoá, còn ở thẻ git `manim-clips-final`). Không đổi package `@openmaic/*`, không thêm npm dependency. Bắt đầu ở [REQUIREMENTS](REQUIREMENTS.md).
+> Tin dùng walkthrough SVG: dữ kiện do hàm thuần sinh, có test; code chỉ-đọc C++ và Python. Toán cũng dùng **walkthrough tương tác**, không video ([ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md)). Không đổi package `@openmaic/*`, không thêm npm dependency. Bắt đầu ở [REQUIREMENTS](REQUIREMENTS.md).
 
 ## 1. Mục tiêu và phạm vi
 
@@ -28,7 +28,6 @@ Hai môn dùng chung **Base Layer** (Phase 1): widget `walkthrough`, trình chi�
 - Walkthrough trên đường tạo khoá học mặc định (classic).
 - Marketplace, adaptive learning, teacher dashboard.
 - Embed bên thứ ba (Desmos/GeoGebra).
-- LLM viết mã Manim chạy trên server phục vụ.
 - Visualizer 3D; kéo điểm trực tiếp trên hình.
 
 ## 2. Mục lục tài liệu
@@ -58,7 +57,7 @@ docs/tutor/
 ├── phase-1-base-layer/SCHEMA.md
 ├── phase-2-competitive-programming/SCHEMA.md
 ├── phase-3-olympiad-math/SCHEMA.md       # mức khung cho tới khi 3-0 có kết quả
-└── tasks/                    # 211 task cho worker: luật chung, card, đợt (README.md, phase-1/2/3.md)
+└── tasks/                    # 140 task cho worker: luật chung, card, đợt (README.md, phase-1/2/3.md)
 ```
 
 ## 3. Kế hoạch theo đợt
@@ -71,9 +70,9 @@ docs/tutor/
 | **G1** | **Cổng sư phạm**: hội đồng LLM "giáo viên chuyên Tin" ký + học sinh mô phỏng + bộ hiệu chuẩn (ADR 0014) | 1c |
 | **1d** | Nhập input tuỳ chỉnh. **Cổng: "preset chạy ổn" đo được** (ADR 0012 §7) | G1 |
 | **2A–2E** | Tin, hai luồng xen kẽ: 2A nền chung tier 1–2 + bài giải đề `bs-answer` (cổng G2) → 2B phần `ts10` còn lại + HSG cốt lõi → 2C HSG cấu trúc dữ liệu/đồ thị ‖ 2D storyboard → 2E độ khó 5 | G1 |
-| **3-0** | Toán: spike S1/S2/S4 **song song 1a**; S3 (sau 1b), S5 + research curriculum Toán | S3: 1b |
-| **3A** | Toán: **Manim đợt 1** (image pin, 3 mẫu, CI + cổng QA, tool `generate_clip_scenes`, export; LLM tác giả Manim + S9) | 1b; 3-0 |
-| **3B–3D** | Manim đợt 2 (sau 3B tổng 9–12 mẫu) + 3 walkthrough Toán → render theo yêu cầu (`manim-service`) → trợ lý soạn nháp offline | 3A |
+| **3-0** | Toán: research curriculum Toán kèm nguồn | — |
+| **3A** | Toán: bộ visualizer `geometry`/`functionPlotter`/`proofOutline` và walkthrough Toán đợt 1 | 1b; 3-0 |
+| **3B–3D** | Toán: mở rộng thành 27 walkthrough → review LLM bằng hai model mạnh và calibration | 3A |
 
 Chỉ có ước lượng cỡ S/M/L ([ADR 0004](decisions/0004-three-phase-plan.md)), chưa có ước lượng thời gian. Phase 2 ‖ Phase 3. Rủi ro và spike: [RISKS](RISKS.md).
 
@@ -84,10 +83,10 @@ Chỉ có ước lượng cỡ S/M/L ([ADR 0004](decisions/0004-three-phase-plan
 3. **Dữ kiện do hàm thuần sinh, có test; lời thầy kịch bản tất định** theo beat của từng preset. LLM chỉ chọn `walkthroughId` + `presetId` qua tool `generate_walkthrough`; từ 1d có thể cấp `input` (ADR 0006, 0011, 0013).
 4. **Widget là HTML tự chứa trong iframe sandbox + CSP**, không phải component React của host; host và iframe bắt tay `widget-ready` (ADR 0005, 0013).
 5. **Mở rộng bằng gói môn học**: thêm môn dùng lại phương tiện có sẵn = thêm thư mục + một dòng đăng ký; thêm **loại phương tiện** mới cần ADR. **Không đổi package publish** (ADR 0005).
-6. **Không thêm npm dependency**; trực quan bằng SVG/DOM tự viết (ADR 0002). ~~Manim là hướng chính cho Toán~~ **đã thay bằng walkthrough tương tác (ADR 0015, 2026-10-08)**: 21 mẫu clip đã viết lại thành walkthrough cùng id; mã Manim đã xoá (còn ở thẻ git `manim-clips-final`) (ADR 0007 phần trực quan hoá Toán bị thay thế). LLM chỉ chọn `walkthroughId` + `presetId`, không viết mã chạy trên server.
+6. **Không thêm npm dependency**; trực quan bằng SVG/DOM tự viết (ADR 0002), kể cả Toán (ADR 0015: walkthrough tương tác, không video). LLM chỉ chọn `walkthroughId` + `presetId`, không viết mã chạy trên server.
 7. **Tái dùng kênh và tiền lệ có sẵn**: `SET_WIDGET_STATE`, `HIGHLIGHT_ELEMENT`, `__maicInteractive`, cách đăng ký tool như `generate_video` ([INTERFACES](INTERFACES.md)).
 8. **Quyết định bằng SWOT**: mỗi ADR có bảng S/W/O/T và trigger đổi quyết định.
-9. **Không cần người thật để vận hành quy trình** (ADR 0014): bộ lọc nội dung, hội đồng giáo viên Tin/Toán, tác giả Manim và học sinh thử đều là **LLM riêng** (khác nhà cung cấp với model dạy), mỗi vai trò có bộ hiệu chuẩn. Kiểm tất định vẫn là cổng cứng. Dữ liệu học sinh được lưu để đo việc học thật.
+9. **Không cần người thật để vận hành quy trình** (ADR 0014): bộ lọc nội dung, hội đồng giáo viên Tin/Toán và học sinh thử đều là **LLM riêng** (khác nhà cung cấp với model dạy), mỗi vai trò có bộ hiệu chuẩn. Kiểm tất định vẫn là cổng cứng. Dữ liệu học sinh được lưu để đo việc học thật.
 
 ## 5. Trạng thái hiện tại
 
@@ -96,18 +95,17 @@ Chỉ có ước lượng cỡ S/M/L ([ADR 0004](decisions/0004-three-phase-plan
   - Đã kiểm tra không có `prerequisites` treo/vòng/ngược tier; `course_shape` theo ADR 0008; `sequencing` đủ 32 topic.
   - **Chưa được git theo dõi**; cần rà nguồn/bản quyền trước khi commit (`provenance` trong file).
 - `.gitignore`: đã bỏ ignore `docs/tutor/` (`/docs/*` + `!/docs/tutor/`); các file **chưa commit**.
-- Đã có `lib/tutor/`, `lib/widgets/`, `lib/subjects/cp/` (2 entry); chưa có `lib/clips/`, `manim/` (Phase 3).
+- Đã có `lib/tutor/`, `lib/widgets/`, `lib/subjects/cp/` (Tin) và `lib/subjects/math/` (27 walkthrough Toán); trạng thái chi tiết ở [HANDOFF](HANDOFF.md).
 - Quyết định của user (2026-09-30), chi tiết ở [REQUIREMENTS §5](REQUIREMENTS.md):
   - chặn `code` toàn ứng dụng;
   - nhập input sau khi preset chạy ổn;
-  - Manim là hướng chính;
+  - (2026-10-08) minh hoạ Toán bằng walkthrough tương tác, không video (ADR 0015);
   - chỉ khi bật workbench;
   - cả hai đối tượng;
-  - lời thầy riêng với clip;
   - code C++ và Python;
   - (2026-10-01) mọi vai trò con người dùng LLM; lưu dữ liệu học sinh (ADR 0014);
   - (2026-10-01) hai nhà cung cấp DeepSeek V4.1 flash + GPT-6-luna (định danh [Unverified], spike Q16); rà pháp lý và commit: chưa cần.
-- (2026-10-01) Đã chia thành 211 task cho worker, đủ cả ba phase ([tasks/](tasks/README.md)). Muốn giao việc trong worktree thì phải commit tài liệu trước (task `0-01`).
+- (2026-10-01) Đã chia thành 140 task cho worker, đủ cả ba phase ([tasks/](tasks/README.md)). Muốn giao việc trong worktree thì phải commit tài liệu trước (task `0-01`).
 - Review 4 chuyên gia (2026-09-30): các lỗi chặn và lỗi Major đã được xử lý trong tài liệu ([REVIEW §Vòng 6](REVIEW-2026-09-29.md)).
 
 ## 6. Cách đọc theo vai trò

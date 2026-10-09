@@ -1,9 +1,9 @@
 # Thiết kế nội dung dạy
 
-- **Trạng thái**: Accepted — rubric và ngưỡng là đề xuất (`[Inference]`) cho tới khi có eval đầu tiên và cổng G1 (sửa 2026-09-30 theo review sư phạm và quyết định của user: hai luồng, bài giải đề, C++ + Python, lời thầy riêng với clip)
+- **Trạng thái**: Accepted — rubric và ngưỡng là đề xuất (`[Inference]`) cho tới khi có eval đầu tiên và cổng G1 (sửa 2026-09-30 theo review sư phạm và quyết định của user: hai luồng, bài giải đề, C++ + Python)
 - **Ngày**: 2026-09-30
 - **Người sở hữu**: Chủ dự án (nội dung)
-- **Liên quan**: [ADR 0006](decisions/0006-deterministic-trace-catalog.md), [ADR 0007](decisions/0007-manim-and-math-visualization.md), [ADR 0008](decisions/0008-lesson-blueprint-hard-problems.md), [ADR 0012](decisions/0012-audience-scope-pedagogy-gates.md), [Phase 2 §2](phase-2-competitive-programming/SCHEMA.md), [Phase 3 §3–§6](phase-3-olympiad-math/SCHEMA.md), [TEST-STRATEGY §6](TEST-STRATEGY.md)
+- **Liên quan**: [ADR 0006](decisions/0006-deterministic-trace-catalog.md), [ADR 0008](decisions/0008-lesson-blueprint-hard-problems.md), [ADR 0012](decisions/0012-audience-scope-pedagogy-gates.md), [ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md), [Phase 2 §2](phase-2-competitive-programming/SCHEMA.md), [Phase 3 §3–§6](phase-3-olympiad-math/SCHEMA.md), [TEST-STRATEGY §6](TEST-STRATEGY.md)
 
 > **Tóm tắt:** tài liệu miền: **dạy thế nào** để bài khó thành *rõ ràng, chi tiết, dễ hiểu, trực quan, sinh động* mà học sinh **không viết/chạy code**. Gồm:
 > - hai luồng học sinh (`ts10`, `hsg`);
@@ -76,15 +76,15 @@ Dạy **cách giải một đề khó**, không chỉ một thuật toán. Ngu�
 | Cảnh | Giai đoạn | Phương tiện | Thầy làm gì |
 | --- | --- | --- | --- |
 | 1 | Động cơ / bài toán | slide, hình tĩnh | Học sinh dự đoán |
-| 2 | Trực giác bằng hình động | slide clip (mỗi chapter một slide, 8–25 s) | Nói ≤ 2 câu **trước** chapter (cần để ý gì) → chapter 1 → hỏi dự đoán → chapter 2 → giải thích **sau** |
+| 2 | Trực giác bằng hình động | walkthrough `geometry`/`functionPlotter` (tua và đổi số được) | Hỏi dự đoán trước khi hình đổi → giải thích **sau** khi hình hiện |
 | 3 | Phát biểu | slide LaTeX | Chỉ vào điều kiện và dấu "=" |
-| 4 | Chứng minh từng bước | clip khung (45–90 s, chia chapter) hoặc walkthrough `proofOutline` | Từng bước; nhảy frame |
+| 4 | Chứng minh từng bước | walkthrough `proofOutline` (cho / cần chứng minh / có / do / suy ra) | Từng bước; nhảy frame |
 | 5 | Ví dụ mẫu | slide + bảng trắng; walkthrough "lab" đổi số | Câu hỏi mở |
-| 6 | Biến thể + sai lầm | clip phản mẫu (10–25 s) + quiz "sai ở bước nào?" | Phản hồi AI |
+| 6 | Biến thể + sai lầm | walkthrough phản mẫu + quiz "sai ở bước nào?" | Phản hồi AI |
 | 7 | Kiểm tra | quiz, ≥ 1 câu dự đoán | — |
 | 8 | Tổng kết + mở rộng | slide | — |
 
-Phân vai: **Manim** cho chuyển động liên tục/hình học/đồ thị; **walkthrough SVG** cho thủ tục cần tua/đổi số; **slide + `wb_latex`** cho chứng minh dài chữ (ADR 0007). **Lời thầy chạy riêng, trước và sau mỗi chapter** (user xác nhận); nhãn và giá trị then chốt phải hiện ngay trong hình để lời và hình không xa nhau.
+Phân vai: **walkthrough tương tác** cho hình học, đồ thị và thủ tục cần tua/đổi số (ADR 0015); **slide + `wb_latex`** cho chứng minh dài chữ. Lời thầy đi theo beat của từng preset; nhãn và giá trị then chốt phải hiện ngay trong hình để lời và hình không xa nhau.
 
 ### 3.4. Ví dụ: khung bài Binary Search
 
@@ -130,14 +130,14 @@ Chung cho cả hai: bình luận ≤ 1 câu và **cùng ngôn ngữ** với lờ
 ## 4. Quy tắc viết lời thầy và chữ trên màn hình
 
 1. **Câu ngắn, gợi mở**: hỏi trước, giải thích sau ("Theo em bước tiếp theo `lo` hay `hi` đổi?"), không đọc lại định nghĩa dài.
-2. **Trỏ vào hình**: "nhìn thanh màu cam", "để ý `mid`"; mỗi câu nói gắn một frame/chapter.
+2. **Trỏ vào hình**: "nhìn thanh màu cam", "để ý `mid`"; mỗi câu nói gắn một frame.
 3. **Số trong lời nói phải có trên màn hình** (state hoặc `vars`/`pointers` của frame vừa nhảy tới). Dùng tham số `{mid}`, `{lo}` trong `narration` thay vì viết cứng số. Kiểm tự động.
 4. **Thứ tự hành động cho mỗi beat**, trong đó hình luôn xuất hiện trước lời giải thích:
    1. `ask`: câu hỏi dự đoán, nói **trước khi nhảy**, có chờ trả lời nếu có `predict`.
    2. `widget_setState{preset, frame}`: hình xuất hiện.
    3. Lời giải thích.
-5. **Clip câm, lời riêng**: lời **trước** chapter nói cần để ý gì; lời **sau** giải thích. Muốn dừng giữa chừng thì phải có chapter riêng.
-6. **Chữ trên màn hình**: chỉ ký hiệu, số, nhãn hình, chú giải màu; **không nướng câu tự nhiên** vào video; ≤ 12 token mỗi khung.
+5. **Một lời gắn một frame**: muốn dừng giữa chừng thì phải có beat riêng.
+6. **Chữ trên màn hình**: chỉ ký hiệu, số, nhãn hình (≤ 8 ký tự), chú giải màu; câu giải thích nằm ở ô giải thích (≤ 160 ký tự).
 7. **Ký hiệu LaTeX chuẩn**, dùng delimiter `\( … \)`; đại lượng trong lời nói phải trùng ký hiệu trên hình.
 8. **Không dùng màu làm cách phân biệt duy nhất**; tương phản ≥ 4,5:1; không nhấp nháy > 3 lần/s.
 9. **Nói rõ mức chặt chẽ**: hình cho trực giác thì ghi "đây là trực giác, chứng minh chặt ở bước sau".
@@ -182,33 +182,29 @@ Ví dụ một `beatDef`:
   misconceptions: [ { 'vi-VN': 'Nghĩ rằng lo = mid (không +1) vẫn dừng được.', 'en-US': '…' } ] }
 ```
 
-### 5.2. Viết một clip Manim (Toán)
+### 5.2. Viết một walkthrough Toán
 
 1. **Brief**: topic, takeaway (1 câu), hiểu lầm hay gặp.
-2. **Storyboard** (LLM soạn nháp offline được): chapter (8–25 s) với `before`/`after` (lời thầy vi/en) và preset; hold ≥ 1,5 s ở khung "chốt" (cũng là `poster`).
-3. **Mẫu tham số hoá** `manim/templates/<id>.py` + `ClipEntry` (`inputSpec`, `presets` 3–5, `invariants`, `bakedText: false` nếu không có chữ theo locale).
-4. Chạy **cổng tự động**: `invariants`, số liệu hiển thị đối chiếu độc lập, bbox chữ, `ffprobe`, SSIM khung vàng.
-5. **Hội đồng LLM Toán ký** (`tutor-review-math` + `-2`: đúng, đủ điều kiện, không suy ngược từ hình đặc biệt); `tutor-review-code` duyệt mã. Mẫu do **LLM tác giả** (`manim-author`) viết, qua AST allowlist + sandbox (ADR 0014). Ghi chi phí token cho mẫu (3A).
-6. Đóng gói: mp4 theo chapter (+ master tuỳ chọn) + poster + `captions.{vi,en}` + `clip-sheet.json`.
-
-### 5.3. Viết `clip-sheet` cho Q&A
-
-Mỗi chapter có: cái đang hiện, công thức, hiểu lầm hay gặp, và 2–3 gợi ý theo bậc (từ nhẹ đến đầy đủ). Thầy dùng thứ này khi học sinh dừng ở slide của chapter đó và hỏi.
+2. **Storyboard** (LLM soạn nháp offline được): 5–10 beat (`start` … `done`) với lời thầy vi/en, 3–5 preset và câu hỏi dự đoán.
+3. **Entry** `lib/subjects/math/catalog/<id>.ts` (`inputSpec`, `presets`, `beatDefs`, `run` dựng hình bằng `figure.ts`) và một dòng trong `pack.ts`.
+4. **Cổng tự động**: `tests/subjects/math/<id>.test.ts` (đối chiếu độc lập với công thức), contract chung của catalog, catalog lock (`UPDATE_CATALOG_LOCK=1`), quét trình duyệt (`catalog-sweep.browser.test.ts`).
+5. **Hội đồng LLM Toán ký** (`tutor-review-math` + `-2`: đúng, đủ điều kiện, không suy ngược từ hình đặc biệt).
+6. Sinh lại khối id trong `SKILL.md` (`pnpm exec tsx scripts/generate-skill-catalog.ts`); đổi nội dung entry thì tăng `entryRev`.
 
 ## 6. Rubric chất lượng
 
 | Tiêu chí | Ngưỡng | Cách đo |
 | --- | --- | --- |
-| Đúng | 0 lỗi sự thật (cổng cứng); `invariants` 100%; bản cài đặt C++/Python cho cùng kết quả | tự động + hội đồng LLM ký |
-| Rõ ràng | quan sát then chốt ≤ 2 câu; ≤ 3 đối tượng mới/chapter; judge ≥ 4 | judge |
+| Đúng | 0 lỗi sự thật (cổng cứng); đối chiếu độc lập 100%; bản cài đặt C++/Python cho cùng kết quả | tự động + hội đồng LLM ký |
+| Rõ ràng | quan sát then chốt ≤ 2 câu; ≤ 3 đối tượng mới/beat; judge ≥ 4 | judge |
 | Chi tiết | có "vì sao đúng", ví dụ số, biên, bẫy theo ngôn ngữ; judge ≥ 4 | judge |
 | Dễ hiểu | thuật ngữ định nghĩa trước khi dùng; chỉ dùng `prerequisites`; judge ≥ 4 | judge + G1/G2 |
 | Trực quan | lời thầy trỏ đúng khung hình; judge ≥ 4 | judge + tự động |
-| Sinh động | ≥ 1 dự đoán **có chờ**/3 scene; clip: ≥ 1 câu hỏi dự đoán sau mỗi 2 chapter; judge ≥ 3,5 | judge + tự động |
+| Sinh động | ≥ 1 dự đoán **có chờ**/3 scene; judge ≥ 3,5 | judge + tự động |
 | Dạy kèm | Q&A: Đúng 100%, Bám frame ≥ 90%, Gợi ý trước ≥ 80%; Dùng hiểu lầm đúng: theo dõi, chưa đặt ngưỡng | `eval:tutor-qa` |
 | Giải đề (bài giải đề) | có thang subtask; mỗi subtask có độ phức tạp; có bước "đọc giới hạn" | judge + hội đồng LLM |
 | Kỹ thuật | ≤ 160 ký tự/`explanation`; 5–10 `beatDefs`; ≥ 4 preset; hai `map` toàn phần; không tràn chữ | tự động |
-| Tiếp cận | tương phản, không nhấp nháy, có caption | tự động + kiểm tay |
+| Tiếp cận | tương phản, không nhấp nháy, `aria-live` | tự động + kiểm tay |
 
 Ngưỡng là `[Inference]`; hiệu chỉnh sau lần eval đầu (`eval:tutor-lesson`, `eval:tutor-qa`). Với N=3 mẫu và ngưỡng 70%, thực tế phải đạt **3/3** (2/3 = 0,67).
 
@@ -217,7 +213,7 @@ Ngưỡng là `[Inference]`; hiệu chỉnh sau lần eval đầu (`eval:tutor-l
 | Bước | Ai | Điều kiện qua |
 | --- | --- | --- |
 | Viết + test tự động | Tác giả | tất cả test xanh |
-| Duyệt kỹ thuật | Người biết code/Manim | review PR |
+| Duyệt kỹ thuật | Người biết code | review PR |
 | Duyệt nội dung dạy | **Hội đồng LLM** đóng vai giáo viên chuyên Tin (`tutor-review-cp` + `-2`) / chuyên Toán (`tutor-review-math` + `-2`), hai nhà cung cấp khác nhau (ADR 0014) | cả hai model chấm mọi tiêu chí rubric §6 ≥ 4/5, không lỗi "Đúng"; review JSON commit cạnh entry |
 | Eval chất lượng | Tự động (LLM-judge) | đạt ngưỡng (tư vấn) |
 | **Cổng sư phạm G1/G2** | Hội đồng LLM + học sinh mô phỏng (`sim-learner`); sau phát hành: số đo học sinh thật | NFR-Q7 (ADR 0012 §6, ADR 0014) |
@@ -232,4 +228,4 @@ Ngưỡng là `[Inference]`; hiệu chỉnh sau lần eval đầu (`eval:tutor-l
   - Tổng 29/32 (30 khi có `geometry`).
   - Đếm bằng script; ánh xạ topic↔mô-đun và nhãn luồng là thủ công (`[Inference]`), hội đồng LLM Tin duyệt.
   - Không có walkthrough theo chủ ý: `t1-complexity`, `t4-number-combinatorics`.
-- **Toán:** khung 28 topic với cột `primary_medium` (Phase 3 §7), hội đồng LLM Toán duyệt và research kèm nguồn. Chưa có nguồn chính thức, nên mọi tên kỳ thi/tài liệu là `[Unverified]`.
+- **Toán:** khung 28 topic với cột `primary_medium` (Phase 3 §7): 18 topic có walkthrough (27 entry), 10 topic dùng slide. Đã gắn 5 nguồn thật (2026-10-09); chi tiết thi cử chưa kiểm chứng vẫn là `[Unverified]`.

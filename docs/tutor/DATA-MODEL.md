@@ -3,11 +3,9 @@
 - **Trạng thái**: Accepted — mô hình mới (catalog, manifest, store tạm) là thiết kế; phần DSL/asset hiện có lấy từ code (sửa 2026-09-30 theo ADR 0011–0013)
 - **Ngày**: 2026-09-30
 - **Người sở hữu**: Chủ dự án
-- **Liên quan**: [ARCHITECTURE §6, §8b](ARCHITECTURE.md), [INTERFACES](INTERFACES.md), [OPERATIONS §4](OPERATIONS.md), [ADR 0001](decisions/0001-step-engine-immutable.md), [ADR 0006](decisions/0006-deterministic-trace-catalog.md), [ADR 0007](decisions/0007-manim-and-math-visualization.md)
+- **Liên quan**: [ARCHITECTURE §6](ARCHITECTURE.md), [INTERFACES](INTERFACES.md), [OPERATIONS §4](OPERATIONS.md), [ADR 0001](decisions/0001-step-engine-immutable.md), [ADR 0006](decisions/0006-deterministic-trace-catalog.md), [ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md)
 
-> **Tóm tắt:** tính năng **không thêm bảng cơ sở dữ liệu** và **không đổi DSL** của OpenMAIC. Dữ liệu học sinh (ADR 0014) nằm trong kho runtime sẵn có, bằng kind mới `tutorLearning` (§8). Dữ liệu mới nằm ở ba nơi: (1) **mã** (catalog entry, hàm thuần), (2) **scene hiện có** (`InteractiveContent.html` + `widgetConfig` nhẹ, hoặc slide có `PPTVideoElement`), (3) **file dữ liệu** (curriculum, manifest/clip-sheet của clip). Nguồn sự thật của nội dung dạy là catalog trong mã; scene lưu bản sinh ra.
-
-> **ĐÃ THAY THẾ MỘT PHẦN ([ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md), 2026-10-08/09):** các phần nói về clip Manim, `manim-service`, `lib/clips`, tool `generate_clip_scenes` và cổng QA video là lịch sử thiết kế; mã đã xoá khỏi cây làm việc (còn ở thẻ git `manim-clips-final`). Rủi ro và mối đe doạ chỉ gắn với các thành phần đó (sandbox render, TeX/Python do LLM viết, hàng đợi render, dung lượng video) được coi là đã đóng vì thành phần không còn tồn tại.
+> **Tóm tắt:** tính năng **không thêm bảng cơ sở dữ liệu** và **không đổi DSL** của OpenMAIC. Dữ liệu học sinh (ADR 0014) nằm trong kho runtime sẵn có, bằng kind mới `tutorLearning` (§8). Dữ liệu mới nằm ở ba nơi: (1) **mã** (catalog entry, hàm thuần), (2) **scene hiện có** (`InteractiveContent.html` + `widgetConfig` nhẹ), (3) **file dữ liệu** (curriculum). Nguồn sự thật của nội dung dạy là catalog trong mã; scene lưu bản sinh ra.
 
 ## 1. Bản đồ dữ liệu
 
@@ -18,23 +16,17 @@ erDiagram
   SCENE ||--o{ SLIDE_ELEMENT : "type=slide"
   INTERACTIVE_CONTENT ||--|| WIDGET_CONFIG : "nhẹ (persist + vào prompt)"
   INTERACTIVE_CONTENT ||--|| WALKTHROUGH_DATA : "trong HTML (chỉ runtime đọc)"
-  SLIDE_ELEMENT ||--o| VIDEO_ELEMENT : "clip"
-  VIDEO_ELEMENT }o--|| ASSET : "src / mediaRef"
   WALKTHROUGH_ENTRY ||--o{ PRESET : "có"
   WALKTHROUGH_ENTRY ||--o{ BEAT : "có"
-  CLIP_ENTRY ||--o{ CHAPTER : "có"
-  CLIP_ENTRY ||--o{ PRESET : "có"
-  CLIP_ENTRY ||--o{ CLIP_ASSET : "dựng ra"
   CURRICULUM_TOPIC ||--o{ WALKTHROUGH_ENTRY : "curriculumTopics"
-  CURRICULUM_TOPIC ||--o{ CLIP_ENTRY : "curriculumTopics"
 ```
 
 | Nhóm | Thực thể | Ở đâu | Nguồn sự thật | Trạng thái |
 | --- | --- | --- | --- | --- |
-| Hiện có | Stage, Scene, `InteractiveContent`, `PPTVideoElement`, Asset | `@openmaic/dsl`, asset pool/server | DSL và kho asset | Đã có |
-| Mới (mã) | `WalkthroughEntry` (`beatDefs`, `problem?`, code C++/Python), `ClipEntry`, `InputSpec`, `Messages` | `lib/subjects/<id>/…`, `lib/clips/` | **Mã** trong git | Thiết kế |
-| Mới (trong scene) | `widgetConfig` nhẹ (có `entryRev`), `walkthrough-data`; slide clip có `PPTVideoElement` | HTML của scene / slide | Sinh từ entry lúc tool tạo scene (ADR 0011) | Thiết kế |
-| Mới (file dữ liệu) | Curriculum, clip manifest, clip-sheet | `references/curriculum/`, cạnh mp4 | File trong git / kho asset | Thiết kế |
+| Hiện có | Stage, Scene, `InteractiveContent`, Asset | `@openmaic/dsl`, asset pool/server | DSL và kho asset | Đã có |
+| Mới (mã) | `WalkthroughEntry` (`beatDefs`, `problem?`, code C++/Python), `InputSpec`, `Messages` | `lib/subjects/<id>/…` | **Mã** trong git | Thiết kế |
+| Mới (trong scene) | `widgetConfig` nhẹ (có `entryRev`), `walkthrough-data` | HTML của scene | Sinh từ entry lúc tool tạo scene (ADR 0011) | Thiết kế |
+| Mới (file dữ liệu) | Curriculum | `references/curriculum/` | File trong git | Thiết kế |
 | Tạm | `widget-runtime-state` (`ready`, `desired`, trạng thái học sinh) | Store trình duyệt (`lib/store/`) | Không persist | Thiết kế |
 | **Dữ liệu học sinh** (ADR 0014) | Kind runtime `chat`, `quizAttempt` (đã có) + `tutorLearning` (mới) | Kho runtime phía server (Postgres) | Bản ghi append-only | Thiết kế |
 | Kết quả hội đồng LLM | `reviews/<entryId>@<entryRev>.json` | `lib/subjects/<id>/reviews/` (git) | Mã/dữ liệu trong git | Thiết kế |
@@ -44,8 +36,6 @@ erDiagram
 | Thực thể | Trường liên quan | Nguồn |
 | --- | --- | --- |
 | `InteractiveContent` | `type:'interactive'`, `html` (srcDoc), `url?`, `widgetType?` (union đóng), `widgetConfig?` (`type` ∈ `WidgetType`, khoá còn lại mở) | `packages/@openmaic/dsl/src/interactive.ts` |
-| `PPTVideoElement` | `type:'video'`, `src?`, `mediaRef?`, `autoplay`, `poster?`, `ext?` | `packages/@openmaic/dsl/src/slides.ts:736` |
-| `PlayVideoAction` | `elementId` (không seek/beat) | `packages/@openmaic/dsl/src/action.ts:190` |
 | Trần asset server | asset ≤32 MiB, request ≤33 MiB, meta ≤64 KiB, ≤8 phần | `packages/@openmaic/storage/src/server/asset.ts:108-111` |
 | Asset pool trình duyệt | IndexedDB `maic-asset-pool` (+ Dexie `mediaFiles`) | `lib/media/asset-pool.ts:18` |
 | `scene-builder` | chép nguyên `widgetConfig` vào scene | `packages/@openmaic/generation/src/scene-builder.ts:92-93` |
@@ -105,41 +95,6 @@ Hai khối JSON trong HTML tự chứa (ARCHITECTURE §6). Trường bắt buộ
 | `input` (1d) | theo `InputSpec` | ≤ 2048 byte UTF-8 của `JSON.stringify(input)` |
 | kích thước HTML | ≤ `maxBytes` của entry | đo bằng số byte UTF-8 của HTML đã dựng; vượt → tool trả lỗi, không ghi |
 
-## 4. Dữ liệu clip (Toán)
-
-`ClipEntry` (kiểu ở ARCHITECTURE §8b) là **mã**. Các file do CI sinh ra cạnh mỗi mp4:
-
-```jsonc
-// manifest.json — một tệp cho cả clip; mỗi chapter một file mp4
-{ "clipId": "amgm-semicircle", "contentHash": "sha256:…", "engineVersion": "manim-ce 0.21.0", "templateRev": 1,
-  "imageDigest": "sha256:…", "profile": "qm-720p30", "w": 1280, "h": 720, "fps": 30, "durationSec": 30.0,
-  "chapters": [ { "id": "dung", "file": "dung.mp4", "posterFile": "dung.png", "startSec": 0, "endSec": 12, "sizeBytes": 800000 } ],
-  "master": { "file": "master.mp4", "sizeBytes": 2400000 }, /* tuỳ chọn */
-  "display": { "a": 2, "b": 8, "r": 5, "h": 4 } /* số scene đã vẽ, đúng khoá của expectedDisplay; vitest đối chiếu (sai số 1e-3) */ }
-// clip-sheet.json (cho thầy Q&A) — CI chép từ ClipEntry.sheet (nguồn chính thức nằm trong mã); Q&A đọc ClipEntry.sheet, file này chỉ đi kèm asset khi export
-{ "chapters": [{ "id": "dung", "shows": "nửa đường tròn đường kính a+b", "formulas": ["h^2 = ab"],
-    "misconceptions": ["h là trung bình cộng"], "hints": ["…", "…"] }] }
-```
-
-| Khoá / quy tắc | Nội dung |
-| --- | --- |
-| **Cache key (định nghĩa duy nhất)** | `sha256(canonicalJSON([1, templateId, templateRev, paramsCanon, localeOrNull, profile, imageDigest]))`. `paramsCanon`: số lượng tử hoá theo `step` của `InputSpec` rồi chuẩn hoá (khoá sắp xếp, số không dấu `+`, không `-0`). `localeOrNull` = `null` nếu clip không có chữ nướng theo locale. `profile` = `qm-720p30`. `templateRev` và `imageDigest` do dịch vụ/CI cấp (INTERFACES §6) |
-| Định danh | `templateId` = `ClipEntry.id` = `clipId` (một mẫu, một id) |
-| Tên asset | băm nội dung; phục vụ `immutable` |
-| **Lưu giữ** | asset clip **đã phát hành không bao giờ bị xoá** hay ghi đè, vì lớp học đã lưu tham chiếu tới nó. Dựng lại không cho kết quả giống từng bit (ADR 0007), nên mất asset là mất URL → sao lưu (OPERATIONS §5) |
-| Bất biến | `entry.chapters` khớp `manifest.chapters` (test); `invariants(params)` đúng trên mọi preset |
-| Đặt tên phần tử video | mỗi chapter một slide, một phần tử: `name: 'clip:<id>@<hash>#<chapterId>'` để Q&A tra `clip-sheet` |
-
-`ClipEntry.asset(presetId | params, locale)` trả `{ master?, chapters: [{ id, url, poster }] } | null` (`null` = chưa dựng → `clip-not-prebuilt` ở 3A, render ở 3C).
-
-Vòng đời clip:
-1. **CI dựng** clip.
-2. Asset băm tên được lưu: repo (≤10 clip) / volume / S3.
-3. Lần dùng đầu tiên, clip được **adopt** vào asset pool.
-4. Clip nằm trong ZIP lớp học; khi import, clip được ghi lại vào asset pool.
-
-Không xoá asset đã phát hành (trên).
-
 ## 5. Curriculum
 
 File dữ liệu; hình dạng lấy từ `docs/tutor/curriculum/curriculum-informatics-vn.json` (đã đối chiếu 32 topic):
@@ -149,7 +104,7 @@ File dữ liệu; hình dạng lấy từ `docs/tutor/curriculum/curriculum-info
 | Gốc | `version`, `locale`, `subject`, `title_vi`, `title_en`, `exam_targets`, `audience`, `course_shape`, `difficulty_scale`, `tiers`, `sequencing`, `sources`, `exam_profile` (có `ts10_format_vi` [Unverified]), `provenance`, `tracks_def` |
 | Tier | `id` (`tier-N`), `name_vi`, `grade_band`, `topics[]` |
 | Topic | `id`, `name_vi`, `name_en`, `difficulty` (1–5), `tracks` (`ts10` \| `hsg`, ADR 0012), `est_scenes`, `prerequisites[]`, `subtopics[]`, `typical_problems[]`, `pitfalls[]`, `interactive_ideas[]`, `vn_sources[]`, `exam_relevance` |
-| Mới cho Toán | `primary_medium`: `manim` \| `walkthrough` \| `slide` |
+| Mới cho Toán | `primary_medium`: `walkthrough` \| `slide`; `walkthrough_ids[]` (id trong `lib/subjects/math/catalog/`) |
 
 **Bất biến (test `curriculum-map.test.ts`):** `id` duy nhất; mọi topic có `tracks` khác rỗng; mọi `prerequisites` tồn tại; không vòng; không phụ thuộc tier cao hơn; `sequencing` liệt kê đủ mọi topic (bản Tin hiện có: 32/32 sau khi bổ sung `t4-geometry`, `t4-game-theory`); `index.json` khớp `tier-N.json`.
 
@@ -160,7 +115,6 @@ File dữ liệu; hình dạng lấy từ `docs/tutor/curriculum/curriculum-info
 | Dữ liệu | Nơi | Vòng đời |
 | --- | --- | --- |
 | `widget-runtime-state` `{ sceneId → { ready, desired, state: { preset, frame, input?, prediction? } } }` | Store `lib/store/widget-runtime-state.ts` | `desired` là `SET_WIDGET_STATE` cuối, **giữ lại** khi iframe bị đẩy khỏi pool (để gửi lại khi `ready`). `state` của học sinh **xoá** khi `srcDoc` đổi hoặc iframe dựng lại. Chỉ giữ giá trị cuối |
-| Job render clip (đợt 3C) | Bộ nhớ `manim-service` | TTL (theo mẫu `RENDER_JOB_TTL_MS`); mất khi restart → idempotent nhờ cache key + gộp job trùng khoá |
 | Trạng thái player (`index`, `isPlaying`, `speed`) | Bộ nhớ trong iframe + `data-*` của `#wt-root` | Mất khi tải lại iframe; hồi phục từ `desired` |
 
 ## 7. Tính nhất quán và di trú
@@ -175,7 +129,6 @@ File dữ liệu; hình dạng lấy từ `docs/tutor/curriculum/curriculum-info
   - Entry mới thêm được tự do.
   - **Đổi `id`** làm scene cũ mất liên kết Q&A (scene vẫn phát vì HTML tự chứa). Vì vậy không đổi `id` đã phát hành; bảo đảm bằng test snapshot danh sách `id` (`tests/subjects/ids-snapshot.test.ts`, đề xuất — TEST-STRATEGY §3).
   - `id` phải duy nhất trên mọi gói (ADR 0013 §1).
-- **Đổi mẫu clip:** tăng `templateRev` → cache key mới → clip mới. Clip cũ vẫn dùng được trong lớp đã lưu và **không bị xoá**.
 
 ## 8. Dữ liệu học sinh (ADR 0014)
 

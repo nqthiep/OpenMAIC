@@ -3,20 +3,17 @@
 - **Trạng thái**: Accepted — chiều *host↔iframe hiện có* đã được kiểm code; phần còn lại là hợp đồng thiết kế (sửa 2026-09-30 theo ADR 0010–0013)
 - **Ngày**: 2026-09-30
 - **Người sở hữu**: Chủ dự án
-- **Liên quan**: [ARCHITECTURE §6–8b](ARCHITECTURE.md), [DATA-MODEL](DATA-MODEL.md), [SECURITY](SECURITY.md), [OPERATIONS](OPERATIONS.md), [ADR 0005](decisions/0005-widget-hosting-model.md), [ADR 0009](decisions/0009-teacher-qa-awareness.md), [ADR 0011](decisions/0011-entry-point-workbench-tool.md), [ADR 0013](decisions/0013-provider-scene-lifecycle.md)
+- **Liên quan**: [ARCHITECTURE §6–8](ARCHITECTURE.md), [DATA-MODEL](DATA-MODEL.md), [SECURITY](SECURITY.md), [OPERATIONS](OPERATIONS.md), [ADR 0005](decisions/0005-widget-hosting-model.md), [ADR 0009](decisions/0009-teacher-qa-awareness.md), [ADR 0011](decisions/0011-entry-point-workbench-tool.md), [ADR 0013](decisions/0013-provider-scene-lifecycle.md), [ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md)
 
 > **Tóm tắt:** nguồn **chính thức** cho mọi giao diện của tính năng:
 > - thông điệp host↔iframe, gồm bắt tay `widget-ready`;
-> - tool agent `generate_walkthrough`, `generate_clip_scenes` và phần thay đổi của `generate_scene`;
+> - tool agent `generate_walkthrough` và phần thay đổi của `generate_scene`;
 > - cờ cấu hình;
 > - kiểu TypeScript nội bộ;
-> - HTTP của `manim-service`;
 > - quy tắc phiên bản;
 > - bộ lọc nội dung, hội đồng LLM duyệt, dữ liệu học sinh (§8, ADR 0014).
 >
 > Nguyên tắc chung: **thông điệp lạ bị bỏ qua, giá trị ngoài miền bị kẹp, không ném lỗi**. Các ADR giải thích *lý do*; khi lệch nhau, file này thắng.
-
-> **ĐÃ THAY THẾ MỘT PHẦN ([ADR 0015](decisions/0015-math-interactive-web-ui-not-video.md), 2026-10-08/09):** các phần nói về clip Manim, `manim-service`, `lib/clips`, tool `generate_clip_scenes` và cổng QA video là lịch sử thiết kế; mã đã xoá khỏi cây làm việc (còn ở thẻ git `manim-clips-final`). Rủi ro và mối đe doạ chỉ gắn với các thành phần đó (sandbox render, TeX/Python do LLM viết, hàng đợi render, dung lượng video) được coi là đã đóng vì thành phần không còn tồn tại.
 
 ## 1. Host → iframe (đã có; runtime `walkthrough` xử lý)
 
@@ -120,26 +117,16 @@ Idempotent theo `callId` (như `duplicate_scene`). `order` đã có trang thì *
 
 Đường classic không có tool: không sinh walkthrough; widget `code` bị coerce sang `diagram`/`simulation` (ADR 0010).
 
-### 3b. Tool agent `generate_clip_scenes` (Phase 3; ADR 0007, 0011)
-
-| Đợt | Tham số | Hành vi |
-| --- | --- | --- |
-| 3A | `{ stageId, afterOrder, clipId, presetId }` | Tra asset dựng sẵn; tạo **mỗi chapter một slide** (tiêu đề + `PPTVideoElement` + chú thích); action `speech(before) → play_video → speech(after)`. Chưa dựng → `clip-not-prebuilt` |
-| 3C | `{ …, params }` thay `presetId` | Kiểm `InputSpec`, tính cache key. Trúng cache → như 3A. Trượt → gọi `manim-service`, tạo slide với video placeholder, báo `media_ready` khi xong (mẫu `generate_video`, `generate-video.ts:480-483`). Job treo → timeout → `failed` → gợi ý preset gần nhất |
-
-Lỗi: `invalid-clip-id` (`validIds`), `invalid-preset-id`, `invalid-clip-params` (`issues`), `clip-not-prebuilt`, `clip-render-unavailable` (không đặt `MANIM_SERVICE_URL`).
-
 ## 4. Cờ cấu hình (hợp đồng vận hành)
 
 | Cờ | Kiểu | Ngữ nghĩa | Nguồn |
 | --- | --- | --- | --- |
 | `OPENMAIC_ALLOW_CODE_WIDGET` | boolean env (`readBoolean`) | **Không đặt / `false` → chặn** widget `code` toàn ứng dụng; `true` → mở (hành vi upstream). Client hỏi server, chưa biết thì coi là chặn | `lib/config/feature-flags.ts` (thêm `isCodeWidgetAllowed()`), ADR 0010 |
 | `OPENMAIC_AGENT_RUNTIME_ENABLED`, `DATABASE_URL`, `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` (build-time) | đã có | **Điều kiện bắt buộc** của tính năng (ADR 0011) | `lib/config/feature-flags.ts:18-25,49-51` |
-| `OPENMAIC_DISABLE_WIDGET_PROVIDERS` | boolean env (`true`/`1`; **không phải danh sách**) | `true` → không đăng ký `generate_walkthrough`/`generate_clip_scenes`; scene đã lưu vẫn phát | `lib/config/feature-flags.ts` (`isWidgetProvidersDisabled()`), OPERATIONS §10 |
+| `OPENMAIC_DISABLE_WIDGET_PROVIDERS` | boolean env (`true`/`1`; **không phải danh sách**) | `true` → không đăng ký `generate_walkthrough`; scene đã lưu vẫn phát | `lib/config/feature-flags.ts` (`isWidgetProvidersDisabled()`), OPERATIONS §10 |
 | `OPENMAIC_TUTOR_MODERATION` | boolean env (`true`/`1`) | **Tắt (mặc định) → chat `/api/chat` không được lọc**, kể cả khi đã có route `tutor-moderation`. **Bật → mọi lượt chat qua bộ lọc và fail-closed** (thiếu route hoặc lọc lỗi/quá hạn → chat bị chặn bằng câu an toàn). Chỉ phủ `/api/chat` (xem SECURITY §6) | `isTutorModerationEnabled()`, `app/api/chat/route.ts`, ADR 0014 |
 | `OPENMAIC_REQUIRE_REVIEW` | boolean env (`true`/`1`) | Tắt (mặc định): mọi entry trong `SUBJECT_PACKS` được phát hành. Bật: chỉ entry có file review đạt ở đúng `entryRev`; **bật mà không có file review nào → không lộ walkthrough nào**. File review phải có trong image (OPERATIONS §2) | `isReviewRequired()`, `lib/subjects/release.ts`, §8.2 |
-| `MANIM_SERVICE_URL`, `MANIM_SERVICE_TOKEN` | URL, chuỗi bí mật | Có → bật render theo yêu cầu (3C); không → `clip-render-unavailable`, chỉ dùng clip dựng sẵn | đề xuất |
-| `MODEL_ROUTES` (thêm stage) | JSON có sẵn | Stage mới: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `manim-author`, `sim-learner`, `tutor-analyst` (ADR 0014). **Thiếu route thì tính năng phụ thuộc tắt**, không rơi về `DEFAULT_MODEL` | `lib/server/model-routes.ts:132-168` |
+| `MODEL_ROUTES` (thêm stage) | JSON có sẵn | Stage mới: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `sim-learner`, `tutor-analyst` (ADR 0014). **Thiếu route thì tính năng phụ thuộc tắt**, không rơi về `DEFAULT_MODEL` | `lib/server/model-routes.ts:132-168` |
 
 ## 5. Hợp đồng TypeScript nội bộ (nguồn chính thức)
 
@@ -173,13 +160,13 @@ interface BuildRequest { readonly id: string; readonly presetId?: string; readon
 interface BuildResult { readonly content: InteractiveContent | SlideContent[]; readonly actions: Action[][]; readonly lessonKit?: unknown }
 interface WidgetContext { readonly locale: Locale; readonly languageDirective?: string }
 interface WidgetProvider {
-  readonly id: string                                              // 'walkthrough' | 'clip'
-  claimsScene(scene: Scene): boolean                               // theo widgetConfig.kind / name 'clip:'
+  readonly id: string                                              // 'walkthrough'
+  claimsScene(scene: Scene): boolean                               // theo widgetConfig.kind
   build(req: BuildRequest, ctx: WidgetContext): BuildResult
   actions(scene: Scene, ctx: WidgetContext): Action[]
   describe(scene: Scene, runtime?: WidgetRuntimeState): string     // chữ lấy từ catalog; entryRev lệch → digest tĩnh
 }
-interface SubjectPack { readonly id: string; readonly skillId: string; readonly walkthroughs: readonly WalkthroughEntry[]; readonly clips?: readonly ClipEntry[] }
+interface SubjectPack { readonly id: string; readonly skillId: string; readonly walkthroughs: readonly WalkthroughEntry[] }
 ```
 
 | Kiểu | Nơi định nghĩa mã | Mô tả đầy đủ |
@@ -188,43 +175,6 @@ interface SubjectPack { readonly id: string; readonly skillId: string; readonly 
 | `InputSpec`, `parseInput` | `lib/tutor/input-spec.ts` | [ADR 0006](decisions/0006-deterministic-trace-catalog.md) |
 | `WalkthroughEntry`, `BeatDef`, `ProblemSpec`, `Messages` | `lib/tutor/catalog/types.ts` | ADR 0006 §7, khối trên |
 | `WidgetProvider`, `WidgetContext`, `WidgetRuntimeState`, `SubjectPack` | `lib/widgets/types.ts` | khối trên; [ADR 0005](decisions/0005-widget-hosting-model.md) |
-| `ClipEntry` | `lib/clips/types.ts` | [ARCHITECTURE §8b](ARCHITECTURE.md) |
-
-## 6. `manim-service` (đợt 3C, hợp đồng đề xuất; theo khuôn `render-service`)
-
-Khuôn lấy từ `render-service/README.md`: submit → poll → download → cancel; 429 máy đọc được; opt-in. Khác `render-service`:
-- **Xác thực bằng token** (`x-manim-token`).
-- **App sở hữu kho asset**: dịch vụ chỉ trả tệp, app lưu với tên băm nội dung.
-- Dịch vụ **gộp job trùng khoá**: hai POST cùng cache key nhận cùng `jobId`.
-
-| Phương thức + đường dẫn | Mục đích | Phản hồi |
-| --- | --- | --- |
-| `POST /render` | JSON `{ templateId, templateRev, params, locale \| null }` | `202 { jobId, cacheKey }`; `409 { error: 'template-rev-mismatch', current }` nếu `templateRev` khác bản dịch vụ đang có |
-| `GET /render/:jobId` | Trạng thái | `{ status: queued\|running\|succeeded\|failed\|cancelled, progress: 0..1, error? }`; vượt deadline → `failed{error:'deadline'}` (chỉ báo qua poll) |
-| `GET /render/:jobId/download?chapter=<id>` | Tệp MP4/PNG của một chapter (hoặc `manifest`) | stream khi `succeeded` |
-| `DELETE /render/:jobId` | Huỷ job đang xếp/đang chạy | `204` |
-| `GET /health` | Hồ sơ tài nguyên, `imageDigest`, `templateRevs`, `accepting: boolean` | `200` |
-
-```jsonc
-// POST /render
-{ "templateId": "amgm-semicircle", "templateRev": 1, "params": { "a": 2, "b": 8 }, "locale": null }
-// 202
-{ "jobId": "9f3c…", "cacheKey": "sha256:ab12…" }
-```
-
-| Mã | Ý nghĩa |
-| --- | --- |
-| `400` | `params` không qua `InputSpec` của mẫu |
-| `401` | thiếu/sai token |
-| `404` | `templateId` không tồn tại |
-| `409` | `templateRev` lệch (app lấy bản mới từ `/health`) |
-| `429 { error, reason }` | `queue_full` \| `per_identity_limit` \| `global_limit` |
-
-**Cache key** (định nghĩa duy nhất ở [DATA-MODEL §4](DATA-MODEL.md)): dịch vụ là nguồn chính thức cho `templateRev` và `imageDigest` (báo qua `/health`). Dịch vụ **không** nhận mã, chỉ nhận `templateId` + `params` số/enum.
-
-**Danh tính cho giới hạn mỗi người:** app gửi owner id của phiên (như luồng preview: `x-openmaic-client`, `render-service/README.md:138-141`), kèm trần toàn cục. Không dựa vào IP (SECURITY T12).
-
-**Phục vụ asset:** clip lớn qua route Range của app theo mẫu `classroom-media` (tên băm nội dung, `immutable`, qua access-code vì nằm dưới `/api/`). `public/clips` (≤ 10 clip) là tệp tĩnh không qua access-code (chấp nhận, SECURITY T21).
 
 ## 7. Phiên bản và tương thích
 
@@ -233,11 +183,9 @@ Khuôn lấy từ `render-service/README.md`: submit → poll → download → c
 | Thêm thông điệp/kind mới là **tương thích ngược** (bên nhận bỏ kind lạ); mọi message mới có `v` | host↔iframe |
 | Đổi nghĩa hoặc xoá trường là **phá vỡ** → tăng `runtimeVersion` và giữ runtime cũ trong scene cũ | `widget-config.runtimeVersion` |
 | Frame, lời, preset, code hoặc `problem` của entry đổi → **tăng `entryRev`** (test snapshot `framesHash` + `contentHash` bắt) | catalog (ADR 0013 §6) |
-| Không đổi `id` walkthrough/clip đã phát hành; id duy nhất trên mọi gói | catalog |
+| Không đổi `id` walkthrough đã phát hành; id duy nhất trên mọi gói | catalog |
 | Thêm `kind` `InputSpec` là tương thích ngược; đổi hành vi kind cũ là phá vỡ | `InputSpec` |
-| Thêm trường tuỳ chọn vào `ClipEntry`/`WalkthroughEntry` là tương thích ngược | catalog |
-| `manifest.json` thêm trường tuỳ chọn được; đổi `chapters` là phá vỡ (test `entry.chapters` khớp `manifest.chapters`) | clip |
-| Mẫu Manim đổi → tăng `templateRev` → cache key mới; asset cũ **không xoá** | clip |
+| Thêm trường tuỳ chọn vào `WalkthroughEntry` là tương thích ngược | catalog |
 
 ## 8. Vai trò LLM và dữ liệu học sinh (ADR 0014)
 

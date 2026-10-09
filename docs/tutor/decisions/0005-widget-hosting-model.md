@@ -75,7 +75,7 @@ Chữ ký đầy đủ (nguồn chính thức): [INTERFACES §5](../INTERFACES.m
 
 ```ts
 interface WidgetProvider {
-  readonly id: string                                          // 'walkthrough' | 'clip'
+  readonly id: string                                          // 'walkthrough' (ban đầu cả 'clip'; ADR 0015 đã bỏ)
   claimsScene(scene: Scene): boolean                           // theo nội dung: widgetConfig.kind (ADR 0013)
   build(req: BuildRequest, ctx: WidgetContext): BuildResult    // tool gọi; không gọi LLM
   actions(scene: Scene, ctx: WidgetContext): Action[]          // generate_actions / duplicate_scene
@@ -87,7 +87,7 @@ interface SubjectPack {
   readonly id: string                          // 'cp' | 'math' | ...   (KHÔNG là union đóng)
   readonly skillId: string
   readonly walkthroughs: readonly WalkthroughEntry[]     // ADR 0006
-  readonly clips?: readonly ClipEntry[]                  // ADR 0007 (Toán)
+  // (ban đầu có thêm clips?: ClipEntry[] cho ADR 0007; ADR 0015 đã bỏ)
 }
 ```
 

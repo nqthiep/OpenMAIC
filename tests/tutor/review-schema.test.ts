@@ -433,7 +433,6 @@ describe('equivalent mutants (C6)', () => {
     [binarySearchEntry, bsAnswerMiniEntry].map((e) => [e, buildReviewMaterial(e)]),
   );
   const mutantOf = (
-    orig: AnyWalkthroughEntry,
     mutated: AnyWalkthroughEntry,
     probe: Parameters<typeof isEquivalentMutant>[1]['probe'],
   ) => ({ entry: mutated, material: buildReviewMaterial(mutated), probe });
@@ -473,12 +472,12 @@ describe('equivalent mutants (C6)', () => {
 
     it('is equivalent when the two variables are equal on every frame of the beat', () => {
       const e = onlyPreset('single'); // lo = hi = 0 at the start
-      expect(isEquivalentMutant(e, mutantOf(e, swapped(e), probe))).toBe(true);
+      expect(isEquivalentMutant(e, mutantOf(swapped(e), probe))).toBe(true);
     });
 
     it('is an error when the filled narration differs on some beat frame', () => {
       const e = onlyPreset('first'); // lo = 0, hi = 9
-      expect(isEquivalentMutant(e, mutantOf(e, swapped(e), probe))).toBe(false);
+      expect(isEquivalentMutant(e, mutantOf(swapped(e), probe))).toBe(false);
     });
   });
 
@@ -494,13 +493,13 @@ describe('equivalent mutants (C6)', () => {
     const orig = withMap([1, 2, 3, 4, 5]);
 
     it('is equivalent when the new line stays inside the original statement range', () => {
-      expect(isEquivalentMutant(orig, mutantOf(orig, withMap([2, 3, 4, 5]), probe))).toBe(true);
-      expect(isEquivalentMutant(orig, mutantOf(orig, withMap([3]), probe))).toBe(true);
+      expect(isEquivalentMutant(orig, mutantOf(withMap([2, 3, 4, 5]), probe))).toBe(true);
+      expect(isEquivalentMutant(orig, mutantOf(withMap([3]), probe))).toBe(true);
     });
 
     it('is an error when a line lands outside the original range', () => {
-      expect(isEquivalentMutant(orig, mutantOf(orig, withMap([6]), probe))).toBe(false);
-      expect(isEquivalentMutant(orig, mutantOf(orig, withMap([1, 2, 3, 4, 9]), probe))).toBe(false);
+      expect(isEquivalentMutant(orig, mutantOf(withMap([6]), probe))).toBe(false);
+      expect(isEquivalentMutant(orig, mutantOf(withMap([1, 2, 3, 4, 9]), probe))).toBe(false);
     });
 
     it('every generated map mutant moves a line outside the original range', () => {
@@ -531,19 +530,14 @@ describe('equivalent mutants (C6)', () => {
 
     it('is an error when the donor beat decides differently (go-right for go-left)', () => {
       const probe = { type: 'hint', beat: 'go-left', donor: 'go-right' } as const;
-      expect(
-        isEquivalentMutant(
-          binarySearchEntry,
-          mutantOf(binarySearchEntry, hintFrom('go-right'), probe),
-        ),
-      ).toBe(false);
+      expect(isEquivalentMutant(binarySearchEntry, mutantOf(hintFrom('go-right'), probe))).toBe(
+        false,
+      );
     });
 
     it('is equivalent when the donor beat has the same decision', () => {
       const probe = { type: 'hint', beat: 'go-left', donor: 'go-left' } as const;
-      expect(
-        isEquivalentMutant(binarySearchEntry, mutantOf(binarySearchEntry, hintFrom('mid'), probe)),
-      ).toBe(true);
+      expect(isEquivalentMutant(binarySearchEntry, mutantOf(hintFrom('mid'), probe))).toBe(true);
     });
 
     it('generated cross-beat hint mutants come from a beat with another decision', () => {

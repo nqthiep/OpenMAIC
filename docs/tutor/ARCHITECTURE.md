@@ -5,11 +5,11 @@
 - **Người sở hữu**: Chủ dự án (kiến trúc)
 - **Liên quan**: [REQUIREMENTS](REQUIREMENTS.md), [INTERFACES](INTERFACES.md), [DATA-MODEL](DATA-MODEL.md), [SECURITY](SECURITY.md), [OPERATIONS](OPERATIONS.md), [NFR](NFR.md), [decisions/](decisions/README.md)
 
-> **Tóm tắt:** SubjectTutor thêm Chuyên Tin và Chuyên Toán vào OpenMAIC bằng **widget HTML tự chứa** (walkthrough) và **clip Manim** (Toán; *từ 2026-10-08 Toán dùng walkthrough tương tác thay clip, ADR 0015: các phần về clip và `manim/` là lịch sử, mã đã xoá khỏi cây làm việc (2026-10-09; còn ở thẻ `manim-clips-final`)*).
-> - **Chỉ có ở đường agent** (workbench): scene do **tool tất định** tạo (`generate_walkthrough`, `generate_clip_scenes`).
+> **Tóm tắt:** SubjectTutor thêm Chuyên Tin và Chuyên Toán vào OpenMAIC bằng **widget HTML tự chứa** (walkthrough). Toán cũng dùng walkthrough tương tác (hình SVG tự viết), không dùng video (ADR 0015).
+> - **Chỉ có ở đường agent** (workbench): scene do **tool tất định** tạo (`generate_walkthrough`).
 > - Provider ở **tầng app** nhận scene theo nội dung, trên vỏ `simulation`.
 > - **Không đổi package, không thêm dependency.**
-> - Chia module: `lib/widgets` (lõi mở rộng, chặn `code`), `lib/tutor` (engine + runtime), `lib/subjects/<id>` (nội dung từng môn), `manim/` (dựng clip).
+> - Chia module: `lib/widgets` (lõi mở rộng, chặn `code`), `lib/tutor` (engine + runtime), `lib/subjects/<id>` (nội dung từng môn).
 > - §1b có sơ đồ C4; §4 có checklist mở rộng.
 
 ## 1. Tổng quan
@@ -18,7 +18,6 @@ SubjectTutor thêm hai môn (Chuyên Tin trước, Chuyên Toán sau) vào OpenM
 
 - **Khung bài giảng cho bài khó** (ADR 0008): 12 giai đoạn, ánh xạ vào scene/widget/hành động sẵn có.
 - **Walkthrough widget** (`kind:'walkthrough'`): trình chiếu từng bước — giải thích tiếng Việt, hình minh hoạ, bảng biến, panel phụ (heap/stack/queue), pseudocode, C++ và Python highlight theo bước (để đọc hiểu), **học sinh dự đoán và đổi input để quan sát** (preset; nhập tuỳ chỉnh trong giới hạn từ lát 1d), beats, thanh điều khiển.
-- **Clip Manim cho Toán** (ADR 0007, hướng chính): video câm dựng từ **mẫu tham số hoá** (LLM chỉ chọn `clipId` + `presetId`/`params` đã kiểm). Mỗi chapter là một file và một slide do tool `generate_clip_scenes` tạo. Lời thầy TTS chạy riêng, trước và sau chapter (user xác nhận).
 - **Thầy điều khiển và trả lời**: kịch bản tất định bằng `widget_setState/widget_highlight`, không bị giới hạn 3–8 action của LLM, đi theo beat của đúng preset (ADR 0013). Q&A biết học sinh đang ở frame nào và dạy kèm theo thang gợi ý (ADR 0009, 0008).
 - **Học chủ động**: dự đoán bước kế (engine chờ có giới hạn), sắp dòng code, tìm dòng sai, điền bảng trace (ADR 0008 Decision 5).
 - **Không có code editor cho học sinh** (ADR 0003): ứng dụng thuần giảng dạy; widget `code` **mặc định bị chặn** ở lúc hiển thị, ghi và sinh (ADR 0010). **Interactive và visualizer là mục đích chính**: walkthrough, simulation, diagram, game, 3D, đổi input để quan sát.
@@ -32,12 +31,12 @@ SubjectTutor thêm hai môn (Chuyên Tin trước, Chuyên Toán sau) vào OpenM
 ```mermaid
 flowchart TB
   HS(["Học sinh"])
-  GV(["Vai trò LLM thay người<br/>hội đồng Tin/Toán, tác giả Manim,<br/>bộ lọc, học sinh mô phỏng"])
+  GV(["Vai trò LLM thay người<br/>hội đồng Tin/Toán,<br/>bộ lọc, học sinh mô phỏng"])
   OPS(["Người vận hành / dev"])
-  SYS["OpenMAIC + SubjectTutor<br/>lớp học AI: slide, quiz, bảng trắng,<br/>walkthrough, clip Manim"]
+  SYS["OpenMAIC + SubjectTutor<br/>lớp học AI: slide, quiz, bảng trắng,<br/>walkthrough"]
   LLM["LLM / TTS / media providers"]
   ST[("Kho asset<br/>IndexedDB · file · S3")]
-  RND["Dịch vụ render<br/>render-service · manim-service"]
+  RND["Dịch vụ render<br/>render-service"]
   HS -- "học, tua, đổi input, hỏi thầy" --> SYS
   GV -- "duyệt, ký, viết mẫu, lọc" --> SYS
   OPS -- "triển khai, cấu hình" --> SYS
@@ -61,23 +60,19 @@ flowchart LR
     API["API routes + agent runtime"]
     WID["lib/widgets<br/>registry, guard, describe"]
     TUT["lib/tutor<br/>engine, build, provider"]
-    SUB["lib/subjects/ID<br/>catalog, clips, messages"]
+    SUB["lib/subjects/ID<br/>catalog, messages"]
     API --> WID
     WID --> TUT
     WID --> SUB
   end
-  MS["manim-service (đợt 3)"]
   RS["render-service"]
-  CI["CI: image Manim,<br/>render preset"]
-  ASSET[("Asset: public/clips · volume · S3")]
+  ASSET[("Asset: volume · S3")]
   UI -- "HTTPS" --> API
-  API --> MS
   API --> RS
-  CI --> ASSET
   API --> ASSET
 ```
 
-Chú giải: mũi tên nét liền là luồng chính; `postMessage` là kênh duy nhất giữa host và iframe ([INTERFACES §1–2](INTERFACES.md)); `manim-service` chỉ nhận `templateId` + `params` số/enum ([SECURITY](SECURITY.md)); ranh giới tin cậy chi tiết ở [SECURITY §2](SECURITY.md).
+Chú giải: mũi tên nét liền là luồng chính; `postMessage` là kênh duy nhất giữa host và iframe ([INTERFACES §1–2](INTERFACES.md)); ranh giới tin cậy chi tiết ở [SECURITY §2](SECURITY.md).
 
 ## 2. Luồng end-to-end
 
@@ -159,39 +154,12 @@ sequenceDiagram
   C-->>H: gợi ý mức 1 (kèm wb_* nếu cần)
 ```
 
-**Tạo slide clip Manim (3A dựng sẵn; 3C theo yêu cầu):**
-
-```mermaid
-sequenceDiagram
-  participant A as Agent
-  participant T as generate_clip_scenes (server)
-  participant K as Asset cache
-  participant M as manim-service
-  A->>T: clipId, presetId hoặc params
-  T->>T: kiểm InputSpec, tính cacheKey
-  T->>K: tra cacheKey
-  alt trúng cache
-    K-->>T: url và poster từng chapter
-    T-->>A: mỗi chapter một slide (src thật)
-  else trượt (chỉ 3C)
-    T->>M: POST /render (templateId, templateRev, params, locale)
-    M-->>T: 202 jobId
-    T-->>A: slide có video placeholder
-    loop poll
-      T->>M: GET /render/jobId
-    end
-    M-->>T: succeeded, tải từng chapter
-    T->>K: lưu asset băm nội dung (không bao giờ xoá)
-    T-->>A: media_ready, vá src
-  end
-```
-
 ## 3. Đã cắt hoặc đổi so với các bản trước
 
 | Trước | Bây giờ | Lý do |
 | --- | --- | --- |
 | Registry `SubjectTutor` (`registerSubjectTutor…`) | Registry **`WidgetProvider` + `SubjectPack`** ở `lib/widgets`, `lib/subjects` | ADR 0005: registry cũ không có consumer; registry mới có hook thật (`build/actions/describe`). |
-| Hàm bọc `generateSceneContent` + `widgetOutline.walkthroughId` + `SceneEnricher` | Tool tất định `generate_walkthrough`, `generate_clip_scenes`; chỉ đường agent | ADR 0011 (review 2026-09-30: A1, A4, A5). |
+| Hàm bọc `generateSceneContent` + `widgetOutline.walkthroughId` + `SceneEnricher` | Tool tất định `generate_walkthrough`; chỉ đường agent | ADR 0011 (review 2026-09-30: A1, A4, A5). |
 | Cờ `OPENMAIC_BLOCK_CODE_WIDGET` (mặc định mở), guard ở điểm sinh | `OPENMAIC_ALLOW_CODE_WIDGET` (mặc định chặn); chặn lúc hiển thị + ghi + sinh + CSP | ADR 0010 (review: F1, F2, A6). |
 | Beat cho cả entry, `beatFrames[id]` | `beatDefs` + `sets[p].beats` theo từng preset; `widget-ready`; `entryRev` | ADR 0013 (review: B1, B2, M2, M3). |
 | `WalkthroughWidget` React, `usePlayer` | Runtime thuần trong iframe; `createPlayer` | ADR 0005: iframe srcDoc sandbox không với tới bundle host. |
@@ -200,8 +168,7 @@ sequenceDiagram
 | Nhiều `widgetType` | Vỏ `simulation` + `widgetConfig.kind` | `WidgetType` là union đóng; không đổi package. |
 | Visualizer `arrayBars`, `dpTable`, `callStack`, `hashTable`, `linkedList`, `segmentTree` riêng, `numberLine`, `vector` | `array`, `tree`, `graph`, `grid`, `geometry`, `functionPlotter`, `proofOutline` + panel phụ | Đếm curriculum: `callStack`/`linkedList` 0 topic; segment tree là cây; `dpTable` tổng quát thành `grid`; `numberLine` chỉ phục vụ một mẫu. |
 | D3/`@xyflow/react`/`motion`/`shiki` | SVG/DOM tự viết | ADR 0002 (SWOT + khảo sát). |
-| Desmos/GeoGebra; manim-web; LLM viết mã Manim chạy trên server | Bỏ | ADR 0007. |
-| Manim = pilot 1–3 clip có cổng | **Manim là hướng chính cho Toán**: mẫu tham số hoá (M3) trên nền thư viện dựng sẵn (M1), phân bổ Z (Manim / walkthrough SVG / slide) | ADR 0007 (user xác nhận 2026-09-30). |
+| Desmos/GeoGebra; manim-web; clip Manim (video) cho Toán; LLM viết mã Manim chạy trên server | Bỏ. Toán dùng walkthrough tương tác, hình SVG tự viết (`lib/subjects/math/figure.ts`) | ADR 0007 (đã bị thay), ADR 0015. |
 | `outline-constraints.json` làm cơ chế cưỡng chế | Chỉ cảnh báo; chặn widget `code` bằng cờ + guard | ADR 0010; `lib/server/agent-runtime/skills.ts:719,879-890`. |
 | Cảnh 6 "code" (luyện code) trong curriculum | Bỏ; thay bằng quiz tự luận AI chấm. **"Đổi tham số" được giữ** (preset + nhập input) | ADR 0003, 0008. (Bản 2026-09-29 hiểu nhầm là phải bỏ cả "đổi tham số" và widget LLM sinh.) |
 
@@ -210,19 +177,18 @@ sequenceDiagram
 ```
 lib/widgets/            # lõi mở rộng (làm một lần)
   types.ts  registry.ts  policy.ts (isCodeWidget, assertScenePolicy)  describe.ts
-lib/server/agent-runtime/walkthrough-tools.ts   # tool generate_walkthrough (ADR 0011); Phase 3: clip-tools.ts
+lib/server/agent-runtime/walkthrough-tools.ts   # tool generate_walkthrough (ADR 0011)
 lib/tutor/              # engine walkthrough dùng chung mọi môn
   engine/  protocol/  runtime/  build/  provider.ts  input-spec.ts
-lib/clips/              # lõi clip Manim: types, cache-key, provider clip, adopt (ADR 0007)
 lib/subjects/
   index.ts              # danh sách gói khai báo tường minh
   cp/    pack.ts  catalog/*.ts  messages/{vi-VN,en-US}.ts
-  math/  (Phase 3)
+  math/  pack.ts  catalog/*.ts  figure.ts
 skills/agent-runtime/<skill>/{SKILL.md, references/…}
 tests/widgets  tests/tutor  tests/subjects/<id>
 ```
 
-Contract (`WidgetProvider`, `SubjectPack`) ở ADR 0005; `WalkthroughEntry` ở ADR 0006; `ClipEntry` ở §8b. Nguồn chính thức của giao diện: [INTERFACES §5](INTERFACES.md).
+Contract (`WidgetProvider`, `SubjectPack`) ở ADR 0005; `WalkthroughEntry` ở ADR 0006; nguồn chính thức của giao diện: [INTERFACES §5](INTERFACES.md).
 
 **Checklist mở rộng** (mọi mục đều là *thêm file*, ngoại trừ dòng đăng ký; mục cuối là ngoại lệ):
 
@@ -230,8 +196,7 @@ Contract (`WidgetProvider`, `SubjectPack`) ở ADR 0005; `WalkthroughEntry` ở 
 | --- | --- |
 | Một bài (walkthrough, kể cả bài giải đề) | 1 file entry trong `lib/subjects/<id>/catalog/` (`beatDefs`, preset, C++ + Python + hai `map`, `entryRev`) + thêm vào `pack.ts` + test + sinh lại khối id trong `SKILL.md` và union id của tool. |
 | Một visualizer | 1 module `VisualizerRenderer` + 1 entry build + quy ước key `highlights/pointers` + 1 test trình duyệt. |
-| Một môn mới **dùng phương tiện có sẵn** (Toán, …) | `lib/subjects/<id>/` + 1 dòng trong `lib/subjects/index.ts` + 1 skill (`title` có chữ Hán + `skill.title.<handle>` ở 12 locale) + `references/` (curriculum). Engine/runtime/provider/Q&A/policy không đổi. Toán **lần đầu** dùng clip thì phải làm hạ tầng clip một lần (`lib/clips`, tool `generate_clip_scenes`, `manim/`) ở Phase 3A — đó là thêm phương tiện, không phải thêm môn. |
-| Một mẫu clip Manim | 1 file `lib/subjects/math/clips/<id>.ts` (`ClipEntry`) + 1 file `manim/templates/<id>.py` + preset + `invariants` + test + sinh lại khối id trong `SKILL.md` + render CI. |
+| Một môn mới **dùng phương tiện có sẵn** (Toán, …) | `lib/subjects/<id>/` + 1 dòng trong `lib/subjects/index.ts` + 1 skill (`title` có chữ Hán + `skill.title.<handle>` ở 12 locale) + `references/` (curriculum). Engine/runtime/provider/Q&A/policy không đổi. |
 | Một **loại phương tiện** mới | **Ngoại lệ, không chỉ thêm file**: ADR mới + 1 `WidgetProvider` + 1 tool tạo scene + 1 trường trong `SubjectPack` (ADR 0005). |
 
 ## 5. Step engine (`lib/tutor/engine/`)
@@ -307,34 +272,6 @@ Mọi visualizer của Phase 2 dùng chung kind: `active`, `compare`, `result`, 
 
 Panel phụ dùng chung: `vars` (bảng biến) và `aux` (danh sách có nhãn) — hiển thị heap của Dijkstra, stack của Tarjan, queue của BFS, mảng failure của KMP.
 
-## 8b. Clip Manim (Toán, ADR 0007)
-
-```ts
-interface ClipEntry<I = unknown> {           // lib/subjects/math/clips/<id>.ts (dùng chung InputSpec, Messages, presets, beats với WalkthroughEntry)
-  readonly id: string                        // duy nhất trên mọi gói; provider clip nhận slide theo name 'clip:<id>@…'
-  readonly kind: 'prebuilt' | 'template'     // M1 | M3
-  readonly curriculumTopics: readonly string[]
-  readonly title: Messages
-  readonly inputSpec: InputSpec              // params chỉ là số/enum — KHÔNG chuỗi tự do (không đường tiêm LaTeX)
-  readonly check?: (input: I) => readonly string[]   // ràng buộc giữa các tham số (tam giác không suy biến, a > b…), như WalkthroughEntry.check
-  readonly presets: readonly { id: string; label: Messages; input: I }[]     // 3–5
-  readonly engine: { name: 'manim-ce'; version: string; templateRev: number }
-  readonly render: { w: 1280; h: 720; fps: 30 }
-  readonly silent: true                      // lời thầy = TTS; chữ trên màn tối thiểu
-  readonly chapters: readonly { id: string; startSec: number; endSec: number; label: Messages; before: Messages; after: Messages; caption?: Messages; ask?: Messages }[]   // lời thầy trước/sau chapter (clip câm)
-  invariants(input: I): boolean              // hàm thuần TS: bất biến toán, chạy trên mọi preset và biên
-  readonly bakedText: boolean                // có chữ nướng theo locale? false → locale = null trong cache key
-  cacheKeyInput(input: I, locale: Locale): unknown[]   // phần do app tính của cache key; định nghĩa đầy đủ ở DATA-MODEL §4 (templateId = id)
-  asset(input: I, locale: Locale): { master?: string; chapters: { id: string; url: string; poster: string }[] } | null   // null = chưa dựng
-  readonly sheet: { readonly chapters: readonly { id: string; shows: Messages; formulas: readonly string[]; misconceptions: readonly Messages[]; hints: readonly [Messages, Messages, Messages] }[] }   // nguồn của clip-sheet.json; Q&A tra trực tiếp từ đây (thêm 2026-10-01)
-}
-// Module của mỗi clip export thêm hàm thuần expectedDisplay(input): Record<string, number> — số/toạ độ mà cảnh phải ghi vào manifest.json; CI đối chiếu (thêm 2026-10-01)
-```
-
-- **Đường đi** (ADR 0011): tool `generate_clip_scenes{clipId, presetId}` tạo **mỗi chapter một slide**. Mỗi slide có tiêu đề, một `PPTVideoElement` (`name:'clip:<id>@<hash>#<chapterId>'`, `src` URL cụ thể) và text chú thích. Kịch bản tất định là `speech(before) → play_video → speech(after)`. Clip được adopt vào asset pool khi dùng lần đầu (export/import/MP4).
-- **Dựng**: `manim/` (Python, image pin Manim CE 0.21.0 + TeX Live + font OFL) qua CI (`scripts/render-clips.mjs`) → asset băm tên (≤10 clip trong `public/clips/`, còn lại volume/S3). Đợt 3C: `manim-service` là container thứ hai theo hợp đồng `render-service`: dài hạn, đã cứng hoá, mỗi job một tiến trình con có giới hạn, mạng riêng, có token (ADR 0007 Decision 5). `generate_clip_scenes{params}` nhận thêm nhánh bất đồng bộ như `generate_video` (placeholder, `media_ready`).
-- **Cổng chất lượng** trước khi vào thư viện: `ffprobe`, bbox chữ, SSIM khung vàng, `invariants` + manifest đối chiếu độc lập, hội đồng LLM Toán ký (Phase 3 §6.1, ADR 0014).
-
 ## 9. Skills và curriculum
 
 - Mỗi môn một skill: `SKILL.md` (kênh chỉ dẫn LLM về cách dạy: blueprint ADR 0008, quy tắc "khi học sinh hỏi", khối bảng `walkthroughId` **sinh từ catalog**; id hợp lệ cũng nằm trong schema của tool `generate_walkthrough`) + `references/` (curriculum theo tier). `outline-constraints.json` chỉ giữ trường có nghĩa: `allowedTypes`, `firstSceneType` (không có `sceneCount`: test của repo cấm giới hạn số trang trong skill; công thức 6–8 scene nằm trong SKILL.md) — **chỉ cảnh báo** (`lib/server/agent-runtime/skills.ts:879-890`), không phải cưỡng chế.
@@ -364,7 +301,7 @@ interface ClipEntry<I = unknown> {           // lib/subjects/math/clips/<id>.ts 
 
 - Widget tự chứa đi qua export HTML/PPTX/ZIP như widget khác (`lib/export/inline-assets.ts`).
 - **Export MP4 đóng băng widget sau ~250 ms**, trong trang có CSP chặn script ngoài và mọi request; beat `widget_*` chỉ là marker chưa dựng (`lib/video-export-app/prepare-interactive-html.ts:36-153`, `passes/timeline.ts:257-266`). [Inference] Walkthrough trong MP4 là một khung tĩnh và lời "bước 5" lệch hình.
-- Giảm thiểu (backlog, chọn khi có nhu cầu MP4): (i) runtime nhận diện cờ chụp tĩnh và nhảy tới `posterBeat` (chưa kiểm khả thi); (ii) dựng thêm slide ảnh cho từng beat; (iii) mở rộng video-export để phát lại `widget_setState` (đổi lõi); (iv) render bằng Hyperframes (ADR 0007). Clip Manim (ADR 0007) đi qua đường video của slide (`VideoSegment`) nên **không** bị giới hạn này **nếu clip là blob trong asset pool** (adopt khi dùng lần đầu); clip chỉ là URL server [Inference] có nguy cơ bị bỏ khỏi ZIP và bị cap 5 phút trong MP4 — spike S3 (Phase 3 §8).
+- Giảm thiểu (backlog, chọn khi có nhu cầu MP4): (i) runtime nhận diện cờ chụp tĩnh và nhảy tới `posterBeat` (chưa kiểm khả thi); (ii) dựng thêm slide ảnh cho từng beat; (iii) mở rộng video-export để phát lại `widget_setState` (đổi lõi); (iv) render bằng Hyperframes.
 
 ## 13. Bảo mật
 
@@ -374,13 +311,12 @@ interface ClipEntry<I = unknown> {           // lib/subjects/math/clips/<id>.ts 
 - Message: kiểm `event.source`, guard kiểu, kẹp miền; iframe→host chỉ id và số nguyên đã kẹp. Ngữ cảnh chat lấy **chữ từ catalog** phía server; không lấy từ iframe, HTML hay `widgetConfig` của scene (chống prompt-injection, ADR 0013 §8).
 - DOM: `textContent`; không `eval`; đồ thị hàm số dùng hệ số đa thức.
 - Không có trình soạn/chạy code của học sinh: widget `code` mặc định bị chặn ở hiển thị, ghi, sinh (ADR 0010). CSP walkthrough không cho mạng, không `eval`. `run()` chạy trong iframe sandbox với input đã kiểm và có trần.
-- Manim (ADR 0007): chỉ mã mẫu của ta chạy; `params` là số/enum (không chuỗi tự do → không tiêm LaTeX; Manim gọi `latex` không có `-no-shell-escape`); render trong container dài hạn đã cứng hoá, mỗi job một tiến trình con có giới hạn và bị kill cả process group, mạng riêng, token (ADR 0007 Decision 5); **LLM không bao giờ viết mã Manim chạy trên đường phục vụ**; không sao chép mô hình cách ly của `render-service` (root + `CAP_NET_ADMIN`) cho mã Python.
 
 ## 14. Tech stack
 
 > Triển khai, cấu hình, CI, giám sát: [OPERATIONS](OPERATIONS.md).
 
-Không thêm npm dependency (ADR 0002). Dùng: SVG/DOM, validator `InputSpec` tự viết (~60 dòng, không dependency), KaTeX (dựng sẵn trên server, CSS + font inline, theo tiền lệ `katex-assets.ts`), Rollup + `rollup-plugin-typescript2` (root đã có; công cụ cuối cùng chốt ở spike Q1), Playwright (đã có). Manim CE 0.21.0 (pin) + TeX Live + font OFL trong image riêng (`manim/`), dựng bằng CI — **không** phải dependency của app; dịch vụ `manim-service` (đợt 3) là container thứ hai theo hợp đồng `render-service`.
+Không thêm npm dependency (ADR 0002). Dùng: SVG/DOM, validator `InputSpec` tự viết (~60 dòng, không dependency), KaTeX (dựng sẵn trên server, CSS + font inline, theo tiền lệ `katex-assets.ts`), Rollup + `rollup-plugin-typescript2` (root đã có; công cụ cuối cùng chốt ở spike Q1), Playwright (đã có).
 
 ## 15. Liên kết
 
@@ -390,6 +326,6 @@ Không thêm npm dependency (ADR 0002). Dùng: SVG/DOM, validator `InputSpec` t�
 | Chất lượng, rủi ro | [NFR](NFR.md), [RISKS](RISKS.md) |
 | Thiết kế kỹ thuật | [DATA-MODEL](DATA-MODEL.md), [INTERFACES](INTERFACES.md), [SECURITY](SECURITY.md), [OPERATIONS](OPERATIONS.md), [TEST-STRATEGY](TEST-STRATEGY.md) |
 | Nội dung dạy | [CONTENT-DESIGN](CONTENT-DESIGN.md), `curriculum/` |
-| Quyết định | [decisions/README](decisions/README.md) (ADR 0001–0013) |
+| Quyết định | [decisions/README](decisions/README.md) (ADR 0001–0015) |
 | Đặc tả theo đợt | [Phase 1](phase-1-base-layer/SCHEMA.md), [Phase 2](phase-2-competitive-programming/SCHEMA.md), [Phase 3](phase-3-olympiad-math/SCHEMA.md) |
 | Lịch sử | [REVIEW-2026-09-29](REVIEW-2026-09-29.md) |

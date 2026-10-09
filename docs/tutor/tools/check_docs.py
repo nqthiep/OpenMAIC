@@ -111,17 +111,18 @@ def check_links():
 
 
 PLANNED = (
-    "lib/tutor", "lib/widgets", "lib/subjects", "lib/clips", "tests/tutor", "tests/widgets",
-    "tests/subjects", "tests/clips", "tests/i18n/tutor", "skills/agent-runtime/competitive-programming",
+    "lib/tutor", "lib/widgets", "lib/subjects", "tests/tutor", "tests/widgets",
+    "tests/subjects", "tests/i18n/tutor", "skills/agent-runtime/competitive-programming",
     "skills/agent-runtime/olympiad-math", "eval/walkthrough", "eval/tutor", "e2e/tests/walkthrough",
-    "scripts/generate-tutor", "scripts/render-clips", "lib/store/widget-runtime-state", "public/clips",
-    "lib/server/agent-runtime/walkthrough-tools", "lib/server/agent-runtime/clip-tools",
+    "scripts/generate-tutor", "lib/store/widget-runtime-state",
+    "lib/server/agent-runtime/walkthrough-tools",
     "tests/ci/", "tests/docs/", "e2e/tests/code-widget-blocked", "tests/runtime/tutor-learning",
     # Thêm khi chia task (tasks/*.md):
     "app/api/widgets/", "lib/hooks/use-code-widget-allowed", "components/scene-renderers/code-widget-blocked",
     "scripts/generate-skill-catalog", "scripts/split-curriculum", "lib/server/agent-runtime/content-moderation",
-    "eval/sim-learner", "eval/manim-author", ".github/workflows/manim-author", "app/api/clips/",
-    "scripts/manim-author-pr",
+    "eval/sim-learner",
+    # đã xoá, chỉ còn ở thẻ git manim-clips-final; ADR 0015 trích làm nguồn số liệu
+    "lib/clips", "tests/clips",
 )
 
 CODE_REF = re.compile(
@@ -176,7 +177,6 @@ ANCHORS = {
     "lib/logger.ts:10": "LOG_FORMAT",
     "app/api/classroom/route.ts:80-81": "sanitizeSceneContent",
     "README.md:418": "ASSET_QUOTA_BYTES",
-    "render-service/README.md:138-141": "x-openmaic-client",
     "lib/server/agent-runtime/dsl-tools.ts:811-836": "Final-state placeholder guard",
     "lib/server/agent-runtime/document-writes.ts:32": "putSceneBringingCurrent",
     "Dockerfile:51-72": "ARG NEXT_PUBLIC_PERSISTENCE",
@@ -258,6 +258,9 @@ def check_ids():
     nfr_ids = set(re.findall(r"^\| (NFR-[A-Z]\d+) \|", nfr, re.M))
     risk_ids = set(re.findall(r"^\| (R\d{2}) \|", risks, re.M))
     for f in files:
+        # ADRs and the dated review are history: they keep citing ids that later edits removed
+        if "/decisions/" in f or os.path.basename(f).startswith("REVIEW-"):
+            continue
         t = rd(f)
         for m in re.finditer(r"\bNFR-[A-Z]\d+\b", t):
             if m.group(0) not in nfr_ids:

@@ -43,7 +43,6 @@ pnpm lint && pnpm check && npx tsc --noEmit && pnpm check:i18n-keys
 | --- | --- | --- |
 | Một walkthrough (thuật toán hoặc bài giải đề) | `lib/subjects/<id>/catalog/<entry>.ts` (`beatDefs` + gợi ý + hiểu lầm, preset, pseudo + C++ + Python + hai `map`, `entryRev`, `problem?`) + thêm vào `pack.ts` + `tests/subjects/<id>/<entry>.test.ts` + sinh lại khối id trong `SKILL.md` | Sửa `packages/@openmaic/*`; thêm `widgetType` mới; dùng `Intl`/`Date`/`Math.random` trong `run` |
 | Một visualizer | `lib/tutor/runtime/visualizers/<name>.ts` + entry build + test trình duyệt | Thêm npm dependency (ADR 0002) |
-| Một mẫu clip Manim | `manim/templates/<id>.py` + `lib/subjects/math/clips/<id>.ts` + preset + `invariants` + test + render CI | Cho LLM viết mã Manim chạy trên server (ADR 0007) |
 | Một môn mới | `lib/subjects/<id>/` + một dòng ở `lib/subjects/index.ts` + skill (`title` có chữ Hán + `skill.title.<handle>` ở 12 locale) + `references/` | Thư mục dữ liệu không có `SKILL.md` dưới `skills/agent-runtime` (test đỏ, agent không đọc được) |
 | Một **loại phương tiện** mới | ADR mới + `WidgetProvider` ở `lib/widgets` + tool tạo scene ở `lib/server/agent-runtime/` + trường trong `SubjectPack` | Đổi `WidgetType`; bọc `generateSceneContent` |
 | Một đường ghi scene mới | Gọi `assertScenePolicy` (tool agent) hoặc phân loại "chỉ chặn hiển thị"; thêm vào danh sách của `tests/widgets/write-paths.test.ts` | Ghi scene mà không phân loại (test đỏ) |
@@ -69,14 +68,14 @@ pnpm lint && pnpm check && npx tsc --noEmit && pnpm check:i18n-keys
 ## 6. Checklist PR
 
 - [ ] Đọc ADR liên quan và không đi ngược quyết định; nếu cần đi ngược → ADR mới (có SWOT, trigger).
-- [ ] Entry/visualizer/clip mới có test cùng PR; test đối chiếu **cách tính độc lập**; frame/lời/preset/code đổi thì **tăng `entryRev`** (snapshot `framesHash`).
-- [ ] `pnpm vitest run tests/tutor tests/widgets tests/subjects tests/clips` xanh; `pnpm lint`, `pnpm check`, `npx tsc --noEmit`, `pnpm check:i18n-keys` xanh.
+- [ ] Entry/visualizer mới có test cùng PR; test đối chiếu **cách tính độc lập**; frame/lời/preset/code đổi thì **tăng `entryRev`** (snapshot `framesHash`).
+- [ ] `pnpm vitest run tests/tutor tests/widgets tests/subjects` xanh; `pnpm lint`, `pnpm check`, `npx tsc --noEmit`, `pnpm check:i18n-keys` xanh.
 - [ ] Không thêm npm dependency; không đổi `packages/@openmaic/*`.
 - [ ] Nhãn i18n đủ 12 locale; tên skill đủ 12 locale (nếu thêm skill).
 - [ ] Không có widget `code`; `tests/widgets/write-paths.test.ts` xanh; không bí mật trong diff (`git diff | grep -iE "api[_-]?key|secret|token"` rỗng ý nghĩa).
 - [ ] Browser test mới có **step riêng** trong `.github/workflows/ci.yml` (TEST-STRATEGY §3).
 - [ ] Cập nhật tài liệu liên quan (INTERFACES/DATA-MODEL/RISKS/…) cùng PR.
-- [ ] Kích thước: HTML/entry ≤ `maxBytes`; `public/clips` ≤ 30 MB.
+- [ ] Kích thước: HTML/entry ≤ `maxBytes`.
 - [ ] Nội dung dạy mới có review đạt của hội đồng LLM Tin/Toán ở đúng `entryRev` ([CONTENT-DESIGN §7](CONTENT-DESIGN.md), ADR 0014).
 - [ ] Nhánh không có CI tự động thì đã chạy đủ lệnh ở TEST-STRATEGY §7 trước khi merge (RISKS R31).
 - [ ] Docs và curriculum đã được commit trên nhánh (đừng để `docs/tutor` ở trạng thái untracked khi giao việc cho worktree).

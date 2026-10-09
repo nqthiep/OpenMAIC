@@ -91,7 +91,7 @@
    - route handler `PUT`/`POST` nhận `scenes`.
 2. Viết test (dùng `execSync('git grep -l -E …')`) với bảng `CLASSIFIED: Record<file, { layer, planned?: boolean, why }>`.
    - `layer` ∈ `'L2-tool'`, `'L1-render-only'`, `'L1-render-point'`, `'L1-export'`, `'not-scene'`.
-3. Ghi sẵn file sẽ có, với `planned: true`: `lib/server/agent-runtime/walkthrough-tools.ts` (L2-tool), `lib/server/agent-runtime/clip-tools.ts` (L2-tool).
+3. Ghi sẵn file sẽ có, với `planned: true`: `lib/server/agent-runtime/walkthrough-tools.ts` (L2-tool).
 4. Test đỏ trong hai trường hợp:
    - có file khớp mẫu mà chưa phân loại;
    - một mục không `planned` không còn khớp mẫu (mục cũ).
@@ -723,7 +723,7 @@ Cả hai lệnh xanh. Báo leader thêm step CI (task `I-01`).
 | Đọc | [../INTERFACES](../INTERFACES.md) §5 (khối `lib/widgets/types.ts`); ADR 0013 quyết định 1 |
 
 **Làm**
-1. `types.ts`: chép khối widgets ở INTERFACES §5. Kiểu `Scene`, `InteractiveContent`, `Action` import từ `@openmaic/dsl`. `clips?: readonly unknown[]` cho tới Phase 3.
+1. `types.ts`: chép khối widgets ở INTERFACES §5. Kiểu `Scene`, `InteractiveContent`, `Action` import từ `@openmaic/dsl`.
 2. `registry.ts`: `createWidgetRegistry({ providers, packs })` trả:
    - `providerForScene(scene)`: 0 provider nhận → `null`; > 1 → ném lỗi;
    - `findWalkthrough(id)`, `walkthroughIds()`.
