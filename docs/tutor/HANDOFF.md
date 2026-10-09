@@ -232,7 +232,7 @@ Nghiệm thu một nhánh: trong worktree chạy eslint và prettier trên file 
 | Việc | Vì sao chặn | Task liên quan |
 | --- | --- | --- |
 | Khoá API và tên model chính xác | Cổng G1/G2, mọi eval thật (moderation, review, sim-learner, qa, lesson), hội đồng review LLM ở `I-04`…`I-07`. Chưa có số đo nào, nên các ngưỡng vẫn là mục tiêu thiết kế, không phải kết quả | `0-02`, `0-05`, `1b-26`, `G1-01`, `2-G2` |
-| Build Docker standalone | Chưa xác nhận file review có được đóng gói (`next.config.ts` `outputFileTracingIncludes`) `[Unverified]` | OPERATIONS §2, smoke item 8 |
+| Dựng image Docker | Bản `pnpm build` standalone đã đóng gói file review (kiểm 2026-10-09); image Docker thì chưa dựng `[Unverified]` | OPERATIONS §2, smoke item 8 |
 | `node_modules` thật cho Playwright | e2e `e2e/tests/*.spec.ts` chưa chạy; `1c-21` (e2e chờ dự đoán) chưa làm | `1c-21` |
 | Runner CI có `g++`, `python3` | Chưa kiểm chứng | bước `TUTOR_IMPL_CHECK` |
 | Review do người | Bản dịch giao diện chưa ai đọc `[Unverified]`; nội dung bài giải đề P2/P3 và 4 mô-đun 2D là đề xuất của leader `[Inference]`, hội đồng LLM duyệt ở bước tích hợp | `I-05`, `I-06` |

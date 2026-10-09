@@ -15,7 +15,13 @@ Stored here, not in `lib/subjects/cp/reviews/`, because it does NOT satisfy ADR 
 Verdicts: pass 3 (bs-answer-mini, prefix-sum, string-scan), fail 16.
 Triage of 5 failing files by hand: the `two-pointers` finding was real (fixed, see git log); most others are
 reviewer artefacts (the script narrates only some frames, so "jumps" are intentional; `vars.last` is the
-value before the update on purpose). Not yet triaged: hash-count, segment-tree, lcs, bfs, dfs, fib-recursion-tree, nim-grundy, others.
+value before the update on purpose).
+Triage of the next seven by hand (2026-10-09): `hash-count`, `segment-tree`, `lcs`, `bfs`, `dfs`, `fib-recursion-tree`,
+`nim-grundy`. Real findings fixed: English "1 nodes"-style plurals in `segment-tree`, `dfs`, `fib-recursion-tree` and ~35 other
+entries (`fill()` now takes `{n|node|nodes}`), and the loop pointer left one past the end of the string during the max scan
+of `hash-count` (entryRev 3). Everything else is reviewer error: the narrated script is cut to 12 beats on purpose, so "jumps
+to done" is intended; `fib` has 15 / 9 nodes as stated (memo hits are drawn as nodes); "every smaller mex value is reachable"
+is true for any impartial game; 2n is "about" the memoised call count.
 
 Lesson eval (6 scenarios x 3 samples, generator deepseek-v4-flash, judge deepseek-v4-pro): FAIL,
 1/6 scenarios >= 70% passing; Dung 3/3 on 4 scenarios, 2/3 on 2. Weakest: clarity (3.0-3.7) on knapsack, grid-components, LIS, binary-search.

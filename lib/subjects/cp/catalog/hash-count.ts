@@ -271,13 +271,13 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
   chars.forEach((c, k) => {
     if (c === best) marks[k] = 'result';
   });
-  put(EX.max, 4, { best, cnt }, n, marks, 'max');
-  put(EX.done, 5, { best, cnt, distinct: count.size }, n, marks, 'done');
+  put(EX.max, 4, { best, cnt }, undefined, marks, 'max');
+  put(EX.done, 5, { best, cnt, distinct: count.size }, undefined, marks, 'done');
 }
 
 export const hashCountEntry: WalkthroughEntry<In, S> = {
   id: 'hash-count',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-hash'],
