@@ -1350,28 +1350,28 @@
     }
   },
   "stack-queue": {
-    "entryRev": 1,
-    "contentHash": "e2a3a1e8bdc09e49",
+    "entryRev": 2,
+    "contentHash": "ab7be6dfc1701b30",
     "framesHash": {
       "nested": {
         "vi-VN": "3112e25d240f881f",
-        "en-US": "81cf90eb2e3ff493"
+        "en-US": "19583774778e4054"
       },
       "sequence": {
         "vi-VN": "8a56c3e8fb6d68f0",
-        "en-US": "2723ce1760522a42"
+        "en-US": "9897736037292887"
       },
       "mismatch": {
         "vi-VN": "1cc5919f05321921",
-        "en-US": "8a120de93c1a2b5a"
+        "en-US": "aeca73a9b0f71cb4"
       },
       "unclosed": {
         "vi-VN": "06ef7dfbb9d4f503",
-        "en-US": "4940e06988bedee3"
+        "en-US": "dff7518cb23620fc"
       },
       "extra-close": {
         "vi-VN": "8139c0653325988a",
-        "en-US": "8b7d69f646eccd5a"
+        "en-US": "7de5d705fb033f77"
       }
     }
   },

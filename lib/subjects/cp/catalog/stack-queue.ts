@@ -22,7 +22,7 @@ const EX = {
   ),
   push: m(
     'Ký tự {c} ở vị trí {i} là ngoặc mở: đẩy vào stack. Stack có {size} ký tự.',
-    'Character {c} at position {i} is an opening bracket: push it. The stack holds {size} characters.',
+    'Character {c} at position {i} is an opening bracket: push it. Stack size: {size}.',
   ),
   check: m(
     'Ký tự {c} ở vị trí {i} là ngoặc đóng. Đỉnh stack là {top}. Hai ký tự có khớp nhau không?',
@@ -34,7 +34,7 @@ const EX = {
   ),
   pop: m(
     'Khớp: {c} đóng đúng {top}. Lấy {top} khỏi stack, còn {size} ký tự.',
-    'Match: {c} closes {top}. Pop {top}; the stack keeps {size} characters.',
+    'Match: {c} closes {top}. Pop {top}; stack size: {size}.',
   ),
   failMismatch: m(
     'Không khớp: {c} cần {need} nhưng đỉnh stack là {top}. Xâu không hợp lệ.',
@@ -93,7 +93,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Đẩy ngoặc mở', 'Push an opener'),
     narration: m(
       'Ký tự {c} ở vị trí {i} là ngoặc mở, chưa biết khi nào được đóng nên cất vào stack. Stack giờ có {size} ký tự.',
-      'Character {c} at position {i} is an opening bracket; we do not know yet when it closes, so we store it. The stack now has {size} characters.',
+      'Character {c} at position {i} is an opening bracket; we do not know yet when it closes, so we store it. Stack size now: {size}.',
     ),
     hints: [
       m(
@@ -164,7 +164,7 @@ const beatDefs: readonly BeatDef[] = [
     label: m('Lấy đỉnh ra', 'Pop the top'),
     narration: m(
       '{c} khớp với {top} ở đỉnh, cặp này đã đóng đúng. Ta lấy {top} khỏi stack; còn {size} ký tự.',
-      '{c} matches the {top} on top, so this pair is closed correctly. We pop {top}; {size} characters remain.',
+      '{c} matches the {top} on top, so this pair is closed correctly. We pop {top}; stack size: {size}.',
     ),
     hints: [
       m(
@@ -330,7 +330,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const stackQueueEntry: WalkthroughEntry<In, S> = {
   id: 'stack-queue',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-stack-queue'],
