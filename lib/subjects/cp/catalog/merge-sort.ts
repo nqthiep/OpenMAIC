@@ -353,7 +353,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
     { values: [...a], mode: 'bars', rows: [] },
     {
       explanation: fill(msg(EX.done, ctx.locale), { n }),
-      codeLine: 2,
+      codeLine: 7,
       highlights: all,
       pointers: {},
       vars: { n },
@@ -364,7 +364,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const mergeSortEntry: WalkthroughEntry<In, S> = {
   id: 'merge-sort',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-sorting', 't2-divide-conquer'],

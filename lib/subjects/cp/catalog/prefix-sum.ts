@@ -164,8 +164,8 @@ const beatDefs: readonly BeatDef[] = [
     ],
     misconceptions: [
       m(
-        'Trừ P[l − 1]: khi l = 0 chỉ số −1 không tồn tại, và còn mất phần tử a[l − 1].',
-        'Subtracting P[l − 1]: when l = 0 index −1 does not exist, and it also drops a[l − 1].',
+        'Trừ P[l − 1]: khi l = 0 chỉ số −1 không tồn tại, và kết quả còn dư a[l − 1] (P[l − 1] chưa gồm phần tử này).',
+        'Subtracting P[l − 1]: when l = 0 index −1 does not exist, and the result keeps an extra a[l − 1] (P[l − 1] does not contain it).',
       ),
       m(
         'Dùng P[r] thay cho P[r + 1]: sẽ thiếu mất a[r].',
@@ -299,7 +299,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const prefixSumEntry: WalkthroughEntry<In, S> = {
   id: 'prefix-sum',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-array-prefix'],
@@ -392,6 +392,13 @@ export const prefixSumEntry: WalkthroughEntry<In, S> = {
       text: m(
         'Tổng lớn có thể vượt int: khai báo P là long long (tổng của 10^5 số tới 10^9 là 10^14).',
         'Large sums can overflow int: declare P as long long (10^5 numbers up to 10^9 sum to 10^14).',
+      ),
+    },
+    {
+      beat: 'build',
+      text: m(
+        'Mã mẫu dựng P ngay trong hàm cho gọn, nên mỗi lần gọi tốn O(n). Với nhiều truy vấn, dựng P một lần bên ngoài rồi chỉ tính P[r + 1] − P[l] cho mỗi truy vấn.',
+        'The sample code builds P inside the function to stay short, so each call costs O(n). With many queries, build P once outside and only compute P[r + 1] − P[l] per query.',
       ),
     },
     {

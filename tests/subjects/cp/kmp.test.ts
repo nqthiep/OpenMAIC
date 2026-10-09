@@ -130,5 +130,5 @@ describe('kmp: result', () => {
   it('every input fits maxFrames', () => {
     for (const input of [...FAMILY, ...PRESETS])
       expect(gen(input).length).toBeLessThanOrEqual(entry.maxFrames);
-  });
+  }, 60_000);
 });

@@ -229,8 +229,8 @@ const beatDefs: readonly BeatDef[] = [
     ],
     misconceptions: [
       m(
-        'Nghĩ rằng dấu bằng xảy ra khi a₁ = b₁ và a₂ = b₂: đó chỉ là một trường hợp, điều kiện đủ là tỉ lệ.',
-        'Thinking equality needs a₁ = b₁ and a₂ = b₂: that is only one case, proportionality is the full condition.',
+        'Nghĩ rằng dấu bằng xảy ra khi a₁ = b₁ và a₂ = b₂: đó chỉ là một trường hợp, điều kiện cần và đủ là hai cặp số tỉ lệ.',
+        'Thinking equality needs a₁ = b₁ and a₂ = b₂: that is only one case; the necessary and sufficient condition is that the two pairs are proportional.',
       ),
     ],
   },
@@ -252,8 +252,8 @@ const beatDefs: readonly BeatDef[] = [
         'Look at the difference of the sides and write it as a sum of squares.',
       ),
       m(
-        'Cách này còn dùng cho AM-GM: a + b − 2√(ab) = (√a − √b)².',
-        'The same trick works for AM-GM: a + b − 2√(ab) = (√a − √b)².',
+        'Cách này còn dùng cho AM-GM (với a, b ≥ 0): a + b − 2√(ab) = (√a − √b)².',
+        'The same trick works for AM-GM (for a, b ≥ 0): a + b − 2√(ab) = (√a − √b)².',
       ),
     ],
     misconceptions: [
@@ -400,7 +400,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
   id: 'cauchy-schwarz',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'math',
   visualizer: 'proofOutline',
   curriculumTopics: ['m2-inequality-classic'],
@@ -437,11 +437,11 @@ export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
       label: m('Tỉ lệ (dấu bằng)', 'Proportional (equality)'),
       input: { a1: 1, a2: 2, b1: 2, b2: 4 },
     },
-    { id: 'zero', label: m('Có số 0', 'With zeros'), input: { a1: 0, a2: 0, b1: 3, b2: 4 } },
+    { id: 'zero', label: m('Có số 0', 'With zeros'), input: { a1: 0, a2: 2, b1: 3, b2: 4 } },
     {
       id: 'negative',
       label: m('Có số âm', 'With negatives'),
-      input: { a1: -1, a2: 3, b1: 2, b2: -2 },
+      input: { a1: -1, a2: 3, b1: 2, b2: -3 },
     },
   ],
   beatDefs,

@@ -112,12 +112,12 @@ describe('cauchy-schwarz: numbers', () => {
     );
   });
 
-  it('presets: generic 1,2,3,4 gives 121 and 125; zero gives 0 and 0; negative gives 64 and 80', () => {
+  it('presets: generic 1,2,3,4 gives 121 and 125; zero gives 64 and 100; negative gives 121 and 130', () => {
     const vars = (p: In, beat: string) => gen(p).find((f) => beatOf(f).includes(beat))!.meta.vars;
     expect(vars(PRESETS[0], 'expand')).toEqual({ L: 121, R: 125 });
     expect(vars(PRESETS[1], 'expand')).toEqual({ L: 100, R: 100 });
-    expect(vars(PRESETS[2], 'expand')).toEqual({ L: 0, R: 0 });
-    expect(vars(PRESETS[3], 'expand')).toEqual({ L: 64, R: 80 });
+    expect(vars(PRESETS[2], 'expand')).toEqual({ L: 64, R: 100 });
+    expect(vars(PRESETS[3], 'expand')).toEqual({ L: 121, R: 130 });
   });
 });
 

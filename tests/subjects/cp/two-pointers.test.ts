@@ -39,7 +39,7 @@ entryContract<In>({
   topics: ['t1-array-prefix'],
   maxFrames: 30,
   presets: ['middle', 'ends', 'absent', 'n2', 'negative'],
-  beats: ['start', 'compare', 'move-right', 'move-left', 'found', 'done'],
+  beats: ['start', 'compare', 'move-right', 'move-left', 'found', 'exhausted', 'done'],
   required: ['start', 'done'],
   pseudoLines: 7,
   vars: ['i', 'j', 'ai', 'aj', 'sum', 'target', 'steps'],

@@ -201,6 +201,31 @@ const beatDefs: readonly BeatDef[] = [
     ],
   },
   {
+    id: 'exhausted',
+    label: m('Hết cặp', 'No pairs left'),
+    narration: m(
+      'i = {i} không còn nhỏ hơn j = {j}: đã thử hết các cặp có thể, và không cặp nào có tổng {target}.',
+      'i = {i} is no longer below j = {j}: every possible pair has been ruled out, and none has sum {target}.',
+    ),
+    hints: [
+      m('Khi nào vòng lặp i < j dừng?', 'When does the loop i < j stop?'),
+      m(
+        'Mỗi lần dời con trỏ loại bớt các cặp không thể đúng; khi i gặp j thì không còn cặp nào.',
+        'Each pointer move rules out pairs that cannot work; when i meets j no pair is left.',
+      ),
+      m(
+        'Không tìm thấy nghĩa là không tồn tại cặp nào: trả về kết quả "không có".',
+        'Not finding one means no pair exists: return the answer "none".',
+      ),
+    ],
+    misconceptions: [
+      m(
+        'Nghĩ rằng hết vòng lặp là do lỗi: đó là kết quả hợp lệ khi không có cặp nào thoả.',
+        'Thinking the loop ending is an error: it is a valid result when no pair satisfies the sum.',
+      ),
+    ],
+  },
+  {
     id: 'done',
     required: true,
     label: m('Kết thúc', 'Done'),
@@ -281,13 +306,13 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
       at(EX.left, 6, 'move-left', undefined, seen);
     }
   }
-  at(EX.miss, 7);
+  at(EX.miss, 7, 'exhausted');
   at(EX.doneMiss, 7, 'done');
 }
 
 export const twoPointersEntry: WalkthroughEntry<In, S> = {
   id: 'two-pointers',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-array-prefix'],

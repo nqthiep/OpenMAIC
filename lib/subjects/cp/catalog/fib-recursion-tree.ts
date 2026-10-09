@@ -99,8 +99,8 @@ const beatDefs: readonly BeatDef[] = [
         'In the formula, is f(k − 1) written before f(k − 2)?',
       ),
       m(
-        'Chương trình chạy từ trái sang phải, nên gặp f(k − 1) trước.',
-        'The program runs left to right, so it meets f(k − 1) first.',
+        'Trong mã này f(k − 1) được gọi trước, rồi mới tới f(k − 2), nên ta gặp f(k − 1) trước.',
+        'In this code f(k − 1) is called before f(k − 2), so we meet f(k − 1) first.',
       ),
       m(
         'Lời gọi con tiếp theo là f(k − 1); f(k − 2) chỉ được gọi sau khi f(k − 1) trả về.',
@@ -203,8 +203,8 @@ const beatDefs: readonly BeatDef[] = [
     required: true,
     label: m('Kết thúc', 'Done'),
     narration: m(
-      'f({n}) = {val}, với {calls} node trên cây. Không nhớ thì số node tăng gần gấp 1,6 lần mỗi khi n tăng 1; có nhớ thì chỉ khoảng 2n.',
-      'f({n}) = {val}, with {calls|node|nodes} in the tree. Without memo the tree grows by about 1.6 times per step of n; with memo it has about 2n nodes.',
+      'f({n}) = {val}, với {calls} node trên cây. Không nhớ thì số node tăng gần gấp 1,6 lần mỗi khi n tăng 1; có nhớ thì chỉ khoảng 2n − 1.',
+      'f({n}) = {val}, with {calls|node|nodes} in the tree. Without memo the tree grows by about 1.6 times per step of n; with memo it has about 2n − 1 nodes.',
     ),
     hints: [
       m('Cây lớn hay nhỏ so với n?', 'Is the tree big or small compared with n?'),
@@ -310,7 +310,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const fibRecursionTreeEntry: WalkthroughEntry<In, S> = {
   id: 'fib-recursion-tree',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'tree',
   curriculumTopics: ['t1-recursion'],
