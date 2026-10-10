@@ -48,7 +48,9 @@ const run = (
   bad: number | null,
   clarity: number | null = 5,
   pre: number | null = 1,
-): PersonaRun => ({ personaId: 'p', pre, good, control, bad, clarity });
+  level: 'weak' | 'average' | 'strong' = 'average',
+  badClarity: number | null = 2,
+): PersonaRun => ({ personaId: 'p', level, pre, good, control, bad, clarity, badClarity });
 const ok0 = { total: 30, failed: 0 };
 
 describe('shipped data files', () => {
@@ -265,7 +267,15 @@ describe('median / runPersona', () => {
     );
     expect(calls).toBe(4 * 3);
     expect(samples).toEqual({ total: 12, failed: 0 });
-    expect(r).toMatchObject({ pre: 1, good: 5, control: 1, bad: 3, clarity: 5 });
+    expect(r).toMatchObject({
+      level: persona.level,
+      pre: 1,
+      good: 5,
+      control: 1,
+      bad: 3,
+      clarity: 5,
+      badClarity: 2,
+    });
   });
 
   it('records a failed sample instead of throwing, and uses the rest', async () => {
@@ -333,6 +343,91 @@ describe('scoreLesson', () => {
       clearPct: 60,
       clearOk: false,
       ok: false,
+    });
+  });
+
+  describe('clarity ("dễ hiểu"): floor, share among average+strong, and the instrument check', () => {
+    // 2 weak, 2 average, 2 strong; real lesson rating vs degraded lesson rating
+    const mix = (weak: number, avg: number, strong: number, bad = 2) => [
+      ...personas(2, () => run(5, 1, 1, weak, 1, 'weak', bad)),
+      ...personas(2, () => run(5, 1, 1, avg, 1, 'average', bad)),
+      ...personas(2, () => run(5, 1, 1, strong, 1, 'strong', bad)),
+    ];
+
+    it('weak personas at 3 pass: only average and strong have to rate >= 4', () => {
+      const s = scoreLesson(mix(3, 4, 4), 5, ok0);
+      expect(s).toMatchObject({
+        hardCount: 0,
+        hardOk: true,
+        clearRated: 4,
+        clearCount: 4,
+        clearPct: 100,
+        clearShareOk: true,
+        instrumentOk: true,
+        clearVerdict: 'pass',
+        clearOk: true,
+        ok: true,
+      });
+    });
+
+    it('a persona rating the lesson 2 fails the floor, weak or not', () => {
+      const s = scoreLesson(mix(2, 4, 4), 5, ok0);
+      expect(s).toMatchObject({ hardCount: 2, hardOk: false, clearVerdict: 'fail', ok: false });
+    });
+
+    it('the 70% share counts average and strong only (weak personas are not in it)', () => {
+      // 2 weak at 5 would lift an all-persona share; among the 4 average+strong only 2 rate >= 4
+      const s = scoreLesson(mix(5, 3, 4), 5, ok0);
+      expect(s).toMatchObject({ clearRated: 4, clearCount: 2, clearPct: 50, clearShareOk: false });
+      expect(s.clearVerdict).toBe('fail');
+      // exactly 70% of 10 average personas passes the share
+      const ten = Array.from({ length: 10 }, (_, i) => run(5, 1, 1, i < 7 ? 4 : 3));
+      expect(scoreLesson(ten, 5, ok0)).toMatchObject({ clearCount: 7, clearPct: 70, clearShareOk: true });
+    });
+
+    it('is inconclusive, not a pass, when the rating does not drop for the degraded lesson', () => {
+      const s = scoreLesson(mix(3, 4, 4, 4), 5, ok0); // degraded rated as high as the real one
+      expect(s).toMatchObject({
+        hardOk: true,
+        clearShareOk: true,
+        droppedCount: 0,
+        instrumentOk: false,
+        clearVerdict: 'inconclusive',
+        clearOk: false,
+        ok: false,
+      });
+    });
+
+    it('still reports a miss as a miss when the instrument is insensitive', () => {
+      const s = scoreLesson(mix(3, 3, 3, 3), 5, ok0);
+      expect(s).toMatchObject({ clearShareOk: false, instrumentOk: false, clearVerdict: 'fail' });
+    });
+
+    it('the instrument check needs half of the personas that rated both lessons', () => {
+      const half = [
+        ...personas(3, () => run(5, 1, 1, 4, 1, 'average', 3)), // dropped by 1
+        ...personas(3, () => run(5, 1, 1, 4, 1, 'strong', 4)), // not dropped
+      ];
+      expect(scoreLesson(half, 5, ok0)).toMatchObject({ droppedRated: 6, droppedCount: 3, instrumentOk: true });
+      const under = [...personas(2, () => run(5, 1, 1, 4, 1, 'average', 3)), ...personas(4, () => run(5, 1, 1, 4, 1, 'strong', 4))];
+      expect(scoreLesson(under, 5, ok0)).toMatchObject({ droppedCount: 2, instrumentOk: false });
+    });
+
+    it('personas without a degraded-lesson rating are left out of the instrument check', () => {
+      const runs = [run(5, 1, 1, 4, 1, 'average', null), run(5, 1, 1, 4, 1, 'strong', 3)];
+      expect(scoreLesson(runs, 5, ok0)).toMatchObject({ droppedRated: 1, droppedCount: 1, instrumentOk: true });
+      const none = [run(5, 1, 1, 4, 1, 'average', null)];
+      expect(scoreLesson(none, 5, ok0)).toMatchObject({ droppedRated: 0, instrumentOk: false });
+    });
+
+    it('lists the clarity lines in the report', () => {
+      const text = formatLesson('x', scoreLesson(mix(3, 4, 4), 5, ok0));
+      expect(text).toContain('0/6 personas rated the lesson <= 2 (target 0) PASS');
+      expect(text).toContain('4/4 average and strong personas rated >= 4 = 100.0% (target >= 70%) PASS');
+      expect(text).toContain('6/6 personas rated the degraded lesson >= 1 lower (target >= 50%) PASS');
+      expect(text).toContain('clear verdict: PASS');
+      const inconclusive = formatLesson('x', scoreLesson(mix(3, 4, 4, 4), 5, ok0));
+      expect(inconclusive).toContain('clear verdict: INCONCLUSIVE');
     });
   });
 

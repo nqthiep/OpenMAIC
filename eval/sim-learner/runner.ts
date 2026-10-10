@@ -10,7 +10,10 @@
  * Pass per lesson (all must hold):
  *   - (good - control) >= 20 points, so the lesson itself taught something,
  *   - (good - degraded) >= 10 points, so the test can tell a bad lesson from a good one,
- *   - >= 70% of personas rate the lesson >= 4,
+ *   - clarity ("dễ hiểu" 1-5, ADR 0014 5(b), amended 2026-10-10): no persona rates it <= 2, and
+ *     >= 70% of the average and strong personas rate it >= 4 (weak personas only need > 2);
+ *     a pass also needs the degraded lesson rated >= 1 lower by half the personas, else it is
+ *     reported as inconclusive,
  *   - failed samples <= 10% of all samples.
  * The gate is relative; the pre-test and the absolute gain are reported but not gated.
  *
@@ -200,7 +203,7 @@ async function main(): Promise<number> {
       );
       const { run } = r;
       console.error(
-        `  ${set.entryId} ${p.id}: pre ${run.pre}, lesson ${run.good}, control ${run.control}, degraded ${run.bad}, clarity ${run.clarity}`,
+        `  ${set.entryId} ${p.id}: pre ${run.pre}, lesson ${run.good}, control ${run.control}, degraded ${run.bad}, clarity ${run.clarity} (degraded ${run.badClarity})`,
       );
       return r;
     });

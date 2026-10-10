@@ -10,9 +10,22 @@
 export const MIN_VS_CONTROL_PCT = 20;
 /** The degraded lesson must score at least this many points below the good one. */
 export const MIN_CALIBRATION_GAP_PCT = 10;
+/** Share of the average and strong personas that must rate the lesson clear. */
 export const MIN_CLEAR_SHARE_PCT = 70;
 /** "dễ hiểu" rating that counts as clear. */
 export const MIN_CLEAR_RATING = 4;
+/**
+ * No persona may rate the real lesson at or below this ("hard" for that student). Weak personas
+ * only have to stay above it: a clean lesson rates 3 for them and a broken one 2 (2026-10-10 data).
+ */
+export const MAX_HARD_RATING = 2;
+/**
+ * The degraded lesson must be rated at least this many points lower than the real one, by at
+ * least the share below of the personas that rated both. Otherwise the rating cannot tell a
+ * broken lesson from this one, and a pass on it is not trusted.
+ */
+export const MIN_CLARITY_DROP = 1;
+export const MIN_CLARITY_DROP_SHARE_PCT = 50;
 /** More failed samples than this share of all samples fails the lesson (and exits 1). */
 export const MAX_FAILED_SAMPLE_PCT = 10;
 /** Samples per persona and arm (temperature 0.3); the median is scored. */
@@ -48,17 +61,20 @@ export type SimLlm = (req: { system: string; prompt: string }) => Promise<string
 
 /**
  * One persona on one lesson: the median number of correct answers per arm over the samples that
- * succeeded (null when every sample of that arm failed), and the median "dễ hiểu" rating.
+ * succeeded (null when every sample of that arm failed), and the median "dễ hiểu" rating of the
+ * real lesson (`clarity`) and of the degraded one (`badClarity`).
  * Arms: `pre` pre-test; `good` post-test after the real lesson; `control` the same post-test with
  * no lesson; `bad` post-test after the degraded lesson.
  */
 export interface PersonaRun {
   personaId: string;
+  level: Persona['level'];
   pre: number | null;
   good: number | null;
   control: number | null;
   bad: number | null;
   clarity: number | null;
+  badClarity: number | null;
 }
 
 /** Model samples taken and how many failed (model call or parse, after the one retry). */
@@ -335,11 +351,13 @@ export async function runPersona(
   return {
     run: {
       personaId: p.id,
+      level: p.level,
       pre: median(pre),
       good: median(good.map((g) => g.post)),
       control: median(control),
       bad: median(bad.map((g) => g.post)),
       clarity: median(good.map((g) => g.clarity)),
+      badClarity: median(bad.map((g) => g.clarity)),
     },
     samples,
   };
@@ -373,10 +391,25 @@ export interface LessonScore {
   vsControl: Gap;
   /** good - degraded, target >= MIN_CALIBRATION_GAP_PCT. */
   vsDegraded: Gap;
-  /** Personas that gave a rating, and how many rated >= MIN_CLEAR_RATING. */
+  /** Personas that rated the real lesson, and how many rated it <= MAX_HARD_RATING (target 0). */
   rated: number;
+  hardCount: number;
+  hardOk: boolean;
+  /** Average and strong personas that rated, and how many of them rated >= MIN_CLEAR_RATING. */
+  clearRated: number;
   clearCount: number;
   clearPct: number;
+  clearShareOk: boolean;
+  /** Personas that rated both lessons, and how many rated the degraded one MIN_CLARITY_DROP lower. */
+  droppedRated: number;
+  droppedCount: number;
+  instrumentOk: boolean;
+  /**
+   * `pass`: the targets hold and the rating can tell a broken lesson from this one.
+   * `fail`: a target is missed (reported as a miss whatever the instrument does).
+   * `inconclusive`: the targets hold but the rating does not drop for the degraded lesson.
+   */
+  clearVerdict: 'pass' | 'fail' | 'inconclusive';
   clearOk: boolean;
   ok: boolean;
 }
@@ -407,8 +440,25 @@ export function scoreLesson(
   samples: SampleCount,
 ): LessonScore {
   const rated = runs.filter((r) => r.clarity !== null);
-  const clearCount = rated.filter((r) => (r.clarity as number) >= MIN_CLEAR_RATING).length;
-  const clearOk = rated.length > 0 && clearCount * 100 >= MIN_CLEAR_SHARE_PCT * rated.length;
+  const hardCount = rated.filter((r) => (r.clarity as number) <= MAX_HARD_RATING).length;
+  const hardOk = rated.length > 0 && hardCount === 0;
+  const clearRated = rated.filter((r) => r.level !== 'weak');
+  const clearCount = clearRated.filter((r) => (r.clarity as number) >= MIN_CLEAR_RATING).length;
+  const clearShareOk =
+    clearRated.length > 0 && clearCount * 100 >= MIN_CLEAR_SHARE_PCT * clearRated.length;
+  const both = rated.filter((r) => r.badClarity !== null);
+  const droppedCount = both.filter(
+    (r) => (r.badClarity as number) <= (r.clarity as number) - MIN_CLARITY_DROP,
+  ).length;
+  const instrumentOk =
+    both.length > 0 && droppedCount * 100 >= MIN_CLARITY_DROP_SHARE_PCT * both.length;
+  const targetsMet = hardOk && clearShareOk;
+  const clearVerdict: LessonScore['clearVerdict'] = !targetsMet
+    ? 'fail'
+    : instrumentOk
+      ? 'pass'
+      : 'inconclusive';
+  const clearOk = clearVerdict === 'pass';
   const failedOk =
     samples.total > 0 && samples.failed * 100 <= MAX_FAILED_SAMPLE_PCT * samples.total;
   const vsControl = gap(runs, 'good', 'control', questions, MIN_VS_CONTROL_PCT);
@@ -426,8 +476,16 @@ export function scoreLesson(
     vsControl,
     vsDegraded,
     rated: rated.length,
+    hardCount,
+    hardOk,
+    clearRated: clearRated.length,
     clearCount,
-    clearPct: rated.length === 0 ? 0 : (100 * clearCount) / rated.length,
+    clearPct: clearRated.length === 0 ? 0 : (100 * clearCount) / clearRated.length,
+    clearShareOk,
+    droppedRated: both.length,
+    droppedCount,
+    instrumentOk,
+    clearVerdict,
     clearOk,
     ok: vsControl.ok && vsDegraded.ok && clearOk && failedOk,
   };
@@ -448,7 +506,10 @@ export function formatLesson(label: string, s: LessonScore): string {
     `  mean correct: pre ${fmt(s.prePct)}%, lesson ${fmt(s.goodPct)}%, no-lesson control ${fmt(s.controlPct)}%, degraded lesson ${fmt(s.badPct)}% (informational)`,
     `  lesson - control:  ${s.vsControl.pct.toFixed(1)} points over ${s.vsControl.n} personas (target >= ${MIN_VS_CONTROL_PCT}) ${status(s.vsControl.ok)}`,
     `  lesson - degraded: ${s.vsDegraded.pct.toFixed(1)} points over ${s.vsDegraded.n} personas (target >= ${MIN_CALIBRATION_GAP_PCT}) ${status(s.vsDegraded.ok)}`,
-    `  clear: ${s.clearCount}/${s.rated} = ${s.clearPct.toFixed(1)}% rated >= ${MIN_CLEAR_RATING} (target >= ${MIN_CLEAR_SHARE_PCT}%) ${status(s.clearOk)}`,
+    `  clear: ${s.hardCount}/${s.rated} personas rated the lesson <= ${MAX_HARD_RATING} (target 0) ${status(s.hardOk)}`,
+    `  clear: ${s.clearCount}/${s.clearRated} average and strong personas rated >= ${MIN_CLEAR_RATING} = ${s.clearPct.toFixed(1)}% (target >= ${MIN_CLEAR_SHARE_PCT}%) ${status(s.clearShareOk)}`,
+    `  clear instrument: ${s.droppedCount}/${s.droppedRated} personas rated the degraded lesson >= ${MIN_CLARITY_DROP} lower (target >= ${MIN_CLARITY_DROP_SHARE_PCT}%) ${status(s.instrumentOk)}`,
+    `  clear verdict: ${s.clearVerdict.toUpperCase()}${s.clearVerdict === 'inconclusive' ? ' (targets hold, but the rating does not drop for a degraded lesson)' : ''}`,
     `  failed samples: ${s.samples.failed}/${s.samples.total} = ${s.failedPct.toFixed(1)}% (target <= ${MAX_FAILED_SAMPLE_PCT}%) ${status(s.failedOk)}`,
   ];
   return lines.join('\n');
