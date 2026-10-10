@@ -11,14 +11,13 @@
  *   pnpm exec tsx eval/tutor-qa/runner.ts [--dry-run] [--limit N] [--concurrency N]
  *
  * Models:
- *   answerer  stage 'chat-adapter': the stage /api/chat uses for the teacher. A MODEL_ROUTES
- *             entry wins, else DEFAULT_MODEL (the same resolution the app does), so the eval
- *             talks to the model students get.
- *   judge     stage 'tutor-analyst', MODEL_ROUTES entry required (no fallback), temperature 0.
+ *   answerer  stage 'chat-adapter': the stage /api/chat uses for the teacher, resolved as the app
+ *             resolves it, so the eval talks to the model students get.
+ *   judge     role 'tutor-analyst' (slot tutor.analyst in openmaic.yml, no fallback), temperature 0.
  *             No dedicated judge stage exists, so this one is reused. The run is REFUSED (exit 2,
  *             also with --dry-run) when the answerer and the judge resolve to the same
  *             `provider:model`: a model must not grade its own answers.
- *   e.g. MODEL_ROUTES='{"tutor-analyst":"<provider:model>"}'
+ *   e.g. slots: { tutor.analyst: <provider:model> }
  *
  * Teacher prompt: a PROXY of the production one (see ./teacher-prompt.ts). It uses the real
  * TUTOR_COACHING from lib/orchestration/prompt-builder.ts; the role and 300-character length
@@ -39,6 +38,7 @@ import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
+import { isTutorHintFirstEnabled } from '@/lib/config/feature-flags';
 import { getTutorRoute, resolveTutorModel } from '@/lib/tutor/llm-roles';
 import { createWalkthroughProvider, getTutorLabels } from '@/lib/tutor/provider';
 import { steps } from '@/lib/tutor/engine/generate';
@@ -62,7 +62,16 @@ import {
 
 const ANSWER_STAGE = 'chat-adapter' as const;
 const JUDGE_STAGE = 'tutor-analyst' as const;
-const CALL_TIMEOUT_MS = 120_000;
+// Judge calls reason at length (8k token budget): 120s timed out on a few calls in earlier runs.
+/**
+ * EVAL_EXPERIMENT=no-narration,no-invented-numbers: experiment switches, eval only. no-narration drops the
+ * "Explanation:" lines from the treatment-arm lesson context (the teacher otherwise copies them
+ * as answers). no-invented-numbers adds a rule against inventing numeric examples.
+ */
+const NO_INVENTED_NUMBERS =
+  '- Do not invent a numeric example or a hypothetical state. To test the student, ask them to compute the next value from the current values in the lesson context.';
+const EXPERIMENTS = new Set((process.env.EVAL_EXPERIMENT ?? '').split(',').filter(Boolean));
+const CALL_TIMEOUT_MS = 300_000;
 
 function getCurrentDir(): string {
   return typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
@@ -141,6 +150,10 @@ async function main(): Promise<number> {
     `Answerer: ${ANSWER_STAGE} -> ${answerModel ?? 'MISSING'} (deployment configuration)`,
   );
   console.log(`Judge:    ${JUDGE_STAGE} -> ${judgeRoute?.model ?? 'MISSING'}`);
+  const hintFirst = isTutorHintFirstEnabled();
+  console.log(
+    `Mode:     ${hintFirst ? 'hint-first' : 'direct'} (OPENMAIC_TUTOR_HINT_FIRST; walkthrough scenes)`,
+  );
   const missing: string[] = [];
   if (!answerModel) {
     missing.push(`"${ANSWER_STAGE}" configuration or DEFAULT_MODEL`);
@@ -148,7 +161,7 @@ async function main(): Promise<number> {
   if (!judgeRoute) missing.push(`"${JUDGE_STAGE}" route`);
   if (missing.length > 0) {
     console.error(
-      `Route: MISSING ${missing.join(' and ')}. Set MODEL_ROUTES='{"${JUDGE_STAGE}":"<provider:model>"}' and DEFAULT_MODEL (or a "${ANSWER_STAGE}" route).`,
+      `Route: MISSING ${missing.join(' and ')}. Assign the judge slot (tutor.analyst) in openmaic.yml, and the llm default for the answerer.`,
     );
     return exitCode(false);
   }
@@ -167,18 +180,19 @@ async function main(): Promise<number> {
   }
 
   // Imported late so --dry-run never loads the LLM stack.
-  const [{ callLLM }, { resolveModel }, { TUTOR_COACHING }] = await Promise.all([
-    import('@/lib/ai/llm'),
-    import('@/lib/server/resolve-model'),
-    import('@/lib/orchestration/prompt-builder'),
-  ]);
+  const [{ callLLM }, { resolveModel }, { TUTOR_COACHING, WALKTHROUGH_ANSWER_POLICY }] =
+    await Promise.all([
+      import('@/lib/ai/llm'),
+      import('@/lib/server/resolve-model'),
+      import('@/lib/orchestration/prompt-builder'),
+    ]);
   const ask = async (
     stage: typeof ANSWER_STAGE | typeof JUDGE_STAGE,
     system: string,
     prompt: string,
     temperature: number,
   ): Promise<string> => {
-    // Answerer: core stage (deployment configuration). Judge: tutor role (MODEL_ROUTES).
+    // Answerer: core stage (deployment configuration). Judge: tutor role (openmaic.yml tutor.analyst).
     const connection =
       stage === JUDGE_STAGE
         ? await resolveTutorModel(JUDGE_STAGE)
@@ -190,8 +204,12 @@ async function main(): Promise<number> {
         system,
         prompt,
         temperature,
-        maxOutputTokens: stage === ANSWER_STAGE ? 800 : 600,
-        maxRetries: 0,
+        // The judge is a reasoning model: its reasoning tokens count toward this budget. It uses
+        // about 2k-3.3k, and 4000 ran out (finishReason "length", empty verdict) on some answers.
+        // The answerer reasons too (up to 800 tokens with the stricter rules): 800 cut some answers to empty.
+        maxOutputTokens: stage === ANSWER_STAGE ? 3000 : 8000,
+        // Transient network errors (connect timeouts) are retried; they are not model misses.
+        maxRetries: 2,
         abortSignal: AbortSignal.timeout(CALL_TIMEOUT_MS),
       },
       stage,
@@ -210,6 +228,10 @@ async function main(): Promise<number> {
       locale: file.locale,
       digest,
       coaching: TUTOR_COACHING,
+      answerPolicy: EXPERIMENTS.has('no-invented-numbers')
+        ? `${WALKTHROUGH_ANSWER_POLICY}\n${NO_INVENTED_NUMBERS}`
+        : WALKTHROUGH_ANSWER_POLICY,
+      hintFirst,
     });
 
   type Job = { scenario: Scenario; arm: Arm };
@@ -227,9 +249,16 @@ async function main(): Promise<number> {
     const runtime = { preset: scenario.presetId, frame: scenario.frame };
     const truth = describeWalkthrough(scene, runtime, deps);
     const digest = arm === 'treatment' ? truth : describeWalkthrough(scene, undefined, deps);
+    const teacherDigest =
+      arm === 'treatment' && EXPERIMENTS.has('no-narration')
+        ? digest
+            .split('\n')
+            .filter((l) => !l.startsWith('Explanation:'))
+            .join('\n')
+        : digest;
     try {
       // 0.3: some natural variation, still repeatable enough to compare arms.
-      const answer = await ask(ANSWER_STAGE, teacherSystem(digest), scenario.question, 0.3);
+      const answer = await ask(ANSWER_STAGE, teacherSystem(teacherDigest), scenario.question, 0.3);
       const verdict = await judge(scenario, truth, answer, judgeLlm);
       return { scenario, arm, verdict };
     } catch (err) {

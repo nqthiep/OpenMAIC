@@ -21,7 +21,7 @@ import {
   type Verdict,
 } from '@/eval/tutor-qa/score';
 import { buildTeacherSystem } from '@/eval/tutor-qa/teacher-prompt';
-import { TUTOR_COACHING } from '@/lib/orchestration/prompt-builder';
+import { TUTOR_COACHING, WALKTHROUGH_ANSWER_POLICY } from '@/lib/orchestration/prompt-builder';
 import { binarySearchEntry as bs } from '@/lib/subjects/cp/catalog/binary-search';
 import { steps } from '@/lib/tutor/engine/generate';
 
@@ -54,10 +54,10 @@ const out = (arm: Outcome['arm'], scenario: Scenario, v: Partial<Verdict> | null
 });
 
 describe('scenarios.json', () => {
-  it('has enough scenarios over 3 frames, with misconception questions', () => {
+  it('has enough scenarios over at least 3 frames, with misconception questions', () => {
     expect(file.scenarios.length).toBeGreaterThanOrEqual(MIN_SCENARIOS);
     const frames = new Set(file.scenarios.map((s) => `${s.presetId}@${s.frame}`));
-    expect(frames.size).toBe(3);
+    expect(frames.size).toBeGreaterThanOrEqual(3);
     expect(file.scenarios.filter((s) => s.misconceptionId).length).toBeGreaterThanOrEqual(3);
     expect(file.scenarios.some((s) => s.fullAnswerRequested)).toBe(true);
   });
@@ -260,17 +260,37 @@ describe('answerer / judge separation and the teacher prompt', () => {
     expect(sameModel('', '')).toBe(false);
   });
 
-  it('builds the teacher prompt from the production coaching, digest and locale', () => {
-    const p = buildTeacherSystem({
+  const prompt = (hintFirst: boolean) =>
+    buildTeacherSystem({
       entryId: 'binary-search',
       locale: 'vi-VN',
       digest: 'DIGEST-TEXT',
       coaching: TUTOR_COACHING,
+      answerPolicy: WALKTHROUGH_ANSWER_POLICY,
+      hintFirst,
     });
+
+  it('builds the teacher prompt from the production coaching, digest and locale', () => {
+    const p = prompt(true);
     expect(p).toContain(TUTOR_COACHING);
     expect(p).toContain('around 300 characters');
     expect(p).toContain('LEAD TEACHER');
     expect(p).toContain('Reply in vi-VN');
     expect(p.endsWith('DIGEST-TEXT')).toBe(true);
+  });
+
+  it('hint-first drops both lines that made the teacher lead with the answer', () => {
+    const p = prompt(true);
+    expect(p).toContain(WALKTHROUGH_ANSWER_POLICY);
+    expect(p).not.toContain('Lead with the direct answer');
+    expect(p).not.toContain('Give the key insight in one crisp sentence');
+  });
+
+  it('direct mode keeps the generic lines and not the policy', () => {
+    const p = prompt(false);
+    expect(p).not.toContain(WALKTHROUGH_ANSWER_POLICY);
+    expect(p).toContain('Lead with the direct answer when the user asked a concrete question.');
+    expect(p).toContain('Give the key insight in one crisp sentence');
+    expect(p).toContain(TUTOR_COACHING);
   });
 });
