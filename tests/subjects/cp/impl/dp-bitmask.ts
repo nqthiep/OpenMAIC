@@ -1,4 +1,6 @@
 /** Harness for `dp-bitmask` (card 2-I1). stdin: n then the n x n matrix. stdout: the cost of the shortest tour from node 0. */
+import { intIn } from '../../stress-gen';
+
 type In = { d: number[][] };
 
 const harness = {
@@ -19,6 +21,16 @@ const harness = {
     'd = [data[1 + n * i:1 + n * (i + 1)] for i in range(n)]',
     'print(tsp(d))',
   ],
+  // a square matrix with a zero diagonal (the check rejects anything else), so a uniform draw
+  // is not rejected as not-square or diagonal-not-zero
+  random: (r: () => number): In => {
+    const n = intIn(r, [2, 4]);
+    return {
+      d: Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => (i === j ? 0 : intIn(r, [0, 20]))),
+      ),
+    };
+  },
   stdin: ({ d }: In) => `${d.length}\n${d.map((row) => row.join(' ')).join('\n')}\n`,
   // Independent oracle: every order of nodes 1..n-1.
   expected: ({ d }: In) => {

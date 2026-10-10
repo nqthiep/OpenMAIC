@@ -1,4 +1,6 @@
 /** Harness for `hld` (card 2-I1). stdin: n, n-1 edges, u v. stdout: the number of chain pieces on the path u-v. */
+import { intIn, randomTree } from '../../stress-gen';
+
 type In = { g: { n: number; edges: number[][] }; u: number; v: number };
 
 const harness = {
@@ -32,6 +34,11 @@ const harness = {
     '    l.sort()',
     'print(count_segments(n, adj, data[1 + 2 * (n - 1)], data[2 + 2 * (n - 1)]))',
   ],
+  // a random tree, so a uniform draw is not rejected as not-a-tree; u and v are nodes of that tree
+  random: (r: () => number): In => {
+    const n = intIn(r, [2, 10]);
+    return { g: { n, edges: randomTree(r, n) }, u: intIn(r, [0, n - 1]), v: intIn(r, [0, n - 1]) };
+  },
   stdin: ({ g, u, v }: In) =>
     `${g.n}\n${g.edges.map(([a, b]) => `${a} ${b}`).join('\n')}\n${u} ${v}\n`,
   // Independent oracle: sizes by recursion, chain id by following heavy children, path by parent walk.

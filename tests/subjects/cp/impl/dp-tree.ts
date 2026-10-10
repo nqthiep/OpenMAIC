@@ -1,4 +1,6 @@
 /** Harness for `dp-tree` (card 2-I1). stdin: n, n-1 edges "a b", n weights. stdout: the maximum independent-set weight. */
+import { intIn, randomTree } from '../../stress-gen';
+
 type In = { g: { n: number; edges: number[][] }; w: number[] };
 
 const harness = {
@@ -30,6 +32,14 @@ const harness = {
     'w = data[1 + 2 * (n - 1):1 + 2 * (n - 1) + n]',
     'print(max_independent(n, adj, w))',
   ],
+  // a random tree with one weight per node, so a uniform draw is not rejected as not-a-tree
+  random: (r: () => number): In => {
+    const n = intIn(r, [1, 8]);
+    return {
+      g: { n, edges: randomTree(r, n) },
+      w: Array.from({ length: n }, () => intIn(r, [1, 20])),
+    };
+  },
   stdin: ({ g, w }: In) =>
     `${g.n}\n${g.edges.map(([a, b]) => `${a} ${b}`).join('\n')}${g.edges.length ? '\n' : ''}${w.join(' ')}\n`,
   // Independent oracle: all 2^n vertex sets, keep the independent ones.
