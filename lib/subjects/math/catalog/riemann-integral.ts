@@ -130,8 +130,8 @@ const beatDefs: readonly BeatDef[] = [
     id: 'limit',
     label: m('Giới hạn', 'The limit'),
     narration: m(
-      'Khi n lớn tới mức không đếm xuể, tổng các hình chữ nhật tiến tới một số cố định. Số đó là tích phân của f từ a đến b. Ta cũng tính được nó từ nguyên hàm.',
-      'When n grows beyond counting, the sum of the rectangles approaches one fixed number. That number is the integral of f from a to b. We can also compute it from an antiderivative.',
+      'Khi n lớn tới mức không đếm xuể, tổng các hình chữ nhật tiến tới một số cố định. Số đó là tích phân của f từ a đến b. Ta cũng tính được nó từ nguyên hàm F, tức hàm có đạo hàm bằng f.',
+      'When n grows beyond counting, the sum of the rectangles approaches one fixed number. That number is the integral of f from a to b. We can also compute it from an antiderivative F, a function whose derivative is f.',
     ),
     hints: [
       m('Tổng Lₙ tiến tới số nào khi n lớn?', 'Which number does the sum Lₙ approach as n grows?'),
@@ -153,7 +153,7 @@ const beatDefs: readonly BeatDef[] = [
     required: true,
     label: m('Kết thúc', 'Done'),
     narration: m(
-      'Tổng Riemann Lₙ tiến tới tích phân I = F(b) − F(a), cũng là diện tích có dấu giữa đồ thị và trục hoành. Đổi mẫu để thấy hằng số cho tổng đúng ngay, còn đồ thị cong thì cần n lớn.',
+      'Tổng Riemann Lₙ tiến tới tích phân I = F(b) − F(a), cũng là diện tích có dấu giữa đồ thị và trục hoành. Thử preset hàm hằng: tổng đúng ngay; đồ thị cong thì cần n lớn.',
       'The Riemann sum Lₙ approaches the integral I = F(b) − F(a), also the signed area between the graph and the horizontal axis. Change the preset: a constant gives the exact sum at once, while a curved graph needs a large n.',
     ),
     hints: [
@@ -175,8 +175,8 @@ const beatDefs: readonly BeatDef[] = [
 
 const EX = {
   start: m(
-    'Vùng nằm giữa đồ thị và trục hoành từ a = {a} đến b = {b}. Biên trên cong nên ta chưa có công thức diện tích trực tiếp.',
-    'The region between the graph and the horizontal axis from a = {a} to b = {b}. Its upper edge is curved, so we have no direct area formula yet.',
+    'Vùng nằm giữa đồ thị hàm f và trục hoành từ a = {a} đến b = {b}. Biên trên cong nên ta chưa có công thức diện tích trực tiếp.',
+    'The region between the graph of f and the horizontal axis from a = {a} to b = {b}. Its upper edge is curved, so we have no direct area formula yet.',
   ),
   rectangles: m(
     'Chia [{a}, {b}] thành n = {n} phần bằng nhau, mỗi phần một hình chữ nhật cao bằng f ở đầu bên trái. Tổng diện tích L = {L}.',
@@ -310,7 +310,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const riemannIntegralEntry: WalkthroughEntry<In, S> = {
   id: 'riemann-integral',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m4-integral'],

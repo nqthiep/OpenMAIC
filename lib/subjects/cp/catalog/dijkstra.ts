@@ -55,8 +55,8 @@ const beatDefs: readonly BeatDef[] = [
     required: true,
     label: m('Bắt đầu', 'Start'),
     narration: m(
-      'Dijkstra tìm đường ngắn nhất theo tổng trọng số (dương) từ {s}. Nó luôn chốt đỉnh gần nhất chưa chốt, nhờ một heap lấy phần tử nhỏ nhất.',
-      'Dijkstra finds shortest paths by total (positive) weight from {s}. It always settles the nearest unsettled node, using a heap that yields the smallest element.',
+      'Dijkstra tìm đường ngắn nhất theo tổng trọng số (dương) từ {s}. Nó luôn chốt đỉnh gần nhất chưa chốt, nhờ một heap (hàng đợi ưu tiên, lấy ra phần tử nhỏ nhất trước).',
+      'Dijkstra finds shortest paths by total (positive) weight from {s}. It always settles the nearest unsettled node, using a heap (a priority queue that yields the smallest element first).',
     ),
     hints: [
       m(
@@ -336,7 +336,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const dijkstraEntry: WalkthroughEntry<In, S> = {
   id: 'dijkstra',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'cp',
   visualizer: 'graph',
   curriculumTopics: ['t4-shortest-path'],

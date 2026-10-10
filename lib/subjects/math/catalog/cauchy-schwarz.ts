@@ -53,8 +53,8 @@ const EX = {
     'The difference is 0, so equality holds: a₁b₂ = a₂b₁, that is, the two pairs are proportional.',
   ),
   equalNo: m(
-    'Hiệu {d} > 0 nên với bộ số này dấu bằng không xảy ra; nó chỉ xảy ra khi a₁b₂ = a₂b₁.',
-    'The difference {d} > 0, so equality does not hold for these numbers; it holds only when a₁b₂ = a₂b₁.',
+    'Hiệu = (a₁b₂ − a₂b₁)² = ({k})² = {d} > 0: dấu bằng không xảy ra. Dấu bằng chỉ khi a₁b₂ = a₂b₁.',
+    'The difference = (a₁b₂ − a₂b₁)² = ({k})² = {d} > 0: equality does not hold. It holds only when a₁b₂ = a₂b₁.',
   ),
   done: m(
     'Vậy (a₁b₁ + a₂b₂)² ≤ (a₁² + a₂²)(b₁² + b₂²), dấu bằng xảy ra khi và chỉ khi a₁b₂ = a₂b₁.',
@@ -149,8 +149,8 @@ const beatDefs: readonly BeatDef[] = [
     id: 'lagrange',
     label: m('Đẳng thức Lagrange', 'Lagrange identity'),
     narration: m(
-      'Hiệu hai vế, vế phải trừ vế trái, bằng {d}. Hai số hạng giống nhau bị triệt tiêu, chỉ còn lại ba số hạng. Chúng gộp thành bình phương của một biểu thức.',
-      'The difference of the sides, right minus left, is {d}. The two equal terms cancel and three terms remain. They combine into the square of one expression.',
+      'Hiệu hai vế, vế phải trừ vế trái, bằng {d}. Hai số hạng giống nhau bị triệt tiêu, chỉ còn lại ba số hạng. Chúng gộp thành (a₁b₂ − a₂b₁)².',
+      'The difference of the sides, right minus left, is {d}. The two equal terms cancel and three terms remain. They combine into (a₁b₂ − a₂b₁)².',
     ),
     ask: {
       text: m(
@@ -400,7 +400,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
   id: 'cauchy-schwarz',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'math',
   visualizer: 'proofOutline',
   curriculumTopics: ['m2-inequality-classic'],

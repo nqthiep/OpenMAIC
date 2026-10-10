@@ -266,7 +266,7 @@ function run(
 
 export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
   id: 'bs-answer',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],
@@ -493,9 +493,9 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
       label: { 'vi-VN': 'Kiểm tra mid', 'en-US': 'Check mid' },
       narration: {
         'vi-VN':
-          'Khoảng đang xét còn [{lo}, {hi}]. Thử H ở giữa, làm tròn lên: mid = {mid}. Cần wood(mid) ≥ m = {m}.',
+          'Khoảng đang xét còn [{lo}, {hi}]. Thử H ở giữa, làm tròn lên (số nguyên gần nhất phía trên): mid = {mid}. Cần wood(mid) ≥ m = {m}.',
         'en-US':
-          'The range is [{lo}, {hi}]. Try the middle H, rounded up: mid = {mid}. We need wood(mid) ≥ m = {m}.',
+          'The range is [{lo}, {hi}]. Try the middle H, rounded up (the nearest whole number above): mid = {mid}. We need wood(mid) ≥ m = {m}.',
       },
       ask: {
         text: {
@@ -555,9 +555,9 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
       },
       ask: {
         text: {
-          'vi-VN': 'Theo em, check(mid) cho kết quả này thì tìm tiếp ở bên trái hay bên phải mid?',
+          'vi-VN': 'Theo em, kết quả cưa ở mid này thì tìm tiếp ở bên trái hay bên phải mid?',
           'en-US':
-            'Given this result of check(mid), do we search on the left or on the right of mid?',
+            'Given this sawing result at mid, do we search on the left or on the right of mid?',
         },
         predict: {
           kind: 'choice',

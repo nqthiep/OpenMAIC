@@ -162,8 +162,8 @@
     }
   },
   "bs-answer": {
-    "entryRev": 3,
-    "contentHash": "2ff5617c4c8d4565",
+    "entryRev": 4,
+    "contentHash": "d8676255d5815a84",
     "framesHash": {
       "classic": {
         "vi-VN": "b6d436853c114739",
@@ -214,24 +214,24 @@
     }
   },
   "cauchy-schwarz": {
-    "entryRev": 3,
-    "contentHash": "ae465f7df77c0f5d",
+    "entryRev": 4,
+    "contentHash": "5837e0411a93e5b3",
     "framesHash": {
       "generic": {
-        "vi-VN": "631a0298ed224ded",
-        "en-US": "08f061bcbfce1682"
+        "vi-VN": "1eea04ba7f2e1d31",
+        "en-US": "d14668c788480a9c"
       },
       "proportional": {
         "vi-VN": "510cae8ab41442f0",
         "en-US": "2440a00bff0af660"
       },
       "zero": {
-        "vi-VN": "d48e8f853406ab39",
-        "en-US": "8ba1ff578d28efa9"
+        "vi-VN": "55cb22485818caf1",
+        "en-US": "1e487d44957e07b7"
       },
       "negative": {
-        "vi-VN": "a02b5595802f8c9b",
-        "en-US": "02833c6af5376d7d"
+        "vi-VN": "31487796cadae0d0",
+        "en-US": "bc2e2fb261a549d1"
       }
     }
   },
@@ -284,8 +284,8 @@
     }
   },
   "convex-hull-trick": {
-    "entryRev": 2,
-    "contentHash": "a06fa7ac533375bc",
+    "entryRev": 3,
+    "contentHash": "9cf58b714a5bd176",
     "framesHash": {
       "classic": {
         "vi-VN": "725c67aebbfcb250",
@@ -398,8 +398,8 @@
     }
   },
   "dijkstra": {
-    "entryRev": 1,
-    "contentHash": "607a57881e16407f",
+    "entryRev": 2,
+    "contentHash": "d538adc1478814db",
     "framesHash": {
       "classic": {
         "vi-VN": "603a0b867e3ee6e8",
@@ -1258,24 +1258,24 @@
     }
   },
   "riemann-integral": {
-    "entryRev": 1,
-    "contentHash": "c66ad28765bf21f6",
+    "entryRev": 2,
+    "contentHash": "b4700edf9573189a",
     "framesHash": {
       "x2-4": {
-        "vi-VN": "eec3f06aea05a7c3",
-        "en-US": "d04bd4d121eab73a"
+        "vi-VN": "66ba5c27ac3d8a58",
+        "en-US": "a3b0ecad240b6003"
       },
       "x2-16": {
-        "vi-VN": "5c23c9754f066025",
-        "en-US": "a0fc40750bab9ad3"
+        "vi-VN": "969c98a2cc6e2f89",
+        "en-US": "c16954e1af363b87"
       },
       "const": {
-        "vi-VN": "a26cad42a9fd1c61",
-        "en-US": "641a93930c53455d"
+        "vi-VN": "c687cb190326c139",
+        "en-US": "2026637a1280d518"
       },
       "cubic": {
-        "vi-VN": "3ae445601787bd37",
-        "en-US": "0011bf87600d5b60"
+        "vi-VN": "9913d76e17e6c27a",
+        "en-US": "79399ffbad8cd9bc"
       }
     }
   },

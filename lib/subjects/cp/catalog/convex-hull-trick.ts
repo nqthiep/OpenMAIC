@@ -56,8 +56,8 @@ const beatDefs: readonly BeatDef[] = [
     required: true,
     label: m('Bắt đầu', 'Start'),
     narration: m(
-      'Ta có {n} đường thẳng và {q} điểm x; với mỗi x cần min của k·x + m trên mọi đường. Thử mọi đường cho mỗi x tốn O(n·q); bao lồi giảm còn O(n + q) khi k giảm và x tăng.',
-      'We have {n|line|lines} and {q} points x; for each x we need the minimum of k·x + m over all lines. Trying every line per x costs O(n·q); the hull trick gets O(n + q) when k decreases and x increases.',
+      'Ta có {n} đường thẳng và {q} điểm x; với mỗi x cần min của k·x + m (k là độ dốc) trên mọi đường. Thử mọi đường cho mỗi x tốn O(n·q); khi k giảm dần và x tăng dần, dùng deque (hàng đợi hai đầu) chỉ cần O(n + q).',
+      'We have {n|line|lines} and {q} points x; for each x we need the minimum of k·x + m (k is the slope) over all lines. Trying every line per x costs O(n·q); with the hull trick (a deque) it gets O(n + q) when k decreases and x increases.',
     ),
     hints: [
       m(
@@ -320,7 +320,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const convexHullTrickEntry: WalkthroughEntry<In, S> = {
   id: 'convex-hull-trick',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'grid',
   curriculumTopics: ['t4-dp-optimize'],
