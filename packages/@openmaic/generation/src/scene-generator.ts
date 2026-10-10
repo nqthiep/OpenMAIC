@@ -34,6 +34,8 @@ import { postProcessInteractiveHtml } from './interactive-post-processor.js';
 import { findInteractiveScriptSyntaxFailure } from './interactive-script-validator.js';
 import { parseActionsFromStructuredOutput } from './action-parser.js';
 import { parseJsonResponse } from './json-repair.js';
+import { renderFlowHtml } from './diagram/flowchart.js';
+import { parseFlowchartResponse } from './diagram/flowchart-response.js';
 import {
   buildCourseContext,
   formatAgentsForPrompt,
@@ -101,6 +103,10 @@ export interface SceneContentOptions {
   /** Original course request/profile, used by PBL v2 for explicit learner-level signals. */
   userRequirements?: UserRequirements;
   allowProceduralSkill?: boolean;
+  /** Flowchart widgets: 'graph' asks the model for nodes and edges and the platform draws them. */
+  diagramOutput?: 'html' | 'graph';
+  /** HTML diagrams: include the visual rules in the prompt. Defaults to on. */
+  diagramVisualRules?: boolean;
   /**
    * Natural-language edit instruction for whole-slide regeneration (MAIC Editor
    * agent `regenerate_scene`). When set, the slide content prompt switches to
@@ -248,6 +254,8 @@ export async function generateSceneContent(
     targetLanguage,
     userRequirements,
     allowProceduralSkill = false,
+    diagramOutput,
+    diagramVisualRules,
     editDirective,
     baselineContent,
   } = options;
@@ -275,6 +283,8 @@ export async function generateSceneContent(
     // Route to widget generation (handles all 5 types)
     return generateWidgetContent(outline, aiCall, languageDirective, {
       allowProceduralSkill,
+      diagramOutput,
+      diagramVisualRules,
       logger: log,
       onFailure: options.onFailure,
     });
@@ -1211,6 +1221,49 @@ function extractHtml(
   return null;
 }
 
+/**
+ * Flowchart as data: ask for a graph and draw it with the platform renderer. Returns null when the
+ * response is unusable, so the caller can fall back to the HTML prompt.
+ */
+async function generateFlowchartFromGraph(
+  outline: SceneOutline,
+  aiCall: AICallFn,
+  languageDirective: string | undefined,
+  log: GenerationLogger,
+): Promise<string | null> {
+  const nodeCount = outline.widgetOutline?.nodeCount;
+  const prompts = buildPrompt(PROMPT_IDS.DIAGRAM_GRAPH, {
+    title: outline.title,
+    description: outline.description,
+    keyPoints: (outline.keyPoints || []).join('\n'),
+    nodeCount: nodeCount ?? 0,
+    hasNodeCount: typeof nodeCount === 'number' && nodeCount > 0,
+    languageDirective: languageDirective || '',
+  });
+  if (!prompts) return null;
+
+  log.info(`Generating flowchart graph for: ${outline.title}`);
+  const response = await aiCall(prompts.system, prompts.user);
+  const parsed = parseFlowchartResponse(response, {
+    maxNodes: typeof nodeCount === 'number' && nodeCount > 0 ? nodeCount : undefined,
+  });
+  if (!parsed) {
+    log.error(`Flowchart graph response is not a valid graph for: ${outline.title}`);
+    return null;
+  }
+  try {
+    return renderFlowHtml(parsed.graph, {
+      title: outline.title,
+      direction: parsed.direction,
+      labels: parsed.labels,
+      lang: parsed.lang,
+    });
+  } catch (error) {
+    log.error(`Flowchart graph is inconsistent for: ${outline.title}`, error);
+    return null;
+  }
+}
+
 // ==================== Ultra Mode Widget Generation ====================
 
 /**
@@ -1222,6 +1275,8 @@ export async function generateWidgetContent(
   languageDirective?: string,
   options: {
     allowProceduralSkill?: boolean;
+    diagramOutput?: 'html' | 'graph';
+    diagramVisualRules?: boolean;
     logger?: GenerationLogger;
     onFailure?: (failure: SceneContentFailure) => void;
   } = {},
@@ -1264,6 +1319,7 @@ export async function generateWidgetContent(
         prescribedNodes,
         hasNodeCount: typeof widgetOutline.nodeCount === 'number' && widgetOutline.nodeCount > 0,
         hasPrescribedNodes: prescribedNodes.length > 0,
+        visualRules: options.diagramVisualRules !== false,
         languageDirective: languageDirective || '',
       };
       break;
@@ -1333,16 +1389,30 @@ export async function generateWidgetContent(
       return null;
   }
 
-  const prompts = buildPrompt(promptId, variables);
-  if (!prompts) {
-    log.error(`Failed to build ${widgetType} prompt for: ${outline.title}`);
-    options.onFailure?.({ code: 'prompt-unavailable' });
-    return null;
+  // Flowchart as data (opt-in): the model returns a graph and the renderer draws it. An unusable
+  // graph falls back to the HTML prompt; transport errors propagate, as they do on the HTML path.
+  let html: string | null = null;
+  if (
+    widgetType === 'diagram' &&
+    options.diagramOutput === 'graph' &&
+    (widgetOutline.diagramType || 'flowchart') === 'flowchart'
+  ) {
+    html = await generateFlowchartFromGraph(outline, aiCall, languageDirective, log);
+    if (!html) log.warn(`Flowchart graph failed for: ${outline.title}; using the HTML prompt`);
   }
 
-  log.info(`Generating ${widgetType} widget for: ${outline.title}`);
-  const response = await aiCall(prompts.system, prompts.user);
-  const html = extractHtml(response, log);
+  if (!html) {
+    const prompts = buildPrompt(promptId, variables);
+    if (!prompts) {
+      log.error(`Failed to build ${widgetType} prompt for: ${outline.title}`);
+      options.onFailure?.({ code: 'prompt-unavailable' });
+      return null;
+    }
+
+    log.info(`Generating ${widgetType} widget for: ${outline.title}`);
+    const response = await aiCall(prompts.system, prompts.user);
+    html = extractHtml(response, log);
+  }
 
   if (!html) {
     log.error(`Failed to extract HTML from ${widgetType} response for: ${outline.title}`);

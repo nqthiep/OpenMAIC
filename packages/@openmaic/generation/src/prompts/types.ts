@@ -9,6 +9,7 @@ export type PromptId =
   | 'quiz-content'
   | 'simulation-content'
   | 'diagram-content'
+  | 'diagram-graph'
   | 'code-content'
   | 'game-content'
   | 'visualization3d-content'
@@ -28,7 +29,8 @@ export type SnippetId =
   | 'slide-image-instructions'
   | 'slide-generated-image-instructions'
   | 'slide-video-instructions'
-  | 'speech-tts-readability';
+  | 'speech-tts-readability'
+  | 'diagram-visual-rules';
 
 /** Loaded prompt template. */
 export interface LoadedPrompt {

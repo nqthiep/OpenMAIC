@@ -5,6 +5,7 @@
  * actions step. The logic of 1.1.x's POST /api/generate/scene-content; the
  * caller resolves the model for the scene type's stage.
  */
+import { diagramGenerationOptions } from '@/lib/server/diagram-config';
 import { coerceCodeOutline } from '@/lib/server/generation/coerce-code-outline';
 import { callLLM } from '@/lib/ai/llm';
 import {
@@ -304,6 +305,8 @@ export async function generateSceneContent(
     targetLanguage: input.targetLanguage || undefined,
     userRequirements: requirements,
     allowProceduralSkill: vocationalActive,
+    // Opt-in until measured: 'graph' has the model return a flowchart as data (see diagram-graph template).
+    ...diagramGenerationOptions(),
     ...(effectiveOutline.type === 'pbl'
       ? {
           pblLoopFallback: (plannerInput) =>

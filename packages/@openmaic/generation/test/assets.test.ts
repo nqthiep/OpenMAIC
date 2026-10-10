@@ -18,6 +18,7 @@ const PROMPT_IDS = [
   'quiz-content',
   'simulation-content',
   'diagram-content',
+  'diagram-graph',
   'code-content',
   'game-content',
   'visualization3d-content',
@@ -38,6 +39,7 @@ const SNIPPET_IDS = [
   'slide-generated-image-instructions',
   'slide-video-instructions',
   'speech-tts-readability',
+  'diagram-visual-rules',
 ] as const satisfies readonly SnippetId[];
 
 const GRANDFATHERED_NON_CAMEL_CASE_PLACEHOLDERS = [

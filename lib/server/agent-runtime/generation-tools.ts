@@ -21,6 +21,7 @@ import type { SceneOutline } from '@/lib/types/generation';
 import type { Action } from '@/lib/types/action';
 import type { Scene } from '@/lib/types/stage';
 import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { diagramGenerationOptions } from '@/lib/server/diagram-config';
 import {
   copiedActions,
   screenCopiedScene,
@@ -434,6 +435,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
           agents,
           languageDirective: doc.stage.languageDirective ?? '',
           allowProceduralSkill: true,
+          ...diagramGenerationOptions(),
           ...(assignedImages.length ? { assignedImages, imageMapping } : {}),
           ...(params.instruction ? { editDirective: params.instruction } : {}),
           ...(baseline ? { baselineContent: baseline } : {}),

@@ -16,6 +16,7 @@ export const PROMPT_IDS = {
   QUIZ_CONTENT: 'quiz-content',
   SIMULATION_CONTENT: 'simulation-content',
   DIAGRAM_CONTENT: 'diagram-content',
+  DIAGRAM_GRAPH: 'diagram-graph',
   CODE_CONTENT: 'code-content',
   GAME_CONTENT: 'game-content',
   VISUALIZATION3D_CONTENT: 'visualization3d-content',

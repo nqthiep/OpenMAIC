@@ -152,7 +152,7 @@ ANCHORS = {
     "lib/orchestration/prompt-builder.ts:209": "TOTAL speech text around",
     "lib/choreography/timing.ts:34": "MAX_VIDEO_WAIT_MS",
     "lib/playback/action-navigation.ts:16-23": "'widget_setState'",
-    "lib/server/agent-runtime/generation-tools.ts:679": "duplicate_scene",
+    "lib/server/agent-runtime/generation-tools.ts:635": "name: 'duplicate_scene'",
     "lib/server/agent-runtime/generation-tools.ts:585-609": "generate_actions",
     "lib/server/agent-runtime/generation-tools.ts:130-143": "function outlineFromScene",
     "packages/@openmaic/dsl/src/interactive.ts:38": "type: WidgetType",
