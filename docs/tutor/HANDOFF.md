@@ -7,6 +7,8 @@
 
 > **Cập nhật 2026-10-08:** Toán chuyển sang web UI (ADR 0015): 27 walkthrough tương tác thay cho 21 clip Manim; xem mục 3b.
 
+> **Cập nhật 2026-10-10 (phiên 5):** thêm cửa học sinh `/learn`, luyện tập không code và màn hình giáo viên `/teacher` (ADR 0016); xem mục 3c. Chạy review một nhà cung cấp cho 10 entry và sửa 2 lỗi chữ thật (`docs/tutor/review-runs/2026-10-10-deepseek-one-provider/`).
+
 > **Tóm tắt:** Phase 1 xong, đã review và sửa. Phase 2 đã triển khai **mã** cho 4 visualizer (`array` nhiều chế độ, `tree`, `graph`, `grid`), eval `tutor-lesson`, và 37 entry catalog (đợt 2A 9, 2B 12, 2C 8, 2D 4, 2E 4; `graham-scan` chờ visualizer `geometry` của Phase 3). Chưa làm: review LLM từng entry và cổng G2 (cần khoá API), review ba góc của Phase 2, lát 1d (chặn bởi cổng 1d-00), Phase 3.
 
 > Mọi điều chưa kiểm chứng trong file này gắn nhãn `[Unverified]` hoặc `[Inference]`. Không coi chúng là sự thật.
@@ -150,6 +152,35 @@ Chưa làm và vì sao (Phase 3):
 | Nghiên cứu nguồn cho curriculum Toán (đề cương thi, lớp, trọng số, tài liệu) | cần nguồn thật; khung hiện là [Inference] |
 | Xem từng walkthrough mới bằng mắt trong ứng dụng thật và e2e riêng | đã chụp ảnh từ iframe headless cho từng entry khi viết; chưa chạy e2e trình duyệt cho entry mới |
 | Nhập số tự do (`customInput`) cho Toán | lát 1d chưa mở (cổng `1d-00`) |
+
+## 3c. Cửa học sinh, luyện tập, tiến độ (cập nhật 2026-10-10, phiên 5)
+
+Quyết định và lý do: [ADR 0016](decisions/0016-student-door-practice-teacher-view.md). Mã (đều mới, không đổi package `@openmaic/*`):
+
+| Phần | File |
+| --- | --- |
+| Trang chọn bài | `app/learn/page.tsx`, `app/learn/learn-door.tsx`, `lib/tutor/door/catalog.ts` |
+| Dựng course (walkthrough + quiz) | `app/api/learn/start/route.ts`, `lib/tutor/door/lesson.ts` |
+| Luyện tập từ câu dự đoán của entry | `lib/tutor/door/practice.ts` |
+| Tiến độ giáo viên/phụ huynh | `app/teacher/page.tsx`, `app/api/teacher/{login,progress}/route.ts`, `lib/server/teacher-gate.ts`, `lib/tutor/door/progress.ts` |
+| Ghi nhật ký học trong lớp | `lib/tutor/use-learning-log.ts` (gắn vào `InteractiveIframeHost`), `widgetConfig.beatsByPreset` ở `provider.ts` |
+| Test | `tests/tutor/door/*.test.ts`, `tests/tutor/learning-log.test.ts`, `tests/widgets/provider.test.ts` |
+
+Hai lỗi có sẵn được tìm ra và sửa trong lúc làm:
+
+- `watchWidgetRuntime` **chưa từng được gọi** ở đâu trong ứng dụng, nên bản ghi `beat` và `prediction` không bao giờ được ghi (chỉ có `rating`). Nay mount ở `InteractiveIframeHost`. Bản ghi `hint` vẫn chưa có nơi ghi (thang gợi ý nằm ở chat), nên cột gợi ý trên `/teacher` chỉ hiện khi đã có dữ liệu.
+- `watchWidgetRuntime` bỏ `skipped` khi tạo bản ghi dự đoán, nên câu bị bỏ qua bị tính là trả lời sai.
+
+Đã kiểm thủ công trên dev server (cổng 3001, Postgres dev `pnpm db:up`): `/learn` → bắt đầu → lớp học có walkthrough và trang Luyện tập; làm quiz; `/teacher` (mã đúng/sai/không cookie); bản ghi `beat` xuất hiện khi phát bài. Chưa có e2e Playwright cho các trang mới.
+
+Làm tiếp cùng ngày (cùng phiên): lộ trình và "Học tiếp", "Tiếp tục/Học lại", lối vào `OPENMAIC_HOME=learn`, câu luyện viết trạng thái ra văn bản (`lib/tutor/door/state-text.ts`), thanh tỉ lệ ở `/teacher`, lớp chỉ có thầy AI. Đã chụp thử ở 375, 768 và 1024 px: **trên điện thoại khung lớp học của upstream không dùng được**, trên máy tính bảng thì dùng được (widget bị cắt nhẹ ở mép phải khi dựng đứng). Chủ dự án chỉ cần màn hình rộng nên **không làm** phần điện thoại (ADR 0016, hệ quả).
+
+Việc còn lại:
+
+- Hội đồng review hai nhà cung cấp cho các entry cốt lõi vẫn chặn vì hạn mức OpenCode Go tháng đã hết (`GoUsageLimitError`, 2026-10-10); DeepSeek trực tiếp còn dùng được. Kết quả một nhà cung cấp chỉ để tham khảo (README của thư mục `review-runs/2026-10-10-…`).
+- `tests/tutor/qa-score.test.ts > scenarios.json` đang đỏ vì `eval/tutor-qa/scenarios.json` (đang sửa dở, chưa commit) có 19 khung thay vì 3. Không thuộc phiên này.
+- Liên kết tới `/learn` từ trang chủ chưa có (`app/page.tsx` là file upstream; thêm một dòng nếu muốn).
+- Chạy runner eval dưới `tsx` sau lần merge upstream 2026-10-10 cần `NODE_OPTIONS=--conditions=import` (`@openmaic/dsl` chỉ xuất `import`).
 
 ## 4. Việc tiếp theo (theo thứ tự)
 
