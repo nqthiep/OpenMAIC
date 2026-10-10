@@ -137,7 +137,7 @@ function run(
       `Cutting at H = ${Hold} gives ${gotOld} ${gotOld === 1 ? 'meter' : 'meters'}. If we raise H by one, how does the total wood change?`,
     ),
     codeLine: 1,
-    vars: { H: Hold, got: gotOld, m, top },
+    vars: { H: Hold, got: gotOld, m, top, row: woodPer(h, Hold).join(', ') },
     tags: ['beat:monotonic'],
   });
   put(H1, {
@@ -175,8 +175,8 @@ function run(
       mid,
       {
         explanation: t(
-          `Còn [${lo}, ${hi}]. Thử cưa ở H = ${mid} (giữa, làm tròn lên): có đủ m = ${m} mét gỗ không?`,
-          `Remaining: [${lo}, ${hi}]. Try cutting at H = ${mid} (middle, rounded up): is there enough wood for m = ${m}?`,
+          `Còn [${lo}, ${hi}]. Thử cưa ở H = ${mid} (giữa khoảng): có đủ m = ${m} mét gỗ không?`,
+          `Remaining: [${lo}, ${hi}]. Try cutting at H = ${mid} (middle of the range): is there enough wood for m = ${m}?`,
         ),
         codeLine: 4,
         vars: { lo, hi, mid, m },
@@ -237,7 +237,7 @@ function run(
 
 export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMiniState> = {
   id: 'bs-answer-mini',
-  entryRev: 4,
+  entryRev: 8,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],
@@ -334,9 +334,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Vét cạn', 'en-US': 'Brute force' },
       narration: {
         'vi-VN':
-          'Vét cạn: thử H lần lượt {tried}, từ cây cao nhất ({top}) hạ dần. Ở H = {H} được {got} mét, cần m = {m}. Thử từng H thế này quá chậm khi h rất lớn.',
+          'wood(H) là tổng gỗ cưa được khi đặt máy cưa ở độ cao H. Cách đơn giản nhất là thử hết: thử H lần lượt {tried}, từ cây cao nhất ({top}) hạ dần. Ở H = {H} được {got} mét, cần m = {m}. Thử từng H thế này quá chậm khi h rất lớn.',
         'en-US':
-          'Brute force: try H = {tried}, going down from the tallest tree ({top}). At H = {H} we get {got|meter|meters} and need m = {m}. Trying every H like this is too slow when h is huge.',
+          'wood(H) is the total wood cut when the saw is set at height H. The simplest method is to try them all: H = {tried}, going down from the tallest tree ({top}). At H = {H} we get {got|meter|meters} and need m = {m}. Trying every H like this is too slow when h is huge.',
       },
       hints: [
         {
@@ -368,9 +368,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Gỗ giảm khi H tăng', 'en-US': 'Wood shrinks as H grows' },
       narration: {
         'vi-VN':
-          'Cưa ở H = {H} được {got} mét. Nâng H lên thì mỗi cây cao hơn H mất bớt gỗ, nên gỗ chỉ giảm hoặc giữ nguyên: một H đủ gỗ thì mọi H thấp hơn cũng đủ.',
+          'Cưa ở H = {H} được {got} mét. Ví dụ: mỗi cây cao hơn H cho phần trên H, cây thấp hơn cho 0. Các cây cho lần lượt {row} mét. Nâng H lên thì mỗi cây cao hơn H chỉ còn phần gỗ ngắn hơn, nên tổng gỗ chỉ giảm hoặc giữ nguyên. Vậy một H đủ gỗ thì mọi H thấp hơn cũng đủ.',
         'en-US':
-          'Cutting at H = {H} gives {got|meter|meters}. Raising H makes every tree taller than H lose wood, so the total never grows: if some H has enough wood then every lower H does too.',
+          'Cutting at H = {H} gives {got|meter|meters}. Example: every tree taller than H gives the part above H, a shorter tree gives 0. In meters, the trees give {row}. Raising H leaves every tree taller than H a shorter piece, so the total never grows: if some H has enough wood then every lower H does too.',
       },
       ask: {
         text: {
@@ -428,9 +428,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Khoảng ban đầu', 'en-US': 'Starting range' },
       narration: {
         'vi-VN':
-          'Ta chặt nhị phân trên H. Bất biến: lo = {lo} luôn đủ gỗ vì m = {m} không vượt tổng chiều cao, và không H nào lớn hơn hi = {hi} đủ gỗ. Đáp án nằm trong [{lo}, {hi}].',
+          'Chặt nhị phân nghĩa là mỗi lần thử giữa khoảng rồi loại một nửa. Ta tìm H trong khoảng [{lo}, {hi}]. Chắc chắn: H = {lo} luôn đủ gỗ, vì m = {m} không vượt tổng chiều cao; mọi H lớn hơn {hi} đều thiếu gỗ. Đáp án nằm trong [{lo}, {hi}].',
         'en-US':
-          'We binary search on H. Invariant: lo = {lo} always has enough wood because m = {m} does not exceed the total height, and no H above hi = {hi} does. The answer lies in [{lo}, {hi}].',
+          'We binary search on H: each try checks the middle and drops half the range. We search H in [{lo}, {hi}]. For sure: H = {lo} always has enough wood, since m = {m} does not exceed the total height; every H above {hi} falls short. The answer lies in [{lo}, {hi}].',
       },
       hints: [
         {
@@ -461,14 +461,14 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Kiểm tra mid', 'en-US': 'Check mid' },
       narration: {
         'vi-VN':
-          'Khoảng đang xét còn [{lo}, {hi}]. Thử H ở giữa, làm tròn lên: mid = {mid}. Cần wood(mid) ≥ m = {m}.',
+          'Khoảng đang xét còn [{lo}, {hi}]. Thử H ở giữa, làm tròn lên (nếu giữa là x,5 thì lấy x+1): mid = {mid}. Cưa ở mid phải được ít nhất m = {m} mét gỗ.',
         'en-US':
-          'The range is [{lo}, {hi}]. Try the middle H, rounded up: mid = {mid}. We need wood(mid) ≥ m = {m}.',
+          'The range is [{lo}, {hi}]. Try the middle H, rounded up (if the middle is x,5 take x+1): mid = {mid}. Cutting at mid must give at least m = {m|meter|meters}.',
       },
       ask: {
         text: {
-          'vi-VN': 'Theo em, cưa ở mid này có đủ gỗ (wood(mid) ≥ m) không?',
-          'en-US': 'Do you think cutting at this mid gives enough wood (wood(mid) ≥ m)?',
+          'vi-VN': 'Theo em, cưa ở mid này có đủ ít nhất m mét gỗ không?',
+          'en-US': 'Do you think cutting at this mid gives at least m meters?',
         },
         predict: {
           kind: 'choice',
@@ -517,9 +517,9 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
       label: { 'vi-VN': 'Thu hẹp', 'en-US': 'Narrow down' },
       narration: {
         'vi-VN':
-          'Cưa ở H = {mid} được {got} mét, so với m = {m}. Đủ gỗ thì đáp án ≥ mid nên lo = mid; thiếu gỗ thì đáp án < mid nên hi = mid − 1.',
+          'Cưa ở H = {mid} được {got} mét, so với m = {m}. Đủ gỗ: mid là đáp án hoặc còn cao hơn, nên lo = mid. Thiếu gỗ: đáp án chắc chắn nhỏ hơn mid, nên hi = mid − 1.',
         'en-US':
-          'Cutting at H = {mid} gives {got|meter|meters}, compared with m = {m}. Enough wood: the answer is ≥ mid, so lo = mid. Not enough: the answer is < mid, so hi = mid − 1.',
+          'Cutting at H = {mid} gives {got|meter|meters}, compared with m = {m}. Enough wood: mid is the answer or larger, so lo = mid. Not enough: the answer is surely below mid, so hi = mid − 1.',
       },
       ask: {
         text: {
@@ -585,8 +585,8 @@ export const bsAnswerMiniEntry: WalkthroughEntry<BsAnswerMiniInput, BsAnswerMini
           'en-US': 'When lo and hi meet, how many candidates are left?',
         },
         {
-          'vi-VN': 'Bất biến: wood(lo) ≥ m, và mọi H lớn hơn hi đều thiếu gỗ.',
-          'en-US': 'Invariant: wood(lo) ≥ m, and every H above hi falls short.',
+          'vi-VN': 'Luôn đúng: H = lo còn đủ gỗ, và mọi H lớn hơn hi đều thiếu gỗ.',
+          'en-US': 'Always true: H = lo still has enough wood, and every H above hi falls short.',
         },
         {
           'vi-VN': 'lo = hi nên chỉ còn một giá trị, và đó là H lớn nhất đủ gỗ.',

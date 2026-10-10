@@ -188,28 +188,28 @@
     }
   },
   "bs-answer-mini": {
-    "entryRev": 4,
-    "contentHash": "c6068f2f6cf72246",
+    "entryRev": 8,
+    "contentHash": "f546af45e9cf307a",
     "framesHash": {
       "classic": {
-        "vi-VN": "645b7181bd0eca38",
-        "en-US": "aac694e67e6c1bc9"
+        "vi-VN": "047fa0be44448eab",
+        "en-US": "ae61655609e4a38f"
       },
       "all-equal": {
-        "vi-VN": "6c508937443eddce",
-        "en-US": "8bc6f8ed32f8e0b1"
+        "vi-VN": "7aa772ea50b8f46e",
+        "en-US": "8123fac01df0ecce"
       },
       "one-tree": {
-        "vi-VN": "1b6ed39ee2c40191",
-        "en-US": "c5bc26c8127e566f"
+        "vi-VN": "4b402354f4c884c9",
+        "en-US": "6b2d9c5281defe71"
       },
       "take-all": {
-        "vi-VN": "df7752ad9858c997",
-        "en-US": "b7ec2b7158087c1a"
+        "vi-VN": "a08448dbae54aa89",
+        "en-US": "0738f348fbbb5fc3"
       },
       "tiny-need": {
-        "vi-VN": "2ae1c05aa0584fdf",
-        "en-US": "e93080e5bbc5f5dc"
+        "vi-VN": "431308b1b447d0f4",
+        "en-US": "9a45561d9ca535ac"
       }
     }
   },
