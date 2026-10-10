@@ -7,7 +7,8 @@ import { buildVirtualWhiteboardContext } from '@/lib/orchestration/summarizers/w
 import { getActionDescriptions } from '@/lib/orchestration/tool-schemas';
 import type { AgentTurnSummary, WhiteboardActionRecord } from '@/lib/orchestration/types';
 import type { StatelessChatRequest } from '@/lib/types/chat';
-import { TUTOR_COACHING } from '@/lib/orchestration/prompt-builder';
+import { TUTOR_COACHING, WALKTHROUGH_ANSWER_POLICY } from '@/lib/orchestration/prompt-builder';
+import { isTutorHintFirstEnabled } from '@/lib/config/feature-flags';
 import { isWalkthroughScene } from '@/lib/widgets/policy';
 
 function compactOutlineText(value: string, maxLength: number): string {
@@ -166,6 +167,8 @@ export function buildChildPrompt(
   const currentScene = body.storeState.currentSceneId
     ? body.storeState.scenes.find((scene) => scene.id === body.storeState.currentSceneId)
     : null;
+  const isWalkthrough = isWalkthroughScene(currentScene);
+  const hintFirst = isWalkthrough && isTutorHintFirstEnabled();
 
   return [
     `You are ${agent.name}.`,
@@ -179,10 +182,12 @@ export function buildChildPrompt(
     buildLanguageConstraint(body.storeState.stage?.languageDirective),
     '',
     '# Length & Style (CRITICAL)',
-    buildLengthGuidelines(agent.role, isWalkthroughScene(currentScene)),
+    buildLengthGuidelines(agent.role, isWalkthrough, hintFirst),
     '- Speak conversationally and naturally. This is live classroom speech, not an essay.',
     '- NEVER use markdown formatting, headings, bullet lists, bold markers, blockquotes, or code fences in visible speech.',
-    '- Lead with the direct answer when the user asked a concrete question.',
+    hintFirst
+      ? WALKTHROUGH_ANSWER_POLICY
+      : '- Lead with the direct answer when the user asked a concrete question.',
     '- Do not impersonate or script other named agents/students. Speak only as yourself.',
     '- Ask at most one short follow-up question.',
     '',
@@ -221,6 +226,10 @@ export function buildNativeChildPrompt(
   availableTools: string[],
   requestStartScene?: { sceneId: string; sceneType: string },
 ): string {
+  const isWalkthrough = isWalkthroughScene(
+    body.storeState.scenes.find((s) => s.id === requestStartScene?.sceneId),
+  );
+  const hintFirst = isWalkthrough && isTutorHintFirstEnabled();
   const nativeToolInventory =
     availableTools.length === 0
       ? 'No Native tools are available. Respond with speech only.'
@@ -259,12 +268,11 @@ export function buildNativeChildPrompt(
     ...nativeWhiteboardGuidance,
     '',
     '# Length & Style (CRITICAL)',
-    buildLengthGuidelines(
-      agent.role,
-      isWalkthroughScene(body.storeState.scenes.find((s) => s.id === requestStartScene?.sceneId)),
-    ),
+    buildLengthGuidelines(agent.role, isWalkthrough, hintFirst),
     '- Speak conversationally. Do not use markdown, headings, lists, or code fences.',
-    '- Lead with the direct answer and ask at most one short follow-up question.',
+    ...(hintFirst
+      ? [WALKTHROUGH_ANSWER_POLICY, '- Ask at most one short follow-up question.']
+      : ['- Lead with the direct answer and ask at most one short follow-up question.']),
     '',
     '# Request-start context',
     `Current scene: ${requestStartScene ? `${requestStartScene.sceneId} (${requestStartScene.sceneType})` : 'none'}`,
@@ -302,14 +310,18 @@ function buildRoleGuideline(role: string): string {
   ].join('\n');
 }
 
-function buildLengthGuidelines(role: string, walkthrough = false): string {
+function buildLengthGuidelines(role: string, walkthrough = false, hintFirst = false): string {
   if (role === 'teacher') {
     return [
       walkthrough
         ? '- Keep your TOTAL visible speech around 300 characters.'
         : '- Keep your TOTAL visible speech around 70 Chinese characters or 1-2 short sentences.',
       '- This is a hard cap, not a suggestion.',
-      '- Give the key insight in one crisp sentence, then optionally ask one short question.',
+      ...(hintFirst
+        ? []
+        : [
+            '- Give the key insight in one crisp sentence, then optionally ask one short question.',
+          ]),
       '- Avoid exhaustive explanations unless the user explicitly asks for depth.',
       ...(walkthrough ? [TUTOR_COACHING] : []),
     ].join('\n');

@@ -16,6 +16,17 @@ function readDefaultOnBoolean(envValue: string | undefined): boolean {
 }
 
 /**
+ * Tutor answer mode on walkthrough scenes (server-only: the chat prompts are built on the
+ * server). Default ON: the teacher opens with a question or a hint and only states the answer
+ * when the student asks for it (WALKTHROUGH_ANSWER_POLICY). `OPENMAIC_TUTOR_HINT_FIRST=false`
+ * (or `0`) restores the generic "lead with the direct answer" behaviour. Other scene types are
+ * unaffected either way.
+ */
+export function isTutorHintFirstEnabled(): boolean {
+  return readDefaultOnBoolean(process.env.OPENMAIC_TUTOR_HINT_FIRST);
+}
+
+/**
  * Server-only gate for durable background agent execution. This is evaluated
  * at process runtime and is never exposed to the browser bundle.
  */

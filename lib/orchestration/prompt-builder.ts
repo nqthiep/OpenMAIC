@@ -12,6 +12,7 @@ import { buildStateContext } from './summarizers/state-context';
 import { buildVirtualWhiteboardContext } from './summarizers/whiteboard-ledger';
 import { buildPeerContextSection } from './summarizers/peer-context';
 import { buildPrompt, PROMPT_IDS } from '@/lib/prompts';
+import { isTutorHintFirstEnabled } from '@/lib/config/feature-flags';
 import { isWalkthroughScene } from '@/lib/widgets/policy';
 
 // ==================== Role Guidelines ====================
@@ -156,7 +157,11 @@ export function buildStructuredPrompt(
     mutualExclusionNote: hasSlideActions ? MUTUAL_EXCLUSION_NOTE : '',
     stateContext: buildStateContext(storeState),
     virtualWhiteboardContext: buildVirtualWhiteboardContext(storeState, whiteboardLedger),
-    lengthGuidelines: buildLengthGuidelines(agentConfig.role, isWalkthroughScene(currentScene)),
+    lengthGuidelines: buildLengthGuidelines(
+      agentConfig.role,
+      isWalkthroughScene(currentScene),
+      isWalkthroughScene(currentScene) && isTutorHintFirstEnabled(),
+    ),
     whiteboardGuidelines: buildWhiteboardGuidelines(agentConfig.role),
     discussionContextSection: buildDiscussionContextSection(discussionContext, agentResponses),
   };
@@ -186,7 +191,17 @@ export function buildStructuredPrompt(
 export const TUTOR_COACHING =
   '- Tutor coaching: first ask what the student thinks; then give hint level 1, then 2, then 3; give the full solution only if the student asks. If their answer matches a known misconception, name it and give a counterexample. Put long parts on the whiteboard with the whiteboard tools.';
 
-function buildLengthGuidelines(role: string, walkthrough = false): string {
+/**
+ * Answer policy for walkthrough scenes. It takes the place of the generic "lead with the direct
+ * answer" line, which contradicts TUTOR_COACHING's hint ladder and made the teacher state the
+ * answer first. A student who asks outright for the answer, a value or the code still gets it.
+ * Shared with lib/chat/pi/prompts.ts and eval/tutor-qa. Measured on eval:tutor-qa: hints first
+ * 14/36 -> 28/36, on-frame 31/41 -> 34/41, correct 38/41 -> 36/41 (within run-to-run noise).
+ */
+export const WALKTHROUGH_ANSWER_POLICY =
+  '- On a walkthrough, when the student asks why or how, your first sentence must be a question or a hint, never the answer or a key number. When the student explicitly asks you to just tell them the answer, a value or the code, give it directly in your first sentence.';
+
+function buildLengthGuidelines(role: string, walkthrough = false, hintFirst = false): string {
   const common = `- Length targets count ONLY your speech text (type:"text" content). Actions (spotlight, whiteboard, etc.) do NOT count toward length. Use as many actions as needed — they don't make your speech "too long."
 - Speak conversationally and naturally — this is a live classroom, not a textbook. Use oral language, not written prose.`;
 
@@ -194,7 +209,7 @@ function buildLengthGuidelines(role: string, walkthrough = false): string {
     return `- Keep your TOTAL speech text around ${walkthrough ? 300 : 100} characters (across all text objects combined). Prefer 2-3 short sentences over one long paragraph.
 ${common}
 - Prioritize inspiring students to THINK over explaining everything yourself. Ask questions, pose challenges, give hints — don't just lecture.
-- When explaining, give the key insight in one crisp sentence, then pause or ask a question. Avoid exhaustive explanations.${walkthrough ? `\n${TUTOR_COACHING}` : ''}`;
+${hintFirst ? '- Avoid exhaustive explanations.' : '- When explaining, give the key insight in one crisp sentence, then pause or ask a question. Avoid exhaustive explanations.'}${walkthrough ? `\n${TUTOR_COACHING}` : ''}${hintFirst ? `\n${WALKTHROUGH_ANSWER_POLICY}` : ''}`;
   }
 
   if (role === 'assistant') {

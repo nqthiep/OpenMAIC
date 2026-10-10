@@ -12,7 +12,7 @@
 
 | Sự thật | Nguồn |
 | --- | --- |
-| Workbench cần **ba** điều kiện: `OPENMAIC_AGENT_RUNTIME_ENABLED=true`, `DATABASE_URL` khác rỗng, và cờ build-time `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`. Thiếu một điều kiện thì `/workbench` trả 404. | `lib/config/feature-flags.ts:18-25,57-59`; `middleware.ts:34-37`; `.env.example:310,347,353` |
+| Workbench cần **ba** điều kiện: `OPENMAIC_AGENT_RUNTIME_ENABLED=true`, `DATABASE_URL` khác rỗng, và cờ build-time `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`. Thiếu một điều kiện thì `/workbench` trả 404. | `lib/config/feature-flags.ts:29-36,68-70`; `middleware.ts:34-37`; `.env.example:310,347,353` |
 | Trang chủ hỏi `/api/agent/runtime` để biết runtime có bật không. | `app/page.tsx:138-147` |
 | `Dockerfile` (stage builder) và `docker-compose.yml` (`build.args`) đều truyền `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` (đã sửa; trước đó compose không bật được workbench). | `Dockerfile:61-72`; `docker-compose.yml:23` |
 | Tool của agent được đăng ký ở `buildDslCourseToolset` và phải có trong `buildCourseAllowlist`; tool **ghi tài liệu** còn phải có trong `STAGE_WRITER_TOOL_NAMES` để chạy tuần tự và được workbench cấp quyền ghi. Đã có tiền lệ đăng ký có điều kiện: `generate_video`. | `lib/server/agent-runtime/course-tools.ts:204-237`; `lib/agent-runtime/stage-writer-tools.ts:20` |

@@ -50,7 +50,7 @@ Chọn **(b)**, làm theo hai bước:
 
 **Q&A cho clip Manim (ADR 0007, Toán):** `play_video` chỉ có `elementId` và học sinh tự tua bằng `<video controls>`; engine không biết học sinh dừng ở đâu. L0 (làm được ngay): mỗi clip có `clip-sheet` (chapter, cái đang hiện, công thức, hiểu lầm hay gặp, gợi ý theo bậc) đưa vào digest của thầy (bước 0) và được tra qua `PPTBaseElement.name` (`clip:<id>@<hash>`) trong `state-context.ts` (nhánh `case 'video'`, hiện chỉ in `video at (x,y)`); thầy hỏi "em đang ở đoạn nào?" (nút chapter) rồi vẽ lại khung `poster` bằng `wb_draw_latex/shape`. L1 (sau): host đọc `currentTime` của thẻ `<video>` → chapter, lưu store như `widget-state`.
 
-Lời thầy khi Q&A bị giới hạn khoảng 100 ký tự (`lib/orchestration/prompt-builder.ts:194`); action không tính vào giới hạn (`:182`). **Sửa 2026-09-30** (ADR 0008 Decision 6): khi scene hiện tại là walkthrough, `buildLengthGuidelines` dùng ngân sách "tutor" khoảng 300 ký tự, và quy tắc "gợi ý trước" nằm trong `SKILL.md`. Spike S2b (skill có tới chat agent không) chạy ở lát 1c.
+Lời thầy khi Q&A bị giới hạn khoảng 100 ký tự (`lib/orchestration/prompt-builder.ts:209`); action không tính vào giới hạn (`:205`). **Sửa 2026-09-30** (ADR 0008 Decision 6): khi scene hiện tại là walkthrough, `buildLengthGuidelines` dùng ngân sách "tutor" khoảng 300 ký tự, và quy tắc "gợi ý trước" nằm trong `SKILL.md`. Spike S2b (skill có tới chat agent không) chạy ở lát 1c.
 
 ## Consequences
 
