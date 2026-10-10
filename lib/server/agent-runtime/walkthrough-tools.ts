@@ -115,7 +115,8 @@ export function buildWalkthroughTool(deps: CourseToolDeps) {
       const sceneId = sceneIdFor(deps.sessionId, callId);
       const replayKey = `${deps.sessionId ?? ''}\0${callId}`;
 
-      // same guards and error shapes as generate_scene: never destroy a page this tool cannot rebuild
+      // same error shapes as generate_scene. Only interactive pages may be replaced: a slide, quiz or
+      // PBL page holds authored content this tool cannot rebuild, so it is never overwritten here.
       const existing = doc.scenes.find((scene) => scene.order === params.order);
       if (existing && !SUPPORTED_SCENE_TYPES.has(existing.type)) {
         return result(
@@ -128,6 +129,13 @@ export function buildWalkthroughTool(deps: CourseToolDeps) {
         return result(
           'The existing page is a PBL project. Delete it first or regenerate it as pbl; changing its type here would destroy the project.',
           { blocked: 'pbl-type-change', sceneId: existing.id, type: existing.type },
+          true,
+        );
+      }
+      if (existing && existing.type !== 'interactive') {
+        return result(
+          `Page ${params.order} is a ${existing.type} page and was left unchanged. Use another order for the walkthrough.`,
+          { blocked: 'occupied-by-content', sceneId: existing.id, type: existing.type },
           true,
         );
       }

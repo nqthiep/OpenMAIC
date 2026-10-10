@@ -133,8 +133,9 @@ describe('generate_walkthrough', () => {
     expect(t.scenes()).toHaveLength(2);
   });
 
-  it('replaces the page that already holds the order', async () => {
-    const t = setup([slide('old', 1), slide('keep', 2)]);
+  it('replaces an interactive page that already holds the order', async () => {
+    const interactive = { ...slide('old', 1), type: 'interactive' } as unknown as Scene;
+    const t = setup([interactive, slide('keep', 2)]);
     const out = await run(t, 'c1', { order: 1 });
     expect(out.isError).toBeUndefined();
     const scenes = t.scenes();
@@ -143,6 +144,17 @@ describe('generate_walkthrough', () => {
     expect(replaced.type).toBe('interactive');
     expect(replaced.id).toBe('old');
     expect(scenes.find((s) => s.id === 'keep')!.type).toBe('slide');
+  });
+
+  it('refuses to overwrite a slide or quiz page at the order, and writes nothing', async () => {
+    const t = setup([slide('s1', 1)]);
+    const out = await run(t, 'c1', { order: 1 });
+    expect(out).toMatchObject({
+      isError: true,
+      details: { blocked: 'occupied-by-content', sceneId: 's1', type: 'slide' },
+    });
+    expect(t.store.putScene).not.toHaveBeenCalled();
+    expect(t.scenes()[0]!.type).toBe('slide');
   });
 
   it('follows the stage language directive and the locale parameter', async () => {
@@ -202,7 +214,7 @@ describe('generate_walkthrough', () => {
   });
 
   it('is idempotent when the call replaced an occupied order', async () => {
-    const t = setup([slide('old', 1)]);
+    const t = setup([{ ...slide('old', 1), type: 'interactive' } as unknown as Scene]);
     const first = await run(t, 'c1', { order: 1 });
     expect(first.details).not.toHaveProperty('replay');
     expect(t.store.putScene).toHaveBeenCalledTimes(1);
@@ -213,7 +225,7 @@ describe('generate_walkthrough', () => {
   });
 
   it('treats an identical existing walkthrough as a replay even without the call memory', async () => {
-    const t = setup([slide('old', 1)]);
+    const t = setup([{ ...slide('old', 1), type: 'interactive' } as unknown as Scene]);
     await run(t, 'c1', { order: 1 });
     const again = await run(t, 'other-call', { order: 1 });
     expect(again.details).toMatchObject({ sceneId: 'old', replay: true });
@@ -221,7 +233,7 @@ describe('generate_walkthrough', () => {
   });
 
   it('rewrites an existing walkthrough when the request differs', async () => {
-    const t = setup([slide('old', 1)]);
+    const t = setup([{ ...slide('old', 1), type: 'interactive' } as unknown as Scene]);
     await run(t, 'c1', { order: 1 });
     const other = await run(t, 'c2', { order: 1, title: 'Another title' });
     expect(other.details).not.toHaveProperty('replay');
