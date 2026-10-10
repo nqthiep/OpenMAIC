@@ -1,6 +1,6 @@
 # ADR 0011: Điểm vào — chỉ đường agent (workbench); walkthrough và clip do tool tất định tạo
 
-- **Status**: Accepted (2026-09-30; điểm vào do user quyết định, cách hiện thực chọn bằng SWOT)
+- **Status**: Accepted (2026-09-30; điểm vào do user quyết định, cách hiện thực chọn bằng SWOT); quyết định 1 được mở rộng bởi [0016](0016-student-door-practice-teacher-view.md): thêm cửa học sinh không cần agent, đường agent giữ nguyên
 - **Date**: 2026-09-30
 - **Deciders**: User ("tính năng chỉ có khi bật workbench") + Architect panel (review 2026-09-30, phát hiện A1, A4, A5)
 - **Thay thế một phần**: [0005](0005-widget-hosting-model.md) (hàm bọc `generateSceneContent`, `SceneEnricher`, call site classic), [0007](0007-manim-and-math-visualization.md) (đường chèn clip)

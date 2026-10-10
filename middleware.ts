@@ -36,6 +36,16 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Not found', { status: 404 });
   }
 
+  // Student deployments (OPENMAIC_HOME=learn) open on the lesson picker instead of the course
+  // generator; `/?classic=1` is the way to the generator (ADR 0016).
+  if (
+    pathname === '/' &&
+    process.env.OPENMAIC_HOME === 'learn' &&
+    !request.nextUrl.searchParams.has('classic')
+  ) {
+    return NextResponse.redirect(new URL('/learn', request.url));
+  }
+
   // One anonymous owner per browser, established on the page response before
   // any API request can mint its own.
   const identity = anonymousOwnerForNavigation({

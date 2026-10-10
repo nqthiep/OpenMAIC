@@ -558,7 +558,7 @@ function QuestionCard({
             {index + 1}
           </span>
           <div>
-            <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-relaxed">
+            <div className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-relaxed whitespace-pre-line">
               <QuizMathText text={question.question} allowDisplayMode />
             </div>
             <p className="text-xs text-gray-400 mt-0.5">

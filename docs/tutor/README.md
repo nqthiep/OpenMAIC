@@ -96,6 +96,7 @@ Chỉ có ước lượng cỡ S/M/L ([ADR 0004](decisions/0004-three-phase-plan
   - **Chưa được git theo dõi**; cần rà nguồn/bản quyền trước khi commit (`provenance` trong file).
 - `.gitignore`: đã bỏ ignore `docs/tutor/` (`/docs/*` + `!/docs/tutor/`); các file **chưa commit**.
 - Đã có `lib/tutor/`, `lib/widgets/`, `lib/subjects/cp/` (Tin) và `lib/subjects/math/` (27 walkthrough Toán); trạng thái chi tiết ở [HANDOFF](HANDOFF.md).
+- (2026-10-10) Cửa học sinh `/learn` (chọn bài, không cần agent), luyện tập không code và màn hình giáo viên `/teacher`: [ADR 0016](decisions/0016-student-door-practice-teacher-view.md).
 - Quyết định của user (2026-09-30), chi tiết ở [REQUIREMENTS §5](REQUIREMENTS.md):
   - chặn `code` toàn ứng dụng;
   - nhập input sau khi preset chạy ổn;
