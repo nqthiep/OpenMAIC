@@ -34,6 +34,7 @@
  * resolve (embedded data blocks for the single file; a later variant can ship
  * the same paths as files next to the page).
  */
+import { decideInteractiveMount } from '@/lib/widgets/policy';
 import type { PPTElement, Slide } from '@openmaic/dsl';
 import type {
   DiscussionAction,
@@ -451,6 +452,7 @@ function prepareScene(
   scene: ManifestScene,
   media: StandaloneMediaResolution,
   resolver: MediaResolver,
+  codeAllowed: boolean,
 ): ManifestScene {
   const actions = prepareStandaloneActions(scene.actions, media.playback?.audio, resolver);
   const rest: ManifestScene = {
@@ -473,6 +475,12 @@ function prepareScene(
     return { ...rest, content: preparePblContent(content) };
   }
   if (content.type === 'interactive') {
+    // ADR 0010 L1: a student-code widget is not packaged on a deployment that blocks it, so the file
+    // cannot run it either; the player shows the scene as unavailable.
+    if (decideInteractiveMount(content, codeAllowed) === 'blocked') {
+      const { url: _url, html: _html, ...withoutPage } = content;
+      return { ...rest, content: { ...withoutPage, html: undefined } };
+    }
     // Inline HTML is the only form that works offline; a URL-only scene keeps
     // no address at all and the player shows it as unavailable.
     const { url: _url, ...interactive } = content;
@@ -492,6 +500,8 @@ function prepareScene(
 export function prepareStandaloneManifest(
   manifest: ClassroomManifest,
   media: StandaloneMediaResolution,
+  /** Whether this deployment allows the student-code widget; unknown (omitted) = blocked. */
+  codeAllowed = false,
 ): PreparedStandaloneManifest {
   const unresolved = new Set<string>();
   const playbackMedia = new Set<string>();
@@ -516,7 +526,7 @@ export function prepareStandaloneManifest(
     usePlaybackMedia: (path) => playbackMedia.add(path),
   };
   const scenes = orderManifestScenes(manifest.scenes).map((scene) =>
-    prepareScene(scene, media, resolver),
+    prepareScene(scene, media, resolver, codeAllowed),
   );
   const { videoManifest: _videoManifest, ...stage } = manifest.stage;
   return {

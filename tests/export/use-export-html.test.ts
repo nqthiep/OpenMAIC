@@ -31,6 +31,10 @@ vi.mock('@/lib/hooks/use-i18n', () => ({
 }));
 vi.mock('@/lib/store/stage', () => ({ useStageStore: { getState: () => mocks.state } }));
 vi.mock('@/lib/classroom/stage-meta-client', () => ({ fetchStageMeta: mocks.fetchStageMeta }));
+// The code-widget probe is a network call the export does not need to test: answer "blocked" directly.
+vi.mock('@/lib/hooks/use-code-widget-allowed', () => ({
+  resolveCodeWidgetAllowed: vi.fn(async () => false),
+}));
 vi.mock('@/lib/export/standalone-html/build-standalone-html', async (importOriginal) => {
   const actual =
     await importOriginal<typeof import('@/lib/export/standalone-html/build-standalone-html')>();

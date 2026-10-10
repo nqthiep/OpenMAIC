@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver';
 import { toast } from 'sonner';
 import { useStageStore } from '@/lib/store/stage';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { resolveCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
 import { createLogger } from '@/lib/logger';
 import type { Scene } from '@/lib/types/stage';
 import type { LegacySpeechAction } from '@/lib/types/action';
@@ -99,6 +100,7 @@ export function useExportHtml() {
           lang: locale,
           classroomUrl,
           includeNarration,
+          codeAllowed: await resolveCodeWidgetAllowed(),
           // Too large for one file: the page plus its media folders, zipped.
           format: 'auto',
           zipReadme: t('export.htmlZipReadme'),

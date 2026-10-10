@@ -1165,6 +1165,35 @@ describe('standalone HTML export media policy', () => {
 });
 
 describe('prepareStandaloneManifest', () => {
+  it('leaves a code widget page out of the file unless the deployment allows the widget', () => {
+    const codeScene = {
+      type: 'interactive',
+      title: 'Editor',
+      order: 0,
+      content: { type: 'interactive', html: '<p>editor</p>', widgetType: 'code', widgetConfig: {} },
+      actions: [],
+    };
+    const manifest = {
+      formatVersion: 1,
+      exportedAt: '',
+      appVersion: '',
+      stage: { name: 'x', createdAt: 0, updatedAt: 0 },
+      agents: [],
+      mediaIndex: {},
+      scenes: [codeScene],
+    } as unknown as ClassroomManifest;
+    const media = { dataUris: new Map<string, string>() };
+
+    const blocked = prepareStandaloneManifest(manifest, media).manifest.scenes[0];
+    expect(blocked.content).toMatchObject({ type: 'interactive', widgetType: 'code' });
+    expect((blocked.content as { html?: unknown }).html).toBeUndefined();
+
+    const allowed = prepareStandaloneManifest(manifest, media, true).manifest.scenes[0];
+    expect((allowed.content as { html?: unknown }).html).toEqual(
+      expect.stringContaining('<p>editor</p>'),
+    );
+  });
+
   it('keeps only poster frames for video and drops audio sources', () => {
     const manifest = {
       formatVersion: 1,

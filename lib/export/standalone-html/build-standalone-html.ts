@@ -543,6 +543,11 @@ export interface StandaloneHtmlExportOptions extends StandaloneMediaDeps {
    * link to it; when absent, the link is omitted.
    */
   classroomUrl?: string;
+  /**
+   * Whether this deployment allows the student-code widget (`useCodeWidgetAllowed`). A code widget's page is
+   * left out of the file unless this is `true` (unknown = blocked).
+   */
+  codeAllowed?: boolean;
   /** Document-store dependencies, forwarded to the snapshot. */
   documentDeps?: DocumentMigrationDeps;
   /** Loads a precompiled player asset by its public path. */
@@ -649,6 +654,7 @@ export async function buildStandaloneHtmlExport(
   });
   const maxBytes = options.maxBytes ?? STANDALONE_HTML_MAX_BYTES;
   const requested = options.format ?? 'html';
+  const codeAllowed = options.codeAllowed === true;
   // Prepared first with images named by path (the ZIP variant's form): the
   // single file's size can be estimated from it without encoding anything.
   // Inline `data:` images are only decoded into files once the ZIP is going
@@ -661,7 +667,7 @@ export async function buildStandaloneHtmlExport(
     });
     return {
       linked: files,
-      prepared: prepareStandaloneManifest(snapshot.manifest, files.resolution),
+      prepared: prepareStandaloneManifest(snapshot.manifest, files.resolution, codeAllowed),
     };
   };
   let { linked, prepared: linkedPrepared } = await link();
@@ -684,7 +690,11 @@ export async function buildStandaloneHtmlExport(
   if (requested === 'zip' || singleFileBytes !== undefined) await ensureInlineDecoded();
   const { manifest, unresolved } =
     requested !== 'zip' && singleFileBytes === undefined
-      ? prepareStandaloneManifest(snapshot.manifest, await encodeStandaloneImages(bytes))
+      ? prepareStandaloneManifest(
+          snapshot.manifest,
+          await encodeStandaloneImages(bytes),
+          codeAllowed,
+        )
       : linkedPrepared;
 
   const [playerScript, playerStyle, mathFonts, chartsScript] = await Promise.all([
