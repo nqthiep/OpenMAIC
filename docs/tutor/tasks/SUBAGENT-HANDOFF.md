@@ -71,7 +71,7 @@ export PATH=/Users/quangthiep/.local/share/fnm/node-versions/v24.21.0/installati
 
 ### 4.4. Mở các cổng sư phạm (chưa mở được)
 
-- **G1/G2** (học sinh mô phỏng, `eval/sim-learner`): cần model thật. Ngưỡng áp dụng: điểm hơn nhóm đối chứng không học ≥ 20 điểm phần trăm, ≥ 70% persona chấm "dễ hiểu" ≥ 4/5 (ADR 0012, 0014).
+- **G1/G2** (học sinh mô phỏng, `eval/sim-learner`): cần model thật. Ngưỡng áp dụng: điểm hơn nhóm đối chứng không học ≥ 20 điểm phần trăm, về "dễ hiểu": không persona nào chấm ≤ 2 và ≥ 70% persona khá/giỏi chấm ≥ 4 (ADR 0014 5(b), sửa 2026-10-10).
 - **Lát 1d** (`customInput`): chỉ mở khi G1 đạt, e2e xanh 20 lần liên tiếp, và ít nhất 10 lớp dùng thật không lỗi (ADR 0012). Cần dữ liệu thật; không tự mở.
 
 ### 4.5. Lỗ hổng còn lại đã ghi (HANDOFF §7)

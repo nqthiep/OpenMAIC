@@ -108,7 +108,7 @@
    - **Đường phục vụ không đổi:** chỉ mẫu đã commit chạy trong `manim-service`; LLM **không** viết Manim khi phục vụ.
 5. **Cổng G1/G2** (thay đổi ADR 0012 quyết định 6):
    - **(a)** Hội đồng `tutor-review-cp` đạt.
-   - **(b)** **Học sinh mô phỏng:** 6 persona (lớp 8/9; yếu/khá/giỏi; học C++ hoặc Python) làm bài kiểm tra 5 câu trước, "học" bằng bản ghi bài giảng (transcript lời thầy + mô tả frame), rồi làm bài sau. Ngưỡng: điểm hơn nhóm đối chứng (cùng bài sau, không học) ≥ 20 điểm % (cài đặt thay cho "sau – trước"), và ≥ 70% persona chấm "dễ hiểu" ≥ 4/5. Đây là tín hiệu thay thế [Inference].
+   - **(b)** **Học sinh mô phỏng:** 6 persona (lớp 8/9; yếu/khá/giỏi; học C++ hoặc Python) làm bài kiểm tra 5 câu trước, "học" bằng bản ghi bài giảng (transcript lời thầy + mô tả frame), rồi làm bài sau. Ngưỡng: điểm hơn nhóm đối chứng (cùng bài sau, không học) ≥ 20 điểm % (cài đặt thay cho "sau – trước"); và **"dễ hiểu"** (sửa 2026-10-10, thay cho "≥ 70% persona chấm ≥ 4/5"): không persona nào chấm ≤ 2, ≥ 70% persona *khá và giỏi* chấm ≥ 4 (persona yếu chỉ cần > 2), và bản bài cố ý kém bị chấm thấp hơn ≥ 1 điểm ở ≥ 50% persona. Nếu hai mục đầu đạt mà mục sau không, kết quả là "không kết luận được", không phải đạt; nếu một mục đầu trượt thì vẫn là không đạt. Lý do sửa [Inference]: trong 36 lần chấm bài tốt (3 lần chạy × 2 bài × 6 persona), persona yếu luôn chấm 3, persona giỏi luôn chấm 4, và bài cố ý kém bị chấm thấp hơn đúng 1 điểm ở `binary-search`; ngưỡng "≥ 4 ở mọi nhóm" vì vậy đo cấu trúc bộ persona nhiều hơn đo bài. Số liệu ở [review-runs/2026-10-10-student-roleplay](../review-runs/2026-10-10-student-roleplay/README.md). Đây là tín hiệu thay thế [Inference].
    - **(c)** Sau khi phát hành, **số đo thật** từ dữ liệu học sinh (quyết định 6) được theo dõi liên tục bằng `tutor-analyst`: tỉ lệ đúng quiz, tỉ lệ đúng câu dự đoán, số lần xin gợi ý mức 3, đánh giá "dễ hiểu" trong app.
    - Các ngưỡng trên là **giá trị áp dụng**, không còn chờ chủ dự án chốt.
 6. **Lưu dữ liệu học sinh** (DATA-MODEL §8, INTERFACES §8.3):
@@ -124,7 +124,7 @@
    | Hội đồng Tin/Toán | ≥ 30 entry **cài lỗi**: sai `explanation`, sai lời thầy, off-by-one trong C++/Python, bẫy sai ngôn ngữ, sai bất biến; + ≥ 10 entry đúng | bắt ≥ 90% lỗi; chặn nhầm ≤ 10% entry đúng |
    | Lọc nội dung | ≥ 100 mẫu độc hại/nhạy cảm + ≥ 200 mẫu giáo dục lành tính (gồm thuật ngữ Tin học dễ nhầm như "kill", "attack", "exploit") | chặn ≥ 99% mẫu độc hại; chặn nhầm ≤ 2% mẫu lành tính |
    | LLM tác giả Manim | 20 brief (S9) | RSR@3 ≥ 90%; đúng-toán (hội đồng) ≥ 90% |
-   | Học sinh mô phỏng | bài giảng tốt và bài giảng **cố ý kém** (bỏ bước, sai thứ tự) | bài kém phải có điểm tăng thấp hơn bài tốt ≥ 10 điểm % |
+   | Học sinh mô phỏng | bài giảng tốt và bài giảng **cố ý kém** (bỏ bước, sai thứ tự) | bài kém phải có điểm tăng thấp hơn bài tốt ≥ 10 điểm %, và bị chấm "dễ hiểu" thấp hơn ≥ 1 điểm ở ≥ 50% persona |
 
 8. **Nhà cung cấp và phân vai** (user chọn 2026-10-01: "Deepseek V4.1 flash và GPT-6-luna"):
    - Cả hai nhà cung cấp đã có trong OpenMAIC: DeepSeek (`deepseek`, OpenAI-compatible, `lib/ai/providers.ts:924-928`; `DEEPSEEK_API_KEY`, `DEEPSEEK_MODELS`, `.env.example:37-40`) và OpenAI (`OPENAI_API_KEY`, `OPENAI_MODELS`, `.env.example:11-13`).

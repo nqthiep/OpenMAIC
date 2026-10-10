@@ -120,7 +120,7 @@ Bảng này chỉ là tóm tắt. Chỉ mục chính thức và trạng thái �
    - tool riêng `generate_walkthrough` thay vì bọc `generate_scene` (ADR 0011);
    - cờ **mặc định chặn** `code` (ADR 0010);
    - bắt tay `widget-ready` (ADR 0013);
-   - cổng G1/G2 và ngưỡng (+20 điểm %, ≥ 70% "dễ hiểu"), nay là **giá trị áp dụng** (ADR 0012, 0014).
+   - cổng G1/G2 và ngưỡng (+20 điểm %; "dễ hiểu" theo ADR 0014 5(b), sửa 2026-10-10), nay là **giá trị áp dụng** (ADR 0012, 0014).
 6. **Khung curriculum Toán** (28 topic, cột `primary_medium`) là đề xuất **[Inference]**; đã gắn 5 nguồn thật (2026-10-09), chi tiết thi cử còn `[Unverified]` (HANDOFF §3b).
 7. **ADR 0014, hội đồng chọn thay user** (đảo được): hai nhà cung cấp cho mỗi hội đồng; ngưỡng bộ hiệu chuẩn; persona học sinh mô phỏng; `tutorLearning` trong kho runtime (không thêm bảng).
 
