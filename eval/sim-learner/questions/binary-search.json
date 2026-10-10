@@ -17,13 +17,23 @@
     {
       "id": "pre-2",
       "text": "Mảng a = [3, 8, 12, 17, 25, 31, 40, 52, 66, 79] (chỉ số từ 0 đến 9). Với lo = 0, hi = 9, giá trị mid = (lo + hi) / 2 (chia nguyên) là bao nhiêu?",
-      "options": ["3", "4", "5", "9"],
+      "options": [
+        "3",
+        "4",
+        "5",
+        "9"
+      ],
       "answer": 1
     },
     {
       "id": "pre-3",
       "text": "Đang tìm target = 66 trong mảng a ở trên, có lo = 0, hi = 9, mid = 4 (a[mid] = 25). Bước tiếp theo là gì?",
-      "options": ["hi = mid - 1", "lo = mid + 1", "lo = mid", "Trả về mid"],
+      "options": [
+        "hi = mid - 1",
+        "lo = mid + 1",
+        "lo = mid",
+        "Trả về mid"
+      ],
       "answer": 1
     },
     {
@@ -52,36 +62,56 @@
   "post": [
     {
       "id": "post-1",
-      "text": "Trong bài giảng, thầy tìm 45 trong mảng đã sắp xếp 10 phần tử. Khi lo = 5 và hi = 9, giá trị mid = (lo + hi) / 2 (chia nguyên) là bao nhiêu?",
-      "options": ["6", "7", "8", "5"],
+      "text": "Trong bài giảng, thầy tìm số 45 trong một mảng đã sắp xếp có 10 phần tử (chỉ số 0 đến 9). Theo đúng thứ tự, thầy đã chọn các chỉ số mid nào?",
+      "options": [
+        "4, 5, 6, 7",
+        "4, 7, 5, 6",
+        "5, 7, 6, 4",
+        "4, 6, 7, 5"
+      ],
       "answer": 1
     },
     {
       "id": "post-2",
-      "text": "Trong bài giảng, ở lượt thầy chọn mid = 7, giá trị a[7] của mảng là bao nhiêu (so với target = 45)?",
-      "options": ["40", "45", "52", "66"],
+      "text": "Trong bài giảng, khi thầy chọn mid = 5, giá trị a[5] là bao nhiêu?",
+      "options": [
+        "25",
+        "40",
+        "31",
+        "52"
+      ],
       "answer": 2
     },
     {
       "id": "post-3",
-      "text": "Mảng c = [4, 9, 15, 21, 33, 48, 60, 71], khoảng tìm lo = 3, hi = 7, có mid = 5 (c[mid] = 48), target = 21. Bước tiếp theo là gì?",
-      "options": ["lo = mid + 1", "Trả về mid", "lo = mid", "hi = mid - 1"],
-      "answer": 3
-    },
-    {
-      "id": "post-4",
-      "text": "Trong bài giảng, để kết luận 45 không có trong mảng, thầy đã so sánh 45 với a[mid] tất cả bao nhiêu lần?",
-      "options": ["3", "4", "5", "10"],
+      "text": "Trong bài giảng, khi thầy chọn mid = 7 để so với 45, thầy kết luận target nằm bên nào và cập nhật biến nào?",
+      "options": [
+        "bên phải; lo = 8",
+        "bên trái; hi = 6",
+        "bên trái; hi = 7",
+        "bên phải; lo = 6"
+      ],
       "answer": 1
     },
     {
-      "id": "post-5",
-      "text": "Ở cuối bài giảng, lo = 7 và hi = 6. Điều nào đúng?",
+      "id": "post-4",
+      "text": "Trong bài giảng, khi thầy dừng vòng lặp, lo và hi có giá trị bao nhiêu?",
       "options": [
-        "Còn đúng một phần tử cần xét là a[6]",
-        "Khoảng tìm rỗng: 45 không có trong mảng, trả về -1",
-        "Phải lấy mid = 6 và so sánh lại",
-        "Phải đặt lại lo = 0"
+        "lo = 7, hi = 6",
+        "lo = 6, hi = 5",
+        "lo = 5, hi = 6",
+        "lo = 7, hi = 7"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "post-5",
+      "text": "Trong bài giảng, lần so sánh đầu tiên thầy so 45 với a[mid] bằng bao nhiêu?",
+      "options": [
+        "12",
+        "25",
+        "40",
+        "66"
       ],
       "answer": 1
     }

@@ -6,64 +6,114 @@
     {
       "id": "pre-1",
       "text": "Một cây cao 20 mét, cưa ở độ cao H = 12. Cây đó cho bao nhiêu mét gỗ (phần bị cắt phía trên)?",
-      "options": ["8", "12", "20", "32"],
+      "options": [
+        "8",
+        "12",
+        "20",
+        "32"
+      ],
       "answer": 0
     },
     {
       "id": "pre-2",
       "text": "Có ba cây cao [6, 3, 9] mét. Cưa ở độ cao H = 4 thì tổng gỗ thu được là bao nhiêu? (cây thấp hơn H không cho gỗ)",
-      "options": ["2", "5", "7", "18"],
+      "options": [
+        "2",
+        "5",
+        "7",
+        "18"
+      ],
       "answer": 2
     },
     {
       "id": "pre-3",
       "text": "Nâng độ cao cưa H lên cao hơn thì tổng gỗ thu được thay đổi thế nào?",
-      "options": ["Tăng", "Không tăng (giảm hoặc giữ nguyên)", "Luôn không đổi", "Chưa thể biết"],
+      "options": [
+        "Tăng",
+        "Không tăng (giảm hoặc giữ nguyên)",
+        "Luôn không đổi",
+        "Chưa thể biết"
+      ],
       "answer": 1
     },
     {
       "id": "pre-4",
       "text": "Khoảng tìm [lo, hi] = [4, 5]. Nếu làm tròn lên thì mid = ⌈(lo + hi) / 2⌉ bằng bao nhiêu?",
-      "options": ["4", "4.5", "5", "9"],
+      "options": [
+        "4",
+        "4.5",
+        "5",
+        "9"
+      ],
       "answer": 2
     },
     {
       "id": "pre-5",
       "text": "Khi chặt nhị phân tìm H lớn nhất, nếu tại mid đủ gỗ (wood(mid) ≥ m) thì bước tiếp theo là gì?",
-      "options": ["hi = mid - 1", "lo = mid", "lo = mid + 1", "hi = mid"],
+      "options": [
+        "hi = mid - 1",
+        "lo = mid",
+        "lo = mid + 1",
+        "hi = mid"
+      ],
       "answer": 1
     }
   ],
   "post": [
     {
       "id": "post-1",
-      "text": "Các cây cao [20, 15, 10, 17] mét. Cưa ở H = 15 thì tổng gỗ thu được là bao nhiêu?",
-      "options": ["7", "5", "12", "22"],
-      "answer": 0
+      "text": "Trong bài giảng, khi thầy thử H = 10, cưa được bao nhiêu mét gỗ?",
+      "options": [
+        "9",
+        "22",
+        "13",
+        "5"
+      ],
+      "answer": 1
     },
     {
       "id": "post-2",
-      "text": "Trong bài giảng, khoảng tìm là lo = 15, hi = 20. Làm tròn lên thì mid là bao nhiêu?",
-      "options": ["17", "18", "16", "20"],
+      "text": "Trong bài giảng, bài toán đặt ra cần ít nhất bao nhiêu mét gỗ (m)?",
+      "options": [
+        "5",
+        "7",
+        "15",
+        "22"
+      ],
       "answer": 1
     },
     {
       "id": "post-3",
-      "text": "Trong bài giảng, cưa ở mid = 16 chỉ được 5 mét gỗ trong khi cần m = 7 (thiếu gỗ). Ta cập nhật gì?",
-      "options": ["lo = 16", "hi = 16", "hi = 15", "lo = 17"],
-      "answer": 2
+      "text": "Trong bài giảng, phần chặt nhị phân thầy thử các mức H theo thứ tự nào?",
+      "options": [
+        "10, 15, 18, 16",
+        "10, 18, 15, 16",
+        "15, 10, 16, 18",
+        "10, 15, 16, 18"
+      ],
+      "answer": 0
     },
     {
       "id": "post-4",
-      "text": "Đáp án cuối cùng của bài giảng (H lớn nhất để đủ m = 7 mét gỗ) là bao nhiêu?",
-      "options": ["10", "18", "16", "15"],
-      "answer": 3
+      "text": "Trong bài giảng, lượt thử H = 18 cưa được bao nhiêu mét gỗ?",
+      "options": [
+        "2",
+        "5",
+        "11",
+        "17"
+      ],
+      "answer": 0
     },
     {
       "id": "post-5",
-      "text": "Các cây cao [3, 8, 2] mét, cần m = 13 mét gỗ (đúng bằng tổng chiều cao). H lớn nhất để đủ gỗ là bao nhiêu?",
-      "options": ["0", "1", "2", "3"],
-      "answer": 0
+      "text": "Trong bài giảng, kết luận cuối cùng: H lớn nhất để đủ gỗ là bao nhiêu?",
+      "options": [
+        "16",
+        "15",
+        "17",
+        "10"
+      ],
+      "answer": 1
     }
   ]
 }

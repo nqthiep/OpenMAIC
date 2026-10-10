@@ -73,14 +73,40 @@ describe('shipped data files', () => {
     expect(new Set([...s.pre, ...s.post].map((x) => x.answer)).size).toBeGreaterThan(2);
   });
 
-  it('binary-search: post-3 is possible (target inside [lo, hi] and mid is the middle)', () => {
-    const s = parseQuestionSet(read('questions/binary-search.json'), 'f');
-    const q3 = s.post[2];
-    expect(q3.text).toContain('lo = 3, hi = 7');
-    expect(q3.text).toContain('mid = 5');
-    expect(q3.text).toContain('target = 21'); // c[3] = 21, inside [3, 7]
-    expect(q3.options[q3.answer]).toBe('hi = mid - 1');
-    expect((3 + 7) >> 1).toBe(5);
+  // Post-test v2 (2026-10-10): every post-test answer is a detail only the lesson states. The
+  // facts are what the transcript of the taught preset says; the question must not give it away.
+  const POST_FACTS: Record<string, RegExp[]> = {
+    'binary-search': [
+      /mid = 4[\s\S]*?mid = 7[\s\S]*?mid = 5[\s\S]*?mid = 6/,
+      /mid = 5, a\[mid\] = 31/,
+      /nên target ở bên trái\. Bỏ nửa phải: hi = 6/,
+      /lo = 7 > hi = 6/,
+      /mid = 4, a\[mid\] = 25/,
+    ],
+    'bs-answer-mini': [
+      /Cưa ở H = 10 được 22 mét/,
+      /m = 7/,
+      /Thử cưa ở H = 10[\s\S]*?Thử cưa ở H = 15[\s\S]*?Thử cưa ở H = 18[\s\S]*?Thử cưa ở H = 16/,
+      /Cưa ở H = 18: được 2 mét/,
+      /H lớn nhất là 15/,
+    ],
+  };
+  const asWord = (x: string) =>
+    new RegExp(`(?<![\\w.])${x.replace(/[.*+?^${'$'}{}()|[\]\\]/g, '\\$&')}(?![\\w.])`);
+
+  it.each([
+    ['binary-search', binarySearchEntry],
+    ['bs-answer-mini', bsAnswerMiniEntry],
+  ])('%s: every post-test answer is stated in the transcript and not in the question', (name, entry) => {
+    const s = parseQuestionSet(read(`questions/${name}.json`), `${name}.json`);
+    const text = renderTranscript(buildTranscript(entry, s.presetId!, s.locale));
+    const facts = POST_FACTS[name];
+    expect(facts).toHaveLength(s.post.length);
+    s.post.forEach((q, i) => {
+      expect(text, `${name} ${q.id}`).toMatch(facts[i]);
+      expect(q.text, `${name} ${q.id} leaks its answer`).not.toMatch(asWord(q.options[q.answer]));
+      expect(new Set(q.options).size).toBe(q.options.length);
+    });
   });
 
   it.each([
@@ -92,13 +118,11 @@ describe('shipped data files', () => {
     for (const f of facts) expect(text, f).toContain(f);
   });
 
-  it('bs-answer-mini covers the ceil-mid trap and the lo = 0 boundary', () => {
+  it('bs-answer-mini: the pre-test still asks about the round-up trap', () => {
+    // The post-test no longer carries the trap or the lo = 0 boundary: those items were answerable
+    // without the lesson (control 63%), so they moved out of the measure (2026-10-10).
     const s = parseQuestionSet(read('questions/bs-answer-mini.json'), 'f');
-    const all = [...s.pre, ...s.post];
-    expect(all.some((x) => /làm tròn lên/.test(x.text))).toBe(true);
-    const edge = s.post[4];
-    expect(edge.text).toContain('[3, 8, 2]');
-    expect(edge.options[edge.answer]).toBe('0');
+    expect(s.pre.some((x) => /làm tròn lên/.test(x.text))).toBe(true);
   });
 });
 
