@@ -41,6 +41,20 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+describe('/api/quiz-grade request validation', () => {
+  it('answers 400, not a server error, when the question is not a string', async () => {
+    const res = await POST(
+      new Request('http://localhost/api/quiz-grade', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ question: 123, userAnswer: 'x', points: 4 }),
+      }) as unknown as Parameters<typeof POST>[0],
+    );
+    expect(res.status).toBe(400);
+    expect(mocks.callLLM).not.toHaveBeenCalled();
+  });
+});
+
 describe('/api/quiz-grade with the tutor content filter', () => {
   it('flag off: no filter call and the grade is untouched', async () => {
     vi.stubEnv('OPENMAIC_TUTOR_MODERATION', '');

@@ -7,6 +7,7 @@ import {
   pickLocale,
   safeMessage,
   eventsFromProducer,
+  observationTexts,
   studentTexts,
   withTutorModeration,
   type ModerateFn,
@@ -259,6 +260,47 @@ describe('withTutorModeration - input', () => {
     const out = await collect(withTutorModeration(makeBody([userMsg('hi')] as never), src.gen));
     expect(src.state.started).toBe(false);
     expect((out[1] as E<'text_delta'>).data.content).toBe(SAFE_MESSAGES.generic.vi);
+  });
+});
+
+describe('observationTexts and the input filter', () => {
+  const packet = (observation: unknown) =>
+    ({ sourceHtmlHash: 'a'.repeat(64), snapshot: { status: 'available', observation } }) as never;
+
+  it('is empty without an observation, and serializes the observation otherwise', () => {
+    expect(observationTexts(undefined)).toEqual([]);
+    expect(observationTexts(packet(undefined))).toEqual([]);
+    expect(observationTexts(packet({ answer: 'typed by the student' }))).toEqual([
+      '{"answer":"typed by the student"}',
+    ]);
+  });
+
+  it('slices a long observation so no part is left unscreened', () => {
+    const slices = observationTexts(packet({ text: 'x'.repeat(9_000) }));
+    expect(slices.length).toBeGreaterThan(1);
+    expect(slices.join('')).toBe(JSON.stringify({ text: 'x'.repeat(9_000) }));
+  });
+
+  it('blocks when the page-reported state carries flagged text, with the agent never started', async () => {
+    const mod = vi.fn<ModerateFn>(async (text) =>
+      text.includes('flagged') ? verdict(['sexual']) : ALLOW,
+    );
+    const src = fakeSource([start(), text('should never appear'), end(), done()]);
+    const out = await collect(
+      withTutorModeration(
+        makeBody(
+          [userMsg('a harmless question')] as never,
+          {
+            interactiveState: packet({ answer: 'flagged words' }),
+          } as never,
+        ),
+        src.gen,
+        { moderate: mod },
+      ),
+    );
+    expect(src.state.started).toBe(false);
+    expect(mod.mock.calls.some(([t]) => t.includes('flagged words'))).toBe(true);
+    expect(types(out)).toEqual(['agent_start', 'text_delta', 'agent_end', 'cue_user', 'done']);
   });
 });
 

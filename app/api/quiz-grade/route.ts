@@ -33,9 +33,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as GradeRequest;
     const { question, userAnswer, points, commentPrompt, language } = body;
-    questionSnippet = question?.substring(0, 60);
-    resolvedPoints = points;
-
     if (
       typeof question !== 'string' ||
       typeof userAnswer !== 'string' ||
@@ -44,6 +41,8 @@ export async function POST(req: NextRequest) {
     ) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'question and userAnswer are required');
     }
+    questionSnippet = question.substring(0, 60);
+    resolvedPoints = points;
 
     // Validate points is a positive finite number
     if (!points || !Number.isFinite(points) || points <= 0) {

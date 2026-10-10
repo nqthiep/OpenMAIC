@@ -101,7 +101,7 @@ describe('extractVisibleText', () => {
     expect(extractVisibleText(quiz)).toEqual(['Quiz', 'Which?', 'Alpha', 'Beta', 'Because Alpha.']);
   });
 
-  it('skips interactive html (also for walkthroughs) but still moderates title and speech', () => {
+  it('screens interactive html, but not stylesheets or comments; walkthroughs skip the catalog html', () => {
     const widget = {
       id: 'w',
       order: 1,
@@ -110,7 +110,15 @@ describe('extractVisibleText', () => {
       content: { type: 'interactive', html: '<body>Secret html</body>', widgetConfig: {} },
       actions: [],
     } as unknown as Scene;
-    expect(extractVisibleText(widget)).toEqual(['W']);
+    expect(extractVisibleText(widget)).toEqual(['W', '<body>Secret html</body>']);
+    const styled = {
+      ...widget,
+      content: {
+        ...widget.content,
+        html: '<style>.a{color:red}</style><!-- hidden --><p title="Shown">Text</p>',
+      },
+    } as unknown as Scene;
+    expect(extractVisibleText(styled)).toEqual(['W', '<p title="Shown">Text</p>']);
     const walk = {
       ...widget,
       content: { ...widget.content, widgetConfig: { kind: 'walkthrough' } },
@@ -159,16 +167,25 @@ describe('moderateScene', () => {
     const seen: number[] = [];
     const mod = vi.fn(async (text: string) => {
       seen.push(text.length);
-      return seen.length === 2 ? BLOCK : ALLOW;
+      return seen.length === 1 ? BLOCK : ALLOW;
     });
     const blocked = await moderateScene(slideScene(long), { moderate: mod });
     expect(blocked?.error).toBe('content-blocked');
-    expect(mod).toHaveBeenCalledTimes(2);
+    // three windows; calls already in flight when the block lands still finish, none start after it
+    expect(mod.mock.calls.length).toBeLessThanOrEqual(3);
     expect(seen.every((n) => n <= 4000)).toBe(true);
 
     const all = vi.fn(async () => ALLOW);
     await moderateScene(slideScene(long), { moderate: all });
     expect(all.mock.calls.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('shows a phrase that straddles a window boundary whole to the model', async () => {
+    const phrase = 'FORBIDDEN';
+    const text = `${'x'.repeat(3_995)}${phrase}${'y'.repeat(100)}`;
+    const mod = vi.fn(async (_text: string) => ALLOW);
+    await moderateScene(slideScene(text), { moderate: mod });
+    expect(mod.mock.calls.some(([t]) => t.includes(phrase))).toBe(true);
   });
 
   it('makes no call for a scene without visible text', async () => {

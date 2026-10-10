@@ -2,7 +2,7 @@
  * Nối bộ lọc nội dung vào luồng `/api/chat` (INTERFACES 8.1, ADR 0014 quyết định 2).
  *
  * `withTutorModeration(body, source)` bọc luồng sự kiện của `statelessGenerate`:
- * - Vào: lọc MỌI tin nhắn học sinh trong request (tối đa 10 tin cuối); vi phạm thì thay cả luồng bằng một lượt thầy soạn sẵn
+ * - Vào: lọc MỌI tin nhắn học sinh trong request (tối đa 10 tin cuối) và observation của trang tương tác (chữ trang tự báo, có thể chứa chữ học sinh gõ); vi phạm thì thay cả luồng bằng một lượt thầy soạn sẵn
  *   (agent không bao giờ chạy: generator chưa được kéo thì chưa làm gì).
  * - Ra: giữ `text_delta` và `action` theo `messageId` tới `agent_end`, lọc trọn câu, rồi mới phát.
  *
@@ -113,6 +113,25 @@ function userMessageText(msg: StatelessChatRequest['messages'][number]): string 
   const name = msg.metadata?.senderName;
   if (typeof name === 'string') out.push(name);
   return out.join('\n').trim();
+}
+
+/** Số ký tự của một lời gọi lọc đầu vào phần observation (cùng cỡ với chiều ra). */
+const OBSERVATION_SLICE_CHARS = 4000;
+
+/**
+ * Chữ của phần observation của trang tương tác mà agent sẽ thấy (`stateNote`). Trang tự báo nên nó có thể
+ * chứa chữ học sinh gõ vào trang, nên được lọc như một tin nhắn học sinh. Không có observation thì rỗng.
+ */
+export function observationTexts(state: StatelessChatRequest['interactiveState']): string[] {
+  const observation = (state as { snapshot?: { observation?: unknown } } | undefined)?.snapshot
+    ?.observation;
+  const text = observation === undefined ? undefined : JSON.stringify(observation);
+  if (!text) return [];
+  const slices: string[] = [];
+  for (let i = 0; i < text.length; i += OBSERVATION_SLICE_CHARS) {
+    slices.push(text.slice(i, i + OBSERVATION_SLICE_CHARS));
+  }
+  return slices;
 }
 
 /** Chữ của tin nhắn học sinh mới nhất, chỉ khi nó là tin CUỐI của lịch sử. */
@@ -374,7 +393,11 @@ export async function* withTutorModeration(
   const mod = deps.moderate ?? moderate;
   const locale = pickLocale(body.storeState?.stage?.languageDirective);
 
-  const verdict = await checkInputs(mod, studentTexts(body.messages), locale);
+  const verdict = await checkInputs(
+    mod,
+    [...studentTexts(body.messages), ...observationTexts(body.interactiveState)],
+    locale,
+  );
   if (verdict) {
     logBlocked('in', verdict);
     yield* scriptedTurn(body, safeMessage(verdict.categories, locale));
