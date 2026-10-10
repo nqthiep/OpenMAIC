@@ -96,7 +96,7 @@ async function main(): Promise<number> {
   console.log(`Benign:  ${benign.length} (${countByGroup(benign)})`);
   if (limit !== undefined) console.log(`Partial run: --limit ${limit} per file.`);
   if (!route) {
-    console.error(`Route: MISSING. No model is assigned to tutor.sim-learner in openmaic.yml.`);
+    console.error(`Route: MISSING. No model is assigned to tutor.moderation in openmaic.yml.`);
     return exitCode(false);
   }
   console.log(`Route: ${STAGE} -> ${route.model}`);
