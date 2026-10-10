@@ -11,6 +11,7 @@ import {
 import { useSceneRuntimeErrors } from '@/lib/store/scene-runtime-errors';
 import { useStageStore } from '@/lib/store/stage';
 import { useWidgetRuntimeState } from '@/lib/store/widget-runtime-state';
+import { useTutorLearningLog } from '@/lib/tutor/use-learning-log';
 import { parseInbound, parseWidgetEvent } from '@/lib/tutor/protocol/messages';
 import type { Scene } from '@/lib/types/stage';
 import { isWalkthroughContent } from '@/lib/widgets/policy';
@@ -202,6 +203,7 @@ export function InteractiveIframeHost({
   readonly onPlaybackPick?: (pick: PlaybackInteractiveComponentPick) => void;
   readonly onPlaybackCancel?: () => void;
 }) {
+  useTutorLearningLog();
   const entries = useInteractiveIframePool((s) => s.entries);
   const activeSceneId = useInteractiveIframePool((s) => s.activeSceneId);
   const reset = useInteractiveIframePool((s) => s.reset);

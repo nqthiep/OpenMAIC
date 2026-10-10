@@ -130,7 +130,7 @@ describe('walkthrough provider: build', () => {
           expect(Object.keys(b.config).sort()).toEqual(
             [
               'type', 'kind', 'walkthroughId', 'entryRev', 'contentHash', 'subject', 'visualizer',
-              'locale', 'presetId', 'panel', 'presets', 'beats', 'runtimeVersion',
+              'locale', 'presetId', 'panel', 'presets', 'beats', 'beatsByPreset', 'runtimeVersion',
             ].sort(),
           ); // prettier-ignore
           expect(b.config).toMatchObject({
@@ -146,6 +146,10 @@ describe('walkthrough provider: build', () => {
             runtimeVersion: 1,
           });
           expect(b.config.contentHash).toBe(entryContentHash(bs));
+          // the beats of every preset (the learning log needs them), never with the answers
+          expect(Object.keys(b.config.beatsByPreset ?? {}).sort()).toEqual([...PRESET_IDS].sort());
+          expect(b.config.beatsByPreset?.[presetId]).toEqual(b.config.beats);
+          expect(JSON.stringify(b.config.beatsByPreset)).not.toContain('"answer"');
           expect(JSON.stringify(b.config)).not.toContain('"frames"');
           expect(b.content).toMatchObject({ type: 'interactive', widgetType: 'simulation' });
           // the html carries the same light config

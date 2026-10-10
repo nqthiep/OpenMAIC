@@ -312,6 +312,9 @@ export function createWalkthroughProvider(
           };
         }),
         beats: plainBeats(current.beats),
+        beatsByPreset: Object.fromEntries(
+          entry.presets.map((p) => [p.id, plainBeats(built.get(p.id)!.beats)]),
+        ),
         runtimeVersion: RUNTIME_VERSION,
       };
 

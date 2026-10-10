@@ -47,6 +47,8 @@ export interface WalkthroughWidgetConfig {
   presets: PresetInfo[];
   /** Beat của `presetId`. */
   beats: BeatRef[];
+  /** Beat của mọi preset (không có `answer`); trang dựng trước khi có trường này chỉ biết `beats`. */
+  beatsByPreset?: Record<string, BeatRef[]>;
   runtimeVersion: number;
   /** Chỉ từ lát 1d (ADR 0013 §9). */
   llmInput?: unknown;

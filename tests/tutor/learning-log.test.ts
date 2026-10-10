@@ -298,7 +298,10 @@ describe('watchWidgetRuntime', () => {
     });
     const state = (
       frame: number,
-      extra: { prediction?: { beatId: string; correct: boolean }; preset?: string } = {},
+      extra: {
+        prediction?: { beatId: string; correct: boolean; skipped?: boolean };
+        preset?: string;
+      } = {},
     ): WidgetRuntimeMap => ({
       s1: { ready: true, state: { preset: extra.preset ?? 'absent', frame, ...extra } },
     });
@@ -366,6 +369,19 @@ describe('watchWidgetRuntime', () => {
       skipped: false,
     });
     expect(valid(t.append.mock.calls[0][1])).toBe(true);
+  });
+
+  it('records a skipped question as skipped, not as a wrong answer', async () => {
+    const t = setup();
+    t.set(t.state(2, { prediction: { beatId: 'mid', correct: false, skipped: true } }));
+    await flush();
+    expect(t.append.mock.calls[0][1]).toEqual({
+      type: 'prediction',
+      sceneId: 's1',
+      beatId: 'mid',
+      correct: false,
+      skipped: true,
+    });
   });
 
   it('records a prediction again after it disappeared or changed', async () => {

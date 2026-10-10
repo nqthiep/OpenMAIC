@@ -258,10 +258,14 @@ export function watchWidgetRuntime(
       if (!p) {
         lastPrediction.delete(sceneId);
       } else {
-        const key = JSON.stringify([p.beatId, p.correct]);
+        const skipped = p.skipped === true;
+        const key = JSON.stringify([p.beatId, p.correct, skipped]);
         if (lastPrediction.get(sceneId) !== key) {
           lastPrediction.set(sceneId, key);
-          emit(buildPredictionRecord({ sceneId, beatId: p.beatId, correct: p.correct }), sceneId);
+          emit(
+            buildPredictionRecord({ sceneId, beatId: p.beatId, correct: p.correct, skipped }),
+            sceneId,
+          );
         }
       }
     }

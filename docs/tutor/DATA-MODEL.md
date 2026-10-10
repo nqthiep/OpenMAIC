@@ -58,6 +58,7 @@ Hai khối JSON trong HTML tự chứa (ARCHITECTURE §6). Trường bắt buộ
               { "id": "single", "label": "Một phần tử", "total": 4, "framesHash": "…" }],
   "beats": [{ "id": "start", "occurrence": 1, "frame": 0 }, { "id": "mid", "occurrence": 1, "frame": 1 },
             { "id": "done", "occurrence": 1, "frame": 8 }],          // của presetId
+  "beatsByPreset": { "mid-hit": [ … ], "first": [ … ] },              // beat của MỌI preset, không có `answer`; nhật ký học (ADR 0016) cần; trang cũ không có
   "runtimeVersion": 1
   // "llmInput": { … }   ← chỉ từ lát 1d (ADR 0013 §9); khi có thì presets[] thêm { "id": "llm", "label": "…", "total": n, "framesHash": "…" }
 }
