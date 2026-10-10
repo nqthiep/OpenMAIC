@@ -101,8 +101,10 @@ async function realLlm(): Promise<SimLlm> {
         model: connection.model,
         system,
         prompt,
-        temperature: 0.3,
-        maxOutputTokens: 300,
+        // Claude 5 models reject `temperature` (the API deprecates it), so they run on their default.
+        ...(/^anthropic:claude-[a-z]+-5(-|$)/.test(route?.model ?? '') ? {} : { temperature: 0.3 }),
+        // Claude 5 models spend hidden reasoning tokens from this same budget: 300 leaves no visible answer.
+        maxOutputTokens: 2000,
         maxRetries: 1,
         abortSignal: AbortSignal.timeout(TIMEOUT_MS),
       },
