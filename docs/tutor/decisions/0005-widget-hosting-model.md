@@ -12,7 +12,7 @@
 
 | Sự thật | Nguồn |
 | --- | --- |
-| Interactive scene = HTML hoàn chỉnh render bằng iframe `srcDoc`, sandbox không `allow-same-origin`. | `packages/@openmaic/dsl/src/interactive.ts`; `components/scene-renderers/InteractiveIframeHost.tsx:388` |
+| Interactive scene = HTML hoàn chỉnh render bằng iframe `srcDoc`, sandbox không `allow-same-origin`. | `packages/@openmaic/dsl/src/interactive.ts`; `components/scene-renderers/InteractiveIframeHost.tsx:567` |
 | `WidgetType` là union đóng 6 giá trị; `isInteractiveContent` và `validateScene` từ chối giá trị lạ. | `packages/@openmaic/dsl/src/interactive.ts:5-26,65-77`; `packages/@openmaic/dsl/src/validate.ts:200-216` |
 | Agent **không có bước outline**: nó tự gọi tool `generate_scene`; tool nhận `widgetType` (5 giá trị) và `widgetOutline: Unknown`. Đường "classic" (`scene-outlines-stream` → `scene-content`) **không nhận skill**. | `lib/server/agent-runtime/generation-tools.ts:44-70`; `lib/server/agent-runtime/course-tools.ts:240` |
 | `outline-constraints.json`: `skillOutlineContext`/`renderConstraints` **không có caller production**; kiểm tra duy nhất là `checkScenesAgainstSkill` **sau khi ghi** scene, chỉ báo `skillViolations`, và bỏ `requiredWidgetOutlineFields`. → `SKILL.md` là kênh chỉ dẫn LLM duy nhất; ràng buộc chỉ là cảnh báo. | `lib/server/agent-runtime/skills.ts:719,879-890`; `lib/server/agent-runtime/generation-tools.ts:458-461` |
@@ -113,7 +113,7 @@ Chặn widget `code` là cờ triển khai chung, không phải chính sách the
   - `Locale` là `string`. Nội dung catalog có bảng `vi-VN`, `en-US`; locale khác dùng `en-US`. Thêm locale không đổi kiểu.
   - Có test.
 - **Cửa vào** (sửa 2026-09-30, ADR 0011): tool `generate_walkthrough` kiểm id/preset trước, trả lỗi kèm `validIds`, rồi gọi `provider.build()`. **Không** bọc `generateSceneContent` và không sửa call site classic. `generate_scene` gặp `walkthroughId` thì trả lỗi `use-generate-walkthrough`.
-- **Call site sinh action cho scene walkthrough đã có:** `generate_actions` (`lib/server/agent-runtime/generation-tools.ts:540-564`) và `duplicate_scene` (`:581`) đi qua `provider.actions(scene)` khi `claimsScene`. Các call site classic (`lib/server/classroom-generation.ts:631`, `app/api/generate/scene-actions/route.ts:160`) không bao giờ gặp walkthrough vì classic không tạo được nó.
+- **Call site sinh action cho scene walkthrough đã có:** `generate_actions` (`lib/server/agent-runtime/generation-tools.ts:585-609`) và `duplicate_scene` (`:581`) đi qua `provider.actions(scene)` khi `claimsScene`. Các call site classic (`lib/server/generation/steps/scene-actions.ts`) không bao giờ gặp walkthrough vì classic không tạo được nó.
 - **Công thức toán** (sửa 2026-09-30):
   - **Không** dùng `postProcessInteractiveHtml`: nó chèn KaTeX từ CDN (`interactive-post-processor.ts:72-74`, `trust:true` ở `:86`), làm HTML mất tính tự chứa, và đổi `$…$` ngoài `<script>`.
   - Công thức trong catalog được **dựng sẵn trên server** bằng `katex.renderToString` (`katex` đã là dependency, `package.json:110`). Iframe chỉ cần CSS + font KaTeX inline, theo tiền lệ `lib/video-export/emit-hyperframes/katex-assets.ts`. `temml` (MathML, `package.json:156`) là phương án dự phòng [Inference: chất lượng MathML cần đo].

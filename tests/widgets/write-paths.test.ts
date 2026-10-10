@@ -34,65 +34,57 @@ const CLASSIFIED: Record<string, Classified> = {
   'lib/server/agent-runtime/generation-tools.ts': { layer: 'L2-tool', why: 'generation tools' },
   'lib/server/agent-runtime/import-pptx.ts': { layer: 'L2-tool', why: 'import writes document' },
   'lib/server/agent-runtime/roster-tools.ts': { layer: 'L2-tool', why: 'saveDocument' },
+  'lib/server/generation/run/document.ts': {
+    layer: 'L2-tool',
+    why: 'generation run writes scenes; code outlines are coerced in steps/outline and steps/scene-content (L3)',
+  },
+  'app/api/persistence/[...path]/route.ts': {
+    layer: 'L2-tool',
+    why: 'server persistence write: logs stored code widgets (ADR 0010 L2)',
+  },
+  'app/api/stages/[id]/generation-complete/route.ts': {
+    layer: 'not-scene',
+    why: 'stage lifecycle: marks a generation run complete',
+  },
+  'app/api/stages/[id]/publish/route.ts': {
+    layer: 'not-scene',
+    why: 'stage lifecycle: publish toggle',
+  },
+  'app/api/stages/[id]/unpublish/route.ts': {
+    layer: 'not-scene',
+    why: 'stage lifecycle: unpublish toggle',
+  },
+  'lib/legacy-browser-import/course.ts': {
+    layer: 'not-scene',
+    why: 'one-way import of the legacy browser library',
+  },
+  'lib/video-export-app/prepare-interactive-html.ts': {
+    layer: 'L1-export',
+    why: 'packages interactive HTML; code HTML is replaced when codeAllowed is not true',
+  },
 
   // --- render points of interactive HTML ---
-  'components/scene-renderers/interactive-renderer.tsx': {
-    layer: 'L1-render-point',
-    why: 'builds srcDoc for the interactive iframe',
-  },
   'components/scene-renderers/InteractiveIframeHost.tsx': {
     layer: 'L1-render-point',
-    why: 'renders iframe srcDoc',
+    why: 'sets srcDoc of the pooled interactive iframe (upstream host)',
   },
   'components/slide-renderer/components/ThumbnailInteractive/index.tsx': {
     layer: 'L1-render-point',
-    why: 'thumbnail iframe srcDoc',
+    why: 'thumbnail iframe of an interactive scene; blocked code HTML is replaced before srcDoc',
+  },
+  'lib/standalone-player/scenes/InteractiveScene.tsx': {
+    layer: 'L1-render-point',
+    why: 'standalone player iframe; the export path blocks code HTML before it is packaged',
   },
 
   // --- export of interactive HTML ---
   'lib/export/use-export-pptx.ts': { layer: 'L1-export', why: 'inlineHtmlAssets for export' },
   'lib/export/use-export-classroom.ts': { layer: 'L1-export', why: 'inlineHtmlAssets' },
   'lib/export/inline-assets.ts': { layer: 'L1-export', why: 'defines inlineHtmlAssets' },
-  'lib/video-export-app/prepare-interactive-html.ts': {
-    layer: 'L1-export',
-    why: 'inlineHtmlAssets for video export',
-  },
-
-  // --- server-side classroom job: outlines go through coerceCodeOutline (L3) ---
-  'lib/server/classroom-generation.ts': {
-    layer: 'L1-render-only',
-    why: 'server classroom job: saves scenes via createSceneWithActions (outline coerced first)',
-  },
-
-  'lib/server/scene-generation.ts': {
-    layer: 'L1-render-only',
-    why: 'defines createSceneWithActions (store-independent scene assembly)',
-  },
 
   // --- API routes accepting writes ---
-  'app/api/classroom/route.ts': { layer: 'L1-render-only', why: 'POST/PUT classroom with scenes' },
-  'app/api/persistence/[...path]/route.ts': {
-    layer: 'L1-render-only',
-    why: 'generic persistence PUT/POST',
-  },
   'app/api/stages/[id]/route.ts': { layer: 'L1-render-only', why: 'saveDocument via PUT/POST' },
   'app/api/stages/route.ts': { layer: 'L1-render-only', why: 'saveDocument via POST' },
-  'app/api/generate/scene-content/route.ts': {
-    layer: 'L1-render-only',
-    why: 'POST generates scene content',
-  },
-  'app/api/stages/[id]/generation-complete/route.ts': {
-    layer: 'not-scene',
-    why: 'POST handler; [Unverified] assumed to touch status only',
-  },
-  'app/api/stages/[id]/publish/route.ts': {
-    layer: 'not-scene',
-    why: 'POST handler; [Unverified] assumed to touch publish state only',
-  },
-  'app/api/stages/[id]/unpublish/route.ts': {
-    layer: 'not-scene',
-    why: 'POST handler; [Unverified] assumed to touch publish state only',
-  },
 
   // --- storage plumbing / client persistence (no widget-specific logic) ---
   'lib/audio/persist-narration-reference.ts': { layer: 'not-scene', why: 'putScene, audio ref' },
@@ -101,7 +93,6 @@ const CLASSIFIED: Record<string, Classified> = {
   'lib/document-store/plain-json-store.ts': { layer: 'not-scene', why: 'store wrapper' },
   'lib/persistence/owner-bound-document-store.ts': { layer: 'not-scene', why: 'store wrapper' },
   'lib/import/use-import-classroom.ts': { layer: 'not-scene', why: 'classroom import' },
-  'lib/utils/database.ts': { layer: 'not-scene', why: 'client DB save/rollback' },
   'lib/utils/stage-storage.ts': { layer: 'not-scene', why: 'client stage save' },
   'lib/store/interactive-iframe-pool.ts': { layer: 'not-scene', why: 'iframe pool state' },
 };
@@ -129,15 +120,16 @@ function findMatches(): string[] {
 
 // Files allowed to call generateSceneContent( (a classic code outline must be coerced before it).
 const CONTENT_GENERATION_CALLERS = [
-  'app/api/generate/scene-content/route.ts', // coerceCodeOutline
+  'lib/server/generation/steps/scene-content.ts', // coerceCodeOutline on the outline first
   'lib/server/agent-runtime/generation-tools.ts', // L2: policy applied by the tool
-  'lib/server/classroom-generation.ts', // coerceCodeOutline
-  'lib/server/scene-generation.ts', // buildSceneFromOutline: no production caller
+  'lib/server/generation/run/services.ts', // the run adapter: the outline already came through steps/scene-content.ts
 ];
 
 describe('generateSceneContent callers (ADR 0010 L3)', () => {
   it('only approved files call generateSceneContent(', () => {
-    const callers = gitGrep('-F -e "generateSceneContent(" -- lib app components');
+    const callers = gitGrep('-F -e "generateSceneContent(" -- lib app components').filter((f) =>
+      /\.tsx?$/.test(f),
+    );
     const extra = callers.filter((f) => !CONTENT_GENERATION_CALLERS.includes(f));
     expect(
       extra,
@@ -150,9 +142,11 @@ describe('generateSceneContent callers (ADR 0010 L3)', () => {
     ).toEqual([]);
   });
 
-  it('the server classroom job coerces every outline before applyOutlineFallbacks', () => {
-    const src = readFileSync('lib/server/classroom-generation.ts', 'utf8');
-    expect(src).toContain('applyOutlineFallbacks(coerceCodeOutline(outline)');
+  it('the outline and scene-content steps coerce code outlines (classic generation)', () => {
+    const content = readFileSync('lib/server/generation/steps/scene-content.ts', 'utf8');
+    expect(content).toContain('coerceCodeOutline({ ...input.outline })');
+    const outline = readFileSync('lib/server/generation/steps/outline.ts', 'utf8');
+    expect(outline).toContain('coerceCodeOutline(sanitizeNonTaskEngineOutline(enrichedBase))');
   });
 });
 

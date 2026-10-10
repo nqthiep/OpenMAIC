@@ -14,19 +14,20 @@
  *          bumps `stage.updatedAt` so the freshness signal sees the change.
  * - DELETE removes the course and its cascading child rows.
  *
- * The configured runtime gates the family (see `app/api/stages/route.ts`):
- * off, or on without a DATABASE_URL, answers the same plain 404.
+ * Server persistence gates the family (see `app/api/stages/route.ts`): without
+ * a DATABASE_URL it answers a plain 404; the agent runtime is not required.
  */
 import type { NextRequest } from 'next/server';
 
 import { DocumentNotFoundError, DocumentVersionError, type MaicDocument } from '@openmaic/storage';
 
-import { isAgentRuntimeConfigured, isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import { isCodeWidgetAllowed, isServerPersistenceConfigured } from '@/lib/config/feature-flags';
 import { createLogger } from '@/lib/logger';
 import { apiError } from '@/lib/server/api-response';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerApiError, ownerJson, ownerNotFound } from '@/lib/server/agent-runtime/route-response';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
+import { ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
 import { isCodeWidget } from '@/lib/widgets/policy';
 
@@ -48,6 +49,8 @@ function isStoreValidationError(error: unknown): error is Error {
 
 /** Map a store save failure onto the route's error surface. */
 function mapSaveError(error: unknown, headers: Headers) {
+  const claimed = ownerWriteErrorResponse(error, headers);
+  if (claimed) return claimed;
   if (error instanceof DocumentNotFoundError) return ownerNotFound(headers);
   if (error instanceof DocumentVersionError) {
     // A document written by a newer client cannot be saved by this one.
@@ -67,9 +70,9 @@ function mapSaveError(error: unknown, headers: Headers) {
 
 // GET /api/stages/[id] — the full document.
 export async function GET(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     const store = await getOwnerScopedDocumentStore(ownerId);
     const document = await store.loadDocument(id);
@@ -80,7 +83,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // PATCH /api/stages/[id] — rename the course (owner-only).
 export async function PATCH(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
 
   let body: unknown;
   try {
@@ -101,7 +104,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     const store = await getOwnerScopedDocumentStore(ownerId);
     const document = await store.loadDocument(id);
@@ -120,7 +123,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 // PUT /api/stages/[id] — save a whole document.
 export async function PUT(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
 
   let body: unknown;
   try {
@@ -147,7 +150,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     if (candidate.stage!.id !== id) {
       return ownerApiError(
@@ -189,12 +192,18 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 // DELETE /api/stages/[id] — remove the course and its scenes/outline.
 export async function DELETE(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     const store = await getOwnerScopedDocumentStore(ownerId);
-    await store.deleteDocument(id);
+    try {
+      await store.deleteDocument(id);
+    } catch (error) {
+      const claimed = ownerWriteErrorResponse(error, responseHeaders);
+      if (claimed) return claimed;
+      throw error;
+    }
     return ownerJson({ ok: true }, 200, responseHeaders);
   });
 }

@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import tinycolor from 'tinycolor2';
-import type { ChartData, ChartOptions, ChartType } from '@openmaic/dsl';
+import type { ChartData, ChartOptions, ChartType, ImportedChartStyle } from '@openmaic/dsl';
 import { getChartOption } from './chartOption';
 import { loadChartRuntime } from './chartRuntime';
+import { isWebKitEngine, repaintClipPaths } from './clipRepaint';
 
 interface ChartProps {
   width: number;
@@ -15,6 +16,7 @@ interface ChartProps {
   textColor?: string;
   lineColor?: string;
   options?: ChartOptions;
+  importedStyle?: ImportedChartStyle;
 }
 
 export function Chart({
@@ -26,6 +28,7 @@ export function Chart({
   textColor,
   lineColor,
   options,
+  importedStyle,
 }: ChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<import('echarts/core').ECharts | null>(null);
@@ -56,18 +59,20 @@ export function Chart({
 
     const option = getChartOption({
       type,
+      importedStyle,
       data,
       themeColors,
       textColor,
       lineColor,
       lineSmooth: options?.lineSmooth || false,
       stack: options?.stack || false,
+      percentStack: options?.percentStack || false,
     });
 
     if (option) {
       chartInstance.current.setOption(option, true);
     }
-  }, [type, data, themeColors, textColor, lineColor, options]);
+  }, [type, data, themeColors, textColor, lineColor, options, importedStyle]);
 
   useEffect(() => {
     updateOptionRef.current = updateOption;
@@ -80,7 +85,16 @@ export function Chart({
       .then((echarts) => {
         if (!mounted || !chartRef.current) return;
 
-        chartInstance.current = echarts.init(chartRef.current, null, { renderer: 'svg' });
+        const chartElement = chartRef.current;
+        const chart = echarts.init(chartElement, null, { renderer: 'svg' });
+        chartInstance.current = chart;
+        if (isWebKitEngine(globalThis.navigator?.userAgent)) {
+          // WebKit does not repaint a series clipped by an animated clip path
+          // (see clipRepaint.ts). `rendered` fires after every painted frame,
+          // so the clipped series shows as it would elsewhere, on first
+          // render, re-render and resize alike.
+          chart.on('rendered', () => repaintClipPaths(chartElement));
+        }
         setChartState('ready');
         updateOptionRef.current();
 

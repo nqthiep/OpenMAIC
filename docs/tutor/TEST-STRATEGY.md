@@ -89,7 +89,6 @@ import { expect, it } from 'vitest'
 
 const CLASSIFIED = {
   'lib/server/agent-runtime/document-writes.ts': 'L2-tool',   // putSceneBringingCurrent
-  'app/api/classroom/route.ts': 'L1-render-only',
   'app/api/persistence/[...path]/route.ts': 'L1-render-only',
 } as const
 

@@ -1,16 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   paneAvailabilityRetryDelay,
-  shouldResumeClassroomGeneration,
+  resolveClassroomSurfaceView,
 } from '@/lib/classroom/progressive-load-policy';
-
-const settled = {
-  loading: false,
-  error: null,
-  transportPersistenceFenced: false,
-  generationStarted: false,
-  mayGenerate: true,
-} as const;
 
 describe('progressive classroom policy', () => {
   it('uses a bounded pane availability backoff', () => {
@@ -23,26 +15,32 @@ describe('progressive classroom policy', () => {
       null,
     ]);
   });
+});
 
-  it.each([
-    { ...settled, loading: true },
-    { ...settled, error: 'failed' },
-    { ...settled, transportPersistenceFenced: true },
-    { ...settled, generationStarted: true },
-    { ...settled, mayGenerate: false },
-  ])('blocks generation resume while progressive state is unsafe: %o', (state) => {
-    expect(shouldResumeClassroomGeneration(state)).toBe(false);
+describe('classroom surface view', () => {
+  const settledPane = {
+    variant: 'pane',
+    loading: false,
+    error: null,
+    notFound: false,
+    loadedClassroomId: null,
+    classroomId: 'stage-a',
+  } as const;
+
+  it('shows not-found after an absent pane load exhausts its retry schedule', () => {
+    expect(resolveClassroomSurfaceView({ ...settledPane, notFound: true })).toBe('not-found');
   });
 
-  it('allows generation resume only after loading and transport fencing settle', () => {
-    expect(shouldResumeClassroomGeneration(settled)).toBe(true);
+  it('shows Retry after an unavailable pane load exhausts its retry schedule', () => {
+    expect(
+      resolveClassroomSurfaceView({
+        ...settledPane,
+        error: 'Could not load this course',
+      }),
+    ).toBe('error');
   });
 
-  it('refuses whenever generation is not permitted, however settled the load is', () => {
-    expect(shouldResumeClassroomGeneration({ ...settled, mayGenerate: false })).toBe(false);
-  });
-
-  it('keeps an unsafe progressive state decisive even when generation is permitted', () => {
-    expect(shouldResumeClassroomGeneration({ ...settled, loading: true })).toBe(false);
+  it('keeps showing loading while a non-terminal pane waits for its classroom', () => {
+    expect(resolveClassroomSurfaceView(settledPane)).toBe('loading');
   });
 });

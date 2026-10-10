@@ -7,6 +7,7 @@
  * Server-side only. Output is deterministic (no `Date`, no random).
  */
 import katex from 'katex';
+import { safeKatexOptions } from '@openmaic/dsl';
 import { KATEX_INLINE_CSS } from '@/lib/tutor/build/generated/katex-inline';
 import { splitMath, type MathTable } from '@/lib/tutor/runtime/rich-text';
 
@@ -26,14 +27,16 @@ export interface MathSegment {
 export function renderTex(tex: string): string | null {
   if (tex.length > MAX_TEX_CHARS) return null;
   try {
-    return katex.renderToString(tex, {
-      throwOnError: true,
-      trust: false,
-      strict: 'ignore',
-      output: 'htmlAndMathml',
-      maxExpand: 100,
-      maxSize: 20,
-    });
+    return katex.renderToString(
+      tex,
+      safeKatexOptions({
+        throwOnError: true,
+        strict: 'ignore',
+        output: 'htmlAndMathml',
+        maxExpand: 100,
+        maxSize: 20,
+      }),
+    );
   } catch {
     return null;
   }

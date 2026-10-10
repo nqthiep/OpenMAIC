@@ -1,8 +1,7 @@
 import { callLLM } from '@/lib/ai/llm';
 import type { Locale } from '@/lib/tutor/catalog/types';
 import { createLogger } from '@/lib/logger';
-import { resolveModel } from '@/lib/server/resolve-model';
-import { getTutorRoute, type RouteValue } from '@/lib/tutor/llm-roles';
+import { getTutorRoute, resolveTutorModel, type RouteValue } from '@/lib/tutor/llm-roles';
 
 const log = createLogger('TutorModeration');
 const STAGE = 'tutor-moderation' as const;
@@ -95,7 +94,8 @@ function parseVerdict(raw: string): { allow: boolean; categories: ModerationCate
 }
 
 const defaultLlm: ModerationLlm = async ({ route, system, prompt, signal }) => {
-  const connection = await resolveModel({ stage: STAGE });
+  const connection = await resolveTutorModel(STAGE);
+  if (!connection) throw new Error('tutor-moderation route is not configured');
   const result = await callLLM(
     {
       model: connection.model,

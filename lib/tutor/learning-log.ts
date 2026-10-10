@@ -7,7 +7,7 @@
  * - `appendTutorLearning`: một phiên tất định cho mỗi (stageId, learnerKey), append-only.
  * - `watchWidgetRuntime`: đổi `useWidgetRuntimeState` thành bản ghi `beat`/`prediction`.
  *
- * Client-only (kho runtime là IndexedDB, hoặc Postgres khi build `NEXT_PUBLIC_PERSISTENCE=1`).
+ * Client-only: ghi qua kho runtime của server persistence (upstream bỏ IndexedDB cho dữ liệu bền).
  */
 import type { RuntimeSession } from '@openmaic/dsl';
 import type { RuntimeStore } from '@openmaic/storage';

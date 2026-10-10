@@ -12,15 +12,15 @@
 
 | Sự thật | Nguồn |
 | --- | --- |
-| Workbench cần **ba** điều kiện: `OPENMAIC_AGENT_RUNTIME_ENABLED=true`, `DATABASE_URL` khác rỗng, và cờ build-time `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`. Thiếu một điều kiện thì `/workbench` trả 404. | `lib/config/feature-flags.ts:18-25,49-51`; `middleware.ts:55-58`; `.env.example:310,347,353` |
+| Workbench cần **ba** điều kiện: `OPENMAIC_AGENT_RUNTIME_ENABLED=true`, `DATABASE_URL` khác rỗng, và cờ build-time `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`. Thiếu một điều kiện thì `/workbench` trả 404. | `lib/config/feature-flags.ts:18-25,57-59`; `middleware.ts:34-37`; `.env.example:310,347,353` |
 | Trang chủ hỏi `/api/agent/runtime` để biết runtime có bật không. | `app/page.tsx:138-147` |
-| `Dockerfile` (stage builder) và `docker-compose.yml` (`build.args`) **không** truyền `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED`, nên image dựng bằng compose không bao giờ có workbench. | `Dockerfile:51-72`; `docker-compose.yml:5-22` |
+| `Dockerfile` (stage builder) và `docker-compose.yml` (`build.args`) đều truyền `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` (đã sửa; trước đó compose không bật được workbench). | `Dockerfile:61-72`; `docker-compose.yml:23` |
 | Tool của agent được đăng ký ở `buildDslCourseToolset` và phải có trong `buildCourseAllowlist`; tool **ghi tài liệu** còn phải có trong `STAGE_WRITER_TOOL_NAMES` để chạy tuần tự và được workbench cấp quyền ghi. Đã có tiền lệ đăng ký có điều kiện: `generate_video`. | `lib/server/agent-runtime/course-tools.ts:204-237`; `lib/agent-runtime/stage-writer-tools.ts:20` |
 | `generate_scene` gọi LLM sinh nội dung (`:387`), rồi gọi LLM sinh action (`:445`), rồi mới dựng `Scene` (`:450`). | `lib/server/agent-runtime/generation-tools.ts` |
 | `generate_actions` dựng lại outline từ scene. Outline này không có `walkthroughId` vì `generate_scene` không lưu outline. | `lib/server/agent-runtime/generation-tools.ts:130-143,513-537` |
-| `duplicate_scene` chép một trang sang vị trí mới, không kèm action. | `lib/server/agent-runtime/generation-tools.ts:644-600` |
+| `duplicate_scene` chép một trang sang vị trí mới, không kèm action. | `lib/server/agent-runtime/generation-tools.ts:679-600` |
 | `generate_video` trả tham chiếu ngay, video dựng nền. Tool đó "never edits a page itself"; agent phải tự vá `mediaRef` bằng `patch_stage`. | `lib/server/agent-runtime/generate-video.ts:480-483` |
-| Đường classic (`scene-outlines-stream` → `scene-content`) không nhận skill. Route `scene-content` nhận outline do client gửi lên. | `app/api/generate/scene-content/route.ts:65-105` |
+| Đường classic (`scene-outlines-stream` → `scene-content`) không nhận skill. Route `scene-content` nhận outline do client gửi lên. | `lib/server/generation/steps/scene-content.ts` |
 
 ## Phương án và SWOT
 
@@ -65,7 +65,7 @@
 ## Hệ quả
 
 **Tốt:**
-- Không còn hàm bọc ở call site classic (`classroom-generation.ts:596`, `scene-content/route.ts:324`).
+- Không còn hàm bọc ở call site classic (trước merge upstream: `classroom-generation.ts:596`, `scene-content/route.ts:324`).
 - Lời thầy trong walkthrough luôn là kịch bản, không lẫn với action của LLM.
 - LLM thấy id hợp lệ ngay trong schema.
 - Q&A và `generate_actions` luôn biết `walkthroughId`, vì nó nằm trong `widgetConfig` (ADR 0013).

@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 import { coerceCodeWidgetType } from '@/lib/widgets/policy';
 import type { SceneOutline } from '@/lib/types/generation';
 import type { WidgetType } from '@/lib/types/widgets';
-import { changeOutlineType } from '@openmaic/generation';
+import { changeOutlineType } from '@openmaic/generation/browser';
 import { countBlockingOutlines, validateOutline } from '@/lib/edit/content-validation';
 
 type SceneType = SceneOutline['type'];

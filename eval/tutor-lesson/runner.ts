@@ -34,7 +34,7 @@ import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
-import { getTutorRoute } from '@/lib/tutor/llm-roles';
+import { getTutorRoute, resolveTutorModel } from '@/lib/tutor/llm-roles';
 import {
   MIN_SAMPLES,
   coverageProblems,
@@ -73,7 +73,12 @@ async function realLlm(
     import('@/lib/server/resolve-model'),
   ]);
   return async ({ system, prompt }) => {
-    const connection = await resolveModel({ stage });
+    // The generator is a core stage (deployment configuration); the judge is a tutor role.
+    const connection =
+      stage === JUDGE_STAGE
+        ? await resolveTutorModel(JUDGE_STAGE)
+        : await resolveModel({ stage: GENERATOR_STAGE });
+    if (!connection) throw new Error(`${JUDGE_STAGE} route is not configured`);
     const result = await callLLM(
       {
         model: connection.model,
@@ -86,7 +91,7 @@ async function realLlm(
       },
       stage,
       undefined,
-      getTutorRoute(stage)?.thinking,
+      stage === JUDGE_STAGE ? getTutorRoute(JUDGE_STAGE)?.thinking : undefined,
     );
     const usage = result.totalUsage ?? result.usage;
     return {
@@ -132,8 +137,8 @@ async function main(): Promise<number> {
   }
   const scenarios = limit === undefined ? file.scenarios : spread(file.scenarios, limit);
 
-  const generatorRoute = getTutorRoute(GENERATOR_STAGE);
-  const generatorModel = generatorRoute?.model ?? process.env.DEFAULT_MODEL;
+  // The generator is a core stage: its model comes from the deployment configuration, shown here as DEFAULT_MODEL.
+  const generatorModel = process.env.DEFAULT_MODEL;
   const judgeRoute = getTutorRoute(JUDGE_STAGE);
 
   console.log('=== Tutor lesson eval ===');
@@ -143,7 +148,7 @@ async function main(): Promise<number> {
   console.log(`Ids: ${scenarios.map((s) => s.id).join(', ')}`);
   if (limit !== undefined) console.log(`Partial run: --limit ${limit} scenarios.`);
   console.log(
-    `Generator: ${GENERATOR_STAGE} -> ${generatorModel ?? 'MISSING'}${generatorRoute ? '' : generatorModel ? ' (DEFAULT_MODEL)' : ''}`,
+    `Generator: ${GENERATOR_STAGE} -> ${generatorModel ?? 'MISSING'} (deployment configuration)`,
   );
   console.log(`Judge:     ${JUDGE_STAGE} -> ${judgeRoute?.model ?? 'MISSING'}`);
   const problems = routeProblems({

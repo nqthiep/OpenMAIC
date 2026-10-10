@@ -17,8 +17,8 @@
 import { compileVideoTimeline, emitHyperframes, toSrt, toVtt } from '@/lib/video-export';
 import { useStageStore } from '@/lib/store';
 import type { Locale } from '@/lib/i18n';
-import { accessDocument } from '@/lib/document-store';
 import { resolveCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
+import { resolveExportStageName } from './resolve-stage-name';
 import { createVideoTimelineDeps } from './timeline-deps';
 import { collectVideoAssets } from './collect';
 import { getVideoExportCoverLabels, resolveVideoExportCta } from './cover-config';
@@ -67,7 +67,7 @@ function configuredVideoExportCta() {
 /**
  * Shared compile prologue for both export paths: read the current stage + scenes
  * from the store (throwing {@link NoScenesError} when empty), resolve the display
- * name from Dexie, load the DI deps (Dexie durations + asset presence + measured
+ * name from document storage, load the DI deps (Dexie durations + asset presence + measured
  * geometry), and pure-compile to the {@link VideoTimeline} IR. Both the full ZIP
  * build and the subtitles-only path go through here so their timing/assets/
  * geometry wiring can never drift.
@@ -89,8 +89,7 @@ async function compileStageIr(options: {
     throw new NoScenesError('No scenes to export');
   }
 
-  const latest = await accessDocument(stage.id).catch(() => undefined);
-  const stageName = latest?.document?.stage.name || stage.name || 'classroom';
+  const stageName = await resolveExportStageName(stage);
   const { width, height } = VIDEO_RESOLUTIONS[options.resolution];
 
   // The student-code widget is blocked unless the server says otherwise; the subtitles-only path packages no HTML.

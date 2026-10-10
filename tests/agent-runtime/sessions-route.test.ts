@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   moderationEnabled: false,
   screenText: vi.fn(),
   createSession: vi.fn(),
+  readRetirement: vi.fn(async (_ownerId: string): Promise<string | null> => null),
   postUserMessage: vi.fn(),
   softDeleteSession: vi.fn(),
   bindOwnerMaterialsToSession: vi.fn(),
@@ -23,9 +24,11 @@ vi.mock('@/lib/config/feature-flags', () => ({
   isTutorModerationEnabled: () => mocks.moderationEnabled,
 }));
 vi.mock('@/lib/tutor/chat-moderation', () => ({ screenText: mocks.screenText }));
-vi.mock('@/lib/server/agent-runtime/owner', () => ({
-  resolveRequestOwnerId: mocks.resolveRequestOwnerId,
-}));
+vi.mock('@/lib/server/identity/resolve', async () =>
+  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
+    mocks.resolveRequestOwnerId,
+  ),
+);
 // The route reads skills off the explicit `skill` param AND the prompt; pin the
 // lookup to a fixed installed set so no user-skill store or skill directory is
 // touched. `findSkill` is the route's (and the runner's) id-or-name lookup.
@@ -41,6 +44,7 @@ vi.mock('@/lib/server/agent-runtime/store', () => ({
     postUserMessage: mocks.postUserMessage,
     softDeleteSession: mocks.softDeleteSession,
     listSessionsByOwner: mocks.listSessionsByOwner,
+    readRetirement: mocks.readRetirement,
   }),
 }));
 vi.mock('@/lib/server/agent-runtime/session-materials', () => ({

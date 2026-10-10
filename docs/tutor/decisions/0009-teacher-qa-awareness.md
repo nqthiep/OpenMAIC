@@ -37,7 +37,7 @@ Chọn **(b)**, làm theo hai bước:
    - Nhận kind mới **chỉ sau `widget-ready`** và chỉ khi `walkthroughId` khớp `widgetConfig`.
    - Ép `frame` là số nguyên trong `[0, total-1]` (`total` lấy từ `widgetConfig.presets`, gồm cả mục `llm` từ 1d); với preset `student` chỉ ép số nguyên ≥ 0, server kẹp sau khi tính lại; giữ `input` chỉ khi ≤ trần kích thước.
    - Ghi vào store mới `lib/store/widget-runtime-state.ts` (theo mẫu `scene-runtime-errors.ts`).
-   - Khi `srcDoc` đổi hoặc iframe bị đẩy khỏi pool (`IFRAME_POOL_CAP=3`, `lib/store/interactive-iframe-pool.ts:21`): xoá trạng thái học sinh, nhưng giữ `desired` để gửi lại khi iframe ready.
+   - Khi `srcDoc` đổi hoặc iframe bị đẩy khỏi pool (`IFRAME_POOL_CAP=3`, `lib/store/interactive-iframe-pool.ts:27`): xoá trạng thái học sinh, nhưng giữ `desired` để gửi lại khi iframe ready.
 3. `components/chat/use-chat-sessions.ts:183-208` (`buildFreshAgentLoopStoreState`, dựng mới mỗi lượt): thêm `widgetState` chỉ cho scene hiện tại (như `quizResults`); thêm kiểu ở `agent-loop.ts:23-45` và `lib/types/chat.ts:322-352`.
 4. `lib/orchestration/summarizers/state-context.ts`: `describe(scene, {preset, frame, input?})` — **server tính lại từ catalog**:
    - Kiểm: `preset` phải ∈ `presets[].id` hoặc là `llm`/`student`; `entryRev` phải khớp. Lệch thì chỉ trả digest tĩnh (ADR 0013 §6).

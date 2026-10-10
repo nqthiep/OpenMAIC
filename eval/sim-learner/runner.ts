@@ -91,10 +91,11 @@ function spread<T>(items: readonly T[], n: number): T[] {
 async function realLlm(): Promise<SimLlm> {
   // Imported late so --dry-run never loads the LLM stack.
   const { callLLM } = await import('@/lib/ai/llm');
-  const { resolveModel } = await import('@/lib/server/resolve-model');
+  const { resolveTutorModel } = await import('@/lib/tutor/llm-roles');
   return async ({ system, prompt }) => {
     const route = getTutorRoute(STAGE);
-    const connection = await resolveModel({ stage: STAGE });
+    const connection = await resolveTutorModel(STAGE);
+    if (!connection) throw new Error(`${STAGE} route is not configured`);
     const result = await callLLM(
       {
         model: connection.model,

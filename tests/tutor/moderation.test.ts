@@ -20,7 +20,7 @@ describe('moderate', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.doUnmock('@/lib/ai/llm');
-    vi.doUnmock('@/lib/server/resolve-model');
+    vi.doUnmock('@/lib/tutor/llm-roles');
     delete process.env.MODEL_ROUTES;
     delete process.env.DEFAULT_MODEL;
   });
@@ -185,15 +185,18 @@ describe('moderate', () => {
       'tutor-moderation': { model: ROUTE_MODEL, thinking: { mode: 'enabled', effort: 'low' } },
     });
     const callLLM = vi.fn().mockResolvedValue({ text: '{"allow":false,"categories":["sexual"]}' });
-    const resolveModel = vi.fn().mockResolvedValue({ model: 'fake-model-object' });
+    const resolveTutorModel = vi.fn().mockResolvedValue({ model: 'fake-model-object' });
     vi.doMock('@/lib/ai/llm', () => ({ callLLM }));
-    vi.doMock('@/lib/server/resolve-model', () => ({ resolveModel }));
+    vi.doMock('@/lib/tutor/llm-roles', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('@/lib/tutor/llm-roles')>()),
+      resolveTutorModel,
+    }));
     const { moderate } = await import('@/lib/tutor/moderation');
 
     const verdict = await moderate('hi', CTX);
 
     expect(verdict).toEqual({ allow: false, categories: ['sexual'], model: ROUTE_MODEL });
-    expect(resolveModel).toHaveBeenCalledWith({ stage: 'tutor-moderation' });
+    expect(resolveTutorModel).toHaveBeenCalledWith('tutor-moderation');
     const [params, source, retry, thinking] = callLLM.mock.calls[0];
     expect(source).toBe('tutor-moderation');
     expect(params.model).toBe('fake-model-object');

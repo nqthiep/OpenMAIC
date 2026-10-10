@@ -11,7 +11,7 @@ import { steps } from '@/lib/tutor/engine/generate';
 import type { Frame } from '@/lib/tutor/engine/types';
 import type { RouteValue } from '@/lib/tutor/llm-roles';
 import { createWalkthroughProvider, getTutorLabels } from '@/lib/tutor/provider';
-import type { LlmStage } from '@/lib/server/model-routes';
+import type { TutorStage } from '@/lib/tutor/llm-roles';
 import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
 
 // --- schema ----------------------------------------------------------------------------------
@@ -543,7 +543,7 @@ export function buildReviewPrompt(m: ReviewMaterial): string {
 
 /** One model call. `signal` aborts at the deadline; the answer is raw model text. */
 export type ReviewLlm = (req: {
-  stage: LlmStage;
+  stage: TutorStage;
   route: RouteValue;
   system: string;
   prompt: string;
@@ -561,7 +561,7 @@ export interface ReviewOutcome {
 /** One reviewer's verdict on `material`. Never throws. `model` is taken from the route, not the answer. */
 export async function reviewOnce(
   material: ReviewMaterial,
-  stage: LlmStage,
+  stage: TutorStage,
   route: RouteValue,
   llm: ReviewLlm,
   timeoutMs = DEFAULT_REVIEW_TIMEOUT_MS,
@@ -606,7 +606,7 @@ export interface PanelResult {
 /** Both reviewers in parallel, then `panelVerdict` (`panel.allowSameProvider`: dev/test only). */
 export async function reviewPanel(
   material: ReviewMaterial,
-  stages: readonly [LlmStage, LlmStage],
+  stages: readonly [TutorStage, TutorStage],
   routes: readonly [RouteValue, RouteValue],
   llm: ReviewLlm,
   timeoutMs?: number,

@@ -101,7 +101,7 @@
 
 **Xong khi:** `pnpm vitest run tests/widgets/write-paths.test.ts` xanh. Danh sách có ít nhất:
 - `interactive-renderer.tsx`, `ThumbnailInteractive/index.tsx`, `use-export-pptx.ts`;
-- `app/api/classroom/route.ts`, `app/api/persistence/[...path]/route.ts`, `app/api/stages/[id]/route.ts`, `app/api/generate/scene-content/route.ts`;
+- `lib/server/classroom-persistence.ts`, `app/api/persistence/[...path]/route.ts`, `app/api/stages/[id]/route.ts`, `lib/server/generation/steps/scene-content.ts`;
 - `document-writes.ts`.
 
 Báo leader danh sách để ghi vào Phase 1 §7 dòng Q12.
@@ -474,7 +474,7 @@ export const CODE_WIDGET_HINT: string
 | Cỡ | M |
 | Phụ thuộc | 1b-01, 1b-02, 1b-03 |
 | Sở hữu | `components/scene-renderers/interactive-renderer.tsx`, `components/slide-renderer/components/ThumbnailInteractive/index.tsx`, `lib/hooks/use-code-widget-allowed.ts`, `components/scene-renderers/code-widget-blocked-notice.tsx` |
-| Đọc | ADR 0010 quyết định 3; `components/scene-renderers/interactive-renderer.tsx:44-47`; `components/slide-renderer/components/ThumbnailInteractive/index.tsx:49-53,82-88`; cách `app/page.tsx` gọi `/api/agent/runtime` (biến cache cấp module) |
+| Đọc | ADR 0010 quyết định 3; `components/scene-renderers/interactive-renderer.tsx:28`; `components/slide-renderer/components/ThumbnailInteractive/index.tsx:49-53,82-88`; cách `app/page.tsx` gọi `/api/agent/runtime` (biến cache cấp module) |
 
 **Làm**
 1. Hook `useCodeWidgetAllowed(): boolean | undefined`:
@@ -496,7 +496,7 @@ export const CODE_WIDGET_HINT: string
 | Cỡ | S |
 | Phụ thuộc | 1b-03, 1b-04 |
 | Sở hữu | `lib/export/use-export-pptx.ts`, `tests/widgets/export-code-block.test.ts` |
-| Đọc | ADR 0010 quyết định 3; `lib/export/use-export-pptx.ts:1288-1294` |
+| Đọc | ADR 0010 quyết định 3; `lib/export/use-export-pptx.ts:1299-1305` |
 
 **Làm**
 1. Tách hàm thuần, export trong cùng file: `interactiveExportHtml(content, codeAllowed): string`.
@@ -513,8 +513,8 @@ export const CODE_WIDGET_HINT: string
 | Cấp | W |
 | Cỡ | S |
 | Phụ thuộc | 1b-02, 1b-03 |
-| Sở hữu | `app/api/classroom/route.ts`, `app/api/persistence/[...path]/route.ts`, `app/api/stages/[id]/route.ts` |
-| Đọc | ADR 0010 quyết định 4 (gạch đầu dòng thứ hai); `app/api/classroom/route.ts:80-81`; `app/api/stages/[id]/route.ts:122` |
+| Sở hữu | `lib/server/classroom-persistence.ts`, `app/api/persistence/[...path]/route.ts`, `app/api/stages/[id]/route.ts` |
+| Đọc | ADR 0010 quyết định 4 (gạch đầu dòng thứ hai); `lib/server/classroom-persistence.ts:56`; `app/api/stages/[id]/route.ts:125` |
 
 **Làm**
 - Ở ba route, sau bước kiểm hiện có: nếu `!isCodeWidgetAllowed()` và có scene `isCodeWidget(scene.content)`, gọi logger có sẵn (`lib/logger.ts`) mức `warn` với sự kiện `code-widget-stored` và `{ stageId, count }`.
@@ -529,8 +529,8 @@ export const CODE_WIDGET_HINT: string
 | Cấp | W+ |
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1b-03, 1b-04 |
-| Sở hữu | `app/api/generate/scene-outlines-stream/route.ts`, `app/api/generate/scene-content/route.ts`, `components/generation/outlines-editor.tsx`, `tests/widgets/classic-coerce.test.ts` |
-| Đọc | ADR 0010 quyết định 5; `sanitizeNonTaskEngineOutline` trong `app/api/generate/scene-outlines-stream/route.ts`; `app/api/generate/scene-content/route.ts:65-105`; `components/generation/outlines-editor.tsx:1136-1176` |
+| Sở hữu | `lib/server/generation/steps/outline.ts`, `lib/server/generation/steps/scene-content.ts`, `components/generation/outlines-editor.tsx`, `tests/widgets/classic-coerce.test.ts` |
+| Đọc | ADR 0010 quyết định 5; `sanitizeNonTaskEngineOutline` trong `lib/server/generation/steps/outline.ts`; `lib/server/generation/steps/scene-content.ts`; `components/generation/outlines-editor.tsx:1136-1176` |
 
 **Làm**
 1. Viết `coerceCodeOutline(outline)` (export từ route outline hoặc file cùng thư mục; ghi rõ trong báo cáo).
@@ -567,7 +567,7 @@ export const CODE_WIDGET_HINT: string
 | Cỡ | S |
 | Phụ thuộc | — |
 | Sở hữu | `Dockerfile`, `docker-compose.yml`, `.env.example` |
-| Đọc | ADR 0011; [../OPERATIONS](../OPERATIONS.md) §2; `Dockerfile:51-72`; `docker-compose.yml:5-22` |
+| Đọc | ADR 0011; [../OPERATIONS](../OPERATIONS.md) §2; `Dockerfile:61-72`; `docker-compose.yml:23` |
 
 **Làm**
 1. `Dockerfile`: thêm `ARG NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` + `ENV` ở stage builder, theo mẫu `ARG NEXT_PUBLIC_PERSISTENCE`.
@@ -806,7 +806,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1b-03, 1b-16 |
 | Sở hữu | `lib/server/agent-runtime/walkthrough-tools.ts`, `lib/tutor/locale.ts`, `tests/widgets/walkthrough-tool.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §3; ADR 0011; tiền lệ `duplicate_scene` (`lib/server/agent-runtime/generation-tools.ts:644-600`, hàm `duplicateId`); `lib/server/agent-runtime/document-writes.ts:32`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §4 (dòng Locale) |
+| Đọc | [../INTERFACES](../INTERFACES.md) §3; ADR 0011; tiền lệ `duplicate_scene` (`lib/server/agent-runtime/generation-tools.ts:679-600`, hàm `duplicateId`); `lib/server/agent-runtime/document-writes.ts:32`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §4 (dòng Locale) |
 
 **Làm**
 1. `lib/tutor/locale.ts`: `resolveLocale(languageDirective?: string): 'vi-VN' | 'en-US'`.
@@ -858,7 +858,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1b-03, 1b-16 |
 | Sở hữu | `lib/server/agent-runtime/generation-tools.ts`, `tests/widgets/generation-tools-policy.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §3 (bảng "Thay đổi ở tool hiện có"); ADR 0010 quyết định 4–5; `lib/server/agent-runtime/generation-tools.ts:540-564`, `lib/server/agent-runtime/generation-tools.ts:644-600` |
+| Đọc | [../INTERFACES](../INTERFACES.md) §3 (bảng "Thay đổi ở tool hiện có"); ADR 0010 quyết định 4–5; `lib/server/agent-runtime/generation-tools.ts:585-609`, `lib/server/agent-runtime/generation-tools.ts:679-600` |
 
 **Làm**
 1. `generate_scene`:
@@ -899,7 +899,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1a-03 |
 | Sở hữu | `components/scene-renderers/InteractiveIframeHost.tsx`, `lib/store/widget-runtime-state.ts`, `tests/widgets/widget-runtime-state.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §1 (đoạn Bắt tay), §2; ADR 0013 quyết định 2; [../DATA-MODEL](../DATA-MODEL.md) §6; `components/scene-renderers/InteractiveIframeHost.tsx:236-238` (hàm `send` đăng ký cho engine), `components/scene-renderers/InteractiveIframeHost.tsx:207-225`; tiền lệ store `lib/store/scene-runtime-errors.ts`; [README](README.md) §5 D9 |
+| Đọc | [../INTERFACES](../INTERFACES.md) §1 (đoạn Bắt tay), §2; ADR 0013 quyết định 2; [../DATA-MODEL](../DATA-MODEL.md) §6; `components/scene-renderers/InteractiveIframeHost.tsx:278-280` (hàm `send` đăng ký cho engine), `components/scene-renderers/InteractiveIframeHost.tsx:207-225`; tiền lệ store `lib/store/scene-runtime-errors.ts`; [README](README.md) §5 D9 |
 
 **Làm**
 1. Store `useWidgetRuntimeState`, theo mẫu `scene-runtime-errors.ts`. Mỗi `sceneId` giữ `{ ready, totals?, desired?, state? }`. Hàm reducer thuần được export để test:
@@ -982,7 +982,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | S |
 | Phụ thuộc | 0-05 |
 | Sở hữu | `lib/utils/iframe.ts` |
-| Đọc | ADR 0010 quyết định 7; `lib/utils/iframe.ts:288` |
+| Đọc | ADR 0010 quyết định 7; `lib/utils/iframe.ts:390` |
 
 **Làm:** chỉ khi Q10 cho kết quả ≤ 10% widget vỡ. Chèn CSP widget LLM (không `'unsafe-eval'`/`'wasm-unsafe-eval'`, `script-src` theo allowlist CDN, `connect-src 'none'`, `form-action 'none'`). Q10 không đạt thì huỷ task.
 
@@ -1152,7 +1152,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | S |
 | Phụ thuộc | — |
 | Sở hữu | `lib/server/model-routes.ts`, `lib/tutor/llm-roles.ts`, `tests/tutor/llm-roles.test.ts` |
-| Đọc | ADR 0014 quyết định 1; `lib/server/model-routes.ts:132-168`; `lib/server/resolve-model.ts:41-47` |
+| Đọc | ADR 0014 quyết định 1; `lib/server/model-routes.ts:127-163`; `lib/server/resolve-model.ts:41-47` |
 
 **Làm**
 1. Thêm vào `LLM_STAGES`: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-code`, `sim-learner`, `tutor-analyst`.
@@ -1206,7 +1206,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1c-09 |
 | Sở hữu | `app/api/chat/route.ts`, `lib/config/feature-flags.ts`, `tests/tutor/chat-moderation.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.1); `app/api/chat/route.ts:44-132`; RISKS dòng Q14 |
+| Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.1); `app/api/chat/route.ts:137-218`; RISKS dòng Q14 |
 
 **Làm**
 1. **Vào:** lọc tin nhắn học sinh trước `statelessGenerate`. `allow:false` thì trả một lượt thầy soạn sẵn theo nhóm, không gọi agent.

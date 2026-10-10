@@ -15,7 +15,11 @@ import {
   PlaybackChromeRoot,
   type PlaybackChromeRootHandle,
 } from '@/components/edit/PlaybackChromeRoot';
-import { InteractiveIframeHost } from '@/components/scene-renderers/InteractiveIframeHost';
+import {
+  InteractiveIframeHost,
+  type PlaybackInteractiveComponentPick,
+  type PlaybackInteractivePickerState,
+} from '@/components/scene-renderers/InteractiveIframeHost';
 import { CHROME_EASE } from '@/lib/edit/transitions';
 import { enterEditMode } from '@/lib/edit/enter-edit-mode';
 import { isEditorPreloaded, preloadEditor } from '@/lib/edit/preload-editor';
@@ -58,9 +62,11 @@ import { exitProPlaybackToStandalone } from '@/lib/workbench/pro-playback-exit';
 export function Stage({
   classroomId,
   onRetryOutline,
+  generationFailureMessage,
 }: {
   classroomId?: string;
   onRetryOutline?: (outlineId: string) => Promise<void>;
+  generationFailureMessage?: string;
 }) {
   const { mode, setMode, scenes, currentSceneId, generatingOutlines, stage } = useStageStore();
   const router = useRouter();
@@ -87,12 +93,15 @@ export function Stage({
   }, [proWorkbenchFlag]);
   const proWorkbenchEntry = proWorkbenchFlag && proRuntime === 'on';
   const currentScene = useStageStore((s) => s.getCurrentScene());
-  // The reference implementation makes editing owner-only. `isOwner` is true for the stage creator and
-  // defaults to true with browser storage (single-user IndexedDB), so this gate is
-  // a no-op upstream but hides Pro mode from visitors / bookmarked viewers in
-  // server-backed mode — their saves would not pass the owner check anyway.
+  // The reference implementation makes editing owner-only. `isOwner` is true for the stage creator,
+  // so this gate hides Pro mode from visitors / bookmarked viewers — their saves
+  // would not pass the owner check anyway.
   const isOwner = useStageStore((s) => s.isOwner);
   const readOnly = useStageStore((s) => s.readOnly);
+  // A course its generation run is still producing is read-only until the run
+  // completes (the server refuses its edits): the Pro switch shows, disabled,
+  // as it does while the browser generates.
+  const courseGenerating = useStageStore((s) => s.courseGenerating);
   const canEditOwnedStage = isOwner && !readOnly;
 
   // Hosted by the Pro workspace's classroom pane. Ambient rather than a prop
@@ -131,6 +140,7 @@ export function Stage({
   // edit-mode entry that would immediately auto-exit.
   const isEditable =
     canEditOwnedStage &&
+    !courseGenerating &&
     isCurrentSceneEditable({
       currentSceneId,
       sceneCount: scenes.length,
@@ -144,7 +154,7 @@ export function Stage({
   const currentStageMatchesHost = !classroomId || stage?.id === classroomId;
   const hostedSceneEditable = isHostedSceneEditable({
     editorEnabled,
-    isOwner: canEditOwnedStage,
+    isOwner: canEditOwnedStage && !courseGenerating,
     stageMatchesHost: currentStageMatchesHost,
     currentSceneId,
     sceneCount: scenes.length,
@@ -203,6 +213,14 @@ export function Stage({
   });
 
   const playbackRef = useRef<PlaybackChromeRootHandle>(null);
+  const [playbackInteractivePicker, setPlaybackInteractivePicker] =
+    useState<PlaybackInteractivePickerState | null>(null);
+  const handlePlaybackInteractivePick = useCallback((pick: PlaybackInteractiveComponentPick) => {
+    playbackRef.current?.acceptInteractivePick(pick);
+  }, []);
+  const handlePlaybackInteractiveCancel = useCallback(() => {
+    playbackRef.current?.cancelElementPick();
+  }, []);
 
   // Pro Switch handler. Edit→playback is a plain flip (PlaybackChromeRoot
   // will mount fresh; its engine effect re-inits). Playback→edit must
@@ -342,7 +360,9 @@ export function Stage({
         >
           <PlaybackChromeRoot
             ref={playbackRef}
+            onInteractivePickerChange={setPlaybackInteractivePicker}
             onRetryOutline={onRetryOutline}
+            generationFailureMessage={generationFailureMessage}
             canEnterProMode={workbenchPlayback || isEditable}
             onEnterProMode={chromeToggleHandler}
             proModeActive={hosted && workbenchPlayback}
@@ -382,7 +402,11 @@ export function Stage({
       {/* Keep-alive host for interactive scene iframes (#619). Lives here, above
           the mode-swap subtree, so its iframes survive Pro mode toggles and
           scene switches instead of reloading on every remount. */}
-      <InteractiveIframeHost />
+      <InteractiveIframeHost
+        playbackPicker={playbackInteractivePicker}
+        onPlaybackPick={handlePlaybackInteractivePick}
+        onPlaybackCancel={handlePlaybackInteractiveCancel}
+      />
     </div>
   );
 }

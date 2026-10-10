@@ -17,7 +17,7 @@
 
 ## 1. Host → iframe (đã có; runtime `walkthrough` xử lý)
 
-Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.contentWindow` (`lib/action/engine.ts:872-902`, `components/scene-renderers/InteractiveIframeHost.tsx:236-238`).
+Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.contentWindow` (`lib/action/engine.ts:872-902`, `components/scene-renderers/InteractiveIframeHost.tsx:278-280`).
 
 | Message | Payload | Runtime xử lý |
 | --- | --- | --- |
@@ -122,11 +122,11 @@ Idempotent theo `callId` (như `duplicate_scene`). `order` đã có trang thì *
 | Cờ | Kiểu | Ngữ nghĩa | Nguồn |
 | --- | --- | --- | --- |
 | `OPENMAIC_ALLOW_CODE_WIDGET` | boolean env (`readBoolean`) | **Không đặt / `false` → chặn** widget `code` toàn ứng dụng; `true` → mở (hành vi upstream). Client hỏi server, chưa biết thì coi là chặn | `lib/config/feature-flags.ts` (thêm `isCodeWidgetAllowed()`), ADR 0010 |
-| `OPENMAIC_AGENT_RUNTIME_ENABLED`, `DATABASE_URL`, `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` (build-time) | đã có | **Điều kiện bắt buộc** của tính năng (ADR 0011) | `lib/config/feature-flags.ts:18-25,49-51` |
+| `OPENMAIC_AGENT_RUNTIME_ENABLED`, `DATABASE_URL`, `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED` (build-time) | đã có | **Điều kiện bắt buộc** của tính năng (ADR 0011) | `lib/config/feature-flags.ts:18-25,57-59` |
 | `OPENMAIC_DISABLE_WIDGET_PROVIDERS` | boolean env (`true`/`1`; **không phải danh sách**) | `true` → không đăng ký `generate_walkthrough`; scene đã lưu vẫn phát | `lib/config/feature-flags.ts` (`isWidgetProvidersDisabled()`), OPERATIONS §10 |
 | `OPENMAIC_TUTOR_MODERATION` | boolean env (`true`/`1`) | **Tắt (mặc định) → chat `/api/chat` không được lọc**, kể cả khi đã có route `tutor-moderation`. **Bật → mọi lượt chat qua bộ lọc và fail-closed** (thiếu route hoặc lọc lỗi/quá hạn → chat bị chặn bằng câu an toàn). Chỉ phủ `/api/chat`, `/api/chat/pi`, `/api/quiz-grade` và tin nhắn của học sinh gửi vào phiên agent (`POST /api/agent/sessions` và `/api/agent/sessions/:id/messages`) (xem SECURITY §6) | `isTutorModerationEnabled()`, `app/api/chat/route.ts`, ADR 0014 |
 | `OPENMAIC_REQUIRE_REVIEW` | boolean env (`true`/`1`) | Tắt (mặc định): mọi entry trong `SUBJECT_PACKS` được phát hành. Bật: chỉ entry có file review đạt ở đúng `entryRev`; **bật mà không có file review nào → không lộ walkthrough nào**. File review phải có trong image (OPERATIONS §2) | `isReviewRequired()`, `lib/subjects/release.ts`, §8.2 |
-| `MODEL_ROUTES` (thêm stage) | JSON có sẵn | Stage mới: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `sim-learner`, `tutor-analyst` (ADR 0014). **Thiếu route thì tính năng phụ thuộc tắt**, không rơi về `DEFAULT_MODEL` | `lib/server/model-routes.ts:132-168` |
+| `MODEL_ROUTES` (thêm stage) | JSON có sẵn | Stage mới: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `sim-learner`, `tutor-analyst` (ADR 0014). **Thiếu route thì tính năng phụ thuộc tắt**, không rơi về `DEFAULT_MODEL` | `lib/server/model-routes.ts:127-163` |
 
 ## 5. Hợp đồng TypeScript nội bộ (nguồn chính thức)
 

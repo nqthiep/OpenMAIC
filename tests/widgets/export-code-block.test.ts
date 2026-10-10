@@ -41,7 +41,7 @@ function scene(content: unknown): Scene {
 }
 
 async function zipHtml(content: unknown, codeAllowed?: boolean): Promise<string> {
-  const result = await buildResourcePackZip([scene(content)], [], [], {
+  const result = await buildResourcePackZip([scene(content)], {
     viewportRatio: 0.5625,
     viewportSize: 960,
     ratioPx2Inch: 96,

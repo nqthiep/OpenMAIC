@@ -51,7 +51,7 @@ import {
   type ReviewLlm,
   type ReviewMaterial,
 } from '@/lib/tutor/review-schema';
-import type { LlmStage } from '@/lib/server/model-routes';
+import type { TutorStage } from '@/lib/tutor/llm-roles';
 import { SUBJECT_PACKS } from '@/lib/subjects';
 import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
 import { cleanVariants, fingerprint } from './clean-variants';
@@ -60,7 +60,7 @@ import type { Outcome, Sample } from './score';
 import { seedErrors } from './seed-errors';
 
 /** Panel stages per subject (LLM_STAGES). */
-const PANELS: Readonly<Record<string, readonly [LlmStage, LlmStage]>> = {
+const PANELS: Readonly<Record<string, readonly [TutorStage, TutorStage]>> = {
   cp: ['tutor-review-cp', 'tutor-review-cp-2'],
   math: ['tutor-review-math', 'tutor-review-math-2'],
 };
@@ -187,11 +187,12 @@ async function main(): Promise<number> {
 
   // Imported late so --dry-run never loads the LLM stack.
   const llm: ReviewLlm = async (req) => {
-    const [{ callLLM }, { resolveModel }] = await Promise.all([
+    const [{ callLLM }, { resolveTutorModel }] = await Promise.all([
       import('@/lib/ai/llm'),
-      import('@/lib/server/resolve-model'),
+      import('@/lib/tutor/llm-roles'),
     ]);
-    const connection = await resolveModel({ stage: req.stage });
+    const connection = await resolveTutorModel(req.stage);
+    if (!connection) throw new Error(`${req.stage} route is not configured`);
     const result = await callLLM(
       {
         model: connection.model,

@@ -39,7 +39,7 @@ import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
-import { getTutorRoute } from '@/lib/tutor/llm-roles';
+import { getTutorRoute, resolveTutorModel } from '@/lib/tutor/llm-roles';
 import { createWalkthroughProvider, getTutorLabels } from '@/lib/tutor/provider';
 import { steps } from '@/lib/tutor/engine/generate';
 import { SUBJECT_PACKS } from '@/lib/subjects';
@@ -124,8 +124,8 @@ async function main(): Promise<number> {
   }
   const scenarios = limit === undefined ? file.scenarios : spread(file.scenarios, limit);
 
-  const answerRoute = getTutorRoute(ANSWER_STAGE);
-  const answerModel = answerRoute?.model ?? process.env.DEFAULT_MODEL;
+  // The answerer is a core stage (deployment configuration), shown here as DEFAULT_MODEL.
+  const answerModel = process.env.DEFAULT_MODEL;
   const judgeRoute = getTutorRoute(JUDGE_STAGE);
 
   console.log('=== Tutor Q&A eval ===');
@@ -138,12 +138,12 @@ async function main(): Promise<number> {
   );
   if (limit !== undefined) console.log(`Partial run: --limit ${limit} scenarios.`);
   console.log(
-    `Answerer: ${ANSWER_STAGE} -> ${answerModel ?? 'MISSING'}${answerRoute ? '' : answerModel ? ' (DEFAULT_MODEL)' : ''}`,
+    `Answerer: ${ANSWER_STAGE} -> ${answerModel ?? 'MISSING'} (deployment configuration)`,
   );
   console.log(`Judge:    ${JUDGE_STAGE} -> ${judgeRoute?.model ?? 'MISSING'}`);
   const missing: string[] = [];
   if (!answerModel) {
-    missing.push(`"${ANSWER_STAGE}" route or DEFAULT_MODEL`);
+    missing.push(`"${ANSWER_STAGE}" configuration or DEFAULT_MODEL`);
   }
   if (!judgeRoute) missing.push(`"${JUDGE_STAGE}" route`);
   if (missing.length > 0) {
@@ -178,7 +178,12 @@ async function main(): Promise<number> {
     prompt: string,
     temperature: number,
   ): Promise<string> => {
-    const connection = await resolveModel({ stage });
+    // Answerer: core stage (deployment configuration). Judge: tutor role (MODEL_ROUTES).
+    const connection =
+      stage === JUDGE_STAGE
+        ? await resolveTutorModel(JUDGE_STAGE)
+        : await resolveModel({ stage: ANSWER_STAGE });
+    if (!connection) throw new Error(`${JUDGE_STAGE} route is not configured`);
     const result = await callLLM(
       {
         model: connection.model,
@@ -191,7 +196,7 @@ async function main(): Promise<number> {
       },
       stage,
       undefined,
-      getTutorRoute(stage)?.thinking,
+      stage === JUDGE_STAGE ? getTutorRoute(JUDGE_STAGE)?.thinking : undefined,
     );
     return result.text;
   };

@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { NextRequest } from 'next/server';
 import type { SceneOutline } from '@/lib/types/generation';
-import { coerceCodeOutline } from '@/app/api/generate/scene-outlines-stream/coerce-code-outline';
+import { coerceCodeOutline } from '@/lib/server/generation/coerce-code-outline';
 
 const generateSceneContent = vi.hoisted(() => vi.fn());
 const streamLLM = vi.hoisted(() => vi.fn());
@@ -117,73 +116,5 @@ describe('coerceCodeOutline', () => {
     for (const o of [codeOutline, legacy('a'), { ...base, type: 'slide' as const }]) {
       expect(coerceCodeOutline(o)).not.toBeNull();
     }
-  });
-});
-
-describe('POST /api/generate/scene-content', () => {
-  const post = async (outline: SceneOutline) => {
-    const { POST } = await import('@/app/api/generate/scene-content/route');
-    return POST(
-      new NextRequest('http://localhost/api/generate/scene-content', {
-        method: 'POST',
-        body: JSON.stringify({
-          outline,
-          allOutlines: [outline],
-          stageId: 'stage-1',
-          stageInfo: { name: 'n' },
-        }),
-      }),
-    );
-  };
-
-  it('coerces a client-sent code outline before generating', async () => {
-    const res = await post(codeOutline);
-    expect(res.status).toBe(200);
-    expect(generateSceneContent.mock.calls[0][0]).toMatchObject({ widgetType: 'simulation' });
-  });
-
-  it('passes code through when the flag is on', async () => {
-    process.env[KEY] = 'true';
-    await post(codeOutline);
-    expect(generateSceneContent.mock.calls[0][0]).toMatchObject({ widgetType: 'code' });
-  });
-});
-
-describe('POST /api/generate/scene-outlines-stream', () => {
-  async function streamedOutlines(): Promise<SceneOutline[]> {
-    const json = JSON.stringify({
-      languageDirective: 'en',
-      outlines: [codeOutline, { ...codeOutline, id: 's2', widgetType: 'game' }],
-    });
-    streamLLM.mockReturnValue({
-      textStream: (async function* () {
-        yield json;
-      })(),
-    });
-    const { POST } = await import('@/app/api/generate/scene-outlines-stream/route');
-    const res = await POST(
-      new NextRequest('http://localhost/api/generate/scene-outlines-stream', {
-        method: 'POST',
-        body: JSON.stringify({ requirements: { requirement: 'sorting', language: 'en-US' } }),
-      }),
-    );
-    const sse = await res.text();
-    return sse
-      .split('\n')
-      .filter((line) => line.startsWith('data: '))
-      .map((line) => JSON.parse(line.slice(6)))
-      .filter((event) => event.type === 'outline')
-      .map((event) => event.data);
-  }
-
-  it('coerces code outlines in the stream and keeps the rest', async () => {
-    const outlines = await streamedOutlines();
-    expect(outlines.map((o) => o.widgetType)).toEqual(['simulation', 'game']);
-  });
-
-  it('keeps code in the stream when the flag is on', async () => {
-    process.env[KEY] = 'true';
-    const outlines = await streamedOutlines();
-    expect(outlines.map((o) => o.widgetType)).toEqual(['code', 'game']);
   });
 });

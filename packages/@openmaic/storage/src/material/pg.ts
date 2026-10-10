@@ -15,6 +15,8 @@
  * dependency the URL trust-gate table has inside the agent-session schema.
  */
 import type { Queryable } from '../runtime/pg.js';
+import { encodeJson } from '../pg-json.js';
+import { applySchemaMigrations, type SchemaMigrationSet } from '../pg-migrations.js';
 import {
   AGENT_SESSION_MATERIAL_KINDS,
   AgentSessionMaterialError,
@@ -58,6 +60,7 @@ CREATE TABLE IF NOT EXISTS agent_session_materials (
   session_id    TEXT NOT NULL REFERENCES agent_sessions(id) ON DELETE CASCADE,
   kind          TEXT NOT NULL,
   title         TEXT,
+  owner_material_id TEXT,
   source_url    TEXT,
   text_asset_id TEXT,
   raw_asset_id  TEXT,
@@ -80,8 +83,14 @@ CREATE TABLE IF NOT EXISTS agent_session_materials (
   ,CONSTRAINT agent_session_materials_extraction_attempts_nonnegative CHECK (extraction_attempts >= 0)
 );
 
+ALTER TABLE agent_session_materials ADD COLUMN IF NOT EXISTS owner_material_id TEXT;
+
 CREATE INDEX IF NOT EXISTS agent_session_materials_session_created_idx
   ON agent_session_materials (session_id, created_at);
+
+CREATE UNIQUE INDEX IF NOT EXISTS agent_session_materials_session_owner_material_idx
+  ON agent_session_materials (session_id, owner_material_id)
+  WHERE owner_material_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS agent_session_materials_extraction_queue_idx
   ON agent_session_materials (created_at)
@@ -105,10 +114,8 @@ function resolveTableNames(
   return names;
 }
 
-function schemaFor(names: AgentSessionMaterialTableNames): string {
-  if (names.materials === DEFAULT_AGENT_SESSION_MATERIAL_TABLE_NAMES.materials) {
-    return AGENT_SESSION_MATERIAL_PG_SCHEMA;
-  }
+/** Rewrite default-name schema SQL for an overridden table name. */
+function renameTable(names: AgentSessionMaterialTableNames, sql: string): string {
   const s = quoteIdentifier(names.materials);
   const kindCheck = `${names.materials}_kind_known`;
   const charsCheck = `${names.materials}_text_chars_nonnegative`;
@@ -119,10 +126,8 @@ function schemaFor(names: AgentSessionMaterialTableNames): string {
   // Constraint/index names are rewritten first (they embed the default table
   // name), then the table-name occurrences themselves; only the CREATE TABLE
   // statement gets the quoted identifier.
-  return AGENT_SESSION_MATERIAL_PG_SCHEMA.replaceAll(
-    'agent_session_materials_kind_known',
-    kindCheck,
-  )
+  return sql
+    .replaceAll('agent_session_materials_kind_known', kindCheck)
     .replaceAll('agent_session_materials_text_chars_nonnegative', charsCheck)
     .replaceAll('agent_session_materials_extraction_status_known', statusCheck)
     .replaceAll('agent_session_materials_extraction_attempts_nonnegative', attemptsCheck)
@@ -132,16 +137,40 @@ function schemaFor(names: AgentSessionMaterialTableNames): string {
     .replaceAll(`CREATE TABLE IF NOT EXISTS ${names.materials}`, `CREATE TABLE IF NOT EXISTS ${s}`);
 }
 
-/** Create the backend-owned table when absent; existing schemas require migrations. */
+/**
+ * The session-material backend's migrations, for the default table name
+ * (recorded under the store `agent-session-material`).
+ */
+export const AGENT_SESSION_MATERIAL_PG_MIGRATIONS: SchemaMigrationSet = {
+  store: 'agent-session-material',
+  migrations: [
+    { version: 1, name: 'baseline', up: AGENT_SESSION_MATERIAL_PG_SCHEMA, transaction: false },
+  ],
+};
+
+/**
+ * Create the backend-owned table, or bring an existing database up to date, by
+ * applying the pending {@link AGENT_SESSION_MATERIAL_PG_MIGRATIONS}. Safe to
+ * call on every start; a schema change is a new migration.
+ */
 export async function ensureAgentSessionMaterialSchema(
   queryable: Queryable,
   tableNames?: Partial<AgentSessionMaterialTableNames>,
 ): Promise<void> {
-  const schema = schemaFor(resolveTableNames(tableNames));
-  for (const sql of schema.split(';')) {
-    const statement = sql.trim();
-    if (statement !== '') await queryable.query(statement);
+  const names = resolveTableNames(tableNames);
+  if (names.materials === DEFAULT_AGENT_SESSION_MATERIAL_TABLE_NAMES.materials) {
+    await applySchemaMigrations(queryable, AGENT_SESSION_MATERIAL_PG_MIGRATIONS);
+    return;
   }
+  // An overridden table is its own store, recorded apart from the default one.
+  await applySchemaMigrations(
+    queryable,
+    {
+      store: `agent-session-material:${names.materials}`,
+      migrations: AGENT_SESSION_MATERIAL_PG_MIGRATIONS.migrations,
+    },
+    { rewriteSql: (sql) => renameTable(names, sql) },
+  );
 }
 
 interface MaterialRow extends Record<string, unknown> {
@@ -149,6 +178,7 @@ interface MaterialRow extends Record<string, unknown> {
   session_id: string;
   kind: string;
   title: string | null;
+  owner_material_id: string | null;
   source_url: string | null;
   text_asset_id: string | null;
   raw_asset_id: string | null;
@@ -171,6 +201,7 @@ function mapRow(row: MaterialRow): AgentSessionMaterial {
     sessionId: row.session_id,
     kind: row.kind as AgentSessionMaterialKind,
     title: row.title,
+    ownerMaterialId: row.owner_material_id,
     sourceUrl: row.source_url,
     textAssetId: row.text_asset_id,
     rawAssetId: row.raw_asset_id,
@@ -196,6 +227,15 @@ function isForeignKeyViolation(error: unknown): boolean {
     error !== null &&
     'code' in error &&
     (error as { code?: unknown }).code === '23503'
+  );
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === '23505'
   );
 }
 
@@ -248,10 +288,11 @@ export class PgAgentSessionMaterialStore implements AgentSessionMaterialStore {
     try {
       const { rows } = await this.queryable.query<MaterialRow>(
         `INSERT INTO ${this.table}
-           (id, session_id, kind, title, source_url, text_asset_id, raw_asset_id,
-            text_chars, derived_from, extraction_status, created_at)
-         SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9,
-                CASE WHEN $3 = 'source' THEN 'idle' ELSE 'done' END, $10
+           (id, session_id, kind, title, owner_material_id, source_url,
+            text_asset_id, raw_asset_id, text_chars, derived_from,
+            extraction_status, created_at)
+         SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+                CASE WHEN $3 = 'source' THEN 'idle' ELSE 'done' END, $11
          FROM agent_sessions AS session
          WHERE session.id = $2 AND session.deleted_at IS NULL
          RETURNING *`,
@@ -260,6 +301,7 @@ export class PgAgentSessionMaterialStore implements AgentSessionMaterialStore {
           sessionId,
           input.kind,
           input.title ?? null,
+          input.ownerMaterialId ?? null,
           input.sourceUrl ?? null,
           input.textAssetId ?? null,
           input.rawAssetId ?? null,
@@ -326,6 +368,65 @@ export class PgAgentSessionMaterialStore implements AgentSessionMaterialStore {
       [materialId, sessionId],
     );
     return result.rows[0] ? mapRow(result.rows[0]) : null;
+  }
+
+  /**
+   * Resolve the session's row for one owner-library upload, or `null`.
+   *
+   * This is intentionally not part of the `AgentSessionMaterialStore`
+   * interface: only the host's owner-material binder needs it, to keep a
+   * rebind idempotent while row ids stay globally unique. The unique
+   * `(session_id, owner_material_id)` index makes at most one row match.
+   */
+  async getMaterialByOwnerMaterialId(
+    sessionId: string,
+    ownerMaterialId: string,
+  ): Promise<AgentSessionMaterial | null> {
+    const result = await this.queryable.query<MaterialRow>(
+      `SELECT material.* FROM ${this.table} AS material
+        INNER JOIN agent_sessions AS session ON session.id = material.session_id
+        WHERE material.owner_material_id = $1 AND material.session_id = $2
+          AND session.deleted_at IS NULL
+        LIMIT 1`,
+      [ownerMaterialId, sessionId],
+    );
+    return result.rows[0] ? mapRow(result.rows[0]) : null;
+  }
+
+  /**
+   * Backfill `owner_material_id` on a row the pre-upgrade binder wrote with
+   * `id = ownerMaterialId` and no `owner_material_id`. The host validates the
+   * form of the legacy row against its owner record before calling this, so
+   * only an already-verified binding is stamped.
+   *
+   * The partial unique index on `(session_id, owner_material_id)` can still
+   * reject the stamp when a concurrent bind already claimed the owner id for
+   * this session; that is an expected race, reported as `null` rather than an
+   * error so the caller can adopt the winner. Returns the updated row, or
+   * `null` when the row no longer matches (already upgraded, claimed, or
+   * gone). Extraction columns are deliberately untouched.
+   */
+  async backfillOwnerMaterialId(
+    sessionId: string,
+    materialId: string,
+    ownerMaterialId: string,
+  ): Promise<AgentSessionMaterial | null> {
+    try {
+      const result = await this.queryable.query<MaterialRow>(
+        `UPDATE ${this.table} AS material
+            SET owner_material_id = $3
+           FROM agent_sessions AS session
+          WHERE material.id = $1 AND material.session_id = $2
+            AND material.owner_material_id IS NULL
+            AND material.session_id = session.id AND session.deleted_at IS NULL
+          RETURNING material.*`,
+        [materialId, sessionId, ownerMaterialId],
+      );
+      return result.rows[0] ? mapRow(result.rows[0]) : null;
+    } catch (error) {
+      if (isUniqueViolation(error)) return null;
+      throw error;
+    }
   }
 
   async enqueueExtraction(sessionId: string, materialId: string): Promise<boolean> {
@@ -428,7 +529,7 @@ export class PgAgentSessionMaterialStore implements AgentSessionMaterialStore {
       [
         input.sourceId,
         input.workerId,
-        JSON.stringify(input.stats),
+        encodeJson(input.stats, 'material extraction stats'),
         input.extractorVersion,
         derived.map((item) => item.id),
         derived.map((item) => item.kind),
