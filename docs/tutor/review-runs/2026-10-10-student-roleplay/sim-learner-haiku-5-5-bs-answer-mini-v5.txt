@@ -1,0 +1,42 @@
+
+> openmaic@1.2.0-rc.1 eval:sim-learner /Users/quangthiep/Projects/OpenMAIC
+> tsx eval/sim-learner/runner.ts
+
+[2026-10-10T11:16:46.216Z] [INFO] [ServerProviderConfig] [ServerProviderConfig] Loaded (environment variables): 2 LLM, 0 TTS, 0 ASR, 0 PDF, 0 Image, 0 Video, 0 WebSearch providers
+[2026-10-10T11:16:46.216Z] [WARN] [ModelConfig] openmaic.yml is present, so slot resolution uses it and not the legacy provider variables, server-providers.yml, DEFAULT_MODEL, MODEL_ROUTES or MODEL_FALLBACK
+=== Simulated learner gate ===
+Personas: 6/6 (g8-weak-py, g8-average-cpp, g8-strong-py, g9-weak-cpp, g9-average-py, g9-strong-cpp)
+Lesson binary-search/absent [vi-VN]: 13 transcript lines, 5+5 questions
+Lesson bs-answer-mini/classic [vi-VN]: 17 transcript lines, 5+5 questions
+Arms: pre, lesson, no-lesson control, degraded lesson (seed 1); 3 samples each, median scored.
+Route: sim-learner -> anthropic:claude-haiku-5-5
+  binary-search g8-weak-py: pre 3, lesson 5, control 2, degraded 3, clarity 3
+  binary-search g8-average-cpp: pre 5, lesson 5, control 4, degraded 3, clarity 4
+  binary-search g8-strong-py: pre 5, lesson 5, control 4, degraded 3, clarity 4
+  binary-search g9-weak-cpp: pre 5, lesson 5, control 2, degraded 3, clarity 3
+  binary-search g9-average-py: pre 4, lesson 5, control 3, degraded 4, clarity 4
+  binary-search g9-strong-cpp: pre 5, lesson 5, control 3, degraded 3, clarity 4
+
+binary-search: 6 personas x 5 questions
+  mean correct: pre 90.0%, lesson 100.0%, no-lesson control 60.0%, degraded lesson 63.3% (informational)
+  lesson - control:  40.0 points over 6 personas (target >= 20) PASS
+  lesson - degraded: 36.7 points over 6 personas (target >= 10) PASS
+  clear: 4/6 = 66.7% rated >= 4 (target >= 70%) FAIL
+  failed samples: 0/72 = 0.0% (target <= 10%) PASS
+  bs-answer-mini g8-weak-py: pre 3, lesson 5, control 1, degraded 3, clarity 3
+  bs-answer-mini g8-average-cpp: pre 5, lesson 5, control 2, degraded 4, clarity 3
+  bs-answer-mini g8-strong-py: pre 5, lesson 5, control 3, degraded 4, clarity 4
+  bs-answer-mini g9-weak-cpp: pre 5, lesson 5, control 1, degraded 3, clarity 3
+  bs-answer-mini g9-average-py: pre 5, lesson 5, control 2, degraded 4, clarity 3
+  bs-answer-mini g9-strong-cpp: pre 5, lesson 5, control 2, degraded 4, clarity 4
+
+bs-answer-mini: 6 personas x 5 questions
+  mean correct: pre 93.3%, lesson 100.0%, no-lesson control 36.7%, degraded lesson 73.3% (informational)
+  lesson - control:  63.3 points over 6 personas (target >= 20) PASS
+  lesson - degraded: 26.7 points over 6 personas (target >= 10) PASS
+  clear: 2/6 = 33.3% rated >= 4 (target >= 70%) FAIL
+  failed samples: 0/72 = 0.0% (target <= 10%) PASS
+
+RESULT: FAIL
+ ELIFECYCLE  Command failed with exit code 1.
+EXIT_CODE=1
