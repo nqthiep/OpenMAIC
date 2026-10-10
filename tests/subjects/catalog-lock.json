@@ -1056,8 +1056,8 @@
     }
   },
   "modular-clock": {
-    "entryRev": 3,
-    "contentHash": "49047e665457ed09",
+    "entryRev": 4,
+    "contentHash": "f38222b8e742c9f6",
     "framesHash": {
       "n10-a2": {
         "vi-VN": "6b31c2654579404a",
@@ -1490,8 +1490,8 @@
     }
   },
   "triangle-altitude": {
-    "entryRev": 1,
-    "contentHash": "6435ef9f1a6727f6",
+    "entryRev": 2,
+    "contentHash": "77a23f7fcc0fd4ee",
     "framesHash": {
       "acute": {
         "vi-VN": "50d38c5b8906617a",

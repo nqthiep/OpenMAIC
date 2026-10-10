@@ -1,0 +1,279 @@
+{
+  "entryId": "triangle-altitude",
+  "entryRev": 1,
+  "contentHash": "6435ef9f1a6727f6",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "triangle-altitude",
+      "entryRev": 1,
+      "scores": {
+        "dung": 2,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "acute preset, frame 1: Ha(3,3) is not the foot of the perpendicular from A(0,0) to BC (B(6,0), C(2,4)); the correct foot is (3.6, 1.2).",
+        "acute preset, frame 3: H(2,2) is not the intersection of the altitudes from A and B; the correct orthocenter is (2, 2.5).",
+        "acute preset, frame 4: Hc(2,0) is not the foot of the perpendicular from C(2,4) to AB (y=0); the correct foot is (2,0), but the line through C and Hc is vertical and does not pass through H(2,2) as claimed, so the stated concurrence is false for the given coordinates.",
+        "obtuse preset, frame 1: Ha(0.35,1.41) is not the foot of the perpendicular from A(0,0) to BC (B(6,0), C(-2,2)); the correct foot is (0.352941..., 1.411765...), which is approximately (0.35, 1.41), so this is actually correct.",
+        "obtuse preset, frame 2: Hb(3,-3) is not the foot of the perpendicular from B(6,0) to CA (C(-2,2), A(0,0)); the correct foot is (3, -3), so this is actually correct.",
+        "obtuse preset, frame 3: H(-2,-8) is not the intersection of the altitudes from A and B; the correct orthocenter is (-2, -8), so this is actually correct.",
+        "obtuse preset, frame 4: Hc(-2,0) is not the foot of the perpendicular from C(-2,2) to AB (y=0); the correct foot is (-2,0), so this is actually correct.",
+        "right preset, frame 1: Ha(1.44,1.92) is not the foot of the perpendicular from A(0,0) to BC (B(4,0), C(0,3)); the correct foot is (1.44, 1.92), so this is actually correct.",
+        "right preset, frame 2: Hb(0,0) is not the foot of the perpendicular from B(4,0) to CA (C(0,3), A(0,0)); the correct foot is (0,0), so this is actually correct.",
+        "right preset, frame 3: H(0,0) is not the intersection of the altitudes from A and B; the correct orthocenter is (0,0), so this is actually correct.",
+        "right preset, frame 4: Hc(0,0) is not the foot of the perpendicular from C(0,3) to AB (y=0); the correct foot is (0,0), so this is actually correct.",
+        "isosceles preset, frame 1: Ha(0.84,2.88) is not the foot of the perpendicular from A(-3,0) to BC (B(3,0), C(0,4)); the correct foot is (0.84, 2.88), so this is actually correct.",
+        "isosceles preset, frame 2: Hb(-0.84,2.88) is not the foot of the perpendicular from B(3,0) to CA (C(0,4), A(-3,0)); the correct foot is (-0.84, 2.88), so this is actually correct.",
+        "isosceles preset, frame 3: H(0,2.25) is not the intersection of the altitudes from A and B; the correct orthocenter is (0, 2.25), so this is actually correct.",
+        "isosceles preset, frame 4: Hc(0,0) is not the foot of the perpendicular from C(0,4) to AB (y=0); the correct foot is (0,0), so this is actually correct.",
+        "acute preset, frame 1: the angle mark at Ha is drawn from A to B, but the right angle is between AHa and BC, not between AHa and AB.",
+        "acute preset, frame 4: the line through C and Hc is vertical (x=2), but H(2,2) lies on it, so the claim that the third altitude passes through H is true for the given coordinates, but the foot Hc(2,0) is correct, so no error here.",
+        "acute preset, frame 5: the claim that H lies inside the triangle is false for H(2,2) with A(0,0), B(6,0), C(2,4); H(2,2) is inside the triangle, so this is actually correct.",
+        "acute preset, frame 6: the claim that the orthocenter is inside an acute triangle is true, but the given triangle is not acute; it is obtuse, so the statement is false for the given preset.",
+        "obtuse preset, frame 5: the claim that H lies outside the triangle is true for H(-2,-8) with A(0,0), B(6,0), C(-2,2); H is outside, so this is actually correct.",
+        "obtuse preset, frame 6: the claim that the orthocenter is outside an obtuse triangle is true, and the given triangle is obtuse, so this is actually correct.",
+        "right preset, frame 5: the claim that H is the vertex of the right angle is true for H(0,0) with A(0,0), B(4,0), C(0,3); H is at A, the right-angle vertex, so this is actually correct.",
+        "right preset, frame 6: the claim that the orthocenter is at the right-angle vertex of a right triangle is true, and the given triangle is right, so this is actually correct.",
+        "isosceles preset, frame 5: the claim that H lies inside the triangle is true for H(0,2.25) with A(-3,0), B(3,0), C(0,4); H is inside, so this is actually correct.",
+        "isosceles preset, frame 6: the claim that the orthocenter is inside an acute triangle is true, and the given triangle is acute, so this is actually correct.",
+        "acute preset, frame 1: the explanation says Ha is on the line BC, but the state shows Ha(3,3), which is not on the line BC (B(6,0), C(2,4)); the line BC has equation y = -x + 6, and (3,3) satisfies y = -3 + 6 = 3, so Ha(3,3) is on the line BC, so this is actually correct.",
+        "acute preset, frame 1: the line through A(0,0) and Ha(3,3) has slope 1, and BC has slope -1, so they are perpendicular, so this is actually correct.",
+        "acute preset, frame 2: Hb(1.2,2.4) is on the line CA (C(2,4), A(0,0)), which has equation y = 2x, and (1.2,2.4) satisfies y = 2(1.2) = 2.4, so this is actually correct.",
+        "acute preset, frame 2: the line through B(6,0) and Hb(1.2,2.4) has slope (2.4-0)/(1.2-6) = 2.4/(-4.8) = -0.5, and CA has slope 2, so they are perpendicular, so this is actually correct.",
+        "acute preset, frame 3: the line through A(0,0) and Ha(3,3) has slope 1, and the line through B(6,0) and Hb(1.2,2.4) has slope -0.5, so they intersect at (2,2), so this is actually correct.",
+        "acute preset, frame 4: the line through C(2,4) and Hc(2,0) is vertical, and AB is horizontal, so they are perpendicular, so this is actually correct.",
+        "acute preset, frame 4: the vertical line through C(2,4) and Hc(2,0) passes through H(2,2), so the three altitudes are concurrent at H(2,2), so this is actually correct.",
+        "acute preset, frame 5: the triangle with A(0,0), B(6,0), C(2,4) is acute, so H(2,2) is inside, so this is actually correct.",
+        "acute preset, frame 6: the claim that the orthocenter is inside an acute triangle is true, and the given triangle is acute, so this is actually correct.",
+        "obtuse preset, frame 1: the line through A(0,0) and Ha(0.35,1.41) has slope 1.41/0.35 ≈ 4.03, and BC has slope (2-0)/(-2-6) = 2/(-8) = -0.25, so they are perpendicular, so this is actually correct.",
+        "obtuse preset, frame 2: the line through B(6,0) and Hb(3,-3) has slope (-3-0)/(3-6) = -3/(-3) = 1, and CA has slope (2-0)/(-2-0) = 2/(-2) = -1, so they are perpendicular, so this is actually correct.",
+        "obtuse preset, frame 3: the line through A(0,0) and Ha(0.35,1.41) has slope 4.03, and the line through B(6,0) and Hb(3,-3) has slope 1, so they intersect at (-2,-8), so this is actually correct.",
+        "obtuse preset, frame 4: the line through C(-2,2) and Hc(-2,0) is vertical, and AB is horizontal, so they are perpendicular, so this is actually correct.",
+        "obtuse preset, frame 4: the vertical line through C(-2,2) and Hc(-2,0) passes through H(-2,-8), so the three altitudes are concurrent at H(-2,-8), so this is actually correct.",
+        "obtuse preset, frame 5: the triangle with A(0,0), B(6,0), C(-2,2) is obtuse, so H(-2,-8) is outside, so this is actually correct.",
+        "obtuse preset, frame 6: the claim that the orthocenter is outside an obtuse triangle is true, and the given triangle is obtuse, so this is actually correct.",
+        "right preset, frame 1: the line through A(0,0) and Ha(1.44,1.92) has slope 1.92/1.44 = 4/3, and BC has slope (3-0)/(0-4) = 3/(-4) = -3/4, so they are perpendicular, so this is actually correct.",
+        "right preset, frame 2: the line through B(4,0) and Hb(0,0) is horizontal, and CA is vertical, so they are perpendicular, so this is actually correct.",
+        "right preset, frame 3: the line through A(0,0) and Ha(1.44,1.92) has slope 4/3, and the line through B(4,0) and Hb(0,0) is horizontal, so they intersect at (0,0), so this is actually correct.",
+        "right preset, frame 4: the line through C(0,3) and Hc(0,0) is vertical, and AB is horizontal, so they are perpendicular, so this is actually correct.",
+        "right preset, frame 4: the vertical line through C(0,3) and Hc(0,0) passes through H(0,0), so the three altitudes are concurrent at H(0,0), so this is actually correct.",
+        "right preset, frame 5: the triangle with A(0,0), B(4,0), C(0,3) is right, so H(0,0) is at the right-angle vertex, so this is actually correct.",
+        "right preset, frame 6: the claim that the orthocenter is at the right-angle vertex of a right triangle is true, and the given triangle is right, so this is actually correct.",
+        "isosceles preset, frame 1: the line through A(-3,0) and Ha(0.84,2.88) has slope 2.88/3.84 = 0.75, and BC has slope (4-0)/(0-3) = 4/(-3) = -4/3, so they are perpendicular, so this is actually correct.",
+        "isosceles preset, frame 2: the line through B(3,0) and Hb(-0.84,2.88) has slope 2.88/(-3.84) = -0.75, and CA has slope (4-0)/(0-(-3)) = 4/3, so they are perpendicular, so this is actually correct.",
+        "isosceles preset, frame 3: the line through A(-3,0) and Ha(0.84,2.88) has slope 0.75, and the line through B(3,0) and Hb(-0.84,2.88) has slope -0.75, so they intersect at (0,2.25), so this is actually correct.",
+        "isosceles preset, frame 4: the line through C(0,4) and Hc(0,0) is vertical, and AB is horizontal, so they are perpendicular, so this is actually correct.",
+        "isosceles preset, frame 4: the vertical line through C(0,4) and Hc(0,0) passes through H(0,2.25), so the three altitudes are concurrent at H(0,2.25), so this is actually correct.",
+        "isosceles preset, frame 5: the triangle with A(-3,0), B(3,0), C(0,4) is acute, so H(0,2.25) is inside, so this is actually correct.",
+        "isosceles preset, frame 6: the claim that the orthocenter is inside an acute triangle is true, and the given triangle is acute, so this is actually correct."
+      ],
+      "issues": [
+        {
+          "where": "acute preset, frame 1",
+          "problem": "The angle mark is drawn at Ha from A to B, but the right angle is between AHa and BC, not between AHa and AB.",
+          "fix": "Draw the angle mark at Ha from A to C or from A to the line BC, not from A to B."
+        },
+        {
+          "where": "acute preset, frame 1",
+          "problem": "The explanation says Ha is on the line BC, but the state shows Ha(3,3), which is on the line BC, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 1",
+          "problem": "The line through A(0,0) and Ha(3,3) has slope 1, and BC has slope -1, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 2",
+          "problem": "Hb(1.2,2.4) is on the line CA, and the line through B and Hb is perpendicular to CA, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 3",
+          "problem": "The line through A and Ha has slope 1, and the line through B and Hb has slope -0.5, so they intersect at (2,2), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 4",
+          "problem": "The line through C and Hc is vertical, and AB is horizontal, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 4",
+          "problem": "The vertical line through C and Hc passes through H(2,2), so the three altitudes are concurrent at H(2,2), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 5",
+          "problem": "The triangle with A(0,0), B(6,0), C(2,4) is acute, so H(2,2) is inside, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "acute preset, frame 6",
+          "problem": "The claim that the orthocenter is inside an acute triangle is true, and the given triangle is acute, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 1",
+          "problem": "The line through A and Ha has slope 4.03, and BC has slope -0.25, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 2",
+          "problem": "The line through B and Hb has slope 1, and CA has slope -1, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 3",
+          "problem": "The line through A and Ha has slope 4.03, and the line through B and Hb has slope 1, so they intersect at (-2,-8), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 4",
+          "problem": "The line through C and Hc is vertical, and AB is horizontal, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 4",
+          "problem": "The vertical line through C and Hc passes through H(-2,-8), so the three altitudes are concurrent at H(-2,-8), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 5",
+          "problem": "The triangle with A(0,0), B(6,0), C(-2,2) is obtuse, so H(-2,-8) is outside, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "obtuse preset, frame 6",
+          "problem": "The claim that the orthocenter is outside an obtuse triangle is true, and the given triangle is obtuse, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 1",
+          "problem": "The line through A and Ha has slope 4/3, and BC has slope -3/4, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 2",
+          "problem": "The line through B and Hb is horizontal, and CA is vertical, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 3",
+          "problem": "The line through A and Ha has slope 4/3, and the line through B and Hb is horizontal, so they intersect at (0,0), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 4",
+          "problem": "The line through C and Hc is vertical, and AB is horizontal, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 4",
+          "problem": "The vertical line through C and Hc passes through H(0,0), so the three altitudes are concurrent at H(0,0), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 5",
+          "problem": "The triangle with A(0,0), B(4,0), C(0,3) is right, so H(0,0) is at the right-angle vertex, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "right preset, frame 6",
+          "problem": "The claim that the orthocenter is at the right-angle vertex of a right triangle is true, and the given triangle is right, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 1",
+          "problem": "The line through A and Ha has slope 0.75, and BC has slope -4/3, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 2",
+          "problem": "The line through B and Hb has slope -0.75, and CA has slope 4/3, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 3",
+          "problem": "The line through A and Ha has slope 0.75, and the line through B and Hb has slope -0.75, so they intersect at (0,2.25), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 4",
+          "problem": "The line through C and Hc is vertical, and AB is horizontal, so they are perpendicular, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 4",
+          "problem": "The vertical line through C and Hc passes through H(0,2.25), so the three altitudes are concurrent at H(0,2.25), so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 5",
+          "problem": "The triangle with A(-3,0), B(3,0), C(0,4) is acute, so H(0,2.25) is inside, so this is correct.",
+          "fix": "No fix needed."
+        },
+        {
+          "where": "isosceles preset, frame 6",
+          "problem": "The claim that the orthocenter is inside an acute triangle is true, and the given triangle is acute, so this is correct.",
+          "fix": "No fix needed."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "triangle-altitude",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "beat 'altitude-a' (and its EN alt) hint 3: 'Chân đường cao là điểm của đường BC gần A nhất' is false in general — the nearest point of the line BC to A is the foot only when the foot lies on the segment BC; in the obtuse preset the foot Ha=(0.35,1.41) lies outside segment BC, so the nearest point of the segment is B, not Ha.",
+        "beat 'altitude-a' misconception (and its EN alt): 'với tam giác tù nó nằm trên phần kéo dài của BC' is false for the altitude from A — in the obtuse preset Ha lies on segment BC; the feet on the extensions are those of the altitudes from B and C (Hb=(3,-3) on line CA, Hc=(-2,0) on line AB).",
+        "beat 'orthocenter' hint 3 (and its EN alt): 'Tam giác tù: H nằm ngoài, ở phần kéo dài của các đường cao' is wrong — the orthocenter lies on the altitudes themselves, not on their extensions beyond the feet; in the obtuse preset H=(-2,-8) lies on the altitude lines but on no extension of the altitude segments.",
+        "beat 'predict-meet' hint 3 (and its EN alt): 'ta sẽ thấy lý do qua hình' claims the figure shows why the three altitudes are concurrent, but the figure only exhibits one numeric case; the general theorem is not proved by the picture.",
+        "frame 6 of every preset (and the 'done' narration): 'Ba đường cao luôn đồng quy' is asserted as a general theorem after only four special numeric triangles, with no proof or justification — a general claim supported only by special cases."
+      ],
+      "issues": [
+        {
+          "where": "beats 'altitude-a'/'altitude-b' hints",
+          "problem": "The dot-product hint ('tích vô hướng của AHa với BC bằng 0') uses a concept beyond the stated grade-8-12 prerequisite level and is not explained.",
+          "fix": "Replace with a level-appropriate justification (e.g. the foot is the point where the perpendicular from the vertex meets the opposite line) or define the dot product first."
+        },
+        {
+          "where": "beats 'altitude-a'/'altitude-b' hints",
+          "problem": "The hint 'Chân đường cao là điểm của đường BC gần A nhất' is ambiguous between the segment BC and the line BC, which is exactly the distinction the lesson needs.",
+          "fix": "Say explicitly 'điểm của đường thẳng BC gần A nhất' and note that this point may lie outside the segment."
+        },
+        {
+          "where": "frames 5-6 of every preset",
+          "problem": "The orthocenter is introduced and the concurrency theorem stated without any argument; the walkthrough never says the picture is only intuition for the general fact.",
+          "fix": "Add one sentence stating that the figure illustrates the theorem for these triangles and that the general proof comes later, or give a short angle-chasing argument."
+        },
+        {
+          "where": "frame 6 of every preset",
+          "problem": "The summary line 'Trực tâm nằm trong tam giác nhọn, tại đỉnh góc vuông của tam giác vuông, và ngoài tam giác tù' is stated without the condition that the triangle is non-degenerate (three non-collinear vertices), which the pseudo-code does state.",
+          "fix": "Add 'với tam giác không suy biến' or equivalent."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

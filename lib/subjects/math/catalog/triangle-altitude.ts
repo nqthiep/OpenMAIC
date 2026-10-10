@@ -122,8 +122,8 @@ const beatDefs: readonly BeatDef[] = [
     ),
     misconceptions: [
       m(
-        'Nghĩ rằng chân đường cao luôn nằm trên đoạn BC: với tam giác tù nó nằm trên phần kéo dài của BC.',
-        'Thinking the foot always lies on the segment BC: in an obtuse triangle it lies on the extension of BC.',
+        'Nghĩ rằng chân đường cao luôn nằm trên đoạn thẳng đối diện: ở tam giác tù, chân của hai đường cao nằm trên phần kéo dài.',
+        'Thinking the foot always lies on the opposite side: in an obtuse triangle the feet of two altitudes lie on the extensions.',
       ),
     ],
   },
@@ -396,7 +396,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const triangleAltitudeEntry: WalkthroughEntry<In, S> = {
   id: 'triangle-altitude',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-triangle-geometry'],

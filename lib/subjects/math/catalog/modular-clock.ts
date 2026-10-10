@@ -137,7 +137,7 @@ const beatDefs: readonly BeatDef[] = [
         'The least number of steps for the sequence of powers to return to a value met in the repeating part.',
       ),
       m(
-        'Nếu a và n nguyên tố cùng nhau, chu kỳ chia hết φ(n); với n nguyên tố, nó chia hết n − 1.',
+        'Nếu a và n nguyên tố cùng nhau, chu kỳ là một ước của φ(n); với n nguyên tố, nó là một ước của n − 1.',
         'If a and n are coprime the period divides φ(n); for a prime n it divides n − 1.',
       ),
     ],
@@ -301,7 +301,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const modularClockEntry: WalkthroughEntry<In, S> = {
   id: 'modular-clock',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-modular-arith'],

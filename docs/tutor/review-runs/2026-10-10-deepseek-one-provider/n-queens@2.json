@@ -1,0 +1,136 @@
+{
+  "entryId": "n-queens",
+  "entryRev": 2,
+  "contentHash": "cd2fe71b31f29c94",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "n-queens",
+      "entryRev": 2,
+      "scores": {
+        "dung": 2,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "n3-none frame 6: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,1) muted while (1,2) is not muted; (1,2) is also attacked by the queen at (0,0) via column/diagonal check? Actually (1,2) is not attacked by (0,0) (different column, |1-0|=1 vs |2-0|=2), so only (1,0) and (1,1) are attacked; (1,1) muted is correct, but the explanation claims attacked cells are dimmed while (1,0) is active not muted, so the dimming is inconsistent with the text.",
+        "n3-none frame 8: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) muted and (1,1) active; (1,0) is attacked by (0,0) via column, so it should be muted, but the active cell (1,1) is the one being checked and is attacked, so the dimming set is incomplete/inconsistent.",
+        "n3-none frame 13: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,1) and (2,2) muted while (2,0) is active; (2,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (2,1),(2,2) are not attacked by (0,0) (|2-0|=2 vs |1-0|=1 and |2-0|=2 vs |2-0|=2? (2,2) is on the same diagonal as (0,0), so it is attacked), so the muted set is wrong.",
+        "n3-none frame 15: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0) and (2,2) muted while (2,1) is active; (2,1) is attacked by (1,2) via diagonal (|2-1|=1, |1-2|=1), so the active cell is attacked but not muted, and (2,0) is not attacked by (1,2), so the muted set is wrong.",
+        "n3-none frame 17: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0) and (2,1) muted while (2,2) is active; (2,2) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (2,0),(2,1) are not attacked by (0,0), so the muted set is wrong.",
+        "n3-none frame 24: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,1) and (1,2) muted while (1,0) is active; (1,0) is attacked by (0,1) via diagonal (|1-0|=1, |0-1|=1), so the active cell is attacked but not muted, and (1,1),(1,2) are not attacked by (0,1), so the muted set is wrong.",
+        "n3-none frame 26: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) and (1,2) muted while (1,1) is active; (1,1) is attacked by (0,1) via column, so the active cell is attacked but not muted, and (1,0),(1,2) are not attacked by (0,1), so the muted set is wrong.",
+        "n3-none frame 28: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) and (1,1) muted while (1,2) is active; (1,2) is attacked by (0,1) via diagonal (|1-0|=1, |2-1|=1), so the active cell is attacked but not muted, and (1,0),(1,1) are not attacked by (0,1), so the muted set is wrong.",
+        "n3-none frame 37: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,1) and (2,2) muted while (2,0) is active; (2,0) is attacked by (0,2) via diagonal (|2-0|=2, |0-2|=2), so the active cell is attacked but not muted, and (2,1),(2,2) are not attacked by (0,2), so the muted set is wrong.",
+        "n3-none frame 39: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0) and (2,2) muted while (2,1) is active; (2,1) is attacked by (1,0) via diagonal (|2-1|=1, |1-0|=1), so the active cell is attacked but not muted, and (2,0),(2,2) are not attacked by (1,0), so the muted set is wrong.",
+        "n3-none frame 41: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0) and (2,1) muted while (2,2) is active; (2,2) is attacked by (0,2) via column, so the active cell is attacked but not muted, and (2,0),(2,1) are not attacked by (0,2), so the muted set is wrong.",
+        "n3-none frame 44: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,2) muted while (1,1) is active; (1,1) is attacked by (0,2) via diagonal (|1-0|=1, |1-2|=1), so the active cell is attacked but not muted, and (1,2) is attacked by (0,2) via column, so the muted set is incomplete.",
+        "n3-none frame 46: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,1) muted while (1,2) is active; (1,2) is attacked by (0,2) via column, so the active cell is attacked but not muted, and (1,1) is attacked by (0,2) via diagonal, so the muted set is incomplete.",
+        "n4 frame 6: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,1) muted while (1,0) is active; (1,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (1,1) is attacked by (0,0) via diagonal, so the muted set is incomplete.",
+        "n4 frame 8: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) muted while (1,1) is active; (1,1) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (1,0) is attacked by (0,0) via column, so the muted set is incomplete.",
+        "n4 frame 13: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,1), (2,2), (2,3) muted while (2,0) is active; (2,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (2,1),(2,2),(2,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n4 frame 15: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0), (2,2), (2,3) muted while (2,1) is active; (2,1) is attacked by (1,2) via diagonal (|2-1|=1, |1-2|=1), so the active cell is attacked but not muted, and (2,0),(2,2),(2,3) are not attacked by (1,2), so the muted set is wrong.",
+        "n4 frame 17: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0), (2,1), (2,3) muted while (2,2) is active; (2,2) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (2,0),(2,1),(2,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n4 frame 19: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0), (2,1), (2,2) muted while (2,3) is active; (2,3) is attacked by (1,2) via diagonal (|2-1|=1, |3-2|=1), so the active cell is attacked but not muted, and (2,0),(2,1),(2,2) are not attacked by (1,2), so the muted set is wrong.",
+        "n4 frame 25: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,2) and (2,3) muted while (2,0) is active; (2,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (2,2),(2,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n4 frame 30: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,1), (3,2), (3,3) muted while (3,0) is active; (3,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (3,1),(3,2),(3,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n4 frame 32: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,0), (3,2), (3,3) muted while (3,1) is active; (3,1) is attacked by (1,3) via diagonal (|3-1|=2, |1-3|=2), so the active cell is attacked but not muted, and (3,0),(3,2),(3,3) are not attacked by (1,3), so the muted set is wrong.",
+        "n4 frame 34: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,0), (3,1), (3,3) muted while (3,2) is active; (3,2) is attacked by (2,1) via diagonal (|3-2|=1, |2-1|=1), so the active cell is attacked but not muted, and (3,0),(3,1),(3,3) are not attacked by (2,1), so the muted set is wrong.",
+        "n4 frame 36: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,0), (3,1), (3,2) muted while (3,3) is active; (3,3) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (3,0),(3,1),(3,2) are not attacked by (0,0), so the muted set is wrong.",
+        "n4 frame 39: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0) and (2,3) muted while (2,2) is active; (2,2) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (2,0),(2,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n4 frame 41: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0) and (2,2) muted while (2,3) is active; (2,3) is attacked by (1,3) via column, so the active cell is attacked but not muted, and (2,0),(2,2) are not attacked by (1,3), so the muted set is wrong.",
+        "n4 frame 48: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,1) and (1,2) muted while (1,0) is active; (1,0) is attacked by (0,1) via diagonal (|1-0|=1, |0-1|=1), so the active cell is attacked but not muted, and (1,1),(1,2) are not attacked by (0,1), so the muted set is wrong.",
+        "n4 frame 50: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) and (1,2) muted while (1,1) is active; (1,1) is attacked by (0,1) via column, so the active cell is attacked but not muted, and (1,0),(1,2) are not attacked by (0,1), so the muted set is wrong.",
+        "n4 frame 52: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) and (1,1) muted while (1,2) is active; (1,2) is attacked by (0,1) via diagonal (|1-0|=1, |2-1|=1), so the active cell is attacked but not muted, and (1,0),(1,1) are not attacked by (0,1), so the muted set is wrong.",
+        "n4 frame 60: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,1) and (3,3) muted while (3,0) is active; (3,0) is attacked by (2,0) via column, so the active cell is attacked but not muted, and (3,1),(3,3) are not attacked by (2,0), so the muted set is wrong.",
+        "n4 frame 62: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,0) and (3,3) muted while (3,1) is active; (3,1) is attacked by (0,1) via column, so the active cell is attacked but not muted, and (3,0),(3,3) are not attacked by (0,1), so the muted set is wrong.",
+        "n5 frame 6: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,1) muted while (1,0) is active; (1,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (1,1) is attacked by (0,0) via diagonal, so the muted set is incomplete.",
+        "n5 frame 8: explanation says 'Các ô bị tấn công ở hàng 1 được tô mờ' but highlights mark (1,0) muted while (1,1) is active; (1,1) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (1,0) is attacked by (0,0) via column, so the muted set is incomplete.",
+        "n5 frame 13: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,1), (2,2), (2,3) muted while (2,0) is active; (2,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (2,1),(2,2),(2,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n5 frame 15: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0), (2,2), (2,3) muted while (2,1) is active; (2,1) is attacked by (1,2) via diagonal (|2-1|=1, |1-2|=1), so the active cell is attacked but not muted, and (2,0),(2,2),(2,3) are not attacked by (1,2), so the muted set is wrong.",
+        "n5 frame 17: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0), (2,1), (2,3) muted while (2,2) is active; (2,2) is attacked by (0,0) via diagonal, so the active cell is attacked but not muted, and (2,0),(2,1),(2,3) are not attacked by (0,0), so the muted set is wrong.",
+        "n5 frame 19: explanation says 'Các ô bị tấn công ở hàng 2 được tô mờ' but highlights mark (2,0), (2,1), (2,2) muted while (2,3) is active; (2,3) is attacked by (1,2) via diagonal (|2-1|=1, |3-2|=1), so the active cell is attacked but not muted, and (2,0),(2,1),(2,2) are not attacked by (1,2), so the muted set is wrong.",
+        "n5 frame 24: explanation says 'Các ô bị tấn công ở hàng 3 được tô mờ' but highlights mark (3,2), (3,3), (3,4) muted while (3,0) is active; (3,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (3,2),(3,3),(3,4) are not attacked by (0,0), so the muted set is wrong.",
+        "n5 frame 29: explanation says 'Các ô bị tấn công ở hàng 4 được tô mờ' but highlights mark (4,1), (4,2), (4,4) muted while (4,0) is active; (4,0) is attacked by (0,0) via column, so the active cell is attacked but not muted, and (4,1),(4,2),(4,4) are not attacked by (0,0), so the muted set is wrong.",
+        "n5 frame 31: explanation says 'Các ô bị tấn công ở hàng 4 được tô mờ' but highlights mark (4,0), (4,2), (4,4) muted while (4,1) is active; (4,1) is attacked by (3,1) via column, so the active cell is attacked but not muted, and (4,0),(4,2),(4,4) are not attacked by (3,1), so the muted set is wrong.",
+        "n5 frame 33: explanation says 'Các ô bị tấn công ở hàng 4 được tô mờ' but highlights mark (4,0), (4,1), (4,4) muted while (4,2) is active; (4,2) is attacked by (1,2) via column, so the active cell is attacked but not muted, and (4,0),(4,1),(4,4) are not attacked by (1,2), so the muted set is wrong.",
+        "n3-none frame 48: explanation says 'Đã thử mọi khả năng sau 18 lần thử ô' but the actual number of cell checks in the frames is 17 (frames 2,5,7,9,12,14,16,20,23,25,27,30,33,36,38,40,43,45 are conflict-check frames; frame 48 is the done frame, so 18 checks would require one more conflict-check frame).",
+        "n4 frame 66: explanation says 'Dừng ở nghiệm đầu tiên sau 26 lần thử ô' but the actual number of cell checks in the frames is 25 (conflict-check frames: 2,5,7,9,12,14,16,18,21,24,26,29,31,33,35,38,39,40,44,47,49,51,53,56,59,61,63 = 27? recount: frames with tag conflict-check in n4 are 2,5,7,9,12,14,16,18,21,24,26,29,31,33,35,38,39,40,44,47,49,51,53,56,59,61,63 = 27, so 26 is wrong).",
+        "n5 frame 37: explanation says 'Dừng ở nghiệm đầu tiên sau 15 lần thử ô' but the actual number of cell checks in the frames is 14 (conflict-check frames: 2,5,7,9,12,14,16,18,20,23,25,28,30,32,34 = 15? recount: 2,5,7,9,12,14,16,18,20,23,25,28,30,32,34 = 15, so 15 is correct; no error here).",
+        "n3-none frame 48: explanation says 'Đã thử mọi khả năng sau 18 lần thử ô' but the actual number of cell checks in the frames is 17 (conflict-check frames: 2,5,7,9,12,14,16,20,23,25,27,30,33,36,38,40,43,45 = 18? recount: 2,5,7,9,12,14,16,20,23,25,27,30,33,36,38,40,43,45 = 18, so 18 is correct; no error here).",
+        "n4 frame 66: explanation says 'Dừng ở nghiệm đầu tiên sau 26 lần thử ô' but the actual number of cell checks in the frames is 27 (conflict-check frames: 2,5,7,9,12,14,16,18,21,24,26,29,31,33,35,38,39,40,44,47,49,51,53,56,59,61,63 = 27), so 26 is wrong.",
+        "n5 frame 37: explanation says 'Dừng ở nghiệm đầu tiên sau 15 lần thử ô' but the actual number of cell checks in the frames is 15 (conflict-check frames: 2,5,7,9,12,14,16,18,20,23,25,28,30,32,34 = 15), so 15 is correct; no error here."
+      ],
+      "issues": [
+        {
+          "where": "frames with 'Các ô bị tấn công ... được tô mờ'",
+          "problem": "The muted highlights consistently mark the wrong cells: the active cell being checked is attacked but not muted, and the muted cells are often not attacked by the compared queen.",
+          "fix": "For each conflict-check frame, compute the attacked cells of the current row from the placed queens and mark exactly those as muted, keeping the active cell highlighted separately."
+        },
+        {
+          "where": "n4 frame 66",
+          "problem": "The stated attempt count 26 does not match the 27 conflict-check frames in the n4 preset.",
+          "fix": "Recount the cell checks and set attempts to 27, or adjust the frames to match 26."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "n-queens",
+      "entryRev": 2,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame n3-none index 13 (vars r=2,c=0,rr=0,qc=0): explanation says only 'hậu ở hàng 0 cùng cột 0' but the queen at (1,2) also attacks (2,1) diagonally, so the dimmed cells 2,1 and 2,2 are not both explained by the cited queen; the frame's rr/qc point at (0,0) while the muted set mixes two attackers.",
+        "Frame n4 index 25 (vars r=2,c=0,rr=0,qc=0): highlights mute 2,2 and 2,3 but not 2,1, yet the queen at (1,3) attacks (2,2) diagonally and the queen at (0,0) attacks (2,2) too; the muted set is inconsistent with the stated single attacker (0,0).",
+        "Frame n4 index 60 (vars r=3,c=0,rr=2,qc=0): highlights mute 3,1 and 3,3 but not 3,2, although the queen at (1,3) attacks (3,1) and (2,0) attacks (3,1); the muted set does not match the cited attacker (2,0).",
+        "Frame n5 index 29 (vars r=4,c=0,rr=0,qc=0): highlights mute 4,1, 4,2, 4,4 but not 4,3, although the queen at (3,1) attacks (4,2) and the queen at (2,4) attacks (4,2); the muted set is inconsistent with the cited attacker (0,0).",
+        "Frame n5 index 31 (vars r=4,c=1,rr=3,qc=1): highlights mute 4,0, 4,2, 4,4 but not 4,3, although the queen at (2,4) attacks (4,2) and (3,1) attacks (4,2); the muted set does not match the cited attacker (3,1).",
+        "Frame n5 index 33 (vars r=4,c=2,rr=1,qc=2): highlights mute 4,0, 4,1, 4,4 but not 4,3, although the queen at (2,4) attacks (4,2) and (3,1) attacks (4,2); the muted set is inconsistent with the cited attacker (1,2).",
+        "Frame n3-none index 48 (vars n=3, attempts=18): the count 18 is wrong — tracing the shown search (row0 c0: 3 checks; row1 c0,c1,c2: 3; row2 c0,c1,c2: 3; backtrack; row0 c1: 3; row1 c0,c1,c2: 3; backtrack; row0 c2: 3; row1 c0,c1,c2: 3; row2 c0,c1,c2: 3) gives 27 cell checks, not 18.",
+        "Frame n4 index 66 (vars n=4, attempts=26): the count 26 is wrong — tracing the shown search gives 4 (row0 c0) + 4 (row1 c0,c1,c2,c3) + 4 (row2 c0..c3) + 4 (row3 c0..c3) + 4 (row2 c2,c3) + 4 (row1 c3) + 4 (row2 c0,c1,c2,c3) + 4 (row3 c0,c1,c2) = 32 cell checks, not 26.",
+        "Frame n5 index 37 (vars n=5, attempts=15): the count 15 is wrong — tracing the shown search gives 5 (row0 c0) + 5 (row1 c0..c4) + 5 (row2 c0..c4) + 5 (row3 c0,c1) + 5 (row4 c0..c3) = 25 cell checks, not 15.",
+        "Beat 'done' narration (and script for n3-none/n4/n5): 'Quay lui không thử hết n^n cách đặt' is wrong — the unrestricted count of one queen per row is n^n only if columns may repeat; with distinct columns it is n!, and the pruning claim should compare against n! (or state n^n as the loose bound)."
+      ],
+      "issues": [
+        {
+          "where": "frames n3-none index 13, n4 index 25, n4 index 60, n5 index 29/31/33",
+          "problem": "The 'muted' highlight sets for attacked cells are computed inconsistently: some cells attacked by a placed queen are left un-muted and some muted cells are not attacked by the single queen named in the explanation.",
+          "fix": "Recompute the muted set as the union of all cells attacked by any placed queen, and either name all attackers in the explanation or keep the explanation to the one attacker whose rr/qc are shown."
+        },
+        {
+          "where": "frames n3-none index 48, n4 index 66, n5 index 37 and the 'done' beat",
+          "problem": "The 'attempts' totals do not match the search actually shown in the frames, and the narration's n^n comparison is not the right baseline.",
+          "fix": "Recount the cell checks from the frame sequence (27, 32, 25) and update vars.attempts and the narration; compare pruning against n! (or explicitly call n^n a loose upper bound)."
+        },
+        {
+          "where": "beats 'conflict-check' and 'backtrack' narration templates",
+          "problem": "The narration is phrased as a conditional ('bị tấn công nếu…') even on frames where the answer is already known, so it does not state the actual outcome of the frame.",
+          "fix": "Add a second sentence stating the concrete result for the current frame (attacked by which queen, or safe), as the frame explanations already do."
+        },
+        {
+          "where": "script for n3-none, n4, n5 (truncated=true)",
+          "problem": "The scripted lesson jumps from the first conflict check straight to the final 'done' frame, so the backtracking steps (the core of the lesson) are never narrated.",
+          "fix": "Narrate at least one full backtrack cycle (a dead end plus the lift of the previous queen) before jumping to the final frame, or mark the skipped range explicitly."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

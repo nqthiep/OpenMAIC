@@ -1,0 +1,96 @@
+{
+  "entryId": "induction-fallacy",
+  "entryRev": 1,
+  "contentHash": "76119c67b9aaf5f0",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "induction-fallacy",
+      "entryRev": 1,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "colors-4, frame 2",
+          "problem": "The explanation says the two groups share 2 horses, but the highlights show p1 in group-0, p2 and p3 in group-2, p4 in group-1. The overlap is p2 and p3, which is correct, but the visual grouping is not clearly explained to the student.",
+          "fix": "Add a short caption or legend explaining that group-0 is the first three horses, group-1 is the last three, and group-2 is the overlap."
+        },
+        {
+          "where": "base-3, frame 1",
+          "problem": "The explanation says 'Suppose k² + k is odd for k = 2', but the highlighted points p2 and p3 are labelled 6 and 12, which are even. The step is algebraically correct, but the visual does not show the assumption.",
+          "fix": "Clarify that the assumption is hypothetical and false, or highlight only the algebraic transition rather than the numeric values."
+        },
+        {
+          "where": "base-3, frame 2",
+          "problem": "The explanation says 'All the first 3 values are even (orange)', but the highlights use 'compare' rather than a colour name. The student may not know what 'compare' means visually.",
+          "fix": "Use a consistent colour label such as 'even' or 'orange' in the highlights, or add a legend."
+        },
+        {
+          "where": "beats, crack",
+          "problem": "The third hint mixes the horse example and the numeric example in one sentence, which may confuse a student working on one preset.",
+          "fix": "Split the hint into two preset-specific hints, or phrase it so it applies to whichever preset is active."
+        },
+        {
+          "where": "script, all presets",
+          "problem": "The script asks the prediction question 'For k large enough, is the induction step from k to k + 1 correct?' before showing the step, but the question is asked while frame 0 is still displayed, so the student has not yet seen the step.",
+          "fix": "Move the prediction question to after frame 1 is displayed, or reorder the script so the step is visible before the question."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "induction-fallacy",
+      "entryRev": 1,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "preset base-3/base-6, frame index 1 (codeLine 2): 'Giả sử k² + k lẻ với k = 2' / 'Suppose k² + k is odd for k = 2' — the hypothesis is false (2²+2 = 6 is even), so the displayed step is not a valid implication; the narration 'Bước này đúng với mọi k' is only true for the corrected hypothesis 'k² + k even'",
+        "preset base-3/base-6, frame index 1: the algebra (k+1)²+(k+1) = (k²+k) + 2(k+1) = 'lẻ + chẵn = lẻ' contradicts the displayed values 6 and 12 (even) and the later frame 'n² + n thực ra luôn chẵn'; the parity conclusion must be 'chẵn + chẵn = chẵn'",
+        "preset base-3/base-6, frame index 2: 'Cả 3 giá trị đầu đều chẵn (cam): bước cơ sở không đúng' — the base case n = 1 is true for the claim 'n² + n is even'; the claim that fails is the oddness claim, so the base case is not the flaw here (the flaw is the false hypothesis in the step)"
+      ],
+      "issues": [
+        {
+          "where": "preset colors-4/colors-8, frames index 3–5 and beat 'crack'",
+          "problem": "the crack is located at the step k = 1 → 2, but the walkthrough never states that the induction step must hold for every k ≥ 1 (including k = 1); the 'before' line does not announce this condition, so the conclusion 'bước 1 lên 2 hỏng nên cả chuỗi sụp đổ' is asserted rather than derived",
+          "fix": "add an explicit line before the crack: 'bước quy nạp phải đúng với mọi k ≥ 1, kể cả k = 1', then show the k = 1 case fails"
+        },
+        {
+          "where": "preset colors-4/colors-8, frame index 2",
+          "problem": "the claim 'Hai nhóm chung 2 con (đậm), nên mọi con cùng màu' is stated as if it were a valid inference, but the two groups are {1,2,3} and {2,3,4} and the overlap is {2,3}; the inference is only valid if the two groups really have the same colour, which is exactly what is being assumed — the text does not flag this as the hidden assumption",
+          "fix": "say explicitly: 'lập luận ngầm giả sử hai nhóm cùng màu; điều đó chỉ đúng nếu chúng chung ít nhất một con'"
+        },
+        {
+          "where": "preset base-3/base-6, frame index 1",
+          "problem": "the step is presented as 'đúng với mọi k' while the hypothesis 'k² + k lẻ' is false for the displayed k; a student cannot tell whether the step or the hypothesis is the error",
+          "fix": "either change the claim to 'n² + n luôn chẵn' and keep the step, or keep the odd claim and show the step fails because the hypothesis is false"
+        },
+        {
+          "where": "preset base-3/base-6, frame index 2",
+          "problem": "the phrase 'bước cơ sở không đúng' is used for a claim whose base case is actually true; the real failure is the false induction hypothesis",
+          "fix": "reword to 'bước cơ sở của phát biểu sai (n² + n lẻ) không đúng, nhưng ở đây bước quy nạp mới là chỗ hỏng vì giả thiết sai'"
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

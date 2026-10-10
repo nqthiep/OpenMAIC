@@ -1,0 +1,98 @@
+{
+  "entryId": "lattice-paths",
+  "entryRev": 2,
+  "contentHash": "d7a67aa8d89c6a96",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-math",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "lattice-paths",
+      "entryRev": 2,
+      "scores": {
+        "dung": 5,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [],
+      "issues": [
+        {
+          "where": "beat 'pascal', narration",
+          "problem": "The narration says 'the number at each point is the sum of its two neighbours' without stating the boundary condition (points on the bottom row and left column have only one predecessor, so the rule needs the edge values fixed at 1).",
+          "fix": "Add a sentence noting that the bottom row and left column are all 1, and the sum rule applies to the remaining points."
+        },
+        {
+          "where": "beat 'binomial', narration",
+          "problem": "The claim that the binomial count 'matches the number in the opposite corner' is asserted but the reason (the Pascal recurrence produces binomial coefficients) is not spelled out.",
+          "fix": "Add one sentence connecting the Pascal recurrence to the identity C(k, r) = C(k-1, r-1) + C(k-1, r), so the match is justified rather than asserted."
+        },
+        {
+          "where": "frames for preset 1-6, path captions",
+          "problem": "Only three paths are shown for the 1 × 6 grid, but the captions say 'every path is equally long' while the visual shows only a few of the 7 paths.",
+          "fix": "Either show all 7 paths or add a caption noting that the remaining paths are obtained by moving the single right step to each of the 7 positions."
+        },
+        {
+          "where": "beat 'start', hints",
+          "problem": "The third hint ('every path has exactly m steps right and n steps up') gives away the answer to the predict question asked in the next beat.",
+          "fix": "Make the third hint lighter, e.g. 'Count how many steps the path must move in each direction to reach B.'"
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-math-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "lattice-paths",
+      "entryRev": 2,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 3,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame 4 (preset 2-2, and the same line in 3-2, 1-6, 4-4): 'Hàng dưới cùng: chỉ có một đường đi thẳng, nên toàn số 1' — the bottom row is not all 1 because there is only one straight path; the number of paths from A to a point on the bottom row is 1 because the only allowed moves are right and up, so no up step may be used (the straight path is the only one, but the reason given is the wrong reason).",
+        "Frame 5 (preset 2-2): 'Số ở cuối hàng là 3' — the last number of row 1 is 3, but the frame's own state shows the row as 1, 2, 3 with the last point g2_1 labelled 3; the caption is consistent with the state, yet the general rule 'mỗi số là tổng của số bên trái và số bên dưới' is stated for the whole row while the leftmost point g0_1 has no left neighbour (it is 1 by the boundary rule), so the rule as stated is not true for every point of the row.",
+        "Frame 6 (preset 2-2): 'Số ở cuối hàng là 6' — the last number of row 2 is 6, but the frame's state shows g2_2 = 6 while the caption's rule 'mỗi số là tổng của số bên trái và số bên dưới' again fails at g0_2 = 1 (no left neighbour); the same boundary omission recurs in every 'Hàng r' frame of all four presets.",
+        "Beat 'binomial' (and the frame-7/9/11/12 lines): 'Một đường đi là một cách chọn n bước đi lên trong tổng m cộng n bước' — this is correct only when the grid is m columns × n rows with m right steps and n up steps; the walkthrough never states that the m × n grid means m right steps and n up steps, and in the 1 × 6 preset the picture has 1 right step and 6 up steps, so the formula C(m+n, n) = C(7,6) = 7 is right only under that unstated convention; the text never fixes the convention, so the general claim is under-specified.",
+        "Beat 'start' hint 3: 'Nên mọi đường đi có đúng m bước phải và n bước lên' — asserted without the convention that m counts columns and n counts rows; with the 1 × 6 preset the picture shows 1 right step and 6 up steps, so the hint is only true under that convention, which is never stated."
+      ],
+      "issues": [
+        {
+          "where": "Frames 4-6 (and the analogous 'Hàng r' frames in 3-2, 1-6, 4-4)",
+          "problem": "The caption says 'mỗi số là tổng của số bên trái và số bên dưới' for every point of the row, but the leftmost point of each row has no left neighbour; the boundary case is never mentioned.",
+          "fix": "Add 'riêng điểm ngoài cùng bên trái chỉ có số bên dưới, nên bằng 1' or state the rule as 'mỗi số (trừ điểm sát trục tung) là tổng...'."
+        },
+        {
+          "where": "Frame 4 caption",
+          "problem": "The justification 'chỉ có một đường đi thẳng, nên toàn số 1' gives a wrong reason: the bottom row is all 1 because no up step is allowed before reaching those points, not because the straight path is unique.",
+          "fix": "Say 'vì muốn tới đó chỉ được đi sang phải, không được đi lên'."
+        },
+        {
+          "where": "Beat 'binomial' and the closing lines",
+          "problem": "The formula C(m+n, n) is stated without fixing whether m is the number of right steps or the number of columns; the 1 × 6 preset makes the ambiguity visible (1 right step, 6 up steps).",
+          "fix": "State explicitly 'm là số bước sang phải, n là số bước đi lên' before using C(m+n, n)."
+        },
+        {
+          "where": "Beat 'paths' ask",
+          "problem": "The prediction question is asked before the answer is visible, which is good, but the options include 'm + n bước phải', which is not a plausible distractor for a student who has just seen the picture; it is a weak distractor.",
+          "fix": "Replace with a distractor such as 'm bước phải và m bước lên' or 'số bước phải bằng số bước lên'."
+        },
+        {
+          "where": "Beat 'pascal' narration",
+          "problem": "The claim 'đúng như tam giác Pascal' is asserted but the picture only shows a rectangular table of sums, not the triangular arrangement; the link is verbal only.",
+          "fix": "Add a sentence explaining that the table's diagonals are the rows of Pascal's triangle, or soften to 'giống quy tắc cộng của tam giác Pascal'."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}

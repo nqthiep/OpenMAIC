@@ -1,0 +1,119 @@
+{
+  "entryId": "knapsack-01",
+  "entryRev": 2,
+  "contentHash": "84f9c59c10402365",
+  "locale": "vi-VN",
+  "verdict": "fail",
+  "reviews": [
+    {
+      "reviewer": "tutor-review-cp",
+      "model": "deepseek:deepseek-v4-pro",
+      "entryId": "knapsack-01",
+      "entryRev": 2,
+      "scores": {
+        "dung": 4,
+        "roRang": 5,
+        "chiTiet": 4,
+        "deHieu": 5,
+        "trucQuan": 5,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame classic index 19: explanation says 'bỏ món 3' (skip item 3) but the tag is 'beat:skip' and the narration for beat:skip says 'Món {i} không giúp thêm giá trị ở sức chứa {c} (hoặc không vừa), nên dp[{i}][{c}] chép lại ô ngay trên: {val}'. However the frame shows two arrows (from 2,4 and from 2,0) and vars a=35, b=30, which is the take/skip comparison, not a simple copy. The explanation text itself is correct (max(35,30)=35, skip item 3), but the tag 'beat:skip' is wrong: this frame is a take-vs-skip comparison where skip wins, which should be tagged 'beat:take' or a dedicated beat, not 'beat:skip' whose narration template does not match the frame's vars (no {val} for the comparison).",
+        "Frame classic index 19: highlights use 'active' for cell 3,4 while all other result frames use 'result'; this is a minor inconsistency but the explanation says the cell is computed, so 'result' would be expected.",
+        "Frame classic index 20: explanation says '35 = dp[2][4] nên món 3 không được lấy' which is correct, but the traceback beat narration template says 'nếu dp khác ô ngay trên thì món {i} đã được lấy' — the frame correctly applies the negation, so no error in the frame itself. However the script for classic jumps from frame 10 directly to frame 23, skipping the traceback frames 20-22 and the take/skip frames 11-19, which is allowed by truncated=true but means the narrated 'done' beat at frame 23 is shown without the traceback having been narrated; this is a script flow issue, not a factual error.",
+        "Frame one-item index 9: explanation says 'sức chứa còn 3' (capacity left 3) after taking item 1 of weight 2 from capacity 5, which is correct (5-2=3). No error.",
+        "Frame classic index 21: explanation says '35 ≠ 15 = dp[1][4] nên món 2 được lấy; sức chứa còn 1' — correct (35≠15, take item 2, 4-3=1). No error.",
+        "Frame classic index 22: explanation says '15 ≠ 0 = dp[0][1] nên món 1 được lấy; sức chứa còn 0' — correct (15≠0, take item 1, 1-1=0). No error."
+      ],
+      "issues": [
+        {
+          "where": "Frame classic index 19",
+          "problem": "The frame is tagged 'beat:skip' but it shows a take-vs-skip comparison (two arrows, vars a and b) where skip wins. The 'skip' beat narration template ('chép lại ô ngay trên: {val}') does not match the frame's vars, which have no {val} for a simple copy.",
+          "fix": "Use a dedicated beat for 'skip wins after comparison' or tag this frame as 'beat:take' with a narration variant that says the skip value is larger, e.g. 'Bỏ món {i} cho {a}, lớn hơn lấy ({b}), nên dp[{i}][{c}] = {val}.'"
+        },
+        {
+          "where": "Frame classic index 19 highlights",
+          "problem": "Cell 3,4 is highlighted 'active' while all other computed result cells use 'result'.",
+          "fix": "Change highlight to 'result' for consistency."
+        },
+        {
+          "where": "Script classic",
+          "problem": "The script jumps from frame 10 to frame 23, skipping the traceback frames 20-22 and the remaining computation frames 11-19. The 'done' narration at frame 23 mentions the best value 35 but the traceback showing items 1,2 was never narrated.",
+          "fix": "Either narrate the traceback frames before the done beat, or adjust the done narration to not imply the traceback was shown."
+        },
+        {
+          "where": "Beat 'skip' narration",
+          "problem": "The narration template 'Món {i} không giúp thêm giá trị ở sức chứa {c} (hoặc không vừa), nên dp[{i}][{c}] chép lại ô ngay trên: {val}' is used for both 'does not fit' and 'fits but skip wins' cases, but the latter case (frame classic 19) has different vars and arrows.",
+          "fix": "Split into two beats: 'not-fit' (simple copy) and 'skip-wins' (comparison with two arrows)."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    },
+    {
+      "reviewer": "tutor-review-cp-2",
+      "model": "deepseek:deepseek-v4-flash",
+      "entryId": "knapsack-01",
+      "entryRev": 2,
+      "scores": {
+        "dung": 3,
+        "roRang": 4,
+        "chiTiet": 4,
+        "deHieu": 4,
+        "trucQuan": 4,
+        "sinhDong": 4
+      },
+      "factErrors": [
+        "Frame classic/4 (dp[1][1]): explanation says 'lấy: dp[0][0] + 15 = 15' but the take source is dp[i-1][c-wi] = dp[0][0]; the frame highlights '0,1' as compare, which is the skip cell, not the take cell — the take arrow should come from 0,0 (as in frame 2), so the highlight/arrow set is inconsistent with the stated formula.",
+        "Frame classic/5 (dp[1][2]): explanation says take = dp[0][1] + 15 = 15, but the frame highlights '0,2' and '0,1'; the skip cell is dp[0][2] and the take cell is dp[0][1] — the highlight labels are swapped relative to the formula (same pattern repeats in frames 6, 7, 12, 13, 19 and in the one-item preset frames 5-8).",
+        "Frame classic/19 (dp[3][4]): explanation says 'lấy: dp[2][0] + 30 = 30' but c - w3 = 4 - 4 = 0, so the take source is dp[2][0]; however the frame highlights '2,4' and '2,0' with '2,4' as compare — dp[2][4] is the skip cell, so the two highlighted sources are mislabeled (skip/take swapped).",
+        "Frame classic/21 (traceback (2,4)): explanation says '35 ≠ 15 = dp[1][4] nên món 2 được lấy; sức chứa còn 1' — correct, but the frame highlights '1,1' as the result cell while the comparison is with dp[1][4]; the highlighted cell should be (1,4) for the comparison and (1,1) only as the next state, so the visual points at the wrong cell for the stated comparison.",
+        "Frame classic/22 (traceback (1,1)): explanation says '15 ≠ 0 = dp[0][1]' and highlights '0,0' as result; the compared cell is dp[0][1], not dp[0][0], so the highlight is wrong.",
+        "Frame one-item/9 (traceback (1,5)): explanation says '3 ≠ 0 = dp[0][5] nên món 1 được lấy; sức chứa còn 3' and highlights '0,3'; the comparison is with dp[0][5] (skip cell), so the highlighted cell should be (0,5) for the comparison, not (0,3).",
+        "Frame cap-zero/4 and too-heavy/20 (traceback): explanation says '0 = dp[1][0] nên món 2 không được lấy' — correct, but the frame highlights both '2,0' and '1,0' as result; the comparison cell is (1,0) and the current cell is (2,0), which is acceptable, but in cap-zero/5 the explanation says '0 = dp[0][0]' while the frame highlights '0,0' — consistent; no error here.",
+        "Beat 'done' narration: 'Bảng có n·cap ô' — the table actually has (n+1)×(cap+1) cells, as the beat's own hint 2 correctly states; the narration's 'n·cap' is wrong (should be (n+1)(cap+1) or at least n·cap is an undercount).",
+        "Beat 'skip' hint 3: 'dùng > chứ không phải ≥ để tránh lấy thừa' — the pseudocode uses max(dp[i][c], dp[i-1][c-w[i]]+v[i]), which is equivalent to taking when the take value is ≥ the skip value; using > vs ≥ does not change the optimal value, and the claim that ≥ would 'lấy thừa' (take redundantly) is misleading — with ≥ the value is identical, only the traceback choice may differ. This is a factual error in the hint.",
+        "Pitfall 'take' (one-dimensional dp[c] must loop c downward): correct in itself, but it is attached to beat 'take' while the walkthrough never shows the 1-D version; more importantly, the pitfall text says 'từ cap xuống w[i]' — for the 1-D version the loop should go from cap down to w[i] inclusive, which is correct; no error.",
+        "Code map cpp: pseudocode line 1 'dp[0][0..cap] ← 0' maps to cpp line 3 (vector initialization with 0), which is correct; pseudocode line 2 maps to cpp lines 4-5 (loops), correct; line 3 maps to cpp line 6, correct; line 4 maps to cpp line 7, correct; line 5 maps to cpp line 10, correct. Python map: line 1→3, line 2→4-5, line 3→6, line 4→7-8, line 5→9, all correct.",
+        "Frame codeLine values: frame classic/2 has codeLine 3 (skip), frame classic/3 has codeLine 2 (loop header), frame classic/4 has codeLine 4 (take) — these match the pseudocode lines being executed, correct.",
+        "Python pitfall: '[[0] * (cap + 1)] * (n + 1) makes every row the same list' — correct.",
+        "C++ pitfall: 'use w[i-1], v[i-1]' — correct.",
+        "Problem statement/constraints/subtasks: not present in the entry, so cannot be checked; no error to report.",
+        "Script classic: setState frame 23 after frame 10 skips frames 11-22, so the narration 'Giá trị lớn nhất là 35' is shown at the final frame — acceptable for a truncated script, but the jump means the prediction at frame 3 is asked before the answer can be seen (the answer dp[1][1]=15 is only visible at frame 4), which is correct for a prediction. No error.",
+        "Script one-item: prediction asked at frame 4 (dp[1][2]) before frame 5 shows the answer — correct.",
+        "Script too-heavy: no prediction asked, and the script jumps from frame 10 to frame 22; the narration at frame 22 says 'Giá trị lớn nhất là 0' which matches the final state — correct.",
+        "Alt locale: 'there are 1 item' in one-item preset — the placeholder {n|item|items} should print '1 item', but the alt text hardcodes 'there are 1 item' which is grammatically wrong; however the primary locale uses 'có 1 món' which is correct. The alt narrationExample also says 'there are 1 item' — this is a locale error in the alt text, not a factual error about the algorithm, but it is a mismatch in meaning/grammar between locales."
+      ],
+      "issues": [
+        {
+          "where": "Frames classic/4-7, 12-13, 19 and one-item/5-8",
+          "problem": "The 'compare' highlights and arrows label the skip cell and take cell inconsistently: the explanation names dp[i-1][c] as skip and dp[i-1][c-wi] as take, but the highlighted cells often swap which is which (e.g. frame 4 highlights 0,1 as compare while the take source is 0,0).",
+          "fix": "Make the highlight/arrow for the skip cell always dp[i-1][c] and for the take cell always dp[i-1][c-wi], and label them in the explanation accordingly."
+        },
+        {
+          "where": "Beat 'done' narration (both locales)",
+          "problem": "Says the table has n·cap cells, while the table is (n+1)×(cap+1); the beat's own hint says (n+1)×(cap+1).",
+          "fix": "Change the narration to '(n+1)×(cap+1) ô' or 'khoảng n·cap ô' to match the hint and the actual table."
+        },
+        {
+          "where": "Beat 'skip' hint 3",
+          "problem": "Claims using ≥ instead of > would 'lấy thừa' (take redundantly); with max() the value is identical either way, only the traceback choice may differ.",
+          "fix": "Rephrase: 'dùng > hay ≥ đều cho cùng giá trị tối ưu; chỉ khác ở việc truy vết có thể chọn lấy món khi hai giá trị bằng nhau'."
+        },
+        {
+          "where": "Alt locale, one-item preset start narration",
+          "problem": "'there are 1 item' is ungrammatical; the placeholder {n|item|items} should yield '1 item'.",
+          "fix": "Use the placeholder or write 'there is 1 item'."
+        },
+        {
+          "where": "Script classic and too-heavy (truncated)",
+          "problem": "The script jumps from frame 10 to frame 23 (classic) and frame 10 to frame 22 (too-heavy), skipping the middle frames; the narration at the jump says the final answer without showing the intermediate cells.",
+          "fix": "Either narrate the skipped frames or add a speech explaining that the remaining cells are filled the same way before jumping to the final frame."
+        }
+      ],
+      "unsourcedClaims": [],
+      "sources": []
+    }
+  ]
+}
