@@ -20,12 +20,16 @@ import type { AppDocumentOutline } from '@/lib/document-store/persistence-types'
 import type { SceneOutline } from '@/lib/types/generation';
 import type { Action } from '@/lib/types/action';
 import type { Scene } from '@/lib/types/stage';
-import type { Scene as DslScene } from '@openmaic/dsl';
-import { isCodeWidgetAllowed, isTutorModerationEnabled } from '@/lib/config/feature-flags';
-import { resolveLocale } from '@/lib/tutor/locale';
-import { moderateScene } from './content-moderation';
-import { assertScenePolicy, isWalkthroughScene } from '@/lib/widgets/policy';
-import { widgetRegistry } from '@/lib/widgets';
+import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
+import {
+  copiedActions,
+  screenCopiedScene,
+  screenGeneratedActions,
+  screenNewScene,
+  walkthroughActions,
+  walkthroughOutlineRejection,
+  walkthroughStaleRejection,
+} from './generation-guards';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
 import type { CourseToolDeps } from './course-tools';
 import { runStageMutation } from './mutation-fence';
@@ -39,7 +43,6 @@ import { isMediaPlaceholder } from '@/lib/store/media-generation';
 import { createLogger } from '@/lib/logger';
 
 const MAX_GENERATE_SCENE_MEDIA = 8;
-const WALKTHROUGH_STALE_HINT = 'call generate_walkthrough to rebuild this page';
 export const SUPPORTED_SCENE_TYPES = new Set(['slide', 'quiz', 'interactive', 'pbl']);
 const log = createLogger('AgentGenerationTools');
 
@@ -131,11 +134,6 @@ function duplicateId(sessionId: string | undefined, callId: string) {
 
 function result(text: string, details: Record<string, unknown>, isError = false) {
   return { content: [{ type: 'text' as const, text }], details, ...(isError ? { isError } : {}) };
-}
-
-/** Shared by every page tool: the stage has no document yet. */
-export function noDocument() {
-  return result('No course document yet. Call create_stage first.', { error: 'no-document' }, true);
 }
 
 function outlineFromScene(scene: Scene, snapshot: unknown): SceneOutline {
@@ -287,7 +285,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         );
       }
       const doc = await deps.store.loadDocument(params.stageId);
-      if (!doc) return noDocument();
+      if (!doc) return result('No course document yet. Call create_stage first.', {}, true);
       const existing = doc.scenes.find((scene) => scene.order === params.order);
       const title = params.title.trim();
       const brief = params.brief.trim();
@@ -343,14 +341,9 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
           true,
         );
       }
-      const walkthroughId = (params.widgetOutline as { walkthroughId?: unknown } | undefined)
-        ?.walkthroughId;
-      if (walkthroughId !== undefined) {
-        return result(
-          'Walkthrough pages are built by generate_walkthrough, not generate_scene.',
-          { error: 'use-generate-walkthrough', validIds: widgetRegistry.walkthroughIds() },
-          true,
-        );
+      const walkthroughRejected = walkthroughOutlineRejection(params.widgetOutline);
+      if (walkthroughRejected) {
+        return result(walkthroughRejected.message, walkthroughRejected.details, true);
       }
       const requestedMedia = params.media ?? [];
       if (requestedMedia.length > MAX_GENERATE_SCENE_MEDIA) {
@@ -505,25 +498,8 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
       });
       if (!built) return result('Page assembly failed; nothing was written.', {}, true);
       const scene = built as Scene;
-      // Only generate_walkthrough may mint a walkthrough: drop a `kind` the LLM put in its widget config.
-      if (isWalkthroughScene(scene)) {
-        delete (scene.content as unknown as { widgetConfig: { kind?: unknown } }).widgetConfig.kind;
-      }
-      const blocked = assertScenePolicy(scene, { codeAllowed: isCodeWidgetAllowed() });
-      if (blocked)
-        return result('Widget "code" is blocked; nothing was written.', { ...blocked }, true);
-      if (isTutorModerationEnabled()) {
-        const flagged = await moderateScene(scene, {
-          locale: resolveLocale(doc.stage.languageDirective),
-        });
-        if (flagged) {
-          return result(
-            'Generated text was blocked by the content filter; nothing was written.',
-            { ...flagged },
-            true,
-          );
-        }
-      }
+      const rejected = await screenNewScene(scene, doc.stage.languageDirective);
+      if (rejected) return result(rejected.message, rejected.details, true);
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, scene),
       );
@@ -593,48 +569,28 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         ? doc?.scenes.find((item) => item.id === params.sceneId)
         : doc?.scenes.find((item) => item.order === params.order);
       if (!doc || !scene) return result('Page not found. Call list_scenes.', {}, true);
-      const provider = widgetRegistry.providerForScene(scene as unknown as DslScene);
-      if (provider?.isStale?.(scene as unknown as DslScene)) {
-        return result(
-          'This page no longer matches the catalog; nothing was written.',
-          { error: 'walkthrough-stale', hint: WALKTHROUGH_STALE_HINT },
-          true,
-        );
-      }
+      const stale = walkthroughStaleRejection(scene);
+      if (stale) return result(stale.message, stale.details, true);
       const outline = outlineFromScene(scene, doc.outline);
-      const actions = provider
-        ? // the scene's own locale wins inside the provider; en-US only backs a missing one
-          filterKnownActions(
-            provider.actions(scene as unknown as DslScene, { locale: 'en-US' }) as Action[],
-          )
-        : filterKnownActions(
-            await actionGenerator(
-              outline,
-              toGenerationContent(scene.content),
-              aiCallFor('scene-actions'),
-              {
-                ctx: actionContext(doc.scenes, scene),
-                agents: doc.stage.generatedAgentConfigs,
-                languageDirective: doc.stage.languageDirective ?? '',
-                userProfile: params.styleDirective,
-              },
-            ),
-          );
+      const actions = filterKnownActions(
+        walkthroughActions(scene) ??
+          (await actionGenerator(
+            outline,
+            toGenerationContent(scene.content),
+            aiCallFor('scene-actions'),
+            {
+              ctx: actionContext(doc.scenes, scene),
+              agents: doc.stage.generatedAgentConfigs,
+              languageDirective: doc.stage.languageDirective ?? '',
+              userProfile: params.styleDirective,
+            },
+          )),
+      );
       if (!actions.length)
         return result('No known actions were generated; the page was unchanged.', {}, true);
       const next = { ...scene, actions } as Scene;
-      if (!provider && isTutorModerationEnabled()) {
-        const flagged = await moderateScene(next, {
-          locale: resolveLocale(doc.stage.languageDirective),
-        });
-        if (flagged) {
-          return result(
-            'Generated text was blocked by the content filter; nothing was written.',
-            { ...flagged },
-            true,
-          );
-        }
-      }
+      const flagged = await screenGeneratedActions(next, doc.stage.languageDirective);
+      if (flagged) return result(flagged.message, flagged.details, true);
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, next),
       );
@@ -683,7 +639,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
     parameters: DuplicateParams,
     async execute(callId, params, signal) {
       const doc = await deps.store.loadDocument(params.stageId);
-      if (!doc) return noDocument();
+      if (!doc) return result('No course document yet. Call create_stage first.', {}, true);
       const scenes = [...doc.scenes].sort((a, b) => a.order - b.order);
       const id = duplicateId(deps.sessionId, callId);
       const replay = scenes.find((scene) => scene.id === id);
@@ -697,9 +653,8 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         ? scenes.find((scene) => scene.id === params.templateSceneId)
         : scenes.find((scene) => scene.order === params.templateOrder);
       if (!template) return result('Template page not found.', {}, true);
-      const blocked = assertScenePolicy(template, { codeAllowed: isCodeWidgetAllowed() });
-      if (blocked)
-        return result('Widget "code" is blocked; nothing was copied.', { ...blocked }, true);
+      const copyRejected = screenCopiedScene(template);
+      if (copyRejected) return result(copyRejected.message, copyRejected.details, true);
       const at = Math.min(params.targetOrder, scenes.length + 1);
       const shifted = shiftCourseOrders(
         scenes,
@@ -708,10 +663,6 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         1,
       );
       const now = Date.now();
-      // Walkthrough source: rebuild actions from the provider when current, else keep the old
-      // ones (never mix the new catalog with old html).
-      const provider = widgetRegistry.providerForScene(template as unknown as DslScene);
-      const rebuild = provider && !provider.isStale?.(template as unknown as DslScene);
       const created = {
         ...structuredClone(template),
         id,
@@ -719,11 +670,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         stageId: params.stageId,
         order: at,
         title: params.title?.trim() || template.title,
-        actions: provider
-          ? rebuild
-            ? provider.actions(template as unknown as DslScene, { locale: 'en-US' })
-            : structuredClone(template.actions ?? [])
-          : [],
+        actions: copiedActions(template),
         createdAt: now,
         updatedAt: now,
       } as Scene;

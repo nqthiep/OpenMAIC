@@ -5,7 +5,7 @@ import type { AgentTool } from '@earendil-works/pi-agent-core';
 import { isDeepStrictEqual } from 'node:util';
 
 import { putSceneBringingCurrent } from './document-writes';
-import { noDocument, SUPPORTED_SCENE_TYPES } from './generation-tools';
+import { SUPPORTED_SCENE_TYPES } from './generation-tools';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
 import type { CourseToolDeps } from './course-tools';
 import { runStageMutation } from './mutation-fence';
@@ -106,7 +106,12 @@ export function buildWalkthroughTool(deps: CourseToolDeps) {
       if (!title) return fail('invalid-title', 'generate_walkthrough needs a non-empty title.');
 
       const doc = await deps.store.loadDocument(params.stageId);
-      if (!doc) return noDocument();
+      if (!doc)
+        return result(
+          'No course document yet. Call create_stage first.',
+          { error: 'no-document' },
+          true,
+        );
       const sceneId = sceneIdFor(deps.sessionId, callId);
       const replayKey = `${deps.sessionId ?? ''}\0${callId}`;
 
