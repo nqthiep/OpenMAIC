@@ -1,12 +1,30 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ModelConfigFile } from '@/lib/server/model-config/openmaic-yml';
+import { setDeploymentConfigForTests } from '@/lib/server/model-config/runtime';
 
 const CTX = { direction: 'in', locale: 'zh-CN', subject: 'informatics' } as const;
 const ROUTE_MODEL = 'anthropic:claude-test';
 
+/** openmaic.yml-shaped deployment: the tutor-moderation slot assigned to `route` (none when null). */
+function deployWith(route: unknown) {
+  setDeploymentConfigForTests({
+    layer: route
+      ? {
+          source: 'deployment',
+          config: {
+            providers: { anthropic: { preset: 'anthropic', apiKey: 'test-key' } },
+            slots: { 'tutor.moderation': route },
+          } as unknown as ModelConfigFile,
+        }
+      : null,
+    legacy: false,
+    notices: [],
+  });
+}
+
 async function load(route: string | null = ROUTE_MODEL) {
   vi.resetModules();
-  delete process.env.MODEL_ROUTES;
-  if (route) process.env.MODEL_ROUTES = JSON.stringify({ 'tutor-moderation': route });
+  deployWith(route);
   return import('@/lib/tutor/moderation');
 }
 
@@ -14,14 +32,11 @@ const reply = (v: unknown) =>
   vi.fn().mockResolvedValue(typeof v === 'string' ? v : JSON.stringify(v));
 
 describe('moderate', () => {
-  beforeEach(() => {
-    delete process.env.DEFAULT_MODEL;
-  });
   afterEach(() => {
     vi.useRealTimers();
     vi.doUnmock('@/lib/ai/llm');
     vi.doUnmock('@/lib/tutor/llm-roles');
-    delete process.env.MODEL_ROUTES;
+    setDeploymentConfigForTests();
     delete process.env.DEFAULT_MODEL;
   });
 
@@ -181,9 +196,7 @@ describe('moderate', () => {
 
   it('default llm calls callLLM with the tutor-moderation stage and the routed model', async () => {
     vi.resetModules();
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'tutor-moderation': { model: ROUTE_MODEL, thinking: { mode: 'enabled', effort: 'low' } },
-    });
+    deployWith({ model: ROUTE_MODEL, thinking: { mode: 'enabled', effort: 'low' } });
     const callLLM = vi.fn().mockResolvedValue({ text: '{"allow":false,"categories":["sexual"]}' });
     const resolveTutorModel = vi.fn().mockResolvedValue({ model: 'fake-model-object' });
     vi.doMock('@/lib/ai/llm', () => ({ callLLM }));

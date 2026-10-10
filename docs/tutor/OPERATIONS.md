@@ -46,7 +46,7 @@ flowchart TB
 | `OPENMAIC_DISABLE_WIDGET_PROVIDERS` | không đặt | Kill-switch kiểu **boolean** (`true`/`1`; không phải danh sách provider): không đăng ký tool `generate_walkthrough` (§10) | Đã có (`lib/config/feature-flags.ts`) |
 | `OPENMAIC_TUTOR_MODERATION` | không đặt = **tắt** | Boolean (`true`/`1`). **Tắt: chat `/api/chat` không được lọc, kể cả khi đã cấu hình route `tutor-moderation`.** Bật: mọi lượt chat qua bộ lọc, **fail-closed** (thiếu route `tutor-moderation` → chat bị chặn bằng câu an toàn). Chỉ phủ `/api/chat`, `/api/chat/pi`, `/api/quiz-grade` và tin nhắn của học sinh gửi vào phiên agent (`POST /api/agent/sessions` và `/api/agent/sessions/:id/messages`) (SECURITY §6) | Đã có |
 | `OPENMAIC_REQUIRE_REVIEW` | không đặt = tắt (mọi entry) | Boolean (`true`/`1`). Bật: chỉ entry có file review đạt ở đúng `entryRev` (`lib/subjects/<môn>/reviews/<id>@<entryRev>.json`). **Bật mà không có file review → không lộ walkthrough nào.** `next.config.ts` đưa `lib/subjects/*/reviews/**` vào bản standalone (`outputFileTracingIncludes`); `release.ts` tìm file theo `process.cwd()` rồi theo đường dẫn của module. Đã kiểm 2026-10-09 trên `pnpm build`: file thử đặt ở `lib/subjects/cp/reviews/` xuất hiện trong `.next/standalone/lib/subjects/cp/reviews/`. Image Docker cũng đã dựng (2026-10-09, cờ workbench bật) và `ls lib/subjects/cp/reviews` trong container thấy đủ các file review | Đã có |
-| `MODEL_ROUTES` (thêm stage, ADR 0014) | không đặt | Model cho từng vai trò LLM: `tutor-moderation`, `tutor-review-cp`, `tutor-review-cp-2`, `tutor-review-math`, `tutor-review-math-2`, `tutor-review-code`, `sim-learner`, `tutor-analyst`. **Thiếu route thì tính năng phụ thuộc tắt** (thiếu `tutor-moderation` → chat học sinh bị chặn). Khuyến nghị hai nhà cung cấp khác model dạy | Đề xuất (biến đã có: `lib/server/model-routes.ts:127-163`) |
+| `slots` `tutor.*` trong `openmaic.yml` (ADR 0014) | không đặt | Model cho từng vai trò LLM của tutor: `tutor.moderation`, `tutor.review-cp`, `tutor.review-cp-2`, `tutor.review-math`, `tutor.review-math-2`, `tutor.review-code`, `tutor.sim-learner`, `tutor.analyst`. Mỗi vai trò là một cây riêng (gốc `tutor`), **không** kế thừa `llm`: thiếu gán thì tính năng tắt (thiếu `tutor.moderation` → chat học sinh bị chặn). Khuyến nghị hai nhà cung cấp khác model dạy | Đã làm (`lib/config/model-slots.ts`, `lib/tutor/llm-roles.ts`) |
 | `RENDER_SERVICE_URL` | không đặt | Bật export MP4 một chạm; container render nằm trên mạng `render` (`internal: true`) | Đã có |
 | `RENDER_MAX_QUEUE` (20), `RENDER_MAX_JOBS_PER_USER` (1), `RENDER_JOB_TTL_MS` (1 800 000), `RENDER_JOB_DEADLINE_MS` (2 700 000) | như trong ngoặc | Tham khảo | Đã có |
 | `NEXT_PUBLIC_PERSISTENCE`, `PERSISTENCE_DEV_TOKEN` | không đặt | Server persistence (Postgres/S3), trần asset 32 MiB | Đã có |
@@ -65,23 +65,19 @@ OPENAI_API_KEY=...            # GPT-6-luna
 OPENAI_MODELS=gpt-6-luna      # tên chính xác: [Unverified]; danh mục repo hiện có gpt-5.6-luna
 DEEPSEEK_API_KEY=...          # DeepSeek V4.1 flash
 DEEPSEEK_MODELS=deepseek-v4.1-flash   # tên chính xác: [Unverified]; ví dụ trong repo là deepseek-v4-flash
-MODEL_ROUTES='{
-  "maic-agent-driver": {"model": "openai:gpt-6-luna", "api": "openai-responses"},
-  "maic-agent": "openai:gpt-6-luna",
-  "chat-adapter": "openai:gpt-6-luna",
-  "tutor-moderation": "deepseek:deepseek-v4.1-flash",
-  "tutor-review-cp": "deepseek:deepseek-v4.1-flash",
-  "tutor-review-math": "deepseek:deepseek-v4.1-flash",
-  "tutor-review-cp-2": "openai:gpt-6-luna",
-  "tutor-review-math-2": "openai:gpt-6-luna",
-  "tutor-review-code": "deepseek:deepseek-v4.1-flash",
-  "sim-learner": "deepseek:deepseek-v4.1-flash",
-  "tutor-analyst": "deepseek:deepseek-v4.1-flash"
-}'
+slots:
+  tutor.moderation: deepseek:deepseek-v4.1-flash
+  tutor.review-cp: deepseek:deepseek-v4.1-flash
+  tutor.review-cp-2: openai:gpt-6-luna
+  tutor.review-math: deepseek:deepseek-v4.1-flash
+  tutor.review-math-2: openai:gpt-6-luna
+  tutor.review-code: deepseek:deepseek-v4.1-flash
+  tutor.sim-learner: deepseek:deepseek-v4.1-flash
+  tutor.analyst: deepseek:deepseek-v4.1-flash
 DEFAULT_MODEL=openai:gpt-6-luna
 ```
 
-Giá trị `api` của `maic-agent-driver` phải là `openai-completions` hoặc `openai-responses` (`.env.example:355-365`); chọn cái nào tuỳ model hỗ trợ (spike Q16). Các stage `tutor-*`, `sim-learner` phải được thêm vào `LLM_STAGES` trước (`lib/server/model-routes.ts:132-154`); nếu chưa thêm, route của chúng không được nhận [Inference].
+Các vai trò tutor là slot `tutor.*` trong `openmaic.yml` (`lib/tutor/llm-roles.ts`); biến `MODEL_ROUTES` không còn được đọc cho các vai trò này. Giá trị `api` của slot agent phải là `openai-completions` hoặc `openai-responses` (`.env.example:355-365`); chọn cái nào tuỳ model hỗ trợ (spike Q16).
 
 Quy tắc: `NEXT_PUBLIC_*` biên dịch vào bundle trình duyệt (compose truyền qua `build.args`); không đặt bí mật vào đó.
 
@@ -160,7 +156,7 @@ Ví dụ truy vấn (với `jq` trên log JSON): `jq -c 'select(.event=="code_wi
 | Agent trả lỗi `invalid-walkthrough-id` kèm `validIds` | SKILL.md lệch catalog; LLM bịa id | Chạy lại sinh khối id từ catalog; xem test `skill-catalog-sync`; kiểm sự kiện `walkthrough_invalid_id` |
 | Học sinh thấy code editor | Có ai đặt `OPENMAIC_ALLOW_CODE_WIDGET=true`; hoặc đường hiển thị mới chưa qua L1 | Bỏ biến; chạy `tests/widgets/policy.test.ts`, `write-paths.test.ts`, e2e `code-widget-blocked.spec.ts` |
 | Lời thầy nói "bước 5" nhưng hình ở frame 0 | Iframe chưa `ready` hoặc bị đẩy khỏi pool, host không gửi lại `desired` | Kiểm sự kiện `widget_ready_timeout`; e2e bắt tay (ADR 0013) |
-| Chat học sinh luôn trả câu an toàn | Thiếu route `tutor-moderation` hoặc model lọc lỗi (fail-closed) | Kiểm `MODEL_ROUTES`; xem sự kiện `moderation_failed_closed` |
+| Chat học sinh luôn trả câu an toàn | Thiếu slot `tutor.moderation` trong `openmaic.yml` hoặc model lọc lỗi (fail-closed) | Kiểm `slots` của `openmaic.yml`; xem sự kiện `moderation_failed_closed` |
 | Entry mới không được phát hành | Hội đồng LLM trượt hoặc thiếu route `tutor-review-*` | Xem `lib/subjects/<id>/reviews/…json`; sửa entry theo `issues` |
 | Xuất ZIP lớp học thất bại/rất nặng | Nhiều media, ZIP dựng trong RAM | Giảm số asset/bài; kiểm kích thước manifest; xem NFR-P7 |
 | MP4 export chỉ thấy khung tĩnh của walkthrough | Hạn chế đã biết (widget bị đóng băng ~250 ms) | ARCHITECTURE §12 (các hướng giảm thiểu, backlog); không phải lỗi vận hành |

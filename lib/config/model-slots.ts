@@ -66,6 +66,18 @@ export const MODEL_SLOTS = [
     noThinkingEffort: true,
   },
   { id: 'agent.title', capability: 'chat', parent: 'agent', configOnly: true },
+  // SubjectTutor roles (ADR 0014). Their own tree, not under `llm`: a role without an assignment is
+  // unassigned and fails closed, so a judge or a content filter never silently runs on the default
+  // model. Set in openmaic.yml only.
+  { id: 'tutor', capability: 'chat', parent: null, configOnly: true },
+  { id: 'tutor.moderation', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.review-cp', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.review-cp-2', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.review-math', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.review-math-2', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.review-code', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.sim-learner', capability: 'chat', parent: 'tutor', configOnly: true },
+  { id: 'tutor.analyst', capability: 'chat', parent: 'tutor', configOnly: true },
   { id: 'tts', capability: 'tts', parent: null },
   { id: 'asr', capability: 'asr', parent: null },
   { id: 'image', capability: 'image', parent: null },

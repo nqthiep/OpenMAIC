@@ -14,11 +14,11 @@
  *   pnpm exec tsx eval/tutor-lesson/runner.ts [--dry-run] [--limit N] [--samples K] [--concurrency N]
  *
  * Models (stages of lib/server/model-routes.ts; no dedicated stage exists, so existing ones are reused):
- *   generator  stage 'scene-outlines-stream' (the lesson-planning stage): a MODEL_ROUTES entry wins,
- *              else DEFAULT_MODEL, as the app resolves it. Temperature 0.7 so the N samples differ [Unverified].
- *   judge      stage 'tutor-analyst', MODEL_ROUTES entry required (no fallback), temperature 0.
+ *   generator  stage 'scene-outlines-stream' (the lesson-planning stage), resolved as the app resolves it.
+ *              Temperature 0.7 so the N samples differ [Unverified].
+ *   judge      role 'tutor-analyst' (slot tutor.analyst in openmaic.yml, no fallback), temperature 0.
  *   The run is REFUSED (exit 2, also with --dry-run) when both resolve to the same `provider:model`.
- *   e.g. MODEL_ROUTES='{"tutor-analyst":"<provider:model>"}' DEFAULT_MODEL=<other provider:model>
+ *   e.g. slots: { tutor.analyst: <provider:model>, llm: <other provider:model> }
  *
  * --dry-run     print the plan (scenarios, sample and call counts, routes); no model call
  * --limit N     N scenarios, spread evenly (a partial run cannot claim a pass)
@@ -159,7 +159,7 @@ async function main(): Promise<number> {
   });
   if (problems.length > 0) {
     console.error(
-      `Route: REFUSED. ${problems.join('; ')}. Set MODEL_ROUTES='{"${JUDGE_STAGE}":"<provider:model>"}' and DEFAULT_MODEL (or a "${GENERATOR_STAGE}" route) on a different model.`,
+      `Route: REFUSED. ${problems.join('; ')}. Assign the judge slot (tutor.analyst) in openmaic.yml to a model other than the generator's.`,
     );
     return exitCode(false);
   }

@@ -40,6 +40,7 @@ const EXPECTED_STAGE_SLOTS: Record<LlmStage, SlotId> = {
 
 const EXPECTED_ROOTS = {
   llm: 'chat',
+  tutor: 'chat',
   tts: 'tts',
   asr: 'asr',
   image: 'image',
@@ -107,10 +108,28 @@ describe('capability slot tree', () => {
     expect(getSlot('agent.title').requires).toBeUndefined();
   });
 
-  it('keeps agent.title out of the settings UI', () => {
+  it('keeps agent.title and the tutor roles out of the settings UI', () => {
     expect(getSlot('agent.title').configOnly).toBe(true);
-    const shown = MODEL_SLOTS.filter((slot) => 'configOnly' in slot && slot.configOnly);
-    expect(shown.map((slot) => slot.id)).toEqual(['agent.title']);
+    const hidden = MODEL_SLOTS.filter((slot) => 'configOnly' in slot && slot.configOnly).map(
+      (slot) => slot.id,
+    );
+    expect(hidden).toEqual([
+      'agent.title',
+      'tutor',
+      'tutor.moderation',
+      'tutor.review-cp',
+      'tutor.review-cp-2',
+      'tutor.review-math',
+      'tutor.review-math-2',
+      'tutor.review-code',
+      'tutor.sim-learner',
+      'tutor.analyst',
+    ]);
+  });
+
+  it('gives the tutor roles their own tree, not the llm default', () => {
+    expect(slotLineage('tutor.review-cp')).toEqual(['tutor.review-cp', 'tutor']);
+    expect(slotLineage('tutor.analyst')).toEqual(['tutor.analyst', 'tutor']);
   });
 });
 

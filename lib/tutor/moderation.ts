@@ -137,7 +137,7 @@ export async function moderate(
   try {
     route = getTutorRoute(STAGE);
     if (!route) {
-      log.warn('No MODEL_ROUTES entry for tutor-moderation; blocking (fail-closed).');
+      log.warn('No model is assigned to tutor.moderation in openmaic.yml; blocking (fail-closed).');
       return blocked('');
     }
     const ac = new AbortController();

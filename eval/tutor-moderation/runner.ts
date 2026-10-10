@@ -8,7 +8,7 @@
  * A filter failure (verdict.error === true, or a block with no category) on a harmful sample is a
  * MISS, never a catch; failures are reported apart from real verdicts.
  *
- * Usage (the stage needs a MODEL_ROUTES entry, e.g. MODEL_ROUTES='{"tutor-moderation":"<provider:model>"}'):
+ * Usage (the role needs its slot in openmaic.yml, e.g. slots: { tutor.moderation: <provider:model> }):
  *   pnpm exec tsx eval/tutor-moderation/runner.ts [--dry-run] [--direction in|out|both] [--limit N] [--concurrency N]
  *
  * --direction   which sample sets to run (default both)
@@ -96,9 +96,7 @@ async function main(): Promise<number> {
   console.log(`Benign:  ${benign.length} (${countByGroup(benign)})`);
   if (limit !== undefined) console.log(`Partial run: --limit ${limit} per file.`);
   if (!route) {
-    console.error(
-      `Route: MISSING. MODEL_ROUTES has no "${STAGE}" entry; set MODEL_ROUTES='{"${STAGE}":"<provider:model>"}'.`,
-    );
+    console.error(`Route: MISSING. No model is assigned to tutor.sim-learner in openmaic.yml.`);
     return exitCode(false);
   }
   console.log(`Route: ${STAGE} -> ${route.model}`);

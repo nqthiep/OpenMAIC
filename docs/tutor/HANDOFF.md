@@ -93,7 +93,7 @@ Kết quả: chạy 8 entry thì hết hạn mức ("Go usage limit exceeded"). 
 
 Thử hội đồng một model (2026-10-09, tạm, chủ dự án đồng ý): `longcat-2.5-preview-free` đóng cả hai vai bằng `--allow-same-provider`. Entry `euclid-gcd`: một lượt đạt điểm đầy đủ, lượt kia quá 900 giây. Kết quả: không đủ tin cậy để chạy 58 entry (mỗi entry có thể mất tới 30 phút và vẫn không ghi file). Chờ UAT để có hai model thật.
 
-Chạy tiếp khi có hạn mức: `pnpm exec tsx eval/tutor-review/runner.ts <entryId>` với `MODEL_ROUTES` trỏ hai stage `tutor-review-<môn>` và `tutor-review-<môn>-2` tới hai model trên (xem `eval/tutor-review/runner.ts` đầu file); chạy song song tối đa 4 tiến trình.
+Chạy tiếp khi có hạn mức: `pnpm exec tsx eval/tutor-review/runner.ts <entryId>` với slot `tutor.review-<môn>` và `tutor.review-<môn>-2` trong `openmaic.yml` trỏ tới hai model trên (xem `eval/tutor-review/runner.ts` đầu file); chạy song song tối đa 4 tiến trình.
 
 ### Gate review LLM: đã thử một phần, CHƯA đạt (cập nhật 2026-10-07)
 

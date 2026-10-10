@@ -6,8 +6,8 @@
  * Calibrate the panel on seeded errors and known-good variants:
  *   pnpm exec tsx eval/tutor-review/runner.ts --calibrate [<entryId>] [--dry-run] [--limit N] [--clean-runs N]
  *
- * Both stages need a MODEL_ROUTES entry, e.g.
- *   MODEL_ROUTES='{"tutor-review-cp":"<provider:model>","tutor-review-cp-2":"<provider:model>"}'
+ * Both roles need their slot in openmaic.yml (tutor.review-cp and tutor.review-cp-2), e.g.
+ *   slots: { tutor.review-cp: <provider:model>, tutor.review-cp-2: <provider:model> }
  * on two different providers (a panel on one provider is refused, see --allow-same-provider).
  *
  * --dry-run             print the plan (counts, route status, prompt sizes); no model call, no file written
@@ -166,7 +166,7 @@ async function main(): Promise<number> {
   }
   if (missing.length > 0) {
     console.error(
-      `Route: MISSING ${missing.join(', ')}. Set MODEL_ROUTES='{"${missing[0]}":"<provider:model>"}' (a panel needs both stages, on two providers).`,
+      `Route: MISSING ${missing.join(', ')}. Assign the tutor review slots in openmaic.yml (a panel needs both roles, on two providers).`,
     );
     return exitCode(false);
   }

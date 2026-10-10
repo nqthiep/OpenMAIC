@@ -22,7 +22,7 @@
  * A sample whose model call or JSON parse fails after one retry is recorded as failed, left out
  * of the median and reported; it never aborts the run.
  *
- * Usage (the stage needs a MODEL_ROUTES entry, e.g. MODEL_ROUTES='{"sim-learner":"<provider:model>"}'):
+ * Usage (the role needs its slot in openmaic.yml, e.g. slots: { tutor.sim-learner: <provider:model> }):
  *   pnpm exec tsx eval/sim-learner/runner.ts [--dry-run] [--limit N] [--concurrency N] [--samples K]
  *
  * --dry-run     print the plan (personas, entries, transcript sizes, route status); no model call
@@ -176,9 +176,7 @@ async function main(): Promise<number> {
   );
   if (!route) {
     // Also in a dry run: a plan that could not be run is not a pass.
-    console.error(
-      `Route: MISSING. MODEL_ROUTES has no "${STAGE}" entry; set MODEL_ROUTES='{"${STAGE}":"<provider:model>"}'.`,
-    );
+    console.error(`Route: MISSING. No model is assigned to tutor.sim-learner in openmaic.yml.`);
     return exitCode(false);
   }
   console.log(`Route: ${STAGE} -> ${route.model}`);

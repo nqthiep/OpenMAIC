@@ -18,7 +18,7 @@
 
 | Sự thật | Nguồn |
 | --- | --- |
-| Model được chọn theo **stage**: `MODEL_ROUTES` (JSON, giá trị là chuỗi model hoặc `{model, thinking}`) thắng `x-model` và `DEFAULT_MODEL`. Danh sách stage là hằng ở tầng app | `lib/server/model-routes.ts:127-163`; `lib/server/resolve-model.ts:41-47`; `.env.example:355-365` |
+| Model của vai trò tutor: slot `tutor.*` trong `openmaic.yml` (sửa 2026-10-10: thay cho `MODEL_ROUTES`, biến này không còn được đọc). Vai trò không gán thì tắt, không rơi về `llm` hay `DEFAULT_MODEL`. Gán được dạng chuỗi hoặc `{model, thinking}` | `lib/server/model-routes.ts:127-163`; `lib/server/resolve-model.ts:41-47`; `.env.example:355-365` |
 | Chat là SSE không trạng thái; server phát các sự kiện `agent_start`, `text_delta`, `action`, `agent_end`, `thinking` | `app/api/chat/route.ts:137-218`; `lib/types/chat.ts` (`StatelessEvent`) |
 | Kho runtime phía server lưu **phiên học** theo `(stageId, learnerKey, kind)` với bản ghi append-only; `kind` là **chuỗi mở**, app tự định nghĩa kind và validator | `packages/@openmaic/storage/src/runtime/types.ts:1-24`; `packages/@openmaic/dsl/src/runtime.ts:152-157,211-212`; `lib/runtime/payload-validators.ts:135-141` (đang có `chat`, `quizAttempt`, `whiteboard`) |
 | Chat của lớp học lưu qua `RuntimeStore` (HTTP tới server), không còn IndexedDB sau server-first persistence | `lib/utils/chat-storage.ts:17` |
@@ -73,7 +73,7 @@
 
 ## Quyết định
 
-1. **Vai trò LLM và stage.** Thêm vào `LLM_STAGES` (`lib/server/model-routes.ts:132-154`); cấu hình bằng `MODEL_ROUTES`:
+1. **Vai trò LLM và slot.** Mỗi vai trò là một slot `tutor.*` (`lib/config/model-slots.ts`), gán trong `openmaic.yml` (sửa 2026-10-10: trước đây là `MODEL_ROUTES`):
 
    | Stage | Vai trò | Ràng buộc |
    | --- | --- | --- |

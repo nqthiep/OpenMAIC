@@ -105,7 +105,7 @@ Mức: **C**ao / **V**ừa / **T**hấp. *Trigger* = tín hiệu để hành đ�
 
 ## 6. Kế hoạch giảm rủi ro theo thứ tự
 
-1. Cấu hình `MODEL_ROUTES` cho các vai trò LLM (hai nhà cung cấp) và dựng bộ hiệu chuẩn (ADR 0014; R34, R35, R37).
+1. Gán các slot `tutor.*` trong `openmaic.yml` cho các vai trò LLM (hai nhà cung cấp) và dựng bộ hiệu chuẩn (ADR 0014; R34, R35, R37).
 2. Commit tài liệu và curriculum lên nhánh tính năng (R18); quyết định cách có CI cho nhánh (R31).
 3. Phase 1: Q1, Q10, Q12 trước khi viết mã 1b; chặn `code` nhiều lớp và test ngay ở 1b (R10).
 4. 1c: Q9, S2b; chuẩn bị G1.
