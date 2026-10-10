@@ -9,7 +9,7 @@ import viVN from '@/lib/i18n/locales/vi-VN.json';
 import { entryContentHash, framesHash } from '@/lib/tutor/catalog/hash';
 import { fill, msg } from '@/lib/tutor/catalog/messages';
 import type { Messages } from '@/lib/tutor/catalog/types';
-import { steps } from '@/lib/tutor/engine/generate';
+import { presetFrames } from '@/lib/tutor/engine/preset-frames';
 import type { Frame } from '@/lib/tutor/engine/types';
 import { buildWalkthroughHtml, htmlBytes } from '@/lib/tutor/build/build-html';
 import { buildMathTable, katexCss } from '@/lib/tutor/build/katex';
@@ -104,12 +104,12 @@ export function getTutorLabels(locale: string): Record<string, string> {
 // --- frames ---------------------------------------------------------------------------------
 
 function framesOf(entry: AnyWalkthroughEntry, preset: Preset, locale: string) {
-  return steps(entry, preset.input, { locale });
+  return presetFrames(entry, preset, locale).frames;
 }
 
 /** `framesHash` of one (preset, locale). */
 function presetFramesHash(entry: AnyWalkthroughEntry, preset: Preset, locale: string): string {
-  return framesHash(framesOf(entry, preset, locale));
+  return presetFrames(entry, preset, locale).hash;
 }
 
 // --- one preset -----------------------------------------------------------------------------

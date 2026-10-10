@@ -6,9 +6,9 @@
  * describes that frame, rebuilt from the catalog via `steps` (task 1c-02).
  * Server-side only: the staleness check hashes with node:crypto.
  */
-import { entryContentHash, framesHash } from '@/lib/tutor/catalog/hash';
+import { entryContentHash } from '@/lib/tutor/catalog/hash';
 import { msg } from '@/lib/tutor/catalog/messages';
-import { steps } from '@/lib/tutor/engine/generate';
+import { presetFrames } from '@/lib/tutor/engine/preset-frames';
 import type { Frame } from '@/lib/tutor/engine/types';
 import type { AnyWalkthroughEntry, WidgetRuntimeState } from '@/lib/widgets/types';
 
@@ -75,9 +75,9 @@ function freshFrames(
   if (ref.presets.length !== entry.presets.length) return null;
   let wanted: readonly Frame<unknown>[] | null = null;
   for (const p of entry.presets) {
-    const frames = steps(entry, p.input, { locale: ref.locale });
-    if (ref.presets.find((r) => r.id === p.id)?.framesHash !== framesHash(frames)) return null;
-    if (p.id === presetId) wanted = frames;
+    const computed = presetFrames(entry, p, ref.locale);
+    if (ref.presets.find((r) => r.id === p.id)?.framesHash !== computed.hash) return null;
+    if (p.id === presetId) wanted = computed.frames;
   }
   return wanted;
 }
