@@ -20,9 +20,10 @@ const PROBE_TIMEOUT_MS = 250;
 /** How often a realm renews its lease while a stage is open. */
 const LEASE_RENEW_MS = 5_000;
 /**
- * How long a lease stays live after its last renewal. Browsers align the timers of
- * hidden tabs to one-minute ticks after a few minutes, so this must sit well above
- * a minute. A crashed tab therefore holds its lease for up to this long.
+ * How long a lease stays live after its last renewal. Hidden tabs can have their
+ * timers throttled, and a browser may align them to one-minute ticks after a few
+ * minutes. That is not measured here, so the window sits well above a minute. A
+ * crashed tab holds its lease for up to this long.
  */
 const LEASE_TTL_MS = 90_000;
 const LEASE_PREFIX = 'maic-stage-lease:';
@@ -158,8 +159,8 @@ function browserStorage(): Storage | undefined {
 }
 
 /**
- * Whether another realm holds a live lease on this stage. Lapsed leases found on
- * the way are removed, so the table does not grow with closed tabs.
+ * Whether another realm holds a live lease on this stage. Lapsed leases are not
+ * removed here: every renewal sweeps them, so the table does not grow with closed tabs.
  */
 function leaseReading(stageId: string): LeaseReading {
   let storage: Storage | undefined;
@@ -171,20 +172,17 @@ function leaseReading(stageId: string): LeaseReading {
   if (!storage) return 'absent';
   const prefix = `${LEASE_PREFIX}${encodeURIComponent(stageId)}:`;
   const now = Date.now();
-  let live = false;
-  const lapsed: string[] = [];
   try {
     for (let index = 0; index < storage.length; index += 1) {
       const key = storage.key(index);
-      if (!key?.startsWith(prefix) || key === ownLeaseKey) continue;
-      if (Number(storage.getItem(key)) > now) live = true;
-      else lapsed.push(key);
+      if (key?.startsWith(prefix) && key !== ownLeaseKey && Number(storage.getItem(key)) > now) {
+        return 'present';
+      }
     }
-    for (const key of lapsed) storage.removeItem(key);
   } catch {
     return 'unknown';
   }
-  return live ? 'present' : 'absent';
+  return 'absent';
 }
 
 /** Writes this realm's lease for the stage it has open, and moves it when that stage changes. */
@@ -197,19 +195,36 @@ function renewLease(): void {
     if (ownLeaseKey && ownLeaseKey !== nextKey) storage?.removeItem(ownLeaseKey);
     ownLeaseKey = nextKey;
     if (nextKey) storage?.setItem(nextKey, String(Date.now() + LEASE_TTL_MS));
+    if (storage) removeLapsedLeases(storage, Date.now());
   } catch {
     // A refused write leaves peers to the probe. This realm's own answer is unchanged.
   }
 }
 
+/** Removes every lapsed lease, whichever stage it names, so a crashed tab's key does not stay. */
+function removeLapsedLeases(storage: Storage, now: number): void {
+  const lapsed: string[] = [];
+  for (let index = 0; index < storage.length; index += 1) {
+    const key = storage.key(index);
+    if (
+      key?.startsWith(LEASE_PREFIX) &&
+      key !== ownLeaseKey &&
+      !(Number(storage.getItem(key)) > now)
+    ) {
+      lapsed.push(key);
+    }
+  }
+  for (const key of lapsed) storage.removeItem(key);
+}
+
 function releaseLease(): void {
   const key = ownLeaseKey;
-  ownLeaseKey = undefined;
   if (!key) return;
   try {
     browserStorage()?.removeItem(key);
+    ownLeaseKey = undefined;
   } catch {
-    // Nothing else to clean up: the lease lapses on its own.
+    // The key stays excluded from this realm's own reads until its window lapses.
   }
 }
 
@@ -218,8 +233,13 @@ function startLease(): void {
   realmId ??= `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
   renewLease();
   leaseTimer = setInterval(renewLease, LEASE_RENEW_MS);
-  // Leaving the page removes the lease at once instead of waiting for it to lapse.
-  if (typeof addEventListener === 'function') addEventListener('pagehide', releaseLease);
+  // Leaving the page removes the lease at once. A page kept in the back-forward cache keeps
+  // its lease: it may come back, and the lease lapses on its own if it does not.
+  if (typeof addEventListener === 'function') {
+    addEventListener('pagehide', (event?: PageTransitionEvent) => {
+      if (!event?.persisted) releaseLease();
+    });
+  }
 }
 
 /** Test seam: drops the channel and the lease so a suite can model separate realms. */

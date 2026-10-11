@@ -6,11 +6,49 @@ import {
 } from '@/lib/media/stage-realm-presence';
 
 type PresenceModule = typeof import('@/lib/media/stage-realm-presence');
+type PagehideListener = (event?: PageTransitionEvent) => void;
 
 /**
- * A peer realm is modelled with its own channel: it answers presence probes the
- * way a second tab's bound module would.
+ * A test double for BroadcastChannel that delivers each message synchronously to the
+ * other channels of the same name. A reply then lands before the probe's timer can run,
+ * so the test does not depend on event-loop timing.
  */
+class SyncBroadcastChannel {
+  private static readonly channels = new Map<string, Set<SyncBroadcastChannel>>();
+  private readonly listeners = new Set<(event: MessageEvent) => void>();
+  onmessage: ((event: MessageEvent) => void) | null = null;
+
+  constructor(private readonly name: string) {
+    const peers = SyncBroadcastChannel.channels.get(name) ?? new Set<SyncBroadcastChannel>();
+    peers.add(this);
+    SyncBroadcastChannel.channels.set(name, peers);
+  }
+
+  addEventListener(_type: string, listener: (event: MessageEvent) => void): void {
+    this.listeners.add(listener);
+  }
+
+  removeEventListener(_type: string, listener: (event: MessageEvent) => void): void {
+    this.listeners.delete(listener);
+  }
+
+  postMessage(data: unknown): void {
+    for (const peer of SyncBroadcastChannel.channels.get(this.name) ?? []) {
+      if (peer !== this) peer.deliver({ data } as MessageEvent);
+    }
+  }
+
+  close(): void {
+    SyncBroadcastChannel.channels.get(this.name)?.delete(this);
+  }
+
+  private deliver(event: MessageEvent): void {
+    this.onmessage?.(event);
+    for (const listener of [...this.listeners]) listener(event);
+  }
+}
+
+/** A peer realm is modelled with its own channel: it answers presence probes the way a second tab's bound module would. */
 function peerHoldingStage(stageId: string): BroadcastChannel {
   const peer = new BroadcastChannel('maic-stage-presence');
   peer.onmessage = (event: MessageEvent) => {
@@ -42,45 +80,44 @@ function memoryStorage(): Storage {
 }
 
 /**
- * A BroadcastChannel whose presence replies are sent `delayMs` late, as a busy
- * peer's would be. Probes and everything else are delivered at once.
+ * A BroadcastChannel that holds presence replies until `release()` is called. A test
+ * releases them after the probe has settled, so no reply can beat the probe window.
  */
-function lateReplyChannel(delayMs: number): typeof BroadcastChannel {
+function heldRepliesChannel(): { Channel: typeof BroadcastChannel; release: () => void } {
   const Real = globalThis.BroadcastChannel;
-  return class extends Real {
-    private readonly pending = new Set<ReturnType<typeof setTimeout>>();
-
+  const held: Array<() => void> = [];
+  class Held extends Real {
     postMessage(message: unknown): void {
       if ((message as { kind?: unknown } | null)?.kind !== 'present') {
         super.postMessage(message);
         return;
       }
-      const timer = setTimeout(() => {
-        this.pending.delete(timer);
-        super.postMessage(message);
-      }, delayMs);
-      this.pending.add(timer);
+      held.push(() => super.postMessage(message));
     }
-
-    close(): void {
-      for (const timer of this.pending) clearTimeout(timer);
-      this.pending.clear();
-      super.close();
-    }
-  } as unknown as typeof BroadcastChannel;
+  }
+  return {
+    Channel: Held,
+    release: () => {
+      for (const send of held.splice(0)) send();
+    },
+  };
 }
 
 describe('stage realm presence', () => {
   afterEach(() => __resetStageRealmPresenceForTesting());
 
   it('reports a peer that has the same stage open', async () => {
-    bindStageRealmPresence(() => 'stage-1');
-    const peer = peerHoldingStage('stage-1');
-
+    vi.stubGlobal('BroadcastChannel', SyncBroadcastChannel);
     try {
-      expect(await probeStageRealmPresence('stage-1')).toBe('present');
+      bindStageRealmPresence(() => 'stage-1');
+      const peer = peerHoldingStage('stage-1');
+      try {
+        expect(await probeStageRealmPresence('stage-1')).toBe('present');
+      } finally {
+        peer.close();
+      }
     } finally {
-      peer.close();
+      vi.unstubAllGlobals();
     }
   });
 
@@ -135,6 +172,7 @@ describe('stage realm presence', () => {
 
 describe('stage realm presence leases', () => {
   const realms: PresenceModule[] = [];
+  let storage: Storage;
 
   /** A separate module instance: its own channel, realm id and lease timer. */
   async function loadRealm(): Promise<PresenceModule> {
@@ -144,8 +182,26 @@ describe('stage realm presence leases', () => {
     return realm;
   }
 
+  /** The lease keys held for one stage right now. */
+  function leaseKeys(stageId: string): string[] {
+    const prefix = `maic-stage-lease:${encodeURIComponent(stageId)}:`;
+    return Array.from({ length: storage.length }, (_, index) => storage.key(index)).filter(
+      (key): key is string => key?.startsWith(prefix) === true,
+    );
+  }
+
+  /** Captures the pagehide listeners the modules register, in binding order. */
+  function capturePagehide(): PagehideListener[] {
+    const listeners: PagehideListener[] = [];
+    vi.stubGlobal('addEventListener', (type: string, listener: PagehideListener) => {
+      if (type === 'pagehide') listeners.push(listener);
+    });
+    return listeners;
+  }
+
   beforeEach(() => {
-    vi.stubGlobal('localStorage', memoryStorage());
+    storage = memoryStorage();
+    vi.stubGlobal('localStorage', storage);
   });
 
   afterEach(() => {
@@ -155,28 +211,33 @@ describe('stage realm presence leases', () => {
     vi.useRealTimers();
   });
 
-  it('answers present from a live peer lease, even when the peer reply misses the window', async () => {
-    vi.stubGlobal('BroadcastChannel', lateReplyChannel(400));
+  it('answers present from a live peer lease, even when the peer reply is held past the window', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
     const peer = await loadRealm();
     peer.bindStageRealmPresence(() => 'stage-1');
     const collector = await loadRealm();
     collector.bindStageRealmPresence(() => 'stage-2');
 
     expect(await collector.probeStageRealmPresence('stage-1')).toBe('present');
+    replies.release();
   });
 
-  it('reports a peer whose lease has lapsed and whose reply is late as absent', async () => {
-    vi.stubGlobal('BroadcastChannel', lateReplyChannel(400));
+  it('reports a peer whose lease has lapsed, and whose reply is held, as absent', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
     vi.useFakeTimers({ toFake: ['Date'] });
     const peer = await loadRealm();
     peer.bindStageRealmPresence(() => 'stage-1');
     const collector = await loadRealm();
     collector.bindStageRealmPresence(() => 'stage-2');
+    expect(leaseKeys('stage-1')).toHaveLength(1);
 
     // Past the 90 s lease window, with no renewal: the peer is treated as gone.
     vi.setSystemTime(Date.now() + 90_001);
 
     expect(await collector.probeStageRealmPresence('stage-1')).toBe('absent');
+    replies.release();
   });
 
   it('keeps a peer present while it renews, and lets its lease go once it is released', async () => {
@@ -212,22 +273,60 @@ describe('stage realm presence leases', () => {
   });
 
   it("removes this realm's lease at once when the page is leaving", async () => {
-    // Late replies keep a probe from standing in for a lease that was not removed.
-    vi.stubGlobal('BroadcastChannel', lateReplyChannel(400));
-    const pagehide: Array<() => void> = [];
-    vi.stubGlobal('addEventListener', (type: string, listener: () => void) => {
-      if (type === 'pagehide') pagehide.push(listener);
-    });
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
+    const pagehide = capturePagehide();
     const peer = await loadRealm();
     peer.bindStageRealmPresence(() => 'stage-1');
     const collector = await loadRealm();
     collector.bindStageRealmPresence(() => 'stage-2');
-    expect(await collector.probeStageRealmPresence('stage-1')).toBe('present');
+    // Both realms registered a listener, and the peer bound first.
+    expect(pagehide).toHaveLength(2);
+    expect(leaseKeys('stage-1')).toHaveLength(1);
 
-    // The peer bound first, so its listener is first.
     pagehide[0]!();
 
+    expect(leaseKeys('stage-1')).toHaveLength(0);
     expect(await collector.probeStageRealmPresence('stage-1')).toBe('absent');
+    replies.release();
+  });
+
+  it('keeps the lease when the page is only stored in the back-forward cache', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
+    const pagehide = capturePagehide();
+    const peer = await loadRealm();
+    peer.bindStageRealmPresence(() => 'stage-1');
+    const collector = await loadRealm();
+    collector.bindStageRealmPresence(() => 'stage-2');
+
+    pagehide[0]!({ persisted: true } as PageTransitionEvent);
+
+    expect(leaseKeys('stage-1')).toHaveLength(1);
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('present');
+    replies.release();
+  });
+
+  it('removes lapsed leases of any stage when a realm renews', async () => {
+    storage.setItem('maic-stage-lease:old-stage:dead-realm', String(Date.now() - 1));
+    const realm = await loadRealm();
+    realm.bindStageRealmPresence(() => 'stage-1');
+
+    expect(storage.getItem('maic-stage-lease:old-stage:dead-realm')).toBeNull();
+    expect(leaseKeys('stage-1')).toHaveLength(1);
+  });
+
+  it('does not count its own lease as a peer after a failed release', async () => {
+    const pagehide = capturePagehide();
+    const realm = await loadRealm();
+    realm.bindStageRealmPresence(() => 'stage-1');
+    storage.removeItem = () => {
+      throw new Error('storage denied');
+    };
+
+    pagehide[0]!();
+
+    expect(await realm.probeStageRealmPresence('stage-1')).toBe('absent');
   });
 
   it('reports unknown, not absent, when the storage API throws', async () => {
