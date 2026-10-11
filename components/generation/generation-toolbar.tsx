@@ -326,7 +326,11 @@ export function GenerationToolbar({
               </span>
             </button>
           ) : (
-            <button className={pillMuted} data-testid="course-material-button">
+            <button
+              className={pillMuted}
+              data-testid="course-material-button"
+              aria-label={t('toolbar.courseMaterialUpload')}
+            >
               <Paperclip className="size-3.5" />
             </button>
           )}
@@ -391,6 +395,9 @@ export function GenerationToolbar({
             />
             <div className="space-y-3">
               <div
+                role="button"
+                tabIndex={0}
+                aria-disabled={materialsLocked || undefined}
                 className={cn(
                   'flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 transition-colors',
                   isDragging
@@ -400,6 +407,11 @@ export function GenerationToolbar({
                 )}
                 onClick={() => {
                   if (!materialsLocked) fileInputRef.current?.click();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter' && e.key !== ' ') return;
+                  e.preventDefault();
+                  e.currentTarget.click();
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();

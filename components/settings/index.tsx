@@ -181,7 +181,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
         <div className="flex h-full flex-col overflow-hidden sm:flex-row">
           {/* Left Sidebar - Navigation */}
           <div
-            className="flex flex-shrink-0 gap-1 overflow-x-auto border-b bg-muted/30 p-2 sm:block sm:w-[var(--settings-nav-width)] sm:space-y-1 sm:overflow-visible sm:border-b-0 sm:p-3"
+            className="flex flex-shrink-0 flex-wrap gap-1 border-b bg-muted/30 p-2 sm:block sm:w-[var(--settings-nav-width)] sm:space-y-1 sm:border-b-0 sm:p-3"
             style={{ '--settings-nav-width': `${sidebarWidth}px` } as React.CSSProperties}
           >
             {nav.map(({ id, icon: Icon, label }) => (
@@ -197,7 +197,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{t(label)}</span>
+                <span>{t(label)}</span>
               </button>
             ))}
           </div>
