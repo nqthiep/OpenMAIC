@@ -87,10 +87,48 @@ describe('/api/quiz-grade with the tutor content filter', () => {
     expect(body.comment).toBe(SAFE_MESSAGES.hate.vi);
   });
 
-  it('a filter that throws fails closed on the way in', async () => {
-    mocks.moderate.mockRejectedValueOnce(new Error('route missing'));
-    const body = await json(await POST(request()));
+  it('a real block on the way in answers 200 with score 0 and the safe message', async () => {
+    mocks.moderate.mockResolvedValueOnce({ allow: false, categories: ['violence'], model: 'm' });
+    const res = await POST(request('...'));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      score: 0,
+      comment: SAFE_MESSAGES.violence.vi,
+    });
     expect(mocks.callLLM).not.toHaveBeenCalled();
-    expect(body).toEqual(expect.objectContaining({ score: 0, comment: SAFE_MESSAGES.generic.vi }));
+  });
+
+  it('a filter that throws answers 503 on the way in, and the grader never runs', async () => {
+    mocks.moderate.mockRejectedValueOnce(new Error('route missing'));
+    const res = await POST(request());
+    expect(mocks.callLLM).not.toHaveBeenCalled();
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({
+      success: false,
+      errorCode: 'GRADING_UNAVAILABLE',
+      error: expect.any(String),
+    });
+  });
+
+  it('a filter that returns an error verdict answers 503 on the way in, not a block', async () => {
+    mocks.moderate.mockResolvedValueOnce({ allow: false, categories: [], model: '', error: true });
+    const res = await POST(request());
+    expect(mocks.callLLM).not.toHaveBeenCalled();
+    expect(res.status).toBe(503);
+    expect(await res.json()).toMatchObject({ success: false, errorCode: 'GRADING_UNAVAILABLE' });
+  });
+
+  it('a filter that fails on the way out replaces the feedback and keeps the score', async () => {
+    mocks.moderate
+      .mockResolvedValueOnce(ALLOW)
+      .mockResolvedValueOnce({ allow: false, categories: [], model: '', error: true });
+    const res = await POST(request());
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      score: 3,
+      comment: SAFE_MESSAGES.generic.vi,
+    });
   });
 });

@@ -89,11 +89,37 @@ const QuizMathText = memo(function QuizMathText({
   );
 });
 
+const QUIZ_GRADE_TIMEOUT_MS = 30_000;
+
+/**
+ * Result for a short answer the AI grader did not score. Half credit rounds
+ * down. `status: 'ungraded'` and `correct: null` mark it neither right nor wrong.
+ */
+export function provisionalShortAnswerResult(q: QuizQuestion, language: string): QuestionResult {
+  return {
+    questionId: q.id,
+    correct: null,
+    status: 'ungraded',
+    earned: Math.floor((q.points ?? 1) * 0.5),
+    aiComment:
+      language === 'vi-VN'
+        ? 'Dịch vụ chấm AI tạm thời không khả dụng. Đây là điểm tạm tính, chưa chấm bằng AI.'
+        : language === 'zh-CN'
+          ? '评分服务暂时不可用，已给予基础分。'
+          : 'Grading service unavailable. Base score given.',
+  };
+}
+
+function isProvisional(result: QuestionResult): boolean {
+  return result.correct === null;
+}
+
 /** Call /api/quiz-grade for a single short-answer question. */
 async function gradeShortAnswerQuestion(
   q: QuizQuestion,
   userAnswer: string,
   language: string,
+  signal: AbortSignal,
 ): Promise<QuestionResult> {
   const pts = q.points ?? 1;
   try {
@@ -103,6 +129,7 @@ async function gradeShortAnswerQuestion(
     const res = await fetch('/api/quiz-grade', {
       method: 'POST',
       headers,
+      signal: AbortSignal.any([signal, AbortSignal.timeout(QUIZ_GRADE_TIMEOUT_MS)]),
       body: JSON.stringify({
         question: q.question,
         userAnswer,
@@ -124,17 +151,7 @@ async function gradeShortAnswerQuestion(
     };
   } catch (err) {
     log.error('[quiz-view] AI grading failed for', q.id, err);
-    // Fallback: give half credit
-    return {
-      questionId: q.id,
-      correct: null,
-      status: 'incorrect',
-      earned: Math.round(pts * 0.5),
-      aiComment:
-        language === 'zh-CN'
-          ? '评分服务暂时不可用，已给予基础分。'
-          : 'Grading service unavailable. Base score given.',
-    };
+    return provisionalShortAnswerResult(q, language);
   }
 }
 
@@ -220,6 +237,14 @@ function QuizCover({
   );
 }
 
+/** Arrow keys inside a radio group: the WAI-ARIA radio pattern moves and selects in both directions. */
+const RADIO_ARROW_STEP: Partial<Record<string, number>> = {
+  ArrowDown: 1,
+  ArrowRight: 1,
+  ArrowUp: -1,
+  ArrowLeft: -1,
+};
+
 function SingleChoiceQuestion({
   question,
   index,
@@ -236,11 +261,30 @@ function SingleChoiceQuestion({
   result?: QuestionResult;
 }) {
   const isReview = !!result;
+  // Only the checked option is in the Tab order; with none checked, the first one is.
+  const anyChecked = question.options?.some((opt) => opt.value === value) ?? false;
+
+  const onGroupKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const step = RADIO_ARROW_STEP[event.key];
+    if (step === undefined || disabled) return;
+    event.preventDefault();
+    const radios = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
+    const current = radios.indexOf(event.target as HTMLButtonElement);
+    const next = radios[(current + step + radios.length) % radios.length];
+    next?.focus();
+    // a click runs the same path as a mouse choice, so the value is selected and saved once
+    next?.click();
+  };
 
   return (
     <QuestionCard question={question} index={index} result={result}>
-      <div className="grid gap-2">
-        {question.options?.map((opt) => {
+      <div
+        className="grid gap-2"
+        role="radiogroup"
+        aria-label={question.question}
+        onKeyDown={onGroupKeyDown}
+      >
+        {question.options?.map((opt, optionIndex) => {
           const selected = value === opt.value;
           const isCorrectOpt = isReview && answerIncludesOption(question, opt.value);
           const isWrong = isReview && selected && result?.status === 'incorrect';
@@ -248,6 +292,9 @@ function SingleChoiceQuestion({
           return (
             <button
               key={opt.value}
+              role="radio"
+              aria-checked={selected}
+              tabIndex={selected || (!anyChecked && optionIndex === 0) ? 0 : -1}
               disabled={disabled}
               onClick={() => !disabled && onChange(opt.value)}
               className={cn(
@@ -358,6 +405,7 @@ function MultipleChoiceQuestion({
           return (
             <button
               key={opt.value}
+              aria-pressed={isSelected}
               disabled={disabled}
               onClick={() => toggle(opt.value)}
               className={cn(
@@ -447,6 +495,7 @@ function ShortAnswerQuestion({
             value={value ?? ''}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
+            aria-label={t('quiz.inputPlaceholder')}
             placeholder={t('quiz.inputPlaceholder')}
             className="w-full min-h-[100px] p-3 pb-10 rounded-xl border border-gray-200 dark:border-gray-600 text-sm resize-none focus:outline-none focus:border-violet-300 dark:focus:border-violet-600 focus:ring-2 focus:ring-violet-100 dark:focus:ring-violet-900/50 transition-all disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:bg-gray-800/50 dark:text-gray-200 dark:placeholder:text-gray-500"
           />
@@ -512,6 +561,8 @@ function QuestionCard({
   const { t } = useI18n();
   const isReview = !!result;
   const pts = question.points ?? 1;
+  // Not reviewed yet, or AI grading did not score it: shown as pending, not right or wrong.
+  const neutral = !result || isProvisional(result);
 
   return (
     <motion.div
@@ -520,12 +571,13 @@ function QuestionCard({
       transition={{ delay: index * 0.05 }}
       className={cn(
         'bg-white dark:bg-gray-800 rounded-2xl border p-5 relative overflow-hidden',
-        !isReview && 'border-gray-150 dark:border-gray-700 shadow-sm',
+        neutral && 'border-gray-150 dark:border-gray-700 shadow-sm',
         isReview &&
           result.status === 'correct' &&
           'border-emerald-200 dark:border-emerald-800 shadow-sm shadow-emerald-50 dark:shadow-emerald-900/20',
         isReview &&
           result.status === 'incorrect' &&
+          !neutral &&
           'border-red-200 dark:border-red-800 shadow-sm shadow-red-50 dark:shadow-red-900/20',
       )}
     >
@@ -533,9 +585,9 @@ function QuestionCard({
       <div
         className={cn(
           'absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl',
-          !isReview && 'bg-violet-400',
+          neutral && 'bg-violet-400',
           isReview && result.status === 'correct' && 'bg-emerald-400',
-          isReview && result.status === 'incorrect' && 'bg-red-400',
+          isReview && result.status === 'incorrect' && !neutral && 'bg-red-400',
         )}
       />
 
@@ -545,13 +597,13 @@ function QuestionCard({
           <span
             className={cn(
               'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0',
-              !isReview &&
-                'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400',
+              neutral && 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400',
               isReview &&
                 result.status === 'correct' &&
                 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400',
               isReview &&
                 result.status === 'incorrect' &&
+                !neutral &&
                 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400',
             )}
           >
@@ -575,7 +627,9 @@ function QuestionCard({
         {isReview && (
           <div className="shrink-0 ml-2">
             {result.status === 'correct' && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
-            {result.status === 'incorrect' && <XCircle className="w-6 h-6 text-red-400" />}
+            {result.status === 'incorrect' && !neutral && (
+              <XCircle className="w-6 h-6 text-red-400" />
+            )}
           </div>
         )}
       </div>
@@ -606,7 +660,9 @@ function ScoreBanner({
   const { t } = useI18n();
   const pct = total > 0 ? Math.round((score / total) * 100) : 0;
   const correctCount = results.filter((r) => r.status === 'correct').length;
-  const incorrectCount = results.filter((r) => r.status === 'incorrect').length;
+  const incorrectCount = results.filter(
+    (r) => r.status === 'incorrect' && !isProvisional(r),
+  ).length;
 
   const color = pct >= 80 ? 'emerald' : pct >= 60 ? 'amber' : 'red';
   const colorMap = {
@@ -699,6 +755,8 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
   const [runtimeGate, setRuntimeGate] = useState<QuizRuntimeGate>({ status: 'loading' });
   const [hydrationVersion, setHydrationVersion] = useState(0);
   const [retrying, setRetrying] = useState(false);
+  // Bumped by "retry" to restart AI grading for the same submission.
+  const [gradingRound, setGradingRound] = useState(0);
   const viewLifetimeRef = useRef<QuizViewLifetime | null>(null);
   viewLifetimeRef.current ??= createQuizViewLifetime();
   const viewLifetime = viewLifetimeRef.current;
@@ -791,6 +849,8 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
   useEffect(() => {
     if (phase !== 'grading') return;
     let cancelled = false;
+    // Aborts the AI requests when grading is cancelled, retried, or the view unmounts.
+    const gradingRequests = new AbortController();
 
     (async () => {
       // 1. Grade choice questions locally (instant)
@@ -800,7 +860,12 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
       const shortAnswerQs = questions.filter(isShortAnswer);
       const aiResults = await Promise.all(
         shortAnswerQs.map((q) =>
-          gradeShortAnswerQuestion(q, (answers[q.id] as string) ?? '', locale),
+          gradeShortAnswerQuestion(
+            q,
+            (answers[q.id] as string) ?? '',
+            locale,
+            gradingRequests.signal,
+          ),
         ),
       );
 
@@ -834,8 +899,9 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
 
     return () => {
       cancelled = true;
+      gradingRequests.abort();
     };
-  }, [phase, questions, answers, locale, sceneId, stageId, attemptId, runtimeWriter]);
+  }, [phase, questions, answers, locale, sceneId, stageId, attemptId, runtimeWriter, gradingRound]);
 
   const handleRetry = useCallback(async () => {
     if (!attemptId || retrying) return;
@@ -1028,6 +1094,24 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
                 />
               ))}
             </div>
+            {phase === 'grading' && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGradingRound((round) => round + 1)}
+                  className="px-4 py-1.5 rounded-lg text-xs font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors"
+                >
+                  {t('common.retry')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPhase('answering')}
+                  className="px-4 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
 

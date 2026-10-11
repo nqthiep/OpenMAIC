@@ -206,7 +206,12 @@ export function buildStateContext(storeState: StatelessChatRequest['storeState']
             const studentAnswer = Array.isArray(ans) ? ans.join(', ') : (ans ?? '');
             const correctAnswer =
               Array.isArray(q.answer) && q.answer.length > 0 ? q.answer.join(', ') : '(open-ended)';
-            const verdict = r ? r.status.toUpperCase() : 'UNGRADED';
+            // Grader failure, not a wrong answer: status 'ungraded', or the null `correct`
+            // that records written before 'ungraded' carry.
+            const ungraded = r?.status === 'ungraded' || r?.correct === null;
+            const verdict = ungraded
+              ? 'UNGRADED (grader error, not wrong: do not tell the student it is wrong)'
+              : (r?.status.toUpperCase() ?? 'UNGRADED');
             const points = q.points ?? 1;
             const earned = r?.earned ?? 0;
             const entry: string[] = [
