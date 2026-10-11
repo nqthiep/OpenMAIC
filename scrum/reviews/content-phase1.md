@@ -8,7 +8,7 @@
 | Date | 2026-10-11 |
 | Reviewer | Product and pedagogy reviewer, automated pass. Named human reviewers: none assigned [Unverified: memo line 284]. |
 | Method | Checklist C1 to C11 (memo lines 264-274), applied to 13 in-scope files. Decision D-07 (DECISIONS.md). |
-| Edits | 6 hunks in 4 files under `skills/agent-runtime/`, committed in the same change set as this review. See Section 3. |
+| Edits | 6 hunks in 4 files under `skills/agent-runtime/`, committed in the same change set as this review. See Section 3. Cycle 4 adds one hunk (E7, `fact-check/SKILL.md`). See "Cycle 4 fixes". |
 
 **Checks run (read-only):** Read, Grep, Glob, `git rev-parse HEAD`, `git status --short`, `git diff --stat`, `git ls-files`, a grep over snake_case identifiers in the six skill bodies, and `python3 -I -m json.tool` on the two constraint files. No tests were run, no packages installed, and no git state was changed.
 
@@ -47,8 +47,8 @@ Key: **P** pass. **F** fail, with finding ID. **S** partial, with style ID. **SM
 | File | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | C9 | C10 | C11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | feynman-learning | P | S (S-06) | F (D-17, D-18) | P | P | S (S-10) | F (D-19) | P | N/A | S (S-01, S-05) | S (S-15); SME F-20 |
-| fact-check | P | N/A | F (D-16) | F (D-12) | P | S (S-11) | P | P | N/A | F edited (D-15); S-02 | P |
-| deep-research | S (S-09) | S (S-08) | F (D-13) | F (D-11 edited; D-12) | F edited (D-10) | S (S-12) | F (D-14) | P | N/A | S (S-05) | S (S-15) |
+| fact-check | P | N/A | F (D-16) | F edited (D-12) | P | S (S-11) | P | P | N/A | F edited (D-15); S-02 | P |
+| deep-research | S (S-09) | S (S-08) | F (D-13) | F (D-11 edited; D-12 edited) | F edited (D-10) | S (S-12) | F (D-14) | P | N/A | S (S-05) | S (S-15) |
 | k12-core-literacy-planning | P | P | F (D-20); S (S-16) | F (D-21) | P | S (S-13) | S (S-18) | SME F-18 | SME F-19 | S (S-03, S-05) | S (S-15); SME F-17 |
 | curriculum-planner | P | P | F edited (D-07, D-08); D-09 open | F (D-09) | P | S (S-14) | N/A | F edited (D-07) | N/A | S (S-05) | S (S-15) |
 | vocational | P | S (S-07) | S (S-17); D-04 edited | F (D-01, D-05) | F (D-01) | F (D-06) | P (note: thresholds unsourced, D-03) | F (D-03) | F (D-02) | S (S-04, S-05) | S (S-15); SME F-21 to F-23 |
@@ -152,7 +152,7 @@ Priority: P1 safety-critical or blocks a required output; P2 contradiction or ga
 - **Severity:** defect.
 - **Proposed correction:** Edited (E6).
 
-### D-12. fact-check/SKILL.md:60-62; deep-research/SKILL.md:46-47. P2, open (OD-3)
+### D-12. fact-check/SKILL.md:60-62; deep-research/SKILL.md:46-47. P2, fixed in cycle 4 (E7); OD-3 open for the number
 - **Item:** C3, C4.
 - **Claim as written:** fact-check: "A normal first pass should need no more than about 6–8 searches." deep-research: "At most **8 `web_search` calls for the whole session**". fact-check description (L4): "Combine with deep-research ...".
 - **Evidence:** The two budgets cover different scopes. Under the text as written, a combined run can exceed the session limit (8 plus 6 to 8). [Verified: lib/server/agent-runtime/web-search.ts] The search tool file has no per-session cap. [Unverified: runner-level limits were not checked.] Code does not settle the number.
@@ -417,8 +417,8 @@ No one has accepted these in writing. Each needs the named owner.
 ## 8. Phase 1 acceptance (memo lines 295-302)
 
 1. **Review record per file:** Partly met. All 13 files are listed with SHA, date and checklist results. Reviewer names not assigned [Unverified].
-2. **No open internal contradiction:** Not met. Six contradictions are edited (E1 to E6). Open: D-01, D-09, D-12, D-18, D-20.
-3. **Automated checks (C4, C5, file resolution):** Identifier check 23 of 25, with 2 expected option-id misses. File resolution passes. C4 fails on D-05, D-09, D-12, D-21 and, for the vocational skill, D-01.
+2. **No open internal contradiction:** Not met. Six contradictions are edited (E1 to E6), and D-12 is fixed in cycle 4 (E7). Open: D-01, D-09, D-18, D-20. D-20 is a definition question with subject content, not an internal contradiction under the cycle 4 rule (see "Cycle 4 fixes").
+3. **Automated checks (C4, C5, file resolution):** Identifier check 23 of 25, with 2 expected option-id misses. File resolution passes. C4 fails on D-05, D-09, D-21 and, for the vocational skill, D-01. D-12 no longer fails C4 after cycle 4 (E7).
 4. **Claim log:** 23 flagged rows (F-01 to F-23) and 26 verified rows (V-01 to V-26). Flagged rows are unverifiable until editions are named.
 5. **Vocational thresholds and safety steps sourced and signed:** Not met. F-21 to F-23 are blocked. No practitioner or safety sign-off exists.
 6. **Sample test after edits:** Not run. It needs model access (D-07 says so).
@@ -431,3 +431,63 @@ No one has accepted these in writing. Each needs the named owner.
 - The six hunks are uncommitted. `git diff --stat` for `skills/agent-runtime/` shows four files: curriculum-planner/SKILL.md (2 hunks), deep-research/SKILL.md (2 hunks), fact-check/SKILL.md (1 hunk), vocational/outline-constraints.json (1 hunk).
 - Reversal (memo line 306): restore the "Before" text in Section 3, or revert the commit once one is made. No commit was requested, so none was made.
 - This review adds one file, `scrum/reviews/content-phase1.md`, under `scrum/reviews/`, which was empty before.
+- Status at cycle 4: `git diff 491c409e278e68b8dda001554398286c26c37ec2 HEAD` shows the four skill files above, so the six hunks are committed at HEAD `9368ff15b1d2ad619c785972f397eed08d1c45e5`. The two bullets above describe the state before that commit.
+- Cycle 4 adds one hunk (E7) in `fact-check/SKILL.md` and one file, `scrum/reviews/templates-phase1.md` (B36). Reversal of E7: restore its Before text in the "Cycle 4 fixes" section.
+
+---
+
+## Cycle 4 fixes
+
+**Scope (B35).** Each open defect in Section 2 was checked against the files it cites and against code or a second repo statement. Rule applied:
+
+- A defect is **internal** when two repo statements conflict, a reference points to something missing, or a rule conflicts with code.
+- A defect is **fixed** here only when an existing statement settles the text, with no number the repo does not already state, no new learner-facing step, and no unverified fact in the edit.
+- Education, safety and subject-matter claims are not changed. Everything else stays open.
+
+Checked at HEAD `9368ff15b1d2ad619c785972f397eed08d1c45e5`. Line numbers are HEAD line numbers. No tests were run, no packages were installed, and no git state was changed.
+
+**Result: 1 fixed (D-12, E7). 14 still open.**
+
+**E7. `fact-check/SKILL.md`, lines 62-63 before the edit (defect D-12, cycle 4)**
+
+Before:
+```
+6–8 searches. Use `fetch_url` to read the source: a result snippet or the mere
+existence of a related source is not evidence.
+```
+After:
+```
+6–8 searches. When it is combined with deep-research in one session, those
+searches count toward deep-research's limit of 8 `web_search` calls for the whole
+session. Use `fetch_url` to read the source: a result snippet or the mere
+existence of a related source is not evidence.
+```
+
+Evidence:
+- `deep-research/SKILL.md:46-47`: "At most **8 `web_search` calls for the whole session**". The whole-session wording covers a combined run, so E7 uses a number the repo already states.
+- `fact-check/SKILL.md:4`: "Combine with deep-research when current evidence is the course's main subject." This is the combined case.
+- `web-search.ts:92-99` gives no count, and `runner.ts:1281-1290` registers the tool and the session URLs, with no count. [Verified: Grep for search-budget and limit terms under `lib/server/agent-runtime` found no count.]
+- `tests/agent-runtime/skills.test.ts:387` pins "6–8 searches". E7 keeps that text (tests not run).
+- Post-edit check: Grep shows the new text at `fact-check/SKILL.md:62-64`.
+
+Residual, OD-3 stays open for the number:
+- [Inference: a combined run's first pass can use most of the 8, leaving little for deep-research's facets. Whether 6–8 or 8 is the right figure is the OD-3 decision.]
+- [Inference: E7 changes search behaviour, not reply text, so the SME rule at `scrum/meetings/qa-rebuttal.md:127` may not apply. Unverified: PD and QA may still want to review it.]
+
+**Left open: internal, decision needed**
+
+- **D-01.** Contradiction verified: `vocational/SKILL.md:26-27` requires `procedural-skill` scenes; `generation-tools.ts:58-59` rejects that widget outside task-engine mode; `vocational/outline-constraints.json:10` requires it. Not edited: `scrum/BACKLOG.md:171` (B34) says "Needs a product decision", and the OD-1 options (state the gate and fall back, extend `generate_scene`, or remove the skill) are product or code choices. The constraint file cannot be scoped without a code change.
+- **D-09.** Contradiction verified: `curriculum-planner/SKILL.md:96` ("let Gate 2 be the one place they confirm") against `stage-design/SKILL.md:30` ("Settle the plan with the user through `ask_user` before creating anything"), reached through `curriculum-planner/SKILL.md:156-157`. `curriculum-planner/SKILL.md:10-11` says stage-design governs how each stage is built, which points toward a confirmation per stage; `:96` points to one confirmation for the series. The repo does not settle which holds, and the Section 3 rule allows an edit only where it does. [Inference: each correction changes how often the user is asked, so it is an OD-2 product choice.]
+- **D-18.** Contradiction verified: `feynman-learning/SKILL.md:88` requires a saved first and second version; `:146-152` says generated pages cannot diagnose each input, and that continuous saving of explanation versions needs the conversation loop (path 3). [Inference: both corrections change what the learner does, namely who keeps the first version and whether the comparison happens in chat.] The final record at `:108-120` depends on the same storage. [Unverified: whether any runtime path persists learner text.] OD-4.
+
+**Left open: not internal under the cycle 4 definition**
+
+- **D-05.** Silence, not contradiction. `vocational/outline-constraints.json:8` caps slides at three, and the skill text does not conflict with that cap. The one-line addition the review proposes is a candidate for the next cycle.
+- **D-06, D-13, D-14, D-16, D-17, D-19.** Each is a missing example, an undefined term, or a missing feedback rule. Each needs new text, not reconciliation. The memo (`scrum/meetings/product.md:188`) calls D-17 an internal contradiction; under the cycle 4 definition it is an undefined threshold.
+
+**Left open: safety or subject matter (not changed)**
+
+- **D-02, D-03.** Vocational clinical scope, and sourcing for thresholds and PPE (`vocational/SKILL.md:4`, `:48-53`).
+- **D-20, D-21.** Dimension count and misconception coverage (`k12-core-literacy-planning/SKILL.md:53`, `:178`). Section 8 item 2 lists D-20 as internal; cycle 4 treats it as a definition question with subject content.
+
+**Template findings (B36)** are in `scrum/reviews/templates-phase1.md`, pinned to the same HEAD. No template was edited.

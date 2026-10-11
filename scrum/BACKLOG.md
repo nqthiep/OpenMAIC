@@ -125,6 +125,8 @@ The reviewer found no Critical issues. Dispositions:
 |-------|------|------|---------|
 | 1 | 2026-10-11 | Accounts foundation; access-gate and classroom hardening; PBL identity | Core, integration, UI, and review fixes landed; see acceptance criteria and review round. Full-suite result recorded in Verification |
 | 2 | 2026-10-11 | Access-cookie signing secret (opt-in); verify managed-key exposure | `ACCESS_COOKIE_SECRET` added with tests; managed-key exposure verified by reading and recorded as a decision (B5). Failed native scrypt calls now answer 503 `ACCOUNTS_BUSY` instead of 500. The rename-rail test's cold import moved to `beforeAll` (B27). One intermittent account-route failure seen in three full runs remains open (B26). Product decisions left for the owner: B1, B5, B14, B15 |
+| 3 | 2026-10-11 | Team meeting 01: decide the open items and implement the decided changes | Decision record in `scrum/DECISIONS.md`; rebuttal round; 8 commits pushed; full run had one timing failure, fixed with an explicit limit |
+| 4 | 2026-10-11 | Close the security gaps the cycle 3 rebuttals named; measure the throttle derivation cost; verify the content fixes; clean full run (A16) | B28, B31, B32, B33 (classroom), B38, B39 done; independent review round (15 findings, all triaged); presence probe window widened (B40 open); final run on the final tree: exit 0; 735 test files passed (9 skipped); 8,131 tests passed (79 skipped); 0 failures; type check, lint and format pass |
 
 ## Process notes (retrospective, cycle 1)
 
@@ -184,3 +186,81 @@ Full record: `scrum/DECISIONS.md`. Specs: `scrum/specs/`. Reviews: `scrum/review
 - Full suite, final tree before the last test-timeout change: 729 of 739 files passed; 8,103 of 8,183 tests passed, 79 skipped.
   One case failed: a voice-clip case timed out under full-suite load (6.4 s against the 5 s default). It passes alone, and an explicit 30 s limit is now set.
   The full suite was not re-run after that limit was set; the file passes alone. [Measured: run output in this session]
+
+## Cycle 4: security hardening and the open items from cycle 3
+
+Sprint goal: close the security gaps the cycle-3 rebuttals named, measure the derivation cost that decides the throttle rule, and get a clean full run on the final state (A16).
+
+### Items completed this cycle
+
+| Item | What changed | Evidence |
+|---|---|---|
+| B28 | The sign-in throttle no longer evicts a live lock. When every tracked name is locked, a new name is refused before the password check, and the check path refuses it until a lock expires. | `lib/server/accounts/login-throttle.ts`, `service.ts`; `tests/accounts/login-throttle.test.ts`, `busy-refund.test.ts` |
+| B31 | "Sign out other devices": `POST /api/auth/revoke-others` revokes every other live session of the account and keeps the caller's. Same-origin and session checks apply. A menu item in the account control; strings drafted in all twelve locales. | `app/api/auth/revoke-others/route.ts`, `lib/server/accounts/store.ts` (`revokeOtherSessions`), `components/account/account-control.tsx`; `tests/accounts/revoke-others.test.ts` (3 cases) |
+| B32 | With the operator's key, the verify-model route sends fixed messages only, and the server log carries a name, code and frame, not the upstream text. A visitor's own key keeps its text. | `app/api/verify-model/route.ts`, `lib/server/resolve-model.ts` (`managedKey`), `lib/server/error-summary.ts`; `tests/api/verify-model-managed-errors.test.ts` (3 cases) |
+| B33 (part) | A shared bounded JSON reader refuses a declared length above the cap before reading, and counts a chunked body. The classroom create route uses it with a 10 MiB cap, and it answers 400 for invalid JSON. | `lib/server/bounded-json.ts`, `app/api/classroom/route.ts`; `tests/server/bounded-json.test.ts`, `classroom-route.test.ts` |
+| B38 | While the access prompt is up, the page behind it is `inert`, so keyboard and screen-reader users cannot reach controls it covers. | `components/access-code-guard.tsx` (`GatedContent`); `tests/components/gated-content.test.ts` |
+| B39 | Measured: see the next section. | `scrum/cycle4-measurements.md` |
+
+### Measurement (B39)
+
+- [Measured: this host, 4 CPUs, measured while other agents ran on the same host] One scrypt derivation at the production cost (N=2^16, r=8, p=1): median 248 ms, minimum 222 ms, maximum 570 ms. Two concurrent derivations (the server's slot count): 7.6 derivations per second.
+- [Inference] Counted failures can reach roughly 6,840 per 15-minute window on this host. Filling the table with live locks needs about 80,000 counted failures in one window (10,000 names, eight failures each). That is out of reach on this host. A faster production host would change this, so the refusal rule stays as defence in depth.
+- [Unverified] Production hardware. The number above is one host and one measurement.
+
+### Carried forward
+
+- **B29** Relative persisted media URLs. Verification and specification: `scrum/specs/relative-media-urls.md` (see its recommendation). No change to stored URLs this cycle.
+- **B33 (rest)** Thirty-one routes still read JSON without a size check. Ordered by how much state each writes: `app/api/stages/route.ts`, `app/api/stages/[id]/route.ts`, `app/api/folders/*`, `app/api/agent/sessions/*`, `app/api/chat/*`, `app/api/generate/*`, `app/api/generate-classroom/route.ts`, the `pbl/v2` routes, and the rest. The shared reader is ready for them.
+- **B30** A required `ACCESS_COOKIE_SECRET` in a dated release. Needs the release date from the owner. [Opinion] Name the release in the changelog when the secret becomes required.
+- **B34** Procedural-skill pages cannot be generated on the conversational path. Two options, each needs a product decision: add an outline tool to the conversational path, or state in the skill that these pages come from the classroom builder only.
+- **B35** Content review: open internal defects fixed by the content reviewer this cycle are recorded in `scrum/reviews/content-phase1.md` under "Cycle 4 fixes". Factual claims remain open for subject-matter review.
+- **B36** Template review: `scrum/reviews/templates-phase1.md` (mechanical checks only; no template was edited).
+- **B37** Admin user interface for account actions: next.
+
+### Review round and fixes (cycle 4)
+
+An independent reviewer read the uncommitted change set and wrote `scrum/reviews/cycle4-review.md` (15 findings: 1 High, 2 Medium, 12 Low). Each one is triaged below.
+
+| Finding | Severity | Outcome |
+|---|---|---|
+| F1 Operator-key upstream text also reached visitors through the chat, outline-stream and agent-profile routes | High | Fixed in all three routes. Visitors get fixed text; the server log keeps name, code and frame. Tests: `tests/server/error-summary.test.ts`, `tests/api/verify-model-managed-errors.test.ts` |
+| F2 The victim scan stopped after 64 locked keys, refusing a name that an unlocked key further back would have admitted | Medium | Fixed: the scan covers the whole table and stops at the first unlocked key. Regression test: "admits a new name when an unlocked key sits behind 64 locked keys" |
+| F3 The access-code route ignored a refused record and still compared the code | Medium | Fixed: a refused identity gets 429 before any comparison (`app/api/access-code/verify/route.ts`) |
+| F4 The client budget charged after each attempt, so concurrent attempts overshot | Low | Fixed: slot reserved before the attempt, refunded on any outcome not counted. Regression test: 40 concurrent attempts, exactly 30 run |
+| F5 A stale refusal flag made Retry-After a fixed 900 seconds | Low | Fixed: one predicate ("a name can be tracked now") drives both the check and the record; Retry-After is the time until the earliest lock lapses. Test: "gives Retry-After as the time until the earliest live lock lapses" |
+| F6 Literal wording of the refusal rule | Low | Kept the behaviour (refuse only when the table is full and every key is locked); the file header now says so |
+| F7 A second sign-out-other-devices request could be sent while one was in flight | Low | Fixed with an in-flight ref |
+| F8 A future throw site could return upstream text through the resolver's message | Low | Accepted: every current throw site returns a local message. Recorded as hygiene; the fixed-text policy applies to the operator-key routes |
+| F9 A visitor's model string could forge a log line | Low | Fixed: logged as a JSON string |
+| F10 Upstream response text was logged in an excerpt | Low | Fixed: status, type and length only |
+| F11 Proxy and target URLs were logged with userinfo and query | Low | Fixed: origin and path only |
+| F12 A JSON `null` body to classroom create answered 500 | Low | Fixed: 400 |
+| F13 A message line could in principle be taken as a stack frame | Low | Fixed: frames must match the four-space V8 indent |
+| F14 The usage chart reuses an instance after its container unmounts | Low | Not fixed this cycle. Recorded as B41 |
+| F15 Two throttle tests had been removed by mistake | Low | Restored, plus the new cases |
+
+### Presence probe window (found by the final run)
+
+- The full run failed one case in `tests/media/stage-realm-presence.test.ts` at 82 ms: a live peer was reported absent. Alone, the file passes.
+- [Inference] The 60 ms probe window is shorter than a busy event loop can deliver a reply. The collector treats `absent` as exclusive (`lib/media/collect-stage-asset-refs.ts:286-292`), so a false `absent` can allow a global asset mutation while a peer is editing the same stage. That is a data-integrity risk, not only a test flake.
+- Change made: the window is 250 ms, a four-fold margin. This reduces the risk; it does not remove it. The collector pays up to the window per probe, which is [Unverified] in size for large collections.
+- **B40 (open, High):** replace the timed probe with a lease that peers renew, or with a per-run cached answer. Needs a design note and a test that holds the reply back.
+
+### Items found this cycle, not yet scheduled
+
+- **B41** Usage chart: the instance is reused after its container unmounts while data is empty (`components/settings/usage-dashboard.tsx:117-121, 230`, review F14). Fix: dispose the instance on container change.
+- **B42** The deep-research skill states a session-wide limit of eight `web_search` calls (`skills/agent-runtime/deep-research/SKILL.md:46`). The tool keeps no counter (`lib/server/agent-runtime/web-search.ts`), so the limit exists only as text. Decide: enforce it in the tool, or state it as guidance.
+- **B43** Log hygiene: the operator-key failure paths are covered. Other error sites that log the full error object (for example `app/api/chat/route.ts` outer catch when the key is the visitor's) are acceptable by policy; confirm with the security reviewer.
+
+### Content and specification outputs (cycle 4)
+
+- B35: the content reviewer fixed one internal defect (E7, `skills/agent-runtime/fact-check/SKILL.md`: the search budget now refers to deep-research's limit). Fourteen defects stay open; three of them are internal but blocked on product decisions D-01, D-09 and D-18. The E7 limit is text only (see B42). Record: `scrum/reviews/content-phase1.md`, "Cycle 4 fixes".
+- B36: the template review found 5 defects and 8 claims for review: `scrum/reviews/templates-phase1.md`. No template was edited.
+- B29: the relative-URL specification recommends **NO-GO** until a browser check of the classroom page loaded from a relative reference passes. Two readers cannot be verified from this environment. Specification: `scrum/specs/relative-media-urls.md`.
+
+### Process notes (retrospective, cycle 4)
+
+- **What helped:** the reviewer checked every claim against the code and reported file and line for each. The review found the same leak class in three routes after the first route had been fixed, which a single-file search would have missed.
+- **What hindered:** two load-sensitive timing failures appeared only in the full run (the voice-clip case and the presence probe). Both pass alone. The lesson: a fixed timing window in a safety decision needs a margin, and a test that depends on one needs a stated budget.
+- **Change for the next cycle:** when fixing a leak class, search all sites of that class before the first commit. Re-run the full suite after every change that touches a shared module.

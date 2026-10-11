@@ -59,7 +59,9 @@ may support a claim, but the course being checked cannot prove itself.
 
 Use `web_search` for shortlisted claims that depend on current, exact, disputed,
 or specialist knowledge. A normal first pass should need no more than about
-6–8 searches. Use `fetch_url` to read the source: a result snippet or the mere
+6–8 searches. When it is combined with deep-research in one session, those
+searches count toward deep-research's limit of 8 `web_search` calls for the whole
+session. Use `fetch_url` to read the source: a result snippet or the mere
 existence of a related source is not evidence.
 
 Do not pause the run to ask the user for sources, permission to use general
