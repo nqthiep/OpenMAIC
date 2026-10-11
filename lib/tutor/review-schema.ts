@@ -94,9 +94,13 @@ export function parseReview(raw: string): Review | null {
   return v as unknown as Review;
 }
 
-/** One model's pass: every score >= MIN_SCORE and no factErrors. */
+/** One model's pass: every score >= MIN_SCORE, no factErrors and no open issue. */
 export function reviewPasses(r: Review): boolean {
-  return r.factErrors.length === 0 && SCORE_KEYS.every((k) => r.scores[k] >= MIN_SCORE);
+  return (
+    r.factErrors.length === 0 &&
+    r.issues.length === 0 &&
+    SCORE_KEYS.every((k) => r.scores[k] >= MIN_SCORE)
+  );
 }
 
 export interface PanelOptions {
@@ -118,7 +122,8 @@ export function providerOf(model: string): string | null {
 /**
  * Panel verdict (ADR 0014 decision 8): pass only if BOTH reviews parsed, come from two different
  * reviewers (and, when both models name their provider, two different providers) about the same
- * entry and revision, and each passes. A disagreement is a fail (two providers only, no tiebreaker).
+ * entry and revision, and each passes `reviewPasses` (an open issue is a fail). A disagreement is a
+ * fail (two providers only, no tiebreaker).
  */
 export function panelVerdict(
   r1: Review | null,

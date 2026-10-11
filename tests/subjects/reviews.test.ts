@@ -10,7 +10,7 @@ import {
   releasedPacks,
   type ReviewLoader,
 } from '@/lib/subjects/release';
-import { entryContentHash } from '@/lib/tutor/catalog/hash';
+import { entryContentHash, entryFramesHash } from '@/lib/tutor/catalog/hash';
 import type { Review } from '@/lib/tutor/review-schema';
 
 const entry = cpPack.walkthroughs[0]!;
@@ -29,9 +29,12 @@ const review = (over: Partial<Review> = {}): Review => ({
   sources: [],
   ...over,
 });
-const file = (over: { contentHash?: string; reviews?: unknown[]; verdict?: string } = {}) =>
+const file = (
+  over: { contentHash?: string; framesHash?: unknown; reviews?: unknown[]; verdict?: string } = {},
+) =>
   JSON.stringify({
     contentHash: entryContentHash(entry),
+    framesHash: entryFramesHash(entry),
     reviews: [review(), review({ reviewer: 'tutor-review-cp-2', model: 'q:n' })],
     ...over,
   });
@@ -94,6 +97,35 @@ describe('releasedPacks (fake loader)', () => {
     expect(ids(releasedPacks([cpPack], loaderOf(file({ contentHash: '0'.repeat(16) }))))).toEqual(
       [],
     );
+  });
+
+  it('drops an entry whose frames changed for one preset or locale (framesHash mismatch)', () => {
+    const frames = entryFramesHash(entry);
+    const preset = Object.keys(frames)[0]!;
+    const locales = Object.keys(frames[preset]!);
+    for (const locale of locales) {
+      const changed = { ...frames, [preset]: { ...frames[preset], [locale]: '0'.repeat(16) } };
+      expect(ids(releasedPacks([cpPack], loaderOf(file({ framesHash: changed }))))).toEqual([]);
+    }
+  });
+
+  it('drops an entry whose record has no framesHash, or misses a locale', () => {
+    const frames = entryFramesHash(entry);
+    const preset = Object.keys(frames)[0]!;
+    const { [Object.keys(frames[preset]!)[0]!]: _dropped, ...partial } = frames[preset]!;
+    expect(ids(releasedPacks([cpPack], loaderOf(file({ framesHash: undefined }))))).toEqual([]);
+    expect(
+      ids(
+        releasedPacks([cpPack], loaderOf(file({ framesHash: { ...frames, [preset]: partial } }))),
+      ),
+    ).toEqual([]);
+  });
+
+  it('drops an entry while any review still has an open issue', () => {
+    const issue = { where: 'beat x', problem: 'p', fix: 'f' };
+    const open = review({ reviewer: 'tutor-review-cp-2', issues: [issue] });
+    expect(ids(releasedPacks([cpPack], loaderOf(file({ reviews: [review(), open] }))))).toEqual([]);
+    expect(ids(releasedPacks([cpPack], loaderOf(file({ reviews: [open, review()] }))))).toEqual([]);
   });
 
   it('drops an entry on malformed JSON or a malformed review', () => {

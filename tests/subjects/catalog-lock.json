@@ -70,8 +70,8 @@
     }
   },
   "amgm-semicircle": {
-    "entryRev": 1,
-    "contentHash": "08bbe06442abbe77",
+    "entryRev": 2,
+    "contentHash": "fcd622e6f7d3d77f",
     "framesHash": {
       "two-eight": {
         "vi-VN": "bf8b3341e59f9d59",
@@ -162,8 +162,8 @@
     }
   },
   "bs-answer": {
-    "entryRev": 4,
-    "contentHash": "d8676255d5815a84",
+    "entryRev": 5,
+    "contentHash": "18d2c20792b5d5c9",
     "framesHash": {
       "classic": {
         "vi-VN": "b6d436853c114739",
@@ -214,8 +214,8 @@
     }
   },
   "cauchy-schwarz": {
-    "entryRev": 4,
-    "contentHash": "5837e0411a93e5b3",
+    "entryRev": 5,
+    "contentHash": "5c94c8f66396e461",
     "framesHash": {
       "generic": {
         "vi-VN": "1eea04ba7f2e1d31",
@@ -236,7 +236,7 @@
     }
   },
   "concurrency-dynamic": {
-    "entryRev": 2,
+    "entryRev": 3,
     "contentHash": "9264feed581ae3e6",
     "framesHash": {
       "acute-ortho": {
@@ -248,8 +248,8 @@
         "en-US": "216a92541d1b76ba"
       },
       "right-ortho": {
-        "vi-VN": "ef1c309d7b2e705b",
-        "en-US": "ea9f45c21f67bb79"
+        "vi-VN": "82b303c9598630b5",
+        "en-US": "5b1972adfa9d34dd"
       },
       "scalene-centroid": {
         "vi-VN": "e47d2e55af28b2e1",
@@ -306,24 +306,24 @@
     }
   },
   "cs-projection": {
-    "entryRev": 1,
-    "contentHash": "7cd3c73041ce8d7e",
+    "entryRev": 2,
+    "contentHash": "84ca1cfa0b9d0aa9",
     "framesHash": {
       "generic": {
-        "vi-VN": "ac9fb6cccb12558e",
-        "en-US": "37c3822e02007390"
+        "vi-VN": "66916af7845b1f4d",
+        "en-US": "09fa7c83c33d2f2e"
       },
       "parallel": {
-        "vi-VN": "268114ddbeee993c",
-        "en-US": "0d7fe3c07e7c50e8"
+        "vi-VN": "7d43a61ff15adae7",
+        "en-US": "e100622a9ca4c487"
       },
       "perpendicular": {
-        "vi-VN": "1774265ef9c0abe9",
-        "en-US": "dc51600244b85633"
+        "vi-VN": "d661d79e5d2db398",
+        "en-US": "3e0de23af0d595b3"
       },
       "opposite": {
-        "vi-VN": "de8d83b655b6ac40",
-        "en-US": "f811c8c10fb51e9f"
+        "vi-VN": "588e6cc72e602217",
+        "en-US": "4ef87c2435f29c73"
       }
     }
   },
@@ -762,8 +762,8 @@
     }
   },
   "induction-fallacy": {
-    "entryRev": 1,
-    "contentHash": "76119c67b9aaf5f0",
+    "entryRev": 2,
+    "contentHash": "cd4abe9b32392f4e",
     "framesHash": {
       "colors-4": {
         "vi-VN": "43a9e0162d07b3d2",
@@ -1034,8 +1034,8 @@
     }
   },
   "min-total-wait": {
-    "entryRev": 2,
-    "contentHash": "5eb797657098a383",
+    "entryRev": 3,
+    "contentHash": "efd0ce0cf13317a6",
     "framesHash": {
       "classic": {
         "vi-VN": "962b56bdf1543126",
@@ -1078,7 +1078,7 @@
     }
   },
   "mvt-lagrange": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "aeee97ef72e5e0b2",
     "framesHash": {
       "square": {
@@ -1086,8 +1086,8 @@
         "en-US": "354b9db7a407f9db"
       },
       "cubic-two": {
-        "vi-VN": "633c3325cac46d90",
-        "en-US": "d1824caa122b5a42"
+        "vi-VN": "cd49eee4b87adb72",
+        "en-US": "54b1b1e0d1e0bf8a"
       },
       "cubic-one": {
         "vi-VN": "b4d31d9328b58170",
@@ -1350,8 +1350,8 @@
     }
   },
   "stack-queue": {
-    "entryRev": 3,
-    "contentHash": "5cf96ce0bf7c68b2",
+    "entryRev": 4,
+    "contentHash": "c71db5e24b3ac8fe",
     "framesHash": {
       "nested": {
         "vi-VN": "3112e25d240f881f",
@@ -1370,8 +1370,8 @@
         "en-US": "dff7518cb23620fc"
       },
       "extra-close": {
-        "vi-VN": "8139c0653325988a",
-        "en-US": "7de5d705fb033f77"
+        "vi-VN": "2e73c9122d2c9e87",
+        "en-US": "f16efe89df40b88c"
       }
     }
   },
@@ -1468,29 +1468,29 @@
     }
   },
   "tiling-coloring": {
-    "entryRev": 1,
+    "entryRev": 2,
     "contentHash": "4130d56ceadb3a39",
     "framesHash": {
       "n8-opposite": {
-        "vi-VN": "6c3f93b13f28d906",
-        "en-US": "155575384fa93131"
+        "vi-VN": "dd7a3c124ce9671c",
+        "en-US": "95b5553de9cd57be"
       },
       "n4-opposite": {
-        "vi-VN": "578dba6c57e07410",
-        "en-US": "fd56f10a95e01774"
+        "vi-VN": "69c43f29ec6ad0f0",
+        "en-US": "c2319151853876de"
       },
       "n6-adjacent": {
-        "vi-VN": "a6735ea78f984b59",
-        "en-US": "3520bd095862661e"
+        "vi-VN": "fb3213134e1b5929",
+        "en-US": "e74720db9bf35898"
       },
       "n8-adjacent": {
-        "vi-VN": "fbe31f34a2507003",
-        "en-US": "c262caa55b9c25d8"
+        "vi-VN": "8c3b9ec113de0982",
+        "en-US": "4e6a29e78dcd41c9"
       }
     }
   },
   "triangle-altitude": {
-    "entryRev": 2,
+    "entryRev": 3,
     "contentHash": "77a23f7fcc0fd4ee",
     "framesHash": {
       "acute": {
@@ -1502,8 +1502,8 @@
         "en-US": "28f3e00aac7b0516"
       },
       "right": {
-        "vi-VN": "34059cb5dec051ce",
-        "en-US": "a2c7a949d8b5dd43"
+        "vi-VN": "f4c58734b13210df",
+        "en-US": "c59a8d234acfe639"
       },
       "isosceles": {
         "vi-VN": "9a87b408844b10f9",

@@ -190,8 +190,8 @@ const EX = {
     'Colour the cells black and white in turns like a chess board: touching cells always differ in colour, so each domino covers one black and one white cell.',
   ),
   count: m(
-    'Còn lại {black} ô đen và {white} ô trắng, tổng {total} ô. Một cách lát cần {d} domino, mỗi cái phủ một ô mỗi màu.',
-    'There remain {black} black and {white} white cells, {total} in all. A tiling needs {d|domino|dominoes}, each covering one cell of each colour.',
+    'Còn lại {black} ô đen và {white} ô trắng, tổng {total} ô. Mọi cách lát cần {d} domino, mỗi cái phủ một ô mỗi màu.',
+    'There remain {black} black and {white} white cells, {total} in all. Any tiling needs {d|domino|dominoes}, each covering one cell of each colour.',
   ),
   concludeNo: m(
     'Hai ô bị bỏ cùng màu đen nên {black} ≠ {white}. Mỗi domino phủ một ô mỗi màu, vậy không thể lát được.',
@@ -308,7 +308,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const tilingColoringEntry: WalkthroughEntry<In, S> = {
   id: 'tiling-coloring',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-pigeonhole-invariants'],

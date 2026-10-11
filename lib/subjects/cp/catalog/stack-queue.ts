@@ -64,7 +64,7 @@ const beatDefs: readonly BeatDef[] = [
     required: true,
     label: m('Bắt đầu', 'Start'),
     narration: m(
-      'Xâu có {n} ký tự gồm ngoặc tròn, vuông, nhọn. Ta dùng một stack để nhớ các ngoặc mở chưa được đóng.',
+      'Xâu có {n} ký tự gồm ngoặc tròn (), ngoặc vuông [] và ngoặc nhọn {}. Ta dùng một stack để nhớ các ngoặc mở chưa được đóng.',
       'The string has {n|character|characters} of round, square and curly brackets. We use a stack to remember the opening brackets not closed yet.',
     ),
     hints: [
@@ -156,6 +156,34 @@ const beatDefs: readonly BeatDef[] = [
       m(
         'Nghĩ rằng ngoặc đóng khớp với ngoặc mở xa hơn đỉnh: bắt buộc phải là ngoặc ở đỉnh.',
         'Thinking a closer may match an opener below the top: it must be the one on top.',
+      ),
+    ],
+  },
+  {
+    id: 'pop-empty',
+    label: m('Stack rỗng', 'Empty stack'),
+    narration: m(
+      'Ký tự {c} ở vị trí {i} là ngoặc đóng, nhưng stack rỗng nên không có ngoặc mở nào để khớp.',
+      'Character {c} at position {i} is a closing bracket, but the stack is empty, so there is no opening bracket to match.',
+    ),
+    hints: [
+      m(
+        'Stack đang rỗng thì còn ngoặc mở nào để so không?',
+        'If the stack is empty, is any opening bracket left to compare with?',
+      ),
+      m(
+        'Không: mọi ngoặc mở trước đó đã được đóng, nên ngoặc đóng này không có cặp.',
+        'No: every earlier opening bracket is already closed, so this closing bracket has no partner.',
+      ),
+      m(
+        'Gặp ngoặc đóng khi stack rỗng thì xâu sai ngay tại đó.',
+        'A closing bracket met with an empty stack makes the string invalid at once.',
+      ),
+    ],
+    misconceptions: [
+      m(
+        'Nghĩ rằng vẫn so được với ngoặc mở đã đóng từ trước: ngoặc đó đã rời stack nên không còn để khớp.',
+        'Thinking it can still be compared with an opening bracket closed earlier: that one has left the stack.',
       ),
     ],
   },
@@ -290,7 +318,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
       top ? { i, c, top: top.ch, size } : { i, c, size },
       top ? { [i]: 'compare', [top.idx]: 'compare' } : { [i]: 'compare' },
       i,
-      'pop-check',
+      top ? 'pop-check' : 'pop-empty',
     );
     if (!top) {
       put(EX.failEmpty, 5, { i, c, size }, { [i]: 'compare' }, i, 'fail');
@@ -330,7 +358,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const stackQueueEntry: WalkthroughEntry<In, S> = {
   id: 'stack-queue',
-  entryRev: 3,
+  entryRev: 4,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t1-stack-queue'],

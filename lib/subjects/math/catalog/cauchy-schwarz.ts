@@ -147,7 +147,7 @@ const beatDefs: readonly BeatDef[] = [
   },
   {
     id: 'lagrange',
-    label: m('Đẳng thức Lagrange', 'Lagrange identity'),
+    label: m('Đồng nhất thức Lagrange', 'Lagrange identity'),
     narration: m(
       'Hiệu hai vế, vế phải trừ vế trái, bằng {d}. Hai số hạng giống nhau bị triệt tiêu, chỉ còn lại ba số hạng. Chúng gộp thành (a₁b₂ − a₂b₁)².',
       'The difference of the sides, right minus left, is {d}. The two equal terms cancel and three terms remain. They combine into (a₁b₂ − a₂b₁)².',
@@ -182,7 +182,7 @@ const beatDefs: readonly BeatDef[] = [
     ],
     misconceptions: [
       m(
-        'Chọn (a₁b₁ − a₂b₂)²: đó là bình phương hiệu hai tích cùng chỉ số, không phải tích chéo.',
+        'Chọn (a₁b₁ − a₂b₂)²: đó là bình phương hiệu hai tích cùng chỉ số, không phải tích có hướng.',
         'Choosing (a₁b₁ − a₂b₂)²: that is the square of the difference of same-index products, not the cross products.',
       ),
     ],
@@ -252,8 +252,8 @@ const beatDefs: readonly BeatDef[] = [
         'Look at the difference of the sides and write it as a sum of squares.',
       ),
       m(
-        'Cách này còn dùng cho AM-GM (với a, b ≥ 0): a + b − 2√(ab) = (√a − √b)².',
-        'The same trick works for AM-GM (for a, b ≥ 0): a + b − 2√(ab) = (√a − √b)².',
+        'Cách này còn dùng cho AM–GM (với a, b ≥ 0): a + b − 2√(ab) = (√a − √b)².',
+        'The same trick works for AM–GM (for a, b ≥ 0): a + b − 2√(ab) = (√a − √b)².',
       ),
     ],
     misconceptions: [
@@ -400,7 +400,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
   id: 'cauchy-schwarz',
-  entryRev: 4,
+  entryRev: 5,
   subject: 'math',
   visualizer: 'proofOutline',
   curriculumTopics: ['m2-inequality-classic'],
@@ -449,7 +449,7 @@ export const cauchySchwarzEntry: WalkthroughEntry<In, S> = {
     {
       beat: 'lagrange',
       text: m(
-        'Chọn nhầm tích chéo: hiệu hai vế là (a₁b₂ − a₂b₁)², không phải (a₁b₁ − a₂b₂)². Kiểm bằng số: thay a, b cụ thể vào cả hai biểu thức.',
+        'Chọn nhầm tích có hướng: hiệu hai vế là (a₁b₂ − a₂b₁)², không phải (a₁b₁ − a₂b₂)². Kiểm bằng số: thay a, b cụ thể vào cả hai biểu thức.',
         'Mixing up the cross products: the difference is (a₁b₂ − a₂b₁)², not (a₁b₁ − a₂b₂)². Check with numbers: put concrete a and b into both expressions.',
       ),
     },

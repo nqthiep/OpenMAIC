@@ -3,7 +3,7 @@
   "entryRev": 3,
   "contentHash": "5cf96ce0bf7c68b2",
   "locale": "vi-VN",
-  "verdict": "pass",
+  "verdict": "fail",
   "reviews": [
     {
       "reviewer": "tutor-review-cp",

@@ -19,7 +19,7 @@
 | Sự thật | Nguồn |
 | --- | --- |
 | Model của vai trò tutor: slot `tutor.*` trong `openmaic.yml` (sửa 2026-10-10: thay cho `MODEL_ROUTES`, biến này không còn được đọc). Vai trò không gán thì tắt, không rơi về `llm` hay `DEFAULT_MODEL`. Gán được dạng chuỗi hoặc `{model, thinking}` | `lib/server/model-routes.ts:127-163`; `lib/server/resolve-model.ts:41-47`; `.env.example:355-365` |
-| Chat là SSE không trạng thái; server phát các sự kiện `agent_start`, `text_delta`, `action`, `agent_end`, `thinking` | `app/api/chat/route.ts:137-218`; `lib/types/chat.ts` (`StatelessEvent`) |
+| Chat là SSE không trạng thái; server phát các sự kiện `agent_start`, `text_delta`, `action`, `agent_end`, `thinking` | `app/api/chat/route.ts:137-214`; `lib/types/chat.ts` (`StatelessEvent`) |
 | Kho runtime phía server lưu **phiên học** theo `(stageId, learnerKey, kind)` với bản ghi append-only; `kind` là **chuỗi mở**, app tự định nghĩa kind và validator | `packages/@openmaic/storage/src/runtime/types.ts:1-24`; `packages/@openmaic/dsl/src/runtime.ts:152-157,211-212`; `lib/runtime/payload-validators.ts:135-141` (đang có `chat`, `quizAttempt`, `whiteboard`) |
 | Chat của lớp học lưu qua `RuntimeStore` (HTTP tới server), không còn IndexedDB sau server-first persistence | `lib/utils/chat-storage.ts:17` |
 | Eval hiện có đã dùng model chấm riêng (`EVAL_SCORER_MODEL`) | `eval/whiteboard-layout/runner.ts:17-37` |
@@ -94,7 +94,7 @@
    - Nội dung được lọc coi là **dữ liệu**, không phải chỉ dẫn.
 3. **Hội đồng LLM thay giáo viên** (INTERFACES §8.2):
    - **Đầu vào:** mỗi entry (walkthrough, bài giải đề, clip), `SKILL.md`, nhãn `tracks` curriculum.
-   - **Cách duyệt:** hai model chấm độc lập theo rubric ADR 0008 và trả JSON có cấu trúc. **Đạt** khi cả hai chấm mọi tiêu chí ≥ 4/5 và không có lỗi "Đúng". Hai model bất đồng thì gọi model thứ ba nếu có một nhà cung cấp thứ ba; **với cấu hình hiện tại chỉ có hai nhà cung cấp (quyết định 8), bất đồng nghĩa là trượt**. Trượt thì **không phát hành** entry.
+   - **Cách duyệt:** hai model chấm độc lập theo rubric ADR 0008 và trả JSON có cấu trúc. **Đạt** khi cả hai chấm mọi tiêu chí ≥ 4/5, không có lỗi "Đúng", và không còn issue mở (bổ sung 2026-10-10, xem WP-G2a). Hai model bất đồng thì gọi model thứ ba nếu có một nhà cung cấp thứ ba; **với cấu hình hiện tại chỉ có hai nhà cung cấp (quyết định 8), bất đồng nghĩa là trượt**. Trượt thì **không phát hành** entry.
    - **Dữ kiện thi cử** (thể thức thi vào 10 chuyên Tin, kỳ thi, tài liệu): hội đồng phải **dẫn nguồn** (URL). Không có nguồn thì dữ kiện giữ `[Unverified]`, không được đưa vào lời thầy như sự thật.
    - **Kiểm tất định vẫn chạy trước và là cổng cứng:** test đối chiếu độc lập, `invariants`, chạy bản cài đặt C++/Python, lint. Hội đồng không vượt qua được một test đỏ.
 4. **LLM tác giả Manim** (thay đổi ADR 0007 Decision 2):

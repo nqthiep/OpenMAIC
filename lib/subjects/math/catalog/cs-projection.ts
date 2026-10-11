@@ -138,8 +138,8 @@ const beatDefs: readonly BeatDef[] = [
     id: 'equality',
     label: m('Dấu bằng', 'Equality'),
     narration: m(
-      'Ta quay v dần về phía đường thẳng của u và xem hình chiếu so với v. Nếu hai vectơ đã song song thì v lắc ra rồi quay về. Khi v song song với u, cùng hay ngược hướng, hình chiếu dài bằng v và dấu bằng xảy ra. Điều kiện là tích chéo ux nhân vy trừ uy nhân vx bằng 0.',
-      'We turn v gradually toward the line of u and watch the projection against v. If the vectors are already parallel, v swings out and comes back. When v is parallel to u, in the same or the opposite direction, the projection is as long as v and equality holds. The condition is the cross product ux times vy minus uy times vx equals 0.',
+      'Ta quay v dần về phía đường thẳng của u và xem hình chiếu so với v. Nếu hai vectơ đã song song từ đầu thì không cần quay. Khi v song song với u, cùng hay ngược hướng, hình chiếu dài bằng v và dấu bằng xảy ra. Điều kiện là tích có hướng ux nhân vy trừ uy nhân vx bằng 0.',
+      'We turn v gradually toward the line of u and watch the projection against v. If the vectors are already parallel, no turning is needed. When v is parallel to u, in the same or the opposite direction, the projection is as long as v and equality holds. The condition is the cross product ux times vy minus uy times vx equals 0.',
     ),
     hints: [
       m(
@@ -151,7 +151,7 @@ const beatDefs: readonly BeatDef[] = [
         'On the line holding u, that is the vectors are parallel.',
       ),
       m(
-        'Cùng phương nghĩa là tích chéo ux·vy − uy·vx = 0.',
+        'Cùng phương nghĩa là tích có hướng ux·vy − uy·vx = 0.',
         'Parallel means the cross product ux·vy − uy·vx = 0.',
       ),
     ],
@@ -174,7 +174,7 @@ const beatDefs: readonly BeatDef[] = [
       m('Bất đẳng thức nói gì về |u·v|?', 'What does the inequality say about |u·v|?'),
       m('|u·v| không vượt tích hai độ dài.', '|u·v| never exceeds the product of the two lengths.'),
       m(
-        'Dấu bằng chỉ xảy ra khi v nằm trên đường thẳng của u (tích chéo bằng 0).',
+        'Dấu bằng chỉ xảy ra khi v nằm trên đường thẳng của u (tích có hướng bằng 0).',
         'Equality holds only when v lies on the line of u (the cross product is 0).',
       ),
     ],
@@ -209,8 +209,16 @@ const EX = {
     'Turn v toward the line of u (step {k}/{parts}): the projection OF grows and approaches OV.',
   ),
   equality: m(
-    'v song song với u: F trùng đầu mút của v, OF = OV, dấu bằng. Dữ liệu ban đầu có ux·vy − uy·vx = {cross}.',
-    'v is parallel to u: F is the tip of v, OF = OV, equality. The original data has ux·vy − uy·vx = {cross}.',
+    'v được quay về song song với u: F trùng đầu mút của v, OF = OV, dấu bằng. Ban đầu ux·vy − uy·vx = {cross} ≠ 0 nên v đã được quay.',
+    'v has been turned parallel to u: F is the tip of v, OF = OV, equality. Initially ux·vy − uy·vx = {cross} ≠ 0, so v was turned.',
+  ),
+  degenerate: m(
+    'F trùng đầu mút V: OF = OV, tam giác OFV suy biến nên không có góc vuông. (u·v)² = {dot2} = {n2} = |u|²|v|², bất đẳng thức thành đẳng thức.',
+    'F is the tip V: OF = OV and triangle OFV is degenerate, with no right angle. (u·v)² = {dot2} = {n2} = |u|²|v|², so the inequality becomes an equality.',
+  ),
+  equalityParallel: m(
+    'v đã song song với u từ đầu: F trùng V, OF = OV, dấu bằng. Có ux·vy − uy·vx = {cross} = 0 nên không cần quay.',
+    'v is already parallel to u: F is V, OF = OV, equality holds. Here ux·vy − uy·vx = {cross} = 0, so no turning is needed.',
   ),
   done: m(
     'Vậy |u·v| ≤ |u||v|, dấu bằng khi và chỉ khi u, v cùng phương. Với dữ liệu này (u·v)² = {dot2} và |u|²|v|² = {n2}.',
@@ -290,25 +298,35 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     VF: 'compare',
     lu: 'visited',
   });
+  // cross = 0: v is already on the line of u, F is its tip (OFV is degenerate), so nothing turns
+  const parallel = cross === 0;
   put(
-    dot === 0 ? EX.perp : EX.triangle,
+    dot === 0 ? EX.perp : parallel ? EX.degenerate : EX.triangle,
     3,
     fig(v, { foot: true, tri: true }),
     { dot2: dot * dot, n2 },
     'inequality',
     { OF: 'result', tri: 'group-2', lu: 'visited' },
   );
-  for (let k = 1; k <= STEPS; k++) {
-    const w = turned(k / STEPS);
-    const last = k === STEPS;
-    put(
-      last ? EX.equality : EX.turn,
-      4,
-      fig(w, { foot: true, tri: true }),
-      last ? { cross } : { k, parts: STEPS },
-      last ? 'equality' : undefined,
-      { OF: 'result', tri: 'group-2', lu: 'visited' },
-    );
+  if (parallel) {
+    put(EX.equalityParallel, 4, fig(v, { foot: true, tri: true }), { cross }, 'equality', {
+      OF: 'result',
+      tri: 'group-2',
+      lu: 'visited',
+    });
+  } else {
+    for (let k = 1; k <= STEPS; k++) {
+      const w = turned(k / STEPS);
+      const last = k === STEPS;
+      put(
+        last ? EX.equality : EX.turn,
+        4,
+        fig(w, { foot: true, tri: true }),
+        last ? { cross } : { k, parts: STEPS },
+        last ? 'equality' : undefined,
+        { OF: 'result', tri: 'group-2', lu: 'visited' },
+      );
+    }
   }
   put(EX.done, 4, fig(v, { foot: true, tri: true }), { dot2: dot * dot, n2 }, 'done', {
     OF: 'result',
@@ -318,7 +336,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const csProjectionEntry: WalkthroughEntry<In, S> = {
   id: 'cs-projection',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-inequality-classic'],

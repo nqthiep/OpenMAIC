@@ -261,6 +261,22 @@ function foot(p: Pt, q: Pt, r: Pt): Pt {
   return [q[0] + t * (r[0] - q[0]), q[1] + t * (r[1] - q[1])];
 }
 
+/** Points at one position share one label ("A = Hb = H") on the first of them; the rest get none. */
+function mergeLabels(points: S['points']): S['points'] {
+  const at = (p: S['points'][number], q: S['points'][number]): boolean =>
+    Math.abs(p.x - q.x) < 1e-9 && Math.abs(p.y - q.y) < 1e-9;
+  return points.map((p, i) => {
+    if (points.slice(0, i).some((q) => at(p, q))) return { ...p, label: '' };
+    return {
+      ...p,
+      label: points
+        .filter((q) => at(p, q))
+        .map((q) => q.id)
+        .join(' = '),
+    };
+  });
+}
+
 function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunContext): void {
   const A: Pt = [input.x1, input.y1];
   const B: Pt = [input.x2, input.y2];
@@ -309,11 +325,12 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     tag: string | undefined,
     marks: Record<string, HighlightKind>,
   ): void => {
-    const points = [pt('A', A), pt('B', B), pt('C', C)];
-    if (shown.Ha) points.push(pt('Ha', Ha));
-    if (shown.Hb) points.push(pt('Hb', Hb));
-    if (shown.Hc) points.push(pt('Hc', Hc));
-    if (shown.H) points.push(pt('H', H));
+    const shownPoints = [pt('A', A), pt('B', B), pt('C', C)];
+    if (shown.Ha) shownPoints.push(pt('Ha', Ha));
+    if (shown.Hb) shownPoints.push(pt('Hb', Hb));
+    if (shown.Hc) shownPoints.push(pt('Hc', Hc));
+    if (shown.H) shownPoints.push(pt('H', H));
+    const points = mergeLabels(shownPoints);
     const segments: S['segments'] = [
       { id: 'AB', from: 'A', to: 'B' },
       { id: 'BC', from: 'B', to: 'C' },
@@ -396,7 +413,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const triangleAltitudeEntry: WalkthroughEntry<In, S> = {
   id: 'triangle-altitude',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-triangle-geometry'],

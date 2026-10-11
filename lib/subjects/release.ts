@@ -1,14 +1,15 @@
 /**
  * Release gate (INTERFACES 8.2): with OPENMAIC_REQUIRE_REVIEW on, a catalog entry is exposed only
  * if `lib/subjects/<subject>/reviews/<entryId>@<entryRev>.json` holds two reviews that pass
- * `panelVerdict` AND a contentHash equal to the entry's current one (an edit invalidates the review).
+ * `panelVerdict` with no open issue, a contentHash equal to the entry's current one, and a
+ * framesHash equal for every preset and locale (an edit of the text or the drawing invalidates it).
  * Server-side only: reads the disk and hashes with node:crypto.
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { entryContentHash } from '@/lib/tutor/catalog/hash';
+import { canonicalJSON, entryContentHash, entryFramesHash } from '@/lib/tutor/catalog/hash';
 import { panelVerdict, parseReview, reviewPath } from '@/lib/tutor/review-schema';
-import type { SubjectPack } from '@/lib/widgets/types';
+import type { AnyWalkthroughEntry, SubjectPack } from '@/lib/widgets/types';
 
 /** Raw text of a review file, or null when it does not exist. Injectable for tests. */
 export type ReviewLoader = (subject: string, entryId: string, entryRev: number) => string | null;
@@ -41,29 +42,37 @@ export function makeDiskReviewLoader(roots: () => string[] = defaultReviewRoots)
 
 export const diskReviewLoader: ReviewLoader = makeDiskReviewLoader();
 
-/** Stored shape: `{ "contentHash": "…", "reviews": [r1, r2] }` (the stored `verdict`, if any, is ignored). */
-function isReleasedAs(
-  subject: string,
-  id: string,
-  rev: number,
-  hash: string,
-  load: ReviewLoader,
-): boolean {
+/**
+ * Stored shape: `{ "contentHash": "…", "framesHash": { preset: { locale: "…" } }, "reviews": [r1, r2] }`.
+ * The stored `verdict`, if any, is ignored: an open issue in either review blocks the pass.
+ */
+function isReleasedAs(subject: string, entry: AnyWalkthroughEntry, load: ReviewLoader): boolean {
   let stored: unknown;
   try {
-    const raw = load(subject, id, rev);
+    const raw = load(subject, entry.id, entry.entryRev);
     if (raw === null) return false;
     stored = JSON.parse(raw);
   } catch {
     return false;
   }
   if (!stored || typeof stored !== 'object') return false;
-  const { contentHash, reviews } = stored as { contentHash?: unknown; reviews?: unknown };
-  if (contentHash !== hash) return false;
+  const { contentHash, framesHash, reviews } = stored as {
+    contentHash?: unknown;
+    framesHash?: unknown;
+    reviews?: unknown;
+  };
+  if (contentHash !== entryContentHash(entry)) return false;
+  if (
+    framesHash === undefined ||
+    canonicalJSON(framesHash) !== canonicalJSON(entryFramesHash(entry))
+  ) {
+    return false;
+  }
   if (!Array.isArray(reviews) || reviews.length !== 2) return false;
   const [r1, r2] = reviews.map((r) => parseReview(JSON.stringify(r)));
   if (!r1 || !r2) return false;
-  if (r1.entryId !== id || r1.entryRev !== rev) return false;
+  if (r1.entryId !== entry.id || r1.entryRev !== entry.entryRev) return false;
+  if (r1.issues.length > 0 || r2.issues.length > 0) return false;
   return panelVerdict(r1, r2) === 'pass';
 }
 
@@ -74,8 +83,6 @@ export function releasedPacks(
 ): SubjectPack[] {
   return packs.map((pack) => ({
     ...pack,
-    walkthroughs: pack.walkthroughs.filter((e) =>
-      isReleasedAs(pack.id, e.id, e.entryRev, entryContentHash(e), loadReview),
-    ),
+    walkthroughs: pack.walkthroughs.filter((e) => isReleasedAs(pack.id, e, loadReview)),
   }));
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { stackQueueEntry as entry } from '@/lib/subjects/cp/catalog/stack-queue';
+import { fill, msg } from '@/lib/tutor/catalog/messages';
 import { steps } from '@/lib/tutor/engine/generate';
 import type { Frame } from '@/lib/tutor/engine/types';
 import { beatOf, entryContract } from './contract';
@@ -40,7 +41,7 @@ entryContract<In>({
   topics: ['t1-stack-queue'],
   maxFrames: 30,
   presets: ['nested', 'sequence', 'mismatch', 'unclosed', 'extra-close'],
-  beats: ['start', 'push', 'pop-check', 'pop', 'fail', 'done'],
+  beats: ['start', 'push', 'pop-check', 'pop-empty', 'pop', 'fail', 'done'],
   required: ['start', 'done'],
   pseudoLines: 7,
   vars: ['n', 'i', 'c', 'top', 'need', 'size'],
@@ -116,6 +117,20 @@ describe('stack-queue: result', () => {
     expect(last('extra-close').text).toMatch(/Stack rỗng/);
     expect(last('unclosed').text).toMatch(/còn 2 ngoặc mở/);
     expect(beats(last('nested').frames)).not.toContain('fail');
+  });
+
+  it('a closer met with an empty stack is narrated as empty, not as a top to compare with', () => {
+    const frames = gen(entry.presets.find((p) => p.id === 'extra-close')!.input);
+    const frame = frames.find((f) => beatOf(f).includes('pop-empty'));
+    expect(frame).toBeDefined();
+    const def = entry.beatDefs.find((b) => b.id === 'pop-empty')!;
+    const spoken = fill(msg(def.narration, 'vi-VN'), frame!.meta.vars);
+    expect(spoken).toMatch(/stack rỗng/);
+    expect(spoken).not.toMatch(/đỉnh stack/);
+  });
+
+  it('the start line names the curly brackets with their symbol {}', () => {
+    expect(msg(entry.beatDefs[0].narration, 'vi-VN')).toContain('ngoặc nhọn {}');
   });
 
   it('the question frame (pop-check) does not announce the verdict', () => {

@@ -90,9 +90,12 @@ describe('cs-projection: the figure is the mathematics', () => {
     for (const i of FAMILY) {
       const frames = gen(i);
       const nv = Math.hypot(i.vx, i.vy);
+      const cross = i.ux * i.vy - i.uy * i.vx;
       const eq = frames.find((x) => beatOf(x).includes('equality'))!;
-      const turn = frames.slice(3, 7);
-      expect(turn).toHaveLength(4);
+      // a v already on the line of u is not turned: its equality frame follows the inequality frame
+      if (cross === 0) expect(frames.indexOf(eq), JSON.stringify(i)).toBe(3);
+      else expect(frames.slice(3, 7), JSON.stringify(i)).toHaveLength(4);
+      const turn = cross === 0 ? [] : frames.slice(3, 7);
       for (const f of turn) expect(Math.abs(Math.hypot(...at(f, 'V')) - nv)).toBeLessThan(3e-3);
       const [vx, vy] = at(eq, 'V');
       const [fx, fy] = at(eq, 'F');
@@ -100,6 +103,16 @@ describe('cs-projection: the figure is the mathematics', () => {
       expect(Math.hypot(vx - fx, vy - fy)).toBeLessThan(2e-3);
       expect(eq.meta.vars).toEqual({ cross: i.ux * i.vy - i.uy * i.vx });
     }
+  });
+
+  it('a v already parallel to u is narrated as degenerate, a turned v as turned', () => {
+    const at2 = (frames: readonly Frame<FigState>[], beat: string) =>
+      frames.find((x) => beatOf(x).includes(beat))!.meta.explanation;
+    const parallel = gen({ ux: 2, uy: 1, vx: 4, vy: 2 });
+    expect(at2(parallel, 'inequality')).toMatch(/suy biến/);
+    expect(at2(parallel, 'inequality')).not.toMatch(/vuông tại F/);
+    expect(at2(parallel, 'equality')).not.toMatch(/được quay/);
+    expect(at2(gen({ ux: 3, uy: 1, vx: 1, vy: 2 }), 'equality')).toMatch(/được quay về/);
   });
 
   it('the perpendicular preset has no triangle and the projection is the origin', () => {

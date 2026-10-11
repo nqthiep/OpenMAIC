@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { SUBJECT_PACKS } from '@/lib/subjects';
-import { entryContentHash, framesHash } from '@/lib/tutor/catalog/hash';
+import { entryContentHash, FRAME_LOCALES, framesHash } from '@/lib/tutor/catalog/hash';
 import { steps } from '@/lib/tutor/engine/generate';
 import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
 import {
@@ -13,7 +13,6 @@ import {
 } from './catalog-lock-compare';
 
 const LOCK_PATH = fileURLToPath(new URL('./catalog-lock.json', import.meta.url));
-const LOCALES = ['vi-VN', 'en-US'] as const;
 const UPDATE = process.env.UPDATE_CATALOG_LOCK === '1';
 
 const entries = SUBJECT_PACKS.flatMap((p) => p.walkthroughs);
@@ -24,7 +23,7 @@ function snapshotEntry(e: AnyWalkthroughEntry): LockEntry {
   const framesByPreset: Record<string, Record<string, string>> = {};
   for (const p of e.presets) {
     framesByPreset[p.id] = {};
-    for (const locale of LOCALES) {
+    for (const locale of FRAME_LOCALES) {
       framesByPreset[p.id][locale] = framesHash(steps(e, p.input, { locale }));
     }
   }

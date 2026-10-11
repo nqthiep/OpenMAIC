@@ -26,6 +26,7 @@ import type { AnyWalkthroughEntry } from '@/lib/widgets/types';
 
 // Pure review schema, panel verdict, seeded-error generation. No model, no network.
 
+const issue = { where: 'beatDefs.mid.hints[1]', problem: 'p', fix: 'f' };
 const review = (over: Partial<Review> = {}): Review => ({
   reviewer: 'tutor-review-cp',
   model: 'p:m',
@@ -33,7 +34,7 @@ const review = (over: Partial<Review> = {}): Review => ({
   entryRev: binarySearchEntry.entryRev,
   scores: { dung: 5, roRang: 4, chiTiet: 4, deHieu: 4, trucQuan: 5, sinhDong: 4 },
   factErrors: [],
-  issues: [{ where: 'beatDefs.mid.hints[1]', problem: 'p', fix: 'f' }],
+  issues: [],
   unsourcedClaims: [],
   sources: [],
   ...over,
@@ -44,6 +45,7 @@ describe('parseReview', () => {
   it('accepts the INTERFACES 8.2 shape, bare or fenced', () => {
     expect(parseReview(text(review()))).toEqual(review());
     expect(parseReview('```json\n' + text(review()) + '\n```')).toEqual(review());
+    expect(parseReview(text(review({ issues: [issue] })))).toEqual(review({ issues: [issue] }));
   });
 
   it.each([
@@ -96,6 +98,12 @@ describe('panelVerdict', () => {
   it('fails on any factError in either review', () => {
     expect(panelVerdict(review({ factErrors: ['x'] }), b)).toBe('fail');
     expect(panelVerdict(a, { ...b, factErrors: ['x'] })).toBe('fail');
+  });
+
+  it('fails while either review still has an open issue, whatever the scores', () => {
+    expect(reviewPasses(review({ issues: [issue] }))).toBe(false);
+    expect(panelVerdict(review({ issues: [issue] }), b)).toBe('fail');
+    expect(panelVerdict(a, { ...b, issues: [issue] })).toBe('fail');
   });
 
   it('treats disagreement as a fail (no third provider)', () => {
@@ -359,6 +367,16 @@ describe('reviewOnce / reviewPanel with a fake model', () => {
     const r = await reviewPanel(material, stages, routes, split);
     expect(r.verdict).toBe('fail');
     expect(r.outcomes[0].review).not.toBeNull();
+  });
+
+  it('fails the panel while one reviewer lists an open issue', async () => {
+    const stages = ['tutor-review-cp', 'tutor-review-cp-2'] as const;
+    const routes = [route('a:1'), route('b:2')] as const;
+    const open: ReviewLlm = async (req) =>
+      answer(req.stage === 'tutor-review-cp-2' ? { issues: [issue] } : {})(req);
+    const r = await reviewPanel(material, stages, routes, open);
+    expect(r.verdict).toBe('fail');
+    expect(r.outcomes[1].review?.issues).toHaveLength(1);
   });
 });
 

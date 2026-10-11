@@ -118,8 +118,8 @@ const beatDefs: readonly BeatDef[] = [
     id: 'equality',
     label: m('Khi nào bằng nhau', 'When equal'),
     narration: m(
-      'Ta trượt C về phía tâm và xem h thay đổi thế nào so với r. Chỉ khi C trùng tâm, tức a bằng b, thì h mới chạm bán kính. Đây chính là bất đẳng thức AM-GM.',
-      'We slide C toward the centre and watch how h compares with r. Only when C is the centre, that is a equals b, does h reach the radius. This is exactly the AM-GM inequality.',
+      'Ta trượt C về phía tâm và xem h thay đổi thế nào so với r. Chỉ khi C trùng tâm, tức a bằng b, thì h mới chạm bán kính. Đây chính là bất đẳng thức AM–GM.',
+      'We slide C toward the centre and watch how h compares with r. Only when C is the centre, that is a equals b, does h reach the radius. This is exactly the AM–GM inequality.',
     ),
     ask: {
       text: m('Khi nào thì h đúng bằng bán kính?', 'When is h exactly equal to the radius?'),
@@ -292,7 +292,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const amgmSemicircleEntry: WalkthroughEntry<In, S> = {
   id: 'amgm-semicircle',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-inequality-basic'],

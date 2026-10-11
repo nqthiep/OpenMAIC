@@ -340,7 +340,7 @@ async function reviewOne(
     return 1;
   }
   // Server-side only: node:crypto (hash). Imported late, like the LLM stack.
-  const { entryContentHash } = await import('@/lib/tutor/catalog/hash');
+  const { entryContentHash, entryFramesHash } = await import('@/lib/tutor/catalog/hash');
   const file = join(
     getCurrentDir(),
     '..',
@@ -352,6 +352,7 @@ async function reviewOne(
     entryId: entry.id,
     entryRev: entry.entryRev,
     contentHash: entryContentHash(entry),
+    framesHash: entryFramesHash(entry),
     locale: LOCALE,
     verdict,
     reviews: [a, b],

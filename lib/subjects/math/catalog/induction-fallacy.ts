@@ -313,11 +313,11 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const inductionFallacyEntry: WalkthroughEntry<In, S> = {
   id: 'induction-fallacy',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m2-induction'],
-  title: m('Nguỵ biện quy nạp', 'Fallacies of induction'),
+  title: m('Ngụy biện quy nạp', 'Fallacies of induction'),
   code: {
     pseudo: [
       'hàng ngựa hoặc hàng giá trị n² + n, kèm phát biểu cần chứng minh bằng quy nạp',

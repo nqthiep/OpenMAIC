@@ -293,6 +293,8 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   const mf = (fb - fa) / d;
   const c3 = c[3] ?? 0;
   const cs = rootsIn(3 * c3 * d, 2 * c[2] * d, c[1] * d - (fb - fa), a, b);
+  /** label of the i-th point c: 'c' when there is one, c₁ and c₂ when there are two */
+  const cLabel = (i: number): string => (cs.length === 1 ? 'c' : `c${'₁₂'[i]}`);
   const g = (x: number): number => f(x) - fa - mf * (x - a);
 
   // the window of the graph of f and, separately, of the graph of g
@@ -373,7 +375,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
   const gMarks: Record<string, HighlightKind> = { A0: 'active', B0: 'active' };
   gPieces.forEach((_, i) => (gMarks[`g${i}`] = 'compare'));
   cs.forEach((x, i) => {
-    gfig.point(`C${i}`, [x, g(x)], 'c');
+    gfig.point(`C${i}`, [x, g(x)], cLabel(i));
     tangent(gfig, `h${i}`, x, g(x), 0);
     gMarks[`C${i}`] = 'result';
     gMarks[`h${i}`] = 'result';
@@ -387,7 +389,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     chord: 'result',
   };
   cs.forEach((x, i) => {
-    ffig.point(`C${i}`, [x, f(x)], 'c');
+    ffig.point(`C${i}`, [x, f(x)], cLabel(i));
     tangent(ffig, `t${i}`, x, f(x), mf);
     fMarks[`C${i}`] = 'result';
     fMarks[`t${i}`] = 'active';
@@ -406,7 +408,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const mvtLagrangeEntry: WalkthroughEntry<In, S> = {
   id: 'mvt-lagrange',
-  entryRev: 1,
+  entryRev: 2,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m4-limits-mvt'],

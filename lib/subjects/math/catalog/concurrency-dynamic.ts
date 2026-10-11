@@ -416,10 +416,13 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
     withLines: boolean,
     withCenter: boolean,
   ): { fig: Figure; marks: Record<string, HighlightKind> } => {
+    const G = centerOf(center, A, B, C);
+    // a centre on a vertex (right triangle: H = A) shares that vertex's label, not a second one
+    const onVertex = (P: Pt): boolean => withCenter && dist(P, G) < 1e-9;
     const fig = new Figure(bounds)
-      .point('A', A, 'A')
-      .point('B', B, 'B')
-      .point('C', C, 'C')
+      .point('A', A, onVertex(A) ? `A = ${letter}` : 'A')
+      .point('B', B, onVertex(B) ? `B = ${letter}` : 'B')
+      .point('C', C, onVertex(C) ? `C = ${letter}` : 'C')
       .polygon('tri', ['A', 'B', 'C']);
     const marks: Record<string, HighlightKind> = { tri: 'group-0', C: 'active' };
     const size = Math.max(dist(A, B), dist(B, C), dist(C, A));
@@ -439,7 +442,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
       });
     }
     if (withCenter) {
-      fig.point('G', centerOf(center, A, B, C), letter);
+      fig.point('G', G, [A, B, C].some(onVertex) ? '' : letter);
       marks.G = 'result';
     }
     return { fig, marks };
@@ -472,7 +475,7 @@ function run(input: Readonly<In>, emit: Emit<S>, _tick: () => void, ctx: RunCont
 
 export const concurrencyDynamicEntry: WalkthroughEntry<In, S> = {
   id: 'concurrency-dynamic',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'math',
   visualizer: 'geometry',
   curriculumTopics: ['m1-triangle-geometry'],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { entryContentHash } from '@/lib/tutor/catalog/hash';
+import { entryContentHash, entryFramesHash } from '@/lib/tutor/catalog/hash';
 import {
   buildReviewMaterial,
   buildReviewPrompt,
@@ -61,6 +61,7 @@ describe('a math walkthrough through the panel with fake reviewers', () => {
       entryId: entry.id,
       entryRev: entry.entryRev,
       contentHash: entryContentHash(entry),
+      framesHash: entryFramesHash(entry),
       reviews: result.outcomes.map((o) => o.review),
     });
     const loader = (_s: string, id: string, rev: number) =>

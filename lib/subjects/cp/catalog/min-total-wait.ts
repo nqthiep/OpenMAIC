@@ -351,7 +351,7 @@ function run(input: Readonly<In>, emit: Emit<S>, tick: () => void, ctx: RunConte
 
 export const minTotalWaitEntry: WalkthroughEntry<In, S> = {
   id: 'min-total-wait',
-  entryRev: 2,
+  entryRev: 3,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t3-greedy'],
@@ -442,9 +442,9 @@ export const minTotalWaitEntry: WalkthroughEntry<In, S> = {
         limit: { 'vi-VN': 't ≤ 10^9', 'en-US': 't ≤ 10^9' },
         idea: {
           'vi-VN':
-            'Cùng cách làm, nhưng tổng chờ có thể tới 10^19 phép nhân nên cần long long (hoặc số lớn).',
+            'Cùng cách làm, nhưng tổng chờ có thể tới khoảng 5·10^18 nên cần long long (int 32 bit không đủ).',
           'en-US':
-            'The same method, but the total can be huge so long long (or big integers) is needed.',
+            'The same method, but the total can reach about 5·10^18, so long long is needed (a 32-bit int is not enough).',
         },
         complexity: 'O(n log n)',
       },
@@ -462,8 +462,8 @@ export const minTotalWaitEntry: WalkthroughEntry<In, S> = {
       lang: 'cpp',
       beat: 'accumulate',
       text: m(
-        'Tổng chờ có thể vượt int khi n = 10^5, t = 10^9: dùng long long cho wait và total (ở đây còn có thể tràn long long, khi đó cần __int128 hoặc đề giới hạn nhỏ hơn).',
-        'The total can overflow int at n = 10^5, t = 10^9: use long long for wait and total (it may even overflow long long, then __int128 or smaller limits are needed).',
+        'Tổng chờ có thể vượt int khi n = 10^5, t = 10^9 (tới khoảng 5·10^18): dùng long long cho wait và total. Long long (tối đa khoảng 9,2·10^18) đủ chứa, không cần __int128.',
+        'The total can overflow int at n = 10^5, t = 10^9 (up to about 5·10^18): use long long for wait and total. Long long (max about 9.2·10^18) holds it, so __int128 is not needed.',
       ),
     },
     {

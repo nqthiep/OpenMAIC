@@ -266,7 +266,7 @@ function run(
 
 export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
   id: 'bs-answer',
-  entryRev: 4,
+  entryRev: 5,
   subject: 'cp',
   visualizer: 'array',
   curriculumTopics: ['t2-binary-search'],
@@ -713,9 +713,9 @@ export const bsAnswerEntry: WalkthroughEntry<BsAnswerInput, BsAnswerState> = {
       lang: 'cpp',
       beat: 'check',
       text: {
-        'vi-VN': 'Tổng gỗ có thể vượt int (tới 10^14 khi n, h lớn): dùng long long cho wood và m.',
+        'vi-VN': 'Tổng gỗ có thể vượt int (tới 10^15 khi n, h lớn): dùng long long cho wood và m.',
         'en-US':
-          'The total wood can overflow int (up to 10^14 for large n, h): use long long for wood and m.',
+          'The total wood can overflow int (up to 10^15 for large n, h): use long long for wood and m.',
       },
     },
     {

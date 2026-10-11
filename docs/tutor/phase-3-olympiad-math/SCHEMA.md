@@ -47,7 +47,7 @@ Nguồn gốc: 3 entry có từ đầu (`cauchy-schwarz`, `triangle-altitude`, `
 | `power-of-point` | Phương tích của một điểm | geometry | m2-circle-power |
 | `tiling-coloring` | Bàn cờ bỏ hai ô, lát domino | geometry | m2-pigeonhole-invariants |
 | `figurate-sums` | Tổng bằng chấm: số lẻ, số tam giác | geometry | m2-induction |
-| `induction-fallacy` | Nguỵ biện quy nạp | geometry | m2-induction |
+| `induction-fallacy` | Ngụy biện quy nạp | geometry | m2-induction |
 | `geometric-series-area` | Chuỗi hình học bằng diện tích | geometry | m3-sequences-limits |
 | `limit-epsilon` | Giới hạn dãy: dải ε và số N | geometry | m3-sequences-limits |
 | `curve-sketching` | Khảo sát và vẽ đồ thị đa thức (bậc ≤ 3) | functionPlotter | m3-derivative-graphs |
