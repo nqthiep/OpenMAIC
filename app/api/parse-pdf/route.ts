@@ -9,6 +9,7 @@ import type { ParsedPdfContent } from '@/lib/types/pdf';
 import { documentArtifactToParsedPdfContent, extractDocument } from '@/lib/document';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { capBodyStream } from '@/lib/server/capped-stream';
 import { isSelfContainedExtractor } from '@/lib/server/material-extraction/services';
 import { checkClientDocumentExtractorBaseUrl } from '@/lib/server/client-extractor-endpoint';
 import {
@@ -23,6 +24,11 @@ import {
   SlotUnassignedError,
 } from '@/lib/server/model-config/runtime';
 const log = createLogger('Parse PDF');
+// Cap on the whole multipart body, checked from Content-Length and while it is read.
+// ponytail: the body is buffered up to this cap; stream the parts if uploads grow.
+const MAX_PDF_UPLOAD_BYTES = 50 * 1024 * 1024;
+const pdfTooLarge = () =>
+  apiError('INVALID_REQUEST', 413, 'Tệp PDF vượt quá dung lượng tối đa 50 MB.');
 
 export async function POST(req: NextRequest) {
   let pdfFileName: string | undefined;
@@ -38,7 +44,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const formData = await req.formData();
+    // Refuse an oversized upload before reading it. The capped stream also stops
+    // a body that omits or understates Content-Length.
+    const declaredLength = Number(req.headers.get('content-length') ?? '');
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_PDF_UPLOAD_BYTES) {
+      return pdfTooLarge();
+    }
+    if (!req.body) return apiError('MISSING_REQUIRED_FIELD', 400, 'No PDF file provided');
+    const capped = capBodyStream(req.body, MAX_PDF_UPLOAD_BYTES);
+    let formData: FormData;
+    try {
+      formData = await new Response(capped.stream, {
+        headers: { 'content-type': contentType },
+      }).formData();
+    } catch (error) {
+      if (capped.exceeded()) return pdfTooLarge();
+      throw error;
+    }
     const pdfFile = formData.get('pdf') as File | null;
     const providerId = formData.get('providerId') as PDFProviderId | null;
     const apiKey = formData.get('apiKey') as string | null;
@@ -122,7 +144,7 @@ export async function POST(req: NextRequest) {
       `PDF parsing failed [provider=${resolvedProviderId ?? 'unknown'}, file="${pdfFileName ?? 'unknown'}"]:`,
       error,
     );
-    return apiError('PARSE_FAILED', 500, error instanceof Error ? error.message : 'Unknown error');
+    return apiError('PARSE_FAILED', 500, 'Không thể đọc tệp PDF, vui lòng thử lại.');
   }
 }
 

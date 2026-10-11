@@ -48,7 +48,15 @@ import {
   MAX_ZIP_TEXT_ENTRY_BYTES,
   MAX_ZIP_UNCOMPRESSED_BYTES,
 } from '@/lib/pdf/mineru-cloud';
+import type { PDFParserConfig } from '@/lib/pdf/types';
 import { resolveAllowLocalNetworks } from '@/lib/server/provider-fetch';
+
+/** The entry point with the settle wait and poll interval at zero, so tests do not sleep. */
+const parse = (config: PDFParserConfig, documentBuffer: Buffer, sourceFileName: string) =>
+  parseWithMinerUCloud(config, documentBuffer, sourceFileName, {
+    settleMs: 0,
+    pollIntervalMs: 0,
+  });
 
 const PUBLIC_UPLOAD = 'https://93.184.216.34/upload/lesson.pdf';
 const PUBLIC_ZIP = 'https://93.184.216.34/result.zip';
@@ -260,7 +268,7 @@ describe('parseWithMinerUCloud — transport policy and response URL validation'
     });
 
     const documentBuffer = Buffer.from('exact document bytes \u0000\u0001', 'latin1');
-    const result = await parseWithMinerUCloud(
+    const result = await parse(
       {
         providerId: 'mineru-cloud',
         apiKey: 'cloud-key',
@@ -284,7 +292,7 @@ describe('parseWithMinerUCloud — transport policy and response URL validation'
   it('keeps a client-supplied local API root on the operator policy while response URLs stay strict', async () => {
     vi.stubEnv('ALLOW_LOCAL_NETWORKS', 'true');
     installMinerU();
-    await parseWithMinerUCloud(
+    await parse(
       {
         providerId: 'mineru-cloud',
         apiKey: 'cloud-key',
@@ -325,7 +333,7 @@ describe('parseWithMinerUCloud — transport policy and response URL validation'
     installMinerU({ zipUrl });
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -339,6 +347,47 @@ describe('parseWithMinerUCloud — transport policy and response URL validation'
     // batch + upload + poll, but never the refused private ZIP URL.
     expect(callUrls()).not.toContain(zipUrl);
     expect(callUrls()).toHaveLength(3);
+  });
+
+  it('polls again while the batch is still processing', async () => {
+    const zip = await makeZip({ 'full.md': '# Polled lesson' });
+    let polls = 0;
+    transport.providerFetch.mockImplementation(async (input: string | URL) => {
+      const url = String(input);
+      if (url.endsWith('/file-urls/batch')) {
+        return new Response(
+          JSON.stringify({
+            code: 0,
+            msg: 'ok',
+            data: { batch_id: 'b1', file_urls: [PUBLIC_UPLOAD] },
+          }),
+          { status: 200 },
+        );
+      }
+      if (url === PUBLIC_UPLOAD) return new Response('', { status: 200 });
+      if (url.endsWith('/extract-results/batch/b1')) {
+        polls += 1;
+        // Two replies with no result yet, then the finished batch.
+        const row =
+          polls < 3
+            ? { file_name: 'lesson.pdf', state: 'processing' }
+            : { file_name: 'lesson.pdf', state: 'done', full_zip_url: PUBLIC_ZIP };
+        return new Response(JSON.stringify({ code: 0, msg: 'ok', data: { extract_result: row } }), {
+          status: 200,
+        });
+      }
+      if (url === PUBLIC_ZIP) return new Response(new Uint8Array(zip), { status: 200 });
+      throw new Error(`Unexpected transport URL: ${url}`);
+    });
+
+    const result = await parse(
+      { providerId: 'mineru-cloud', apiKey: 'cloud-key', baseUrl: 'https://mineru.example/api/v4' },
+      Buffer.from('bytes'),
+      'lesson.pdf',
+    );
+
+    expect(polls).toBe(3);
+    expect(result.text).toContain('Polled lesson');
   });
 });
 
@@ -360,7 +409,7 @@ describe('parseWithMinerUCloud — response-supplied URL rejection', () => {
       installMinerU({ zipUrl });
 
       await expect(
-        parseWithMinerUCloud(
+        parse(
           {
             providerId: 'mineru-cloud',
             apiKey: 'cloud-key',
@@ -382,7 +431,7 @@ describe('parseWithMinerUCloud — response-supplied URL rejection', () => {
     installMinerU({ uploadUrl });
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -401,7 +450,7 @@ describe('parseWithMinerUCloud — response-supplied URL rejection', () => {
     installMinerU({ zipUrl: 'http://93.184.216.34/result.zip' });
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -444,7 +493,7 @@ describe('parseWithMinerUCloud — response-supplied URL rejection', () => {
     });
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -476,7 +525,7 @@ describe('parseWithMinerUCloud — response-supplied URL rejection', () => {
     });
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -518,7 +567,7 @@ describe('parseWithMinerUCloud — response-supplied URL rejection', () => {
     });
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -540,7 +589,7 @@ describe('parseWithMinerUCloud — bounded reads', () => {
 
   async function runWithZipResponse(zipResponse: Response): Promise<PromiseSettledResult<unknown>> {
     installMinerU({ onZip: () => zipResponse });
-    return parseWithMinerUCloud(
+    return parse(
       { providerId: 'mineru-cloud', apiKey: 'cloud-key', baseUrl: 'https://mineru.example/api/v4' },
       Buffer.from('bytes'),
       'lesson.pdf',
@@ -663,7 +712,7 @@ describe('parseWithMinerUCloud — bounded reads', () => {
     );
 
     await expect(
-      parseWithMinerUCloud(
+      parse(
         {
           providerId: 'mineru-cloud',
           apiKey: 'cloud-key',
@@ -693,7 +742,7 @@ describe('parseWithMinerUCloud — caller-facing errors', () => {
       new Response(JSON.stringify({ code: 1, msg: 'internal-secret-msg' }), { status: 500 }),
     );
 
-    const error = await parseWithMinerUCloud(config, pdf, 'lesson.pdf').catch((e: Error) => e);
+    const error = await parse(config, pdf, 'lesson.pdf').catch((e: Error) => e);
 
     expect((error as Error).message).toBe(
       'MinerU Cloud create batch failed: MinerU Cloud file-urls/batch: HTTP 500',
@@ -703,7 +752,7 @@ describe('parseWithMinerUCloud — caller-facing errors', () => {
   it('reports a rejected request by numeric code without the envelope message', async () => {
     answerBatch(new Response(JSON.stringify({ code: -60002, msg: 'internal-secret-msg' })));
 
-    const error = await parseWithMinerUCloud(config, pdf, 'lesson.pdf').catch((e: Error) => e);
+    const error = await parse(config, pdf, 'lesson.pdf').catch((e: Error) => e);
 
     expect((error as Error).message).toBe(
       'MinerU Cloud create batch failed: MinerU Cloud file-urls/batch: request rejected (code -60002)',
@@ -713,7 +762,7 @@ describe('parseWithMinerUCloud — caller-facing errors', () => {
   it('drops a non-numeric code and never quotes it', async () => {
     answerBatch(new Response(JSON.stringify({ code: 'internal-secret-code', msg: 'x' })));
 
-    const error = await parseWithMinerUCloud(config, pdf, 'lesson.pdf').catch((e: Error) => e);
+    const error = await parse(config, pdf, 'lesson.pdf').catch((e: Error) => e);
 
     expect((error as Error).message).toBe(
       'MinerU Cloud create batch failed: MinerU Cloud file-urls/batch: request rejected',
@@ -737,7 +786,7 @@ describe('parseWithMinerUCloud — caller-facing errors', () => {
       );
     });
 
-    const error = await parseWithMinerUCloud(config, pdf, 'lesson.pdf').catch((e: Error) => e);
+    const error = await parse(config, pdf, 'lesson.pdf').catch((e: Error) => e);
 
     expect((error as Error).message).toBe('MinerU Cloud parsing failed');
   });
@@ -745,7 +794,7 @@ describe('parseWithMinerUCloud — caller-facing errors', () => {
   it('runs a server-managed API root with local networks allowed', async () => {
     installMinerU();
 
-    await parseWithMinerUCloud({ ...config, managed: true }, pdf, 'lesson.pdf');
+    await parse({ ...config, managed: true }, pdf, 'lesson.pdf');
 
     expect(policyFor('/file-urls/batch')?.allowLocalNetworks).toBe(true);
     expect(policyFor(PUBLIC_UPLOAD)?.allowLocalNetworks).toBe(false);

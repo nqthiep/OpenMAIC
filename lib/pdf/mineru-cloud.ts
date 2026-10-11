@@ -9,6 +9,7 @@ import JSZip from 'jszip';
 import type { PDFParserConfig } from './types';
 import type { ParsedPdfContent } from '@/lib/types/pdf';
 import { extractMinerUResult } from './mineru-parser';
+import { redactSecretsForLog } from '@/lib/server/log-redaction';
 import { MINERU_CLOUD_DEFAULT_BASE } from './constants';
 import {
   getExtensionsForMimes,
@@ -55,8 +56,17 @@ export const MAX_ZIP_UNCOMPRESSED_BYTES = 512 * 1024 * 1024; // 512 MiB
 export const MAX_ZIP_TEXT_ENTRY_BYTES = 64 * 1024 * 1024; // 64 MiB
 export const MAX_ZIP_IMAGE_ENTRY_BYTES = 32 * 1024 * 1024; // 32 MiB
 
+const SETTLE_MS = 1_500;
 const POLL_INTERVAL_MS = 2_500;
 const POLL_MAX_MS = 15 * 60 * 1_000; // 15 minutes
+
+/** Waits between MinerU requests. Omitted fields keep the production values. */
+export interface MinerUCloudTiming {
+  /** Pause after the upload, before the first poll, while the backend registers it. */
+  settleMs?: number;
+  /** Pause between polls while the batch has no result yet. */
+  pollIntervalMs?: number;
+}
 
 // Extension → MIME for image types MinerU can emit inside its result zip.
 // Derived from MINERU_IMAGE_MIMES so this table can't drift from the accept
@@ -202,17 +212,21 @@ async function readMinerUJson<T>(res: Response, context: string): Promise<T> {
     // Never quote the body: it is logged here and kept out of caller-facing
     // errors (the parse routes relay error messages).
     log.warn(
-      `[MinerU Cloud] ${context}: non-JSON body (HTTP ${res.status}): ${text.slice(0, 500)}`,
+      `[MinerU Cloud] ${context}: non-JSON body (HTTP ${res.status}): ${redactSecretsForLog(text).slice(0, 500)}`,
     );
     throw new Error(`MinerU Cloud ${context}: invalid JSON response (HTTP ${res.status})`);
   }
   // The envelope's `msg` is the endpoint's own text: log it, never relay it.
   if (!res.ok) {
-    log.warn(`[MinerU Cloud] ${context}: HTTP ${res.status}: ${String(json?.msg).slice(0, 500)}`);
+    log.warn(
+      `[MinerU Cloud] ${context}: HTTP ${res.status}: ${redactSecretsForLog(String(json?.msg)).slice(0, 500)}`,
+    );
     throw new Error(`MinerU Cloud ${context}: HTTP ${res.status}`);
   }
   if (json?.code !== 0) {
-    log.warn(`[MinerU Cloud] ${context}: code ${json?.code}: ${String(json?.msg).slice(0, 500)}`);
+    log.warn(
+      `[MinerU Cloud] ${context}: code ${json?.code}: ${redactSecretsForLog(String(json?.msg)).slice(0, 500)}`,
+    );
     const code = Number.isInteger(json?.code) ? ` (code ${json.code})` : '';
     throw new Error(`MinerU Cloud ${context}: request rejected${code}`);
   }
@@ -487,12 +501,16 @@ async function parseMinerUZip(zipUrl: string, signal?: AbortSignal): Promise<Par
  * @param config - Must have `apiKey` (required) and optionally `baseUrl` (defaults to mineru.net/api/v4)
  * @param documentBuffer - Raw document bytes
  * @param sourceFileName - Original filename for the upload
+ * @param timing - Waits between requests; production uses the defaults
  */
 export async function parseWithMinerUCloud(
   config: PDFParserConfig,
   documentBuffer: Buffer,
   sourceFileName?: string,
+  timing: MinerUCloudTiming = {},
 ): Promise<ParsedPdfContent> {
+  const settleMs = timing.settleMs ?? SETTLE_MS;
+  const pollIntervalMs = timing.pollIntervalMs ?? POLL_INTERVAL_MS;
   const token = config.apiKey;
   if (!token) {
     throw new Error('MinerU Cloud API key is required');
@@ -585,7 +603,7 @@ export async function parseWithMinerUCloud(
   }
 
   // Give the backend a moment to register the upload
-  await sleep(1_500, config.signal);
+  await sleep(settleMs, config.signal);
 
   // Step 3: Poll for completion
   log.info(`[MinerU Cloud] Upload complete, polling for results...`);
@@ -621,7 +639,7 @@ export async function parseWithMinerUCloud(
       list[0];
 
     if (!row?.state) {
-      await sleep(POLL_INTERVAL_MS, config.signal);
+      await sleep(pollIntervalMs, config.signal);
       continue;
     }
 
@@ -631,7 +649,9 @@ export async function parseWithMinerUCloud(
     }
 
     if (row.state === 'failed') {
-      log.warn(`[MinerU Cloud] Batch ${batchData.batch_id} failed: ${row.err_msg ?? ''}`);
+      log.warn(
+        `[MinerU Cloud] Batch ${batchData.batch_id} failed: ${redactSecretsForLog(row.err_msg ?? '')}`,
+      );
       throw new Error('MinerU Cloud parsing failed');
     }
 
@@ -639,7 +659,7 @@ export async function parseWithMinerUCloud(
       return parseMinerUZip(row.full_zip_url, config.signal);
     }
 
-    await sleep(POLL_INTERVAL_MS, config.signal);
+    await sleep(pollIntervalMs, config.signal);
   }
 
   log.warn(`[MinerU Cloud] Batch ${batchData.batch_id} timed out`);

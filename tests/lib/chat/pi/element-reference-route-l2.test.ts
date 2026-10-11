@@ -936,10 +936,7 @@ describe('PPT element reference Route → Director → real call_agent L2', () =
       const error = await response.json();
       expect(error).toMatchObject({
         errorCode: 'INVALID_REQUEST',
-        error:
-          scenario === 'malformed-packet'
-            ? 'Invalid interactive state packet'
-            : 'Interactive state does not match the current Scene source',
+        error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
       });
       expect(error).not.toHaveProperty('reason');
       expect(response.headers.has('X-OpenMAIC-Element-Reference-Accepted')).toBe(false);

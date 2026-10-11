@@ -25,6 +25,8 @@ import type { ThinkingConfig } from '@/lib/types/provider';
 import { isTutorModerationEnabled } from '@/lib/config/feature-flags';
 import { withTutorModeration } from '@/lib/tutor/chat-moderation';
 const log = createLogger('Chat API');
+// Shown to the client for any failed turn; the cause is only in the server log.
+const CHAT_FAILED_MESSAGE = 'Không thể xử lý yêu cầu, vui lòng thử lại.';
 
 /**
  * POST /api/chat
@@ -185,9 +187,7 @@ export async function POST(req: NextRequest) {
         try {
           const errorEvent: StatelessEvent = {
             type: 'error',
-            data: {
-              message: error instanceof Error ? error.message : String(error),
-            },
+            data: { message: CHAT_FAILED_MESSAGE },
           };
           await writer.write(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
           await writer.close();
@@ -209,10 +209,6 @@ export async function POST(req: NextRequest) {
       `Chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
       error,
     );
-    return apiError(
-      'INTERNAL_ERROR',
-      500,
-      error instanceof Error ? error.message : 'Failed to process request',
-    );
+    return apiError('INTERNAL_ERROR', 500, CHAT_FAILED_MESSAGE);
   }
 }

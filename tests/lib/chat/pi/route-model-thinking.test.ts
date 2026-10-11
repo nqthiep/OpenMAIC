@@ -13,6 +13,7 @@ let originalCoursewareReferenceFlag: string | undefined;
 const mocks = vi.hoisted(() => ({
   resolveModel: vi.fn(),
   runPiDirectorLoop: vi.fn(),
+  logWarn: vi.fn(),
 }));
 
 vi.mock('@/lib/server/resolve-model', () => ({
@@ -34,7 +35,7 @@ vi.mock('@/lib/chat/pi/director-loop', () => ({
 vi.mock('@/lib/logger', () => ({
   createLogger: () => ({
     info: vi.fn(),
-    warn: vi.fn(),
+    warn: mocks.logWarn,
     error: vi.fn(),
     debug: vi.fn(),
   }),
@@ -146,7 +147,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Pi chat runtime is disabled',
+      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
     });
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
@@ -162,7 +163,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'config.agentIds must be a non-empty array of unique, non-empty strings',
+      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
     });
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
@@ -178,7 +179,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Unknown classroom agents in config.agentIds: missing-agent',
+      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
     });
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
   });
@@ -248,7 +249,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(referencedResponse.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Courseware references are disabled',
+      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
     });
     expect(referencedResponse.headers.get('X-OpenMAIC-Element-Reference-Accepted')).toBeNull();
     expect(mocks.resolveModel).toHaveBeenCalledOnce();
@@ -497,8 +498,14 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: expect.stringContaining('exactly one source node; found 0'),
+      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
     });
+    expect(mocks.logWarn).toHaveBeenCalledWith(
+      'Pi chat element reference rejected:',
+      expect.objectContaining({
+        message: expect.stringContaining('exactly one source node; found 0'),
+      }),
+    );
     expect(response.headers.get('X-OpenMAIC-Element-Reference-Accepted')).toBeNull();
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
@@ -577,8 +584,12 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: expect.stringContaining(error),
+      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
     });
+    expect(mocks.logWarn).toHaveBeenCalledWith(
+      'Pi chat element reference rejected:',
+      expect.objectContaining({ message: expect.stringContaining(error) }),
+    );
     expect(response.headers.get('X-OpenMAIC-Element-Reference-Accepted')).toBeNull();
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();

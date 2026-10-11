@@ -121,7 +121,7 @@ describe('Director shared Pi transport consumer', () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it.each(['stream error', 'thrown error'])(
-    'logs and streams the provider reason through the real Director and route (%s)',
+    'logs the provider reason and streams only the fixed message through the real Director and route (%s)',
     async (failureMode) => {
       vi.stubEnv('NEXT_PUBLIC_PI_CHAT_ENABLED', 'true');
       vi.stubEnv('OPENMAIC_ENABLE_PI_NATIVE_CHILD_RUNTIME', 'false');
@@ -149,12 +149,12 @@ describe('Director shared Pi transport consumer', () => {
 
       expect(response.status).toBe(200);
       expect(events.filter((event) => event.type === 'error')).toEqual([
-        { type: 'error', data: { message: error.message } },
+        { type: 'error', data: { message: 'Không thể xử lý yêu cầu, vui lòng thử lại.' } },
       ]);
       expect(events.some((event) => event.type === 'done' || event.type === 'cue_user')).toBe(
         false,
       );
-      expect(mocks.logError).toHaveBeenCalledWith('Pi chat stream error:', expect.any(Error));
+      expect(mocks.logError).toHaveBeenCalledWith('Pi chat stream error:', error);
       expect(mocks.streamLLM).toHaveBeenCalledOnce();
     },
   );

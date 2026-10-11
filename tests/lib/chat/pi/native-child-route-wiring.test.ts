@@ -866,7 +866,7 @@ describe('PR2 Native Child route production wiring', () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body).toMatchObject({ error: expect.stringContaining('Unsupported Tavily base URL') });
+    expect(body).toMatchObject({ error: 'Không thể xử lý yêu cầu, vui lòng thử lại.' });
     expect(mocks.streamLLM).not.toHaveBeenCalled();
     expect(mocks.searchWeb).not.toHaveBeenCalled();
   });

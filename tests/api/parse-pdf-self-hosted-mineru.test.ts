@@ -30,6 +30,7 @@ const mocks = vi.hoisted(() => ({
   resolvePDFBaseUrl: vi.fn(),
   promisesLookup: vi.fn(),
   callbackLookup: vi.fn(),
+  logError: vi.fn(),
 }));
 
 vi.mock('@/lib/server/provider-config', async (importOriginal) => ({
@@ -49,16 +50,14 @@ vi.mock('node:dns', async (importOriginal) => {
 });
 
 vi.mock('@/lib/logger', () => ({
-  createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
+  createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: mocks.logError, debug: vi.fn() }),
 }));
 
-const CONNECTION_FAILED = {
+const PDF_MESSAGE = 'Không thể đọc tệp PDF, vui lòng thử lại.';
+// Every failure on the MinerU path answers with this body; the cause stays in the server log.
+const PARSE_FAILED = {
   status: 500,
-  json: {
-    success: false,
-    errorCode: 'PARSE_FAILED',
-    error: 'Cannot connect to the self-hosted MinerU server, please check the Base URL',
-  },
+  json: { success: false, errorCode: 'PARSE_FAILED', error: PDF_MESSAGE },
 };
 
 const MINERU_OK = JSON.stringify({
@@ -72,6 +71,11 @@ async function postParsePdf(fields: Record<string, string>) {
   const request = new Request('http://localhost/api/parse-pdf', { method: 'POST', body: form });
   const res = await POST(request as unknown as NextRequest);
   return { status: res.status, json: await res.json() };
+}
+
+/** Every error the route logged, as text: the server log is where the cause is kept. */
+function loggedErrorText(): string {
+  return mocks.logError.mock.calls.map((args) => args.map(String).join(' ')).join('\n');
 }
 
 const originalAllowLocal = process.env.ALLOW_LOCAL_NETWORKS;
@@ -123,7 +127,7 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
       expect(mineru.lastBody()!.toString('latin1')).toContain('filename="doc.pdf"');
     });
 
-    it('does not echo an error body and keeps only the status', async () => {
+    it('does not echo an error body and logs the status', async () => {
       const mineru = await startLoopback((_req, res) => {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('internal-secret-body');
@@ -131,13 +135,12 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
 
       const res = await postParsePdf({ providerId: 'mineru', baseUrl: mineru.origin });
 
-      expect(res).toEqual({
-        status: 500,
-        json: { success: false, errorCode: 'PARSE_FAILED', error: 'MinerU API error (500)' },
-      });
+      expect(res).toEqual(PARSE_FAILED);
+      expect(JSON.stringify(res.json)).not.toContain('internal-secret-body');
+      expect(loggedErrorText()).toContain('MinerU API error (500)');
     });
 
-    it('keeps the missing-dependency classification without quoting the body', async () => {
+    it('answers a missing MinerU dependency with the fixed message', async () => {
       const mineru = await startLoopback((_req, res) => {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end("ModuleNotFoundError: No module named 'mineru.backend.pipeline' secret-path");
@@ -145,9 +148,9 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
 
       const res = await postParsePdf({ providerId: 'mineru', baseUrl: mineru.origin });
 
-      expect(res.status).toBe(500);
-      expect(res.json.error).toMatch(/pipeline\/core dependencies are not installed/);
-      expect(res.json.error).not.toContain('secret-path');
+      expect(res).toEqual(PARSE_FAILED);
+      expect(JSON.stringify(res.json)).not.toContain('secret-path');
+      expect(loggedErrorText()).toContain('pipeline/core dependencies are not installed');
     });
 
     it('does not surface a JSON parser snippet for a non-JSON success body', async () => {
@@ -158,14 +161,8 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
 
       const res = await postParsePdf({ providerId: 'mineru', baseUrl: mineru.origin });
 
-      expect(res).toEqual({
-        status: 500,
-        json: {
-          success: false,
-          errorCode: 'PARSE_FAILED',
-          error: 'The self-hosted MinerU server returned an invalid response',
-        },
-      });
+      expect(res).toEqual(PARSE_FAILED);
+      expect(JSON.stringify(res.json)).not.toContain('internal-secret-page');
     });
 
     it('refuses a redirect and never follows it', async () => {
@@ -177,7 +174,7 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
 
       const res = await postParsePdf({ providerId: 'mineru', baseUrl: origin.origin });
 
-      expect(res).toEqual(CONNECTION_FAILED);
+      expect(res).toEqual(PARSE_FAILED);
       expect(origin.requests()).toBe(1);
       expect(target.requests()).toBe(0);
     });
@@ -198,7 +195,7 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
       expect.anything(),
       expect.any(Function),
     );
-    expect(res).toEqual(CONNECTION_FAILED);
+    expect(res).toEqual(PARSE_FAILED);
     expect(trap.requests()).toBe(0);
   });
 
@@ -228,7 +225,7 @@ describe('POST /api/parse-pdf with self-hosted MinerU', () => {
 
     const res = await postParsePdf({ providerId: 'mineru' });
 
-    expect(res).toEqual(CONNECTION_FAILED);
+    expect(res).toEqual(PARSE_FAILED);
   });
 
   it('refuses a client-supplied loopback base URL without the opt-in', async () => {

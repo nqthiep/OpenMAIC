@@ -21,14 +21,36 @@ import {
 import type { ASRProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { capBodyStream } from '@/lib/server/capped-stream';
 import { findUnsafeNetworkTargetError, validatePublicUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Transcription');
+// Cap on the whole multipart body, checked from Content-Length and while it is read.
+// ponytail: the body is buffered up to this cap; stream the parts if uploads grow.
+const MAX_AUDIO_UPLOAD_BYTES = 50 * 1024 * 1024;
+const audioTooLarge = () =>
+  apiError('INVALID_REQUEST', 413, 'Tệp âm thanh vượt quá dung lượng tối đa 50 MB.');
 
 export async function POST(req: NextRequest) {
   let resolvedProviderId: string | undefined;
   let resolvedModelId: string | undefined;
   try {
-    const formData = await req.formData();
+    // Refuse an oversized upload before reading it. The capped stream also stops
+    // a body that omits or understates Content-Length.
+    const declaredLength = Number(req.headers.get('content-length') ?? '');
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_AUDIO_UPLOAD_BYTES) {
+      return audioTooLarge();
+    }
+    if (!req.body) return apiError('MISSING_REQUIRED_FIELD', 400, 'Audio file is required');
+    const capped = capBodyStream(req.body, MAX_AUDIO_UPLOAD_BYTES);
+    let formData: FormData;
+    try {
+      formData = await new Response(capped.stream, {
+        headers: { 'content-type': req.headers.get('content-type') ?? '' },
+      }).formData();
+    } catch (error) {
+      if (capped.exceeded()) return audioTooLarge();
+      throw error;
+    }
     const audioFile = formData.get('audio') as File;
     const providerId = formData.get('providerId') as ASRProviderId | null;
     // Trim the client model id and normalize empty → undefined, matching the
@@ -103,8 +125,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'TRANSCRIPTION_FAILED',
       500,
-      'Transcription failed',
-      error instanceof Error ? error.message : 'Unknown error',
+      'Không thể nhận dạng giọng nói, vui lòng thử lại.',
     );
   }
 }

@@ -43,8 +43,7 @@ const PUBLIC: Answer[] = [{ address: '93.184.216.34', family: 4 }];
 const LOOPBACK: Answer[] = [{ address: '127.0.0.1', family: 4 }];
 const METADATA: Answer[] = [{ address: '169.254.169.254', family: 4 }];
 
-const PRIVATE_BLOCK_MESSAGE = 'Local/private network URLs are not allowed';
-const METADATA_BLOCK_MESSAGE = 'Cloud instance metadata endpoints are never allowed';
+const BLOCKED_URL_MESSAGE = 'Địa chỉ tệp không được phép truy cập.';
 
 /** A callback-style `dns.lookup` stand-in that always returns `addresses`. */
 function answerWith(addresses: Answer[]) {
@@ -177,7 +176,7 @@ describe('POST /api/proxy-media DNS-rebinding hardening', () => {
 
     expect(res.status).toBe(403);
     expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
-    expect(json.error).toContain(PRIVATE_BLOCK_MESSAGE);
+    expect(json.error).toBe(BLOCKED_URL_MESSAGE);
   });
 
   it('proxies a local target with ALLOW_LOCAL_NETWORKS=true through the pinned path', async () => {
@@ -214,7 +213,7 @@ describe('POST /api/proxy-media DNS-rebinding hardening', () => {
 
     expect(res.status).toBe(403);
     expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
-    expect(json.error).toContain(METADATA_BLOCK_MESSAGE);
+    expect(json.error).toBe(BLOCKED_URL_MESSAGE);
     expect(nowhere.requests()).toBe(0);
   });
 
@@ -247,7 +246,7 @@ describe('POST /api/proxy-media DNS-rebinding hardening', () => {
 
     expect(res.status).toBe(403);
     expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
-    expect(json.error).toContain(PRIVATE_BLOCK_MESSAGE);
+    expect(json.error).toBe(BLOCKED_URL_MESSAGE);
     expect(internal.requests()).toBe(0);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(dispatchersSeen[0]).toBeDefined();
@@ -309,7 +308,7 @@ describe('POST /api/proxy-media DNS-rebinding hardening', () => {
     expect(server.requests()).toBe(2);
   });
 
-  it('returns the size-cap 502 promptly when the upstream body never ends', async () => {
+  it('returns the size-cap 413 promptly when the upstream body never ends', async () => {
     const huge = await startLoopback((_req, res) => {
       res.writeHead(200, {
         'Content-Type': 'application/octet-stream',
@@ -328,7 +327,7 @@ describe('POST /api/proxy-media DNS-rebinding hardening', () => {
     const elapsed = Date.now() - started;
     const json = await res.json();
 
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(413);
     expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
     expect(elapsed).toBeLessThan(1000);
     expect(huge.requests()).toBe(1);

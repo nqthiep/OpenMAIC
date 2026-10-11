@@ -104,7 +104,10 @@ describe('POST /api/proxy-media', () => {
     const json = await res.json();
 
     expect(res.status).toBe(403);
-    expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
+    expect(json).toMatchObject({
+      errorCode: 'INVALID_URL',
+      error: 'Địa chỉ tệp không được phép truy cập.',
+    });
   });
 
   it('4. too many redirects returns 502 TOO_MANY_REDIRECTS', async () => {
@@ -136,7 +139,10 @@ describe('POST /api/proxy-media', () => {
     const json = await res.json();
 
     expect(res.status).toBe(403);
-    expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
+    expect(json).toMatchObject({
+      errorCode: 'INVALID_URL',
+      error: 'Địa chỉ tệp không được phép truy cập.',
+    });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -167,7 +173,10 @@ describe('POST /api/proxy-media', () => {
     const json = await res.json();
 
     expect(res.status).toBe(404);
-    expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
+    expect(json).toMatchObject({
+      errorCode: 'UPSTREAM_ERROR',
+      error: 'Nguồn không trả về tệp đa phương tiện.',
+    });
   });
 
   it('8. upstream 503 is collapsed to 502', async () => {
@@ -181,25 +190,24 @@ describe('POST /api/proxy-media', () => {
     expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
   });
 
-  it('9. upstream Content-Length exceeding cap returns 502', async () => {
+  it('9. upstream Content-Length exceeding cap returns 413', async () => {
     mocks.validateUrlForSSRF.mockResolvedValue(null);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(null, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': String(26 * 1024 * 1024), // 26 MiB > 25 MiB cap
-          },
-        }),
-      ),
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': String(26 * 1024 * 1024), // 26 MiB > 25 MiB cap
+        },
+      }),
     );
+    vi.stubGlobal('fetch', fetchMock);
 
     const res = await postProxy({ url: 'https://example.com/huge-asset' });
     const json = await res.json();
 
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(413);
     expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
+    expect(fetchMock).toHaveBeenCalledTimes(1); // no retry of the oversized asset
   });
 });

@@ -94,7 +94,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         for (const [key, value] of responseHeaders) nameError.headers.append(key, value);
         return nameError;
       }
-      console.error(`[Folders] Failed to rename [owner=${ownerId}, id=${id}]:`, error);
+      console.error(`[Folders] Failed to rename [id=${id}]:`, error);
       return jsonError(500, 'FOLDER_RENAME_FAILED', 'Failed to rename folder', responseHeaders);
     }
   });
@@ -119,7 +119,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     } catch (error) {
       const claimed = ownerWriteErrorResponse(error, responseHeaders);
       if (claimed) return claimed;
-      console.error(`[Folders] Failed to delete [owner=${ownerId}, id=${id}]:`, error);
+      console.error(`[Folders] Failed to delete [id=${id}]:`, error);
       return jsonError(500, 'FOLDER_DELETE_FAILED', 'Failed to delete folder', responseHeaders);
     }
   });

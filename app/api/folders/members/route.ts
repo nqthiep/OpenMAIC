@@ -61,10 +61,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       const claimed = ownerWriteErrorResponse(error, responseHeaders);
       if (claimed) return claimed;
-      console.error(
-        `[Folders] Failed to set membership [owner=${ownerId}, stage=${stageId}]:`,
-        error,
-      );
+      console.error(`[Folders] Failed to set membership [stage=${stageId}]:`, error);
       return jsonError(
         500,
         'FOLDER_MEMBER_FAILED',

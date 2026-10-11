@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
         responseHeaders,
       );
     } catch (error) {
-      console.error(`[Folders] Failed to list [owner=${ownerId}]:`, error);
+      console.error('[Folders] Failed to list:', error);
       return jsonError(500, 'FOLDER_LIST_FAILED', 'Failed to list folders', responseHeaders);
     }
   });
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
         for (const [key, value] of responseHeaders) nameError.headers.append(key, value);
         return nameError;
       }
-      console.error(`[Folders] Failed to create [owner=${ownerId}]:`, error);
+      console.error('[Folders] Failed to create:', error);
       return jsonError(500, 'FOLDER_CREATE_FAILED', 'Failed to create folder', responseHeaders);
     }
   });

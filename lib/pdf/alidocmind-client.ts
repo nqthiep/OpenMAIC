@@ -14,6 +14,7 @@ import { Config } from '@alicloud/openapi-client';
 import { RuntimeOptions } from '@alicloud/tea-util';
 import { createLogger } from '@/lib/logger';
 import { ALIDOCMIND_DEFAULT_BASE } from '@/lib/pdf/constants';
+import { redactSecretsForLog } from '@/lib/server/log-redaction';
 
 const log = createLogger('AliDocMind');
 
@@ -158,7 +159,8 @@ export async function parseWithAliDocMindClient(
   options.signal?.throwIfAborted();
   const jobId = submitRes.body?.data?.id;
   if (!jobId) {
-    throw new Error(`AliDocMind submit returned no job id: ${JSON.stringify(submitRes.body)}`);
+    const body = redactSecretsForLog(String(JSON.stringify(submitRes.body)));
+    throw new Error(`AliDocMind submit returned no job id: ${body}`);
   }
   log.info(`Job ${jobId} submitted, polling…`);
 
@@ -180,7 +182,7 @@ export async function parseWithAliDocMindClient(
       const benign = lower === '200' || lower === 'success';
       if (!benign) {
         throw new Error(
-          `AliDocMind status query failed (code ${code}): ${statusRes.body?.message ?? 'unknown'}`,
+          `AliDocMind status query failed (code ${code}): ${redactSecretsForLog(statusRes.body?.message ?? 'unknown')}`,
         );
       }
     }
@@ -191,7 +193,9 @@ export async function parseWithAliDocMindClient(
       lastStatus = status;
     }
     if (status === 'fail' || status === 'failed') {
-      throw new Error(`AliDocMind job ${jobId} failed: ${statusRes.body?.message ?? 'unknown'}`);
+      throw new Error(
+        `AliDocMind job ${jobId} failed: ${redactSecretsForLog(statusRes.body?.message ?? 'unknown')}`,
+      );
     }
     if (status === 'success') {
       const result = await fetchResult(client, jobId, options.signal);
@@ -244,7 +248,7 @@ async function fetchResult(
     const code = res.body?.code;
     if (code !== undefined && code !== null && String(code) !== '200') {
       throw new Error(
-        `AliDocMind getDocParserResult failed (code ${code}): ${res.body?.message ?? 'unknown'}`,
+        `AliDocMind getDocParserResult failed (code ${code}): ${redactSecretsForLog(res.body?.message ?? 'unknown')}`,
       );
     }
 
@@ -324,7 +328,9 @@ export async function verifyAliDocMindCredentials(
     if (isProbeOk) {
       return { ok: true };
     }
-    log.warn(`Credential probe rejected [code=${codeStr || 'empty'}]: ${res.body?.message ?? ''}`);
+    log.warn(
+      `Credential probe rejected [code=${codeStr || 'empty'}]: ${redactSecretsForLog(res.body?.message ?? '')}`,
+    );
     return {
       ok: false,
       error: codeStr
@@ -350,7 +356,7 @@ export async function verifyAliDocMindCredentials(
     }
     // The SDK error (service code, transport errno, TLS or timeout detail) is
     // logged only; the caller gets one fixed message.
-    log.warn(`Credential probe failed [code=${code || 'none'}]: ${msg}`);
+    log.warn(`Credential probe failed [code=${code || 'none'}]: ${redactSecretsForLog(msg)}`);
     return { ok: false, error: PROBE_FAILED_MESSAGE };
   }
 }

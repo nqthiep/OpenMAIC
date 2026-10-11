@@ -147,6 +147,10 @@ import { extractMinerUResult } from './mineru-parser';
 import { parseWithMinerUCloud } from './mineru-cloud';
 import { parseWithAliDocMindClient } from './alidocmind-client';
 import { providerFetch, type ProviderFetchPolicy } from '@/lib/server/provider-fetch';
+import { redactSecretsForLog, urlOriginForLog } from '@/lib/server/log-redaction';
+
+// Re-exported for existing importers; the definitions live in lib/server/log-redaction.ts.
+export { redactSecretsForLog, urlOriginForLog };
 
 const log = createLogger('PDFProviders');
 const DEFAULT_MINERU_BACKEND = 'pipeline';
@@ -436,7 +440,7 @@ function isTrustedAliyunOssUrl(url: string): boolean {
  */
 export async function fetchAliDocMindImageAsBase64(url: string): Promise<string | null> {
   if (!isTrustedAliyunOssUrl(url)) {
-    log.warn(`[AliDocMind] refusing non-OSS image URL: ${url.slice(0, 80)}`);
+    log.warn(`[AliDocMind] refusing non-OSS image URL: ${urlOriginForLog(url)}`);
     return null;
   }
   const controller = new AbortController();
@@ -447,7 +451,7 @@ export async function fetchAliDocMindImageAsBase64(url: string): Promise<string 
       redirect: 'error', // signed OSS URLs are direct; a redirect is suspicious
     });
     if (!res.ok) {
-      log.warn(`[AliDocMind] image fetch ${res.status} for ${url.slice(0, 80)}`);
+      log.warn(`[AliDocMind] image fetch ${res.status} for ${urlOriginForLog(url)}`);
       return null;
     }
     // Reject early on a declared oversized length…
@@ -646,7 +650,7 @@ export async function parseWithMinerUDocument(
     );
   }
 
-  log.info(`[MinerU] Parsing document with MinerU server: ${config.baseUrl}`);
+  log.info(`[MinerU] Parsing document with MinerU server: ${urlOriginForLog(config.baseUrl)}`);
 
   // Create FormData for file upload
   const formData = new FormData();
@@ -694,18 +698,21 @@ export async function parseWithMinerUDocument(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '');
-    log.error(`[MinerU] file_parse failed [status=${response.status}]: ${errorText.slice(0, 500)}`);
+    // The body can echo credentials, so only the status and a redacted snippet are logged.
+    log.error(
+      `[MinerU] file_parse failed [status=${response.status}]: ${redactSecretsForLog(errorText).slice(0, 500)}`,
+    );
     throw new Error(describeSelfHostedMinerUError(response.status, errorText));
   }
 
   // A body that is not JSON must not surface the parser's message: Node's
-  // SyntaxError quotes a snippet of the input.
+  // SyntaxError quotes the start of the input, so only the status is logged.
   let json: { results?: Record<string, Record<string, unknown>> };
   try {
     json = await response.json();
-  } catch (error) {
-    log.error('[MinerU] file_parse returned a non-JSON body:', error);
-    throw new Error(SELF_HOSTED_MINERU_INVALID_RESPONSE, { cause: error });
+  } catch {
+    log.error(`[MinerU] file_parse returned a non-JSON body [status=${response.status}]`);
+    throw new Error(SELF_HOSTED_MINERU_INVALID_RESPONSE);
   }
 
   // Response: { results: { "<fileName>": { md_content, images, content_list, ... } } }

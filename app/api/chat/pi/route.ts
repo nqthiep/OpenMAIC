@@ -49,10 +49,13 @@ import {
 } from '@/lib/chat/pi/element-reference';
 
 const log = createLogger('Pi Chat API');
+// Shown to the client for any failed turn; the cause is only in the server log.
+const PI_CHAT_FAILED_MESSAGE = 'Không thể xử lý yêu cầu, vui lòng thử lại.';
 
 export async function POST(req: NextRequest) {
   if (!isPiChatEnabled()) {
-    return apiError('INVALID_REQUEST', 404, 'Pi chat runtime is disabled');
+    log.warn('Pi chat request rejected: the runtime is disabled');
+    return apiError('INVALID_REQUEST', 404, PI_CHAT_FAILED_MESSAGE);
   }
 
   // Like every owner-resolving route, a request whose credential an owner
@@ -82,22 +85,26 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
     chatMessageCount = body.messages?.length;
 
     if (!body.messages || !Array.isArray(body.messages)) {
-      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: messages');
+      log.warn('Pi chat request rejected: messages missing or not an array');
+      return apiError('MISSING_REQUIRED_FIELD', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     if (!body.storeState) {
-      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: storeState');
+      log.warn('Pi chat request rejected: storeState missing');
+      return apiError('MISSING_REQUIRED_FIELD', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     if (!body.config || body.config.agentIds == null) {
-      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: config.agentIds');
+      log.warn('Pi chat request rejected: config.agentIds missing');
+      return apiError('MISSING_REQUIRED_FIELD', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     if (
       (body.elementReference !== undefined || body.interactiveState !== undefined) &&
       !isCoursewareReferenceEnabled()
     ) {
-      return apiError('INVALID_REQUEST', 400, 'Courseware references are disabled');
+      log.warn('Pi chat request rejected: courseware references are disabled');
+      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     let elementReference;
@@ -105,10 +112,11 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       elementReference = resolveElementReference(body);
     } catch (error) {
       if (error instanceof ElementReferenceValidationError) {
+        log.warn('Pi chat element reference rejected:', error);
         return apiError(
           'INVALID_REQUEST',
           400,
-          error.message,
+          PI_CHAT_FAILED_MESSAGE,
           undefined,
           body.elementReference?.kind === 'whiteboard_element'
             ? 'whiteboard_reference_changed'
@@ -126,7 +134,8 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       ));
     } catch (error) {
       if (error instanceof ElementReferenceValidationError) {
-        return apiError('INVALID_REQUEST', 400, error.message);
+        log.warn('Pi chat interactive state rejected:', error);
+        return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
       }
       throw error;
     }
@@ -138,11 +147,8 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       agentIds.some((id) => typeof id !== 'string' || id.trim().length === 0 || id !== id.trim()) ||
       new Set(agentIds).size !== agentIds.length
     ) {
-      return apiError(
-        'INVALID_REQUEST',
-        400,
-        'config.agentIds must be a non-empty array of unique, non-empty strings',
-      );
+      log.warn('Pi chat request rejected: config.agentIds is not a list of unique strings');
+      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     const {
@@ -167,25 +173,23 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
     });
 
     if (isProviderKeyRequired(providerId) && !resolvedApiKey) {
-      return apiError('MISSING_API_KEY', 401, 'API Key is required');
+      log.warn('Pi chat request rejected: no API key for the resolved provider');
+      return apiError('MISSING_API_KEY', 401, PI_CHAT_FAILED_MESSAGE);
     }
 
     const agentConfigs = resolveAgentConfigs(body);
     const resolvedAgentIds = new Set(agentConfigs.map((agent) => agent.id));
     const unresolvedAgentIds = agentIds.filter((id) => !resolvedAgentIds.has(id));
+    // JSON.stringify keeps client-sent ids on one log line.
     if (unresolvedAgentIds.length > 0) {
-      return apiError(
-        'INVALID_REQUEST',
-        400,
-        `Unknown classroom agents in config.agentIds: ${unresolvedAgentIds.join(', ')}`,
+      log.warn(
+        `Pi chat request rejected: unknown classroom agents ${JSON.stringify(unresolvedAgentIds)}`,
       );
+      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
     }
     if (agentConfigs.length === 0) {
-      return apiError(
-        'INVALID_REQUEST',
-        400,
-        `No valid classroom agents found for config.agentIds: ${body.config.agentIds.join(', ')}`,
-      );
+      log.warn(`Pi chat request rejected: no valid classroom agents ${JSON.stringify(agentIds)}`);
+      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     const signal = req.signal;
@@ -257,8 +261,8 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
             })
           : undefined;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Invalid Web Search configuration';
-      return apiError('INVALID_REQUEST', 400, message);
+      log.warn('Pi chat web search configuration rejected:', error);
+      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
     }
 
     log.info(
@@ -346,7 +350,7 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
         try {
           await send({
             type: 'error',
-            data: { message: error instanceof Error ? error.message : String(error) },
+            data: { message: PI_CHAT_FAILED_MESSAGE },
           });
           await writer.close();
         } catch {
@@ -368,10 +372,6 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       `Pi chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
       error,
     );
-    return apiError(
-      'INTERNAL_ERROR',
-      500,
-      error instanceof Error ? error.message : 'Failed to process request',
-    );
+    return apiError('INTERNAL_ERROR', 500, PI_CHAT_FAILED_MESSAGE);
   }
 }
