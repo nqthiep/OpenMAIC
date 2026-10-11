@@ -25,6 +25,7 @@ import type { DocumentProducer } from '@/lib/document-store/persistence-types';
 import type { PendingChange, StaleDroppedSave } from '@/lib/utils/stage-storage';
 import { collectStageAssetRefs } from '@/lib/media/collect-stage-asset-refs';
 import { reconcileSceneMediaAllocations } from '@/lib/media/reconcile-scene-media';
+import { markStageRealmClean, markStageRealmDirty } from '@/lib/media/stage-realm-presence';
 import {
   isStageDeleted,
   isStageDeletionInFlight,
@@ -108,6 +109,7 @@ function markPendingChanges(stageId: string | undefined, ...changes: PendingChan
     pendingRevision += 1;
     pendingChanges.set(pendingChangeKey(change), { change, revision: pendingRevision });
   }
+  markStageRealmDirty(stageId);
   schedulePendingSave();
 }
 
@@ -130,7 +132,10 @@ export function markStagePersistenceDirty(changes: PendingChange[]): void {
  * instead.
  */
 export function discardPendingStageChanges(stageId: string): void {
-  if (pendingStageId === stageId) resetPendingChanges();
+  if (pendingStageId === stageId) {
+    resetPendingChanges();
+    markStageRealmClean(stageId);
+  }
 }
 
 /**
@@ -898,8 +903,12 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
             pendingChanges.delete(key);
           }
         }
-        if (pendingChanges.size === 0) cancelScheduledSave();
-        else schedulePendingSave();
+        if (pendingChanges.size === 0) {
+          cancelScheduledSave();
+          markStageRealmClean(stage.id);
+        } else {
+          schedulePendingSave();
+        }
       }
 
       return true;
@@ -1163,6 +1172,7 @@ function startFlushRound(): FlushRound | null {
       throw error;
     } finally {
       flushInFlight = null;
+      if (pendingChanges.size === 0) markStageRealmClean(stageId);
       // Successive mutations and failed writes both leave durable work queued.
       // Always restore the retry timer so dirt is never stranded.
       if (pendingChanges.size > 0 && pendingStageId) schedulePendingSave();

@@ -329,6 +329,84 @@ describe('stage realm presence leases', () => {
     expect(await realm.probeStageRealmPresence('stage-1')).toBe('absent');
   });
 
+  it('keeps a stage with unflushed edits present past the lease window, until the dirty window ends', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const peer = await loadRealm();
+    peer.bindStageRealmPresence(() => 'stage-1');
+    peer.markStageRealmDirty('stage-1');
+    const collector = await loadRealm();
+    collector.bindStageRealmPresence(() => 'stage-2');
+
+    // Past the 90 s lease window, with no renewal: the dirty window still protects the stage.
+    vi.setSystemTime(Date.now() + 90_001);
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('present');
+
+    // Past the 10 min dirty window: absent, with the reply still held.
+    vi.setSystemTime(Date.now() + 10 * 60_000);
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('absent');
+    replies.release();
+  });
+
+  it('returns a stage to the normal lease window once its edits are saved', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const peer = await loadRealm();
+    peer.bindStageRealmPresence(() => 'stage-1');
+    peer.markStageRealmDirty('stage-1');
+    peer.markStageRealmClean('stage-1');
+    const collector = await loadRealm();
+    collector.bindStageRealmPresence(() => 'stage-2');
+
+    vi.setSystemTime(Date.now() + 90_001);
+
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('absent');
+    replies.release();
+  });
+
+  it('keeps the lease of a page that leaves with unflushed edits', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
+    const pagehide = capturePagehide();
+    const peer = await loadRealm();
+    peer.bindStageRealmPresence(() => 'stage-1');
+    peer.markStageRealmDirty('stage-1');
+    const collector = await loadRealm();
+    collector.bindStageRealmPresence(() => 'stage-2');
+
+    pagehide[0]!();
+
+    expect(leaseKeys('stage-1')).toHaveLength(1);
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('present');
+    replies.release();
+  });
+
+  it('reads a lease written before the dirty window existed', async () => {
+    storage.setItem('maic-stage-lease:stage-1:older-realm', String(Date.now() + 60_000));
+    const collector = await loadRealm();
+    collector.bindStageRealmPresence(() => 'stage-2');
+
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('present');
+  });
+
+  it('does not protect another stage with the dirty window of the stage open here', async () => {
+    const replies = heldRepliesChannel();
+    vi.stubGlobal('BroadcastChannel', replies.Channel);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const peer = await loadRealm();
+    peer.bindStageRealmPresence(() => 'stage-1');
+    peer.markStageRealmDirty('stage-2');
+    const collector = await loadRealm();
+    collector.bindStageRealmPresence(() => 'stage-2');
+
+    vi.setSystemTime(Date.now() + 90_001);
+
+    expect(await collector.probeStageRealmPresence('stage-1')).toBe('absent');
+    replies.release();
+  });
+
   it('reports unknown, not absent, when the storage API throws', async () => {
     vi.stubGlobal('localStorage', {
       get length() {
