@@ -59,7 +59,7 @@ Hai khối JSON trong HTML tự chứa (ARCHITECTURE §6). Trường bắt buộ
   "beats": [{ "id": "start", "occurrence": 1, "frame": 0 }, { "id": "mid", "occurrence": 1, "frame": 1 },
             { "id": "done", "occurrence": 1, "frame": 8 }],          // của presetId
   "beatsByPreset": { "mid-hit": [ … ], "first": [ … ] },              // beat của MỌI preset, không có `answer`; nhật ký học (ADR 0016) cần; trang cũ không có
-  "runtimeVersion": 1
+  "runtimeVersion": 2
   // "llmInput": { … }   ← chỉ từ lát 1d (ADR 0013 §9); khi có thì presets[] thêm { "id": "llm", "label": "…", "total": n, "framesHash": "…" }
 }
 ```
@@ -120,7 +120,7 @@ File dữ liệu; hình dạng lấy từ `docs/tutor/curriculum/curriculum-info
 
 ## 7. Tính nhất quán và di trú
 
-- **Phiên bản runtime:** `widget-config.runtimeVersion` (int). Scene cũ giữ runtime cũ vì HTML tự chứa, nên nâng runtime **không** cần di trú scene cũ.
+- **Phiên bản runtime:** `widget-config.runtimeVersion` (int). Scene đã lưu giữ runtime lúc dựng vì HTML tự chứa, nên nâng runtime **cần dựng lại** walkthrough đã lưu của giáo viên: gọi `generate_walkthrough` để ghi đè trang ở cùng `order`. Trong lúc chưa dựng lại, `generate_actions` trên scene đó bị từ chối (`walkthrough-stale`, không ghi gì). Học sinh luôn dựng mới khi bắt đầu bài (`lib/tutor/door/lesson.ts`), nên không phụ thuộc scene đã lưu.
 - **Phiên bản entry** (ADR 0013 §6): `entryRev` + `framesHash` trong `widgetConfig`.
   - Q&A tính lại từ catalog chỉ khi khớp; lệch thì chỉ trả digest tĩnh.
   - Scene vẫn phát bình thường.

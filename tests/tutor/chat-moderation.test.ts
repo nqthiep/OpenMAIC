@@ -236,6 +236,8 @@ describe('withTutorModeration - input', () => {
     await collect(
       withTutorModeration(makeBody(msgs as never), fakeSource([]).gen, { moderate: mod }),
     );
+    // The cap is reached (a sequential filter would pass the upper bound alone) and not exceeded.
+    expect(peak).toBeGreaterThanOrEqual(3);
     expect(peak).toBeLessThanOrEqual(3);
     expect(mod.mock.calls.length).toBeLessThan(10);
   });

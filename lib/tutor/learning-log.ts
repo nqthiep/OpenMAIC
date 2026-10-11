@@ -82,7 +82,11 @@ export function buildHintRecord(i: Omit<Of<'hint'>, 'type'>): Of<'hint'> {
 }
 
 export function buildRatingRecord(i: Omit<Of<'rating'>, 'type'>): Of<'rating'> {
-  return { type: 'rating', stageId: i.stageId, easy: clampInt(i.easy, 1, MAX_RATING) };
+  return {
+    type: 'rating',
+    stageId: i.stageId,
+    easy: clampInt(i.easy, 1, MAX_RATING),
+  };
 }
 
 /** Mức gợi ý = số lần bấm cho cặp (sceneId, beatId), kẹp 3. */

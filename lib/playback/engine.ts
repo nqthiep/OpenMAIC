@@ -348,6 +348,12 @@ export class PlaybackEngine {
     this.currentTrigger = null;
   }
 
+  /** → idle, and release the action waits (prediction, video, speech) the engine may be blocked on. */
+  dispose(): void {
+    this.stop();
+    this.actionEngine.dispose();
+  }
+
   /**
    * Consume a discussion and immediately publish a progress snapshot.
    * `onProgress` otherwise fires before a discussion action executes (the id

@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => ({
   engineStop: vi.fn(),
   engineStart: vi.fn(),
   engineContinuePlayback: vi.fn(),
+  engineDispose: vi.fn(),
   handleUserInterrupt: vi.fn(),
 }));
 
@@ -295,6 +296,10 @@ vi.mock('@/lib/playback', () => ({
     stop() {
       mocks.engineStop();
     }
+    dispose() {
+      mocks.engineDispose();
+      this.stop(); // the real dispose() stops the engine, then releases its waits
+    }
     getMode() {
       return mocks.engineMode;
     }
@@ -401,6 +406,7 @@ describe('PlaybackChromeRoot element-reference ownership', () => {
     mocks.endSession.mockReset();
     mocks.endSession.mockResolvedValue(undefined);
     mocks.engineStop.mockReset();
+    mocks.engineDispose.mockReset();
     mocks.engineStart.mockReset();
     mocks.engineContinuePlayback.mockReset();
     mocks.handleUserInterrupt.mockReset();
@@ -1041,5 +1047,29 @@ describe('PlaybackChromeRoot element-reference ownership', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('disposes the engine it replaces when the scene changes', async () => {
+    await renderOwner();
+    expect(mocks.engineDispose).not.toHaveBeenCalled();
+    stageState.scenes = [scene, interactiveScene];
+    stageState.currentSceneId = interactiveScene.id;
+    await rerenderOwner();
+    expect(mocks.engineDispose).toHaveBeenCalledOnce();
+  });
+
+  it('disposes the engine on unmount', async () => {
+    await renderOwner();
+    act(() => root.unmount());
+    expect(mocks.engineDispose).toHaveBeenCalledOnce();
+  });
+
+  it('disposes the engine on teardown, when the stage leaves playback', async () => {
+    const ownerRef = createRef<PlaybackChromeRootHandle>();
+    await renderOwner({ ref: ownerRef });
+    await act(async () => {
+      await ownerRef.current!.teardown();
+    });
+    expect(mocks.engineDispose).toHaveBeenCalledOnce();
   });
 });

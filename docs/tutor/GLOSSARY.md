@@ -27,7 +27,7 @@
 | **`tutorLearning`** | Kind dữ liệu học sinh trong kho runtime: beat, dự đoán, gợi ý, đánh giá, nhãn lọc. | [INTERFACES §8.3](INTERFACES.md) |
 | **curriculum-map** | Dữ liệu 4 tier × topic (id, độ khó, prerequisite, bẫy, ý tưởng tương tác…). | [DATA-MODEL §5](DATA-MODEL.md) |
 | **customInput** | Cờ của entry cho phép học sinh nhập input của mình trong giới hạn `InputSpec`. Làm ở lát 1d. | [ADR 0008](decisions/0008-lesson-blueprint-hard-problems.md) |
-| **dự đoán có chờ** (`predict`) | Câu hỏi dự đoán mà engine dừng chờ học sinh trả lời (tối đa 20 s hoặc "Bỏ qua") trước khi tiết lộ. | [ADR 0008](decisions/0008-lesson-blueprint-hard-problems.md) |
+| **dự đoán có chờ** (`predict`) | Câu hỏi dự đoán mà engine dừng chờ học sinh trả lời (walkthrough: chờ tới khi học sinh bấm Tiếp hoặc Phát, đổi khung, hoặc iframe tải lại; câu hỏi không có khung hẹn 20 s; "Bỏ qua" giữ câu hỏi và hiện đáp án) trước khi tiết lộ. | [ADR 0008](decisions/0008-lesson-blueprint-hard-problems.md) |
 | **describe()** | Hook của provider trả mô tả scene cho thầy Q&A; **mọi chữ lấy từ catalog**, không từ HTML/iframe. | [INTERFACES §5](INTERFACES.md) |
 | **entryRev / framesHash** | Phiên bản nội dung của entry và băm frame từng preset; lệch thì Q&A chỉ dùng digest tĩnh. | [ADR 0013](decisions/0013-provider-scene-lifecycle.md) |
 | **Element Inventory** | Danh sách id/lớp/nhãn của widget mà stage sinh action đưa cho LLM; bỏ `<script>`/`<style>`. | [ADR 0005](decisions/0005-widget-hosting-model.md) |

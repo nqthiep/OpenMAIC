@@ -68,7 +68,7 @@ Kết thúc Phase 1 (tới G1), **một walkthrough thật chạy trọn vòng �
 | `app/api/chat/route.ts` (`:44-132`), `lib/tutor/moderation.ts` (mới) | Bộ lọc vào/ra (INTERFACES §8.1): lọc tin nhắn học sinh trước `statelessGenerate`; giữ `text_delta` theo `messageId` tới `agent_end` rồi lọc; fail-closed. | 1c |
 | `lib/runtime/payload-validators.ts` (`:33-37`) | Thêm kind `tutorLearning` + validator (INTERFACES §8.3); host ghi beat/dự đoán/gợi ý/đánh giá. | 1c |
 | `eval/tutor-review/`, `eval/sim-learner/`, `eval/tutor-moderation/` (mới) | Hội đồng LLM, học sinh mô phỏng, bộ hiệu chuẩn (ADR 0014). | 1c |
-| `lib/action/engine.ts` (`:881-886`) | `executeWidgetSetState`: nếu `state.predict` thì chờ `widget-state.prediction` tối đa 20 s hoặc "Bỏ qua"; silent/export không chờ (spike Q9). | 1c |
+| `lib/action/engine.ts` (`:881-886`) | `executeWidgetSetState`: nếu `state.predict` thì chờ `widget-state.prediction` chờ học sinh (Tiếp, Phát, Bỏ qua hoặc đổi khung; walkthrough không hẹn giờ, câu hỏi không có khung hẹn 20 s); silent/export không chờ (spike Q9). | 1c |
 
 Không sửa: `packages/@openmaic/*`, template prompt trong package, `vitest.config.ts`.
 
@@ -230,7 +230,7 @@ tests/widgets/  tests/tutor/  tests/subjects/cp/
 
 **1c**
 - [ ] Thầy Q&A thấy digest và **frame hiện tại** (test `describe` + e2e `widget-state`); chữ lấy từ catalog.
-- [ ] Câu hỏi dự đoán có chờ: engine dừng tới khi học sinh trả lời, bấm "Bỏ qua" hoặc hết 20 s (e2e).
+- [ ] Câu hỏi dự đoán có chờ: engine dừng tới khi học sinh trả lời, bấm "Bỏ qua", Tiếp, Phát hoặc đổi khung (walkthrough không hẹn giờ; e2e).
 - [ ] `eval:tutor-qa` chạy lần đầu với chỉ số ADR 0008 (Đúng, Bám frame, Gợi ý trước); ghi kết quả.
 - [ ] Spike S2b, Q14, Q15 có kết luận.
 - [ ] Bộ lọc vào/ra hoạt động: tin nhắn độc hại bị chặn; câu trả lời chỉ hiện sau khi lọc; model lọc lỗi → câu an toàn (fail-closed); thiếu route → chat bị chặn (test `tests/tutor/moderation.test.ts`).

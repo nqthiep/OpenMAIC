@@ -26,7 +26,7 @@ const config: WalkthroughWidgetConfig = {
   panel: 'cpp',
   presets: [{ id: 'mid-hit', label: 'Trúng ở giữa', total: 2, framesHash: 'a1b2c3d4e5f60718' }],
   beats: [{ id: 'start', occurrence: 1, frame: 0 }],
-  runtimeVersion: 1,
+  runtimeVersion: 2,
 };
 
 const data: WalkthroughData = {

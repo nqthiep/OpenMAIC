@@ -143,7 +143,7 @@ describe('walkthrough provider: build', () => {
             locale,
             presetId,
             panel: 'pseudo',
-            runtimeVersion: 1,
+            runtimeVersion: 2,
           });
           expect(b.config.contentHash).toBe(entryContentHash(bs));
           // the beats of every preset (the learning log needs them), never with the answers
@@ -299,10 +299,13 @@ describe('walkthrough provider: build', () => {
       options: ['lo đổi', 'hi đổi', 'Không đổi: tìm thấy'],
     });
     expect(b.data.beatText.start).toEqual({ label: 'Bắt đầu' });
-    const answerAt = (preset: string) =>
-      build({ id: 'binary-search', presetId: preset }).data.sets[preset].beats.find(
+    const answerAt = (preset: string) => {
+      const beat = build({ id: 'binary-search', presetId: preset }).data.sets[preset].beats.find(
         (x) => x.id === 'mid',
-      )?.answer;
+      )!;
+      // answer is the shown position; order maps it back to the original option
+      return beat.order![beat.answer!];
+    };
     expect(answerAt('mid-hit')).toBe(2); // found at once
     expect(answerAt('absent')).toBe(0); // a[mid] < target -> lo changes
     expect(answerAt('first')).toBe(1); // a[mid] > target -> hi changes

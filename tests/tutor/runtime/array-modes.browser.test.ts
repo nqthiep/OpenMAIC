@@ -67,7 +67,7 @@ const config: WalkthroughWidgetConfig = {
   panel: 'cpp',
   presets: [{ id: 'p', label: 'P', total: frames.length, framesHash: '0000000000000000' }],
   beats: [],
-  runtimeVersion: 1,
+  runtimeVersion: 2,
 };
 const data: WalkthroughData = {
   title: 'Array',

@@ -3,6 +3,7 @@
  * Builds the self-contained widget, its scripted actions and the staleness check, all from the
  * catalog. Server-side only: hashing uses node:crypto. Never calls an LLM.
  */
+import { createHash } from 'node:crypto';
 import type { Action, Scene } from '@openmaic/dsl';
 import enUS from '@/lib/i18n/locales/en-US.json';
 import viVN from '@/lib/i18n/locales/vi-VN.json';
@@ -31,7 +32,8 @@ import type {
   WidgetProvider,
 } from '@/lib/widgets/types';
 
-export const RUNTIME_VERSION = 1;
+/** Version of the runtime and of the beat data it reads; a stored scene built with another value is stale. */
+export const RUNTIME_VERSION = 2;
 /** Beats narrated per scene (ADR 0013 decision 4) [Inference]; the rest stay reachable by seeking. */
 export const MAX_NARRATED_BEATS = 12;
 /** A beat's prediction question is asked on its first N occurrences in a script; later ones are plain narration. */
@@ -70,6 +72,11 @@ const EXTRA_LABELS: Readonly<Record<string, Messages>> = {
   code: { 'vi-VN': 'Mã', 'en-US': 'Code' },
   correct: { 'vi-VN': 'Đúng rồi!', 'en-US': 'Correct!' },
   incorrect: { 'vi-VN': 'Chưa đúng.', 'en-US': 'Not quite.' },
+  answer: { 'vi-VN': 'Đáp án đúng', 'en-US': 'Correct answer' },
+  loadError: {
+    'vi-VN': 'Không tải được nội dung bài học.',
+    'en-US': 'The lesson content could not be loaded.',
+  },
 };
 
 /** Kind labels of the `proofOutline` visualizer; added to a page only when its entry uses that visualizer. */
@@ -116,36 +123,83 @@ function presetFramesHash(entry: AnyWalkthroughEntry, preset: Preset, locale: st
 
 interface PresetBuild {
   readonly frames: readonly Frame<unknown>[];
-  /** In order of appearance; predict beats carry `answer`. */
+  /** In order of appearance; predict beats carry `order` and `answer` (its shown position). */
   readonly beats: readonly BeatRef[];
 }
 
-function buildPreset(entry: AnyWalkthroughEntry, preset: Preset, locale: string): PresetBuild {
-  const frames = framesOf(entry, preset, locale);
-  const defs = new Map(entry.beatDefs.map((d) => [d.id, d]));
-  const seen = new Map<string, number>();
-  const beats: BeatRef[] = [];
-  frames.forEach((frame, i) => {
-    for (const tag of frame.meta.tags ?? []) {
-      if (!tag.startsWith('beat:')) continue;
-      const id = tag.slice('beat:'.length);
-      const def = defs.get(id);
-      if (!def) throw new Error(`unknown beat "${id}" in preset "${preset.id}"`);
-      const occurrence = (seen.get(id) ?? 0) + 1;
-      seen.set(id, occurrence);
-      const ref: BeatRef = { id, occurrence, frame: i };
-      const predict = def.ask?.predict;
-      if (predict) {
-        const answer = predict.answer(frame, frames[i + 1]);
-        if (!Number.isInteger(answer) || answer < 0 || answer >= predict.options.length) {
-          throw new Error(`beat "${id}" in preset "${preset.id}": answer ${answer} out of range`);
-        }
-        ref.answer = answer;
-      }
-      beats.push(ref);
-    }
+/** Permutation of `0..n-1` seeded by sha256(`seed`): Fisher-Yates over the digest bytes. */
+function seededOrder(seed: string, n: number): number[] {
+  const digest = createHash('sha256').update(seed).digest();
+  const order = Array.from({ length: n }, (_, k) => k);
+  for (let i = n - 1; i > 0; i--) {
+    const j = digest[i % digest.length] % (i + 1);
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}
+
+/**
+ * When every occurrence of one question shows its answer at one position, occurrence k is rotated
+ * right by k, so the position varies (deterministic).
+ */
+function spreadAnswers(refs: readonly BeatRef[]): void {
+  if (refs.length < 2 || refs.some((r) => r.answer !== refs[0].answer)) return;
+  refs.slice(1).forEach((ref, i) => {
+    const order = ref.order!;
+    const shift = (i + 1) % order.length;
+    ref.order = order.map((_, j) => order[(j - shift + order.length) % order.length]);
+    ref.answer = (ref.answer! + shift) % order.length;
   });
-  return { frames, beats };
+}
+
+/**
+ * Frames and beats of every preset, in preset order. A predict's options are shown in an order seeded
+ * by (entry, beat, frame), so the answer does not stay at one position. The check runs per preset (the
+ * learner's script asks the first occurrences there) and then over the whole entry (the widget holds
+ * every preset). Depends only on the catalog.
+ */
+function buildPresets(entry: AnyWalkthroughEntry, locale: string): Map<string, PresetBuild> {
+  const defs = new Map(entry.beatDefs.map((d) => [d.id, d]));
+  const built = new Map<string, PresetBuild>();
+  const perPreset = new Map<string, BeatRef[]>();
+  const entryWide = new Map<string, BeatRef[]>();
+  for (const preset of entry.presets) {
+    const frames = framesOf(entry, preset, locale);
+    const seen = new Map<string, number>();
+    const beats: BeatRef[] = [];
+    frames.forEach((frame, i) => {
+      for (const tag of frame.meta.tags ?? []) {
+        if (!tag.startsWith('beat:')) continue;
+        const id = tag.slice('beat:'.length);
+        const def = defs.get(id);
+        if (!def) throw new Error(`unknown beat "${id}" in preset "${preset.id}"`);
+        const occurrence = (seen.get(id) ?? 0) + 1;
+        seen.set(id, occurrence);
+        const ref: BeatRef = { id, occurrence, frame: i };
+        const predict = def.ask?.predict;
+        if (predict) {
+          const answer = predict.answer(frame, frames[i + 1]);
+          const n = predict.options.length;
+          if (!Number.isInteger(answer) || answer < 0 || answer >= n) {
+            throw new Error(`beat "${id}" in preset "${preset.id}": answer ${answer} out of range`);
+          }
+          ref.order = seededOrder(`${entry.id}|${id}|${i}`, n);
+          ref.answer = ref.order.indexOf(answer);
+          const presetKey = `${preset.id}|${id}`;
+          perPreset.set(presetKey, [...(perPreset.get(presetKey) ?? []), ref]);
+          entryWide.set(id, [...(entryWide.get(id) ?? []), ref]);
+        }
+        beats.push(ref);
+      }
+    });
+    built.set(preset.id, { frames, beats });
+  }
+  for (const refs of [...perPreset.values(), ...entryWide.values()]) spreadAnswers(refs);
+  return built;
+}
+
+function buildPreset(entry: AnyWalkthroughEntry, preset: Preset, locale: string): PresetBuild {
+  return buildPresets(entry, locale).get(preset.id)!;
 }
 
 /**
@@ -398,6 +452,11 @@ export function createWalkthroughProvider(
       const ref = readWalkthroughRef(scene);
       const entry = ref && deps.findWalkthrough(ref.walkthroughId);
       if (!ref || !entry) return true;
+      // a scene from another version has no beat `order`, so its answers keep their fixed positions
+      const cfg = (
+        scene as unknown as { content?: { widgetConfig?: { runtimeVersion?: unknown } } }
+      ).content?.widgetConfig;
+      if (cfg?.runtimeVersion !== RUNTIME_VERSION) return true;
       if (!entry.presets.some((p) => p.id === ref.presetId)) return true;
       if (ref.entryRev !== entry.entryRev || ref.contentHash !== entryContentHash(entry)) {
         return true;

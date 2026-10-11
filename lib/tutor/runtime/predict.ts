@@ -19,9 +19,10 @@ export interface Prediction {
 }
 
 /**
- * Beat đang hỏi: cùng `beatId`, ưu tiên beat nằm đúng frame `index`, rồi beat gần nhất trước nó,
- * rồi beat đầu tiên (beat lặp có nhiều lần xuất hiện). `null` khi không hỏi được: không có beat,
- * thiếu/sai `answer`, hoặc thiếu `options`.
+ * The question for the beat being asked: same `beatId`, preferring the occurrence at frame `index`,
+ * then the nearest earlier one, then the first. Options are shown in the beat's `order` (absent means
+ * the original order); `answer` is the shown position. `null` when it cannot be asked: no beat, a
+ * missing or bad `answer`, no `options`, or an `order` that is not a permutation of `options`.
  */
 export function resolvePredict(
   beatId: string,
@@ -35,24 +36,35 @@ export function resolvePredict(
     same.filter((b) => b.frame < index).reduce<BeatRef | undefined>((_, b) => b, undefined) ??
     same[0];
   const text = isRecord(beatText) ? beatText[beatId] : undefined;
-  const options = isRecord(text) && Array.isArray(text.options) ? text.options.map(String) : [];
+  const source = isRecord(text) && Array.isArray(text.options) ? text.options.map(String) : [];
   const answer = ref?.answer;
+  const order: unknown = ref?.order ?? source.map((_, k) => k);
   if (
     !ref ||
-    options.length === 0 ||
+    source.length === 0 ||
     typeof answer !== 'number' ||
     !Number.isInteger(answer) ||
     answer < 0 ||
-    answer >= options.length
+    answer >= source.length ||
+    !isPermutation(order, source.length)
   ) {
     return null;
   }
   return {
     beatId,
     ask: isRecord(text) && typeof text.ask === 'string' ? text.ask : '',
-    options,
+    options: order.map((j) => source[j]),
     answer,
   };
+}
+
+function isPermutation(order: unknown, n: number): order is number[] {
+  return (
+    Array.isArray(order) &&
+    order.length === n &&
+    new Set(order).size === n &&
+    order.every((j) => Number.isInteger(j) && j >= 0 && j < n)
+  );
 }
 
 /** `chosen` = chỉ số đã chọn; `null` = "Bỏ qua" (`correct: false, skipped: true`). */

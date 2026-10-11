@@ -5,6 +5,7 @@
  */
 import { createPlayer, type PlayerState } from '@/lib/tutor/engine/player';
 import {
+  makeContinue,
   makeReady,
   makeState,
   parseInbound,
@@ -36,7 +37,8 @@ import { buildPrediction, resolvePredict, type Prediction } from './predict';
 import { setRichText, type MathTable } from './rich-text';
 
 const FLASH_MS = 1500;
-const LOAD_ERROR = 'Walkthrough data could not be loaded.';
+/** Used only when the data block itself is unreadable: no label can come from it then. */
+const LOAD_ERROR_FALLBACK = 'Không tải được nội dung bài học.';
 
 interface PresetEntry {
   id: string;
@@ -50,8 +52,6 @@ interface OpenQuestion {
   index: number;
   beatId: string;
   answered: boolean;
-  /** Player đang chạy khi câu hỏi hiện: tạm dừng, chạy lại sau khi trả lời/bỏ qua. */
-  resume: boolean;
 }
 
 const skipped = (beatId: string): Prediction => ({ beatId, correct: false, skipped: true });
@@ -97,6 +97,18 @@ function load(doc: Document): Loaded {
   };
 }
 
+/** The `loadError` label from `walkthrough-data` when that block still parses, else the fallback. */
+function loadErrorText(doc: Document): string {
+  try {
+    const data: unknown = JSON.parse(doc.getElementById('walkthrough-data')?.textContent ?? '');
+    const text = isRecord(data) && isRecord(data.labels) ? data.labels.loadError : undefined;
+    if (typeof text === 'string' && text !== '') return text;
+  } catch {
+    // unreadable block: fall through to the fallback
+  }
+  return LOAD_ERROR_FALLBACK;
+}
+
 function queryOrNull(selector: string): Element | null {
   try {
     return document.querySelector(selector);
@@ -116,7 +128,7 @@ function boot(visualizer: VisualizerRenderer): void {
   try {
     loaded = load(document);
   } catch {
-    refs.explanation.textContent = LOAD_ERROR;
+    refs.explanation.textContent = loadErrorText(document);
     return;
   }
   const { config, data, presets } = loaded;
@@ -133,7 +145,7 @@ function boot(visualizer: VisualizerRenderer): void {
   let shown: { preset: string; index: number } | null = null;
   let prevFrame: Frame<unknown> | undefined;
   let open: OpenQuestion | null = null;
-  const pending: Prediction[] = []; // câu hỏi bị bỏ không ai trả lời: báo `skipped` ở lần `sync` tới
+  const pending: Prediction[] = []; // predicts that cannot be asked: reported as skipped at the next sync
   let batching = false; // gộp nhiều op của một message thành một lần vẽ + một `widget-state`
 
   const player = createPlayer({ total: presets.find((p) => p.id === preset)?.total ?? 1 });
@@ -156,6 +168,9 @@ function boot(visualizer: VisualizerRenderer): void {
         prediction,
       }),
     );
+  // The learner moved on (Tiếp, or Phát starting playback). The host ends a prediction wait on it,
+  // also on the last frame, where no frame change follows.
+  const postContinue = () => post(makeContinue({ walkthroughId: config.walkthroughId }));
   const setCaption = (text: string) => {
     if (refs.caption) refs.caption.textContent = text;
   };
@@ -198,15 +213,13 @@ function boot(visualizer: VisualizerRenderer): void {
   }
 
   // --- dự đoán ---
-  /** Đóng câu hỏi hiện tại; chưa trả lời thì ghi nhận `skipped` để engine không chờ tới hết giờ. */
+  /** Close the open question. Moving on without an answer is not a skip, so nothing is reported. */
   function closePredict(): void {
-    const o = open;
     open = null;
     if (refs.predict) {
       refs.predict.removeAttribute('data-result');
       refs.predict.replaceChildren();
     }
-    if (o && !o.answered) pending.push(skipped(o.beatId));
   }
 
   function showPredict(beatId: string): void {
@@ -217,7 +230,7 @@ function boot(visualizer: VisualizerRenderer): void {
       pending.push(skipped(beatId)); // không hỏi được: báo bỏ qua ngay
       return;
     }
-    const o: OpenQuestion = { preset, index, beatId, answered: false, resume: false };
+    const o: OpenQuestion = { preset, index, beatId, answered: false };
     open = o;
     renderPredict(
       refs.predict,
@@ -227,16 +240,14 @@ function boot(visualizer: VisualizerRenderer): void {
         skip: labelOf('skip'),
         correct: labelOf('correct'),
         incorrect: labelOf('incorrect'),
+        // a stage built before this label existed shows the check mark only
+        answer: data.labels?.answer ?? '',
       },
       (chosen) => {
         // Chỉ message này mang `prediction`; `sync` không bao giờ gửi lại (engine coi mọi
-        // `prediction` của beat là đã trả lời).
+        // `prediction` của beat là đã trả lời). The player stays paused until the learner moves on.
         o.answered = true;
         postState(buildPrediction(q, chosen));
-        if (o.resume) {
-          o.resume = false;
-          player.play();
-        }
       },
     );
   }
@@ -277,7 +288,6 @@ function boot(visualizer: VisualizerRenderer): void {
 
   /**
    * Vẽ lại theo player; báo `widget-state` khi frame hoặc preset đổi (và `notify`), hoặc khi `force`.
-   * Câu hỏi bị bỏ lại (đổi frame/preset) được báo `skipped` trong chính message đó.
    */
   function sync(notify: boolean, force = false): void {
     const s = player.getState();
@@ -358,8 +368,7 @@ function boot(visualizer: VisualizerRenderer): void {
     try {
       for (const op of ops) applyOp(op);
       if (open && !open.answered && player.getState().isPlaying) {
-        // tick kế tiếp sẽ xoá câu hỏi chưa ai trả lời: tạm dừng, chạy lại sau khi trả lời/bỏ qua
-        open.resume = true;
+        // a tick would clear the question before anyone answers it
         player.pause();
       }
     } finally {
@@ -408,9 +417,17 @@ function boot(visualizer: VisualizerRenderer): void {
     tab?.addEventListener('click', () => setPanel(p as Panel));
   }
   refs.prev?.addEventListener('click', () => player.step(-1));
-  refs.next?.addEventListener('click', () => player.step(1));
+  refs.next?.addEventListener('click', () => {
+    player.step(1);
+    closePredict(); // the last frame does not move, so Tiếp itself ends an open question
+    postContinue();
+  });
   refs.reset?.addEventListener('click', () => player.reset());
-  refs.play?.addEventListener('click', () => player.toggle());
+  refs.play?.addEventListener('click', () => {
+    const starting = !player.getState().isPlaying;
+    player.toggle();
+    if (starting) postContinue(); // a pause is not a move-on
+  });
   refs.speed?.addEventListener('input', () => player.setSpeed(Number(refs.speed?.value)));
   refs.slider?.addEventListener('input', () => player.jump(Number(refs.slider?.value)));
 

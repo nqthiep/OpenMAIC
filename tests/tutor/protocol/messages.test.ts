@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   parseInbound,
   planSetWidgetState,
+  makeContinue,
   makeReady,
   makeState,
+  parseLearnerContinue,
   parseWidgetEvent,
   type SetWidgetStateMessage,
 } from '@/lib/tutor/protocol/messages';
@@ -164,5 +166,43 @@ describe('widget-ready / widget-state', () => {
     for (const v of [null, [], 3, 'x', { kind: 'runtime-error' }, { ...ok, v: 2 }]) {
       expect(parseWidgetEvent(v)).toBeNull();
     }
+  });
+});
+
+describe('learner-continue', () => {
+  it('builds and parses the learner-continue message', () => {
+    const m = makeContinue({ walkthroughId: 'bs' });
+    expect(m).toEqual({
+      __maicInteractive: true,
+      kind: 'learner-continue',
+      v: 1,
+      walkthroughId: 'bs',
+    });
+    expect(parseLearnerContinue(JSON.parse(JSON.stringify(m)))).toEqual(m);
+  });
+
+  it('keeps only its own fields', () => {
+    expect(parseLearnerContinue({ ...makeContinue({ walkthroughId: 'bs' }), frame: 3 })).toEqual(
+      makeContinue({ walkthroughId: 'bs' }),
+    );
+  });
+
+  it('rejects other shapes without throwing', () => {
+    const ok = makeContinue({ walkthroughId: 'bs' });
+    const bad = [
+      null,
+      [],
+      'learner-continue',
+      { ...ok, __maicInteractive: false },
+      { ...ok, v: 2 },
+      { ...ok, kind: 'widget-state' },
+      { ...ok, walkthroughId: 7 },
+      { __maicInteractive: true, kind: 'learner-continue', v: 1 },
+    ];
+    for (const v of bad) expect(parseLearnerContinue(v)).toBeNull();
+  });
+
+  it('is not a widget event, so the host state path never records it', () => {
+    expect(parseWidgetEvent(makeContinue({ walkthroughId: 'bs' }))).toBeNull();
   });
 });

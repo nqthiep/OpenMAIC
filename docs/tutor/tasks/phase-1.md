@@ -1098,7 +1098,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | — |
 | Phụ thuộc | — |
 | Sở hữu | — |
-| Đọc | ADR 0008 Decision 5; ADR 0013 quyết định 3; `lib/action/engine.ts:900-905`; `lib/playback/action-resume.ts:101-111` |
+| Đọc | ADR 0008 Decision 5; ADR 0013 quyết định 3; `lib/action/engine.ts:937-942`; `lib/playback/action-resume.ts:101-111` |
 
 **Đã chốt (2026-10-05, xem INTERFACES §1 điều 6, §5):** chỉ kind `choice`; `BeatDef.ask.predict.answer(frame, next): number` là hàm thuần trả chỉ số đáp án; provider tính lúc dựng và lưu số vào `sets[p].beats[i].answer`; runtime so khớp và gửi `prediction { beatId, correct, skipped? }`; engine chờ ≤ 20 s, hết giờ = bỏ qua; silent/export không chờ. Phần đo Q9 (tương tác với resume, chat mở giữa chừng) làm khi chạy e2e.
 
@@ -1117,7 +1117,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-22, 1c-05 |
 | Sở hữu | `lib/action/engine.ts`, `tests/tutor/predict-wait.test.ts` |
-| Đọc | `lib/action/engine.ts:900-905`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §2 (dòng `lib/action/engine.ts`); **hợp đồng do `1c-05` chốt** |
+| Đọc | `lib/action/engine.ts:937-942`; [../phase-1-base-layer/SCHEMA](../phase-1-base-layer/SCHEMA.md) §2 (dòng `lib/action/engine.ts`); **hợp đồng do `1c-05` chốt** |
 
 **Làm:** trong `executeWidgetSetState`, nếu `state.predict` thì chờ tối đa 20 s cho tới khi `useWidgetRuntimeState` có `prediction` của `beatId` đó (hoặc tín hiệu bỏ qua). Chế độ silent/export không chờ. Timer tiêm vào được để test.
 
@@ -1206,7 +1206,7 @@ Báo leader `htmlBytes` thật để chỉnh `maxBytes`.
 | Cỡ | M |
 | Phụ thuộc | 1b-02, 1c-09 |
 | Sở hữu | `app/api/chat/route.ts`, `lib/config/feature-flags.ts`, `tests/tutor/chat-moderation.test.ts` |
-| Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.1); `app/api/chat/route.ts:137-218`; RISKS dòng Q14 |
+| Đọc | [../INTERFACES](../INTERFACES.md) §8 (mục 8.1); `app/api/chat/route.ts:137-214`; RISKS dòng Q14 |
 
 **Làm**
 1. **Vào:** lọc tin nhắn học sinh trước `statelessGenerate`. `allow:false` thì trả một lượt thầy soạn sẵn theo nhóm, không gọi agent.

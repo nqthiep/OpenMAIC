@@ -42,6 +42,24 @@ export function framesHash(frames: unknown): string {
   return hash16(JSON.parse(json));
 }
 
+/** The locales whose frames are hashed: the catalog lock and every approval cover the same set. */
+export const FRAME_LOCALES = ['vi-VN', 'en-US'] as const;
+
+/**
+ * `framesHash` of every (preset, locale) of an entry. The frames hold the per-step text and the
+ * drawn coordinates, which `entryContentHash` does not cover, so an approval stores this map too.
+ */
+export function entryFramesHash(entry: WalkthroughEntry): Record<string, Record<string, string>> {
+  return Object.fromEntries(
+    entry.presets.map((p) => [
+      p.id,
+      Object.fromEntries(
+        FRAME_LOCALES.map((locale) => [locale, framesHash(steps(entry, p.input, { locale }))]),
+      ),
+    ]),
+  );
+}
+
 /**
  * beatDefs as hashed: the `ask.predict.answer` function is replaced by its observable behaviour
  * (see {@link predictAnswers}), so the hash is stable and still moves when the answer logic changes.

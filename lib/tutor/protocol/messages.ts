@@ -224,3 +224,34 @@ export function parseWidgetEvent(data: unknown): WidgetReady | WidgetState | nul
     return null;
   }
 }
+
+/** The learner pressed Tiếp or Phát in the walkthrough, also on the last frame where no frame change follows. */
+export interface WidgetContinue {
+  __maicInteractive: true;
+  kind: 'learner-continue';
+  v: 1;
+  walkthroughId: string;
+}
+
+export function makeContinue(args: { walkthroughId: string }): WidgetContinue {
+  return {
+    __maicInteractive: true,
+    kind: 'learner-continue',
+    v: 1,
+    walkthroughId: args.walkthroughId,
+  };
+}
+
+/**
+ * Parses only `learner-continue`. It stays apart from `parseWidgetEvent`, whose callers record every
+ * other kind as a learner state.
+ */
+export function parseLearnerContinue(data: unknown): WidgetContinue | null {
+  try {
+    if (!isRecord(data) || data.__maicInteractive !== true || data.v !== 1) return null;
+    if (data.kind !== 'learner-continue' || typeof data.walkthroughId !== 'string') return null;
+    return makeContinue({ walkthroughId: data.walkthroughId });
+  } catch {
+    return null;
+  }
+}

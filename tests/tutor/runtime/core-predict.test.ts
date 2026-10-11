@@ -51,7 +51,8 @@ describe('runtime core: state reports and predict (jsdom)', () => {
       <script type="application/json" id="walkthrough-data">${JSON.stringify(data)}</script>
       <div id="wt-root"><p id="wt-explanation"></p><div id="wt-visualizer"></div>
         <div id="wt-beats"></div><div id="wt-predict"></div>
-        <button id="wt-play"></button><button id="wt-next"></button></div>`;
+        <button id="wt-play"></button><button id="wt-next"></button>
+        <input id="wt-frame-slider" type="range"></div>`;
     startWalkthroughRuntime({ type: 't', mount() {}, render() {} });
   });
   afterEach(() => {
@@ -87,7 +88,7 @@ describe('runtime core: state reports and predict (jsdom)', () => {
     expect(root().getAttribute('data-preset')).toBe('p');
   });
 
-  it('predict + playing:true keeps the question open, then resumes after the answer', () => {
+  it('predict + playing:true pauses on the question, and the answer stays until the learner moves on', () => {
     send({ frame: 1, playing: true, predict: { beatId: 'b' } });
     expect(document.querySelectorAll('#wt-predict [data-option]')).toHaveLength(2);
     expect(root().getAttribute('data-playing')).toBe('false');
@@ -100,32 +101,81 @@ describe('runtime core: state reports and predict (jsdom)', () => {
     expect(states().filter((m) => m.prediction)).toEqual([
       expect.objectContaining({ frame: 1, prediction: { beatId: 'b', correct: true } }),
     ]);
-    expect(root().getAttribute('data-playing')).toBe('true');
-    vi.advanceTimersByTime(1300);
+    vi.advanceTimersByTime(10_000);
+    expect(root().getAttribute('data-playing')).toBe('false');
+    expect(root().getAttribute('data-frame-index')).toBe('1');
+    expect(document.querySelector('#wt-predict [role=status]')!.textContent).toBe('Yes');
+
+    click('#wt-next');
     expect(root().getAttribute('data-frame-index')).toBe('2');
     expect(document.querySelector('#wt-predict')!.childElementCount).toBe(0); // result cleared on move
     expect(states().filter((m) => m.prediction)).toHaveLength(1); // moving on never re-sends
   });
 
-  it('skip posts skipped once, keeps a result paragraph and resumes playing', () => {
-    send({ frame: 1, playing: true, predict: { beatId: 'b' } });
-    click('#wt-predict [data-predict-skip]');
-    expect(states().filter((m) => m.prediction)).toHaveLength(1);
-    expect(document.querySelector('#wt-predict [role=status]')!.textContent).toBe('Skip');
-    expect(document.querySelectorAll('#wt-predict button')).toHaveLength(0);
-    expect(root().getAttribute('data-playing')).toBe('true');
+  it('a stage built before the answer label shows the check mark, never the raw key', () => {
+    send({ frame: 1, playing: false, predict: { beatId: 'b' } });
+    click('#wt-predict [data-option="0"]');
+    const right = document.querySelector('#wt-predict [data-option="1"]')!;
+    expect(right.textContent).toContain('✓');
+    expect(right.textContent).not.toContain('answer');
   });
 
-  it('a question cleared by moving on before an answer posts skipped with the new frame', () => {
+  it('play after an answer runs the frames, and the question goes once the frame moves', () => {
+    send({ frame: 1, playing: false, predict: { beatId: 'b' } });
+    click('#wt-predict [data-option="1"]');
+    click('#wt-play');
+    expect(root().getAttribute('data-playing')).toBe('true');
+    vi.advanceTimersByTime(1300);
+    expect(root().getAttribute('data-frame-index')).toBe('2');
+    expect(document.querySelector('#wt-predict')!.childElementCount).toBe(0);
+  });
+
+  it('skip posts skipped once, keeps the question with the answer shown, and the player stays paused', () => {
+    send({ frame: 1, playing: true, predict: { beatId: 'b' } });
+    click('#wt-predict [data-predict-skip]');
+    expect(states().filter((m) => m.prediction)).toEqual([
+      expect.objectContaining({ prediction: { beatId: 'b', correct: false, skipped: true } }),
+    ]);
+    expect(document.querySelector('#wt-predict .wt-predict-ask')!.textContent).toBe('Which?');
+    expect(
+      document.querySelector('#wt-predict [data-option="1"]')!.classList.contains('wt-on'),
+    ).toBe(true);
+    expect(document.querySelector('#wt-predict [role=status]')!.textContent).toBe('Skip');
+    vi.advanceTimersByTime(10_000);
+    expect(root().getAttribute('data-playing')).toBe('false');
+    expect(root().getAttribute('data-frame-index')).toBe('1');
+  });
+
+  it('a wrong pick is posted as a wrong answer, not a skip, and the right option stays marked', () => {
+    send({ frame: 1, playing: false, predict: { beatId: 'b' } });
+    click('#wt-predict [data-option="0"]');
+    expect(states().filter((m) => m.prediction)).toEqual([
+      expect.objectContaining({ frame: 1, prediction: { beatId: 'b', correct: false } }),
+    ]);
+    expect(
+      document.querySelector<HTMLElement>('#wt-predict [data-option="0"]')!.style.borderColor,
+    ).toBe('var(--wt-err)');
+    expect(
+      document.querySelector('#wt-predict [data-option="1"]')!.classList.contains('wt-on'),
+    ).toBe(true);
+  });
+
+  it('moving on before an answer clears the question and reports no skip', () => {
     send({ frame: 1, playing: false, predict: { beatId: 'b' } });
     click('#wt-next');
     expect(root().getAttribute('data-frame-index')).toBe('2');
     expect(document.querySelector('#wt-predict')!.childElementCount).toBe(0);
-    expect(states().filter((m) => m.prediction)).toEqual([
-      expect.objectContaining({
-        frame: 2,
-        prediction: { beatId: 'b', correct: false, skipped: true },
-      }),
-    ]);
+    expect(states().filter((m) => m.prediction)).toHaveLength(0);
+    expect(states().at(-1)).toMatchObject({ preset: 'p', frame: 2 });
+  });
+
+  it('dragging the frame slider past a question clears it and reports no skip', () => {
+    send({ frame: 1, playing: false, predict: { beatId: 'b' } });
+    const slider = document.getElementById('wt-frame-slider') as HTMLInputElement;
+    slider.value = '3';
+    slider.dispatchEvent(new Event('input'));
+    expect(root().getAttribute('data-frame-index')).toBe('3');
+    expect(document.querySelector('#wt-predict')!.childElementCount).toBe(0);
+    expect(states().filter((m) => m.prediction)).toHaveLength(0);
   });
 });

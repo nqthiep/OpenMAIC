@@ -84,7 +84,7 @@ const config: WalkthroughWidgetConfig = {
   panel: 'pseudo',
   presets: [{ id: 'p', label: 'p', total: frames.length, framesHash: '0000000000000000' }],
   beats: [],
-  runtimeVersion: 1,
+  runtimeVersion: 2,
 };
 const data: WalkthroughData = {
   title: 'Proof',

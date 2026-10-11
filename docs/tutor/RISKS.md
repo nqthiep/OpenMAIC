@@ -79,7 +79,7 @@ Mức: **C**ao / **V**ừa / **T**hấp. *Trigger* = tín hiệu để hành đ�
 | Q2–Q6 | Q2 (`widgetConfig` có bị ghi đè?): không. Q3 (locale): tham số tool + heuristic. Q4 (LLM dùng `frame`?): thay bằng kịch bản. Q5 (điểm sinh action): tool tự sinh; `generate_actions`/`duplicate_scene` qua provider (ADR 0011). Q6 (thông điệp sớm, pool): `widget-ready` + gửi lại (ADR 0013) | — | — | **Đã đóng bằng thiết kế** (Q6 cần e2e xác nhận) |
 | Q7 | Runtime nhận diện cờ chụp tĩnh của video-export để nhảy tới `posterBeat` | khả thi/không | Backlog MP4 | Chưa làm |
 | Q8 | KaTeX dựng sẵn trên server (CSS + font inline), qua export | công thức đúng ở HTML/MP4/ZIP; CSS + font ≤ ~300 KB | Phase 3B (walkthrough Toán) | Chưa làm |
-| Q9 | Engine chờ dự đoán: tạm dừng/tua, resume, chat mở giữa chừng, silent mode | không treo; hết giờ 20 s luôn đi tiếp | Lát 1c | Chưa làm |
+| Q9 | Engine chờ dự đoán: tạm dừng/tua, resume, chat mở giữa chừng, silent mode | không treo; walkthrough không hẹn giờ; câu hỏi không có khung hẹn 20 s | Lát 1c | Chưa làm |
 | Q10 | CSP cho widget LLM: tỉ lệ widget mẫu bị vỡ (≥ 30 widget, 6 chủ đề) | ≤ 10% vỡ thì bật | Lát 1b (cho widget LLM) | Chưa làm |
 | Q12 | Liệt kê chính xác mọi route/hàm ghi scene cho `write-paths.test.ts` | danh sách đủ, test xanh | Lát 1b | Chưa làm |
 | Q13 | Resume scene walkthrough: coi `widget_setState` tuyệt đối là "dựng lại được" trong `lib/playback` | resume đúng beat | Backlog sau 1c | Chưa làm |

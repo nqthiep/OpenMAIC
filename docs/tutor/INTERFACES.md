@@ -31,8 +31,10 @@ Host gửi `{ type, ...payload }` bằng `postMessage(…, '*')` tới `iframe.c
 3. `frame` không phải số nguyên thì bỏ trường; ngoài miền thì kẹp vào `[0, total(preset)-1]` của bộ **mới**.
 4. `speed` kẹp `[0.25, 2]`.
 5. `playing:true` là idempotent: đang phát thì không làm gì; ở frame cuối thì đứng yên, chỉ về 0 khi có `restart:true`.
-6. `predict` (1c) hiện câu hỏi dự đoán của beat (`options` lấy từ `walkthrough-data.beatText[beatId].options`), học sinh chọn một phương án hoặc bấm "Bỏ qua"; runtime so chỉ số đã chọn với `sets[preset].beats[i].answer` rồi báo `widget-state.prediction = { beatId, correct, skipped? }` (ADR 0008 Decision 5). Engine chờ tối đa 20 s; hết giờ coi như bỏ qua (`skipped: true`).
+6. `predict` (1c) hiện câu hỏi dự đoán của beat (`options` lấy từ `walkthrough-data.beatText[beatId].options`), học sinh chọn một phương án hoặc bấm "Bỏ qua"; runtime so chỉ số đã chọn với `sets[preset].beats[i].answer` rồi báo `widget-state.prediction = { beatId, correct, skipped? }` (ADR 0008 Decision 5). Walkthrough có khung không hẹn giờ. Sau khi trả lời hay bỏ qua, đáp án ở lại và engine vẫn chờ tới khi học sinh bấm Tiếp hoặc Phát (thông điệp `learner-continue`, §2; Tiếp còn kết thúc chờ ở khung cuối), hoặc đổi khung, đổi preset, iframe tải lại. Câu hỏi không có khung, và câu hỏi ngoài walkthrough (chat, lớp thường), hẹn 20 s (`PREDICT_WAIT_MS`); hết giờ engine chỉ thôi chờ, không báo `prediction` nào.
 7. `content` hiện ở `#wt-caption`.
+
+**Thứ tự hiển thị của câu dự đoán** (`RUNTIME_VERSION` 2): `sets[preset].beats[i].order` là hoán vị của `beatText[beatId].options`; vị trí k hiện phương án gốc `order[k]`, nên `answer` (vị trí hiện của đáp án đúng) và `order[answer]` (chỉ số gốc) cùng trỏ tới đáp án đúng. Trường chỉ có trong `sets`, không có trong `widgetConfig.beats` hay `beatsByPreset`; vắng `order` thì thứ tự là gốc. Provider tính `order` tất định theo (mã entry, id beat, chỉ số frame) và xoay vòng khi mọi lần xuất hiện của một câu hỏi, trong một preset hoặc cả entry, cùng vị trí đáp án. `resolvePredict` không hỏi (trả `null`) khi `order` không phải hoán vị. Scene lưu với phiên bản runtime cũ bị coi là stale (`isStale`) và cần dựng lại.
 
 **Bắt tay** (ADR 0013 §2):
 - Host giữ `desired[sceneId]` là `SET_WIDGET_STATE` cuối cùng.
@@ -66,6 +68,8 @@ Kênh hiện có gồm `runtime-error`, `element-picked`, `element-picker-disarm
 ```json
 { "__maicInteractive": true, "kind": "widget-state", "v": 1, "walkthroughId": "binary-search", "preset": "mid-hit", "frame": 7 }
 ```
+
+**`learner-continue`** (mới, 1c) báo học sinh vừa đi tiếp trong walkthrough: `{ __maicInteractive: true, kind: 'learner-continue', v: 1, walkthroughId }`. Runtime gửi mỗi lần học sinh bấm Tiếp, và khi Phát bắt đầu chạy (Tạm dừng thì không gửi). Host đọc riêng bằng `parseLearnerContinue` (`lib/tutor/protocol/messages.ts`), không ghi nó như trạng thái học sinh. Engine dùng nó để kết thúc chờ dự đoán (§1 điều 6), khi nguồn là một iframe trên trang và `walkthroughId` khớp.
 
 ## 3. Tool agent `generate_walkthrough` (mới, lát 1b; ADR 0011)
 
@@ -218,8 +222,8 @@ declare function moderate(text: string, ctx: { direction: 'in' | 'out'; locale: 
   "sources": ["https://…"] }
 ```
 
-- **Đạt** khi hai model (`tutor-review-cp`, `tutor-review-cp-2`) đều có mọi điểm ≥ 4 và `factErrors` rỗng. Bất đồng thì chạy model thứ ba **nếu có nhà cung cấp thứ ba**; cấu hình hiện tại chỉ có hai nhà cung cấp nên bất đồng = trượt (ADR 0014 quyết định 8). Trượt → entry **không được phát hành**: dev, test và e2e dùng mọi entry trong `SUBJECT_PACKS`; bản phát hành đặt `OPENMAIC_REQUIRE_REVIEW=true` (`isReviewRequired()`), khi đó `lib/widgets/index.ts` dựng registry từ `releasedPacks()` (`lib/subjects/release.ts`) và chỉ giữ entry có file review đạt ở đúng `entryRev`.
-- Kết quả lưu cạnh entry: `lib/subjects/<id>/reviews/<entryId>@<entryRev>.json`, được commit. File có dạng `{ "contentHash", "reviews": [r1, r2] }`; "đạt" tính lại bằng `panelVerdict(r1, r2)` (không tin trường `verdict` lưu sẵn) và `contentHash` phải bằng `entryContentHash(entry)` hiện tại, nên sửa entry sau khi duyệt thì review mất hiệu lực. Test `tests/subjects/reviews.test.ts` kiểm cơ chế lọc.
+- **Đạt** khi hai model (`tutor-review-cp`, `tutor-review-cp-2`) đều có mọi điểm ≥ 4, `factErrors` rỗng và `issues` rỗng (mọi issue còn mở đều chặn đạt). Bất đồng thì chạy model thứ ba **nếu có nhà cung cấp thứ ba**; cấu hình hiện tại chỉ có hai nhà cung cấp nên bất đồng = trượt (ADR 0014 quyết định 8). Trượt → entry **không được phát hành**: dev, test và e2e dùng mọi entry trong `SUBJECT_PACKS`; bản phát hành đặt `OPENMAIC_REQUIRE_REVIEW=true` (`isReviewRequired()`), khi đó `lib/widgets/index.ts` dựng registry từ `releasedPacks()` (`lib/subjects/release.ts`) và chỉ giữ entry có file review đạt ở đúng `entryRev`.
+- Kết quả lưu cạnh entry: `lib/subjects/<id>/reviews/<entryId>@<entryRev>.json`, được commit. File có dạng `{ "contentHash", "framesHash": { preset: { locale } }, "reviews": [r1, r2] }`; "đạt" tính lại bằng `panelVerdict(r1, r2)` (không tin trường `verdict` lưu sẵn). `contentHash` phải bằng `entryContentHash(entry)` và `framesHash` phải bằng `entryFramesHash(entry)` hiện tại (mọi preset và locale), nên sửa lời khung, hình, code, đề hoặc bất kỳ nội dung nào sau khi duyệt thì review mất hiệu lực. Test `tests/subjects/reviews.test.ts` kiểm cơ chế lọc.
 
 ### 8.3. Dữ liệu học sinh: kind `tutorLearning`
 

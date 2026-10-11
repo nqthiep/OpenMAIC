@@ -57,10 +57,12 @@ import katex from 'katex';
 import { safeKatexOptions } from '@openmaic/dsl';
 import { createLogger } from '@/lib/logger';
 import { useWidgetRuntimeState } from '@/lib/store/widget-runtime-state';
+import { isWalkthroughScene } from '@/lib/widgets/policy';
+import { parseLearnerContinue } from '@/lib/tutor/protocol/messages';
 
 const log = createLogger('ActionEngine');
 
-/** Max wait for a prediction answer; on timeout the engine carries on (= skipped). */
+/** Max wait for a prediction answer in a regular classroom; a walkthrough waits for the learner. */
 export const PREDICT_WAIT_MS = 20_000;
 
 /** Timer pair, injectable so the prediction wait is unit-testable. */
@@ -181,6 +183,20 @@ function isPlayableVideoTask(task: MediaTask): boolean {
   return task.status === 'done' && !!task.objectUrl;
 }
 
+/** Whether `source` is a frame of this page; the walkthrough runs in one. */
+function isPageFrame(source: MessageEventSource | null): boolean {
+  return Array.from(document.querySelectorAll('iframe')).some(
+    (frame) => frame.contentWindow === source,
+  );
+}
+
+/** `widgetConfig.walkthroughId` of a scene: the id its iframe reports under. */
+function walkthroughIdOf(scene: unknown): string | undefined {
+  const config = (scene as { content?: { widgetConfig?: { walkthroughId?: unknown } } } | undefined)
+    ?.content?.widgetConfig;
+  return typeof config?.walkthroughId === 'string' ? config.walkthroughId : undefined;
+}
+
 // ==================== ActionEngine ====================
 
 /** Callback for sending messages to widget iframe */
@@ -198,6 +214,8 @@ export class ActionEngine {
   private effectTimer: ReturnType<typeof setTimeout> | null = null;
   private widgetMessageCallback: WidgetMessageCallback | null = null;
   private predictTimer: PredictTimer;
+  /** Cancel functions of the waits still pending (prediction, video, speech); see dispose(). */
+  private pendingWaits = new Set<() => void>();
 
   constructor(
     stageStore: StageStore,
@@ -217,12 +235,13 @@ export class ActionEngine {
     this.widgetMessageCallback = callback;
   }
 
-  /** Clean up timers when the engine is no longer needed */
+  /** Clean up timers and release every pending wait when the engine is no longer needed */
   dispose(): void {
     if (this.effectTimer) {
       clearTimeout(this.effectTimer);
       this.effectTimer = null;
     }
+    for (const cancel of [...this.pendingWaits]) cancel();
   }
 
   /**
@@ -356,14 +375,19 @@ export class ActionEngine {
     if (!this.audioPlayer) return;
 
     return new Promise<void>((resolve) => {
-      this.audioPlayer!.onEnded(() => resolve());
+      const done = () => {
+        this.pendingWaits.delete(done);
+        resolve();
+      };
+      this.pendingWaits.add(done);
+      this.audioPlayer!.onEnded(done);
       // The legacy URL of an unconverted pair rides along as the fallback of
       // last resort; converted documents carry no audioUrl.
       this.audioPlayer!.play(action.audioId || '', (action as LegacySpeechAction).audioUrl)
         .then((audioStarted) => {
-          if (!audioStarted) resolve();
+          if (!audioStarted) done();
         })
-        .catch(() => resolve());
+        .catch(done);
     });
   }
 
@@ -387,13 +411,20 @@ export class ActionEngine {
       // deferred restore that is done but still byte-less.
       if (!isPlayableVideoTask(binding.task) && binding.task.status !== 'failed') {
         // Wait for media to be playable (or fail)
+        let released = false;
         await new Promise<void>((resolve) => {
           let unsubscribe = () => {};
           const finish = () => {
             unsubscribe();
             options.signal?.removeEventListener('abort', finish);
+            this.pendingWaits.delete(release);
             resolve();
           };
+          const release = () => {
+            released = true;
+            finish();
+          };
+          this.pendingWaits.add(release);
           unsubscribe = useMediaGenerationStore.subscribe((state) => {
             const t = resolveActionVideoMedia(this.stageStore, state.tasks, action.elementId)?.task;
             if (!t || isPlayableVideoTask(t) || t.status === 'failed') {
@@ -408,7 +439,7 @@ export class ActionEngine {
           }
         });
 
-        if (options.signal?.aborted) return;
+        if (released || options.signal?.aborted) return;
       }
 
       // If failed, skip playback
@@ -432,6 +463,7 @@ export class ActionEngine {
         clearTimeout(timeout);
         unsubscribe();
         options.signal?.removeEventListener('abort', abortPlayback);
+        this.pendingWaits.delete(abortPlayback);
         resolve();
       };
       const abortPlayback = () => {
@@ -450,6 +482,7 @@ export class ActionEngine {
         }
       });
       options.signal?.addEventListener('abort', abortPlayback, { once: true });
+      this.pendingWaits.add(abortPlayback);
       if (useCanvasStore.getState().playingVideoElementId !== action.elementId) {
         finish();
       }
@@ -905,43 +938,90 @@ export class ActionEngine {
     action: WidgetSetStateAction,
     options: ActionExecutionOptions = {},
   ): Promise<void> {
-    // Prediction question: after sending, wait for the learner's answer (INTERFACES §1 item 6).
+    // Prediction question: the wait ends on the learner's answer or move-on (INTERFACES §1 item 6).
     // `execute` returns early for silent mode, so silent/export never gets here.
     const beatId = (action.state.predict as { beatId?: unknown } | undefined)?.beatId;
     const sceneId = typeof beatId === 'string' ? this.stageStore.getState().currentSceneId : null;
-    // An older answer for the same beat (replay) does not count: wait for a new `state`.
-    const stale = sceneId ? useWidgetRuntimeState.getState().byScene[sceneId]?.state : undefined;
+    // Subscribed before sending: the widget's reply can land during the delay below.
+    const waiting =
+      sceneId && typeof beatId === 'string'
+        ? this.waitForPrediction(sceneId, beatId, action.state, options.signal)
+        : null;
     this.sendWidgetMessage('SET_WIDGET_STATE', { state: action.state, content: action.content });
     // Quick delay for state change to propagate
     await delay(WIDGET_MS);
-    if (sceneId && typeof beatId === 'string') {
-      await this.waitForPrediction(sceneId, beatId, stale, options.signal);
-    }
+    await waiting;
   }
 
-  /** Resolves when `widget-state` carries a prediction for `beatId` (answered or skipped), on timeout or on abort. */
+  /**
+   * Resolves when the learner answers `beatId` (a skip counts too) in a regular classroom, or moves on
+   * from the question: the widget then reports a frame or preset other than the question's, or the
+   * iframe reloads. Also on abort and dispose. A walkthrough keeps the answer on screen until the
+   * learner moves on; its Tiếp or Phát (`learner-continue`) is a move-on too, also on the last frame.
+   * A regular classroom gives up after PREDICT_WAIT_MS, and so does a walkthrough question without a
+   * frame, since a frame move cannot be seen then.
+   */
   private waitForPrediction(
     sceneId: string,
     beatId: string,
-    stale: unknown,
+    question: Record<string, unknown>,
     signal?: AbortSignal,
   ): Promise<void> {
+    // An older state (a replay of the same beat) does not count: wait for a new `widget-state`.
+    const stale = useWidgetRuntimeState.getState().byScene[sceneId]?.state;
+    const { frame, preset } = question;
+    const scene = this.stageStore.getState().scenes?.find((s) => s.id === sceneId);
+    // Only a walkthrough shown in its iframe is answered by the learner. Chat has no widget callback,
+    // so its question keeps the regular timer.
+    const walkthrough = this.widgetMessageCallback !== null && isWalkthroughScene(scene);
+    const timed = !walkthrough || typeof frame !== 'number';
     return new Promise<void>((resolve) => {
-      const answered = (byScene: ReturnType<typeof useWidgetRuntimeState.getState>['byScene']) => {
-        const state = byScene[sceneId]?.state;
-        return state !== stale && state?.prediction?.beatId === beatId;
-      };
+      // set when the widget reports the question's frame; a later different frame is a move-on
+      let shown = false;
       let unsubscribe = () => {};
+      let stopListening = () => {};
+      let timer: unknown;
       const finish = () => {
         unsubscribe();
-        this.predictTimer.clear(timer);
+        stopListening();
+        if (timed) this.predictTimer.clear(timer);
         signal?.removeEventListener('abort', finish);
+        this.pendingWaits.delete(finish);
         resolve();
       };
-      const timer = this.predictTimer.set(finish, PREDICT_WAIT_MS);
-      unsubscribe = useWidgetRuntimeState.subscribe((s) => answered(s.byScene) && finish());
+      unsubscribe = useWidgetRuntimeState.subscribe(({ byScene }) => {
+        const state = byScene[sceneId]?.state;
+        if (!state) {
+          // the iframe reloaded (its state is cleared), so a shown question is gone
+          if (shown) finish();
+          return;
+        }
+        if (state === stale) return;
+        // a walkthrough keeps the answer on screen until the learner moves on
+        if (!walkthrough && state.prediction?.beatId === beatId) return finish();
+        if (state.frame === frame && (preset === undefined || state.preset === preset)) {
+          shown = true;
+        } else if (shown) {
+          finish();
+        }
+      });
+      if (walkthrough && typeof window !== 'undefined') {
+        // Tiếp or Phát in the walkthrough. Unlike a frame change, it also comes on the last frame.
+        // A framed question counts only once the widget has shown it.
+        const walkthroughId = walkthroughIdOf(scene);
+        const onMessage = (event: MessageEvent) => {
+          if (typeof frame === 'number' && !shown) return;
+          const continued = parseLearnerContinue(event.data);
+          if (!continued || continued.walkthroughId !== walkthroughId) return;
+          if (isPageFrame(event.source)) finish();
+        };
+        window.addEventListener('message', onMessage);
+        stopListening = () => window.removeEventListener('message', onMessage);
+      }
+      this.pendingWaits.add(finish);
       signal?.addEventListener('abort', finish, { once: true });
-      if (signal?.aborted || answered(useWidgetRuntimeState.getState().byScene)) finish();
+      if (timed) timer = this.predictTimer.set(finish, PREDICT_WAIT_MS);
+      if (signal?.aborted) finish();
     });
   }
 

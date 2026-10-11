@@ -120,6 +120,29 @@ interface PlaybackChromeRootProps {
 }
 
 /**
+ * The scene auto-play moves to after `completedSceneId`, or null to stay put.
+ * It moves only while the completed scene is still the current one, so picking
+ * another lesson during the pause cancels the advance. Quiz, interactive and PBL
+ * scenes wait for the user.
+ */
+export function autoAdvanceTarget(args: {
+  scenes: ReadonlyArray<{ id: string; type: string }>;
+  completedSceneId: string;
+  currentSceneId: string | null;
+  pendingOutlineCount: number;
+}): string | null {
+  const { scenes, completedSceneId, currentSceneId, pendingOutlineCount } = args;
+  if (currentSceneId !== completedSceneId) return null;
+  const idx = scenes.findIndex((scene) => scene.id === completedSceneId);
+  if (idx < 0) return null;
+  const { type } = scenes[idx];
+  if (type === 'quiz' || type === 'interactive' || type === 'pbl') return null;
+  if (idx < scenes.length - 1) return scenes[idx + 1].id;
+  // Last scene done while the next outline is still generating: wait on the pending page.
+  return pendingOutlineCount > 0 ? PENDING_SCENE_ID : null;
+}
+
+/**
  * PlaybackChromeRoot — owns the entire playback/autonomous chrome and
  * its state. Mounted whenever `mode !== 'edit'`. The Pro Switch in
  * `Header` calls `onEnterProMode`; the parent `Stage` is responsible
@@ -311,6 +334,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     const discussionAbortRef = useRef<AbortController | null>(null);
     const presentationIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cursorSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pendingCursorRef = useRef<{ stageId: string; cursor: PlaybackCursor } | null>(null);
     const stageRef = useRef<HTMLDivElement>(null);
     // Guard to prevent double flash when manual stop triggers onDiscussionEnd
@@ -581,7 +605,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
             discussionAbortRef.current.abort();
             discussionAbortRef.current = null;
           }
-          engineRef.current?.stop();
+          engineRef.current?.dispose();
           discussionTTS.cleanup();
           resetSceneState();
         },
@@ -693,7 +717,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
       const initializeScene = async () => {
         const previousEngine = engineRef.current;
         engineRef.current = null;
-        previousEngine?.stop();
+        previousEngine?.dispose();
 
         const previousSceneId = activeSceneIdRef.current;
         if (previousSceneId && previousSceneId !== currentScene?.id) {
@@ -925,39 +949,21 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
             // Auto-play: advance to next scene after a short pause
             const { autoPlayLecture } = useSettingsStore.getState();
             if (autoPlayLecture) {
-              setTimeout(() => {
+              if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
+              const completedSceneId = currentScene.id;
+              autoAdvanceTimerRef.current = setTimeout(() => {
+                autoAdvanceTimerRef.current = null;
                 const stageState = useStageStore.getState();
                 if (!useSettingsStore.getState().autoPlayLecture) return;
-                const allScenes = stageState.scenes;
-                const curId = stageState.currentSceneId;
-                const idx = allScenes.findIndex((s) => s.id === curId);
-                if (idx >= 0 && idx < allScenes.length - 1) {
-                  const currentScene = allScenes[idx];
-                  if (
-                    currentScene.type === 'quiz' ||
-                    currentScene.type === 'interactive' ||
-                    currentScene.type === 'pbl'
-                  ) {
-                    return;
-                  }
-                  autoStartRef.current = true;
-                  stageState.setCurrentSceneId(allScenes[idx + 1].id);
-                } else if (
-                  idx === allScenes.length - 1 &&
-                  stageState.generatingOutlines.length > 0
-                ) {
-                  // Last scene exhausted but next is still generating — go to pending page
-                  const currentScene = allScenes[idx];
-                  if (
-                    currentScene.type === 'quiz' ||
-                    currentScene.type === 'interactive' ||
-                    currentScene.type === 'pbl'
-                  ) {
-                    return;
-                  }
-                  autoStartRef.current = true;
-                  stageState.setCurrentSceneId(PENDING_SCENE_ID);
-                }
+                const target = autoAdvanceTarget({
+                  scenes: stageState.scenes,
+                  completedSceneId,
+                  currentSceneId: stageState.currentSceneId,
+                  pendingOutlineCount: stageState.generatingOutlines.length,
+                });
+                if (!target) return;
+                autoStartRef.current = true;
+                stageState.setCurrentSceneId(target);
               }, 1500);
             }
           },
@@ -1007,6 +1013,15 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
       // eslint-disable-next-line react-hooks/exhaustive-deps -- Only re-run when scene changes, functions are stable refs
     }, [currentScene]);
 
+    // Picking another lesson or unmounting drops a pending auto-advance. Keyed on the
+    // scene id, so a refreshed scene object does not cancel it.
+    useEffect(() => {
+      return () => {
+        if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = null;
+      };
+    }, [currentSceneId]);
+
     // Cleanup on unmount
     useEffect(() => {
       const audioPlayer = audioPlayerRef.current;
@@ -1019,7 +1034,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         if (pendingCursor) persistCursorSafely(pendingCursor);
         saveSceneResumePosition(activeSceneIdRef.current, currentPlaybackActionIndexRef.current);
         if (engineRef.current) {
-          engineRef.current.stop();
+          engineRef.current.dispose();
         }
         audioPlayer.destroy();
         if (discussionAbortRef.current) {

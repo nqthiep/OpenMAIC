@@ -131,14 +131,32 @@ export interface PredictLabels {
   skip: string;
   correct: string;
   incorrect: string;
+  /** Word shown beside the right option once the question is closed. */
+  answer: string;
+}
+
+/** A glyph after an option's text. Hidden from screen readers: the status line carries the words. */
+function mark(btn: HTMLElement, glyph: string): void {
+  const span = btn.ownerDocument.createElement('span');
+  span.setAttribute('aria-hidden', 'true');
+  span.textContent = ` ${glyph}`;
+  btn.appendChild(span);
+}
+
+/** A word after an option's text. Unlike `mark`, screen readers read it. */
+function tag(btn: HTMLElement, word: string): void {
+  const span = btn.ownerDocument.createElement('span');
+  span.textContent = ` ${word}`;
+  btn.appendChild(span);
 }
 
 /**
- * Câu hỏi dự đoán trong `#wt-predict`: đề, các nút chọn (`<button data-option>`, dùng được bằng
- * bàn phím) và "Bỏ qua". `onPick(i | null)` được gọi tối đa một lần; sau đó nút bị khoá, nút đúng
- * có `wt-on`, nút đã chọn `aria-pressed`, kết quả hiện ở `<p role="status" tabindex="-1">`
- * (bỏ qua: chỉ còn đoạn này, chữ là nhãn `skip`, `data-result="skipped"`).
- * Focus: nút đầu tiên khi câu hỏi hiện ra, đoạn kết quả sau khi trả lời hoặc bỏ qua.
+ * Prediction question in `#wt-predict`: the prompt, the option buttons (`<button data-option>`,
+ * keyboard reachable) and "Skip". `onPick(i | null)` is called at most once. After that every button
+ * is locked, the right option carries `wt-on`, a check mark and the word `labels.answer`, a wrong
+ * pick gets a red border and a cross, and the result shows in `<p role="status" tabindex="-1">`.
+ * Skip keeps the question on screen with the answer revealed (`data-result="skipped"`).
+ * Focus: the first option when the question appears, the result after an answer or a skip.
  */
 export function renderPredict(
   el: HTMLElement,
@@ -175,15 +193,22 @@ export function renderPredict(
   const finish = (chosen: number | null) => {
     if (done) return;
     done = true;
+    for (const b of [...buttons, skip]) b.disabled = true;
+    const right = buttons[q.answer];
+    right.classList.add('wt-on');
+    mark(right, '✓');
+    tag(right, labels.answer);
     if (chosen === null) {
       el.setAttribute('data-result', 'skipped');
       status.textContent = labels.skip;
-      el.replaceChildren(status);
     } else {
       const hit = chosen === q.answer;
-      for (const b of [...buttons, skip]) b.disabled = true;
-      buttons[chosen].setAttribute('aria-pressed', 'true');
-      buttons[q.answer].classList.add('wt-on');
+      const picked = buttons[chosen];
+      picked.setAttribute('aria-pressed', 'true');
+      if (!hit) {
+        picked.style.borderColor = 'var(--wt-err)';
+        mark(picked, '✗');
+      }
       el.setAttribute('data-result', hit ? 'correct' : 'incorrect');
       status.textContent = hit ? labels.correct : labels.incorrect;
     }

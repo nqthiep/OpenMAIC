@@ -85,18 +85,20 @@ describe.skipIf(!REQUIRED)('runtime predict mode (browser)', () => {
     await ask();
     await pw(widget.locator('#wt-predict .wt-predict-ask')).toHaveText(text.ask!);
     const opts = widget.locator('#wt-predict button[data-option]');
-    expect(await opts.allTextContents()).toEqual(text.options);
+    expect(await opts.allTextContents()).toEqual(beat.order!.map((j) => text.options![j]));
     await pw(widget.locator('#wt-predict button[data-predict-skip]')).toHaveText(data.labels.skip);
     expect(await predictions()).toHaveLength(0); // asking alone sends no prediction
 
-    // moving on before an answer clears the panel and reports it skipped (the engine stops waiting)
+    // moving on before an answer clears the panel; the frame change ends the engine's wait, no skip
+    const before = (await messages()).length;
+    const predictedBefore = (await predictions()).length;
     await send({ frame: 0 });
     await pw(widget.locator('#wt-predict button')).toHaveCount(0);
-    await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
-    expect((await predictions())[0]).toMatchObject({
-      frame: 0,
-      prediction: { beatId: beat.id, correct: false, skipped: true },
-    });
+    await vi.waitFor(async () =>
+      expect((await messages()).slice(before).some((m) => m.frame === 0)).toBe(true),
+    );
+    // The frame change sent no prediction: the count is what it was before the move.
+    expect(await predictions()).toHaveLength(predictedBefore);
     await page.close();
   });
 
@@ -152,8 +154,9 @@ describe.skipIf(!REQUIRED)('runtime predict mode (browser)', () => {
     await page.close();
   });
 
-  it('predict with playing:true holds playback until the question is answered', async () => {
+  it('predict with playing:true holds playback until the learner continues', async () => {
     await load();
+    const before = (await messages()).length;
     await send({
       preset: 'absent',
       frame: beat.frame,
@@ -162,17 +165,32 @@ describe.skipIf(!REQUIRED)('runtime predict mode (browser)', () => {
       predict: { beatId: beat.id },
     });
     const root = widget.locator('#wt-root');
+    const continues = async () =>
+      (await messages()).filter((m) => m.kind === 'learner-continue').length;
     await pw(widget.locator('#wt-predict button[data-option]').first()).toBeVisible();
+    // The engine's echo of the asked frame: it has handled the question and paused.
+    await vi.waitFor(async () =>
+      expect(
+        (await messages()).slice(before).some((m) => m.frame === beat.frame && !m.prediction),
+      ).toBe(true),
+    );
     await pw(root).toHaveAttribute('data-playing', 'false');
-    await page.waitForTimeout(1500); // > 2 ticks at speed 2
     await pw(root).toHaveAttribute('data-frame-index', String(beat.frame));
     await pw(widget.locator('#wt-predict button[data-option]').first()).toBeVisible();
     expect(await predictions()).toHaveLength(0);
 
     await widget.locator(`#wt-predict button[data-option="${beat.answer}"]`).click();
+    await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
+    // the answer stays on screen and playback stays held until the learner presses next or play
+    await pw(widget.locator('#wt-predict [role=status]')).toHaveText(data.labels.correct);
+    await pw(root).toHaveAttribute('data-playing', 'false');
+    await pw(root).toHaveAttribute('data-frame-index', String(beat.frame));
+    expect(await continues()).toBe(0);
+
+    await widget.locator('#wt-play').click();
     await pw(root).toHaveAttribute('data-playing', 'true');
     await pw(root).not.toHaveAttribute('data-frame-index', String(beat.frame), { timeout: 3000 });
-    await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
+    await vi.waitFor(async () => expect(await continues()).toBe(1));
     await page.close();
   });
 
@@ -193,11 +211,14 @@ describe.skipIf(!REQUIRED)('runtime predict mode (browser)', () => {
       }),
     ]);
     // later state messages never carry the prediction again
+    const before = (await messages()).length;
+    const predictedBefore = (await predictions()).length;
     await send({ frame: 0 });
-    await vi.waitFor(async () =>
-      expect((await messages()).some((m) => m.frame === 0 && !m.prediction)).toBe(true),
-    );
-    expect(await predictions()).toHaveLength(1);
+    await vi.waitFor(async () => {
+      const fresh = (await messages()).slice(before);
+      expect(fresh.some((m) => m.frame === 0 && !m.prediction)).toBe(true);
+    });
+    expect(await predictions()).toHaveLength(predictedBefore);
     await page.close();
   });
 
@@ -214,15 +235,29 @@ describe.skipIf(!REQUIRED)('runtime predict mode (browser)', () => {
     await page.close();
   });
 
-  it('skip: clears the panel and sends skipped once', async () => {
+  it('skip: keeps the question with the answer revealed and sends skipped once', async () => {
     await load();
     await ask();
     await widget.locator('#wt-predict button[data-predict-skip]').click();
-    await pw(widget.locator('#wt-predict button')).toHaveCount(0);
+    await pw(widget.locator('#wt-predict')).toHaveAttribute('data-result', 'skipped');
+    await pw(widget.locator('#wt-predict .wt-predict-ask')).toHaveText(text.ask!);
+    await pw(widget.locator('#wt-predict [role=status]')).toHaveText(data.labels.skip);
+    await pw(widget.locator(`#wt-predict button[data-option="${beat.answer}"]`)).toHaveClass(
+      /wt-on/,
+    );
+    await pw(widget.locator('#wt-predict button[data-option]').first()).toBeDisabled();
     await vi.waitFor(async () => expect(await predictions()).toHaveLength(1));
     const p = await predictions();
     expect(p).toHaveLength(1);
     expect(p[0].prediction).toEqual({ beatId: beat.id, correct: false, skipped: true });
+    // moving on after the skip reports nothing more
+    const before = (await messages()).length;
+    const predictedBefore = (await predictions()).length;
+    await send({ frame: 0 });
+    await vi.waitFor(async () =>
+      expect((await messages()).slice(before).some((m) => m.frame === 0)).toBe(true),
+    );
+    expect(await predictions()).toHaveLength(predictedBefore);
     await page.close();
   });
 

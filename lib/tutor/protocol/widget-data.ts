@@ -21,8 +21,10 @@ export interface BeatRef {
   id: string;
   occurrence: number;
   frame: number;
-  /** Chỉ số đáp án đúng của câu dự đoán; provider tính lúc dựng, chỉ có trong `sets[p].beats`. */
+  /** Shown position of the correct option (after `order`); set by the provider, only in `sets[p].beats`. */
   answer?: number;
+  /** Only in `sets[p].beats`: shown position k displays the original option `order[k]`. Absent = original order. */
+  order?: number[];
 }
 
 export interface PresetInfo {
