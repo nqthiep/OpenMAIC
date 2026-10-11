@@ -101,6 +101,7 @@ import { useNearViewport } from '@/lib/hooks/use-near-viewport';
 import { SpeechButton } from '@/components/audio/speech-button';
 import { useImportClassroom } from '@/lib/import/use-import-classroom';
 import {
+  isLearnHomeBuild,
   isProWorkbenchEnabled,
   isPptxImportEnabled,
   shouldShowVocationalTestUi,
@@ -187,6 +188,8 @@ function HomePage() {
   }, [router, workbenchEntryEnabled]);
   const [form, setForm] = useState<FormState>(initialFormState);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Settings lets users add providers and keys. A student deployment fixes both in openmaic.yml.
+  const settingsEnabled = !isLearnHomeBuild();
   const [settingsSection, setSettingsSection] = useState<
     import('@/lib/types/settings').SettingsSection | undefined
   >(undefined);
@@ -666,6 +669,7 @@ function HomePage() {
         {/* Theme Selector */}
         <div className="relative">
           <button
+            aria-label={t('settings.theme')}
             onClick={() => {
               setThemeOpen(!themeOpen);
             }}
@@ -723,26 +727,33 @@ function HomePage() {
           )}
         </div>
 
-        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
+        {settingsEnabled && (
+          <>
+            <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
 
-        {/* Settings Button */}
-        <div className="relative">
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
-          >
-            <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-          </button>
-        </div>
+            {/* Settings Button */}
+            <div className="relative">
+              <button
+                aria-label={t('settings.title')}
+                onClick={() => setSettingsOpen(true)}
+                className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
+              >
+                <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
+              </button>
+            </div>
+          </>
+        )}
       </div>
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={(open) => {
-          setSettingsOpen(open);
-          if (!open) setSettingsSection(undefined);
-        }}
-        initialSection={settingsSection}
-      />
+      {settingsEnabled && (
+        <SettingsDialog
+          open={settingsOpen}
+          onOpenChange={(open) => {
+            setSettingsOpen(open);
+            if (!open) setSettingsSection(undefined);
+          }}
+          initialSection={settingsSection}
+        />
+      )}
 
       {/* ═══ Background Decor ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -938,6 +949,7 @@ function HomePage() {
         <AnimatePresence>
           {error && (
             <motion.div
+              role="alert"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}

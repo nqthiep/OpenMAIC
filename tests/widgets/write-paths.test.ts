@@ -2,27 +2,23 @@
  * Inventory of every scene write path and iframe render point (ADR 0010, Q12).
  * Inventory only: it does not check that the guard for each layer is installed.
  */
-import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 type Layer = 'L2-tool' | 'L1-render-only' | 'L1-render-point' | 'L1-export' | 'not-scene';
 
 interface Classified {
   layer: Layer;
-  planned?: boolean;
   why: string;
 }
 
 const CLASSIFIED: Record<string, Classified> = {
-  // --- planned files (not yet in the tree) ---
+  // --- L2: agent-runtime tools that write scenes/documents ---
   'lib/server/agent-runtime/walkthrough-tools.ts': {
     layer: 'L2-tool',
-    planned: true,
     why: 'walkthrough tool writes scenes',
   },
-
-  // --- L2: agent-runtime tools that write scenes/documents ---
   'lib/server/agent-runtime/document-writes.ts': {
     layer: 'L2-tool',
     why: 'putSceneBringingCurrent: shared helper behind tool scene writes',
@@ -41,6 +37,10 @@ const CLASSIFIED: Record<string, Classified> = {
   'app/api/persistence/[...path]/route.ts': {
     layer: 'L2-tool',
     why: 'server persistence write: logs stored code widgets (ADR 0010 L2)',
+  },
+  'app/api/learn/start/route.ts': {
+    layer: 'L2-tool',
+    why: 'student door: buildLesson runs assertScenePolicy before saveDocument (ADR 0016)',
   },
   'app/api/stages/[id]/generation-complete/route.ts': {
     layer: 'not-scene',
@@ -97,23 +97,38 @@ const CLASSIFIED: Record<string, Classified> = {
   'lib/store/interactive-iframe-pool.ts': { layer: 'not-scene', why: 'iframe pool state' },
 };
 
-function gitGrep(args: string): string[] {
-  try {
-    return execSync(`git grep -l ${args}`, { encoding: 'utf8' }).split('\n').filter(Boolean);
-  } catch {
-    return []; // git grep exits 1 on no match
-  }
+/**
+ * Source files under `dirs`: tracked files, plus new files not yet `git add`ed (ignored files
+ * excluded). A git failure throws: it must not turn into an empty inventory.
+ */
+function sourceFiles(dirs: readonly string[]): string[] {
+  const listed = execFileSync(
+    'git',
+    ['ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', ...dirs],
+    { encoding: 'utf8' },
+  );
+  // A tracked file deleted from disk has no content to scan.
+  return listed.split('\0').filter((file) => file !== '' && existsSync(file));
+}
+
+/** Files under `dirs` whose content matches `pattern`. */
+function filesMatching(dirs: readonly string[], pattern: RegExp): string[] {
+  return sourceFiles(dirs).filter((file) => pattern.test(readFileSync(file, 'utf8')));
 }
 
 function findMatches(): string[] {
-  const dirs = 'lib app components';
-  const code = gitGrep(
-    `-E -e "putScene\\(" -e "putSceneBringingCurrent\\(" -e "saveDocument\\(" ` +
-      `-e "createSceneWithActions\\(" -e "srcDoc[=:]" -e "inlineHtmlAssets\\(" -- ${dirs}`,
+  const code = filesMatching(
+    ['lib', 'app', 'components'],
+    /putScene\(|putSceneBringingCurrent\(|saveDocument\(|createSceneWithActions\(|srcDoc[=:]|inlineHtmlAssets\(/,
   );
-  const routes = gitGrep(
-    `-E "export (async function|const) (PUT|POST)" -- app/api/classroom app/api/persistence ` +
-      `app/api/stages app/api/generate/scene-content`,
+  const routes = filesMatching(
+    [
+      'app/api/classroom',
+      'app/api/persistence',
+      'app/api/stages',
+      'app/api/generate/scene-content',
+    ],
+    /export (async function|const) (PUT|POST)/,
   );
   return [...new Set([...code, ...routes])].sort();
 }
@@ -127,8 +142,8 @@ const CONTENT_GENERATION_CALLERS = [
 
 describe('generateSceneContent callers (ADR 0010 L3)', () => {
   it('only approved files call generateSceneContent(', () => {
-    const callers = gitGrep('-F -e "generateSceneContent(" -- lib app components').filter((f) =>
-      /\.tsx?$/.test(f),
+    const callers = filesMatching(['lib', 'app', 'components'], /generateSceneContent\(/).filter(
+      (f) => /\.tsx?$/.test(f),
     );
     const extra = callers.filter((f) => !CONTENT_GENERATION_CALLERS.includes(f));
     expect(
@@ -161,15 +176,11 @@ describe('scene write-path inventory (ADR 0010)', () => {
     ).toEqual([]);
   });
 
-  it('has no stale non-planned entries', () => {
-    const stale = Object.entries(CLASSIFIED)
-      .filter(([f, c]) => !c.planned && !found.includes(f))
-      .map(([f]) => f);
+  it('has no stale entries', () => {
+    const stale = Object.keys(CLASSIFIED).filter((f) => !found.includes(f));
     expect(
       stale,
-      stale
-        .map((f) => `mục ${f} không còn khớp mẫu: xoá khỏi CLASSIFIED hoặc đặt planned (ADR 0010)`)
-        .join('\n'),
+      stale.map((f) => `mục ${f} không còn khớp mẫu: xoá khỏi CLASSIFIED (ADR 0010)`).join('\n'),
     ).toEqual([]);
   });
 });

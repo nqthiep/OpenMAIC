@@ -24,7 +24,7 @@ import { useExportPPTX } from '@/lib/export/use-export-pptx';
 import { useExportClassroom } from '@/lib/export/use-export-classroom';
 import { classroomHasPlaybackMedia, useExportHtml } from '@/lib/export/use-export-html';
 import { isScriptExportReady, useExportScript } from '@/lib/export/use-export-script';
-import { isVideoExportEnabled } from '@/lib/config/feature-flags';
+import { isLearnHomeBuild, isVideoExportEnabled } from '@/lib/config/feature-flags';
 import { useVideoRenderStore } from '@/lib/store/video-render';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { VideoExportDialog } from './video-export-dialog';
@@ -138,6 +138,8 @@ export function HeaderControls({
   const { exporting: isExportingHtml, exportStandaloneHtml } = useExportHtml();
   const { exporting: isExportingScript, exportScriptDocx, exportScriptMd } = useExportScript();
   const videoExportEnabled = isVideoExportEnabled();
+  // Settings lets users add providers and keys. A student deployment fixes both in openmaic.yml.
+  const settingsEnabled = !isLearnHomeBuild();
   // Video render lives in a global store so its progress ring stays on the
   // export button even after the menu closes / scenes switch mid-render.
   const videoRendering = useVideoRenderStore(
@@ -245,14 +247,15 @@ export function HeaderControls({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Settings */}
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
-          aria-label={t('settings.title')}
-        >
-          <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-        </button>
+        {settingsEnabled && (
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
+            aria-label={t('settings.title')}
+          >
+            <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
+          </button>
+        )}
       </div>
 
       {/* Pro Switch — toggle property: on/off both clickable, not a
@@ -489,7 +492,7 @@ export function HeaderControls({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      {settingsEnabled && <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />}
       {videoExportEnabled && (
         <VideoExportDialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen} />
       )}
