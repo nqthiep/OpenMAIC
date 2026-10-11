@@ -512,6 +512,7 @@ export const defaultRunStepServices: RunStepServices = {
       {
         text: input.text,
         audioId: input.audioId,
+        ownerId,
         connection: input.target.connection,
         requestedVoice: input.voice,
         speed: input.speed,
@@ -569,7 +570,11 @@ export const defaultRunStepServices: RunStepServices = {
           return { status: 'refused', message: error.message, errorCode: 'INVALID_URL' };
         }
         if (error instanceof InvalidOwnerCredentialError) {
-          return { status: 'refused', message: 'invalid owner credential', errorCode: error.code };
+          return {
+            status: 'refused',
+            message: 'Thông tin xác thực không hợp lệ, vui lòng tải lại trang và thử lại.',
+            errorCode: error.code,
+          };
         }
         throw error;
       }
@@ -578,7 +583,7 @@ export const defaultRunStepServices: RunStepServices = {
     return { image, video };
   },
 
-  async generateImage(_ownerId, input, ctx) {
+  async generateImage(ownerId, input, ctx) {
     // What a media Retry sends POST /api/generate/image.
     const result = await generateImageStep(
       {
@@ -590,6 +595,7 @@ export const defaultRunStepServices: RunStepServices = {
           ...(ctx.signal ? { signal: ctx.signal } : {}),
         },
         connection: input.connection,
+        ownerId,
       },
       ctx,
     );
@@ -609,7 +615,7 @@ export const defaultRunStepServices: RunStepServices = {
     });
   },
 
-  async generateVideo(_ownerId, input, ctx) {
+  async generateVideo(ownerId, input, ctx) {
     // What a media Retry sends POST /api/generate/video.
     const result = await generateVideoStep(
       {
@@ -619,6 +625,7 @@ export const defaultRunStepServices: RunStepServices = {
           ...(ctx.signal ? { signal: ctx.signal } : {}),
         },
         connection: input.connection,
+        ownerId,
         onProviderTask: input.onProviderTask,
         ...(input.resume ? { resume: input.resume } : {}),
       },

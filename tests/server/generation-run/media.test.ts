@@ -183,6 +183,7 @@ describe('media step services', () => {
       {
         options: { prompt: 'A leaf', aspectRatio: '4:3', style: 'watercolor', stageId: 'stage-1' },
         connection,
+        ownerId: 'user:a',
       },
       { log },
     );
@@ -212,6 +213,7 @@ describe('media step services', () => {
       {
         options: { prompt: 'Sun', aspectRatio: '16:9' },
         connection,
+        ownerId: 'user:a',
         onProviderTask,
         resume,
       },
@@ -252,7 +254,7 @@ describe('the media slots of a run', () => {
           },
           credential: {
             status: 'refused',
-            message: 'invalid owner credential',
+            message: 'Thông tin xác thực không hợp lệ, vui lòng tải lại trang và thử lại.',
             errorCode: 'INVALID_CREDENTIAL',
           },
         }[name],

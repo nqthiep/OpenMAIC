@@ -31,6 +31,8 @@ export interface NarrationInput {
   providerOptions?: Record<string, unknown>;
   /** Filled in as the provider and voice resolve, for the caller's failure log. */
   trace?: { providerId?: string; voice?: string };
+  /** The account the work is for; the usage recorded here is attributed to it. */
+  ownerId?: string;
 }
 
 export type NarrationRefusal =
@@ -157,6 +159,7 @@ export async function synthesizeNarration(
     providerId: ttsProviderId,
     modelId: config.modelId,
     quantity: text.length,
+    ownerId: input.ownerId,
   });
 
   return { audio, format, providerId: ttsProviderId, modelId: config.modelId };

@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import { accountUserIdOf } from '@/lib/accounts/owner';
 import { createLogger } from '@/lib/logger';
 import { hasBillableTokens, type NormalizedUsage } from '@/lib/usage/normalize';
 
@@ -36,6 +37,8 @@ export interface UsageRecordInput {
   quantity?: number;
   /** Unit for `quantity`. */
   unit?: UsageUnit;
+  /** The account (`acct_<uuid>`) the work is for. Other owners are not recorded. */
+  ownerId?: string;
 }
 
 /** A persisted usage row — pure usage, no cost. */
@@ -56,6 +59,8 @@ export interface UsageRecord {
   // Non-token usage (e.g. image count, video seconds, TTS characters).
   quantity?: number;
   unit?: UsageUnit;
+  /** The account (`acct_<uuid>`) the work is for; absent when no account owns it. */
+  ownerId?: string;
 }
 
 interface RecordOptions {
@@ -125,6 +130,9 @@ export async function recordUsage(
       reasoningTokens: usage.reasoningTokens,
       ...(input.quantity != null ? { quantity: input.quantity } : {}),
       ...(input.unit ? { unit: input.unit } : {}),
+      // Only an account owner is written: usage of any other owner is recorded
+      // exactly as it was before this field existed.
+      ...(input.ownerId && accountUserIdOf(input.ownerId) ? { ownerId: input.ownerId } : {}),
     };
 
     const dir = usageDir(opts.baseDir);
@@ -143,6 +151,8 @@ export interface GenerationUsageInput {
   /** The client-requested model id; falls back to providerId when absent. */
   modelId?: string;
   quantity: number;
+  /** The account the work is for, when the caller has one. */
+  ownerId?: string;
 }
 
 /**
@@ -161,6 +171,7 @@ export function recordGenerationUsage(input: GenerationUsageInput): Promise<void
     modelId,
     modelString: `${input.providerId}:${modelId}`,
     quantity: input.quantity,
+    ownerId: input.ownerId,
   });
 }
 

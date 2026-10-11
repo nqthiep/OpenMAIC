@@ -54,6 +54,8 @@ export interface VideoInput {
    * submitted on.
    */
   resume?: VideoProviderTask;
+  /** The account the work is for; the usage recorded here is attributed to it. */
+  ownerId?: string;
 }
 
 export type VideoRefusal =
@@ -133,6 +135,7 @@ export async function generateVideoStep(
     providerId,
     modelId: model,
     quantity: result.duration,
+    ownerId: input.ownerId,
   });
 
   return result;

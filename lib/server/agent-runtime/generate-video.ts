@@ -619,6 +619,7 @@ async function runVideoGenerationJob(input: VideoJobInput): Promise<void> {
       providerId: input.providerId,
       modelId: input.model,
       quantity: result.duration,
+      ownerId: deps.ownerId,
     });
     log.info(
       `[${toolCallId}] Video generated: provider=${input.providerId}, model=${input.model ?? 'default'}, ${result.width}x${result.height}, ${result.duration}s`,

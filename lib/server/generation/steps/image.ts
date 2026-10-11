@@ -27,6 +27,8 @@ export interface ImageInput {
    * provider's allowlist, on the legacy default provider.
    */
   requestedModel?: string;
+  /** The account the work is for; the usage recorded here is attributed to it. */
+  ownerId?: string;
 }
 
 export type ImageRefusal = 'missing-api-key' | 'missing-model';
@@ -82,6 +84,7 @@ export async function generateImageStep(
     providerId,
     modelId: model,
     quantity: 1,
+    ownerId: input.ownerId,
   });
 
   return result;

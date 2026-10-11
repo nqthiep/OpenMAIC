@@ -335,6 +335,7 @@ export function buildGenerateImageTool(
           providerId,
           modelId: model,
           quantity: 1,
+          ownerId: deps.ownerId,
         });
         log.info(
           `[${toolCallId}] Image generated: provider=${providerId}, model=${model ?? 'default'}, ${result.width}x${result.height}`,
