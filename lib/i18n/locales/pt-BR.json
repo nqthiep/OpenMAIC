@@ -2015,6 +2015,8 @@
     "accountMenu": "Conta: {{username}}",
     "signedInAs": "Conectado como",
     "signOut": "Sair",
+    "signOutOthers": "Sair dos outros dispositivos",
+    "signOutOthersDone": "Os outros dispositivos foram desconectados.",
     "modesLabel": "Escolha entrar ou criar uma conta",
     "modes": {
       "signIn": "Entrar",

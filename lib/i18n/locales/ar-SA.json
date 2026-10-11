@@ -2015,6 +2015,8 @@
     "accountMenu": "الحساب: {{username}}",
     "signedInAs": "تم تسجيل الدخول باسم",
     "signOut": "تسجيل الخروج",
+    "signOutOthers": "تسجيل الخروج من الأجهزة الأخرى",
+    "signOutOthersDone": "تم تسجيل الخروج من الأجهزة الأخرى.",
     "modesLabel": "اختر تسجيل الدخول أو إنشاء حساب",
     "modes": {
       "signIn": "تسجيل الدخول",

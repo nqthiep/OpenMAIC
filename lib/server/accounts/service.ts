@@ -177,6 +177,14 @@ export async function loginAccount(
   // Counted before the first await, so attempts that run concurrently see each
   // other and cannot all pass the check above. A successful sign-in clears the count.
   const failure = deps.throttle.recordFailure(username);
+  // Refused because every tracked name is still locked: no password is checked and nothing is derived.
+  if (failure === undefined) {
+    throw new AccountError(
+      'RATE_LIMITED',
+      'Too many failed sign-in attempts. Try again later.',
+      deps.throttle.retryAfterSeconds(username),
+    );
+  }
 
   const { account, passwordMatches } = await checkCredentials(deps, username, input.password).catch(
     (error: unknown) => {

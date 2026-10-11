@@ -46,7 +46,15 @@ export async function POST(request: Request) {
   }
   // Counted before the first await, so attempts that arrive together cannot all
   // pass the check above. A correct code clears the count below.
-  accessCodeThrottle.recordFailure(throttleKey);
+  // A refused identity gets no comparison at all: the table is full of live locks.
+  if (accessCodeThrottle.recordFailure(throttleKey) === undefined) {
+    const response = apiError('RATE_LIMITED', 429, 'Too many attempts. Try again later.');
+    response.headers.set(
+      'Retry-After',
+      String(accessCodeThrottle.retryAfterSeconds(throttleKey) ?? 900),
+    );
+    return response;
+  }
 
   let body: unknown;
   try {

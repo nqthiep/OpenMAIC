@@ -61,20 +61,12 @@ describe('LoginThrottle', () => {
     expect(throttle.retryAfterSeconds('alice')).toBeUndefined();
   });
 
-  it('reset clears one key and leaves other keys throttled', () => {
-    const { throttle } = createThrottle({ maxFailures: 2 });
-    for (const name of ['alice', 'alice', 'bob', 'bob']) throttle.recordFailure(name);
-    throttle.reset('alice');
-    expect(throttle.retryAfterSeconds('alice')).toBeUndefined();
-    expect(throttle.retryAfterSeconds('bob')).toBe(60);
-  });
-
-  it('bounds tracked keys: inserting maxKeys + 1 keys evicts the oldest and keeps the newest', () => {
+  it('bounds tracked keys: a flood of new names never grows the table past maxKeys', () => {
     const { throttle } = createThrottle({ maxFailures: 1, maxKeys: 3 });
     for (const name of ['k0', 'k1', 'k2', 'k3']) throttle.recordFailure(name);
-    expect(throttle.retryAfterSeconds('k0')).toBeUndefined();
+    expect(throttle.retryAfterSeconds('k0')).toBe(60);
     expect(throttle.retryAfterSeconds('k1')).toBe(60);
-    expect(throttle.retryAfterSeconds('k3')).toBe(60);
+    expect(throttle.retryAfterSeconds('k2')).toBe(60);
   });
 
   it('keeps a locked key through a flood of unlocked keys', () => {
@@ -85,31 +77,33 @@ describe('LoginThrottle', () => {
     expect(throttle.retryAfterSeconds('victim')).toBe(60);
   });
 
-  it('drops expired keys before it evicts a key that is still throttled', () => {
-    const { throttle, advance } = createThrottle({ maxFailures: 2, maxKeys: 2 });
-    throttle.recordFailure('stale');
-    advance(30_000);
-    throttle.recordFailure('victim');
-    throttle.recordFailure('victim');
-    advance(40_000);
-    throttle.recordFailure('newcomer');
-    expect(throttle.retryAfterSeconds('victim')).toBe(20);
-  });
-
-  it('evicts the oldest locked key only when every tracked key is locked', () => {
+  it('refuses a new name, and keeps every live lock, when every tracked key is locked', () => {
     const { throttle } = createThrottle({ maxFailures: 2, maxKeys: 2 });
     for (const name of ['a', 'a', 'b', 'b']) throttle.recordFailure(name);
-    throttle.recordFailure('c');
-    expect(throttle.retryAfterSeconds('a')).toBeUndefined();
+
+    expect(throttle.recordFailure('c')).toBeUndefined();
+    expect(throttle.retryAfterSeconds('a')).toBe(60);
     expect(throttle.retryAfterSeconds('b')).toBe(60);
+    // A refused name is refused before the password check, not only after its failure.
+    expect(throttle.retryAfterSeconds('c')).toBe(60);
+  });
+
+  it('admits refused names again once a lock expires, and keeps the table bounded', () => {
+    const { throttle, advance } = createThrottle({ maxFailures: 2, maxKeys: 2 });
+    for (const name of ['a', 'a', 'b', 'b']) throttle.recordFailure(name);
+    expect(throttle.recordFailure('c')).toBeUndefined();
+
+    advance(60_001);
     expect(throttle.retryAfterSeconds('c')).toBeUndefined();
+    expect(throttle.recordFailure('c')).toBeDefined();
+    expect(throttle.retryAfterSeconds('a')).toBeUndefined();
   });
 
   it('refund takes back exactly the failure it names, and only once', () => {
     const { throttle, advance } = createThrottle({ maxFailures: 2 });
     throttle.recordFailure('alice');
     advance(1_000);
-    const second = throttle.recordFailure('alice');
+    const second = throttle.recordFailure('alice')!;
     expect(throttle.retryAfterSeconds('alice')).toBe(59);
 
     throttle.refund('alice', second);
@@ -124,8 +118,53 @@ describe('LoginThrottle', () => {
   it('refund on an unknown key or a key with no failures does nothing', () => {
     const { throttle } = createThrottle({ maxFailures: 1 });
     expect(() => throttle.refund('nobody', 0)).not.toThrow();
-    const token = throttle.recordFailure('bob');
+    const token = throttle.recordFailure('bob')!;
     throttle.refund('bob', token);
     expect(throttle.retryAfterSeconds('bob')).toBeUndefined();
+  });
+  it('reset clears one key and leaves other keys throttled', () => {
+    const { throttle } = createThrottle({ maxFailures: 2 });
+    for (const name of ['alice', 'alice', 'bob', 'bob']) throttle.recordFailure(name);
+    throttle.reset('alice');
+    expect(throttle.retryAfterSeconds('alice')).toBeUndefined();
+    expect(throttle.retryAfterSeconds('bob')).toBe(60);
+  });
+
+  it('drops expired keys before it evicts a key that is still throttled', () => {
+    const { throttle, advance } = createThrottle({ maxFailures: 2, maxKeys: 2 });
+    throttle.recordFailure('stale');
+    advance(30_000);
+    throttle.recordFailure('victim');
+    throttle.recordFailure('victim');
+    advance(40_000);
+    throttle.recordFailure('newcomer');
+    expect(throttle.retryAfterSeconds('victim')).toBe(20);
+  });
+
+  it('admits a new name when an unlocked key sits behind 64 locked keys', () => {
+    const { throttle } = createThrottle({ maxFailures: 2, maxKeys: 70 });
+    for (let index = 0; index < 64; index += 1) {
+      throttle.recordFailure(`locked${index}`);
+      throttle.recordFailure(`locked${index}`);
+    }
+    throttle.recordFailure('unlocked');
+    for (let index = 0; index < 5; index += 1) {
+      throttle.recordFailure(`more${index}`);
+      throttle.recordFailure(`more${index}`);
+    }
+    expect(throttle.recordFailure('newcomer')).toBeDefined();
+    expect(throttle.retryAfterSeconds('locked0')).toBe(60);
+  });
+
+  it('gives Retry-After as the time until the earliest live lock lapses', () => {
+    const { throttle, advance } = createThrottle({ maxFailures: 2, maxKeys: 2 });
+    throttle.recordFailure('a');
+    throttle.recordFailure('a');
+    advance(10_000);
+    throttle.recordFailure('b');
+    throttle.recordFailure('b');
+    expect(throttle.recordFailure('c')).toBeUndefined();
+    // 'a' locked first and lapses first: 60 s from its first failure, 50 s from now.
+    expect(throttle.retryAfterSeconds('c')).toBe(50);
   });
 });

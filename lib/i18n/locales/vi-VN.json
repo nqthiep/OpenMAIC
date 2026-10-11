@@ -2015,6 +2015,8 @@
     "accountMenu": "Tài khoản: {{username}}",
     "signedInAs": "Đã đăng nhập với",
     "signOut": "Đăng xuất",
+    "signOutOthers": "Đăng xuất các thiết bị khác",
+    "signOutOthersDone": "Đã đăng xuất các thiết bị khác.",
     "modesLabel": "Chọn đăng nhập hoặc tạo tài khoản",
     "modes": {
       "signIn": "Đăng nhập",

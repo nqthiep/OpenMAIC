@@ -17,7 +17,12 @@ import { isBrowserPersistenceEnabled } from '@/lib/persistence/bootstrap';
 import { SESSION_ENDED_EVENT } from '@/lib/persistence/session-end';
 import { cn } from '@/lib/utils';
 import { AccountDialog } from './account-dialog';
-import { fetchAccountSession, signOut, type AccountSession } from './account-api';
+import {
+  fetchAccountSession,
+  signOut,
+  signOutOtherSessions,
+  type AccountSession,
+} from './account-api';
 
 const log = createLogger('AccountControl');
 
@@ -35,6 +40,7 @@ export function AccountControl() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const signingOutRef = useRef(false);
+  const signingOutOthersRef = useRef(false);
   const signInTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -116,6 +122,23 @@ export function AccountControl() {
       });
   };
 
+  const handleSignOutOthers = () => {
+    if (signingOutOthersRef.current) return;
+    signingOutOthersRef.current = true;
+    signOutOtherSessions()
+      .then(() => toast.success(t('account.signOutOthersDone')))
+      .catch((error: unknown) => {
+        log.warn(
+          'Sign-out of other sessions failed',
+          error instanceof Error ? error.name : 'unknown error',
+        );
+        toast.error(t('account.errors.generic'));
+      })
+      .finally(() => {
+        signingOutOthersRef.current = false;
+      });
+  };
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -145,6 +168,10 @@ export function AccountControl() {
         >
           <LogOut className="size-4" aria-hidden="true" />
           {t('account.signOut')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleSignOutOthers} className="cursor-pointer gap-2">
+          <LogOut className="size-4" aria-hidden="true" />
+          {t('account.signOutOthers')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

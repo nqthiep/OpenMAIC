@@ -2033,6 +2033,8 @@
     "accountMenu": "Account: {{username}}",
     "signedInAs": "Signed in as",
     "signOut": "Sign out",
+    "signOutOthers": "Sign out other devices",
+    "signOutOthersDone": "Other devices have been signed out.",
     "modesLabel": "Choose sign in or create account",
     "modes": {
       "signIn": "Sign in",

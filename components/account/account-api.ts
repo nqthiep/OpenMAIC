@@ -117,3 +117,16 @@ export async function signOut(): Promise<void> {
     throw failureFrom(response, body);
   }
 }
+
+/** Signs out every other session of this account. Resolves with how many were signed out. */
+export async function signOutOtherSessions(): Promise<number> {
+  const response = await fetch('/api/auth/revoke-others', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const body = await readJson(response);
+  if (!response.ok || !isRecord(body) || body.success !== true) {
+    throw failureFrom(response, body);
+  }
+  return typeof body.revoked === 'number' ? body.revoked : 0;
+}

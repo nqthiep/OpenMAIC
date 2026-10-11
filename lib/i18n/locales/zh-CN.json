@@ -2015,6 +2015,8 @@
     "accountMenu": "账号：{{username}}",
     "signedInAs": "当前登录账号",
     "signOut": "退出登录",
+    "signOutOthers": "退出其他设备",
+    "signOutOthersDone": "已退出其他设备。",
     "modesLabel": "选择登录或创建账号",
     "modes": {
       "signIn": "登录",

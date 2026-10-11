@@ -407,6 +407,9 @@ provides no isolation for them.
 - **A session that ends** (signed out in another tab, expired, or the account
   disabled) is refused on the next request with `401 SESSION_ENDED`. The page
   then shows a notice and asks the visitor to sign in again.
+- **Sign out other devices** (account menu, or `POST /api/auth/revoke-others`)
+  ends every other session of the account and keeps the current one. Use it after
+  a device is lost or shared.
 - **Course and classroom ids are bearer credentials.** Anyone who holds an id can
   read that course. Only writes and deletes are owner-only. A classroom cannot be
   revoked; a document can be deleted by its owner. A client-chosen classroom id
@@ -421,7 +424,9 @@ provides no isolation for them.
   process, so a multi-instance deployment gets one budget per instance. Behind a
   trusted proxy (`TRUST_PROXY_HEADERS=true`) each client address also has its own
   budget of 30 counted failures per 15 minutes, so one school network does not
-  lock a class out.
+  lock a class out. When the sign-in throttle is full of live locks, a name that
+  has no record is refused until a lock expires. Live locks are never released
+  early, so a flood of names cannot unlock an account.
 
 For a sign-in-only deployment, leave `PERSISTENCE_DEV_TOKEN` unset. Every
 signed-out persistence request then answers 503, and signed-in requests are

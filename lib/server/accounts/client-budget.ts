@@ -36,10 +36,20 @@ function clientBudget(): LoginThrottle {
   return (globalState[BUDGET_KEY] ??= new LoginThrottle(CLIENT_BUDGET_LIMITS));
 }
 
+function refusal(retryAfterSeconds: number | undefined): AccountError {
+  return new AccountError(
+    'RATE_LIMITED',
+    'Too many failed attempts from this network. Try again later.',
+    retryAfterSeconds,
+  );
+}
+
 /**
- * Runs one attempt against the client's budget. A client whose budget is spent is
- * refused before the attempt runs. An attempt that fails with `countedCode` is
- * charged to the client. Any other outcome is not counted.
+ * Runs one attempt against the client's budget. The attempt's slot is reserved before
+ * the attempt starts, so concurrent attempts from one client count against the budget
+ * together. A slot is kept only when the attempt fails with `countedCode`. Every other
+ * outcome gives the slot back. A client whose budget is spent is refused before the
+ * attempt runs.
  */
 export async function withClientBudget<T>(
   key: string | undefined,
@@ -47,20 +57,20 @@ export async function withClientBudget<T>(
   attempt: () => Promise<T>,
 ): Promise<T> {
   if (key === undefined) return attempt();
-  const retryAfter = clientBudget().retryAfterSeconds(key);
-  if (retryAfter !== undefined) {
-    throw new AccountError(
-      'RATE_LIMITED',
-      'Too many failed attempts from this network. Try again later.',
-      retryAfter,
-    );
-  }
+  const budget = clientBudget();
+  const retryAfter = budget.retryAfterSeconds(key);
+  if (retryAfter !== undefined) throw refusal(retryAfter);
+
+  const token = budget.recordFailure(key);
+  if (token === undefined) throw refusal(budget.retryAfterSeconds(key));
+
+  let counted = false;
   try {
     return await attempt();
   } catch (error) {
-    if (error instanceof AccountError && error.code === countedCode) {
-      clientBudget().recordFailure(key);
-    }
+    counted = error instanceof AccountError && error.code === countedCode;
     throw error;
+  } finally {
+    if (!counted) budget.refund(key, token);
   }
 }

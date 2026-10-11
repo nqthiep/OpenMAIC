@@ -2015,6 +2015,8 @@
     "accountMenu": "Konto: {{username}}",
     "signedInAs": "Angemeldet als",
     "signOut": "Abmelden",
+    "signOutOthers": "Auf anderen Geräten abmelden",
+    "signOutOthersDone": "Auf anderen Geräten wurde abgemeldet.",
     "modesLabel": "Anmelden oder Konto erstellen wählen",
     "modes": {
       "signIn": "Anmelden",

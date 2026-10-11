@@ -263,3 +263,24 @@ export async function recordAdminRead(
     [input.actorId, input.action, input.reason ?? null, input.now.toISOString()],
   );
 }
+
+/**
+ * Revokes every live session of the account except the one whose token hash is kept.
+ * Returns how many were revoked, so the caller can say what happened.
+ */
+export async function revokeOtherSessions(
+  db: AccountQueryable,
+  input: { accountId: string; keepTokenHash: string; now: Date },
+): Promise<number> {
+  const result = await db.query(
+    `UPDATE account_sessions
+        SET revoked_at = $3::timestamptz
+      WHERE account_id = $1::text
+        AND token_hash <> $2::text
+        AND revoked_at IS NULL
+        AND expires_at > $3::timestamptz
+      RETURNING token_hash`,
+    [input.accountId, input.keepTokenHash, input.now.toISOString()],
+  );
+  return result.rows.length;
+}

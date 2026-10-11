@@ -2000,6 +2000,8 @@
     "accountMenu": "帳號：{{username}}",
     "signedInAs": "目前登入帳號",
     "signOut": "登出",
+    "signOutOthers": "登出其他裝置",
+    "signOutOthersDone": "已登出其他裝置。",
     "modesLabel": "選擇登入或建立帳號",
     "modes": {
       "signIn": "登入",

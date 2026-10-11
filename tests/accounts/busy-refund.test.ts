@@ -61,3 +61,22 @@ describe('a sign-in refused by the busy password queue', () => {
     scrypt.failing = true;
   });
 });
+
+describe('a sign-in refused by a saturated throttle', () => {
+  it('is refused before any password derivation runs', async () => {
+    scrypt.failing = true;
+    const throttle = new LoginThrottle({ maxFailures: 1, windowMs: 60_000, maxKeys: 1 });
+    // One live lock fills the table, so a new name cannot be tracked.
+    throttle.recordFailure('someone-else');
+    const { deps } = createDeps();
+
+    const error = await loginAccount(
+      { ...deps, throttle },
+      { username: 'alice', password: PASSWORD },
+    ).catch((caught: unknown) => caught);
+
+    // A derivation would have failed as busy. The refusal comes first, so no derivation ran.
+    expect(error).toMatchObject({ code: 'RATE_LIMITED' });
+    expect(error).not.toBeInstanceOf(PasswordWorkBusyError);
+  });
+});

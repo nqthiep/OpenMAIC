@@ -2015,6 +2015,8 @@
     "accountMenu": "Аккаунт: {{username}}",
     "signedInAs": "Вы вошли как",
     "signOut": "Выйти",
+    "signOutOthers": "Выйти на других устройствах",
+    "signOutOthersDone": "Вы вышли на других устройствах.",
     "modesLabel": "Выберите вход или создание аккаунта",
     "modes": {
       "signIn": "Войти",

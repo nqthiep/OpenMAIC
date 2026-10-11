@@ -105,4 +105,28 @@ describe('withClientBudget', () => {
 
     await expect(withClientBudget(other, 'USERNAME_TAKEN', async () => 'ok')).resolves.toBe('ok');
   });
+  it('counts concurrent attempts from one client together, so the budget cannot be overshot', async () => {
+    const key = freshKey();
+    let started = 0;
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const attempt = async () => {
+      started += 1;
+      await gate;
+      throw new AccountError('INVALID_CREDENTIALS', 'refused');
+    };
+
+    const runs = Array.from({ length: 40 }, () =>
+      withClientBudget(key, 'INVALID_CREDENTIALS', attempt).catch((error: unknown) => error),
+    );
+    release();
+    const outcomes = await Promise.all(runs);
+
+    expect(started).toBe(30);
+    expect(
+      outcomes.filter((outcome) => (outcome as AccountError).code === 'RATE_LIMITED'),
+    ).toHaveLength(10);
+  });
 });

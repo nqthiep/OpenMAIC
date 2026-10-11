@@ -2015,6 +2015,8 @@
     "accountMenu": "Cuenta: {{username}}",
     "signedInAs": "Sesión iniciada como",
     "signOut": "Cerrar sesión",
+    "signOutOthers": "Cerrar sesión en otros dispositivos",
+    "signOutOthersDone": "Se cerró la sesión en los otros dispositivos.",
     "modesLabel": "Elige iniciar sesión o crear una cuenta",
     "modes": {
       "signIn": "Iniciar sesión",

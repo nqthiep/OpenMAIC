@@ -2015,6 +2015,8 @@
     "accountMenu": "계정: {{username}}",
     "signedInAs": "로그인한 계정",
     "signOut": "로그아웃",
+    "signOutOthers": "다른 기기에서 로그아웃",
+    "signOutOthersDone": "다른 기기에서 로그아웃했습니다.",
     "modesLabel": "로그인 또는 계정 만들기 선택",
     "modes": {
       "signIn": "로그인",
