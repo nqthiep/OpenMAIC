@@ -202,6 +202,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     } catch (error) {
       const claimed = ownerWriteErrorResponse(error, responseHeaders);
       if (claimed) return claimed;
+      // A foreign or missing course is the same absent course for the caller.
+      if (error instanceof DocumentNotFoundError) return ownerNotFound(responseHeaders);
       throw error;
     }
     return ownerJson({ ok: true }, 200, responseHeaders);

@@ -2,10 +2,11 @@
  * POST /api/stages/[id]/generation-complete
  *
  * Monotonically marks an existing stage outline as generation-complete.
- * Owner-only. This route deliberately performs a narrow UPDATE so a stale
- * load-time repair cannot overwrite newer classroom content. A course its
- * generation run is still producing answers 409 `COURSE_GENERATING`: the run
- * decides when it is complete.
+ * Owner-only: another owner's course answers 404, as a missing one does. This
+ * route deliberately performs a narrow UPDATE so a stale load-time repair
+ * cannot overwrite newer classroom content. A course its generation run is
+ * still producing answers 409 `COURSE_GENERATING`: the run decides when it is
+ * complete.
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -30,16 +31,11 @@ export async function POST(req: NextRequest, { params }: Params) {
     try {
       const access = await resolveStageAccess(stageId);
 
-      // Absent and tombstoned are the same 404 — the caller must not learn
-      // that an id used to be a real course, and a deleted course has no
-      // state left worth repairing.
-      if (!access) {
+      // Absent, tombstoned and another owner's are the same 404 — the caller
+      // must not learn that an id used to be a real course, and a deleted course
+      // has no state left worth repairing.
+      if (!access || access.ownerId !== ownerId) {
         return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
-      }
-
-      // Owner only.
-      if (access.ownerId !== ownerId) {
-        return NextResponse.json({ error: 'forbidden' }, { status: 403, headers: responseHeaders });
       }
 
       const { withTransaction } = await getServerPersistenceProvider(
@@ -57,7 +53,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
       }
 
-      console.info('Stage generation marked complete', { stageId, ownerId });
+      console.info('Stage generation marked complete', { stageId });
       return NextResponse.json({ ok: true }, { status: 200, headers: responseHeaders });
     } catch (error) {
       const refused = ownerWriteErrorResponse(error, responseHeaders);

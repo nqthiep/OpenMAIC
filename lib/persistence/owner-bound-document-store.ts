@@ -3,6 +3,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { Scene, Stage } from '@openmaic/dsl';
 import {
   PgDocumentStore,
+  readStageFreshnessManifest,
   type Queryable,
   type WithTransaction,
 } from '@openmaic/storage/document/pg';
@@ -14,6 +15,8 @@ import type {
   MaicDocument,
   SceneLike,
   SceneValidator,
+  StageFreshnessManifest,
+  StageFreshnessManifestStore,
   StageValidator,
 } from '@openmaic/storage';
 import { DocumentWriteRefusedError } from '@openmaic/storage';
@@ -127,12 +130,11 @@ async function runCreateHooks(
  * A document with its slide HTML restricted to the renderer's vocabulary.
  *
  * Slide text, shape text, table cells and LaTeX snapshots are HTML that the
- * classroom renders with `dangerouslySetInnerHTML`, and document reads are
- * capability-by-id: a course link is enough to load any owner's course. So
- * every document this store writes or returns passes through the same policy
- * `/api/classroom` applies. Writes keep new rows clean; reads cover rows
- * stored before this was enforced. Same scope as that route: the stage and
- * the scenes, never the outline.
+ * classroom renders with `dangerouslySetInnerHTML`, and a published course is
+ * readable by anyone holding its id. So every document this store writes or
+ * returns passes through the same policy `/api/classroom` applies. Writes keep
+ * new rows clean; reads cover rows stored before this was enforced. Same scope
+ * as that route: the stage and the scenes, never the outline.
  */
 function sanitizedDocument<TScene extends SceneLike, TStage extends Stage>(
   doc: MaicDocument<TScene, TStage>,
@@ -244,6 +246,14 @@ export type SceneMutationHook = (queryable: Queryable, wrote: boolean) => Promis
 interface RawOwnershipRow extends Record<string, unknown> {
   owner_id: string;
   deleted_at: Date | string | null;
+  is_public: boolean;
+}
+
+const LONE_SURROGATE = /[\uD800-\uDFFF]/u;
+
+/** An id PostgreSQL can bind as text: no NUL and no lone surrogate (see stage-access.ts). */
+function isBindableId(stageId: string): boolean {
+  return !stageId.includes('\u0000') && !LONE_SURROGATE.test(stageId);
 }
 
 function queryableFor(connection: Pick<PoolClientLike, 'query'>): Queryable {
@@ -429,7 +439,7 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
           // assets stayed behind and someone should know.
           console.warn(
             `Tombstoned stage ${stageId} but withdrew no asset references: the document row is ` +
-              `absent or not owned by ${this.ownerId}. Its registry entries will not be ` +
+              `absent or not owned by the stage's owner. Its registry entries will not be ` +
               `reclaimed.`,
           );
         }
@@ -451,12 +461,21 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
     return scene && sanitizeSceneContent(scene);
   }
 
-  /** The trigger-maintained freshness manifest is a read: capability-by-id. */
-  async readFreshnessManifest(stageId: string) {
-    return this.readGated(stageId, () => this.inner.readFreshnessManifest(stageId));
+  /**
+   * The trigger-maintained freshness manifest, gated like the document. The
+   * package's own read is scoped to the store's owner and would hide a published
+   * course from other owners. The gate has already decided visibility, so the
+   * revision read runs unscoped inside the gate's transaction.
+   */
+  async readFreshnessManifest(stageId: string): Promise<StageFreshnessManifest | null> {
+    return this.readGated(stageId, () =>
+      this.runTransaction((queryable) => readStageFreshnessManifest(stageId, queryable)),
+    );
   }
 
   private async readGated<T>(stageId: string, body: () => Promise<T>): Promise<T | null> {
+    // An id the database cannot bind is no course; the gate's query never sees it.
+    if (!isBindableId(stageId)) return null;
     try {
       return await this.tagged({ stageId, mode: 'read' }, body);
     } catch (error) {
@@ -511,7 +530,10 @@ export function createOwnerBoundDocumentStore<
   TStage extends Stage = Stage,
 >(
   options: OwnerBoundDocumentStoreOptions,
-): DocumentStore<TScene, TStage> & DocumentFolderStore & CreateOnlyDocumentStore<TScene, TStage> {
+): DocumentStore<TScene, TStage> &
+  DocumentFolderStore &
+  CreateOnlyDocumentStore<TScene, TStage> &
+  StageFreshnessManifestStore {
   const operations = new AsyncLocalStorage<PendingOperation>();
   if (options.principal && options.principal.ownerId !== options.ownerId) {
     throw new Error('createOwnerBoundDocumentStore: principal does not match ownerId');
@@ -555,7 +577,7 @@ export function createOwnerBoundDocumentStore<
         if (operation?.stageId) {
           const lock = operation.mode === 'read' ? 'FOR SHARE' : 'FOR UPDATE';
           const result = await queryable.query<RawOwnershipRow>(
-            `SELECT owner_id, deleted_at FROM stage_meta WHERE stage_id = $1 ${lock}`,
+            `SELECT owner_id, deleted_at, is_public FROM stage_meta WHERE stage_id = $1 ${lock}`,
             [operation.stageId],
           );
           const row = result.rows[0];
@@ -563,7 +585,13 @@ export function createOwnerBoundDocumentStore<
             throw new StageIdTakenError(operation.stageId);
           }
           if (row) {
-            if (operation.mode !== 'read' && row.owner_id !== options.ownerId) {
+            // A draft belongs to its owner. Another owner may read a course only
+            // while it is published and not deleted; every write needs the owner.
+            const publishedAndLive = row.is_public && row.deleted_at === null;
+            if (
+              row.owner_id !== options.ownerId &&
+              (operation.mode !== 'read' || !publishedAndLive)
+            ) {
               throw new StageAccessError(operation.stageId, options.ownerId, 'foreign');
             }
             if (row.deleted_at !== null && operation.mode !== 'delete') {

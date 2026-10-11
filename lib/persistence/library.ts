@@ -4,10 +4,10 @@
  * The provider returns ids; this module turns them into the `DocumentSummary`
  * items `GET /api/stages` has always returned. It is also the access rule:
  * only an id the document read path would serve is listed -- one with an
- * ownership row that is not tombstoned (see `decideDocumentAccess` and the
- * owner-bound store's read gate) -- so a provider cannot surface a course
- * that `GET /api/stages/{id}` would refuse. What a provider may hand out
- * beyond that (reads are capability-by-id) is the host's decision.
+ * ownership row that is not tombstoned, and that is the caller's own or
+ * published (see `decideDocumentAccess` and the owner-bound store's read gate)
+ * -- so a provider cannot surface a course that `GET /api/stages/{id}` would
+ * refuse.
  */
 import type { DocumentSummary } from '@openmaic/storage';
 import type { Queryable } from '@openmaic/storage/document/pg';
@@ -38,7 +38,9 @@ interface LibraryRow extends Record<string, unknown> {
 
 /**
  * Summaries of the listable courses among `stageIds`, in the given order with
- * duplicates dropped. `folderId` is kept only for `ownerId`'s own courses.
+ * duplicates dropped. A course is listable to `ownerId` when it is their own or
+ * published, and not deleted (the read gate's rule). `folderId` is kept only
+ * for `ownerId`'s own courses.
  */
 export async function summarizeLibraryStages(
   queryable: Queryable,
@@ -64,7 +66,8 @@ export async function summarizeLibraryStages(
        FROM document_stages AS stages
        JOIN stage_meta AS meta ON meta.stage_id = stages.id
       WHERE stages.id = ANY($1::text[])
-        AND meta.deleted_at IS NULL`,
+        AND meta.deleted_at IS NULL
+        AND (meta.owner_id = $2 OR meta.is_public)`,
     [ordered, ownerId],
   );
   const byId = new Map(result.rows.map((row) => [row.id, row]));

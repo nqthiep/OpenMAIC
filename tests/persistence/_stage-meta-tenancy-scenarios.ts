@@ -121,11 +121,9 @@ export async function freshInstallScenario(pool: ScenarioPool): Promise<void> {
   expect(await ids(alice.listDocuments())).toEqual(['alice-1', 'alice-2']);
   expect(await ids(bob.listDocuments())).toEqual(['bob-1']);
 
-  // Reads remain capability-by-id.
-  await expect(alice.loadDocument('bob-1')).resolves.toMatchObject({ stage: { id: 'bob-1' } });
-  await expect(alice.getScene('bob-1', 'bob-1-scene')).resolves.toMatchObject({
-    id: 'bob-1-scene',
-  });
+  // Another owner's draft reads as absent, by id and by scene.
+  await expect(alice.loadDocument('bob-1')).resolves.toBeNull();
+  await expect(alice.getScene('bob-1', 'bob-1-scene')).resolves.toBeNull();
 
   // Writes to another owner's course are refused on every path, and change nothing.
   const before = JSON.stringify(await bob.loadDocument('bob-1'));
@@ -140,6 +138,15 @@ export async function freshInstallScenario(pool: ScenarioPool): Promise<void> {
   await expect(alice.deleteDocument('bob-1')).rejects.toMatchObject(REFUSED);
   expect(JSON.stringify(await bob.loadDocument('bob-1'))).toBe(before);
   expect(await ids(bob.listDocuments())).toEqual(['bob-1']);
+
+  // Published, the course reads by id for another owner, and still takes no write from it.
+  await pool.query('UPDATE stage_meta SET is_public = true WHERE stage_id = $1', ['bob-1']);
+  await expect(alice.loadDocument('bob-1')).resolves.toMatchObject({ stage: { id: 'bob-1' } });
+  await expect(alice.getScene('bob-1', 'bob-1-scene')).resolves.toMatchObject({
+    id: 'bob-1-scene',
+  });
+  await expect(alice.deleteDocument('bob-1')).rejects.toMatchObject(REFUSED);
+  expect(JSON.stringify(await bob.loadDocument('bob-1'))).toBe(before);
 
   // The owner edits its own course.
   await alice.putStage('alice-1', {

@@ -97,7 +97,7 @@ describe('reference-fidelity stage access', () => {
     expect(provider.pool).toBe(pool);
   });
 
-  it('allows capability reads, refuses foreign writes, and filters the owner library', async () => {
+  it('keeps a draft to its owner, refuses foreign writes, and filters the owner library', async () => {
     const connectionString = process.env.DATABASE_URL!;
     const { getServerPersistenceProvider } = await import('@/lib/persistence/server-provider');
     await getServerPersistenceProvider(connectionString, () => pool as never);
@@ -106,21 +106,26 @@ describe('reference-fidelity stage access', () => {
     const visitor = ownerStore(pool, `anon:${visitorCookie}`);
     await owner.saveDocument(courseDocument(stageId));
 
-    await expect(visitor.loadDocument(stageId)).resolves.toMatchObject({ stage: { id: stageId } });
+    // A draft is absent to another owner, by id and by route, exactly as a missing course is.
+    await expect(visitor.loadDocument(stageId)).resolves.toBeNull();
     await expect(
       visitor.saveDocument(courseDocument(stageId, 'Foreign edit')),
     ).rejects.toBeInstanceOf(StageAccessError);
     const { handlePersistenceRequest } = await import('@/app/api/persistence/[...path]/route');
-    const visitorRead = await handlePersistenceRequest(
-      new Request(`http://localhost/api/persistence/documents/${stageId}`, {
-        headers: { cookie: `anonymous_id=${visitorCookie}` },
-      }),
-      { poolFactory: () => pool as never },
-    );
-    expect(visitorRead.status).toBe(200);
-    await expect(visitorRead.json()).resolves.toMatchObject({ stage: { id: stageId } });
+    const readAs = (cookie: string, id: string) =>
+      handlePersistenceRequest(
+        new Request(`http://localhost/api/persistence/documents/${id}`, {
+          headers: { cookie: `anonymous_id=${cookie}` },
+        }),
+        { poolFactory: () => pool as never },
+      );
+    const visitorRead = await readAs(visitorCookie, stageId);
+    const missingRead = await readAs(visitorCookie, 'stage-capability-missing');
+    expect(visitorRead.status).toBe(404);
+    expect(await visitorRead.text()).toBe(await missingRead.text());
 
-    const foreignWrite = await handlePersistenceRequest(
+    // A create of a taken id is refused as forbidden; a missing id would be created instead.
+    const foreignCreate = await handlePersistenceRequest(
       new Request(`http://localhost/api/persistence/documents/${stageId}`, {
         method: 'PUT',
         headers: {
@@ -131,10 +136,48 @@ describe('reference-fidelity stage access', () => {
       }),
       { poolFactory: () => pool as never },
     );
-    expect(foreignWrite.status).toBe(403);
-    await expect(foreignWrite.json()).resolves.toMatchObject({
+    expect(foreignCreate.status).toBe(403);
+    await expect(foreignCreate.json()).resolves.toMatchObject({
       error: { code: 'FORBIDDEN_DOCUMENTS' },
     });
+
+    // Another owner's draft answers a request as a missing course does: the same status, body
+    // and headers (one request id for both).
+    const sameAnswerAs = async (foreign: Promise<Response>, missing: Promise<Response>) => {
+      const fromForeign = await foreign;
+      const fromMissing = await missing;
+      expect(fromForeign.status).toBe(fromMissing.status);
+      expect(await fromForeign.text()).toBe(await fromMissing.text());
+      expect(Object.fromEntries(fromForeign.headers)).toEqual(
+        Object.fromEntries(fromMissing.headers),
+      );
+      return fromForeign.status;
+    };
+    const writeAs = (id: string) =>
+      handlePersistenceRequest(
+        new Request(`http://localhost/api/persistence/documents/${id}/stage`, {
+          method: 'PUT',
+          headers: {
+            cookie: `anonymous_id=${visitorCookie}`,
+            'content-type': 'application/json',
+            'x-request-id': 'fidelity-write',
+          },
+          body: JSON.stringify(courseDocument(id, 'Foreign edit').stage),
+        }),
+        { poolFactory: () => pool as never },
+      );
+    const deleteAs = (id: string) =>
+      handlePersistenceRequest(
+        new Request(`http://localhost/api/persistence/documents/${id}`, {
+          method: 'DELETE',
+          headers: { cookie: `anonymous_id=${visitorCookie}`, 'x-request-id': 'fidelity-delete' },
+        }),
+        { poolFactory: () => pool as never },
+      );
+    // A write and a delete answer 404 as a missing course does.
+    expect(await sameAnswerAs(writeAs(stageId), writeAs('stage-capability-missing'))).toBe(404);
+    expect(await sameAnswerAs(deleteAs(stageId), deleteAs('stage-capability-missing'))).toBe(404);
+    await expect(owner.loadDocument(stageId)).resolves.toMatchObject({ stage: { id: stageId } });
 
     const { GET: listStages } = await import('@/app/api/stages/route');
     const ownerList = await listStages(
@@ -151,6 +194,53 @@ describe('reference-fidelity stage access', () => {
       stages: [expect.objectContaining({ id: stageId })],
     });
     await expect(visitorList.json()).resolves.toEqual({ stages: [] });
+
+    // Published, the course opens to the visitor by id.
+    await pool.query('UPDATE stage_meta SET is_public = true WHERE stage_id = $1', [stageId]);
+    await expect(visitor.loadDocument(stageId)).resolves.toMatchObject({ stage: { id: stageId } });
+    expect((await readAs(visitorCookie, stageId)).status).toBe(200);
+  });
+
+  it('answers the status and stage-meta routes to another owner as a missing course, until published', async () => {
+    const connectionString = process.env.DATABASE_URL!;
+    const { getServerPersistenceProvider } = await import('@/lib/persistence/server-provider');
+    await getServerPersistenceProvider(connectionString, () => pool as never);
+    const stageId = 'stage-status-policy';
+    await ownerStore(pool, `anon:${ownerCookie}`).saveDocument(courseDocument(stageId));
+    const { GET: status } = await import('@/app/api/stages/[id]/status/route');
+    const { GET: stageMeta } = await import('@/app/api/stage-meta/[stageId]/route');
+    const request = (cookie: string, path: string) =>
+      new NextRequest(`http://localhost${path}`, { headers: { cookie: `anonymous_id=${cookie}` } });
+    const statusOf = (cookie: string, id: string) =>
+      status(request(cookie, `/api/stages/${id}/status`), { params: Promise.resolve({ id }) });
+    const metaOf = (cookie: string, id: string) =>
+      stageMeta(request(cookie, `/api/stage-meta/${id}`), {
+        params: Promise.resolve({ stageId: id }),
+      });
+
+    for (const read of [statusOf, metaOf]) {
+      const foreign = await read(visitorCookie, stageId);
+      const missing = await read(visitorCookie, 'stage-status-missing');
+      expect(foreign.status).toBe(404);
+      expect(await foreign.text()).toBe(await missing.text());
+    }
+    await expect(statusOf(ownerCookie, stageId).then((res) => res.json())).resolves.toEqual({
+      isPublic: false,
+      publishedAt: null,
+    });
+    await expect(metaOf(ownerCookie, stageId).then((res) => res.json())).resolves.toMatchObject({
+      isOwner: true,
+      source: 'document',
+    });
+
+    await pool.query('UPDATE stage_meta SET is_public = true WHERE stage_id = $1', [stageId]);
+    await expect(statusOf(visitorCookie, stageId).then((res) => res.json())).resolves.toEqual({
+      isPublic: true,
+      publishedAt: null,
+    });
+    const visitorMeta = await (await metaOf(visitorCookie, stageId)).json();
+    expect(visitorMeta).toMatchObject({ isOwner: false, isPublic: true });
+    expect(visitorMeta).not.toHaveProperty('source');
   });
 
   it('tombstones deletions and permanently retires the stage id', async () => {

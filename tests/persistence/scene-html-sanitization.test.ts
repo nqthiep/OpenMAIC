@@ -8,10 +8,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * route and owner-bound store on an in-memory PostgreSQL, with two browsers
  * that each hold their own anonymous identity.
  *
- * Document reads are capability-by-id, so the course link alone lets a viewer
- * load another owner's course, and the classroom renders slide text with
- * `dangerouslySetInnerHTML`. The store must therefore hold and return only
- * the renderer's HTML vocabulary, as `/api/classroom` does.
+ * A published course opens for any viewer with its link, and the classroom
+ * renders slide text with `dangerouslySetInnerHTML`. The store must therefore
+ * hold and return only the renderer's HTML vocabulary, as `/api/classroom` does.
  */
 
 class PGlitePool {
@@ -185,7 +184,8 @@ describe('slide HTML on the persistence document path', () => {
       expect(html).not.toMatch(/onerror|<img/i);
     }
 
-    // The shared course link: a different browser, capability-by-id read.
+    // Published, so a different browser opens the course by its link.
+    await pool.query('UPDATE stage_meta SET is_public = true WHERE stage_id = $1', [stageId]);
     const get = await request(VIEWER, 'GET', `/documents/${stageId}`);
     expect(get.status).toBe(200);
     const doc = (await get.json()) as { scenes: Scene[] };
@@ -218,6 +218,8 @@ describe('slide HTML on the persistence document path', () => {
     expect(
       (await request(AUTHOR, 'PUT', `/documents/${stageId}`, course(stageId, BENIGN))).status,
     ).toBeLessThan(300);
+    // Published, so another browser opens it by its link.
+    await pool.query('UPDATE stage_meta SET is_public = true WHERE stage_id = $1', [stageId]);
     // What an earlier release could have stored: written past the store.
     await pool.query(
       'UPDATE document_scenes SET data = $3::jsonb WHERE stage_id = $1 AND id = $2',

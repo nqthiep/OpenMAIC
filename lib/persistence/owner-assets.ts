@@ -5,8 +5,8 @@
  * ({@link assetPrincipalForOwner}), so quota is accounted per owner and the
  * store's own per-principal checks make replace and delete owner-only.
  *
- * Reads stay capability-by-id, because a course is readable by id and its
- * viewers must be able to load the media it names. The store itself only
+ * Reads stay by id, so a viewer of a published course can load the media it
+ * names. The store itself only
  * answers a principal's own entries, so {@link createOwnerAssetStore} adds one
  * rule on top of it: an entry held by another owner is readable when it is
  * committed and a live (not tombstoned) course **of that same owner**

@@ -132,6 +132,7 @@ describe('library provider', () => {
   });
 
   it('lists what the provider chooses, in its order, as the same list items', async () => {
+    await pool.query("UPDATE stage_meta SET is_public = true WHERE stage_id = 'stage-bob-live'");
     const { configurePersistenceHooks } = await import('@/lib/server/persistence-hooks');
     const contexts: LibraryListContext[] = [];
     configurePersistenceHooks({

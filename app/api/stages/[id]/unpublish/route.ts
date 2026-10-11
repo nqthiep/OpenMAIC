@@ -36,17 +36,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
 
       const access = await resolveStageAccess(stageId);
-      if (!access) {
+      if (!access || access.ownerId !== ownerId) {
         return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
-      }
-      if (access.ownerId !== ownerId) {
-        return NextResponse.json({ error: 'forbidden' }, { status: 403, headers: responseHeaders });
       }
 
       const db = await getStageAccessDb();
       await setStagePublished(db, stageId, false, null);
 
-      console.info('Stage unpublished', { stageId, ownerId });
+      console.info('Stage unpublished', { stageId });
       return NextResponse.json({ success: true }, { status: 200, headers: responseHeaders });
     } catch (error) {
       console.error('Failed to unpublish stage', {

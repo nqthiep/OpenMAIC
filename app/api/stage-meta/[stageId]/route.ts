@@ -16,6 +16,12 @@
  * leaked `{isPublic: true}` for a tombstoned course it would be a public oracle
  * for "this course used to exist".
  *
+ * ## A draft answers its owner only
+ *
+ * A non-owner asking about a course that is not published gets the same 404 as
+ * for an id no course holds. A published course answers a non-owner with its
+ * public fields only (no `source`).
+ *
  * ## No `ownerId` in the response, ever
  *
  * `isOwner` is a boolean derived server-side. Returning the owner's identity
@@ -51,29 +57,29 @@ export async function GET(req: NextRequest, { params }: Params) {
     try {
       const access = await resolveStageAccess(stageId);
 
-      // Absent or tombstoned — indistinguishable, deliberately.
-      if (!access) {
-        return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
-      }
-
       // Identity comparison, and nothing else: this boolean is the client's
       // ONLY owner signal, so a `true` here must mean every write through the
       // owner-bound store will be accepted (the store re-checks the owner
       // scope inside its write transactions).
-      const isOwner = access.ownerId === ownerId;
+      const isOwner = access?.ownerId === ownerId;
 
-      return NextResponse.json(
-        {
-          isOwner,
-          isPublic: access.isPublic,
-          publishedAt: access.publishedAt,
-          generationComplete: access.generationComplete,
-          // Which layer answered. Diagnostic only — the client must not branch
-          // on it.
-          source: access.source,
-        },
-        { status: 200, headers: responseHeaders },
-      );
+      // Absent, tombstoned and another owner's draft: the same 404, deliberately.
+      if (!access || (!isOwner && !access.isPublic)) {
+        return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
+      }
+
+      // A published course answers a non-owner with these public fields only.
+      const meta = {
+        isOwner,
+        isPublic: access.isPublic,
+        publishedAt: access.publishedAt,
+        generationComplete: access.generationComplete,
+      };
+      // Which layer answered. Diagnostic only, for the owner: the client must not branch on it.
+      return NextResponse.json(isOwner ? { ...meta, source: access.source } : meta, {
+        status: 200,
+        headers: responseHeaders,
+      });
     } catch (error) {
       console.error('Failed to resolve stage meta', {
         stageId,

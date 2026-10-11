@@ -84,13 +84,13 @@ export interface LibraryListContext {
  * ids into the same `DocumentSummary` items it has always returned, in the
  * order the provider gave (duplicates keep their first position), and drops
  * every id the document read path would refuse -- one without an ownership
- * row, or a deleted course. A provider therefore cannot make a course appear
- * that `GET /api/stages/{id}` would not serve. `folderId` is reported only for
- * the principal's own courses: another owner's folder means nothing here.
+ * row, a deleted course, or another owner's draft. A provider therefore cannot
+ * make a course appear that `GET /api/stages/{id}` would not serve. `folderId`
+ * is reported only for the principal's own courses: another owner's folder
+ * means nothing here.
  *
- * Reads are capability-by-id, so listing an id is handing it out: a provider
- * lists another owner's course only when the principal is entitled to know
- * the id (it saved it, it was shared with it). That decision is the host's.
+ * A published course of another owner is readable by id, so a provider may
+ * list one; which published courses to list is the host's decision.
  */
 export interface LibraryProvider {
   /** Short label for logs and boot errors. */

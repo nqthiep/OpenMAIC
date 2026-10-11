@@ -85,13 +85,21 @@ describe('GET /api/stage-meta/[stageId]', () => {
     });
   });
 
-  it('reports a visitor as non-owner', async () => {
+  it('reports a visitor as non-owner of a published course, and answers a draft as absent', async () => {
     mocks.accessRow!.meta_owner_id = 'someone-else';
-    const response = await getStageMeta(
+    const draft = await getStageMeta(
       new NextRequest(`http://localhost/api/stage-meta/${STAGE_ID}`),
       stageMetaParams(STAGE_ID),
     );
-    await expect(response.json()).resolves.toMatchObject({ isOwner: false });
+    expect(draft.status).toBe(404);
+    await expect(draft.json()).resolves.toEqual({ error: 'not_found' });
+
+    mocks.accessRow!.meta_is_public = true;
+    const published = await getStageMeta(
+      new NextRequest(`http://localhost/api/stage-meta/${STAGE_ID}`),
+      stageMetaParams(STAGE_ID),
+    );
+    await expect(published.json()).resolves.toMatchObject({ isOwner: false });
   });
 
   it('answers 404 for an absent or tombstoned course', async () => {
@@ -180,7 +188,7 @@ describe('POST /api/stages/[id]/generation-complete', () => {
     await expect(response.json()).resolves.toEqual({ ok: true });
   });
 
-  it('forbids a visitor', async () => {
+  it('answers a visitor’s course as absent', async () => {
     mocks.accessRow!.meta_owner_id = 'someone-else';
     const response = await postGenerationComplete(
       new NextRequest(`http://localhost/api/stages/${STAGE_ID}/generation-complete`, {
@@ -188,8 +196,8 @@ describe('POST /api/stages/[id]/generation-complete', () => {
       }),
       params(STAGE_ID),
     );
-    expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({ error: 'forbidden' });
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'not_found' });
   });
 });
 

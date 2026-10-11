@@ -19,6 +19,9 @@ interface AssetStoreLike {
 const BOUNDARY_COOKIE = '55555555-5555-4555-8555-555555555555';
 const BOUNDARY_ASSET_PRINCIPAL = `owner:anon:${BOUNDARY_COOKIE}`;
 
+/** The cookie of the owner of the course the adapter cases address (their own draft). */
+const ADAPTER_COOKIE = '33333333-3333-4333-8333-333333333333';
+
 describe('embedded persistence route', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -28,7 +31,7 @@ describe('embedded persistence route', () => {
       ensureStageMetaSchema: vi.fn().mockResolvedValue(undefined),
       readStageMeta: vi.fn().mockResolvedValue({
         stageId: 'adapter-test',
-        ownerId: 'adapter-test-owner',
+        ownerId: `anon:${ADAPTER_COOKIE}`,
         isPublic: false,
         deletedAt: null,
       }),
@@ -981,7 +984,10 @@ describe('embedded persistence route', () => {
     const put = await handlePersistenceRequest(
       new Request('http://localhost/api/persistence/documents/stage%2Fslash', {
         method: 'PUT',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          cookie: `anonymous_id=${ADAPTER_COOKIE}`,
+        },
         body: JSON.stringify({ hello: 'world' }),
       }),
       { poolFactory: () => pool as never },
@@ -994,6 +1000,7 @@ describe('embedded persistence route', () => {
     const del = await handlePersistenceRequest(
       new Request('http://localhost/api/persistence/documents/stage%2Fslash', {
         method: 'DELETE',
+        headers: { cookie: `anonymous_id=${ADAPTER_COOKIE}` },
       }),
       { poolFactory: () => pool as never },
     );
@@ -1043,7 +1050,9 @@ describe('embedded persistence route', () => {
       query: vi.fn().mockResolvedValue({ rows: [] }),
     };
     const response = await handlePersistenceRequest(
-      new Request(`http://localhost/api/persistence/${path}`, {}),
+      new Request(`http://localhost/api/persistence/${path}`, {
+        headers: { cookie: `anonymous_id=${ADAPTER_COOKIE}` },
+      }),
       { poolFactory: () => pool as never },
     );
     return { response, body: new Uint8Array(await response.arrayBuffer()) };

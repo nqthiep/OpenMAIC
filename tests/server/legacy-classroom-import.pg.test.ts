@@ -587,11 +587,12 @@ describe.skipIf(!contractUrl)('legacy classroom import on PostgreSQL', () => {
     expect(await ledgerRow('stop02')).toBeUndefined();
   });
 
-  it('imports for the dedicated legacy owner: readable by link, writable by nobody else', async () => {
+  it('imports for the dedicated legacy owner published: readable by link, writable by nobody else', async () => {
     const dir = await freshDirectory({ 'shared01.json': legacyClassroom('shared01', 'Shared') });
 
     await importLegacyClassrooms({ directory: dir, ownerId: LEGACY_CLASSROOM_OWNER_ID });
 
+    // The import publishes the course, as the file store served it: a visitor's link opens it.
     const visitor = ownerStore(pool, 'anon:3c1f7e2a-9b4d-4e6f-8a0b-1c2d3e4f5a6b');
     const course = await visitor.loadDocument('shared01');
     expect(course?.stage.name).toBe('Shared');

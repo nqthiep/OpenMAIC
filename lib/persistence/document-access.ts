@@ -72,19 +72,21 @@ export async function decideDocumentAccess(
     case 'unknown':
       return 'forbid';
     case 'read': {
+      // A draft answers its owner only; a published course answers anyone, until it is deleted.
       const meta = await readMeta(action.stageId);
-      if (!meta) return 'not-found';
-      return meta.deletedAt === null ? 'allow' : 'not-found';
+      if (!meta || meta.deletedAt !== null) return 'not-found';
+      return meta.ownerId === ownerId || meta.isPublic ? 'allow' : 'not-found';
     }
     case 'write': {
+      // Another owner's course answers as a missing one does: no existence leak.
       const meta = await readMeta(action.stageId);
-      if (!meta) return 'not-found';
-      if (meta.ownerId !== ownerId) return 'forbid';
+      if (!meta || meta.ownerId !== ownerId) return 'not-found';
       return meta.deletedAt === null ? 'allow' : 'not-found';
     }
     case 'delete': {
+      // Another owner's course answers as a missing one does, as for writes.
       const meta = await readMeta(action.stageId);
-      if (!meta || meta.ownerId !== ownerId) return 'forbid';
+      if (!meta || meta.ownerId !== ownerId) return 'not-found';
       return 'allow';
     }
     case 'create': {

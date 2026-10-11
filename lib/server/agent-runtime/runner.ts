@@ -1362,8 +1362,8 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     // The owner-bound document store: ONE store per run, bound to the claimed
     // session's owner, shared by every stage tool. The owner id is
     // deliberately absent from every model-visible parameter — the model cannot
-    // forge a target owner. Reads are capability-by-id and foreign writes are
-    // refused. `withPlainJsonDocumentWrites` strips
+    // forge a target owner. Reads go by id: a draft answers its owner only, a published
+    // course anyone. Foreign writes are refused. `withPlainJsonDocumentWrites` strips
     // undefined-valued members at the write boundary so a JSON pointer `set`
     // that carries them never persists a JSON-null key (reference semantics).
     // `getAgentSessionStore` above already guards on DATABASE_URL, so the

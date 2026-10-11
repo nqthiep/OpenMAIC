@@ -21,9 +21,9 @@
  *   narration line whose clip is gone is left unvoiced, the shape a failed
  *   synthesis leaves. References to another classroom's files stay as they are
  *   and keep being served from that classroom's folder.
- * - The course is saved complete, sanitized, through the owner-bound store
- *   (`saveCompletedClassroom`), for the deployment's default owner
- *   ({@link resolveLegacyClassroomOwner}).
+ * - The course is saved complete, sanitized and published, through the
+ *   owner-bound store (`saveCompletedClassroom`), for the deployment's default
+ *   owner ({@link resolveLegacyClassroomOwner}).
  * - Every classroom goes through the state machine of
  *   {@link importLegacyClassrooms}; outcomes land in a ledger
  *   (`lib/persistence/legacy-classroom-imports.ts`), the `imported` row in
@@ -60,6 +60,7 @@ import {
 import { assetPrincipalForOwner } from '@/lib/persistence/owner-assets';
 import { CREATE_REFUSED, isStageIdTakenError } from '@/lib/persistence/owner-bound-document-store';
 import { getServerPersistenceProvider } from '@/lib/persistence/server-provider';
+import { setStagePublished } from '@/lib/persistence/stage-meta';
 import { saveCompletedClassroom } from '@/lib/server/classroom-persistence';
 import {
   CLASSROOMS_DIR,
@@ -80,10 +81,9 @@ const log = createLogger('LegacyClassroomImport');
  * The owner imported classrooms belong to when the deployment has no fixed
  * owner (anonymous-cookie mode, or host-registered auth methods). The old file
  * store had no owners: a classroom was readable by anyone holding its link and
- * listed in nobody's library. Course reads are capability-by-id, so importing
- * under an owner no request resolves to keeps exactly that: every link opens
- * the classroom read-only, and it clutters no visitor's library. A visitor who
- * wants an editable copy exports it as a ZIP and imports it.
+ * listed in nobody's library. An imported course belongs to this owner and is
+ * published on import, so any visitor's link opens it; no library lists it
+ * unless a host provider does.
  */
 export const LEGACY_CLASSROOM_OWNER_ID = 'system:legacy-classrooms';
 
@@ -493,13 +493,17 @@ export async function importLegacyClassrooms(
             ownerId,
             { ...read.document, outlines: [] },
             {
-              inTransaction: (tx) =>
-                recordLegacyClassroomImport(tx, {
+              inTransaction: async (tx) => {
+                // Published on import, as the file store served them: a visitor
+                // holding the link still opens the classroom. Only the owner writes.
+                await setStagePublished(tx, legacyId, true, Date.now());
+                await recordLegacyClassroomImport(tx, {
                   legacyId,
                   outcome: 'imported',
                   stageId: legacyId,
                   ownerId,
-                }),
+                });
+              },
             },
           );
           summary.mediaStored += media.stored;
@@ -510,7 +514,7 @@ export async function importLegacyClassrooms(
           if (error instanceof ImportStorageFullError) {
             summary.interrupted = 'storage-full';
             log.error(
-              `The asset store of owner ${ownerId} is full (ASSET_QUOTA_BYTES): the legacy ` +
+              'The asset store of an owner is full (ASSET_QUOTA_BYTES): the legacy ' +
                 `classroom import stopped at ${legacyId} and will be retried later`,
             );
             break;
@@ -555,7 +559,7 @@ export async function importLegacyClassrooms(
     `Legacy classrooms in ${directory}: ${summary.found} found, ${summary.imported} imported, ` +
       `${summary.alreadySettled} already settled, ${summary.skipped} skipped, ` +
       `${summary.failed} failed (media: ${summary.mediaStored} stored, ` +
-      `${summary.mediaMissing} missing) for owner ${ownerId}. ` +
+      `${summary.mediaMissing} missing). ` +
       (isLegacyClassroomImportComplete(summary)
         ? 'Nothing is pending. Keep the directory in place: imported classrooms may still ' +
           'reference files in it.'

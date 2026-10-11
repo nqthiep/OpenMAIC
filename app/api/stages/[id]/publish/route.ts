@@ -5,7 +5,8 @@
  * anonymous owner is refused with the reference's `login_required` (a
  * published course is a durable public artifact, so it needs a real account,
  * not an anonymous cookie partition); any other principal without the role is
- * refused with `forbidden`.
+ * refused with `forbidden`. Another owner's course answers `not_found`, as a
+ * missing one does.
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -39,11 +40,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
 
       const access = await resolveStageAccess(stageId);
-      if (!access) {
+      if (!access || access.ownerId !== ownerId) {
         return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
-      }
-      if (access.ownerId !== ownerId) {
-        return NextResponse.json({ error: 'forbidden' }, { status: 403, headers: responseHeaders });
       }
 
       if (access.isPublic) {
@@ -57,7 +55,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       const db = await getStageAccessDb();
       await setStagePublished(db, stageId, true, publishedAt);
 
-      console.info('Stage published', { stageId, ownerId });
+      console.info('Stage published', { stageId });
       return NextResponse.json(
         { success: true, publishedAt, name: access.name },
         { status: 200, headers: responseHeaders },

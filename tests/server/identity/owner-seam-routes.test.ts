@@ -162,7 +162,8 @@ describe('owner identity seam through the routes', () => {
       stages: [],
     });
 
-    expect((await publish(stageId, { 'x-test-user': 'bob' })).status).toBe(403);
+    // Another owner's draft answers as a missing course does.
+    expect((await publish(stageId, { 'x-test-user': 'bob' })).status).toBe(404);
     const published = await publish(stageId, { 'x-test-user': 'alice' });
     expect(published.status).toBe(200);
     await expect(published.json()).resolves.toMatchObject({ success: true });

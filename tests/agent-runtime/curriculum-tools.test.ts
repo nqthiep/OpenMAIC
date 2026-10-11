@@ -9,7 +9,7 @@
  *    mint is refused fail-closed;
  *  - create_stage mints the document skeleton through the store with
  *    server-job producer semantics;
- *  - mutations and listings are owner-scoped while reads are capability-by-id;
+ *  - mutations and listings are owner-scoped while reads by id follow visibility;
  *  - every execute takes pi's 3rd `signal` argument and re-checks it at each
  *    IO boundary: a pre-aborted signal throws before any work;
  *  - read_stage_outline renders the outline/scene UNION view (planned pages
