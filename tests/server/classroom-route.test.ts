@@ -130,6 +130,77 @@ describe('POST /api/classroom — id validation before persistence', () => {
     expect(mocks.persistClassroom).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'abc-123_XY' }),
       'http://localhost',
+      { createOnly: true },
     );
+  });
+
+  it('answers 409 instead of replacing a classroom that the client id already names', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    mocks.persistClassroom.mockRejectedValueOnce(
+      Object.assign(new Error('EEXIST: file already exists'), { code: 'EEXIST' }),
+    );
+
+    const res = await POST(
+      postClassroom(
+        {
+          id: 'abc-123_XY',
+          title: 'Lesson',
+        },
+        [
+          {
+            id: 'scene-1',
+            stageId: 'abc-123_XY',
+            title: 'Scene 1',
+            order: 0,
+            type: 'slide',
+            content: { type: 'slide', canvas: {} },
+          },
+        ],
+      ),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(json).toMatchObject({ success: false, errorCode: 'INVALID_REQUEST' });
+  });
+
+  it('refuses an id longer than the allowed length', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom({ id: 'a'.repeat(129), title: 'Lesson' }, [
+        {
+          id: 'scene-1',
+          stageId: 'a',
+          title: 'Scene 1',
+          order: 0,
+          type: 'slide',
+          content: { type: 'slide', canvas: {} },
+        },
+      ]),
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('refuses a non-string id before the allowlist can coerce it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom({ id: ['abc-123_XY'], title: 'Lesson' }, [
+        {
+          id: 'scene-1',
+          stageId: 'abc-123_XY',
+          title: 'Scene 1',
+          order: 0,
+          type: 'slide',
+          content: { type: 'slide', canvas: {} },
+        },
+      ]),
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
   });
 });

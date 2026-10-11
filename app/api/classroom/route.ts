@@ -4,6 +4,7 @@ import { validateScene } from '@openmaic/dsl';
 import { apiSuccess, apiError, API_ERROR_CODES } from '@/lib/server/api-response';
 import {
   buildRequestOrigin,
+  isAlreadyExistsError,
   isValidClassroomId,
   persistClassroom,
   readClassroom,
@@ -63,6 +64,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // A non-string id would be coerced by the allowlist check below (["abc"] reads as "abc"), so refuse the type first.
+    if (stage.id !== undefined && typeof stage.id !== 'string') {
+      return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'Invalid classroom id');
+    }
     const id = stage.id || randomUUID();
 
     // An id that fails the allowlist never reaches the filesystem: the storage
@@ -80,10 +85,25 @@ export async function POST(request: NextRequest) {
     const safeStage = sanitizeSceneContent(stage);
     const safeScenes = sanitizeSceneContent(scenes);
 
-    const persisted = await persistClassroom(
-      { id, stage: { ...safeStage, id }, scenes: safeScenes },
-      baseUrl,
-    );
+    // The id comes from the client, so an existing classroom must never be
+    // replaced through this route: create-only, and a taken id is a conflict.
+    let persisted: Awaited<ReturnType<typeof persistClassroom>>;
+    try {
+      persisted = await persistClassroom(
+        { id, stage: { ...safeStage, id }, scenes: safeScenes },
+        baseUrl,
+        { createOnly: true },
+      );
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        return apiError(
+          API_ERROR_CODES.INVALID_REQUEST,
+          409,
+          'A classroom with this id already exists',
+        );
+      }
+      throw error;
+    }
 
     return apiSuccess({ id: persisted.id, url: persisted.url }, 201);
   } catch (error) {

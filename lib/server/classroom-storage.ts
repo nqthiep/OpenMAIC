@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 import type { NextRequest } from 'next/server';
@@ -28,6 +29,30 @@ export async function writeJsonFileAtomic(filePath: string, data: unknown) {
   await fs.rename(tempFilePath, filePath);
 }
 
+/**
+ * Writes a JSON file only when nothing exists at `filePath`. The content is
+ * staged in a temp file and hard-linked into place: link fails with EEXIST when
+ * the target already exists, so two concurrent creators cannot both succeed,
+ * and no reader sees a partially written file. Rejects with the EEXIST error
+ * unchanged so callers can map it to a conflict.
+ */
+export async function writeJsonFileCreateOnly(filePath: string, data: unknown): Promise<void> {
+  await ensureDir(path.dirname(filePath));
+
+  const tempFilePath = `${filePath}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`;
+  try {
+    await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.link(tempFilePath, filePath);
+  } finally {
+    // Runs whether the write, the link, or neither failed, so no staging file is left behind.
+    await fs.rm(tempFilePath, { force: true });
+  }
+}
+
+export function isAlreadyExistsError(error: unknown): boolean {
+  return (error as NodeJS.ErrnoException | undefined)?.code === 'EEXIST';
+}
+
 export function buildRequestOrigin(req: NextRequest): string {
   return req.headers.get('x-forwarded-host')
     ? `${req.headers.get('x-forwarded-proto') || 'http'}://${req.headers.get('x-forwarded-host')}`
@@ -41,8 +66,9 @@ export interface PersistedClassroomData {
   createdAt: string;
 }
 
+/** Allowlisted characters, capped length. Generated ids are UUIDs (36 characters). */
 export function isValidClassroomId(id: string): boolean {
-  return /^[a-zA-Z0-9_-]+$/.test(id);
+  return /^[a-zA-Z0-9_-]{1,128}$/.test(id);
 }
 
 /**
@@ -74,6 +100,12 @@ export async function readClassroom(id: string): Promise<PersistedClassroomData 
   }
 }
 
+/**
+ * Stores a classroom. By default an existing file with the same id is replaced,
+ * which generation retries rely on. `createOnly` refuses to replace anything: it
+ * rejects with EEXIST (see isAlreadyExistsError). Callers that accept ids from
+ * clients must use it, because a client-chosen id can name another author's classroom.
+ */
 export async function persistClassroom(
   data: {
     id: string;
@@ -81,6 +113,7 @@ export async function persistClassroom(
     scenes: Scene[];
   },
   baseUrl: string,
+  options: { createOnly?: boolean } = {},
 ): Promise<PersistedClassroomData & { url: string }> {
   const classroomData: PersistedClassroomData = {
     id: data.id,
@@ -91,7 +124,11 @@ export async function persistClassroom(
 
   const filePath = resolveClassroomFilePath(data.id);
   await ensureClassroomsDir();
-  await writeJsonFileAtomic(filePath, classroomData);
+  if (options.createOnly) {
+    await writeJsonFileCreateOnly(filePath, classroomData);
+  } else {
+    await writeJsonFileAtomic(filePath, classroomData);
+  }
 
   return {
     ...classroomData,

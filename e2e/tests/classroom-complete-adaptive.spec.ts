@@ -17,7 +17,9 @@ import { ClassroomPage } from '../pages/classroom.page';
  * the completion slot.
  */
 
-const STAGE_ID = 'classroom-complete-adaptive-e2e';
+// Unique per run: POST /api/classroom refuses to replace an existing classroom (409),
+// so a fixed id would fail on a second run against the same data directory.
+const STAGE_ID = `classroom-complete-adaptive-e2e-${Date.now()}`;
 
 const CLASSROOM_PAYLOAD = {
   stage: {
