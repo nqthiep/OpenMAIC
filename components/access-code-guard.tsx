@@ -4,6 +4,19 @@ import { useEffect, useState, ReactNode } from 'react';
 import { AccessCodeModal } from '@/components/access-code-modal';
 import { useSettingsStore } from '@/lib/store/settings';
 
+/**
+ * The page behind the access prompt is inert while the prompt is up, so keyboard and
+ * screen reader users cannot reach controls the prompt covers. `contents` keeps the
+ * wrapper out of the layout.
+ */
+export function GatedContent({ gated, children }: { gated: boolean; children?: ReactNode }) {
+  return (
+    <div inert={gated ? true : undefined} className="contents">
+      {children}
+    </div>
+  );
+}
+
 export function AccessCodeGuard({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<{
     enabled: boolean;
@@ -54,7 +67,7 @@ export function AccessCodeGuard({ children }: { children: ReactNode }) {
           }}
         />
       )}
-      {children}
+      <GatedContent gated={needsAuth}>{children}</GatedContent>
     </>
   );
 }

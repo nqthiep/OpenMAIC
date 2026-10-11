@@ -8,7 +8,11 @@
  * allocating a fresh id when the answer is yes or unknown.
  */
 const PRESENCE_CHANNEL = 'maic-stage-presence';
-const PROBE_TIMEOUT_MS = 60;
+// A peer's reply can arrive late when this tab's event loop is busy. At 60 ms a live peer
+// was reported as absent under full-suite load, and the collector treats absent as
+// exclusive. 250 ms gives a wider margin. The residual risk and its design fix (a lease
+// that peers renew) are recorded as backlog B40.
+const PROBE_TIMEOUT_MS = 250;
 
 type PresenceMessage =
   | { readonly kind: 'probe'; readonly stageId: string; readonly probeId: string }
