@@ -97,7 +97,7 @@ describe('summarize', () => {
   it('tags anonymous learners instead of showing their key', () => {
     const anon = report.attempts.filter((a) => a.who !== 'Minh');
     expect(anon).toHaveLength(3);
-    for (const a of anon) expect(a.who).toMatch(/^#[0-9a-f]{4}$/);
+    for (const a of anon) expect(a.who).toMatch(/^#[0-9a-f]{12}$/);
     expect(new Set(anon.map((a) => a.who)).size).toBe(3);
   });
 
