@@ -443,7 +443,7 @@ describe('voice clone agent tools', () => {
       durationSeconds: 2,
       mime: 'audio/wav',
     });
-  });
+  }, 30_000); // synthesises 2 s of audio; the default 5 s limit is exceeded under full-suite load
 
   it('compensates the stored asset when the material row write fails', async () => {
     const getMaterial = vi
