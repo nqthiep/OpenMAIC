@@ -127,6 +127,7 @@ The reviewer found no Critical issues. Dispositions:
 | 2 | 2026-10-11 | Access-cookie signing secret (opt-in); verify managed-key exposure | `ACCESS_COOKIE_SECRET` added with tests; managed-key exposure verified by reading and recorded as a decision (B5). Failed native scrypt calls now answer 503 `ACCOUNTS_BUSY` instead of 500. The rename-rail test's cold import moved to `beforeAll` (B27). One intermittent account-route failure seen in three full runs remains open (B26). Product decisions left for the owner: B1, B5, B14, B15 |
 | 3 | 2026-10-11 | Team meeting 01: decide the open items and implement the decided changes | Decision record in `scrum/DECISIONS.md`; rebuttal round; 8 commits pushed; full run had one timing failure, fixed with an explicit limit |
 | 4 | 2026-10-11 | Close the security gaps the cycle 3 rebuttals named; measure the throttle derivation cost; verify the content fixes; clean full run (A16) | B28, B31, B32, B33 (classroom), B38, B39 done; independent review round (15 findings, all triaged); presence probe window widened (B40 open); final run on the final tree: exit 0; 735 test files passed (9 skipped); 8,131 tests passed (79 skipped); 0 failures; type check, lint and format pass |
+| 5 | 2026-10-11 | Presence lease for B40; administrator panel (B37); metadata body caps (B33 part 2); log hygiene and operator-key text (B43) | B40, B41, B42 done; B37 built; B33 part 2 (six handlers) done; B43 partly done (six routes and nine log sites fixed; B45, B46 open). Two independent reviews (`scrum/reviews/cycle5-review.md`). Full suite on the final tree: exit 0; 739 files passed, 9 skipped; 8,188 tests passed, 79 skipped; type check, ESLint and Prettier clean on changed files |
 
 ## Process notes (retrospective, cycle 1)
 
@@ -251,7 +252,7 @@ An independent reviewer read the uncommitted change set and wrote `scrum/reviews
 
 - **B41** Usage chart: the instance is reused after its container unmounts while data is empty (`components/settings/usage-dashboard.tsx:117-121, 230`, review F14). Fix: dispose the instance on container change.
 - **B42** The deep-research skill states a session-wide limit of eight `web_search` calls (`skills/agent-runtime/deep-research/SKILL.md:46`). The tool keeps no counter (`lib/server/agent-runtime/web-search.ts`), so the limit exists only as text. Decide: enforce it in the tool, or state it as guidance.
-- **B43** Log hygiene: the operator-key failure paths are covered. Other error sites that log the full error object (for example `app/api/chat/route.ts` outer catch when the key is the visitor's) are acceptable by policy; confirm with the security reviewer.
+- **B43** Log hygiene: the operator-key failure paths are covered. [Corrected in cycle 5, `scrum/DECISIONS-02.md` D-23: only four provider sites use `describeUnexpectedError`; the rest is B45.] Other error sites that log the full error object (for example `app/api/chat/route.ts` outer catch when the key is the visitor's) are acceptable by policy; confirm with the security reviewer.
 
 ### Content and specification outputs (cycle 4)
 
@@ -264,3 +265,55 @@ An independent reviewer read the uncommitted change set and wrote `scrum/reviews
 - **What helped:** the reviewer checked every claim against the code and reported file and line for each. The review found the same leak class in three routes after the first route had been fixed, which a single-file search would have missed.
 - **What hindered:** two load-sensitive timing failures appeared only in the full run (the voice-clip case and the presence probe). Both pass alone. The lesson: a fixed timing window in a safety decision needs a margin, and a test that depends on one needs a stated budget.
 - **Change for the next cycle:** when fixing a leak class, search all sites of that class before the first commit. Re-run the full suite after every change that touches a shared module.
+
+## Cycle 5: presence lease, administrator panel, body caps, and log hygiene
+
+Full record: `scrum/DECISIONS-02.md`. Reviews: `scrum/reviews/cycle5-review.md`. Presence design: `scrum/specs/presence-lease.md`.
+
+Sprint goal: close B40 (High); build the administrator panel (B37); extend the body caps (B33, part 2); settle the log-hygiene question (B43) and fix what the review required.
+
+### Items completed this cycle
+
+| Item | What changed | Commits | Evidence |
+|---|---|---|---|
+| B40 | Each realm with a stage open keeps a localStorage lease (renewed every 5 s, lapsing 90 s after the last renewal). A live lease answers present at once; the timed probe stays for tabs that predate leases. Ten review findings fixed, one rejected with reason | c2ff226, 6f791c0 | `lib/media/stage-realm-presence.ts`; `tests/media/stage-realm-presence.test.ts` (16) and `tests/media/prove-exclusive-ownership.test.ts` (7) pass |
+| B41 | The usage chart disposes an instance whose container was removed, and creates a new one for the new container | 0d5be8e | `components/settings/usage-chart-instance.ts`; `tests/components/usage-chart-instance.test.ts` (5) |
+| B42 | The eight-search limit is stated as guidance in the deep-research and fact-check skills; the tool does not count calls | c2fb062 | `skills/agent-runtime/deep-research/SKILL.md`; `skills/agent-runtime/fact-check/SKILL.md` |
+| B33 (part 2) | Six folder and agent-session handlers read the body through `readBoundedJson` with a 1 MiB cap; an oversize body answers 413 | 3515545 | `tests/server/bounded-body-metadata-routes.test.ts` (30); the 12 oversize cases fail on the original handlers |
+| B37 | Administrator account panel: the account list, and disable or enable behind a confirmation dialog. The session response carries `administrator`, so a non-administrator makes no list request | a91280b | `components/settings/account-admin-panel.tsx`; `tests/components/account-admin-panel.test.ts`; `tests/accounts/admin-routes.test.ts` and the account route tests (34 tests in four files) pass |
+| B43 (part) | Six routes stop sending operator upstream text to visitors (chat stream, chat pi, image, video, verify image, verify video). Seven body-parse sites and the YAML loader log summaries only | this cycle's final commit | `tests/server/error-summary.test.ts`; `tests/api/verify-image-managed-text.test.ts`; 39 existing route and helper test files pass (543 tests) |
+
+### Verification
+
+- Full suite on the final tree: exit 0; 739 test files passed, 9 skipped; 8,188 tests passed, 79 skipped. [Measured: `npx vitest run`, this session.] Cycle 4 final state: 735 files and 8,131 tests.
+- Type check: `npx tsc --noEmit`, 0 errors. [Measured]
+- ESLint and Prettier: clean on every changed file. [Measured]
+- `pnpm check:i18n-keys`: passes, 12 locale files. [Measured]
+- Not verified: the administrator panel at 360 px in a browser `[Unverified]`; two real tabs for the presence lease `[Unverified]`; whether a real provider's error text echoes a key (B45) `[Unverified]`.
+
+### Review round
+
+- Presence lease: an independent read-only review found no High findings. Eleven findings were triaged: ten fixed, one rejected. The rejected one asked that a missing storage API read as `unknown`; it stays `absent`, because only Node reaches that case, and the change would have sent 34 test files down the fork path.
+- Log hygiene: the review found that the cycle 4 claim ("operator-key failure paths are covered") was wrong, and that six routes sent operator upstream text to visitors. All six are fixed. The claim is corrected above.
+
+### Backlog status after cycle 5
+
+| Item | Status | Note |
+|---|---|---|
+| B33 | Part done | Six metadata handlers. The rest is B47 |
+| B37 | Done | 360 px check open `[Unverified]` |
+| B40 | Done | Residuals in the spec; follow-up B44 |
+| B41, B42 | Done | B42 enforcement not decided |
+| B43 | Partly done | Open: B45 and B46. Cycle 4 claim corrected |
+| B44 | Open (new) | Flush pending saves before a frozen tab can be left with edits. The frozen-tab residual of B40. Medium |
+| B45 | Open (new) | About 27 provider error logs log the raw error object. Whether upstream text can echo a key is `[Unverified]`. Includes `lib/orchestration/stateless-generate.ts:500`. Medium |
+| B46 | Open (new) | Visitor content (prompts, model output) in info and warn logs. A privacy policy decision. Low-medium |
+| B47 | Open (new) | Body caps for the stage, chat, generate, generate-classroom and pbl routes. Needs measured request sizes first. Medium |
+
+Still open from earlier cycles: B29 (the relative-URL recommendation stays NO-GO until the browser check passes), B30, B34, B35, B36, B13, B17. These need a release date, a product decision, or subject-matter review.
+
+### Process notes (retrospective, cycle 5)
+
+- **What helped:** disjoint file ownership for the two workers, with the targeted suites re-run before each commit; read-only reviewers who gave file and line for each finding and checked the claims against the code, including one of the coordinator's own tests that passed on the previous code.
+- **What hindered:** the session worker restarted mid-cycle, so the work resumed from the committed state; the workers ran for about ten minutes each, and the coordinator waited for the last reports for much longer; a variable set inside a backgrounded chain was not visible to the parent shell, so the first log path was wrong and had to be found through the process table.
+- **Change for the next cycle:** record, in the commit message, what each check covered (targeted or full). When a backlog entry says "covered", name the sites that were checked, so the next review can test the claim.
