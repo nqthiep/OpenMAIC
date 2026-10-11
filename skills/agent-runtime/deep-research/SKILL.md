@@ -43,8 +43,9 @@ textbook knowledge is skipped and taught as such.
 
 ## Step 3 — Search with a budget
 
-- At most **8 `web_search` calls for the whole session**, planned across the
-  facets. One precise query beats several vague ones; write queries in the
+- Aim for about **8 `web_search` calls for the whole session**, planned across
+  the facets. This is a guideline you keep yourself: the search tool does not
+  count calls. One precise query beats several vague ones; write queries in the
   language of the course.
 - The session shares one run with planning, `set_roster` and
   every page's generation, and every extra call is latency the user watches.
