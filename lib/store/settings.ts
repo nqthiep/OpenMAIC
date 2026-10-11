@@ -15,10 +15,12 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import i18next from 'i18next';
 import type { ASRProviderId } from '@/lib/audio/types';
 import type { AgentVoiceOverride } from '@/lib/audio/voice-resolver';
 import { isCustomASRProvider } from '@/lib/audio/types';
 import { ASR_PROVIDERS, CUSTOM_ASR_DEFAULT_LANGUAGES } from '@/lib/audio/constants';
+import { REQUEST_LOCALE_FALLBACK } from '@/lib/i18n/request-locale';
 import { createKVPersistStorage, purgeLegacyPersistKey } from '@/lib/store/kv-persist';
 import {
   normalizeLegacyModelSettings,
@@ -29,7 +31,7 @@ import {
 import { keepUnimported } from '@/lib/legacy-browser-import/model-settings-unimported';
 
 /** Persisted-blob version for zustand's `persist` `migrate` ladder. */
-const SETTINGS_PERSIST_VERSION = 5;
+const SETTINGS_PERSIST_VERSION = 6;
 
 /**
  * Bound after the store exists; see `onWriteRefused` for why it is not inlined.
@@ -43,11 +45,38 @@ export const PLAYBACK_SPEEDS = [1, 1.25, 1.5, 2] as const;
 export type PlaybackSpeed = (typeof PLAYBACK_SPEEDS)[number];
 
 /**
+ * The speech language for a provider until the user picks one: the one that
+ * matches the UI language, else the one with the same primary subtag, else
+ * Vietnamese when offered, else the provider's first language (or 'auto').
+ */
+export function defaultASRLanguage(
+  uiLocale: string,
+  supportedLanguages: readonly string[],
+): string {
+  const wanted = uiLocale.toLowerCase();
+  const primary = wanted.split('-')[0];
+  const match =
+    supportedLanguages.find((l) => l.toLowerCase() === wanted) ??
+    supportedLanguages.find((l) => l.toLowerCase().split('-')[0] === primary) ??
+    supportedLanguages.find((l) => l === REQUEST_LOCALE_FALLBACK);
+  return match || supportedLanguages[0] || 'auto';
+}
+
+/** The UI language now; Vietnamese, the app's home language, until i18n has one. */
+export function currentUiLocale(): string {
+  return i18next.language || REQUEST_LOCALE_FALLBACK;
+}
+
+/**
  * Validate and resolve ASR language for a given provider.
  * Keeps current language if supported by the provider, otherwise falls back
- * to the provider's default supported language (or 'auto').
+ * to the default for the UI language (see defaultASRLanguage).
  */
-export function getValidASRLanguage(providerId: ASRProviderId, currentLanguage?: string): string {
+export function getValidASRLanguage(
+  providerId: ASRProviderId,
+  currentLanguage?: string,
+  uiLocale = currentUiLocale(),
+): string {
   if (!providerId || typeof providerId !== 'string') return 'auto';
   let supportedLanguages: readonly string[];
   if (isCustomASRProvider(providerId)) {
@@ -61,7 +90,9 @@ export function getValidASRLanguage(providerId: ASRProviderId, currentLanguage?:
     currentLanguage &&
     supportedLanguages.includes(currentLanguage),
   );
-  return isLanguageValid && currentLanguage ? currentLanguage : supportedLanguages[0] || 'auto';
+  return isLanguageValid && currentLanguage
+    ? currentLanguage
+    : defaultASRLanguage(uiLocale, supportedLanguages);
 }
 
 export interface SettingsState {
@@ -219,6 +250,14 @@ export function migrateSettingsToV5(
   return next;
 }
 
+/**
+ * The version 6 migration: 'zh-CN' was the default speech language, so a blob
+ * that still holds it gets the UI-language default instead. Runs once per blob.
+ */
+function migrateSettingsToV6(persisted: Partial<PersistedSettings>): Partial<PersistedSettings> {
+  return persisted.asrLanguage === 'zh-CN' ? { ...persisted, asrLanguage: '' } : persisted;
+}
+
 /** Set when a load staged kept model settings: the store writes itself back without them. */
 let stagedOnLoad = false;
 
@@ -231,7 +270,8 @@ export const useSettingsStore = create<SettingsState>()(
       ttsVoice: 'default',
       ttsVoiceProviderId: '',
       ttsSpeed: 1.0,
-      asrLanguage: 'zh-CN',
+      // '' until the user picks one; getValidASRLanguage then follows the UI language
+      asrLanguage: '',
       reviewOutlineEnabled: false,
 
       // Playback controls
@@ -301,7 +341,9 @@ export const useSettingsStore = create<SettingsState>()(
       migrate: (persistedState: unknown, version: number) => {
         const state = { ...((persistedState as Record<string, unknown> | null) ?? {}) };
         // v4 → v5: model settings move to the server (RFC #1701).
-        return version < 5 ? migrateSettingsToV5(state, version) : pickPersisted(state);
+        const migrated = version < 5 ? migrateSettingsToV5(state, version) : pickPersisted(state);
+        // v5 → v6: the speech language follows the UI language.
+        return version < 6 ? migrateSettingsToV6(migrated) : migrated;
       },
       // Only known preference fields reach the state; anything else a blob
       // carries (fields of earlier builds) is ignored. Model settings kept

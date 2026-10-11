@@ -1,13 +1,16 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ASRProviderId } from '@/lib/audio/types';
 import { normalizeASRUploadAudio } from '@/lib/audio/wav-utils';
 import { loadModelCapabilities } from '@/lib/model-settings/capabilities';
 import { createLogger } from '@/lib/logger';
+import { getClientTranslation } from '@/lib/i18n';
+import { ASR_PROVIDERS } from '@/lib/audio/constants';
+import { currentUiLocale, defaultASRLanguage } from '@/lib/store/settings';
 
 const log = createLogger('AudioRecorder');
 
 /** Shown when the workspace's asr slot resolves to nothing. */
-export const ASR_NOT_CONFIGURED_MESSAGE = 'Speech recognition is not set up';
+export const ASR_NOT_CONFIGURED_MESSAGE = 'Chưa thiết lập nhận dạng giọng nói';
 
 /**
  * The provider the workspace's asr slot resolves to (its registry id), and the
@@ -24,6 +27,10 @@ async function asrSetup(): Promise<{ providerId: ASRProviderId; language: string
     providerId,
     language: getValidASRLanguage(providerId, useSettingsStore.getState().asrLanguage),
   };
+}
+
+function stopTracks(stream: MediaStream) {
+  stream.getTracks().forEach((track) => track.stop());
 }
 
 // Window.SpeechRecognition / webkitSpeechRecognition have minimal constructor
@@ -50,6 +57,38 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   const speechRecognitionRef = useRef<any>(null);
   // Synchronous lock to prevent rapid re-entry (React state updates are async)
   const busyRef = useRef(false);
+  // Async steps still pending after unmount check this before opening the mic or reporting back.
+  const unmountedRef = useRef(false);
+
+  // Release the mic, timer and recognizer when the owner unmounts.
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      const recognition = speechRecognitionRef.current;
+      if (recognition) {
+        recognition.onstart = null;
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        recognition.abort();
+        speechRecognitionRef.current = null;
+      }
+      const recorder = mediaRecorderRef.current;
+      if (recorder) {
+        recorder.ondataavailable = null;
+        recorder.onstop = null;
+        if (recorder.state !== 'inactive') recorder.stop();
+        if (recorder.stream) stopTracks(recorder.stream);
+        mediaRecorderRef.current = null;
+      }
+      audioChunksRef.current = [];
+    };
+  }, []);
 
   // Send audio to server for transcription
   const transcribeAudio = useCallback(
@@ -81,10 +120,15 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
         }
 
         const result = await response.json();
-        onTranscription?.(result.text);
+        if (!unmountedRef.current) onTranscription?.(result.text);
       } catch (error) {
         log.error('Transcription error:', error);
-        onError?.(error instanceof Error ? error.message : '语音识别失败，请重试');
+        if (!unmountedRef.current)
+          onError?.(
+            error instanceof Error
+              ? error.message
+              : getClientTranslation('voice.error.transcription'),
+          );
       } finally {
         setIsProcessing(false);
         setRecordingTime(0);
@@ -103,6 +147,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       if (typeof window !== 'undefined') {
         // Nothing to record with when the asr slot is off or unassigned.
         const setup = await asrSetup();
+        if (unmountedRef.current) return;
         if (!setup) {
           // Release the lock: a later click (once speech input is set up) must work.
           busyRef.current = false;
@@ -116,7 +161,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
           // Check if Speech Recognition is supported
           if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
             busyRef.current = false;
-            onError?.('您的浏览器不支持语音识别功能');
+            onError?.(getClientTranslation('voice.error.unsupported'));
             return;
           }
 
@@ -125,7 +170,12 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Web Speech API instance shape isn't in lib.dom
           const recognition: any = new SpeechRecognitionCtor();
 
-          recognition.lang = asrLanguage || 'zh-CN';
+          recognition.lang =
+            asrLanguage ||
+            defaultASRLanguage(
+              currentUiLocale(),
+              ASR_PROVIDERS['browser-native'].supportedLanguages,
+            );
           recognition.continuous = continuous;
           recognition.interimResults = false;
 
@@ -163,7 +213,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
           recognition.onerror = (event: { error: string }) => {
             log.error('Speech recognition error:', event.error);
-            let errorMessage = '语音识别失败';
+            let errorMessage = getClientTranslation('voice.error.recognition');
 
             switch (event.error) {
               case 'aborted':
@@ -177,19 +227,19 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
                 }
                 return;
               case 'no-speech':
-                errorMessage = '未检测到语音输入';
+                errorMessage = getClientTranslation('voice.error.noSpeech');
                 break;
               case 'audio-capture':
-                errorMessage = '无法访问麦克风';
+                errorMessage = getClientTranslation('voice.error.audioCapture');
                 break;
               case 'not-allowed':
-                errorMessage = '麦克风权限被拒绝';
+                errorMessage = getClientTranslation('voice.error.notAllowed');
                 break;
               case 'network':
-                errorMessage = '网络错误';
+                errorMessage = getClientTranslation('voice.error.network');
                 break;
               default:
-                errorMessage = `语音识别错误: ${event.error}`;
+                errorMessage = getClientTranslation('voice.error.other', { error: event.error });
             }
 
             onError?.(errorMessage);
@@ -221,6 +271,10 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       // Use MediaRecorder for server-side ASR
       // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (unmountedRef.current) {
+        stopTracks(stream);
+        return;
+      }
 
       // Create MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
@@ -238,7 +292,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
       mediaRecorder.onstop = async () => {
         // Stop all audio tracks
-        stream.getTracks().forEach((track) => track.stop());
+        stopTracks(stream);
 
         // Merge audio chunks
         const audioBlob = new Blob(audioChunksRef.current, {
@@ -262,7 +316,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     } catch (error) {
       busyRef.current = false;
       log.error('Failed to start recording:', error);
-      onError?.('无法访问麦克风，请检查权限设置');
+      if (!unmountedRef.current) onError?.(getClientTranslation('voice.error.microphone'));
     }
   }, [onTranscription, onError, transcribeAudio, continuous]);
 
@@ -321,7 +375,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
       // Stop all audio tracks
       if (mediaRecorderRef.current.stream) {
-        mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
+        stopTracks(mediaRecorderRef.current.stream);
       }
 
       busyRef.current = false;
