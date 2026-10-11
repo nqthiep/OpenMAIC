@@ -9,7 +9,10 @@ import {
 } from '../../packages/@openmaic/storage/src/agent-session/pg';
 import { readPriorRunRecord } from '@/lib/server/agent-runtime/entry-tree-storage';
 
+import { endContractPool, openContractPool } from '../persistence/_contract-database';
+
 const contractUrl = process.env.PG_CONTRACT_URL;
+const SCHEMA = 'prior_run_record_contract';
 
 function transactionFor(pool: Pool): WithTransaction {
   return async (body) => {
@@ -39,7 +42,7 @@ describe.skipIf(!contractUrl)('prior runs read from the PostgreSQL event log', (
   let store: PgAgentSessionStore;
 
   beforeAll(async () => {
-    pool = new Pool({ connectionString: contractUrl });
+    pool = await openContractPool(contractUrl!, SCHEMA);
     await ensureAgentSessionSchema(pool as Queryable);
   });
 
@@ -53,7 +56,7 @@ describe.skipIf(!contractUrl)('prior runs read from the PostgreSQL event log', (
   });
 
   afterAll(async () => {
-    await pool.end();
+    await endContractPool(pool, SCHEMA);
   });
 
   it('tells a failed start from a run that completed messages', async () => {

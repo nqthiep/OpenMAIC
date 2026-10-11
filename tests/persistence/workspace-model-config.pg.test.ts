@@ -12,7 +12,10 @@ import {
 import { storedSecretKids } from '@/lib/server/instance-secret-check';
 import { instanceKey, resetInstanceKeyForTests } from '@/lib/server/secret-box';
 
+import { endContractPool, openContractPool } from './_contract-database';
+
 const contractUrl = process.env.PG_CONTRACT_URL;
+const SCHEMA = 'workspace_model_config_contract';
 
 describe.skipIf(!contractUrl)('workspace model configuration on PostgreSQL', () => {
   let pool: Pool;
@@ -21,7 +24,7 @@ describe.skipIf(!contractUrl)('workspace model configuration on PostgreSQL', () 
   beforeAll(async () => {
     vi.stubEnv('OPENMAIC_SECRET_KEY', 'pg-contract-secret');
     resetInstanceKeyForTests();
-    pool = new Pool({ connectionString: contractUrl });
+    pool = await openContractPool(contractUrl!, SCHEMA);
     await ensureWorkspaceModelConfigSchema(queryable());
   });
 
@@ -30,7 +33,7 @@ describe.skipIf(!contractUrl)('workspace model configuration on PostgreSQL', () 
   });
 
   afterAll(async () => {
-    await pool.end();
+    await endContractPool(pool, SCHEMA);
     vi.unstubAllEnvs();
     resetInstanceKeyForTests();
   });

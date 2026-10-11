@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { findEngineImports, findUnsafeRenderUses, usesAutoRenderText } from './math-engine-guard';
 
@@ -69,14 +69,34 @@ const ALLOWLIST: Record<string, { kind: 'render-calls' | 'reviewed'; reason: str
 const NON_PRODUCT_PATH_RE = /(^|\/)(tests?|__tests__|__snapshots__)\/|\.(test|spec)\.[cm]?[jt]sx?$/;
 
 function productSources(): string[] {
-  return execFileSync(
-    'git',
-    ['ls-files', '--', '*.ts', '*.tsx', '*.js', '*.jsx', '*.mjs', '*.cjs', '*.mts', '*.cts'],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
-  )
-    .split('\n')
-    .filter(Boolean)
-    .filter((file) => !NON_PRODUCT_PATH_RE.test(file));
+  // Tracked and untracked (not ignored) files: a source not yet added to git is still scanned.
+  return (
+    execFileSync(
+      'git',
+      [
+        'ls-files',
+        '--cached',
+        '--others',
+        '--exclude-standard',
+        '-z',
+        '--',
+        '*.ts',
+        '*.tsx',
+        '*.js',
+        '*.jsx',
+        '*.mjs',
+        '*.cjs',
+        '*.mts',
+        '*.cts',
+      ],
+      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    )
+      .split('\0')
+      .filter(Boolean)
+      // A tracked file deleted from disk is not a source to scan.
+      .filter((file) => existsSync(file))
+      .filter((file) => !NON_PRODUCT_PATH_RE.test(file))
+  );
 }
 
 describe('math engine guard recognizes every import shape', () => {

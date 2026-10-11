@@ -11,11 +11,16 @@ function browserTests(dir: string): string[] {
   });
 }
 
+/** The workflow split into its steps: each `- name:` or `- uses:` item with its `run:` and `env:`. */
+const ciSteps = readFileSync('.github/workflows/ci.yml', 'utf8').split(/\n(?= {6}- )/);
+
 describe('CI browser test steps', () => {
-  const ci = readFileSync('.github/workflows/ci.yml', 'utf8');
-  it.each(browserTests('tests'))('%s has a step in ci.yml', (file) => {
-    expect(ci, `add a CI step running ${file} with its env flag`).toContain(
-      file.replaceAll('\\', '/'),
-    );
+  it.each(browserTests('tests'))('%s has a step in ci.yml that sets its env flag', (file) => {
+    const path = file.replaceAll('\\', '/');
+    const flag = /process\.env\.(\w+) === '1'/.exec(readFileSync(path, 'utf8'))?.[1];
+    expect(flag, `${path} must read its env flag as process.env.NAME === '1'`).toBeDefined();
+    const step = ciSteps.find((s) => s.includes(`pnpm exec vitest run ${path}`));
+    expect(step, `add a CI step running ${path} with its env flag`).toBeDefined();
+    expect(step, `the CI step running ${path} must set ${flag}: '1'`).toContain(`${flag}: '1'`);
   });
 });

@@ -11,7 +11,10 @@ import {
   type RegisterOwnerMaterialInput,
 } from '@/lib/persistence/owner-materials';
 
+import { endContractPool, openContractPool } from './_contract-database';
+
 const contractUrl = process.env.PG_CONTRACT_URL;
+const SCHEMA = 'owner_materials_contract';
 
 /** Wait until some backend in this database is blocked on a lock. */
 async function waitForLockWaiter(pool: Pool): Promise<void> {
@@ -30,7 +33,7 @@ describe.skipIf(!contractUrl)('owner material quota reservations on PostgreSQL',
   let pool: Pool;
 
   beforeAll(async () => {
-    pool = new Pool({ connectionString: contractUrl });
+    pool = await openContractPool(contractUrl!, SCHEMA);
     await ensureOwnerMaterialSchema(pool as unknown as ConnectableQueryable);
   });
 
@@ -39,7 +42,7 @@ describe.skipIf(!contractUrl)('owner material quota reservations on PostgreSQL',
   });
 
   afterAll(async () => {
-    await pool.end();
+    await endContractPool(pool, SCHEMA);
   });
 
   const input = (id: string): RegisterOwnerMaterialInput => ({
