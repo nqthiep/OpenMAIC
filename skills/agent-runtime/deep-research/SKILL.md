@@ -60,8 +60,8 @@ textbook knowledge is skipped and taught as such.
   institutions, the report or dataset itself — and for time-sensitive claims
   prefer the most recent. Skip mirrors and aggregators repackaging the same
   story: fetch one origin, not three copies of it.
-- `fetch_url` accepts only URLs that appeared in the user's messages or in
-  this session's `web_search` results. Never assemble or recall a URL from
+- `fetch_url` accepts only URLs whose origin (scheme, host and port) appeared in
+  the user's messages or in this session's `web_search` results. Never assemble or recall a URL from
   memory — if the source you want did not surface, refine the search instead
   of guessing an address. A URL that never surfaced does not exist for this
   course.
@@ -105,7 +105,7 @@ generation.
 ## Step 8 — Ground the outline
 
 There is no outline generator: plan the outline in the conversation, then
-`create_stage` and one `generate_scene` per page with an explicit brief. The
+`create_stage`, `set_roster`, and one `generate_scene` per page with an explicit brief. The
 page generator sees each page's `brief` and nothing you remember. Write the
 research into the briefs: the facets, the ledgered claims with their
 attribution (source name + date), the conflicts and how they were resolved,

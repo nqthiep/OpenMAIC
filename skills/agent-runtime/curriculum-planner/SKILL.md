@@ -153,7 +153,7 @@ Once you have the go:
    - `create_stage` passing the series folder's `folderId` — the stage is filed
      into the folder in the same call, never left sitting in ungrouped — keep
      the returned `stageId` and pass it to every generation/edit/read call;
-   - build it by the `stage-design` sequence — outline once, roster, one
+   - build it by the `stage-design` sequence — plan the page list in the conversation, set the roster, one
      `generate_scene` per page in order, `list_scenes` to verify, audio checked
      before it counts as done;
    - after the lesson is built, `list_folder_stages` and check the stage is in
@@ -164,8 +164,8 @@ Once you have the go:
      covering, and what the next one starts from. Three or four sentences.
 3. Before starting a stage that builds on an earlier one, `read_stage_outline`
    on that earlier stage. Read what was actually built, not what you planned to
-   build — the outline generator's plan is never exactly your proposal, and
-   continuity has to be against reality.
+   build. The built stage may differ from the plan you proposed, so
+   continuity has to be checked against what is there.
 4. `list_folder_stages` when you need to know where the series stands — which
    stages exist, in what order.
 

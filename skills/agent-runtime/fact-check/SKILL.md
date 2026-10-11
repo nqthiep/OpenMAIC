@@ -99,7 +99,8 @@ by generated page content.
 
 In review mode, return roughly 3–8 useful findings in the first pass, or fewer
 when fewer exist. Group them under these bold plain-text labels, in this order,
-and omit an empty group. Keep them at normal body-text size: do not prefix them
+and omit an empty group. Write these labels and the bullet labels below in the
+user's language; the Chinese forms shown here apply to a Chinese reply. Keep them at normal body-text size: do not prefix them
 with Markdown heading markers such as `#` or `##`.
 
 - **A. 明确事实错误**
