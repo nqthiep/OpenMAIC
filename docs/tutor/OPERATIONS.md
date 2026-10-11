@@ -82,6 +82,25 @@ DEFAULT_MODEL=openai:gpt-6-luna
 
 Các vai trò tutor là slot `tutor.*` trong `openmaic.yml` (`lib/tutor/llm-roles.ts`); biến `MODEL_ROUTES` không còn được đọc cho các vai trò này. Giá trị `api` của slot agent phải là `openai-completions` hoặc `openai-responses` (`.env.example:355-365`); chọn cái nào tuỳ model hỗ trợ (spike Q16).
 
+**Chọn file cấu hình model (`openmaic.yml`):** nguồn đọc được chọn lúc khởi động (`lib/server/model-config/openmaic-yml.ts`, `deployment-layer.ts`):
+
+- Không đặt `OPENMAIC_CONFIG`: server đọc `openmaic.yml` trong thư mục làm việc (`/app` trong image Docker).
+- Đặt `OPENMAIC_CONFIG=<đường dẫn>`: server đọc đúng file đó (đường dẫn tương đối tính từ thư mục làm việc). Nếu file không tồn tại, server dừng khi khởi động.
+- Có file thì file là nguồn duy nhất: `DEFAULT_MODEL`, `MODEL_FALLBACK`, biến provider trong env và `server-providers.yml` bị bỏ qua (server báo một thông báo). `MODEL_ROUTES` không được dịch; đặt nó mà không có file thì server dừng khi khởi động.
+- Không có file và không có biến cũ: không có cấu hình model; phải chọn model trong giao diện.
+- **Không có file nào được tự nạp** từ `openmaic.local.yml`. Muốn dùng file đó, phải đặt `OPENMAIC_CONFIG` trỏ tới nó.
+- Bí mật không nằm trong file: viết `${TEN_BIEN}` và đặt biến trong `.env.local` (chạy trực tiếp) hoặc trong `env_file` của compose.
+
+Cách chạy theo từng trường hợp:
+
+| Trường hợp | Cách làm |
+| --- | --- |
+| Chạy trực tiếp trên máy (`pnpm dev`, `pnpm start`) | `cp openmaic.example.yml openmaic.yml` ở thư mục gốc, hoặc đặt `OPENMAIC_CONFIG=openmaic.local.yml`. Khoá API đặt trong `.env.local`. |
+| Chạy eval hoặc runner với cấu hình thử | `OPENMAIC_CONFIG=openmaic.local.yml pnpm exec tsx eval/...` (xem [review-runs/2026-10-10-student-roleplay](review-runs/2026-10-10-student-roleplay/README.md)). |
+| Docker, một cấu hình cố định | `cp openmaic.example.yml openmaic.yml`, rồi bỏ comment mount `./openmaic.yml:/app/openmaic.yml:ro` trong `docker-compose.yml`. **Chỉ mount khi file tồn tại:** nếu không, Docker tạo thư mục tên `openmaic.yml` và server không đọc được cấu hình. |
+| Docker, file cục bộ tên khác (ví dụ `openmaic.local.yml`) | Mount file vào `/app/openmaic.local.yml` **và** đặt `OPENMAIC_CONFIG=/app/openmaic.local.yml` trong `environment`. Đặt cả hai trong một file override chưa commit (`docker-compose.override.yml`); file này hiện chưa nằm trong `.gitignore`, nên phải thêm vào trước. Không sửa `docker-compose.yml` để bật mount cho file không có trong repo. |
+| Docker, không có file | Không mount gì. Model chỉ có thể lấy từ biến cũ (đã deprecated, xem `.env.example`). |
+
 Quy tắc: `NEXT_PUBLIC_*` biên dịch vào bundle trình duyệt (compose truyền qua `build.args`); không đặt bí mật vào đó.
 
 **Danh tính cho giới hạn mỗi người:** `render-service` chỉ có danh tính thật khi `TRUST_PROXY_HEADERS=true` sau reverse proxy; nếu không, mọi client chung một danh tính (`render-service/README.md`), và `docker-compose.yml` vì vậy đặt `RENDER_MAX_JOBS_PER_USER=0`.

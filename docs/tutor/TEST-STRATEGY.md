@@ -26,16 +26,16 @@
 | Tầng | Công cụ / vị trí | Kiểm gì | Lệnh | Khi nào chạy |
 | --- | --- | --- | --- | --- |
 | Đơn vị (node) | vitest; `tests/**/*.test.ts` (chỉ pattern này được thu thập, `vitest.config.ts:11`) | engine, player, `InputSpec`, guard message, entry, provider, tool, policy, describe, catalog↔SKILL.md, curriculum | `pnpm vitest run tests/tutor tests/widgets tests/subjects` | mọi PR (`pnpm test`) |
-| Tương đương server/trình duyệt | vitest + e2e | `run` chạy trong bundle iframe cho frame **giống** bản server cùng input (`framesHash` bằng nhau) | như trên + e2e | mọi PR |
+| Tương đương server/trình duyệt | vitest browser (Chromium): `tests/tutor/runtime/*.browser.test.ts`, 7 file có `framesHash` | `run` chạy trong iframe cho frame **giống** bản server cùng input (`framesHash` bằng nhau) | `TUTOR_BROWSER=1 pnpm exec vitest run tests/tutor/runtime/<file>.browser.test.ts` | job `e2e`, **mỗi file một step riêng** (§5) |
 | Tích hợp (không LLM) | vitest | tool `generate_walkthrough` ghi scene hợp lệ với `aiCall` giả ném lỗi nếu bị gọi | như trên | mọi PR |
 | Trình duyệt (iframe) | Playwright; `e2e/tests/` (cổng 3002, Chromium; `playwright.config.ts`) | `sandbox` đúng; `widget-ready`; lệnh gửi trước `ready` vẫn được áp; dựng lại iframe → về đúng frame; `widget-state`; nguồn lạ bị bỏ; **0 request ra ngoài**; lớp học có `code` không hiện editor; dự đoán có chờ | `pnpm exec playwright test e2e/tests/walkthrough-widget.spec.ts e2e/tests/code-widget-blocked.spec.ts` | job `e2e` |
 | Trình duyệt (export) | vitest browser test theo mẫu `tests/video-export/*.browser.test.ts` | widget tự chứa qua `prepareInteractiveHtmlScenes`; không dùng `localStorage` | `INTERACTIVE_STATIC_BROWSER=1 pnpm exec vitest run <file>.browser.test.ts` | job `e2e`, **mỗi file một step riêng** (§5) |
-| Bản cài đặt C++/Python | job riêng, cờ `TUTOR_IMPL_CHECK=1` | chạy `impl.cpp` (g++) và `impl.py` (python3) trên preset, so kết quả cuối với `run()` | `TUTOR_IMPL_CHECK=1 pnpm vitest run tests/subjects/impl-equivalence.test.ts` (đề xuất) | job riêng (đề xuất); `g++`/`python3` trên runner: [Unverified] |
+| Bản cài đặt C++/Python | job `tutor-impl`, cờ `TUTOR_IMPL_CHECK=1` | chạy `impl.cpp` (g++) và `impl.py` (python3) trên preset, so kết quả cuối với `run()` | `TUTOR_IMPL_CHECK=1 pnpm vitest run tests/subjects/impl-equivalence.test.ts` | job `tutor-impl`; `g++`/`python3` trên runner: [Unverified] |
 | i18n | `pnpm check:i18n-keys` + `tests/i18n/tutor-locales.test.ts` | 12 locale có `subject.tutor.*`; script chỉ so với `en-US`, không bắt thiếu key ở `en-US`, nên cần test riêng | `pnpm check:i18n-keys` | mọi PR |
 | Skill/workbench | vitest | tên skill ở 12 locale; `title` chứa chữ Hán; không thư mục thiếu `SKILL.md`; skill `deep-interactive` không còn `code` | `pnpm vitest run tests/workbench/workbench-i18n.test.ts tests/agent-runtime/skills.test.ts` | mọi PR |
 | Tĩnh | ESLint (có luật tất định cho catalog), Prettier, TypeScript | kiểu, định dạng, cấm `Intl`/`Date`/`Math.random` trong `run` | `pnpm lint` · `pnpm check` · `npx tsc --noEmit` | mọi PR |
-| Tài liệu | `docs/tutor/tools/check_docs.py` | cấu trúc, liên kết, tham chiếu code, **neo nội dung** | `python3 docs/tutor/tools/check_docs.py` | mọi PR (đề xuất thêm vào job `check`) |
-| Eval (LLM) | `eval/<tên>/` (mẫu `eval/outline-language`, `eval/orchestration`) | chất lượng bài, lời thầy khớp frame, Q&A, RSR (offline) | `pnpm eval:tutor-lesson`, `pnpm eval:tutor-qa`, `pnpm eval:walkthrough-actions`: `eval:tutor-qa`, `eval:tutor-review`, `eval:tutor-moderation`, `eval:sim-learner` đã có trong `package.json`; `eval:tutor-lesson`, `eval:walkthrough-actions` chưa có | thủ công/định kỳ, **không** chặn CI |
+| Tài liệu | `docs/tutor/tools/check_docs.py` | cấu trúc, liên kết, tham chiếu code, **neo nội dung** | `python3 docs/tutor/tools/check_docs.py` | mọi PR (job `check`) |
+| Eval (LLM) | `eval/<tên>/` (mẫu `eval/outline-language`, `eval/orchestration`) | chất lượng bài, lời thầy khớp frame, Q&A, RSR (offline) | `pnpm eval:tutor-lesson`, `pnpm eval:tutor-qa`, `pnpm eval:tutor-review`, `pnpm eval:tutor-moderation`, `pnpm eval:sim-learner` (có trong `package.json`); `eval:walkthrough-actions` chưa có script | thủ công/định kỳ, **không** chặn CI |
 | Vai trò LLM (cổng) | `eval/tutor-review/`, `eval/tutor-moderation/`, `eval/sim-learner/` | Hội đồng LLM duyệt entry (JSON có schema); học sinh mô phỏng G1/G2; **bộ hiệu chuẩn** của từng vai trò (ADR 0014 quyết định 7) | `pnpm eval:tutor-review`, `eval:tutor-moderation`, `eval:sim-learner` | mỗi khi entry đổi (`entryRev`), đổi model/prompt, và trước mỗi cổng |
 | Thủ công có ghi chép | checklist demo | "dạy em Binary Search" trọn vòng trên workbench; xuất/nhập lớp học; Safari/Firefox; màn 375 px; `ar-SA` | — | trước phát hành mỗi đợt |
 
@@ -58,9 +58,13 @@
 | Bộ lọc nội dung | `tests/tutor/moderation.test.ts` | giữ `text_delta` tới `agent_end`; `allow:false` → câu an toàn, bỏ `action`; model lỗi/quá hạn → chặn (fail-closed); thiếu route → chat bị chặn; nội dung trong khối dữ liệu |
 | Review của hội đồng | `tests/subjects/reviews.test.ts` | mọi entry trong `pack.ts` có `reviews/<id>@<entryRev>.json` đạt (hai model, điểm ≥ 4, không `factErrors`) |
 | `tutorLearning` | `tests/runtime/tutor-learning.test.ts` | validator: đúng hình dạng, ≤ 2 KB, khoá lạ bị từ chối; không có trường nguyên văn nội dung bị chặn |
-| Skill | `tests/tutor/skills.test.ts`, `skill-catalog-sync.test.ts` | không skill nào cho phép `code`; khối id trong `SKILL.md` khớp catalog (snapshot) |
+| Skill | `tests/tutor/skill-catalog-sync.test.ts` | `outline-constraints.json` không có `allowedWidgetTypes`, `typeMix`, `sceneCount`; khối id trong `SKILL.md` khớp catalog (snapshot). Việc không skill nào cho phép `code` chưa có test tự động |
 | Curriculum | `tests/tutor/curriculum-map.test.ts` | id duy nhất; `tracks` khác rỗng; prerequisite tồn tại; không vòng; không phụ thuộc tier cao hơn; `sequencing` đủ topic; `index.json` khớp |
-| Bước CI của browser test | `tests/ci/browser-steps.test.ts` (đề xuất) | mọi `*.browser.test.ts` có một step trong `.github/workflows/ci.yml` kèm cờ |
+| Bước CI của browser test | `tests/ci/browser-steps.test.ts` | mọi `*.browser.test.ts` có một step trong `.github/workflows/ci.yml` đặt đúng cờ môi trường của file |
+| PostgreSQL (hợp đồng) | `tests/persistence/_contract-database.ts`: `owner-materials`, `workspace-model-config`, `entry-tree-storage` | chỉ chạy trên DB có tên kết thúc `_test` hoặc `_contract` (DB khác bị từ chối trước khi tạo hoặc truncate); mỗi suite làm việc trong schema riêng. Suite PG tài khoản có guard riêng (dòng dưới). Các suite pg khác chưa có guard |
+| Danh sách suite PostgreSQL trong CI | `tests/ci/storage-pg-contract-list.test.ts` | mọi suite đọc `PG_CONTRACT_URL` nằm trong `storage-pg-contract.yml`, trừ các khoảng trống đã ghi trong test |
+
+Suite PG tài khoản (tests/accounts/*.pg.test.ts) cần ACCOUNTS_TEST_DATABASE_URL trỏ tới DB có tên kết thúc _accounts_test; thiếu biến thì các suite này bị bỏ qua.
 
 Ví dụ test đối chiếu **cách tính độc lập** (không dùng chính hàm đang kiểm):
 
@@ -80,26 +84,9 @@ describe('quick-sort', () => {
 })
 ```
 
-Ví dụ test **kiểm kê đường ghi** (ý tưởng; danh sách chốt ở spike Q12):
+Test **kiểm kê đường ghi** là `tests/widgets/write-paths.test.ts`. Danh sách file lấy từ `git ls-files --cached --others --exclude-standard` (gồm file mới chưa `git add`), rồi đọc nội dung từ đĩa. Lỗi git làm test đỏ, không bị nuốt thành danh sách rỗng.
 
-```ts
-// tests/widgets/write-paths.test.ts
-import { execSync } from 'node:child_process'
-import { expect, it } from 'vitest'
-
-const CLASSIFIED = {
-  'lib/server/agent-runtime/document-writes.ts': 'L2-tool',   // putSceneBringingCurrent
-  'app/api/persistence/[...path]/route.ts': 'L1-render-only',
-} as const
-
-it('mọi đường ghi scene đã được phân loại chặn `code`', () => {
-  const hits = execSync("git grep -l -E 'putScene\\(|saveDocument\\(' -- lib app", { encoding: 'utf8' })
-    .trim().split('\n').filter((f) => !f.includes('/tests/'))
-  for (const f of hits) expect(Object.keys(CLASSIFIED)).toContain(f)
-})
-```
-
-Quy tắc test tự bỏ qua theo môi trường: mọi test cần trình duyệt phải dùng `describe.skipIf(!process.env.<CỜ>)`, và `ci.yml` phải có **một step riêng** chạy đúng file đó với cờ (`.github/workflows/ci.yml:271-279`). Thiếu step thì test nằm trong `pnpm test` sẽ bị bỏ qua lặng lẽ; `tests/ci/browser-steps.test.ts` bắt lỗi này.
+Quy tắc test tự bỏ qua theo môi trường: mọi test cần trình duyệt phải dùng `describe.skipIf(!process.env.<CỜ>)`, và `ci.yml` phải có **một step riêng** chạy đúng file đó với cờ (xem các step `Walkthrough runtime Chromium tests` và các bước cùng nhóm trong job `e2e`). Thiếu step thì test nằm trong `pnpm test` sẽ bị bỏ qua lặng lẽ; `tests/ci/browser-steps.test.ts` bắt lỗi này.
 
 ## 4. Dữ liệu kiểm thử
 
@@ -114,14 +101,14 @@ Quy tắc test tự bỏ qua theo môi trường: mọi test cần trình duyệ
 | Cổng | Job hiện có | Nội dung liên quan tính năng |
 | --- | --- | --- |
 | Lint, kiểu, i18n | `check` | `pnpm check`, ESLint (luật tất định), `tsc`, `check:i18n-keys` |
-| Unit | `check` → `pnpm test` | mọi test §3 chạy bằng vitest |
-| Package versions | `check` | `git diff --name-only origin/main -- packages/@openmaic` rỗng → không cần bump |
+| Unit | `check` → `pnpm test` | mọi test §3 không cần trình duyệt; test trình duyệt bị bỏ qua khi thiếu cờ |
+| Phiên bản gói | `check` (bước `Package version bumps`, và bản chạy khi push vào `main`) | `node scripts/check-package-version-bumps.mjs <base>`: đầu vào phát hành của gói `@openmaic/*` đổi so với base thì phải tăng version; kiểm cả quy tắc định dạng DSL; chế độ release so với registry npm |
 | Trình duyệt | `e2e` (build + Playwright) | walkthrough iframe, bắt tay, CSP, chặn `code`; **mỗi browser test một step có cờ** |
 | Render service | `render-service` | không đổi bởi tính năng |
-| **Đề xuất thêm** | `check` | `python3 docs/tutor/tools/check_docs.py` |
-| **Đề xuất thêm** | job `tutor-impl` | `TUTOR_IMPL_CHECK=1` |
+| Tài liệu | `check` | `python3 docs/tutor/tools/check_docs.py` |
+| Bản cài đặt C++/Python | `tutor-impl` | `TUTOR_IMPL_CHECK=1` (`impl-equivalence.test.ts`) |
 
-**CI chỉ chạy** khi push vào `main`/nhánh integration, hoặc khi mở PR vào danh sách nhánh cố định (`.github/workflows/ci.yml:3-19`). Merge local trên nhánh tính năng không có CI, nên phải chạy đủ §7 trước khi merge, hoặc mở PR vào `main` của fork.
+**CI chỉ chạy** khi push vào `main`/nhánh integration, hoặc khi mở PR vào danh sách nhánh cố định (khối `on:` của `.github/workflows/ci.yml`). Merge local trên nhánh tính năng không có CI, nên phải chạy đủ §7 trước khi merge, hoặc mở PR vào `main` của fork.
 
 ## 6. Eval (không chặn CI)
 
@@ -145,7 +132,7 @@ pnpm exec playwright test e2e/tests/walkthrough-widget.spec.ts e2e/tests/code-wi
 python3 docs/tutor/tools/check_docs.py
 ```
 
-Lưu ý môi trường: cần Node ≥ 22.19.0 (`package.json` `engines`; `Dockerfile` dùng `node:22-alpine`). Nếu shell tích hợp không có `node` trên `PATH`, thêm thư mục Node vào `PATH` trước khi chạy. e2e cần workbench thì đặt `OPENMAIC_AGENT_RUNTIME_ENABLED=true`, `DATABASE_URL`, `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`.
+Lưu ý môi trường: cần Node ≥ 22.19.0 (`package.json` `engines`; `Dockerfile` dùng `node:22-alpine`; `.node-version` ghi 22 cho fnm). Nếu shell tích hợp không có `node` trên `PATH`, thêm thư mục Node vào `PATH` trước khi chạy. e2e cần đặt `E2E_DATABASE_URL` trỏ tới một DB dành riêng cho e2e, không dùng `DATABASE_URL` của `.env.local`. e2e cần workbench thì đặt thêm `OPENMAIC_AGENT_RUNTIME_ENABLED=true`, `NEXT_PUBLIC_PRO_WORKBENCH_ENABLED=true`.
 
 ## 8. Cái gì **không** được kiểm (và vì sao chấp nhận)
 
@@ -153,12 +140,12 @@ Lưu ý môi trường: cần Node ≥ 22.19.0 (`package.json` `engines`; `Docke
 | --- | --- | --- |
 | Hành vi LLM thật trong CI | không tất định, tốn phí | eval thủ công có ngưỡng; kiểm biên bằng `aiCall` giả |
 | Editor "trá hình" trong widget LLM | không có oracle | CSP + heuristic cảnh báo (SECURITY §6) |
-| Hiệu năng nhảy frame trong CI | máy CI dao động, Playwright `retries: 2` | spec riêng `--retries=0`, chỉ theo dõi (NFR-P4) |
+| Hiệu năng nhảy frame trong CI | máy CI dao động, Playwright `retries: 2` | đề xuất, chưa có spec (NFR-P4): spec riêng `--retries=0`, chỉ theo dõi |
 | a11y tự động (axe) | ADR 0002 cấm thêm dependency | test bảng màu + e2e bàn phím + checklist tay |
 
 ## 9. Quản lý test không ổn định và bảo trì
 
-- Test tất định không được retry. Playwright có `retries: 2` trong CI (`playwright.config.ts:7`), nên test walkthrough phải ổn định **không cần** retry: đợi `widget-ready`, không dùng timeout cứng.
+- Test tất định không được retry. Playwright có `retries: 2` trong CI (`playwright.config.ts:19`); các spec walkthrough chạy ở project `chromium-walkthrough` với `retries: 0`, nên test walkthrough phải ổn định **không cần** retry: đợi `widget-ready`, không dùng timeout cứng.
 - Fake timer cho mọi test player; không dựa vào giờ thật.
 - `framesHash` đổi thì phải tăng `entryRev`.
 - Thêm walkthrough mới = PR phải kèm test tương ứng (checklist ở [ONBOARDING](ONBOARDING.md)).

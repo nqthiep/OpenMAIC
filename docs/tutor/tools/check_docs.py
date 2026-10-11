@@ -128,7 +128,7 @@ PLANNED = (
 CODE_REF = re.compile(
     r"`((?:(?:lib|components|app|packages|scripts|tests|skills|public|eval|e2e|render-service|\.github)"
     r"/[A-Za-z0-9_@\-./\[\]]*?\.(?:ts|tsx|mjs|json|md|js|yml|py))"
-    r"|middleware\.ts|next\.config\.ts|Dockerfile|docker-compose\.yml|README\.md|package\.json"
+    r"|middleware\.ts|proxy\.ts|next\.config\.ts|Dockerfile|docker-compose\.yml|README\.md|package\.json"
     r"|playwright\.config\.ts|vitest\.config\.ts|eslint\.config\.mjs|\.env\.example)"
     r"(?::(\d+(?:-\d+)?(?:,\s?\d+(?:-\d+)?)*))?`"
 )
@@ -156,7 +156,7 @@ ANCHORS = {
     "lib/server/agent-runtime/generation-tools.ts:585-609": "generate_actions",
     "lib/server/agent-runtime/generation-tools.ts:130-143": "function outlineFromScene",
     "packages/@openmaic/dsl/src/interactive.ts:38": "type: WidgetType",
-    "middleware.ts:34-37": "isProWorkbenchEnabled",
+    "proxy.ts:136-158": "process.env.ACCESS_CODE",
     "lib/config/feature-flags.ts:29-36": "OPENMAIC_AGENT_RUNTIME_ENABLED",
     "lib/config/feature-flags.ts:68-70": "NEXT_PUBLIC_PRO_WORKBENCH_ENABLED",
     "next.config.ts:72-76": "frame-ancestors",
@@ -170,9 +170,9 @@ ANCHORS = {
     "lib/server/model-routes.ts:127-163": "export const LLM_STAGES",
     "lib/runtime/payload-validators.ts:135-141": "APP_RUNTIME_PAYLOAD_VALIDATORS",
     "packages/@openmaic/dsl/src/runtime.ts:152-157": "open `string`",
-    "app/api/chat/route.ts:137-218": "statelessGenerate(",
+    "app/api/chat/route.ts:137-214": "statelessGenerate(",
     "packages/@openmaic/generation/templates/slide-actions/system.md:116-117": "MUST be the **last**",
-    "lib/action/engine.ts:900-905": "executeWidgetSetState",
+    "lib/action/engine.ts:937-942": "executeWidgetSetState",
     "lib/utils/iframe.ts:390": "export function patchHtmlForIframe",
     "lib/logger.ts:10": "LOG_FORMAT",
     "lib/server/classroom-persistence.ts:56": "sanitizeSceneContent(classroom.stage)",
