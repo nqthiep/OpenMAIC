@@ -19,6 +19,11 @@ import type { StatelessChatRequest, StatelessEvent } from '@/lib/types/chat';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { resolveModel } from '@/lib/server/resolve-model';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import type { ThinkingConfig } from '@/lib/types/provider';
 const log = createLogger('Chat API');
 
@@ -45,6 +50,8 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
   let chatModel: string | undefined;
   let chatMessageCount: number | undefined;
+  // True once the operator's key is chosen. Upstream error text then stays on the server.
+  let managedKey = false;
 
   try {
     const body: StatelessChatRequest = await req.json();
@@ -69,6 +76,7 @@ export async function POST(req: NextRequest) {
       apiKey: resolvedApiKey,
       providerId,
       thinkingConfig: resolvedThinking,
+      managedKey: operatorKeyUsed,
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
@@ -79,6 +87,8 @@ export async function POST(req: NextRequest) {
       // wins, an unrouted one honors this client thinking (see resolve-model.ts).
       thinkingConfig: body.thinkingConfig ?? body.thinking,
     });
+
+    managedKey = operatorKeyUsed;
 
     if (isProviderKeyRequired(providerId) && !resolvedApiKey) {
       return apiError('MISSING_API_KEY', 401, 'API Key is required');
@@ -167,7 +177,7 @@ export async function POST(req: NextRequest) {
 
         log.error(
           `Chat stream error [model=${body.model ?? 'unknown'}, agents=${body.config?.agentIds?.length ?? 0}, messages=${body.messages?.length ?? 0}]:`,
-          error,
+          managedKey ? describeUnexpectedError(error) : error,
         );
 
         // Try to send error event
@@ -175,7 +185,7 @@ export async function POST(req: NextRequest) {
           const errorEvent: StatelessEvent = {
             type: 'error',
             data: {
-              message: error instanceof Error ? error.message : String(error),
+              message: visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT),
             },
           };
           await writer.write(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
@@ -201,7 +211,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Failed to process request',
+      visitorErrorText(error, managedKey, 'Failed to process request'),
     );
   }
 }

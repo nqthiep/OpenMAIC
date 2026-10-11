@@ -37,6 +37,11 @@ import type {
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { sortDocumentImagesForVision } from '@/lib/document/bundle';
 import { resolveVisionImagesForPrompt } from '@/lib/persistence/resolve-vision-images';
 import { resolveVocationalActive } from '@/lib/config/feature-flags';
@@ -287,6 +292,8 @@ function ensureUniqueOutlineId(outline: SceneOutline, usedIds: Set<string>): Sce
 export async function POST(req: NextRequest) {
   let requirementSnippet: string | undefined;
   let resolvedModelString: string | undefined;
+  // True once the operator's key is chosen. Upstream error text then stays on the server.
+  let managedKey = false;
   try {
     const body = await req.json();
 
@@ -296,7 +303,9 @@ export async function POST(req: NextRequest) {
       modelInfo,
       modelString,
       thinkingConfig,
+      managedKey: operatorKeyUsed,
     } = await resolveModelFromRequest(req, body, 'scene-outlines-stream');
+    managedKey = operatorKeyUsed;
     resolvedModelString = modelString;
 
     if (!body.requirements) {
@@ -637,7 +646,7 @@ export async function POST(req: NextRequest) {
                 stopHeartbeat();
                 return;
               }
-              lastError = error instanceof Error ? error.message : String(error);
+              lastError = visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT);
               log.warn(
                 `Outlines stream error detail (attempt ${attempt}/${MAX_STREAM_RETRIES + 1}): ${lastError}`,
               );
@@ -684,7 +693,7 @@ export async function POST(req: NextRequest) {
         } catch (error) {
           const errorEvent = JSON.stringify({
             type: 'error',
-            error: error instanceof Error ? error.message : String(error),
+            error: visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT),
           });
           controller.enqueue(encoder.encode(`data: ${errorEvent}\n\n`));
         } finally {
@@ -709,8 +718,8 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     log.error(
       `Outline streaming failed [requirement="${requirementSnippet ?? 'unknown'}...", model=${resolvedModelString ?? 'unknown'}]:`,
-      error,
+      managedKey ? describeUnexpectedError(error) : error,
     );
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT));
   }
 }

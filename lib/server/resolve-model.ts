@@ -19,6 +19,8 @@ import { fetchWithRedirectValidation } from '@/lib/server/fetch-with-redirect-va
 import { getStageRoute, type LlmStage } from '@/lib/server/model-routes';
 
 export interface ResolvedModel extends ModelWithInfo {
+  /** True when the operator's key is in use. Its upstream error text must not reach a visitor. */
+  managedKey: boolean;
   /** Original model string (e.g. "openai/gpt-4o-mini") */
   modelString: string;
   /** Resolved provider ID (e.g. "openai", "ollama") */
@@ -148,6 +150,8 @@ export async function resolveModel(params: {
     apiKey,
     baseUrl,
     thinkingConfig,
+    // True when the operator's key is in use. Its upstream error text must not reach a visitor.
+    managedKey: managed,
   };
 }
 

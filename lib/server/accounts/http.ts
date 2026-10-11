@@ -3,6 +3,7 @@ import { apiError, type ApiErrorCode } from '@/lib/server/api-response';
 
 import { PasswordWorkBusyError } from './password';
 import { AccountError, type AccountErrorCode } from './service';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('AccountsRoute');
 
@@ -124,29 +125,7 @@ function errorCodeOf(value: unknown): string {
   return value instanceof Error ? value.name : 'unknown error';
 }
 
-/**
- * A diagnostic line for an unexpected error: name, string code, and the first stack
- * frame. The message is never included. The frame is read only after the stack's own
- * header, so a newline inside the message cannot pass for a frame.
- */
-/** A name or code is logged only when it is a plain token, so text from a message cannot ride along. */
-const LOGGABLE_TOKEN = /^[A-Za-z0-9_.]{1,64}$/;
-
-export function describeUnexpectedError(value: unknown): string {
-  if (!(value instanceof Error)) return 'non-error value';
-  const rawCode = (value as { code?: unknown }).code;
-  const code = typeof rawCode === 'string' && LOGGABLE_TOKEN.test(rawCode) ? rawCode : 'none';
-  const name = LOGGABLE_TOKEN.test(value.name) ? value.name : 'unknown';
-  const header = value.message ? `${value.name}: ${value.message}` : value.name;
-  const stack = value.stack ?? '';
-  const afterHeader = stack.startsWith(header) ? stack.slice(header.length) : '';
-  const frame =
-    afterHeader
-      .split('\n')
-      .map((line) => line.trim())
-      .find((line) => line.startsWith('at ')) ?? 'frame unavailable';
-  return `${name} code=${code} frame=${frame}`;
-}
+export { describeUnexpectedError };
 
 /**
  * Runs an account route body. Every response is marked no-store, and unexpected

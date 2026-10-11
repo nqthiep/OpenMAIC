@@ -2322,9 +2322,9 @@ export function getModel(config: ModelConfig): ModelWithInfo {
             try {
               JSON.parse(text);
             } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
+              // No body text and no parser message: both can echo upstream content, which may carry key material.
               log.warn(
-                `[Lemonade] Invalid JSON response from OpenAI-compatible path: status=${response.status}, contentType=${contentType || 'n/a'}, bodyLen=${text.length}, first=${JSON.stringify(text.slice(0, 500))}, last=${JSON.stringify(text.slice(Math.max(0, text.length - 500)))}, parseError=${message}`,
+                `[Lemonade] Invalid JSON response from OpenAI-compatible path: status=${response.status}, contentType=${contentType || 'n/a'}, bodyLen=${text.length}, parseError=${error instanceof Error ? error.name : 'unknown'}`,
               );
             }
           } catch (error) {

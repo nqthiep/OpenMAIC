@@ -179,6 +179,37 @@ describe('POST /api/classroom — id validation before persistence', () => {
     expect(json).toMatchObject({ success: false, errorCode: 'INVALID_REQUEST' });
   });
 
+  it('refuses a payload over the byte cap before reading it, and never persists it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    const oversized = new NextRequest('http://localhost/api/classroom', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'content-length': String(10 * 1024 * 1024 + 1),
+      },
+      body: '{}',
+    });
+
+    const res = await POST(oversized);
+
+    expect(res.status).toBe(413);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('answers 400 for a body that is not JSON, and never persists it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    const malformed = new NextRequest('http://localhost/api/classroom', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{"stage": ',
+    });
+
+    const res = await POST(malformed);
+
+    expect(res.status).toBe(400);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
   it('refuses a client-chosen id under 16 characters and never persists it', async () => {
     const { POST } = await import('@/app/api/classroom/route');
 

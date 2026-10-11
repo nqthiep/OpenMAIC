@@ -116,7 +116,7 @@ export async function proxyFetch(input: string | URL, init?: RequestInit): Promi
   const url = typeof input === 'string' ? input : input.toString();
 
   if (!agent) {
-    log.info('No proxy configured, using direct fetch for:', url.slice(0, 80));
+    log.info('No proxy configured, using direct fetch for:', loggableUrl(url));
     return fetch(input, init);
   }
 
@@ -127,11 +127,11 @@ export async function proxyFetch(input: string | URL, init?: RequestInit): Promi
     // Unparseable input — let fetch surface the real error below.
   }
   if (parsed && shouldBypassProxy(parsed)) {
-    log.info('Bypassing proxy (loopback/NO_PROXY) for:', url.slice(0, 80));
+    log.info('Bypassing proxy (loopback/NO_PROXY) for:', loggableUrl(url));
     return fetch(input, init);
   }
 
-  log.info('Using proxy', cachedProxyUrl, 'for:', url.slice(0, 80));
+  log.info('Using proxy', loggableUrl(cachedProxyUrl), 'for:', loggableUrl(url));
   // Use undici's fetch with the proxy dispatcher
   const res = await undiciFetch(input, {
     ...(init as UndiciRequestInit),
@@ -140,4 +140,18 @@ export async function proxyFetch(input: string | URL, init?: RequestInit): Promi
 
   // undici's Response is compatible with the global Response
   return res as unknown as Response;
+}
+
+/**
+ * Origin and path only. Userinfo and the query string can carry credentials or keys, so
+ * neither is logged.
+ */
+function loggableUrl(value: string | undefined): string {
+  if (!value) return 'unset';
+  try {
+    const parsed = new URL(value);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return 'unparseable URL';
+  }
 }

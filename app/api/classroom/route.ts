@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server';
 import { randomUUID } from 'crypto';
 import { validateScene } from '@openmaic/dsl';
 import { apiSuccess, apiError, API_ERROR_CODES } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import {
   buildRequestOrigin,
   isAlreadyExistsError,
@@ -17,6 +18,9 @@ const log = createLogger('Classroom API');
 /** Shortest client-chosen classroom id that POST accepts. */
 const CLIENT_CLASSROOM_ID_MIN_LENGTH = 16;
 
+/** Largest classroom payload POST accepts. The app's own client never posts one; this bounds external callers. */
+const CLASSROOM_CREATE_MAX_BYTES = 10 * 1024 * 1024;
+
 function describeSceneIssue(issue: { path: string; message: string }): string {
   const at = issue.path && issue.path !== '' ? issue.path : '/';
   return `${at}: ${issue.message}`;
@@ -26,7 +30,22 @@ export async function POST(request: NextRequest) {
   let stageId: string | undefined;
   let sceneCount: number | undefined;
   try {
-    const body = await request.json();
+    const read = await readBoundedJson(request, CLASSROOM_CREATE_MAX_BYTES);
+    if (!read.ok) {
+      return apiError(
+        API_ERROR_CODES.INVALID_REQUEST,
+        read.status,
+        read.code === 'PAYLOAD_TOO_LARGE'
+          ? `Classroom payload exceeds ${CLASSROOM_CREATE_MAX_BYTES} bytes`
+          : 'Invalid JSON body',
+      );
+    }
+    // The body is untrusted and each field is validated below, as it was when this was request.json().
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body: any = read.value;
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+      return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'Invalid JSON body');
+    }
     const { stage, scenes } = body;
     stageId = stage?.id;
     sceneCount = scenes?.length;

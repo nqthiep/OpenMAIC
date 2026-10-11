@@ -2,11 +2,14 @@ import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModel } from '@/lib/server/resolve-model';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { callLLM } from '@/lib/ai/llm';
 const log = createLogger('Verify Model');
 
 export async function POST(req: NextRequest) {
   let model: string | undefined;
+  // Set once the operator's key is chosen. Upstream text from that key is never sent to the visitor.
+  let managedKey = false;
   try {
     const body = await req.json();
     const { apiKey, baseUrl, providerType } = body;
@@ -26,6 +29,7 @@ export async function POST(req: NextRequest) {
         providerType,
       });
       languageModel = result.model;
+      managedKey = result.managedKey;
     } catch (error) {
       return apiError(
         'INVALID_REQUEST',
@@ -52,7 +56,11 @@ export async function POST(req: NextRequest) {
       response: text,
     });
   } catch (error) {
-    log.error(`Model verification failed [model="${model ?? 'unknown'}"]:`, error);
+    // With the operator's key, the log keeps a name, code and frame, not the upstream message.
+    log.error(
+      `Model verification failed [model=${JSON.stringify(model ?? 'unknown')}]:`,
+      managedKey ? describeUnexpectedError(error) : error,
+    );
 
     let errorMessage = 'Connection failed';
     if (error instanceof Error) {
@@ -67,7 +75,8 @@ export async function POST(req: NextRequest) {
         errorMessage = 'Cannot connect to API server, please check the Base URL';
       } else if (error.message.includes('timeout')) {
         errorMessage = 'Connection timed out, please check your network';
-      } else {
+      } else if (!managedKey) {
+        // The visitor's own key: its error text describes their own key and is useful to them.
         errorMessage = error.message;
       }
     }

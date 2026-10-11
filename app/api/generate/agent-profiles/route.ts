@@ -11,6 +11,11 @@ import { callLLM } from '@/lib/ai/llm';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { AGENT_COLOR_PALETTE } from '@/lib/constants/agent-defaults';
 import { normalizeVoiceDesign } from '@/lib/audio/voice-design';
 import { isQwenCloneVoice, resolveTTSModelForVoice } from '@/lib/audio/constants';
@@ -130,6 +135,8 @@ function stripCodeFences(text: string): string {
 export async function POST(req: NextRequest) {
   let stageName: string | undefined;
   let modelString: string | undefined;
+  // True once the operator's key is chosen. Upstream error text then stays on the server.
+  let managedKey = false;
   try {
     const body = (await req.json()) as RequestBody;
     const {
@@ -163,8 +170,10 @@ export async function POST(req: NextRequest) {
       model: languageModel,
       modelString: _modelString,
       thinkingConfig,
+      managedKey: operatorKeyUsed,
     } = await resolveModelFromRequest(req, body, 'agent-profiles');
     modelString = _modelString;
+    managedKey = operatorKeyUsed;
 
     // ── Build prompt ──
     const sceneSummary = sceneOutlines?.length
@@ -361,8 +370,8 @@ Return a JSON object with this exact structure:
   } catch (error) {
     log.error(
       `Agent profiles generation failed [stage="${stageName ?? 'unknown'}", model=${modelString ?? 'unknown'}]:`,
-      error,
+      managedKey ? describeUnexpectedError(error) : error,
     );
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT));
   }
 }
