@@ -315,7 +315,18 @@
   },
   "voice": {
     "startListening": "Nhập bằng giọng nói",
-    "stopListening": "Dừng ghi âm"
+    "stopListening": "Dừng ghi âm",
+    "error": {
+      "transcription": "Nhận dạng giọng nói thất bại, vui lòng thử lại",
+      "unsupported": "Trình duyệt này không hỗ trợ nhận dạng giọng nói",
+      "recognition": "Nhận dạng giọng nói thất bại",
+      "noSpeech": "Không phát hiện giọng nói",
+      "audioCapture": "Không truy cập được micro",
+      "notAllowed": "Micro bị từ chối quyền truy cập",
+      "network": "Lỗi mạng",
+      "other": "Lỗi nhận dạng giọng nói: {{error}}",
+      "microphone": "Không truy cập được micro. Hãy kiểm tra quyền truy cập micro"
+    }
   },
   "stage": {
     "currentScene": "Cảnh hiện tại",
@@ -736,7 +747,7 @@
       "shortTitle": "Danh sách nhân vật"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "Bỏ tham chiếu {{label}}",
       "counts": "Đã tham chiếu {{count}}/{{max}}",
       "exitPicking": "Xong",
       "startPicking": "Tham chiếu phần tử"
@@ -2196,25 +2207,25 @@
     "serverConfiguredAddOwn": "Muốn dùng thông tin đăng nhập riêng, hãy thêm một nhà cung cấp khác."
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "Lớp học chưa đặt tên",
+    "sceneCount": "{{count}} trang",
+    "sceneCount_one": "{{count}} trang",
+    "sceneCount_other": "{{count}} trang",
+    "courseLinkHint": "Mở «{{name}}» ở bên phải",
+    "courseLinkMore": "Còn {{count}} lớp học khác",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "Tham chiếu lớp học cho tin nhắn này",
+      "empty": "Không có lớp học nào khớp",
+      "alreadyNamed": "Đã tham chiếu",
+      "remove": "Bỏ {{name}}",
+      "pillHint": "Tin nhắn này tham chiếu «{{name}}»",
       "notAccepted": "Máy chủ tạm thời không khả dụng. Vui lòng thử lại sau giây lát.",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "Tham chiếu «{{name}}»",
+      "capped": "Chỉ hiện {{count}} mục đầu, gõ thêm để thu hẹp"
     },
     "heroTitle": "What will you create today?",
     "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "newSession": "Trò chuyện mới",
     "sections": {
       "courses": "Courses",
       "sessions": "Chats"
@@ -2228,7 +2239,7 @@
     "pagePosition": "Page {{index}} of {{total}}",
     "exitPro": "Exit Pro",
     "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
+    "homeAria": "Về trang chủ",
     "currentSession": "Current chat",
     "startLearning": "Bắt đầu học",
     "time": {
@@ -2330,16 +2341,16 @@
   },
   "proMode": {
     "attach": "Đính kèm tài liệu",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
+    "mentionCourse": "Tham chiếu lớp học",
+    "loadSkill": "Tải skill",
+    "skillMenuTitle": "Chọn skill thiết kế bài học",
+    "skillsLoading": "Đang tải skill…",
+    "noSkillsAvailable": "Chưa có skill nào",
+    "userSkillsGroup": "Skill của tôi",
+    "builtinSkillsGroup": "Skill tích hợp",
+    "skillsLoadFailed": "Tải skill thất bại, bấm để thử lại",
+    "retrySkills": "Thử lại",
+    "noSkillMatch": "Không có skill nào khớp “{{query}}”",
     "badgeAria": "Chế độ Pro",
     "badgeEnter": "Chế độ Pro",
     "badgeExit": "Quay lại chế độ cổ điển",

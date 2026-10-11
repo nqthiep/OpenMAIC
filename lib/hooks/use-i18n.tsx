@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Locale, defaultLocale, supportedLocales } from '@/lib/i18n';
 import '@/lib/i18n/config';
+import { saveLocaleChoice } from '@/lib/i18n/locale-switch';
 
 const LOCALE_STORAGE_KEY = 'locale';
 
@@ -45,13 +46,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Also writes the cookie that /learn reads on the server, so both pages agree.
   const setLocale = (newLocale: Locale) => {
     i18n.changeLanguage(newLocale);
-    try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
-    } catch {
-      // localStorage unavailable
-    }
+    saveLocaleChoice(newLocale);
   };
 
   return <I18nContext.Provider value={{ locale, setLocale, t }}>{children}</I18nContext.Provider>;

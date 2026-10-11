@@ -315,7 +315,18 @@
   },
   "voice": {
     "startListening": "语音输入",
-    "stopListening": "停止录音"
+    "stopListening": "停止录音",
+    "error": {
+      "transcription": "语音识别失败，请重试",
+      "unsupported": "您的浏览器不支持语音识别功能",
+      "recognition": "语音识别失败",
+      "noSpeech": "未检测到语音输入",
+      "audioCapture": "无法访问麦克风",
+      "notAllowed": "麦克风权限被拒绝",
+      "network": "网络错误",
+      "other": "语音识别错误: {{error}}",
+      "microphone": "无法访问麦克风，请检查权限设置"
+    }
   },
   "stage": {
     "currentScene": "当前场景",

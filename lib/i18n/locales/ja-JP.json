@@ -315,7 +315,18 @@
   },
   "voice": {
     "startListening": "音声入力",
-    "stopListening": "録音を停止"
+    "stopListening": "録音を停止",
+    "error": {
+      "transcription": "Speech recognition failed, please try again",
+      "unsupported": "This browser does not support speech recognition",
+      "recognition": "Speech recognition failed",
+      "noSpeech": "No speech detected",
+      "audioCapture": "Cannot access the microphone",
+      "notAllowed": "Microphone access denied",
+      "network": "Network error",
+      "other": "Speech recognition error: {{error}}",
+      "microphone": "Cannot access the microphone. Check the permission settings"
+    }
   },
   "stage": {
     "currentScene": "現在のシーン",

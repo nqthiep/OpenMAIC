@@ -315,7 +315,18 @@
   },
   "voice": {
     "startListening": "語音輸入",
-    "stopListening": "停止錄音"
+    "stopListening": "停止錄音",
+    "error": {
+      "transcription": "語音辨識失敗，請重試",
+      "unsupported": "您的瀏覽器不支援語音辨識功能",
+      "recognition": "語音辨識失敗",
+      "noSpeech": "未偵測到語音輸入",
+      "audioCapture": "無法存取麥克風",
+      "notAllowed": "麥克風權限被拒絕",
+      "network": "網路錯誤",
+      "other": "語音辨識錯誤: {{error}}",
+      "microphone": "無法存取麥克風，請檢查權限設定"
+    }
   },
   "stage": {
     "currentScene": "目前場景",

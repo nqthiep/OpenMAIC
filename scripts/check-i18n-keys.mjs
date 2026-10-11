@@ -56,7 +56,44 @@ function readLocaleKeys(filePath) {
   return [...collectLeafKeys(parsed, fileName)].sort();
 }
 
+// Vietnamese copy is shown to Vietnamese users, so CJK text there is a bug. Language-name
+// keys (settings.lang_*) are written in their own script and are exempt.
+const CJK =
+  /[\p{Ideographic}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Bopomofo}]/u;
+const VI_FILES = [
+  path.join(LOCALES_DIR, 'vi-VN.json'),
+  path.join(process.cwd(), 'lib', 'i18n', 'workbench-locales', 'vi-VN.json'),
+];
+
+function cjkKeys(value, keyPath = '', found = []) {
+  if (isPlainObject(value)) {
+    for (const [key, child] of Object.entries(value)) {
+      cjkKeys(child, keyPath ? `${keyPath}.${key}` : key, found);
+    }
+  } else if (typeof value === 'string' && CJK.test(value) && !/^settings\.lang_/.test(keyPath)) {
+    found.push(keyPath);
+  }
+  return found;
+}
+
+function checkVietnameseCjk() {
+  const found = VI_FILES.flatMap((file) =>
+    cjkKeys(JSON.parse(fs.readFileSync(file, 'utf8'))).map(
+      (key) => `${path.relative(process.cwd(), file)}: ${key}`,
+    ),
+  );
+  if (found.length === 0) return;
+
+  console.error('Vietnamese locale copy contains CJK text:');
+  for (const entry of found) {
+    console.error(`  - ${entry}`);
+  }
+  process.exit(1);
+}
+
 function main() {
+  checkVietnameseCjk();
+
   const localeFiles = fs
     .readdirSync(LOCALES_DIR)
     .filter((name) => name.endsWith('.json'))
