@@ -28,7 +28,10 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerNotFound } from '@/lib/server/agent-runtime/route-response';
-import { resolveSignedInOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import {
+  resolveSignedInSession,
+  sessionEndedResponse,
+} from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
 // Self-hosted `next start` ignores maxDuration; Vercel's adapter can still use
@@ -48,8 +51,9 @@ export async function GET(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
   const responseHeaders = new Headers();
-  const signedInOwnerId = await resolveSignedInOwnerId(req.headers);
-  const ownerId = resolveRequestOwnerId(req, responseHeaders, signedInOwnerId);
+  const session = await resolveSignedInSession(req.headers);
+  if (session.ended) return sessionEndedResponse();
+  const ownerId = resolveRequestOwnerId(req, responseHeaders, session.ownerId);
   const { id: stageId } = await params;
 
   // Existence-gated, exactly like the manifest route: the owner-bound store

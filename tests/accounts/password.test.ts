@@ -37,6 +37,10 @@ const MALFORMED: Array<[string, (valid: string) => string]> = [
   ['N below the lower bound', (valid) => withField(valid, 1, String(2 ** 13))],
   ['N above the upper bound', (valid) => withField(valid, 1, String(2 ** 19))],
   ['N that exceeds the memory ceiling for r', (valid) => withField(valid, 1, String(2 ** 18))],
+  [
+    'N and r at the byte-exact edge that scrypt refuses',
+    (valid) => withField(withField(valid, 1, String(2 ** 16)), 2, '16'),
+  ],
   ['r of zero', (valid) => withField(valid, 2, '0')],
   ['r above the upper bound', (valid) => withField(valid, 2, '17')],
   ['p of zero', (valid) => withField(valid, 3, '0')],

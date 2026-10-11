@@ -23,9 +23,12 @@ export function accountsEnabled(): boolean {
   return isServerPersistenceConfigured();
 }
 
-/** Registration is open unless the operator sets ACCOUNT_REGISTRATION=closed. */
+/**
+ * Registration is closed unless the operator sets ACCOUNT_REGISTRATION=open. Closed
+ * by default, so a deployment that never chose open registration does not offer it.
+ */
 export function registrationOpen(): boolean {
-  return process.env.ACCOUNT_REGISTRATION?.trim().toLowerCase() !== 'closed';
+  return process.env.ACCOUNT_REGISTRATION?.trim().toLowerCase() === 'open';
 }
 
 /** One throttle per process, kept on globalThis so dev-mode module reloads do not reset it. */

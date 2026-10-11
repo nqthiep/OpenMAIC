@@ -1,6 +1,7 @@
 import type { PersistencePoolFactory } from '@/lib/persistence/server-provider';
-import { resolveAuthenticatedOwnerId } from '@/lib/server/accounts/runtime';
-import { readSessionCookie } from '@/lib/server/accounts/session';
+import { accountsEnabled, resolveAuthenticatedOwnerId } from '@/lib/server/accounts/runtime';
+import { clearSessionCookieHeader, readSessionCookie } from '@/lib/server/accounts/session';
+import { apiError } from '@/lib/server/api-response';
 
 import { resolveRequestOwnerId } from './owner';
 
@@ -21,6 +22,35 @@ export async function resolveSignedInOwnerId(
 ): Promise<string | undefined> {
   if (readSessionCookie(headers) === undefined) return undefined;
   return resolveAuthenticatedOwnerId(headers, poolFactory);
+}
+
+/**
+ * A request that carries a well-formed session cookie which no longer resolves to a
+ * live account (expired, revoked, or the account disabled) has ended its session.
+ * While accounts are enabled, such a request must not fall back to the anonymous
+ * owner: its work would silently land in a different partition. Malformed, duplicated
+ * and absent cookies, and deployments without accounts, keep the anonymous identity.
+ */
+export async function resolveSignedInSession(
+  headers: Headers,
+  poolFactory?: PersistencePoolFactory,
+): Promise<{ ownerId: string | undefined; ended: boolean }> {
+  if (readSessionCookie(headers) === undefined) return { ownerId: undefined, ended: false };
+  const ownerId = await resolveAuthenticatedOwnerId(headers, poolFactory);
+  if (ownerId !== undefined) return { ownerId, ended: false };
+  return { ownerId: undefined, ended: accountsEnabled() };
+}
+
+/** 401 for a request whose session has ended. Also clears the cookie, so the browser stops sending it. */
+export function sessionEndedResponse(): Response {
+  const response = apiError(
+    'SESSION_ENDED',
+    401,
+    'Your sign-in has ended. Sign in again to continue.',
+  );
+  response.headers.set('Cache-Control', 'no-store');
+  response.headers.append('Set-Cookie', clearSessionCookieHeader());
+  return response;
 }
 
 export interface RequestOwnerOptions {
@@ -51,9 +81,10 @@ export async function withRequestOwnerId(
 ): Promise<Response> {
   const responseHeaders = new Headers();
   try {
-    const authenticatedOwnerId = await resolveSignedInOwnerId(req.headers, options.poolFactory);
-    const ownerId = resolveRequestOwnerId(req, responseHeaders, authenticatedOwnerId);
-    return await handler(ownerId, responseHeaders, authenticatedOwnerId !== undefined);
+    const session = await resolveSignedInSession(req.headers, options.poolFactory);
+    if (session.ended) return sessionEndedResponse();
+    const ownerId = resolveRequestOwnerId(req, responseHeaders, session.ownerId);
+    return await handler(ownerId, responseHeaders, session.ownerId !== undefined);
   } catch (error) {
     console.error('[agent-runtime] request failed under its resolved owner', error);
     return new Response('Internal Server Error', { status: 500, headers: responseHeaders });

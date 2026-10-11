@@ -16,11 +16,13 @@ import {
   insertSession,
   revokeSession,
   type AccountQueryable,
+  type AccountRecord,
   type SessionAccount,
 } from './store';
 import {
   hashPassword,
   PASSWORD_MAX_LENGTH,
+  PasswordWorkBusyError,
   verifyAgainstDummyHash,
   verifyPassword,
 } from './password';
@@ -141,6 +143,20 @@ export async function registerAccount(
   return issueSession(deps, accountId, username, now);
 }
 
+async function checkCredentials(
+  deps: AccountServiceDeps,
+  username: string,
+  password: string,
+): Promise<{ account: AccountRecord | undefined; passwordMatches: boolean }> {
+  const account = await findAccountByUsername(deps.db, username);
+  // Unknown usernames verify against a placeholder hash so both branches spend
+  // a full scrypt computation and the response time does not reveal existence.
+  const passwordMatches = account
+    ? await verifyPassword(password, account.passwordHash)
+    : await verifyAgainstDummyHash(password);
+  return { account, passwordMatches };
+}
+
 export async function loginAccount(
   deps: AccountServiceDeps,
   input: CredentialsInput,
@@ -160,14 +176,15 @@ export async function loginAccount(
   }
   // Counted before the first await, so attempts that run concurrently see each
   // other and cannot all pass the check above. A successful sign-in clears the count.
-  deps.throttle.recordFailure(username);
+  const failure = deps.throttle.recordFailure(username);
 
-  const account = await findAccountByUsername(deps.db, username);
-  // Unknown usernames verify against a placeholder hash so both branches spend
-  // a full scrypt computation and the response time does not reveal existence.
-  const passwordMatches = account
-    ? await verifyPassword(input.password, account.passwordHash)
-    : await verifyAgainstDummyHash(input.password);
+  const { account, passwordMatches } = await checkCredentials(deps, username, input.password).catch(
+    (error: unknown) => {
+      // A busy password queue means no password was checked, so this is not a guess.
+      if (error instanceof PasswordWorkBusyError) deps.throttle.refund(username, failure);
+      throw error;
+    },
+  );
 
   if (!account || account.disabled || !passwordMatches) {
     throw invalid();

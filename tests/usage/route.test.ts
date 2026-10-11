@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GET } from '@/app/api/usage/route';
 import { readUsageRecords, type UsageRecord } from '@/lib/server/usage-storage';
 
@@ -11,8 +11,19 @@ vi.mock('@/lib/server/usage-storage', async (importOriginal) => {
   };
 });
 
+// The usage log is for administrators, and only when accounts are on. This file tests the totals,
+// so it stands in for an administrator. The gate itself is covered in tests/accounts/admin-routes.test.ts.
+vi.mock('@/lib/server/accounts/admin', () => ({
+  requireAdministrator: async () => ({ accountId: 'administrator', username: 'root' }),
+}));
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe('GET /api/usage', () => {
   it('does not add cache detail fields again to displayed token totals', async () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://usage-route-test');
     const record: UsageRecord = {
       id: '1',
       createdAt: Date.UTC(2026, 5, 29),

@@ -149,7 +149,10 @@ function parseStoredHash(stored: string): ParsedHash | undefined {
   if (!isPowerOfTwo(n) || n < MIN_COST_N || n > MAX_COST_N) return undefined;
   if (r < 1 || r > MAX_BLOCK_SIZE_R) return undefined;
   if (p < 1 || p > MAX_PARALLELISM_P) return undefined;
-  if (128 * n * r > MAX_MEMORY_BYTES) return undefined;
+  // The memory scrypt charges (OpenSSL's check, enforced through maxmem): the lookup
+  // table of N + 2 blocks plus p working blocks, each 128·r bytes. The earlier
+  // 128·N·r check accepted parameters that scrypt then rejected at the boundary.
+  if (128 * r * (n + 2) + 128 * r * p > MAX_MEMORY_BYTES) return undefined;
 
   if (!BASE64URL.test(rawSalt) || !BASE64URL.test(rawHash)) return undefined;
   const salt = Buffer.from(rawSalt, 'base64url');

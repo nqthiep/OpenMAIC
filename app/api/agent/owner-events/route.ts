@@ -14,7 +14,10 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
-import { resolveSignedInOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import {
+  resolveSignedInSession,
+  sessionEndedResponse,
+} from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
 // Self-hosted `next start` ignores maxDuration; Vercel's adapter can still use
@@ -45,8 +48,9 @@ export async function GET(req: NextRequest) {
   // partitioned by its session; any other request by the anonymous cookie minted
   // on first attach. The owner is resolved before any store read.
   const responseHeaders = new Headers();
-  const signedInOwnerId = await resolveSignedInOwnerId(req.headers);
-  const ownerId = resolveRequestOwnerId(req, responseHeaders, signedInOwnerId);
+  const session = await resolveSignedInSession(req.headers);
+  if (session.ended) return sessionEndedResponse();
+  const ownerId = resolveRequestOwnerId(req, responseHeaders, session.ownerId);
   const store = await getAgentSessionStore();
 
   const url = new URL(req.url);

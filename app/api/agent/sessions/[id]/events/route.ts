@@ -39,7 +39,10 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
-import { resolveSignedInOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import {
+  resolveSignedInSession,
+  sessionEndedResponse,
+} from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
 // Self-hosted `next start` does not enforce maxDuration; it remains useful to
@@ -74,8 +77,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   // owner comes from the session cookie and is resolved first; a session cookie
   // that cannot be checked rejects here rather than falling back to the anonymous
   // owner.
-  const signedInOwnerId = await resolveSignedInOwnerId(req.headers);
-  const ownerId = resolveRequestOwnerId(req, responseHeaders, signedInOwnerId);
+  const session = await resolveSignedInSession(req.headers);
+  if (session.ended) return sessionEndedResponse();
+  const ownerId = resolveRequestOwnerId(req, responseHeaders, session.ownerId);
   const store = await getAgentSessionStore();
   const meta = await store.getSession(id);
   if (!meta) {

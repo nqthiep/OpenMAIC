@@ -73,6 +73,8 @@ beforeEach(async () => {
   vi.unstubAllEnvs();
   vi.stubEnv('NODE_ENV', 'test');
   vi.stubEnv('DATABASE_URL', DATABASE_URL);
+  // Registration is closed by default. Most cases in this file register accounts, so they open it.
+  vi.stubEnv('ACCOUNT_REGISTRATION', 'open');
   // The login throttle is a process-wide singleton on globalThis. Clear it so
   // failures recorded by one test cannot throttle the next.
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
@@ -411,6 +413,46 @@ describe('account routes', () => {
       expect(retryAfter).toBeGreaterThan(0);
       expect(retryAfter).toBeLessThanOrEqual(15 * 60);
       expect(await leaksSecret(limited, PASSWORD)).toBe(false);
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it('refuses a trusted client after 30 failed sign-ins, while another client still signs in', async () => {
+    const { register, login } = await loadRoutes();
+    vi.stubEnv('TRUST_PROXY_HEADERS', 'true');
+    const other = { 'x-forwarded-for': '198.51.100.7' };
+    const spent = { 'x-forwarded-for': '203.0.113.200' };
+    await register(jsonRequest('/api/auth/register', ALICE, other));
+
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      const failed = await login(
+        jsonRequest('/api/auth/login', { username: `ghost${attempt}`, password: PASSWORD }, spent),
+      );
+      expect(failed.status).toBe(401);
+    }
+
+    const refused = await login(
+      jsonRequest('/api/auth/login', { username: 'ghost-last', password: PASSWORD }, spent),
+    );
+    expect(await summarize(refused)).toMatchObject({ status: 429, errorCode: 'RATE_LIMITED' });
+    expect((await login(jsonRequest('/api/auth/login', ALICE, other))).status).toBe(200);
+  }, 90_000);
+
+  it(
+    'answers 403 REGISTRATION_DISABLED when ACCOUNT_REGISTRATION is not set to open',
+    async () => {
+      const { register, session } = await loadRoutes();
+      vi.stubEnv('ACCOUNT_REGISTRATION', '');
+
+      const refused = await register(jsonRequest('/api/auth/register', ALICE));
+      expect(await summarize(refused)).toMatchObject({
+        status: 403,
+        errorCode: 'REGISTRATION_DISABLED',
+      });
+      await expect(accountCount()).resolves.toBe(0);
+      await expect((await session(sessionRequest())).json()).resolves.toMatchObject({
+        registrationOpen: false,
+      });
     },
     ROUTE_TIMEOUT_MS,
   );

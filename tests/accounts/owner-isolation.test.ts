@@ -306,7 +306,7 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
   );
 
   it(
-    'treats a forged or malformed session cookie as the anonymous visitor it accompanies',
+    'treats a malformed session cookie as the anonymous visitor it accompanies, and refuses a forged well-formed one',
     async () => {
       const account = await signUp('forged-cookie-owner');
       const accountStage = 'stage-forged-cookie-account';
@@ -329,9 +329,12 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
       const malformed = `${visitor}; openmaic_session=not-a-session-token`;
       const wellFormed = `${visitor}; openmaic_session=${FORGED_TOKEN}`;
 
-      // Both fall back to the visitor's own partition. Neither sees the account's course.
+      // A malformed cookie falls back to the visitor's own partition and never sees the account's course.
       await expect(listedStageIds(malformed)).resolves.toEqual([stageId]);
-      await expect(listedStageIds(wellFormed)).resolves.toEqual([stageId]);
+      // A well-formed cookie that no live session backs is refused, not demoted silently (D-12).
+      const refused = await stagesResponse(wellFormed);
+      expect(refused.status).toBe(401);
+      await expect(refused.json()).resolves.toMatchObject({ errorCode: 'SESSION_ENDED' });
       const edit = await persistence(`/documents/${stageId}/stage`, {
         method: 'PUT',
         cookie: malformed,
@@ -339,10 +342,11 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
       });
       expect(edit.status).toBe(204);
 
-      // With no anonymous cookie, a forged session earns a fresh anonymous owner, which holds nothing.
+      // With no anonymous cookie, the forged session is refused too, and nothing is minted for it.
       const fresh = await stagesResponse(`openmaic_session=${FORGED_TOKEN}`);
-      expect(fresh.headers.get('set-cookie')).toContain('anonymous_id=');
-      await expect(fresh.json()).resolves.toEqual({ stages: [] });
+      expect(fresh.status).toBe(401);
+      expect(fresh.headers.get('set-cookie')).toContain('openmaic_session=;');
+      expect(fresh.headers.get('set-cookie')).not.toContain('anonymous_id=');
     },
     TIMEOUT,
   );
@@ -367,7 +371,7 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
   );
 
   it(
-    'revokes a session on sign-out: the old cookie becomes anonymous and loses the account courses',
+    'revokes a session on sign-out: the old cookie is refused and cleared, and the account courses stay with the account',
     async () => {
       const stageId = 'stage-after-logout';
       const first = await signUp('logout-owner');
@@ -387,16 +391,18 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
       );
       await logoutAccount(deps, first.token);
 
+      // The revoked cookie is refused and the response clears it (D-12).
       const afterLogout = await stagesResponse(first.cookie);
-      expect(afterLogout.headers.get('set-cookie')).toContain('anonymous_id=');
-      await expect(afterLogout.json()).resolves.toEqual({ stages: [] });
+      expect(afterLogout.status).toBe(401);
+      expect(afterLogout.headers.get('set-cookie')).toContain('openmaic_session=;');
+      await expect(afterLogout.json()).resolves.toMatchObject({ errorCode: 'SESSION_ENDED' });
 
       const write = await persistence(`/documents/${stageId}/stage`, {
         method: 'PUT',
         cookie: first.cookie,
         body: course(stageId, 'After sign-out').stage,
       });
-      expect(write.status).toBe(403);
+      expect(write.status).toBe(401);
 
       await expect(listedStageIds(second.cookie)).resolves.toEqual([stageId]);
     },

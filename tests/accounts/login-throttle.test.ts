@@ -76,4 +76,56 @@ describe('LoginThrottle', () => {
     expect(throttle.retryAfterSeconds('k1')).toBe(60);
     expect(throttle.retryAfterSeconds('k3')).toBe(60);
   });
+
+  it('keeps a locked key through a flood of unlocked keys', () => {
+    const { throttle } = createThrottle({ maxFailures: 2, maxKeys: 3 });
+    throttle.recordFailure('victim');
+    throttle.recordFailure('victim');
+    for (let index = 0; index < 50; index += 1) throttle.recordFailure(`flood${index}`);
+    expect(throttle.retryAfterSeconds('victim')).toBe(60);
+  });
+
+  it('drops expired keys before it evicts a key that is still throttled', () => {
+    const { throttle, advance } = createThrottle({ maxFailures: 2, maxKeys: 2 });
+    throttle.recordFailure('stale');
+    advance(30_000);
+    throttle.recordFailure('victim');
+    throttle.recordFailure('victim');
+    advance(40_000);
+    throttle.recordFailure('newcomer');
+    expect(throttle.retryAfterSeconds('victim')).toBe(20);
+  });
+
+  it('evicts the oldest locked key only when every tracked key is locked', () => {
+    const { throttle } = createThrottle({ maxFailures: 2, maxKeys: 2 });
+    for (const name of ['a', 'a', 'b', 'b']) throttle.recordFailure(name);
+    throttle.recordFailure('c');
+    expect(throttle.retryAfterSeconds('a')).toBeUndefined();
+    expect(throttle.retryAfterSeconds('b')).toBe(60);
+    expect(throttle.retryAfterSeconds('c')).toBeUndefined();
+  });
+
+  it('refund takes back exactly the failure it names, and only once', () => {
+    const { throttle, advance } = createThrottle({ maxFailures: 2 });
+    throttle.recordFailure('alice');
+    advance(1_000);
+    const second = throttle.recordFailure('alice');
+    expect(throttle.retryAfterSeconds('alice')).toBe(59);
+
+    throttle.refund('alice', second);
+    expect(throttle.retryAfterSeconds('alice')).toBeUndefined();
+    throttle.refund('alice', second);
+    expect(throttle.retryAfterSeconds('alice')).toBeUndefined();
+
+    throttle.recordFailure('alice');
+    expect(throttle.retryAfterSeconds('alice')).toBe(59);
+  });
+
+  it('refund on an unknown key or a key with no failures does nothing', () => {
+    const { throttle } = createThrottle({ maxFailures: 1 });
+    expect(() => throttle.refund('nobody', 0)).not.toThrow();
+    const token = throttle.recordFailure('bob');
+    throttle.refund('bob', token);
+    expect(throttle.retryAfterSeconds('bob')).toBeUndefined();
+  });
 });

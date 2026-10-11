@@ -29,6 +29,15 @@ CREATE TABLE IF NOT EXISTS account_sessions (
 CREATE INDEX IF NOT EXISTS account_sessions_account_idx ON account_sessions (account_id);
 
 CREATE INDEX IF NOT EXISTS account_sessions_expires_idx ON account_sessions (expires_at);
+
+CREATE TABLE IF NOT EXISTS account_admin_audit (
+  id BIGSERIAL PRIMARY KEY,
+  actor_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  action TEXT NOT NULL,
+  reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 `;
 
 export async function ensureAccountSchema(queryable: AccountQueryable): Promise<void> {
@@ -158,4 +167,99 @@ export async function deleteExpiredSessions(db: AccountQueryable, now: Date): Pr
   await db.query(`DELETE FROM account_sessions WHERE expires_at <= $1::timestamptz`, [
     now.toISOString(),
   ]);
+}
+
+export interface AccountListRow {
+  id: string;
+  username: string;
+  createdAt: string;
+  disabledAt: string | null;
+}
+
+interface AccountListDbRow {
+  id: string;
+  username: string;
+  created_at: Date | string;
+  disabled_at: Date | string | null;
+}
+
+/** One page of accounts in id order, starting after `afterId`. No password material. */
+export async function listAccounts(
+  db: AccountQueryable,
+  afterId: string | undefined,
+  limit: number,
+): Promise<AccountListRow[]> {
+  const result = await db.query(
+    `SELECT id, username, created_at, disabled_at
+       FROM accounts
+      WHERE ($1::text IS NULL OR id > $1::text)
+      ORDER BY id
+      LIMIT $2::int`,
+    [afterId ?? null, limit],
+  );
+  return (result.rows as AccountListDbRow[]).map((row) => ({
+    id: row.id,
+    username: row.username,
+    createdAt: new Date(row.created_at).toISOString(),
+    disabledAt: row.disabled_at ? new Date(row.disabled_at).toISOString() : null,
+  }));
+}
+
+/**
+ * Disables or enables an account and writes its audit row in one statement, so the
+ * change and the record of who made it succeed or fail together. Disabling also
+ * revokes the account's live sessions, so enabling the account later does not
+ * bring them back. Returns false when no account has that id.
+ */
+export async function setAccountDisabled(
+  db: AccountQueryable,
+  input: {
+    actorId: string;
+    targetId: string;
+    disable: boolean;
+    reason: string | undefined;
+    now: Date;
+  },
+): Promise<boolean> {
+  const result = await db.query(
+    `WITH target AS (
+       UPDATE accounts
+          SET disabled_at = CASE WHEN $3::boolean THEN $4::timestamptz ELSE NULL END
+        WHERE id = $2::text
+        RETURNING id
+     ), revoked AS (
+       UPDATE account_sessions
+          SET revoked_at = $4::timestamptz
+        WHERE $3::boolean
+          AND account_id = $2::text
+          AND revoked_at IS NULL
+        RETURNING token_hash
+     ), audit AS (
+       INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
+       SELECT $1::text, id, $5::text, $6::text, $4::timestamptz FROM target
+       RETURNING id
+     )
+     SELECT id FROM target`,
+    [
+      input.actorId,
+      input.targetId,
+      input.disable,
+      input.now.toISOString(),
+      input.disable ? 'disable' : 'enable',
+      input.reason ?? null,
+    ],
+  );
+  return result.rows.length > 0;
+}
+
+/** Records an administrator read, such as a page of the account list. */
+export async function recordAdminRead(
+  db: AccountQueryable,
+  input: { actorId: string; action: string; reason: string | undefined; now: Date },
+): Promise<void> {
+  await db.query(
+    `INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
+     VALUES ($1::text, '*', $2::text, $3::text, $4::timestamptz)`,
+    [input.actorId, input.action, input.reason ?? null, input.now.toISOString()],
+  );
 }
