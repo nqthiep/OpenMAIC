@@ -24,8 +24,12 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 export const runtime = 'nodejs';
+
+/** Largest membership body, refused before it is buffered. The body is two ids. */
+const FOLDER_MEMBER_MAX_BYTES = 1024 * 1024;
 
 function jsonError(status: number, code: string, message: string, headers?: Headers): NextResponse {
   return NextResponse.json({ error: { code, message } }, { status, headers });
@@ -35,13 +39,17 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 export async function POST(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return jsonError(400, 'INVALID_BODY', 'request body must be JSON');
+  const read = await readBoundedJson(req, FOLDER_MEMBER_MAX_BYTES);
+  if (!read.ok) {
+    return jsonError(
+      read.status,
+      'INVALID_BODY',
+      read.code === 'PAYLOAD_TOO_LARGE'
+        ? `request body exceeds ${FOLDER_MEMBER_MAX_BYTES} bytes`
+        : 'request body must be JSON',
+    );
   }
-  const { stageId, folderId } = (body ?? {}) as { stageId?: unknown; folderId?: unknown };
+  const { stageId, folderId } = (read.value ?? {}) as { stageId?: unknown; folderId?: unknown };
   if (typeof stageId !== 'string' || stageId.length === 0) {
     return jsonError(400, 'MISSING_STAGE_ID', 'stageId must be a non-empty string');
   }

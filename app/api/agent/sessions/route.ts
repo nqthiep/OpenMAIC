@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { apiError } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { MAX_SESSION_TEXT_LENGTH } from '@/lib/server/agent-runtime/limits';
 import { findSkill, inferSkillIdFromPrompt, listSkills } from '@/lib/server/agent-runtime/skills';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
@@ -22,6 +23,12 @@ import { buildRequestOrigin, isValidClassroomId } from '@/lib/server/classroom-s
 import { decodeCourseRefs } from '@/lib/workbench/course-refs';
 
 export const runtime = 'nodejs';
+
+/**
+ * Largest session create body, refused before it is buffered. The prompt is capped at
+ * MAX_SESSION_TEXT_LENGTH characters and the other fields are short ids and refs.
+ */
+const SESSION_CREATE_MAX_BYTES = 1024 * 1024;
 
 interface CreateSessionBody {
   prompt?: string;
@@ -40,12 +47,17 @@ export async function POST(req: NextRequest) {
     return new Response('Not found', { status: 404 });
   }
 
-  let body: CreateSessionBody = {};
-  try {
-    body = ((await req.json()) ?? {}) as CreateSessionBody;
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  const read = await readBoundedJson(req, SESSION_CREATE_MAX_BYTES);
+  if (!read.ok) {
+    return apiError(
+      'INVALID_REQUEST',
+      read.status,
+      read.code === 'PAYLOAD_TOO_LARGE'
+        ? `request body exceeds ${SESSION_CREATE_MAX_BYTES} bytes`
+        : 'invalid JSON body',
+    );
   }
+  const body = (read.value ?? {}) as CreateSessionBody;
 
   const existingCourse = body.existingCourse === true;
   const stageId = body.stageId?.toString().trim() || undefined;

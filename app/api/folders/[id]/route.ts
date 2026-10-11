@@ -20,10 +20,14 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { folderNameErrorResponse } from '@/lib/server/folder-name-errors';
 import { validateFolderName } from '@/lib/utils/folder-name-validation';
 
 export const runtime = 'nodejs';
+
+/** Largest folder rename body, refused before it is buffered. The app sends one name. */
+const FOLDER_RENAME_MAX_BYTES = 1024 * 1024;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -40,13 +44,17 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 export async function PATCH(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return jsonError(400, 'INVALID_BODY', 'request body must be JSON');
+  const read = await readBoundedJson(req, FOLDER_RENAME_MAX_BYTES);
+  if (!read.ok) {
+    return jsonError(
+      read.status,
+      'INVALID_BODY',
+      read.code === 'PAYLOAD_TOO_LARGE'
+        ? `request body exceeds ${FOLDER_RENAME_MAX_BYTES} bytes`
+        : 'request body must be JSON',
+    );
   }
-  const name = (body as { name?: unknown })?.name;
+  const name = (read.value as { name?: unknown })?.name;
   if (typeof name !== 'string') {
     return jsonError(400, 'FOLDER_NAME_INVALID', 'name must be a string');
   }

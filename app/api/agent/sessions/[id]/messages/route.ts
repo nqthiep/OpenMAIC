@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { apiError } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { MAX_SESSION_TEXT_LENGTH } from '@/lib/server/agent-runtime/limits';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
 import { scheduleConversationTitle } from '@/lib/server/agent-runtime/conversation-title-task';
@@ -17,6 +18,12 @@ import {
 } from '@/lib/server/agent-runtime/session-materials';
 
 export const runtime = 'nodejs';
+
+/**
+ * Largest message body, refused before it is buffered. The text and the element and course
+ * refs each have their own caps, and together they fit under this one.
+ */
+const SESSION_MESSAGE_MAX_BYTES = 1024 * 1024;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) {
@@ -31,19 +38,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return new Response('Not found', { status: 404, headers: responseHeaders });
     }
 
-    let body: {
+    const read = await readBoundedJson(req, SESSION_MESSAGE_MAX_BYTES);
+    if (!read.ok) {
+      const response = apiError(
+        'INVALID_REQUEST',
+        read.status,
+        read.code === 'PAYLOAD_TOO_LARGE'
+          ? `request body exceeds ${SESSION_MESSAGE_MAX_BYTES} bytes`
+          : 'invalid JSON body',
+      );
+      responseHeaders.forEach((value, name) => response.headers.append(name, value));
+      return response;
+    }
+    const body = (read.value ?? {}) as {
       text?: string;
       materialIds?: unknown;
       elementRefs?: unknown;
       courseRefs?: unknown;
-    } = {};
-    try {
-      body = ((await req.json()) ?? {}) as typeof body;
-    } catch {
-      const response = apiError('INVALID_REQUEST', 400, 'invalid JSON body');
-      responseHeaders.forEach((value, name) => response.headers.append(name, value));
-      return response;
-    }
+    };
 
     const text = (body.text ?? '').toString().trim();
     if (
