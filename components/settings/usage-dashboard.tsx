@@ -9,6 +9,7 @@ import { Loader2, RefreshCw, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useTheme } from '@/lib/hooks/use-theme';
+import { chartInstanceFor } from '@/components/settings/usage-chart-instance';
 
 echarts.use([LineChart, GridComponent, TooltipComponent, SVGRenderer]);
 
@@ -115,11 +116,11 @@ export function UsageDashboard() {
   // Area-only with a soft gradient + faint line, theme-aware, to avoid the
   // harsh solid stroke in dark mode.
   useEffect(() => {
-    if (!chartRef.current) return;
-    if (!chartInstance.current) {
-      chartInstance.current = echarts.init(chartRef.current, undefined, { renderer: 'svg' });
-    }
+    chartInstance.current = chartInstanceFor(chartInstance.current, chartRef.current, (node) =>
+      echarts.init(node, undefined, { renderer: 'svg' }),
+    );
     const chart = chartInstance.current;
+    if (!chart) return;
     const axis = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
     const split = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
     const accent = isDark ? '#a78bfa' : '#7c3aed'; // violet, matches primary
