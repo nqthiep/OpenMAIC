@@ -63,9 +63,14 @@ const MAX_QUEUED_DERIVATIONS = 64;
 let activeDerivations = 0;
 const derivationQueue: Array<() => void> = [];
 
-/** Thrown when the derivation queue is full. The route answers 503 and the client may retry. */
+/**
+ * Thrown when a password check cannot run now: the derivation queue is full, or
+ * the native scrypt call failed (in practice, an allocation failure under memory
+ * pressure). Both are transient, so the route answers 503 and the client may retry.
+ * `reason` keeps the underlying error for logs; it is never sent to the client.
+ */
 export class PasswordWorkBusyError extends Error {
-  constructor() {
+  constructor(readonly reason?: unknown) {
     super('Password checks are busy');
     this.name = 'PasswordWorkBusyError';
   }
@@ -103,7 +108,7 @@ async function deriveKey(
   try {
     return await new Promise<Buffer>((resolve, reject) => {
       scrypt(password, salt, keyLength, scryptOptions, (error, derivedKey) => {
-        if (error) reject(error);
+        if (error) reject(new PasswordWorkBusyError(error));
         else resolve(derivedKey);
       });
     });

@@ -115,6 +115,15 @@ export function accountErrorResponse(error: AccountError): Response {
   return response;
 }
 
+/** An error's code or name, for logs. Never its message, which can carry data. */
+function errorCodeOf(value: unknown): string {
+  if (value !== null && typeof value === 'object') {
+    const code = (value as { code?: unknown }).code;
+    if (typeof code === 'string') return code;
+  }
+  return value instanceof Error ? value.name : 'unknown error';
+}
+
 /**
  * Runs an account route body. Every response is marked no-store, and unexpected
  * errors are logged by type only, so credentials and database text stay out of logs.
@@ -127,6 +136,7 @@ export async function runAccountRoute(handler: () => Promise<Response>): Promise
     if (error instanceof AccountError) {
       response = accountErrorResponse(error);
     } else if (error instanceof PasswordWorkBusyError) {
+      log.warn('Password check unavailable', errorCodeOf(error.reason));
       response = apiError('ACCOUNTS_BUSY', 503, 'Account service is busy. Try again shortly.');
       response.headers.set('Retry-After', '2');
     } else {
