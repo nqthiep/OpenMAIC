@@ -2040,6 +2040,35 @@
       "internal": "伺服器無法完成此要求，請稍後重試。",
       "generic": "發生問題，請重試。",
       "sessionEnded": "登入已結束，請重新登入後繼續。"
+    },
+    "admin": {
+      "title": "Accounts",
+      "description": "Disabling an account signs it out everywhere and blocks sign-in until it is enabled again.",
+      "refresh": "Refresh",
+      "empty": "No accounts yet.",
+      "loadMore": "Load more",
+      "created": "Created {{date}}",
+      "you": "You",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "disable": "Disable",
+      "enable": "Enable",
+      "disableLabel": "Disable {{username}}",
+      "enableLabel": "Enable {{username}}",
+      "confirm": {
+        "disableTitle": "Disable {{username}}?",
+        "disableDescription": "They are signed out everywhere and cannot sign in until the account is enabled again.",
+        "disableAction": "Disable account",
+        "enableTitle": "Enable {{username}}?",
+        "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
+        "enableAction": "Enable account"
+      },
+      "errors": {
+        "loadFailed": "Accounts could not be loaded. Try again.",
+        "changeFailed": "The account could not be updated. Try again."
+      }
     }
   },
   "classroomComplete": {

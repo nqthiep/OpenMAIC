@@ -2055,6 +2055,35 @@
       "internal": "Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại sau.",
       "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
       "sessionEnded": "Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại để tiếp tục."
+    },
+    "admin": {
+      "title": "Accounts",
+      "description": "Disabling an account signs it out everywhere and blocks sign-in until it is enabled again.",
+      "refresh": "Refresh",
+      "empty": "No accounts yet.",
+      "loadMore": "Load more",
+      "created": "Created {{date}}",
+      "you": "You",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "disable": "Disable",
+      "enable": "Enable",
+      "disableLabel": "Disable {{username}}",
+      "enableLabel": "Enable {{username}}",
+      "confirm": {
+        "disableTitle": "Disable {{username}}?",
+        "disableDescription": "They are signed out everywhere and cannot sign in until the account is enabled again.",
+        "disableAction": "Disable account",
+        "enableTitle": "Enable {{username}}?",
+        "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
+        "enableAction": "Enable account"
+      },
+      "errors": {
+        "loadFailed": "Accounts could not be loaded. Try again.",
+        "changeFailed": "The account could not be updated. Try again."
+      }
     }
   },
   "proMode": {

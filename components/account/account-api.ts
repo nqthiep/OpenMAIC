@@ -9,6 +9,8 @@ export interface AccountSession {
   readonly registrationOpen: boolean;
   readonly authenticated: boolean;
   readonly account?: { readonly username: string };
+  /** True only when the signed-in account is an administrator. */
+  readonly administrator?: boolean;
 }
 
 export interface AccountCredentials {
@@ -72,6 +74,7 @@ export async function fetchAccountSession(): Promise<AccountSession> {
     registrationOpen: body.registrationOpen === true,
     authenticated: body.authenticated === true,
     account,
+    administrator: body.administrator === true,
   };
 }
 
@@ -129,4 +132,72 @@ export async function signOutOtherSessions(): Promise<number> {
     throw failureFrom(response, body);
   }
   return typeof body.revoked === 'number' ? body.revoked : 0;
+}
+
+/** One account as the administrator list reports it. The list never carries password material. */
+export interface AdminAccount {
+  readonly id: string;
+  readonly username: string;
+  readonly createdAt: string;
+  readonly disabledAt: string | null;
+}
+
+export interface AdminAccountPage {
+  readonly accounts: readonly AdminAccount[];
+  readonly nextAfter: string | null;
+}
+
+function isAdminAccount(value: unknown): value is AdminAccount {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.username === 'string' &&
+    typeof value.createdAt === 'string' &&
+    (value.disabledAt === null || typeof value.disabledAt === 'string')
+  );
+}
+
+/**
+ * One page of accounts in id order. Pass the previous page's `nextAfter` to read the next.
+ * A visitor who is not an administrator gets 403, or 401 when signed out.
+ */
+export async function fetchAdminAccounts(after?: string): Promise<AdminAccountPage> {
+  const query = after === undefined ? '' : `?after=${encodeURIComponent(after)}`;
+  const response = await fetch(`/api/admin/accounts${query}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+  });
+  const body = await readJson(response);
+  if (!response.ok || !isRecord(body) || body.success !== true) {
+    throw failureFrom(response, body);
+  }
+  const { accounts, nextAfter } = body;
+  if (!Array.isArray(accounts) || !accounts.every(isAdminAccount)) {
+    throw failureFrom(response, body);
+  }
+  return { accounts, nextAfter: typeof nextAfter === 'string' ? nextAfter : null };
+}
+
+/** Disables an account. Its sessions stop working at once. The server refuses the caller's own account. */
+export function disableAccount(accountId: string): Promise<void> {
+  return postAccountDisabled(accountId, 'disable');
+}
+
+/** Enables an account. Sessions that the disable ended stay ended; the account signs in again. */
+export function enableAccount(accountId: string): Promise<void> {
+  return postAccountDisabled(accountId, 'enable');
+}
+
+async function postAccountDisabled(accountId: string, action: 'disable' | 'enable'): Promise<void> {
+  const response = await fetch(`/api/admin/accounts/${encodeURIComponent(accountId)}/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    // The route reads a JSON object. An empty object sends no reason.
+    body: JSON.stringify({}),
+  });
+  const body = await readJson(response);
+  if (!response.ok || !isRecord(body) || body.success !== true) {
+    throw failureFrom(response, body);
+  }
 }
