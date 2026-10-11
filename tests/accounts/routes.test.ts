@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
 
@@ -54,9 +54,21 @@ const MALFORMED_REGISTER_BODIES = [
   },
 ];
 
+/**
+ * One in-process database for the whole file, with the schema applied once. Each
+ * test starts from empty account tables. A database per test made the file create
+ * about a dozen PGlite instances; under full-suite load one of them intermittently
+ * failed every query, which surfaced as plain errors inside the route.
+ */
 let db: PGlite | undefined;
 
-beforeEach(() => {
+beforeAll(async () => {
+  db = new PGlite();
+  await db.waitReady;
+  await ensureAccountSchema(new PGlitePool(db));
+}, ROUTE_TIMEOUT_MS);
+
+beforeEach(async () => {
   vi.resetModules();
   vi.unstubAllEnvs();
   vi.stubEnv('NODE_ENV', 'test');
@@ -64,12 +76,16 @@ beforeEach(() => {
   // The login throttle is a process-wide singleton on globalThis. Clear it so
   // failures recorded by one test cannot throttle the next.
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
+  await db!.exec('TRUNCATE account_sessions, accounts');
 });
 
-afterEach(async () => {
+afterEach(() => {
   vi.doUnmock('@/lib/persistence/server-provider');
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
+});
+
+afterAll(async () => {
   await db?.close();
   db = undefined;
 });
@@ -83,13 +99,9 @@ class PGlitePool {
   }
 }
 
-/** Points the account routes at a fresh PGlite database and loads their handlers. */
+/** Points the account routes at the file's database and loads their handlers. */
 async function loadRoutes(): Promise<AccountRoutes> {
-  db = new PGlite();
-  await db.waitReady;
-  const pool = new PGlitePool(db);
-  // The production provider runs this on first use; the mock bypasses that, so run it here.
-  await ensureAccountSchema(pool);
+  const pool = new PGlitePool(db!);
   vi.doMock('@/lib/persistence/server-provider', () => ({
     getServerPersistenceProvider: async () => ({ pool }),
   }));

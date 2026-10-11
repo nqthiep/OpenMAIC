@@ -41,7 +41,11 @@ const roots: Root[] = [];
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
-beforeAll(() => {
+beforeAll(async () => {
+  // Load the rail's module graph here, under the hook's own timeout. Loading it inside
+  // the first test made that test's five-second budget depend on cold-import speed,
+  // which the full suite's load regularly exceeds.
+  await import('@/components/workbench/workspace/WorkspaceRail');
   if (!globalThis.PointerEvent) vi.stubGlobal('PointerEvent', MouseEvent);
   vi.stubGlobal(
     'ResizeObserver',
@@ -51,7 +55,7 @@ beforeAll(() => {
       disconnect() {}
     },
   );
-});
+}, 60_000);
 
 afterEach(() => {
   for (const root of roots.splice(0)) {
