@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured, isProWorkbenchEnabled } from '@/lib/config/feature-flags';
+import { isAccessTokenTimestampFresh } from '@/lib/server/access-token-policy';
 
 /** Convert string to Uint8Array */
 function encode(str: string): Uint8Array {
@@ -21,6 +22,9 @@ async function verifyToken(token: string, accessCode: string): Promise<boolean> 
 
   const timestamp = token.substring(0, dotIndex);
   const signature = token.substring(dotIndex + 1);
+  // A valid signature on an expired token is refused, so a captured cookie
+  // stops working after the cookie lifetime instead of when the code rotates.
+  if (!isAccessTokenTimestampFresh(timestamp, Date.now())) return false;
 
   const keyData = encode(accessCode);
   const key = await crypto.subtle.importKey(
