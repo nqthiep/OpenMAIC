@@ -24,23 +24,21 @@ export async function POST(request: Request) {
     return apiSuccess({ valid: true });
   }
 
-  // Everything down to `consume` runs synchronously, so for a trusted identity
-  // the limiter decision and the reservation happen in the same tick: a burst of
-  // concurrent requests cannot all pass the window check before any of them is
-  // recorded. For an untrusted identity `consume` always allows and stores
-  // nothing, so there is no shared counter to race on.
+  // Everything down to `consume` runs synchronously, so the limiter decision and
+  // the reservation happen in the same tick: a burst of concurrent requests
+  // cannot all pass the window check before any of them is recorded.
   warnIfAccessCodeIsShort(accessCode);
   const trusted = isTrustedProxyIdentity();
   const identity = clientIdentity(request);
   const limit = accessCodeAttemptLimiter.consume(identity, trusted);
   if (limit.limited) {
-    const response = apiError('RATE_LIMITED', 429, 'Too many access-code attempts');
+    const response = apiError('RATE_LIMITED', 429, 'Quá nhiều lần nhập sai. Vui lòng thử lại sau.');
     response.headers.set('Retry-After', String(limit.retryAfterSeconds));
     return response;
   }
 
-  // The reservation (trusted identities only) is taken before the body is
-  // parsed, so even a malformed body consumes a slot. That is intentional.
+  // The reservation is taken before the body is parsed, so even a malformed body
+  // consumes a slot. That is intentional.
   let body: unknown;
   try {
     body = await request.json();
@@ -58,14 +56,13 @@ export async function POST(request: Request) {
   const a = encoder.encode(candidate);
   const b = encoder.encode(accessCode);
   if (a.byteLength !== b.byteLength || !timingSafeEqual(a, b)) {
-    // For a trusted identity the reservation taken above already counts this
-    // failure; an untrusted identity is not counted at all.
+    // The reservation taken above counts this failure.
     return apiError('INVALID_REQUEST', 401, 'Invalid access code');
   }
 
-  // For a trusted per-client identity a success clears that client's history.
-  // Untrusted callers stored nothing, so this is a no-op for them.
-  accessCodeAttemptLimiter.recordSuccess(identity, trusted);
+  // A correct code clears a trusted client's history. On the shared budget it
+  // gives back this attempt's slot only, so successes never spend the budget.
+  accessCodeAttemptLimiter.recordSuccess(identity, trusted, limit);
 
   const token = createAccessToken(accessCode);
   const cookieStore = await cookies();

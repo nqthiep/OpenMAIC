@@ -19,9 +19,14 @@ export function isTrustedProxyIdentity(): boolean {
   return process.env.TRUST_PROXY_HEADERS === 'true';
 }
 
+/**
+ * The client's identity. From `X-Forwarded-For` the last entry, which the nearest proxy
+ * appends: the entries before it came from the client and can be forged. The accounts
+ * throttle reads the same entry (`lib/accounts/http.ts`).
+ */
 export function clientIdentity(req: Pick<Request, 'headers'>): string {
   if (!isTrustedProxyIdentity()) return 'direct';
   const fwd = req.headers.get('x-forwarded-for');
-  if (fwd) return fwd.split(',')[0].trim() || 'anonymous';
+  if (fwd) return fwd.split(',').pop()?.trim() || 'anonymous';
   return req.headers.get('x-real-ip')?.trim() || 'anonymous';
 }

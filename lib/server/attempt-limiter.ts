@@ -8,12 +8,14 @@
  *   {@link ATTEMPT_LIMIT_WINDOW_MS} per identity. Behind a proxy that overwrites
  *   the forwarding headers the identity is per-client, so a success clears that
  *   client's history.
- * - **Untrusted identity** (the default): always allow, and store nothing.
- *   Without a trusted proxy the app cannot attribute a request to a client, so a
- *   shared throttle is a denial-of-service lever with no real brute-force
- *   benefit: one attacker can hold the shared budget empty and lock everyone
- *   out. The real protection is a long random `ACCESS_CODE` (see
- *   `warnIfAccessCodeIsShort`).
+ * - **Untrusted identity** (the default): one shared budget when the limiter
+ *   has `untrustedBudget`, otherwise always allow and store nothing. Without a
+ *   trusted proxy the app cannot attribute a request to a client, so a shared
+ *   budget lets one attacker lock everyone out. It is used only where that
+ *   lockout is acceptable: the teacher gate (every attempt counts) and the
+ *   student access code (`ACCESS_CODE_SHARED_*`: failed guesses count, and a
+ *   correct code gives its own slot back). The real protection is a long random
+ *   `ACCESS_CODE` (see `warnIfAccessCodeIsShort`).
  *
  * Scope and trade-offs, stated explicitly:
  * - It is per-process: state lives in this module's memory and is NOT shared
@@ -50,6 +52,8 @@ export interface LimitStatus {
    * 0 when not limited.
    */
   retryAfterSeconds: number;
+  /** Set when the attempt was reserved. Pass it to `release` to give the attempt back. */
+  reservedAt?: number;
 }
 
 /** Injectable clock so tests can drive the window and the refill. */
@@ -120,12 +124,22 @@ export class SlidingWindowFailureLimiter {
     this.failures.delete(key);
     this.failures.set(key, timestamps);
     this.enforceCapacity(now);
-    return { limited: false, retryAfterSeconds: 0 };
+    return { limited: false, retryAfterSeconds: 0, reservedAt: now };
   }
 
   /** Forget `identity`'s reserved attempts, e.g. after a correct code. */
   recordSuccess(identity: string): void {
     this.failures.delete(boundIdentityKey(identity));
+  }
+
+  /** Give back the attempt reserved at `reservedAt`. A no-op once it has left the window. */
+  release(identity: string, reservedAt: number): void {
+    const key = boundIdentityKey(identity);
+    const timestamps = this.failures.get(key);
+    const index = timestamps?.lastIndexOf(reservedAt) ?? -1;
+    if (!timestamps || index === -1) return;
+    timestamps.splice(index, 1);
+    if (timestamps.length === 0) this.failures.delete(key);
   }
 
   /** Drop all tracked state. Exists mainly for tests. */
@@ -170,44 +184,78 @@ export class SlidingWindowFailureLimiter {
   }
 }
 
+/** A process-wide failure budget for callers whose identity is not trusted. */
+export interface UntrustedAttemptBudget {
+  readonly maxFailures: number;
+  readonly windowMs: number;
+}
+
 /** Options accepted by {@link AccessCodeAttemptLimiter}. */
-export type AccessCodeAttemptLimiterOptions = SlidingWindowFailureLimiterOptions;
+export interface AccessCodeAttemptLimiterOptions extends SlidingWindowFailureLimiterOptions {
+  /**
+   * Opt-in shared budget for untrusted callers. Unset (the default), untrusted
+   * callers are never throttled.
+   */
+  untrustedBudget?: UntrustedAttemptBudget;
+}
+
+/** The single key of the shared untrusted bucket. */
+const UNTRUSTED_BUCKET = 'untrusted';
 
 /**
- * Facade used by the verify route. It applies per-identity throttling only for
- * trusted identities; untrusted (shared) callers are always allowed and leave
- * no state behind.
+ * Facade used by the verify routes. Trusted identities get per-identity
+ * throttling. Untrusted callers are always allowed, unless the limiter was built
+ * with `untrustedBudget`, in which case they share one bucket.
  */
 export class AccessCodeAttemptLimiter {
   private readonly trustedIdentities: SlidingWindowFailureLimiter;
+  private readonly untrustedBucket: SlidingWindowFailureLimiter | null;
 
   constructor(options: AccessCodeAttemptLimiterOptions = {}) {
     this.trustedIdentities = new SlidingWindowFailureLimiter(options);
+    this.untrustedBucket = options.untrustedBudget
+      ? new SlidingWindowFailureLimiter({
+          maxFailures: options.untrustedBudget.maxFailures,
+          windowMs: options.untrustedBudget.windowMs,
+          maxIdentities: 1,
+          now: options.now,
+        })
+      : null;
   }
 
   /**
-   * Reserve one attempt for `identity` when `trusted`, otherwise always allow.
-   * The untrusted branch is unconditional: there is no shared counter to store
-   * or to exhaust.
+   * Reserve one attempt for `identity`. A trusted identity uses its own window;
+   * an untrusted caller uses the shared bucket when there is one. Without a
+   * bucket the untrusted branch is unconditional and stores nothing.
    */
   consume(identity: string, trusted: boolean = isTrustedProxyIdentity()): LimitStatus {
-    if (!trusted) return { limited: false, retryAfterSeconds: 0 };
-    return this.trustedIdentities.consume(identity);
+    if (trusted) return this.trustedIdentities.consume(identity);
+    if (!this.untrustedBucket) return { limited: false, retryAfterSeconds: 0 };
+    return this.untrustedBucket.consume(UNTRUSTED_BUCKET);
   }
 
   /**
-   * Clear a trusted identity's history after a correct code. Untrusted callers
-   * store nothing, so this is a no-op for them.
+   * Clear a trusted identity's history after a correct code. For an untrusted
+   * caller, `reservation` (what `consume` returned for this attempt) gives back
+   * only that attempt's shared slot. Without it the shared bucket is never
+   * cleared, so a success there is not a reset.
    */
-  recordSuccess(identity: string, trusted: boolean = isTrustedProxyIdentity()): void {
+  recordSuccess(
+    identity: string,
+    trusted: boolean = isTrustedProxyIdentity(),
+    reservation?: LimitStatus,
+  ): void {
     if (trusted) {
       this.trustedIdentities.recordSuccess(identity);
+    } else if (reservation?.reservedAt !== undefined) {
+      this.untrustedBucket?.release(UNTRUSTED_BUCKET, reservation.reservedAt);
     }
   }
 
   /** Drop all tracked state. Exists mainly for tests. */
   reset(): void {
     this.trustedIdentities.reset();
+    this.untrustedBucket?.reset();
   }
 
   /** Stored trusted-identity keys, for tests/diagnostics. */
@@ -216,5 +264,20 @@ export class AccessCodeAttemptLimiter {
   }
 }
 
+/**
+ * Failed guesses the shared student budget allows in one window, without a trusted proxy.
+ * ponytail: per process, so N replicas allow N budgets; move it to a shared store if the
+ * access code runs on several instances.
+ */
+export const ACCESS_CODE_SHARED_MAX_FAILURES = 200;
+
+/** Shared student budget window in milliseconds. */
+export const ACCESS_CODE_SHARED_WINDOW_MS = 15 * 60_000;
+
 /** Process-wide limiter used by the access-code verification route. */
-export const accessCodeAttemptLimiter = new AccessCodeAttemptLimiter();
+export const accessCodeAttemptLimiter = new AccessCodeAttemptLimiter({
+  untrustedBudget: {
+    maxFailures: ACCESS_CODE_SHARED_MAX_FAILURES,
+    windowMs: ACCESS_CODE_SHARED_WINDOW_MS,
+  },
+});

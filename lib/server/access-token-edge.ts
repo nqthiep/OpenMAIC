@@ -6,7 +6,7 @@ import {
 /**
  * Edge-compatible verifier for HMAC-signed access tokens.
  *
- * This lives outside `middleware.ts` so it can be unit tested without loading
+ * This lives outside `proxy.ts` so it can be unit tested without loading
  * the Next.js middleware entrypoint, and it deliberately uses only the Web
  * Crypto API (no `node:crypto`) so Edge middleware can import it.
  */
@@ -21,6 +21,26 @@ function bufToHex(buf: ArrayBuffer): string {
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+/** Shortest `OPENMAIC_ACCESS_SECRET` used as the cookie key, in code points. */
+export const ACCESS_SECRET_MIN_LENGTH = 32;
+
+/**
+ * HMAC key of the site access cookie. With `OPENMAIC_ACCESS_SECRET` set and long enough, the key is
+ * the secret joined with the access code: a copied cookie cannot be checked offline against the code,
+ * and changing the code still revokes every cookie. Without it, the key is the access code alone. The
+ * Node signer and both verifiers use this one rule. It lives here because this module imports no
+ * `node:` built-ins and so runs in both runtimes.
+ */
+export function accessSigningKey(
+  accessCode: string,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): string {
+  const secret = env.OPENMAIC_ACCESS_SECRET;
+  return secret !== undefined && [...secret].length >= ACCESS_SECRET_MIN_LENGTH
+    ? `${secret}\u0000${accessCode}`
+    : accessCode;
 }
 
 /** Verify an HMAC-signed token using Web Crypto API (Edge-compatible) */
@@ -38,7 +58,7 @@ export async function verifyAccessTokenEdge(token: string, accessCode: string): 
   // Canonical lowercase hex only, matching the Node verifier.
   if (!isAccessTokenSignatureFormatValid(signature)) return false;
 
-  const keyData = encode(accessCode);
+  const keyData = encode(accessSigningKey(accessCode));
   const key = await crypto.subtle.importKey(
     'raw',
     keyData.buffer as ArrayBuffer,

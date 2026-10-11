@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState, ReactNode } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import { AccessCodeModal } from '@/components/access-code-modal';
 import { importLegacyModelSettings } from '@/components/model-settings-init';
 import { modelSettingsClient } from '@/lib/model-settings/client';
@@ -12,10 +12,6 @@ export function AccessCodeGuard({ children }: { children: ReactNode }) {
     authenticated: boolean;
     loading: boolean;
   }>({ enabled: false, authenticated: false, loading: true });
-  // The page mounted under the gate has already sent its requests (library,
-  // folders, active runs, ...) and they were answered 401. Mounting it again
-  // once the code is accepted lets every one of them be sent authorized.
-  const [grantedCount, setGrantedCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +37,10 @@ export function AccessCodeGuard({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Children are built while the status is loading, so the server markup and
+  // deployments without an access code are unaffected. While the code is
+  // required they are not built: their requests would get 401, and their
+  // controls would stay focusable behind the dialog. Accepting the code builds them.
   const needsAuth = !status.loading && status.enabled && !status.authenticated;
 
   return (
@@ -50,7 +50,6 @@ export function AccessCodeGuard({ children }: { children: ReactNode }) {
           open={true}
           onSuccess={() => {
             setStatus((s) => ({ ...s, authenticated: true }));
-            setGrantedCount((n) => n + 1);
             // Model settings are read on mount, which on an ACCESS_CODE-gated
             // deployment is before any access cookie exists: the middleware
             // answers 401 and nothing is known about the workspace's models
@@ -72,7 +71,7 @@ export function AccessCodeGuard({ children }: { children: ReactNode }) {
           }}
         />
       )}
-      <Fragment key={grantedCount}>{children}</Fragment>
+      {!needsAuth && children}
     </>
   );
 }

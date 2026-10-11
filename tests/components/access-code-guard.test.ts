@@ -39,12 +39,16 @@ function stubStatus(body: { enabled: boolean; authenticated: boolean }) {
   );
 }
 
-/** Counts mounts: each mount is one round of the page's on-mount requests. */
+/** Counts mounts and live instances: each mount is one round of the page's on-mount requests. */
 function renderGuardedPage() {
-  const mounts = { count: 0 };
+  const mounts = { count: 0, live: 0 };
   function Page() {
     useEffect(() => {
       mounts.count += 1;
+      mounts.live += 1;
+      return () => {
+        mounts.live -= 1;
+      };
     }, []);
     return null;
   }
@@ -67,6 +71,18 @@ it('mounts the page again once the access code is accepted, so its requests are 
   expect(mounts.count).toBe(2);
   // The one-time import of this browser's earlier courses is resumed too.
   await vi.waitFor(() => expect(legacyImport.resume).toHaveBeenCalledTimes(1));
+  await act(async () => root.unmount());
+});
+
+it('does not build the page while the access code is required', async () => {
+  stubStatus({ enabled: true, authenticated: false });
+  const { root, mounts, render } = renderGuardedPage();
+  await act(async () => render());
+  expect(modal.onSuccess).not.toBeNull();
+  expect(mounts.live).toBe(0);
+
+  await act(async () => modal.onSuccess!());
+  expect(mounts.live).toBe(1);
   await act(async () => root.unmount());
 });
 

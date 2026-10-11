@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 import { ACCESS_TOKEN_MAX_AGE_SECONDS } from '@/lib/server/access-token-shared';
-import { ATTEMPT_LIMIT_MAX_FAILURES } from '@/lib/server/attempt-limiter';
+import {
+  ACCESS_CODE_SHARED_MAX_FAILURES,
+  ATTEMPT_LIMIT_MAX_FAILURES,
+} from '@/lib/server/attempt-limiter';
 
 const mocks = vi.hoisted(() => ({
   cookieSet: vi.fn(),
@@ -18,6 +21,7 @@ vi.mock('next/headers', () => ({
 const ACCESS_CODE = 'demo-code';
 const LONG_ACCESS_CODE = 'a'.repeat(32);
 const MAX_FAILURES = ATTEMPT_LIMIT_MAX_FAILURES;
+const SHARED_MAX = ACCESS_CODE_SHARED_MAX_FAILURES;
 
 type VerifyPost = (request: Request) => Promise<Response>;
 
@@ -64,21 +68,21 @@ afterEach(() => {
   delete process.env.TRUST_PROXY_HEADERS;
 });
 
-describe('POST /api/access-code/verify — shared identity (untrusted, no throttle)', () => {
-  it('evaluates all 50 concurrent wrong guesses without returning 429', async () => {
+describe('POST /api/access-code/verify — shared identity (untrusted, shared budget)', () => {
+  it(`evaluates all ${SHARED_MAX} concurrent wrong guesses of the shared budget without returning 429`, async () => {
     const POST = await loadPost();
 
     const responses = await Promise.all(
-      Array.from({ length: 50 }, () => POST(verifyRequest('wrong-code'))),
+      Array.from({ length: SHARED_MAX }, () => POST(verifyRequest('wrong-code'))),
     );
 
     expect(responses.every((res) => res.status === 401)).toBe(true);
   });
 
-  it('always accepts a correct code regardless of prior failures', async () => {
+  it('accepts a correct code while the shared budget has room', async () => {
     const POST = await loadPost();
 
-    await failTimes(POST, 100);
+    await failTimes(POST, SHARED_MAX - 1);
 
     const res = await POST(verifyRequest(ACCESS_CODE));
     expect(res.status).toBe(200);
@@ -104,8 +108,8 @@ describe('POST /api/access-code/verify — shared identity (untrusted, no thrott
     });
     expect((await POST(nullBody)).status).toBe(401);
 
-    // Nothing was counted, so later requests are unaffected.
-    await failTimes(POST, 50);
+    // The null body used one shared slot, so this many more guesses still leave room for the code.
+    await failTimes(POST, SHARED_MAX - 2);
     expect((await POST(verifyRequest(ACCESS_CODE))).status).toBe(200);
   });
 });
