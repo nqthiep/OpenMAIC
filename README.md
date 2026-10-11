@@ -293,7 +293,7 @@ ACCESS_CODE=your-secret-code
 
 When set, visitors see a password prompt before accessing the app. All API routes are also protected. If not set, the app works as before.
 
-The access cookie lasts seven days, and changing the code signs every visitor out at once. Without `ACCESS_COOKIE_SECRET` (32 characters or more, set separately from the code), a captured cookie can be checked offline against guesses of the code. Set it on any deployment where that matters. Wrong codes are limited to ten per 15 minutes. Without `TRUST_PROXY_HEADERS=true` that limit is shared by all visitors, so a flood of wrong guesses can lock everyone out of the prompt for 15 minutes. Set `TRUST_PROXY_HEADERS=true` only behind a reverse proxy that overwrites `x-forwarded-for`, which gives each client its own limit.
+The access cookie lasts seven days, and changing the code asks every visitor for it again at once. Without `ACCESS_COOKIE_SECRET` (32 characters or more, set separately from the code), a captured cookie can be checked offline against guesses of the code, so a short code protects little. Set the secret on any deployment where that matters. Changing the secret also asks visitors for the code again; account sessions are not affected. At startup the server warns when `ACCESS_CODE` is set without the secret, or when the code is shorter than 12 characters. Wrong codes are limited to ten per 15 minutes. Without `TRUST_PROXY_HEADERS=true` that limit is shared by all visitors, so a flood of wrong guesses can lock everyone out of the prompt for 15 minutes. Set `TRUST_PROXY_HEADERS=true` only behind a reverse proxy that overwrites `x-forwarded-for`, which gives each client its own limit.
 
 ### Vercel Deployment
 
@@ -392,21 +392,42 @@ each account its own partition. For a signed-in request, a live server-side
 session decides the owner of courses, agent sessions, skills and runtime data,
 and client-supplied identity headers are ignored. Signed-out visitors keep the
 anonymous per-browser owner and still rely on the development token, which
-provides no isolation for them. Open limits, not yet addressed:
+provides no isolation for them.
 
-- Anyone who holds a course id can read that course, because sharing by link is
-  the current design. Only writes and deletes are owner-only.
-- Courses created before signing in stay with the anonymous browser; they are
-  not moved into the account.
-- The sign-in throttle lives in each server process, so a multi-instance
-  deployment gets one budget per instance.
+- **Registration is closed by default.** Set `ACCOUNT_REGISTRATION=open` to allow
+  sign-ups. To create the first accounts, set it to `open`, create them, then
+  set it back or remove it. Existing accounts keep signing in either way.
+- **Administrators** are the usernames in `ADMIN_USERNAMES`. They can list
+  accounts (`GET /api/admin/accounts`, paged), disable or enable an account
+  (`POST /api/admin/accounts/{id}/disable` and `/enable`, with an optional
+  `{"reason": "..."}` of at most 200 characters), and read the usage log
+  (`GET /api/usage`). Every read and change is written to the
+  `account_admin_audit` table. No administrator can disable their own account.
+  Usage is off when accounts are off, and there is no admin screen yet.
+- **A session that ends** (signed out in another tab, expired, or the account
+  disabled) is refused on the next request with `401 SESSION_ENDED`. The page
+  then shows a notice and asks the visitor to sign in again.
+- **Course and classroom ids are bearer credentials.** Anyone who holds an id can
+  read that course. Only writes and deletes are owner-only. A classroom cannot be
+  revoked; a document can be deleted by its owner. A client-chosen classroom id
+  must be at least 16 characters; generated ids are 36.
+- **Server LLM keys** are spent by any visitor who can reach the deployment, so
+  set `ACCESS_CODE`. Accounts do not yet gate them. The startup warning says so.
+- **`PUBLIC_APP_ORIGIN`** sets the origin of share and media links. Without it,
+  links trust the `x-forwarded-host` header, so the proxy must overwrite that header.
+- **Limits, not yet addressed:** courses created before signing in stay with the
+  anonymous browser and are not moved into the account (a specification is in
+  `scrum/specs/claim-anonymous-data.md`). Failure limits live in each server
+  process, so a multi-instance deployment gets one budget per instance. Behind a
+  trusted proxy (`TRUST_PROXY_HEADERS=true`) each client address also has its own
+  budget of 30 counted failures per 15 minutes, so one school network does not
+  lock a class out.
 
 For a sign-in-only deployment, leave `PERSISTENCE_DEV_TOKEN` unset. Every
 signed-out persistence request then answers 503, and signed-in requests are
 served without the token. The browser's behaviour for signed-out visitors in
-that setup has not been checked in a real browser. `ACCOUNT_REGISTRATION=closed`
-stops new sign-ups while existing accounts keep signing in. Settings are listed
-in `.env.example`.
+that setup has not been checked in a real browser. Settings are listed in
+`.env.example`.
 
 `PERSISTENCE_POSTGRES_PASSWORD` initializes the PostgreSQL role only when the
 data directory is empty; changing it later does not rotate an existing

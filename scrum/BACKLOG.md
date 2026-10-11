@@ -132,3 +132,53 @@ The reviewer found no Critical issues. Dispositions:
 - **What hindered:** agents editing shared files caused transient failures in other suites (route mocks that lacked a schema call; a bootstrap test that now needs a `fetch` stub); a background wrapper reports "completed" when the wrapper exits, not when the work finishes; `pkill -f` matched the coordinating shell's own command line.
 - **Change for the next cycle:** the coordinator runs the full suite after each integration step, not only at the end; any new module that is called from a shared provider must come with the test mocks that exercise that provider (checked in the same change); concurrency checks are written for every limiter, not only the first one found.
 - **Still open:** the full suite takes about four minutes, so iteration uses targeted folders and the full run is kept for integration points.
+
+## Cycle 3: team meeting 01 rulings
+
+Full record: `scrum/DECISIONS.md`. Specs: `scrum/specs/`. Reviews: `scrum/reviews/`. Rebuttals: `scrum/meetings/*-rebuttal.md`.
+
+### Backlog status after cycle 3
+
+| Item | Decision | Status | Note |
+|---|---|---|---|
+| B1 | D-01 | Done (conditions) | 16-character client id floor; bearer-credential docs; comment fixed. Publish control next. |
+| B2 | D-06 | Spec | `scrum/specs/claim-anonymous-data.md`; open: shared-browser consent |
+| B5 | D-02 | Partial | Phase 1 warning done; phase 2 spec `scrum/specs/managed-keys.md` |
+| B6 | D-09 | Done (warnings) | Required secret next, in a dated release |
+| B7 | D-10 | Partial | `PUBLIC_APP_ORIGIN` done; relative stored URLs next |
+| B9 | D-13 | Done | Last forwarded entry |
+| B11 | D-11 | Done (most) | Eviction, refund, per-client budget; refusal rule next |
+| B12 | D-12 | Done | Fail closed, client re-read, visible status |
+| B13 | D-08 | Done | `en-US` fallback; release gate documented |
+| B14 | D-03 | Done | Closed by default |
+| B15 | D-04 | Done (bound) | Cost unchanged; burst measurement before any change |
+| B16 | D-05 | Done (API) | Admin allowlist, audited disable and enable; no admin UI |
+| B17 | D-07 | Partial | Phase 1 review of skill documents; template review next |
+| B18 | D-16 | Partial | Classroom 500s; managed-key scope next |
+| B21 | D-05 | Done | Usage admin-only; off without accounts |
+| B22 | D-14 | Done | Startup probe, one log line, no lock-file fallback |
+| B23 | D-15 | Done (a11y) | Full-page landmark next |
+| B26 | D-17 | Partial | Diagnostics done (token-checked); root cause open |
+
+### New backlog items from cycle 3
+
+- **B28** Refuse untracked usernames while the sign-in throttle is saturated with live locks (security, D-11). Measure production derivation time first; saturation is out of reach at 180 ms per derivation `[Inference]`.
+- **B29** Relative persisted media URLs when `PUBLIC_APP_ORIGIN` is unset or invalid (security, QA, devil's advocate; D-10). Verify the renderer and export first.
+- **B30** Required `ACCESS_COOKIE_SECRET` in a dated release (security, D-09).
+- **B31** "Sign out other sessions" for the account (security, D-18).
+- **B32** Managed-key upstream error text stripped at `app/api/verify-model/route.ts` (security, QA, D-16).
+- **B33** Body-size cap on POST routes that write files, starting with `app/api/classroom/route.ts` (security, devil's advocate risk 2).
+- **B34** Procedural-skill pages cannot be generated on the conversational path: no outline tool there (content review, F-series). Needs a product decision.
+- **B35** Content review, phase 1 open defects (15) and flagged claims (23): `scrum/reviews/content-phase1.md`. Subject-matter reviewers needed.
+- **B36** Template mechanical pass and six learner-facing template files (QA, product; D-07 scope).
+- **B37** Admin user interface for account actions (product dissent kept; API exists).
+- **B38** Access gate: `<main>` landmark and inert background behind the prompt (UX, D-15).
+- **B39** Derivation time measurement on production-class hardware (platform, D-04).
+
+### Verification this cycle
+
+- Type check: `tsc --noEmit` passes.
+- Lint: ESLint passes on every changed code file.
+- i18n parity: `scripts/check-i18n-keys.mjs` passes with the new keys.
+- Targeted suites pass: throttle, busy refund, password and sync-error, registration, account routes, admin routes, diagnostics, session-ended, client budget, origin, config validation, classroom routes, hard links, render identity, learner key re-read, session-end watch.
+- Full suite: see the cycle log row below.
