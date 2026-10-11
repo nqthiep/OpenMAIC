@@ -19,6 +19,11 @@ describe('embedded persistence route', () => {
     vi.doMock('@/lib/persistence/owner-materials', () => ({
       ensureOwnerMaterialSchema: vi.fn().mockResolvedValue(undefined),
     }));
+    // The mock pools here have no query(); the account schema is exercised by tests/accounts.
+    vi.doMock('@/lib/server/accounts/store', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('@/lib/server/accounts/store')>()),
+      ensureAccountSchema: vi.fn().mockResolvedValue(undefined),
+    }));
   });
 
   it('returns a clear 404 when DATABASE_URL is unset', async () => {
