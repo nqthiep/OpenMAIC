@@ -26,7 +26,7 @@ import { apiError } from '@/lib/server/api-response';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import type { StatelessChatRequest } from '@/lib/types/chat';
 import { resolveClassroomWebSearchConfig } from '@/lib/server/web-search-config';
-import { authenticatePersistenceHeaders } from '@/lib/persistence/server-auth';
+import { resolveLearnerKeyForRequest } from '@/lib/persistence/server-auth';
 import { getServerPersistenceProvider } from '@/lib/persistence/server-provider';
 import { createWhiteboardRuntimeService } from '@/lib/whiteboard/runtime/store';
 import { hasNativeWhiteboardAction } from '@/lib/chat/pi/tools/native-whiteboard';
@@ -172,22 +172,24 @@ export async function POST(req: NextRequest) {
       nativeWhiteboardRequested &&
       validRequestStartStageId &&
       process.env.NEXT_PUBLIC_PERSISTENCE === '1' &&
-      process.env.DATABASE_URL &&
-      process.env.PERSISTENCE_DEV_TOKEN
+      process.env.DATABASE_URL
     ) {
-      const principal = authenticatePersistenceHeaders(req.headers);
-      const learnerKey = principal?.learnerKey;
-      if (learnerKey && learnerKey === learnerKey.trim()) {
-        try {
+      try {
+        // A signed-in request is partitioned by its session and never by the
+        // x-learner-key header. Anonymous requests keep the development binding,
+        // which still needs its token. A session that cannot be checked throws
+        // here, so the whiteboard is left out and no partition is taken from the header.
+        const learnerKey = await resolveLearnerKeyForRequest(req.headers);
+        if (learnerKey) {
           const provider = await getServerPersistenceProvider(process.env.DATABASE_URL);
           nativeWhiteboardLearnerKey = learnerKey;
           nativeWhiteboardService = createWhiteboardRuntimeService({
             store: provider.runtimeStore,
             resolveLearnerKey: () => learnerKey,
           });
-        } catch {
-          log.warn('Native whiteboard capability unavailable: persistence initialization failed');
         }
+      } catch {
+        log.warn('Native whiteboard capability unavailable: persistence or session check failed');
       }
     }
     let nativeWebSearchConfig: ReturnType<typeof resolveClassroomWebSearchConfig>;

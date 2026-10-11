@@ -7,9 +7,13 @@
  * page can read and write EVERY learner partition and all documents by
  * supplying an arbitrary x-learner-key. Its only purpose is to keep unrelated
  * network scanners out of a trusted-network endpoint. Suitable only for
- * localhost or trusted-network, single-user deployments. Production must
- * replace this module with real session verification and derive learner
- * identity from server-controlled claims.
+ * localhost or trusted-network, single-user deployments.
+ *
+ * This is the anonymous path. A request with a live account session is identified
+ * by that session (lib/server/accounts) and never reaches this module. For an
+ * anonymous caller holding the token, the header selects an anonymous learner
+ * partition. Keys in the reserved account namespace (`acct:`) are refused here,
+ * so the token cannot be used to read an account's runtime data.
  */
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage } from 'node:http';
@@ -18,6 +22,8 @@ import type { AssetPrincipal } from '@openmaic/storage';
 import type { RuntimeHttpPrincipal } from '@openmaic/storage/server';
 
 import { createLogger } from '@/lib/logger';
+import { resolveSignedInOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { ACCOUNT_OWNER_PREFIX } from '@/lib/server/accounts/service';
 
 const log = createLogger('PersistenceAuth');
 
@@ -84,15 +90,18 @@ function authenticatePersistenceCredentials(
 
   const token = process.env.PERSISTENCE_DEV_TOKEN;
   if (!token || !authorization || !secureEqual(authorization, `Bearer ${token}`)) return undefined;
+  // A header cannot name an account partition. A client whose cached account key
+  // outlived its session is refused here rather than served someone else's data.
+  if (learnerKey?.startsWith(ACCOUNT_OWNER_PREFIX)) return undefined;
 
   // Documents are stored without any ownership partition, so assets are
   // stored under one shared principal to match: this authenticator provides
   // no user isolation either way (the header is client-supplied), and a
   // per-header asset partition only meant a converted document's assets
   // became unreadable to every other browser the document was shared with.
-  // The learner key still partitions runtime sessions, which are genuinely
-  // per-learner state. Production replaces this module with real session
-  // verification and derives both from server-controlled claims.
+  // The learner key still partitions runtime sessions for anonymous requests,
+  // which are genuinely per-learner state. A signed-in request is partitioned by
+  // its session and never reaches this function.
   return { key: SHARED_ASSET_PRINCIPAL, ...(learnerKey ? { learnerKey } : {}) };
 }
 
@@ -110,4 +119,19 @@ export async function authenticatePersistenceRequest(
     singleHeader(req.headers.authorization),
     singleHeader(req.headers['x-learner-key']),
   );
+}
+
+/**
+ * The runtime learner partition for a request that reaches a learner-scoped
+ * surface outside the persistence route (the Pi chat whiteboard).
+ *
+ * A live session is the identity, and the x-learner-key header is not read for
+ * it. Otherwise the development binding decides, exactly as before. A session
+ * cookie that cannot be checked rejects rather than falling back to the header.
+ */
+export async function resolveLearnerKeyForRequest(headers: Headers): Promise<string | undefined> {
+  const signedInOwnerId = await resolveSignedInOwnerId(headers);
+  if (signedInOwnerId !== undefined) return signedInOwnerId;
+  const learnerKey = authenticatePersistenceHeaders(headers)?.learnerKey;
+  return learnerKey && learnerKey === learnerKey.trim() ? learnerKey : undefined;
 }

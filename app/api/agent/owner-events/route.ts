@@ -14,6 +14,7 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
+import { resolveSignedInOwnerId } from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
 // Self-hosted `next start` ignores maxDuration; Vercel's adapter can still use
@@ -40,13 +41,12 @@ export async function GET(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
   // Identity belongs to the request, not the URL. EventSource reconnects to
-  // this same stable path with the anonymous cookie minted on first attach.
-  // This slice resolves only the anonymous cookie identity; a future auth
-  // integration must thread `authenticatedOwnerId` through here, or sessions
-  // created under authenticated identities would be unreachable by their own
-  // owner.
+  // this same stable path with the same cookies. A signed-in request is
+  // partitioned by its session; any other request by the anonymous cookie minted
+  // on first attach. The owner is resolved before any store read.
   const responseHeaders = new Headers();
-  const ownerId = resolveRequestOwnerId(req, responseHeaders);
+  const signedInOwnerId = await resolveSignedInOwnerId(req.headers);
+  const ownerId = resolveRequestOwnerId(req, responseHeaders, signedInOwnerId);
   const store = await getAgentSessionStore();
 
   const url = new URL(req.url);

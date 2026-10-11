@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 
 import { settleWhiteboardVisibility } from '@/lib/chat/pi/whiteboard-visibility';
-import { authenticatePersistenceHeaders } from '@/lib/persistence/server-auth';
+import { resolveLearnerKeyForRequest } from '@/lib/persistence/server-auth';
 import { apiError } from '@/lib/server/api-response';
 
 export const runtime = 'nodejs';
@@ -29,8 +29,11 @@ function validBody(value: unknown): value is {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
-  const principal = authenticatePersistenceHeaders(req.headers);
-  if (!principal?.learnerKey) {
+  // A signed-in caller settles only queries of its own account partition.
+  // Anonymous callers keep the development binding. A session that cannot be
+  // checked rejects here.
+  const learnerKey = await resolveLearnerKeyForRequest(req.headers);
+  if (!learnerKey) {
     return apiError('INVALID_CREDENTIALS', 401, 'Invalid persistence development binding');
   }
 
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (
     !settleWhiteboardVisibility({
       ...body,
-      learnerKey: principal.learnerKey,
+      learnerKey,
     })
   ) {
     return apiError('INVALID_REQUEST', 404, 'Whiteboard visibility query is not pending here');

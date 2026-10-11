@@ -34,20 +34,21 @@ function anonymousCookieHeader(id: string): string {
  * let unrelated visitors see one another's sessions, while an anonymous cookie
  * provides the smallest useful isolation boundary.
  *
- * An explicit `authenticatedOwnerId` (from the host's auth layer) is returned
- * verbatim: authenticated principals must not be partitioned under a fresh
- * anonymous identity, and no anonymous cookie is minted for them.
+ * An explicit `authenticatedOwnerId` (a live account session, resolved by
+ * resolveSignedInOwnerId in with-owner.ts) is returned verbatim: signed-in
+ * requests must not be partitioned under a fresh anonymous identity, and no
+ * anonymous cookie is minted for them.
  *
  * Otherwise the identity comes from a valid anonymous cookie, or a fresh UUID
  * is minted. A mint is only useful when it is persisted, so `responseHeaders`
  * — the headers the caller returns to the client — is required: it receives
  * the outgoing Set-Cookie header whenever a new cookie is issued.
  *
- * Current callers (the agent event-stream routes) pass no authenticated
- * owner: for them this slice resolves only the anonymous cookie identity. A
- * future auth integration must thread `authenticatedOwnerId` through those
- * call sites, or sessions created under authenticated identities would be
- * unreachable by their own owner.
+ * Every caller passes the signed-in owner. withRequestOwnerId resolves it for
+ * the routes it wraps, and the stage freshness stream and the owner and session
+ * event streams resolve it directly. Only a request with no live session reaches
+ * the anonymous cookie, so sessions created under an account stay reachable by
+ * that account.
  */
 export function resolveRequestOwnerId(
   req: Pick<Request, 'headers'>,

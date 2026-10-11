@@ -82,6 +82,7 @@ function indirectEgressWithinGrace(
 async function createPersistenceHandler(
   connectionString: string,
   ownerId: string,
+  signedIn: boolean,
   access: DocumentAccess,
   poolFactory?: PersistencePoolFactory,
 ): Promise<RequestListener> {
@@ -121,10 +122,10 @@ async function createPersistenceHandler(
   // is the access code. Allocation is bounded by the asset store's per-principal
   // quota, which with one shared principal is a deployment-wide cap.
   //
-  // Runtime requests still take their partition key from a client-supplied
-  // header, because a runtime session genuinely is per-learner state. Before
-  // runtime routes carry production data, their authenticator must be replaced
-  // with real session verification.
+  // Runtime requests of an anonymous visitor still take their partition key from
+  // a client-supplied header behind the development token, because a runtime
+  // session genuinely is per-learner state. A signed-in request is partitioned by
+  // its account session instead, and that header is never read for it.
   // Reclamation is not scheduled from here, and must not be: a route module
   // has no once-per-process guarantee and no shutdown hook. AssetCollector
   // runs from instrumentation.ts instead, over the byte store this same
@@ -139,6 +140,9 @@ async function createPersistenceHandler(
       if (request.url?.startsWith('/assets')) {
         return { key: SHARED_ASSET_PRINCIPAL, learnerKey: ownerId };
       }
+      // A live session is the identity. The development bearer token and its
+      // production refusal apply to anonymous requests only.
+      if (signedIn) return { learnerKey: ownerId };
       return authenticatePersistenceRequest(request);
     },
     authorizeAssets: async (_principal, request) => {
@@ -310,54 +314,69 @@ export async function handlePersistenceRequest(
   if (!connectionString) {
     return jsonError(404, 'PERSISTENCE_NOT_CONFIGURED', 'server persistence not configured');
   }
-  if (!process.env.PERSISTENCE_DEV_TOKEN) {
-    return jsonError(
-      503,
-      'PERSISTENCE_DEV_TOKEN_MISSING',
-      'server persistence requires PERSISTENCE_DEV_TOKEN (development auth only)',
-    );
-  }
-
-  return withRequestOwnerId(request, async (ownerId, responseHeaders) => {
-    try {
-      const path = routeRelativePath(request);
-      const action = parseDocumentAction(request.method, path);
-      let access: DocumentAccess = 'allow';
-      if (path === '/documents' || path.startsWith('/documents/')) {
-        const { pool } = await getServerPersistenceProvider(connectionString, deps.poolFactory);
-        const queryable = pool;
-        access = await decideDocumentAccess(
-          action,
-          ownerId,
-          (stageId) => readStageMeta(queryable, stageId),
-          (stageId) =>
-            pool
-              .query('SELECT 1 FROM document_stages WHERE id = $1', [stageId])
-              .then((result) => result.rows.length > 0),
-          (stageId) => readStageMeta(queryable, stageId),
+  // The owner is resolved once, here: a live session partitions the request under
+  // its account, and anything else under the anonymous cookie. The development
+  // gate concerns anonymous requests only, so it is applied inside the handler.
+  return withRequestOwnerId(
+    request,
+    async (ownerId, responseHeaders, signedIn) => {
+      // An anonymous request without the development token is refused as before.
+      // That refusal carries no owner cookie, exactly as it never did.
+      if (!signedIn && !process.env.PERSISTENCE_DEV_TOKEN) {
+        return jsonError(
+          503,
+          'PERSISTENCE_DEV_TOKEN_MISSING',
+          'server persistence requires PERSISTENCE_DEV_TOKEN (development auth only)',
         );
       }
 
-      const response =
-        access === 'not-found'
-          ? jsonError(404, 'DOCUMENT_NOT_FOUND', '@openmaic/storage: document not found')
-          : await runNodeHandler(
-              await createPersistenceHandler(connectionString, ownerId, access, deps.poolFactory),
-              request,
-            );
-      for (const [name, value] of responseHeaders.entries()) response.headers.append(name, value);
-      return response;
-    } catch (error) {
-      console.error('Embedded persistence route initialization failed', error);
-      const response = jsonError(
-        500,
-        'PERSISTENCE_INIT_FAILED',
-        'server persistence initialization failed',
-      );
-      for (const [name, value] of responseHeaders.entries()) response.headers.append(name, value);
-      return response;
-    }
-  });
+      try {
+        const path = routeRelativePath(request);
+        const action = parseDocumentAction(request.method, path);
+        let access: DocumentAccess = 'allow';
+        if (path === '/documents' || path.startsWith('/documents/')) {
+          const { pool } = await getServerPersistenceProvider(connectionString, deps.poolFactory);
+          const queryable = pool;
+          access = await decideDocumentAccess(
+            action,
+            ownerId,
+            (stageId) => readStageMeta(queryable, stageId),
+            (stageId) =>
+              pool
+                .query('SELECT 1 FROM document_stages WHERE id = $1', [stageId])
+                .then((result) => result.rows.length > 0),
+            (stageId) => readStageMeta(queryable, stageId),
+          );
+        }
+
+        const response =
+          access === 'not-found'
+            ? jsonError(404, 'DOCUMENT_NOT_FOUND', '@openmaic/storage: document not found')
+            : await runNodeHandler(
+                await createPersistenceHandler(
+                  connectionString,
+                  ownerId,
+                  signedIn,
+                  access,
+                  deps.poolFactory,
+                ),
+                request,
+              );
+        for (const [name, value] of responseHeaders.entries()) response.headers.append(name, value);
+        return response;
+      } catch (error) {
+        console.error('Embedded persistence route initialization failed', error);
+        const response = jsonError(
+          500,
+          'PERSISTENCE_INIT_FAILED',
+          'server persistence initialization failed',
+        );
+        for (const [name, value] of responseHeaders.entries()) response.headers.append(name, value);
+        return response;
+      }
+    },
+    { poolFactory: deps.poolFactory },
+  );
 }
 
 export const GET = (request: Request) => handlePersistenceRequest(request);
