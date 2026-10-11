@@ -10,6 +10,7 @@ import {
   type AssetIndirectByteEgress,
 } from '@openmaic/storage/server';
 
+import { accountsEnabled } from '@/lib/accounts/gate';
 import { validateAppScene, validateAppStage } from '@/lib/document-store/validators';
 import { createLogger } from '@/lib/logger';
 import { configuredAssetByteEgress } from '@/lib/persistence/asset-byte-egress';
@@ -163,9 +164,22 @@ interface AssetAdmission {
 const LEARNER_MERGE_PATH = '/runtime/learners/merge';
 
 /**
+ * With accounts on, no anonymous work is claimed: an account never takes what
+ * the browser did before signing in. Each merge path asks here first, and a
+ * refusal is logged on the server.
+ */
+function accountsRefuseClaims(): boolean {
+  if (!accountsEnabled()) return false;
+  log.warn('owner claim refused: accounts are on (OPENMAIC_ACCOUNTS=true)');
+  return true;
+}
+
+/**
  * Whether `principal` may merge runtime learner `from` into `to`: only its own
  * pending claim into itself, from a non-anonymous principal, on a same-origin
- * JSON request (the merge acts on cookies; see `isSameOriginJsonRequest`).
+ * JSON request (the merge acts on cookies; see `isSameOriginJsonRequest`), and
+ * never with accounts on. This is also the storage router's `authorizeMerge`, so
+ * a spelling of the path that the canonical check does not match is refused here.
  */
 function mayMergeLearner(
   principal: OwnerPrincipal,
@@ -174,6 +188,7 @@ function mayMergeLearner(
   toLearnerKey: string,
 ): boolean {
   return (
+    !accountsRefuseClaims() &&
     principal.kind !== 'anonymous' &&
     principal.pendingClaim?.fromOwnerId === fromLearnerKey &&
     toLearnerKey === principal.ownerId &&
@@ -209,13 +224,20 @@ function mergeThroughClaim(store: RuntimeStore, principal: OwnerPrincipal): Runt
 /**
  * `POST /runtime/learners/merge` for this app: the runtime contract's shape
  * (`{ fromLearnerKey, toLearnerKey }` in, `{ moved }` out), performed as a
- * claim, with the claim endpoint's refusals and cookie handling.
+ * claim, with the claim endpoint's refusals and cookie handling. With accounts on
+ * it answers `403 CLAIM_DISABLED` instead.
  */
 async function handleLearnerMerge(
   request: Request,
   principal: OwnerPrincipal,
   responseHeaders: Headers,
 ): Promise<Response> {
+  if (accountsRefuseClaims()) {
+    return withHeaders(
+      jsonError(403, 'CLAIM_DISABLED', 'Chức năng này không khả dụng khi bật tài khoản.'),
+      responseHeaders,
+    );
+  }
   let body: { fromLearnerKey?: unknown; toLearnerKey?: unknown };
   try {
     body = (await request.json()) as typeof body;

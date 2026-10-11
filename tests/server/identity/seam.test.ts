@@ -285,7 +285,10 @@ describe('invalid credentials', () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      error: { code: 'INVALID_CREDENTIAL', message: 'invalid owner credential' },
+      error: {
+        code: 'INVALID_CREDENTIAL',
+        message: 'Thông tin xác thực không hợp lệ, vui lòng tải lại trang và thử lại.',
+      },
     });
     expect(response.headers.has('set-cookie')).toBe(false);
     expect(handler).not.toHaveBeenCalled();

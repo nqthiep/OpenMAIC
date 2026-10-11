@@ -1,3 +1,4 @@
+import { accountsEnabled } from '@/lib/accounts/gate';
 import { isSameOriginJsonRequest } from '@/lib/persistence/owner-claim-http';
 import { BROWSER_ID_PATTERN, bindLegacyImport } from '@/lib/persistence/legacy-import-bindings';
 import { fenceOwnerWrite, ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
@@ -31,6 +32,9 @@ function jsonError(status: number, code: string, message: string, headers?: Head
  * every owner write (a retired owner answers `403 OWNER_RETIRED`, a claim in
  * progress `503 OWNER_BUSY`), uncacheable. `400` for a malformed browser id.
  *
+ * With accounts on (`OPENMAIC_ACCOUNTS=true`) it answers `403 LEGACY_IMPORT_DISABLED`
+ * and binds nothing: the browser's pre-server data belongs to no account.
+ *
  * Only an owner the browser already presented is bound. A request whose owner
  * was minted by that very request (it carried no valid owner cookie) answers
  * `409 OWNER_NOT_ESTABLISHED` with the minted cookie and binds nothing: other
@@ -41,6 +45,13 @@ function jsonError(status: number, code: string, message: string, headers?: Head
  * response has established the owner (`lib/server/identity/navigation.ts`).
  */
 export async function POST(request: Request): Promise<Response> {
+  if (accountsEnabled()) {
+    return jsonError(
+      403,
+      'LEGACY_IMPORT_DISABLED',
+      'the legacy browser import is off while accounts are on',
+    );
+  }
   if (!isSameOriginJsonRequest(request)) {
     return jsonError(403, 'CROSS_ORIGIN_REFUSED', 'bindings must be same-origin JSON requests');
   }

@@ -21,7 +21,12 @@ import type { OwnerAuthRequest, OwnerPrincipal } from './types';
  */
 export function invalidOwnerCredentialResponse(): Response {
   return Response.json(
-    { error: { code: 'INVALID_CREDENTIAL', message: 'invalid owner credential' } },
+    {
+      error: {
+        code: 'INVALID_CREDENTIAL',
+        message: 'Thông tin xác thực không hợp lệ, vui lòng tải lại trang và thử lại.',
+      },
+    },
     { status: 401 },
   );
 }

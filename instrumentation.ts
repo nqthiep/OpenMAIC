@@ -44,6 +44,12 @@ export async function register(): Promise<void> {
     warnIfAccessCodeIsUnset(process.env.ACCESS_CODE);
   }
 
+  // The site cookie is signed with ACCESS_CODE alone until OPENMAIC_ACCESS_SECRET is long enough.
+  if (process.env.ACCESS_CODE) {
+    const { warnIfAccessSecretIsWeak } = await import('@/lib/server/access-token');
+    warnIfAccessSecretIsWeak();
+  }
+
   // Every store's recorded schema versions, read in the background: a database
   // this release must not run against (upgraded by a newer release) stops the
   // process here rather than failing every request that touches the store
@@ -222,6 +228,13 @@ async function validateBootConfiguration(): Promise<void> {
   const { deploymentConfig } = await import('@/lib/server/model-config/runtime');
   runConfigurationCheck(deploymentConfig);
 
+  // Student deployments (OPENMAIC_HOME=learn) are refused unless their learner-facing settings hold.
+  // The flag is read inline, as proxy.ts does, so a deployment without it never loads the check.
+  if (process.env.OPENMAIC_HOME === 'learn') {
+    const { validateStudentModeConfiguration } = await import('@/lib/server/config-validation');
+    runConfigurationCheck(validateStudentModeConfiguration);
+  }
+
   // The asset quota, read here rather than at the first persistence request.
   // The provider that consumes it is lazy and memoised, so a malformed ceiling
   // would otherwise let the process boot, pass its health check, and then fail
@@ -266,6 +279,11 @@ async function validateBootConfiguration(): Promise<void> {
   //
   // A registration that throws stops the process too, reported as a startup
   // failure with its stack (it is host code, not a setting).
+  // Accounts (OPENMAIC_ACCOUNTS=true) register their owner auth method before the
+  // owner identity check below reads the registration.
+  const { configureAccountsAuthentication } = await import('@/lib/accounts/boot');
+  runConfigurationCheck(configureAccountsAuthentication);
+
   const { validateOwnerIdentityConfiguration } = await import('@/lib/server/identity/registry');
   runConfigurationCheck(validateOwnerIdentityConfiguration);
 

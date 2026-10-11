@@ -1,3 +1,5 @@
+import { accountsEnabled } from '@/lib/accounts/gate';
+import { createLogger } from '@/lib/logger';
 import {
   claimRefusalResponse,
   isSameOriginJsonRequest,
@@ -6,6 +8,8 @@ import {
 import { withRequestOwner } from '@/lib/server/identity/with-owner';
 
 export const runtime = 'nodejs';
+
+const log = createLogger('OwnerIdentity');
 
 function jsonError(status: number, code: string, message: string, headers: Headers): Response {
   return Response.json({ error: { code, message } }, { status, headers });
@@ -28,8 +32,19 @@ function jsonError(status: number, code: string, message: string, headers: Heade
  *   that lost a lock race answers `503 OWNER_BUSY` with `Retry-After`.
  * - Never claimed automatically before this handler (`OWNER_CLAIM_TRIGGER=auto`
  *   skips this route), so the answer always reports this request's claim.
+ * - With accounts on (`OPENMAIC_ACCOUNTS=true`) it answers `403 CLAIM_DISABLED` before
+ *   anything else and claims nothing: an account never takes the browser's anonymous work.
  */
 export async function POST(request: Request): Promise<Response> {
+  if (accountsEnabled()) {
+    log.warn('owner claim refused: accounts are on (OPENMAIC_ACCOUNTS=true)');
+    return jsonError(
+      403,
+      'CLAIM_DISABLED',
+      'Chức năng này không khả dụng khi bật tài khoản.',
+      new Headers(),
+    );
+  }
   if (!isSameOriginJsonRequest(request)) {
     return jsonError(
       403,

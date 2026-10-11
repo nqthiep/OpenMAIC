@@ -16,10 +16,10 @@
  * fetches or prefetches, not Server Actions, all of which a page sends after
  * its document response already set the cookie.
  *
- * Which configurations mint. The middleware can run in the Edge runtime,
- * where the owner auth methods a host registers from `instrumentation.ts`
- * (`./registry.ts`) are not visible, so this decides from the environment
- * alone: it mints whenever neither built-in catch-all owner is configured
+ * Which configurations mint. The proxy does not read the registry
+ * (`./registry.ts`): the owner auth methods a host registers from
+ * `instrumentation.ts` are not visible to it, so this decides from the
+ * environment alone: it mints whenever neither built-in catch-all owner is configured
  * (`OWNER_SINGLE_USER`, `PERSISTENCE_SHARED_OWNER_ID`), since with either one
  * no request ever resolves to an anonymous owner and no cookie is minted
  * anywhere. With the default configuration -- no host registration -- that is
@@ -31,7 +31,7 @@
  * cookieless page load; the boot warns when such a registration leaves it on
  * (`warnAboutOwnerIdentityConfiguration` in `./registry.ts`). A host that keeps
  * anonymous visitors needs minting for them and skips
- * {@link anonymousOwnerForNavigation} in `middleware.ts` only for the requests
+ * {@link anonymousOwnerForNavigation} in `proxy.ts` only for the requests
  * its methods authenticate.
  */
 import { establishAnonymousCookie } from './anonymous-cookie';

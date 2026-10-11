@@ -16,6 +16,7 @@ import type { SchemaMigrationSet } from '@openmaic/storage/pg-migrations';
 import { RUNTIME_PG_MIGRATIONS } from '@openmaic/storage/runtime/pg';
 import { USER_SKILL_PG_MIGRATIONS } from '@openmaic/storage/skill/pg';
 
+import { ACCOUNTS_MIGRATIONS } from '@/lib/accounts/schema';
 import { OWNER_AGENT_MIGRATIONS } from '@/lib/server/agents/store';
 
 import { GENERATION_RUN_MIGRATIONS } from './generation-runs';
@@ -41,4 +42,5 @@ export const APP_SCHEMA_STORES: readonly SchemaMigrationSet[] = [
   AGENT_SESSION_MATERIAL_PG_MIGRATIONS,
   USER_SKILL_PG_MIGRATIONS,
   GENERATION_RUN_MIGRATIONS,
+  ACCOUNTS_MIGRATIONS,
 ];

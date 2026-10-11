@@ -76,6 +76,7 @@ next-env.d.ts
 
 # docs (design docs under docs/tutor are tracked)
 /docs/*
+!/docs/accounts/
 !/docs/tutor/
 # Eval results
 eval/whiteboard-layout/results/

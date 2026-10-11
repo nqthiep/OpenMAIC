@@ -186,6 +186,13 @@ const SHIPPED: readonly (readonly [
     true,
     '73994d78d22a31a3b7c62f9ecb147a20bd70ffa17ab036f7bd6a75df682d9827',
   ],
+  [
+    'accounts',
+    1,
+    'baseline',
+    true,
+    'f42ee59336705bb068623cc323e87f075fee0a5e696b24989e152017790a9cd4',
+  ],
 ];
 
 /**
