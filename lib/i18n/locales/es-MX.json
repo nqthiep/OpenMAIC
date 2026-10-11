@@ -2007,6 +2007,52 @@
     "placeholder": "Código de acceso",
     "error": "Código de acceso no válido. Inténtalo de nuevo."
   },
+  "account": {
+    "trigger": {
+      "signIn": "Iniciar sesión"
+    },
+    "accountMenu": "Cuenta: {{username}}",
+    "signedInAs": "Sesión iniciada como",
+    "signOut": "Cerrar sesión",
+    "modesLabel": "Elige iniciar sesión o crear una cuenta",
+    "modes": {
+      "signIn": "Iniciar sesión",
+      "create": "Crear cuenta"
+    },
+    "dialog": {
+      "signInTitle": "Iniciar sesión",
+      "createTitle": "Crear cuenta",
+      "signInDescription": "Escribe tu nombre de usuario y contraseña.",
+      "createDescription": "Elige un nombre de usuario y una contraseña."
+    },
+    "fields": {
+      "username": "Nombre de usuario",
+      "password": "Contraseña"
+    },
+    "hints": {
+      "username": "De 3 a 32 caracteres: letras latinas, números, puntos, guiones bajos o guiones. Debe empezar con una letra o un número.",
+      "password": "De 8 a 256 caracteres."
+    },
+    "submit": {
+      "signIn": "Iniciar sesión",
+      "signingIn": "Iniciando sesión…",
+      "create": "Crear cuenta",
+      "creating": "Creando cuenta…"
+    },
+    "errors": {
+      "invalidCredentials": "Nombre de usuario o contraseña incorrectos.",
+      "usernameInvalid": "Usa de 3 a 32 caracteres: letras latinas, números, puntos, guiones bajos o guiones. Debe empezar con una letra o un número.",
+      "usernameTaken": "Ese nombre de usuario ya está en uso.",
+      "passwordInvalid": "Usa de 8 a 256 caracteres.",
+      "rateLimited": "Demasiados intentos fallidos. Vuelve a intentarlo en {{minutes}} min.",
+      "rateLimitedLater": "Demasiados intentos fallidos. Vuelve a intentarlo más tarde.",
+      "registrationDisabled": "Por ahora no se aceptan nuevas cuentas.",
+      "notConfigured": "Las cuentas no están disponibles en este servidor.",
+      "invalidRequest": "No se pudo procesar la solicitud. Inténtalo de nuevo.",
+      "internal": "El servidor no pudo completar la solicitud. Inténtalo más tarde.",
+      "generic": "Algo salió mal. Inténtalo de nuevo."
+    }
+  },
   "proMode": {
     "attach": "Adjuntar material",
     "mentionCourse": "引用课堂",

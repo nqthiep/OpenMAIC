@@ -2007,6 +2007,52 @@
     "placeholder": "Zugangscode",
     "error": "Ungültiger Zugangscode. Bitte versuche es erneut."
   },
+  "account": {
+    "trigger": {
+      "signIn": "Anmelden"
+    },
+    "accountMenu": "Konto: {{username}}",
+    "signedInAs": "Angemeldet als",
+    "signOut": "Abmelden",
+    "modesLabel": "Anmelden oder Konto erstellen wählen",
+    "modes": {
+      "signIn": "Anmelden",
+      "create": "Konto erstellen"
+    },
+    "dialog": {
+      "signInTitle": "Anmelden",
+      "createTitle": "Konto erstellen",
+      "signInDescription": "Gib deinen Benutzernamen und dein Passwort ein.",
+      "createDescription": "Wähle einen Benutzernamen und ein Passwort."
+    },
+    "fields": {
+      "username": "Benutzername",
+      "password": "Passwort"
+    },
+    "hints": {
+      "username": "3–32 Zeichen: lateinische Buchstaben, Ziffern, Punkte, Unterstriche oder Bindestriche. Beginne mit einem Buchstaben oder einer Ziffer.",
+      "password": "8–256 Zeichen."
+    },
+    "submit": {
+      "signIn": "Anmelden",
+      "signingIn": "Wird angemeldet…",
+      "create": "Konto erstellen",
+      "creating": "Konto wird erstellt…"
+    },
+    "errors": {
+      "invalidCredentials": "Benutzername oder Passwort ist falsch.",
+      "usernameInvalid": "Verwende 3–32 Zeichen: lateinische Buchstaben, Ziffern, Punkte, Unterstriche oder Bindestriche. Beginne mit einem Buchstaben oder einer Ziffer.",
+      "usernameTaken": "Dieser Benutzername ist bereits vergeben.",
+      "passwordInvalid": "Verwende 8–256 Zeichen.",
+      "rateLimited": "Zu viele fehlgeschlagene Versuche. Versuche es in {{minutes}} Min. erneut.",
+      "rateLimitedLater": "Zu viele fehlgeschlagene Versuche. Versuche es später erneut.",
+      "registrationDisabled": "Neue Konten sind derzeit nicht verfügbar.",
+      "notConfigured": "Konten sind auf diesem Server nicht verfügbar.",
+      "invalidRequest": "Diese Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+      "internal": "Der Server konnte diese Anfrage nicht abschließen. Bitte versuche es später erneut.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    }
+  },
   "proMode": {
     "attach": "Attach material",
     "mentionCourse": "引用课堂",

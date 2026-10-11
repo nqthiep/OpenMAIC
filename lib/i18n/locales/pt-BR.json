@@ -2007,6 +2007,52 @@
     "placeholder": "Código de acesso",
     "error": "Código inválido. Tente novamente."
   },
+  "account": {
+    "trigger": {
+      "signIn": "Entrar"
+    },
+    "accountMenu": "Conta: {{username}}",
+    "signedInAs": "Conectado como",
+    "signOut": "Sair",
+    "modesLabel": "Escolha entrar ou criar uma conta",
+    "modes": {
+      "signIn": "Entrar",
+      "create": "Criar conta"
+    },
+    "dialog": {
+      "signInTitle": "Entrar",
+      "createTitle": "Criar conta",
+      "signInDescription": "Digite seu nome de usuário e senha.",
+      "createDescription": "Escolha um nome de usuário e uma senha."
+    },
+    "fields": {
+      "username": "Nome de usuário",
+      "password": "Senha"
+    },
+    "hints": {
+      "username": "De 3 a 32 caracteres: letras latinas, números, pontos, sublinhados ou hífens. Comece com uma letra ou um número.",
+      "password": "De 8 a 256 caracteres."
+    },
+    "submit": {
+      "signIn": "Entrar",
+      "signingIn": "Entrando…",
+      "create": "Criar conta",
+      "creating": "Criando conta…"
+    },
+    "errors": {
+      "invalidCredentials": "Nome de usuário ou senha incorretos.",
+      "usernameInvalid": "Use de 3 a 32 caracteres: letras latinas, números, pontos, sublinhados ou hífens. Comece com uma letra ou um número.",
+      "usernameTaken": "Esse nome de usuário já está em uso.",
+      "passwordInvalid": "Use de 8 a 256 caracteres.",
+      "rateLimited": "Muitas tentativas sem sucesso. Tente novamente em {{minutes}} min.",
+      "rateLimitedLater": "Muitas tentativas sem sucesso. Tente novamente mais tarde.",
+      "registrationDisabled": "No momento, não há novas contas disponíveis.",
+      "notConfigured": "As contas não estão disponíveis neste servidor.",
+      "invalidRequest": "Não foi possível processar a solicitação. Tente novamente.",
+      "internal": "O servidor não conseguiu concluir a solicitação. Tente novamente mais tarde.",
+      "generic": "Algo deu errado. Tente novamente."
+    }
+  },
   "proMode": {
     "attach": "Anexar material",
     "mentionCourse": "引用课堂",

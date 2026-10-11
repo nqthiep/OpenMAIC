@@ -6,6 +6,7 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { StageMode } from '@/lib/types/stage';
 import { classroomExitLabelKey, exitClassroom } from '@/lib/workbench/classroom-exit';
+import { AccountControl } from '@/components/account/account-control';
 import { HeaderControls } from './stage/header-controls';
 
 interface HeaderProps {
@@ -86,6 +87,11 @@ export function Header({
             </div>
           )}
         </div>
+
+        {/* Account entry: application-global, so a workbench-attached classroom
+            hides it with the other global controls. Renders nothing unless
+            server accounts are enabled. */}
+        {hideGlobalControls ? null : <AccountControl />}
 
         {/* Standalone classroom keeps the full cluster. Workbench-attached
             classrooms omit both the global capsule and course share/export. */}

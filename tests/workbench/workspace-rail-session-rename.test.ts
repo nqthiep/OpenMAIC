@@ -25,6 +25,7 @@ vi.mock('@/lib/brand/brand-context', () => ({
 vi.mock('@/components/workbench/ProBadge', () => ({ ProBadge: () => null }));
 vi.mock('@/components/language-switcher', () => ({ LanguageSwitcher: () => null }));
 vi.mock('@/components/site-header/theme-toggle', () => ({ ThemeToggle: () => null }));
+vi.mock('@/components/account/account-control', () => ({ AccountControl: () => null }));
 vi.mock('@/lib/workbench/workspace-actions', () => ({
   deleteWorkspaceSession: vi.fn(async () => ({ deleted: true })),
 }));

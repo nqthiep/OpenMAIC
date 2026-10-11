@@ -2007,6 +2007,52 @@
     "placeholder": "访问码",
     "error": "访问码错误，请重试。"
   },
+  "account": {
+    "trigger": {
+      "signIn": "登录"
+    },
+    "accountMenu": "账号：{{username}}",
+    "signedInAs": "当前登录账号",
+    "signOut": "退出登录",
+    "modesLabel": "选择登录或创建账号",
+    "modes": {
+      "signIn": "登录",
+      "create": "创建账号"
+    },
+    "dialog": {
+      "signInTitle": "登录",
+      "createTitle": "创建账号",
+      "signInDescription": "请输入用户名和密码。",
+      "createDescription": "请设置用户名和密码。"
+    },
+    "fields": {
+      "username": "用户名",
+      "password": "密码"
+    },
+    "hints": {
+      "username": "3–32 个字符，可使用英文字母、数字、点、下划线或连字符，且以字母或数字开头。",
+      "password": "8–256 个字符。"
+    },
+    "submit": {
+      "signIn": "登录",
+      "signingIn": "正在登录…",
+      "create": "创建账号",
+      "creating": "正在创建账号…"
+    },
+    "errors": {
+      "invalidCredentials": "用户名或密码不正确。",
+      "usernameInvalid": "用户名需为 3–32 个字符，可使用英文字母、数字、点、下划线或连字符，且以字母或数字开头。",
+      "usernameTaken": "该用户名已被使用。",
+      "passwordInvalid": "密码需为 8–256 个字符。",
+      "rateLimited": "失败次数过多，请 {{minutes}} 分钟后再试。",
+      "rateLimitedLater": "失败次数过多，请稍后再试。",
+      "registrationDisabled": "当前暂不开放注册。",
+      "notConfigured": "此服务器未启用账号功能。",
+      "invalidRequest": "无法处理该请求，请重试。",
+      "internal": "服务器无法完成该请求，请稍后重试。",
+      "generic": "出现问题，请重试。"
+    }
+  },
   "proMode": {
     "attach": "添加材料",
     "mentionCourse": "引用课堂",

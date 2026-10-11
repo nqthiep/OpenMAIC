@@ -1992,6 +1992,52 @@
     "placeholder": "課堂碼",
     "error": "課堂碼錯誤，請重試。"
   },
+  "account": {
+    "trigger": {
+      "signIn": "登入"
+    },
+    "accountMenu": "帳號：{{username}}",
+    "signedInAs": "目前登入帳號",
+    "signOut": "登出",
+    "modesLabel": "選擇登入或建立帳號",
+    "modes": {
+      "signIn": "登入",
+      "create": "建立帳號"
+    },
+    "dialog": {
+      "signInTitle": "登入",
+      "createTitle": "建立帳號",
+      "signInDescription": "請輸入使用者名稱和密碼。",
+      "createDescription": "請設定使用者名稱和密碼。"
+    },
+    "fields": {
+      "username": "使用者名稱",
+      "password": "密碼"
+    },
+    "hints": {
+      "username": "3–32 個字元，可使用英文字母、數字、點、底線或連字號，且以英文字母或數字開頭。",
+      "password": "8–256 個字元。"
+    },
+    "submit": {
+      "signIn": "登入",
+      "signingIn": "正在登入…",
+      "create": "建立帳號",
+      "creating": "正在建立帳號…"
+    },
+    "errors": {
+      "invalidCredentials": "使用者名稱或密碼不正確。",
+      "usernameInvalid": "使用者名稱需為 3–32 個字元，可使用英文字母、數字、點、底線或連字號，且以英文字母或數字開頭。",
+      "usernameTaken": "此使用者名稱已被使用。",
+      "passwordInvalid": "密碼需為 8–256 個字元。",
+      "rateLimited": "失敗次數過多，請 {{minutes}} 分鐘後再試。",
+      "rateLimitedLater": "失敗次數過多，請稍後再試。",
+      "registrationDisabled": "目前暫不開放註冊。",
+      "notConfigured": "此伺服器未啟用帳號功能。",
+      "invalidRequest": "無法處理此要求，請重試。",
+      "internal": "伺服器無法完成此要求，請稍後重試。",
+      "generic": "發生問題，請重試。"
+    }
+  },
   "classroomComplete": {
     "title": "課程完成",
     "trailLabels": {

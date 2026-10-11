@@ -19,6 +19,22 @@ describe('persistence client bootstrap', () => {
     vi.resetModules();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+    // Bootstrap asks the server who is signed in; answer "signed out" so the device key is used.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              success: true,
+              enabled: false,
+              registrationOpen: false,
+              authenticated: false,
+            }),
+            { headers: { 'content-type': 'application/json' } },
+          ),
+      ),
+    );
   });
 
   it('leaves all sealed storage seams untouched when the flag is unset', async () => {

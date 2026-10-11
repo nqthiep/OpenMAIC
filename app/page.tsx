@@ -29,6 +29,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { AccountControl } from '@/components/account/account-control';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { createLogger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
@@ -801,6 +802,8 @@ function HomePage() {
             <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
           </button>
         </div>
+        {/* Renders nothing unless browser persistence and accounts are enabled. */}
+        <AccountControl />
       </div>
       <SettingsDialog
         open={settingsOpen}

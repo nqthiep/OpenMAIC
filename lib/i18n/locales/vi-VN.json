@@ -2007,6 +2007,52 @@
     "placeholder": "Mã truy cập",
     "error": "Mã truy cập không đúng. Vui lòng thử lại."
   },
+  "account": {
+    "trigger": {
+      "signIn": "Đăng nhập"
+    },
+    "accountMenu": "Tài khoản: {{username}}",
+    "signedInAs": "Đã đăng nhập với",
+    "signOut": "Đăng xuất",
+    "modesLabel": "Chọn đăng nhập hoặc tạo tài khoản",
+    "modes": {
+      "signIn": "Đăng nhập",
+      "create": "Tạo tài khoản"
+    },
+    "dialog": {
+      "signInTitle": "Đăng nhập",
+      "createTitle": "Tạo tài khoản",
+      "signInDescription": "Nhập tên người dùng và mật khẩu.",
+      "createDescription": "Chọn tên người dùng và mật khẩu."
+    },
+    "fields": {
+      "username": "Tên người dùng",
+      "password": "Mật khẩu"
+    },
+    "hints": {
+      "username": "Từ 3 đến 32 ký tự: chữ cái Latinh, chữ số, dấu chấm, gạch dưới hoặc gạch nối. Bắt đầu bằng chữ cái hoặc chữ số.",
+      "password": "Từ 8 đến 256 ký tự."
+    },
+    "submit": {
+      "signIn": "Đăng nhập",
+      "signingIn": "Đang đăng nhập…",
+      "create": "Tạo tài khoản",
+      "creating": "Đang tạo tài khoản…"
+    },
+    "errors": {
+      "invalidCredentials": "Tên người dùng hoặc mật khẩu không đúng.",
+      "usernameInvalid": "Dùng từ 3 đến 32 ký tự: chữ cái Latinh, chữ số, dấu chấm, gạch dưới hoặc gạch nối, bắt đầu bằng chữ cái hoặc chữ số.",
+      "usernameTaken": "Tên người dùng này đã được sử dụng.",
+      "passwordInvalid": "Dùng từ 8 đến 256 ký tự.",
+      "rateLimited": "Quá nhiều lần thử không thành công. Thử lại sau {{minutes}} phút.",
+      "rateLimitedLater": "Quá nhiều lần thử không thành công. Vui lòng thử lại sau.",
+      "registrationDisabled": "Hiện chưa mở đăng ký tài khoản mới.",
+      "notConfigured": "Tài khoản không khả dụng trên máy chủ này.",
+      "invalidRequest": "Không thể xử lý yêu cầu. Vui lòng thử lại.",
+      "internal": "Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại sau.",
+      "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+  },
   "proMode": {
     "attach": "Đính kèm tài liệu",
     "mentionCourse": "引用课堂",

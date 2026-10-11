@@ -2007,6 +2007,52 @@
     "placeholder": "Code d’accès",
     "error": "Code d’accès invalide. Veuillez réessayer."
   },
+  "account": {
+    "trigger": {
+      "signIn": "Se connecter"
+    },
+    "accountMenu": "Compte : {{username}}",
+    "signedInAs": "Connecté en tant que",
+    "signOut": "Se déconnecter",
+    "modesLabel": "Choisir de se connecter ou de créer un compte",
+    "modes": {
+      "signIn": "Se connecter",
+      "create": "Créer un compte"
+    },
+    "dialog": {
+      "signInTitle": "Se connecter",
+      "createTitle": "Créer un compte",
+      "signInDescription": "Saisissez votre nom d’utilisateur et votre mot de passe.",
+      "createDescription": "Choisissez un nom d’utilisateur et un mot de passe."
+    },
+    "fields": {
+      "username": "Nom d’utilisateur",
+      "password": "Mot de passe"
+    },
+    "hints": {
+      "username": "3 à 32 caractères : lettres latines, chiffres, points, tirets bas ou tirets. Commence par une lettre ou un chiffre.",
+      "password": "8 à 256 caractères."
+    },
+    "submit": {
+      "signIn": "Se connecter",
+      "signingIn": "Connexion en cours…",
+      "create": "Créer le compte",
+      "creating": "Création du compte en cours…"
+    },
+    "errors": {
+      "invalidCredentials": "Nom d’utilisateur ou mot de passe incorrect.",
+      "usernameInvalid": "Utilisez 3 à 32 caractères : lettres latines, chiffres, points, tirets bas ou tirets, en commençant par une lettre ou un chiffre.",
+      "usernameTaken": "Ce nom d’utilisateur est déjà pris.",
+      "passwordInvalid": "Utilisez 8 à 256 caractères.",
+      "rateLimited": "Trop de tentatives échouées. Réessayez dans {{minutes}} min.",
+      "rateLimitedLater": "Trop de tentatives échouées. Réessayez plus tard.",
+      "registrationDisabled": "La création de nouveaux comptes n’est pas ouverte pour le moment.",
+      "notConfigured": "Les comptes ne sont pas disponibles sur ce serveur.",
+      "invalidRequest": "La demande n’a pas pu être traitée. Veuillez réessayer.",
+      "internal": "Le serveur n’a pas pu terminer cette demande. Veuillez réessayer plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    }
+  },
   "proMode": {
     "attach": "Joindre un support",
     "mentionCourse": "引用课堂",

@@ -96,6 +96,7 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { useBrand } from '@/lib/brand/brand-context';
 import type { HomeDiscoveryState, useHomeDiscovery } from '@/lib/hooks/use-home-discovery';
 import { ProBadge } from '@/components/workbench/ProBadge';
+import { AccountControl } from '@/components/account/account-control';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeToggle } from '@/components/site-header/theme-toggle';
 import { SettingsDialog } from '@/components/settings';
@@ -2075,6 +2076,8 @@ function RailUtilities({ onOpenSettings }: { readonly onOpenSettings: () => void
         aria-label={t('workspace.utilitiesAria')}
         className="ws-utils flex items-center gap-0.5 px-3 py-2.5"
       >
+        {/* Renders nothing unless browser persistence and accounts are enabled. */}
+        <AccountControl />
         <LanguageSwitcher />
         <ThemeToggle />
         <button

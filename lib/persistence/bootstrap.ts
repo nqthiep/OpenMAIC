@@ -27,16 +27,72 @@ export function isBrowserPersistenceEnabled(): boolean {
   return typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PERSISTENCE === '1';
 }
 
+/** Same-origin account session route (app/api/auth/session). */
+const ACCOUNT_SESSION_PATH = '/api/auth/session';
+
+interface AccountSessionBody {
+  readonly success: true;
+  readonly enabled: boolean;
+  readonly authenticated: boolean;
+  readonly learnerKey?: unknown;
+}
+
+function isAccountSessionBody(value: unknown): value is AccountSessionBody {
+  if (value === null || typeof value !== 'object') return false;
+  const body = value as Record<string, unknown>;
+  return (
+    body.success === true &&
+    typeof body.enabled === 'boolean' &&
+    typeof body.authenticated === 'boolean'
+  );
+}
+
+/**
+ * Reads the account session. A transport failure, a non-2xx status or a
+ * malformed body rejects: the caller must not guess which learner this is.
+ */
+async function readAccountSession(): Promise<AccountSessionBody> {
+  const response = await fetch(ACCOUNT_SESSION_PATH, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    throw new Error(`Account session request failed with HTTP ${response.status}`);
+  }
+  const body: unknown = await response.json();
+  if (!isAccountSessionBody(body)) {
+    throw new Error('Account session response is malformed');
+  }
+  return body;
+}
+
+/**
+ * A signed-in account's partition key, otherwise the device key. A signed-in
+ * learner never falls back to the device key: those writes would land in a
+ * partition that the account cannot reach.
+ */
+async function resolveLearnerKey(): Promise<string> {
+  const session = await readAccountSession();
+  if (session.enabled && session.authenticated) {
+    if (typeof session.learnerKey === 'string' && session.learnerKey.length > 0) {
+      return session.learnerKey;
+    }
+    throw new Error('Signed-in account session carries no learner key');
+  }
+  return getLearnerKey((deviceKv ??= new BrowserKVStore()));
+}
+
 export function getPersistenceLearnerKey(): Promise<string> {
   if (!isBrowserPersistenceEnabled()) {
     return Promise.reject(new Error('Browser persistence is not enabled'));
   }
-  return (learnerKeyPromise ??= getLearnerKey((deviceKv ??= new BrowserKVStore())).catch(
-    (error) => {
-      learnerKeyPromise = undefined;
-      throw error;
-    },
-  ));
+  // Memoised for the page's lifetime. A rejection clears the memo so the next
+  // caller retries the session read rather than inheriting the failure.
+  return (learnerKeyPromise ??= resolveLearnerKey().catch((error) => {
+    learnerKeyPromise = undefined;
+    throw error;
+  }));
 }
 
 export async function getPersistenceRequestHeaders(): Promise<Record<string, string>> {

@@ -2007,6 +2007,52 @@
     "placeholder": "접근 코드",
     "error": "유효하지 않은 접근 코드입니다. 다시 시도해 주세요."
   },
+  "account": {
+    "trigger": {
+      "signIn": "로그인"
+    },
+    "accountMenu": "계정: {{username}}",
+    "signedInAs": "로그인한 계정",
+    "signOut": "로그아웃",
+    "modesLabel": "로그인 또는 계정 만들기 선택",
+    "modes": {
+      "signIn": "로그인",
+      "create": "계정 만들기"
+    },
+    "dialog": {
+      "signInTitle": "로그인",
+      "createTitle": "계정 만들기",
+      "signInDescription": "사용자 이름과 비밀번호를 입력하세요.",
+      "createDescription": "사용자 이름과 비밀번호를 정하세요."
+    },
+    "fields": {
+      "username": "사용자 이름",
+      "password": "비밀번호"
+    },
+    "hints": {
+      "username": "3~32자: 영문자, 숫자, 마침표, 밑줄, 하이픈을 사용할 수 있습니다. 영문자 또는 숫자로 시작하세요.",
+      "password": "8~256자."
+    },
+    "submit": {
+      "signIn": "로그인",
+      "signingIn": "로그인 중…",
+      "create": "계정 만들기",
+      "creating": "계정 만드는 중…"
+    },
+    "errors": {
+      "invalidCredentials": "사용자 이름 또는 비밀번호가 올바르지 않습니다.",
+      "usernameInvalid": "3~32자의 영문자, 숫자, 마침표, 밑줄, 하이픈을 사용하고 영문자 또는 숫자로 시작하세요.",
+      "usernameTaken": "이미 사용 중인 사용자 이름입니다.",
+      "passwordInvalid": "8~256자를 사용하세요.",
+      "rateLimited": "실패한 시도가 너무 많습니다. {{minutes}}분 후에 다시 시도하세요.",
+      "rateLimitedLater": "실패한 시도가 너무 많습니다. 잠시 후 다시 시도하세요.",
+      "registrationDisabled": "현재 새 계정을 만들 수 없습니다.",
+      "notConfigured": "이 서버에서는 계정을 사용할 수 없습니다.",
+      "invalidRequest": "요청을 처리할 수 없습니다. 다시 시도하세요.",
+      "internal": "서버가 이 요청을 완료하지 못했습니다. 나중에 다시 시도하세요.",
+      "generic": "문제가 발생했습니다. 다시 시도하세요."
+    }
+  },
   "proMode": {
     "attach": "자료 첨부",
     "mentionCourse": "引用课堂",

@@ -2007,6 +2007,52 @@
     "placeholder": "アクセスコード",
     "error": "アクセスコードが正しくありません。もう一度お試しください。"
   },
+  "account": {
+    "trigger": {
+      "signIn": "ログイン"
+    },
+    "accountMenu": "アカウント: {{username}}",
+    "signedInAs": "ログイン中のアカウント",
+    "signOut": "ログアウト",
+    "modesLabel": "ログインまたはアカウント作成を選択",
+    "modes": {
+      "signIn": "ログイン",
+      "create": "アカウントを作成"
+    },
+    "dialog": {
+      "signInTitle": "ログイン",
+      "createTitle": "アカウントを作成",
+      "signInDescription": "ユーザー名とパスワードを入力してください。",
+      "createDescription": "ユーザー名とパスワードを設定してください。"
+    },
+    "fields": {
+      "username": "ユーザー名",
+      "password": "パスワード"
+    },
+    "hints": {
+      "username": "3〜32文字：英字、数字、ピリオド、アンダースコア、ハイフンが使えます。英字または数字で始めてください。",
+      "password": "8〜256文字。"
+    },
+    "submit": {
+      "signIn": "ログイン",
+      "signingIn": "ログイン中…",
+      "create": "アカウントを作成",
+      "creating": "アカウントを作成中…"
+    },
+    "errors": {
+      "invalidCredentials": "ユーザー名またはパスワードが正しくありません。",
+      "usernameInvalid": "3〜32文字の英字、数字、ピリオド、アンダースコア、ハイフンを使い、英字または数字で始めてください。",
+      "usernameTaken": "このユーザー名はすでに使われています。",
+      "passwordInvalid": "8〜256文字で入力してください。",
+      "rateLimited": "失敗回数が多すぎます。{{minutes}}分後にもう一度お試しください。",
+      "rateLimitedLater": "失敗回数が多すぎます。しばらくしてからもう一度お試しください。",
+      "registrationDisabled": "現在、新しいアカウントは作成できません。",
+      "notConfigured": "このサーバーではアカウント機能を利用できません。",
+      "invalidRequest": "リクエストを処理できませんでした。もう一度お試しください。",
+      "internal": "サーバーでこのリクエストを完了できませんでした。しばらくしてからもう一度お試しください。",
+      "generic": "問題が発生しました。もう一度お試しください。"
+    }
+  },
   "proMode": {
     "attach": "教材を添付",
     "mentionCourse": "引用课堂",

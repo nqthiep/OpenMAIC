@@ -2025,6 +2025,52 @@
     "placeholder": "Access code",
     "error": "Invalid access code. Please try again."
   },
+  "account": {
+    "trigger": {
+      "signIn": "Sign in"
+    },
+    "accountMenu": "Account: {{username}}",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "modesLabel": "Choose sign in or create account",
+    "modes": {
+      "signIn": "Sign in",
+      "create": "Create account"
+    },
+    "dialog": {
+      "signInTitle": "Sign in",
+      "createTitle": "Create account",
+      "signInDescription": "Enter your username and password.",
+      "createDescription": "Choose a username and password."
+    },
+    "fields": {
+      "username": "Username",
+      "password": "Password"
+    },
+    "hints": {
+      "username": "3–32 characters: English letters, digits, dots, underscores or hyphens. Start with a letter or digit.",
+      "password": "8–256 characters."
+    },
+    "submit": {
+      "signIn": "Sign in",
+      "signingIn": "Signing in…",
+      "create": "Create account",
+      "creating": "Creating account…"
+    },
+    "errors": {
+      "invalidCredentials": "Incorrect username or password.",
+      "usernameInvalid": "Use 3–32 characters: English letters, digits, dots, underscores or hyphens. Start with a letter or digit.",
+      "usernameTaken": "That username is already taken.",
+      "passwordInvalid": "Use 8–256 characters.",
+      "rateLimited": "Too many failed attempts. Try again in {{minutes}} min.",
+      "rateLimitedLater": "Too many failed attempts. Try again later.",
+      "registrationDisabled": "New accounts are not open right now.",
+      "notConfigured": "Accounts are not available on this server.",
+      "invalidRequest": "That request could not be processed. Please try again.",
+      "internal": "The server could not complete this request. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
   "workbench": {
     "tool": {
       "label": {
