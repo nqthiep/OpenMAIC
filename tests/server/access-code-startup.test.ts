@@ -94,6 +94,7 @@ describe('missing access-code startup warning', () => {
   it('does not warn at startup when the code is configured', async () => {
     vi.stubEnv('NEXT_RUNTIME', 'nodejs');
     vi.stubEnv('ACCESS_CODE', 'long-random-code-for-test');
+    vi.stubEnv('OPENMAIC_ACCESS_SECRET', 'access-secret-for-tests-01234567');
     vi.spyOn(process, 'once').mockReturnValue(process);
     const { register } = await import('@/instrumentation');
 

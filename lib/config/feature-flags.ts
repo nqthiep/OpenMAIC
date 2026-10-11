@@ -197,10 +197,30 @@ export function isWidgetProvidersDisabled(): boolean {
 }
 
 /**
+ * Student deployment (`OPENMAIC_HOME=learn`), read on the server: `/` opens the lesson picker. Boot
+ * checks the learner-facing settings (lib/server/config-validation.ts).
+ */
+export function isLearnHome(): boolean {
+  return process.env.OPENMAIC_HOME === 'learn';
+}
+
+/**
+ * The student deployment as built into the browser bundle. The Settings button is a client component
+ * and cannot read `OPENMAIC_HOME`, so the build sets this too. Boot refuses a student deployment whose
+ * build lacks it.
+ */
+export function isLearnHomeBuild(): boolean {
+  return process.env.NEXT_PUBLIC_OPENMAIC_HOME === 'learn';
+}
+
+/**
  * Server-only release gate for subject catalog entries (INTERFACES 8.2). Default OFF: dev, tests and
  * e2e expose every entry. A release deployment sets it, and then only entries with a passing review
- * for their exact entryRev are exposed (`lib/subjects/release.ts`).
+ * for their exact entryRev are exposed (`lib/subjects/release.ts`). A student deployment keeps it on
+ * unless the flag is explicitly `false` or `0`; boot warns about that override.
  */
 export function isReviewRequired(): boolean {
-  return readBoolean(process.env.OPENMAIC_REQUIRE_REVIEW);
+  const value = process.env.OPENMAIC_REQUIRE_REVIEW;
+  if (isLearnHome()) return value !== 'false' && value !== '0';
+  return readBoolean(value);
 }

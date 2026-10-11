@@ -17,16 +17,28 @@
  *    answer 404 while the runner never starts.
  *
  * Everything here is a warning, never a throw: operators with partial config
- * still get a running app, and the warnings name exactly what is broken.
+ * still get a running app, and the warnings name exactly what is broken. The one
+ * exception is the student-mode preflight (`validateStudentModeConfiguration`): a
+ * student deployment is refused at boot, so that check throws.
  */
 
 import { getProvider, warnBareModelIdDeprecation } from '@/lib/ai/providers';
-import { isAgentRuntimeEnabled } from '@/lib/config/feature-flags';
+import {
+  isAgentRuntimeEnabled,
+  isLearnHome,
+  isLearnHomeBuild,
+  isReviewRequired,
+  isTutorModerationEnabled,
+} from '@/lib/config/feature-flags';
+import { ACCESS_CODE_MIN_RECOMMENDED_LENGTH } from '@/lib/server/access-code-warning';
+import { ACCESS_SECRET_MIN_LENGTH } from '@/lib/server/access-token-edge';
+import { deploymentConfig, userKeysAllowed } from '@/lib/server/model-config/runtime';
 import {
   isServerConfiguredProvider,
   LLM_ENV_MAP,
   resolveApiKey,
 } from '@/lib/server/provider-config';
+import { getTutorRoute } from '@/lib/tutor/llm-roles';
 import type { ProviderId } from '@/lib/types/provider';
 
 /** Consistent prefix for boot-time config warnings. */
@@ -119,6 +131,87 @@ function validateAgentRuntime(): void {
 }
 
 /**
+ * Warnings for student-mode settings that boot accepts but that change what learners see.
+ */
+function validateStudentModeWarnings(): void {
+  if (isLearnHome() && !isReviewRequired()) {
+    warn(
+      'OPENMAIC_REQUIRE_REVIEW is false on a student deployment (OPENMAIC_HOME=learn): lessons without a passing review are shown to students. Leave it unset to show only reviewed lessons.',
+    );
+  }
+  if (!isLearnHome() && isLearnHomeBuild()) {
+    warn(
+      'NEXT_PUBLIC_OPENMAIC_HOME=learn was set at build time but OPENMAIC_HOME is not learn: the Settings button is hidden for every user of this build.',
+    );
+  }
+}
+
+/**
+ * The preflight of a student deployment (`OPENMAIC_HOME=learn`). It lists every problem at once,
+ * each naming the setting or file to change, and throws so that boot stops (instrumentation.ts runs
+ * it among the fatal checks). It does nothing otherwise.
+ */
+export function validateStudentModeConfiguration(): void {
+  if (!isLearnHome()) return;
+
+  const problems: string[] = [];
+  const accessCode = process.env.ACCESS_CODE ?? '';
+  if ([...accessCode].length < ACCESS_CODE_MIN_RECOMMENDED_LENGTH) {
+    problems.push(
+      `ACCESS_CODE must be set to at least ${ACCESS_CODE_MIN_RECOMMENDED_LENGTH} characters.`,
+    );
+  }
+  const secret = process.env.OPENMAIC_ACCESS_SECRET ?? '';
+  if ([...secret].length < ACCESS_SECRET_MIN_LENGTH) {
+    problems.push(
+      `OPENMAIC_ACCESS_SECRET must be set to at least ${ACCESS_SECRET_MIN_LENGTH} characters (a shorter value is ignored).`,
+    );
+  } else if (secret === accessCode) {
+    problems.push('OPENMAIC_ACCESS_SECRET must differ from ACCESS_CODE.');
+  }
+  if (!isTutorModerationEnabled()) {
+    problems.push(
+      'OPENMAIC_TUTOR_MODERATION must be true: chat moderation is mandatory on student deployments.',
+    );
+  }
+  if (!getTutorRoute('tutor-moderation')) {
+    problems.push(
+      'tutor.moderation has no model: assign one under slots in openmaic.yml (tutor.moderation, or a parent slot that covers it).',
+    );
+  }
+  const layer = deploymentConfig().layer;
+  if (userKeysAllowed(layer)) {
+    problems.push(
+      'allowUserKeys must be false in openmaic.yml: students may not add providers or keys.',
+    );
+  }
+  if (layer?.config.lock !== 'all') {
+    problems.push(
+      'lock: all must be set in openmaic.yml: no one may change a model or provider on a student deployment.',
+    );
+  }
+  if (!isLearnHomeBuild()) {
+    problems.push(
+      'NEXT_PUBLIC_OPENMAIC_HOME=learn must be set at build time, or the Settings button stays visible to students.',
+    );
+  }
+  // A fixed owner puts every learner in one library, whatever the access code.
+  if (['true', '1'].includes(process.env.OWNER_SINGLE_USER?.trim().toLowerCase() ?? '')) {
+    problems.push(
+      'OWNER_SINGLE_USER must be unset: every learner would share one owner and library.',
+    );
+  }
+  if (process.env.PERSISTENCE_SHARED_OWNER_ID?.trim()) {
+    problems.push(
+      'PERSISTENCE_SHARED_OWNER_ID must be unset: every learner would share one owner and library.',
+    );
+  }
+  if (problems.length > 0) {
+    throw new Error(`OPENMAIC_HOME=learn refuses to start:\n- ${problems.join('\n- ')}`);
+  }
+}
+
+/**
  * Validate server model-routing config at boot. Warn-only, cheap, and
  * non-throwing: a broken config never prevents the server from starting.
  */
@@ -127,6 +220,7 @@ export function validateServerConfig(): void {
     validateDefaultModel();
     validateModelsEnvPins();
     validateAgentRuntime();
+    validateStudentModeWarnings();
   } catch (err) {
     // Boot-time validation must never take the server down.
     const detail = err instanceof Error ? err.message : String(err);
