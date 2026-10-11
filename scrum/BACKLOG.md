@@ -72,7 +72,7 @@ The reviewer found no Critical issues. Dispositions:
 
 ### Verification
 
-- `pnpm test` on the final state: 716 test files and 8,012 tests passed, 9 files and 79 tests skipped, 0 failures (baseline: 702 files and 7,896 tests). Duration about four minutes.
+- `pnpm test` on the cycle-2 state: 718 test files and 8,019 tests passed, 9 files and 79 tests skipped, 0 failures (baseline: 702 files and 7,896 tests). The cycle-1 review state passed 716 and 8,012. Duration about four minutes. Two earlier full runs in cycle 2 each failed one intermittent test; see B26 and B27.
 - `npx tsc --noEmit`: 0 errors on the final state.
 - `pnpm check:i18n-keys`: passes (12 locale files).
 - ESLint on every changed TypeScript file: 0 errors. One existing `react-hooks/exhaustive-deps` warning in `app/page.tsx` (`loadClassrooms`) predates this change; the change does not touch that effect.
