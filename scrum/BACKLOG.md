@@ -181,4 +181,6 @@ Full record: `scrum/DECISIONS.md`. Specs: `scrum/specs/`. Reviews: `scrum/review
 - Lint: ESLint passes on every changed code file.
 - i18n parity: `scripts/check-i18n-keys.mjs` passes with the new keys.
 - Targeted suites pass: throttle, busy refund, password and sync-error, registration, account routes, admin routes, diagnostics, session-ended, client budget, origin, config validation, classroom routes, hard links, render identity, learner key re-read, session-end watch.
-- Full suite: see the cycle log row below.
+- Full suite, final tree before the last test-timeout change: 729 of 739 files passed; 8,103 of 8,183 tests passed, 79 skipped.
+  One case failed: a voice-clip case timed out under full-suite load (6.4 s against the 5 s default). It passes alone, and an explicit 30 s limit is now set.
+  The full suite was not re-run after that limit was set; the file passes alone. [Measured: run output in this session]
