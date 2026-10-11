@@ -108,13 +108,13 @@ describe('POST /api/classroom — id validation before persistence', () => {
     const res = await POST(
       postClassroom(
         {
-          id: 'abc-123_XY',
+          id: 'abc-123_XYZ-0001',
           title: 'Lesson',
         },
         [
           {
             id: 'scene-1',
-            stageId: 'abc-123_XY',
+            stageId: 'abc-123_XYZ-0001',
             title: 'Scene 1',
             order: 0,
             type: 'slide',
@@ -126,12 +126,27 @@ describe('POST /api/classroom — id validation before persistence', () => {
     const json = await res.json();
 
     expect(res.status).toBe(201);
-    expect(json).toMatchObject({ success: true, id: 'abc-123_XY' });
+    expect(json).toMatchObject({ success: true, id: 'abc-123_XYZ-0001' });
     expect(mocks.persistClassroom).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'abc-123_XY' }),
+      expect.objectContaining({ id: 'abc-123_XYZ-0001' }),
       'http://localhost',
       { createOnly: true },
     );
+  });
+
+  it('answers 500 without the absolute storage path in the body', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    mocks.persistClassroom.mockRejectedValueOnce(
+      new Error("EACCES: permission denied, open '/srv/openmaic/data/classrooms/abc.json'"),
+    );
+
+    const res = await POST(postClassroom({ id: 'abc-123_XYZ-0001', title: 'Lesson' }, []));
+    const text = await res.text();
+
+    expect(res.status).toBe(500);
+    expect(text).toContain('Failed to store classroom');
+    expect(text).not.toContain('/srv/openmaic');
+    expect(text).not.toContain('EACCES');
   });
 
   it('answers 409 instead of replacing a classroom that the client id already names', async () => {
@@ -143,13 +158,13 @@ describe('POST /api/classroom — id validation before persistence', () => {
     const res = await POST(
       postClassroom(
         {
-          id: 'abc-123_XY',
+          id: 'abc-123_XYZ-0001',
           title: 'Lesson',
         },
         [
           {
             id: 'scene-1',
-            stageId: 'abc-123_XY',
+            stageId: 'abc-123_XYZ-0001',
             title: 'Scene 1',
             order: 0,
             type: 'slide',
@@ -162,6 +177,17 @@ describe('POST /api/classroom — id validation before persistence', () => {
 
     expect(res.status).toBe(409);
     expect(json).toMatchObject({ success: false, errorCode: 'INVALID_REQUEST' });
+  });
+
+  it('refuses a client-chosen id under 16 characters and never persists it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(postClassroom({ id: 'short-id-1', title: 'Lesson' }, []));
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json).toMatchObject({ success: false, errorCode: 'INVALID_REQUEST' });
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
   });
 
   it('refuses an id longer than the allowed length', async () => {
@@ -188,10 +214,10 @@ describe('POST /api/classroom — id validation before persistence', () => {
     const { POST } = await import('@/app/api/classroom/route');
 
     const res = await POST(
-      postClassroom({ id: ['abc-123_XY'], title: 'Lesson' }, [
+      postClassroom({ id: ['abc-123_XYZ-0001'], title: 'Lesson' }, [
         {
           id: 'scene-1',
-          stageId: 'abc-123_XY',
+          stageId: 'abc-123_XYZ-0001',
           title: 'Scene 1',
           order: 0,
           type: 'slide',

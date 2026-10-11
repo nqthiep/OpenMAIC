@@ -14,6 +14,9 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('Classroom API');
 
+/** Shortest client-chosen classroom id that POST accepts. */
+const CLIENT_CLASSROOM_ID_MIN_LENGTH = 16;
+
 function describeSceneIssue(issue: { path: string; message: string }): string {
   const at = issue.path && issue.path !== '' ? issue.path : '/';
   return `${at}: ${issue.message}`;
@@ -76,6 +79,15 @@ export async function POST(request: NextRequest) {
     if (!isValidClassroomId(id)) {
       return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'Invalid classroom id');
     }
+    // A client-chosen id has to be hard to guess, since GET serves any classroom by id.
+    // Generated ids are 36 characters and always pass. Existing shorter files stay readable.
+    if (stage.id && stage.id.length < CLIENT_CLASSROOM_ID_MIN_LENGTH) {
+      return apiError(
+        API_ERROR_CODES.INVALID_REQUEST,
+        400,
+        `Classroom id must be at least ${CLIENT_CLASSROOM_ID_MIN_LENGTH} characters`,
+      );
+    }
 
     const baseUrl = buildRequestOrigin(request);
 
@@ -111,12 +123,8 @@ export async function POST(request: NextRequest) {
       `Classroom storage failed [stageId=${stageId ?? 'unknown'}, scenes=${sceneCount ?? 0}]:`,
       error,
     );
-    return apiError(
-      API_ERROR_CODES.INTERNAL_ERROR,
-      500,
-      'Failed to store classroom',
-      error instanceof Error ? error.message : String(error),
-    );
+    // No detail in the response: storage errors carry absolute paths. The log above keeps them.
+    return apiError(API_ERROR_CODES.INTERNAL_ERROR, 500, 'Failed to store classroom');
   }
 }
 
@@ -151,11 +159,6 @@ export async function GET(request: NextRequest) {
       `Classroom retrieval failed [id=${request.nextUrl.searchParams.get('id') ?? 'unknown'}]:`,
       error,
     );
-    return apiError(
-      API_ERROR_CODES.INTERNAL_ERROR,
-      500,
-      'Failed to retrieve classroom',
-      error instanceof Error ? error.message : String(error),
-    );
+    return apiError(API_ERROR_CODES.INTERNAL_ERROR, 500, 'Failed to retrieve classroom');
   }
 }

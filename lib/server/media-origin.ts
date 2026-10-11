@@ -28,6 +28,8 @@
  */
 import type { NextRequest } from 'next/server';
 
+import { requestPublicOrigin } from '@/lib/server/public-origin';
+
 /**
  * Final fallback origin when nothing is threaded and no request exists.
  *
@@ -72,9 +74,5 @@ export function resolveMediaServingOrigin(
  * proxy-forwarded host when present, else the request URL's own origin.
  */
 export function requestOrigin(req: NextRequest): string {
-  const forwardedHost = req.headers.get('x-forwarded-host');
-  if (forwardedHost) {
-    return `${req.headers.get('x-forwarded-proto') || 'http'}://${forwardedHost}`;
-  }
-  return req.nextUrl.origin;
+  return requestPublicOrigin(req);
 }

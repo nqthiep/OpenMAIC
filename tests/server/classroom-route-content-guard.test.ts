@@ -32,7 +32,7 @@ vi.mock('@/lib/logger', () => ({
 function slideScene(element?: Record<string, unknown>): Record<string, unknown> {
   return {
     id: 'scene-1',
-    stageId: 'abc-123_XY',
+    stageId: 'abc-123_XYZ-0001',
     title: 'Scene 1',
     order: 0,
     type: 'slide',
@@ -54,7 +54,7 @@ function slideScene(element?: Record<string, unknown>): Record<string, unknown> 
   };
 }
 
-const stage = { id: 'abc-123_XY', name: 'Lesson', createdAt: 0, updatedAt: 0 };
+const stage = { id: 'abc-123_XYZ-0001', name: 'Lesson', createdAt: 0, updatedAt: 0 };
 
 function postClassroom(body: unknown) {
   return new NextRequest('http://localhost/api/classroom', {
@@ -120,7 +120,7 @@ describe('POST /api/classroom — DSL shape validation', () => {
         scenes: [
           {
             id: 'scene-1',
-            stageId: 'abc-123_XY',
+            stageId: 'abc-123_XYZ-0001',
             title: 'Scene 1',
             order: 0,
             type: 'holodeck',
@@ -202,7 +202,7 @@ describe('GET /api/classroom — legacy stored content is cleaned on the way out
 
   it('serves sanitized content for classrooms stored before this change', async () => {
     mocks.readClassroom.mockResolvedValue({
-      id: 'abc-123_XY',
+      id: 'abc-123_XYZ-0001',
       createdAt: '2024-01-01T00:00:00.000Z',
       stage,
       scenes: [

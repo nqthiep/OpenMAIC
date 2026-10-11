@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import type { NextRequest } from 'next/server';
 import type { Scene, Stage } from '@/lib/types/stage';
+import { requestPublicOrigin } from '@/lib/server/public-origin';
 
 export const CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms');
 export const CLASSROOM_JOBS_DIR = path.join(process.cwd(), 'data', 'classroom-jobs');
@@ -29,6 +30,14 @@ export async function writeJsonFileAtomic(filePath: string, data: unknown) {
   await fs.rename(tempFilePath, filePath);
 }
 
+/** Errors that mean the filesystem will not create hard links (EPERM on some volumes, ENOTSUP). */
+function isLinkUnsupportedError(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  return code === 'EPERM' || code === 'ENOTSUP';
+}
+
+let linkUnsupportedLogged = false;
+
 /**
  * Writes a JSON file only when nothing exists at `filePath`. The content is
  * staged in a temp file and hard-linked into place: link fails with EEXIST when
@@ -42,10 +51,41 @@ export async function writeJsonFileCreateOnly(filePath: string, data: unknown): 
   const tempFilePath = `${filePath}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`;
   try {
     await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2), 'utf-8');
-    await fs.link(tempFilePath, filePath);
+    await fs.link(tempFilePath, filePath).catch((error: unknown) => {
+      // Logged once per process: the same volume fails the same way for every create.
+      if (isLinkUnsupportedError(error) && !linkUnsupportedLogged) {
+        linkUnsupportedLogged = true;
+        console.error(
+          `[classroom] Hard links are not supported in ${path.dirname(filePath)}. Classroom creation fails until the data directory is on a filesystem that supports them.`,
+        );
+      }
+      throw error;
+    });
   } finally {
     // Runs whether the write, the link, or neither failed, so no staging file is left behind.
     await fs.rm(tempFilePath, { force: true });
+  }
+}
+
+/**
+ * Whether `dir` accepts the hard links that create-only writes need. Creates and
+ * removes two probe files. Throws only for filesystem errors other than the
+ * link refusal, which returns false.
+ */
+export async function probeHardLinkSupport(dir: string = CLASSROOMS_DIR): Promise<boolean> {
+  await ensureDir(dir);
+  const source = path.join(dir, `.link-probe-${randomUUID()}.tmp`);
+  const target = `${source}.linked`;
+  try {
+    await fs.writeFile(source, '', 'utf-8');
+    await fs.link(source, target);
+    return true;
+  } catch (error) {
+    if (isLinkUnsupportedError(error)) return false;
+    throw error;
+  } finally {
+    await fs.rm(source, { force: true });
+    await fs.rm(target, { force: true });
   }
 }
 
@@ -54,9 +94,7 @@ export function isAlreadyExistsError(error: unknown): boolean {
 }
 
 export function buildRequestOrigin(req: NextRequest): string {
-  return req.headers.get('x-forwarded-host')
-    ? `${req.headers.get('x-forwarded-proto') || 'http'}://${req.headers.get('x-forwarded-host')}`
-    : req.nextUrl.origin;
+  return requestPublicOrigin(req);
 }
 
 export interface PersistedClassroomData {

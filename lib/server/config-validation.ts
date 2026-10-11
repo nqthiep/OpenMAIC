@@ -25,6 +25,7 @@
 import { getProvider, warnBareModelIdDeprecation } from '@/lib/ai/providers';
 import { isAgentRuntimeEnabled } from '@/lib/config/feature-flags';
 import { LLM_STAGES } from '@/lib/server/model-routes';
+import { parsePublicAppOrigin } from '@/lib/server/public-origin';
 import {
   isServerConfiguredProvider,
   LLM_ENV_MAP,
@@ -166,6 +167,85 @@ function validateAgentRuntime(): void {
   }
 }
 
+/** Shortest access code that passes the boot check without a warning. */
+const MIN_ACCESS_CODE_LENGTH = 12;
+
+/**
+ * The access cookie is signed with the access code unless ACCESS_COOKIE_SECRET is
+ * set. A visitor holding one valid cookie can then test codes offline, so a short
+ * code protects little. Warnings only, so existing deployments keep booting.
+ */
+function validateAccessGate(): void {
+  const code = process.env.ACCESS_CODE?.trim();
+  if (!code) return;
+  if (!process.env.ACCESS_COOKIE_SECRET?.trim()) {
+    warn(
+      'ACCESS_CODE is set but ACCESS_COOKIE_SECRET is not: the access cookie is signed with the code, so a visitor holding one cookie can test codes offline. Set ACCESS_COOKIE_SECRET to at least 32 characters.',
+    );
+  }
+  if (code.length < MIN_ACCESS_CODE_LENGTH) {
+    warn(
+      `ACCESS_CODE is ${code.length} characters. Use at least ${MIN_ACCESS_CODE_LENGTH}: a short code is the only protection when the cookie can be tested offline.`,
+    );
+  }
+}
+
+/**
+ * Server LLM keys are spent by whoever can reach this server. Nothing stops that
+ * without an access code, so say so at boot.
+ */
+function validateManagedKeys(): void {
+  if (process.env.ACCESS_CODE?.trim()) return;
+  const managed = [...new Set(Object.values(LLM_ENV_MAP))].filter((providerId) => {
+    const provider = getProvider(providerId as ProviderId);
+    return !!provider?.requiresApiKey && !!resolveApiKey(providerId);
+  });
+  if (managed.length === 0) return;
+  warn(
+    `Server API keys are set for ${managed.join(', ')}, and ACCESS_CODE is not set: anyone who can reach this server can spend them. Set ACCESS_CODE, or remove the server keys if each user brings a key.`,
+  );
+}
+
+/**
+ * Classroom creation needs hard links in the data directory. Without them each
+ * create fails with a 500, so check at boot instead of waiting for a teacher to
+ * find out. Asynchronous and fire-and-forget: it never blocks startup.
+ */
+export async function checkClassroomStorage(): Promise<void> {
+  try {
+    const { CLASSROOMS_DIR, probeHardLinkSupport } = await import('@/lib/server/classroom-storage');
+    if (await probeHardLinkSupport()) return;
+    warn(
+      `Hard links are not supported in ${CLASSROOMS_DIR}. Classroom creation will fail until the data directory is on a filesystem that supports them.`,
+    );
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException | undefined)?.code ?? 'unknown';
+    warn(`Could not check classroom storage (${code}). Classroom creation may fail.`);
+  }
+}
+
+/**
+ * PUBLIC_APP_ORIGIN sets the origin in generated links. An invalid value is never
+ * trusted; the server's own origin is used instead. Unset in production, the
+ * proxy's forwarded host decides the origin, which is worth saying at boot.
+ */
+function validatePublicOrigin(): void {
+  const raw = process.env.PUBLIC_APP_ORIGIN?.trim();
+  if (raw) {
+    if (!parsePublicAppOrigin(raw)) {
+      warn(
+        "PUBLIC_APP_ORIGIN must be an origin such as https://classroom.example.edu, with no path, query or credentials. Until it is fixed, generated links use this server's own address.",
+      );
+    }
+    return;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    warn(
+      "PUBLIC_APP_ORIGIN is not set. Generated links then trust the x-forwarded-host header from the proxy; set it to this server's public origin.",
+    );
+  }
+}
+
 /**
  * Validate server model-routing config at boot. Warn-only, cheap, and
  * non-throwing: a broken config never prevents the server from starting.
@@ -176,6 +256,9 @@ export function validateServerConfig(): void {
     validateDefaultModel();
     validateModelsEnvPins();
     validateAgentRuntime();
+    validateAccessGate();
+    validateManagedKeys();
+    validatePublicOrigin();
   } catch (err) {
     // Boot-time validation must never take the server down.
     const detail = err instanceof Error ? err.message : String(err);

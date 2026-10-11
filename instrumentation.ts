@@ -36,8 +36,11 @@ export async function register(): Promise<void> {
   // surfaces here as [config] warnings instead of failing at request time.
   // Imported dynamically so the Edge bundle never pulls in the fs/js-yaml
   // backed provider config it reads.
-  const { validateServerConfig } = await import('@/lib/server/config-validation');
+  const { validateServerConfig, checkClassroomStorage } =
+    await import('@/lib/server/config-validation');
   validateServerConfig();
+  // Not awaited: the probe writes to disk, and register must return before the server is ready.
+  void checkClassroomStorage();
 
   let runner: import('@/lib/server/agent-runtime/runner').AgentRunnerHandle | undefined;
   let extractionRunner:

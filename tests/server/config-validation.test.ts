@@ -56,6 +56,9 @@ function clearConfigEnv() {
   delete process.env.DEFAULT_MODEL;
   delete process.env.OPENMAIC_AGENT_RUNTIME_ENABLED;
   delete process.env.DATABASE_URL;
+  delete process.env.ACCESS_CODE;
+  delete process.env.ACCESS_COOKIE_SECRET;
+  delete process.env.PUBLIC_APP_ORIGIN;
   for (const prefix of LLM_ENV_PREFIXES) {
     delete process.env[`${prefix}_API_KEY`];
     delete process.env[`${prefix}_BASE_URL`];
@@ -86,9 +89,70 @@ describe('validateServerConfig — warning matrix', () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
+  it('warns when the access code has no cookie secret, since the cookie is then signed with the code', async () => {
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('ACCESS_COOKIE_SECRET');
+  });
+
+  it('warns on a short access code by length only, never echoing the code', async () => {
+    vi.stubEnv('ACCESS_CODE', 'hunter2');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain('7 characters');
+    expect(message).not.toContain('hunter2');
+  });
+
+  it('warns that server keys are spendable without an access code, naming providers and not key values', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'sk-secret-value-123');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    const messages = warnSpy.mock.calls.map((call: unknown[]) => String(call[0]));
+    const managed = messages.find((message: string) => message.includes('ACCESS_CODE is not set'));
+    expect(managed).toBeDefined();
+    expect(managed).toContain('openai');
+    expect(messages.join('\n')).not.toContain('sk-secret-value-123');
+  });
+
+  it('does not warn about server keys once an access code is set', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'sk-test');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('warns in production when PUBLIC_APP_ORIGIN is unset', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('PUBLIC_APP_ORIGIN');
+  });
+
+  it('warns on a PUBLIC_APP_ORIGIN that is not a bare origin', async () => {
+    vi.stubEnv('PUBLIC_APP_ORIGIN', 'classroom.example.edu');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('PUBLIC_APP_ORIGIN must be an origin');
+  });
+
   it('emits no warnings on a fully valid config', async () => {
     vi.stubEnv('OPENAI_API_KEY', 'sk-test');
     vi.stubEnv('ANTHROPIC_API_KEY', 'sk-test');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.4-mini');
     vi.stubEnv(
       'MODEL_ROUTES',
@@ -181,6 +245,8 @@ describe('validateServerConfig — warning matrix', () => {
   it('does not warn when <PREFIX>_MODELS is set with the key present', async () => {
     vi.stubEnv('DEEPSEEK_API_KEY', 'sk-test');
     vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
@@ -213,6 +279,8 @@ describe('validateServerConfig — warning matrix', () => {
     yamlOverride = 'providers:\n  deepseek:\n    apiKey: sk-yaml\n';
     vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' }));
     vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();

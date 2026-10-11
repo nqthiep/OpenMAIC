@@ -33,7 +33,8 @@ const SUBMIT_TIMEOUT_MS = 300_000;
 function clientIdentity(req: NextRequest): string {
   if (process.env.TRUST_PROXY_HEADERS !== 'true') return 'direct';
   const fwd = req.headers.get('x-forwarded-for');
-  if (fwd) return fwd.split(',')[0].trim() || 'anonymous';
+  // The last entry is the one the nearest trusted proxy appended. Earlier entries are client-supplied.
+  if (fwd) return fwd.split(',').pop()!.trim() || 'anonymous';
   return req.headers.get('x-real-ip')?.trim() || 'anonymous';
 }
 
