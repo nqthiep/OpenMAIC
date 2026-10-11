@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import {
   DEFAULT_QWEN_TTS_VOICE_CLONE_MODEL,
   isQwenCatalogVoice,
@@ -213,7 +214,7 @@ function loadYamlFile(filename: string): YamlData {
     if (!parsed || typeof parsed !== 'object') return {};
     return parsed as YamlData;
   } catch (e) {
-    log.warn(`[ServerProviderConfig] Failed to load ${filename}:`, e);
+    log.warn(`[ServerProviderConfig] Failed to load ${filename}: ${describeUnexpectedError(e)}`);
     return {};
   }
 }

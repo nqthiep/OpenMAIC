@@ -23,6 +23,7 @@ import {
   describeUnexpectedError,
   MODEL_FAILURE_TEXT,
   visitorErrorText,
+  visitorStreamEvent,
 } from '@/lib/server/error-summary';
 import type { ThinkingConfig } from '@/lib/types/provider';
 const log = createLogger('Chat API');
@@ -155,7 +156,7 @@ export async function POST(req: NextRequest) {
             break;
           }
 
-          const data = `data: ${JSON.stringify(event)}\n\n`;
+          const data = `data: ${JSON.stringify(visitorStreamEvent(event, managedKey))}\n\n`;
           await writer.write(encoder.encode(data));
         }
 
@@ -205,8 +206,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     log.error(
-      `Chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
-      error,
+      `Chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]: ${describeUnexpectedError(error)}`,
     );
     return apiError(
       'INTERNAL_ERROR',

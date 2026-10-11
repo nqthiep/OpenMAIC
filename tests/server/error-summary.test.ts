@@ -4,7 +4,32 @@ import {
   describeUnexpectedError,
   MODEL_FAILURE_TEXT,
   visitorErrorText,
+  visitorStreamEvent,
 } from '@/lib/server/error-summary';
+
+describe('visitorStreamEvent', () => {
+  it('replaces an error event with the fixed text when the operator key was used', () => {
+    const event = { type: 'error', data: { message: 'Invalid API key sk-live-echoed' } };
+
+    expect(visitorStreamEvent(event, true)).toEqual({
+      type: 'error',
+      data: { message: MODEL_FAILURE_TEXT },
+    });
+  });
+
+  it('passes an error event through for a visitor who supplied their own key', () => {
+    const event = { type: 'error', data: { message: 'Rate limit reached' } };
+
+    expect(visitorStreamEvent(event, false)).toBe(event);
+  });
+
+  it('passes other events through unchanged, whatever the key', () => {
+    const event = { type: 'text', data: { text: 'lesson text' } };
+
+    expect(visitorStreamEvent(event, true)).toBe(event);
+    expect(visitorStreamEvent(event, false)).toBe(event);
+  });
+});
 
 describe('visitorErrorText', () => {
   it('sends the fixed text, never upstream text, when the operator key was used', () => {

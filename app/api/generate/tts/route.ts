@@ -26,6 +26,7 @@ import {
 } from '@/lib/server/provider-config';
 import type { TTSProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { VOXCPM_AUTO_VOICE_ID, VOXCPM_TTS_PROVIDER_ID } from '@/lib/audio/voxcpm';
@@ -166,8 +167,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     log.error(
-      `TTS generation failed [provider=${ttsProviderId ?? 'unknown'}, voice=${ttsVoice ?? 'unknown'}, audioId=${audioId ?? 'unknown'}]:`,
-      error,
+      `TTS generation failed [provider=${ttsProviderId ?? 'unknown'}, voice=${ttsVoice ?? 'unknown'}, audioId=${audioId ?? 'unknown'}]: ${describeUnexpectedError(error)}`,
     );
     if (error instanceof TTSRateLimitError) {
       return apiError('RATE_LIMITED', 429, error.message);

@@ -42,3 +42,18 @@ export function visitorErrorText(error: unknown, managedKey: boolean, fallback: 
   if (managedKey || !(error instanceof Error)) return fallback;
   return error.message;
 }
+
+/** Shown to a visitor when the operator's key is used and the provider refuses the content. */
+export const CONTENT_BLOCKED_TEXT = 'The provider blocked this content under its safety policy.';
+
+/**
+ * A stream event as a visitor may see it. With the operator's key, an error event carries
+ * the fixed text, because its message is upstream text. Other events pass unchanged.
+ */
+export function visitorStreamEvent<T extends { type: string }>(
+  event: T,
+  managedKey: boolean,
+): T | { type: 'error'; data: { message: string } } {
+  if (!managedKey || event.type !== 'error') return event;
+  return { type: 'error', data: { message: MODEL_FAILURE_TEXT } };
+}

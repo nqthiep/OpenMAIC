@@ -24,6 +24,7 @@ import {
   resolveTTSModel,
 } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { normalizeVoiceDesign } from '@/lib/audio/voice-design';
@@ -231,8 +232,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     log.error(
-      `Voice registration failed [provider=${providerId ?? 'unknown'}, voiceId=${voiceId ?? 'unknown'}]:`,
-      error,
+      `Voice registration failed [provider=${providerId ?? 'unknown'}, voiceId=${voiceId ?? 'unknown'}]: ${describeUnexpectedError(error)}`,
     );
     if (error instanceof QwenVoiceCloneError) {
       return apiError(error.code, error.httpStatus || 502, qwenVoiceCloneErrorMessage(error));

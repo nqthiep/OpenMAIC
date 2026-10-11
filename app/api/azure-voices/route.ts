@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 const log = createLogger('Azure Voices');
@@ -58,7 +59,9 @@ export async function POST(req: NextRequest) {
 
     return apiSuccess({ voices });
   } catch (error) {
-    log.error(`Azure voices fetch failed [baseUrl="${baseUrl ?? 'unknown'}"]:`, error);
+    log.error(
+      `Azure voices fetch failed [baseUrl="${baseUrl ?? 'unknown'}"]: ${describeUnexpectedError(error)}`,
+    );
     return apiError(
       'INTERNAL_ERROR',
       500,

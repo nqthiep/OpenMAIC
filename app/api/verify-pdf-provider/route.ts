@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import {
   isServerConfiguredProvider,
@@ -165,7 +166,9 @@ export async function POST(req: NextRequest) {
       status: response.status,
     });
   } catch (error) {
-    log.error(`PDF provider verification failed [provider=${providerId ?? 'unknown'}]:`, error);
+    log.error(
+      `PDF provider verification failed [provider=${providerId ?? 'unknown'}]: ${describeUnexpectedError(error)}`,
+    );
 
     let errorMessage = 'Connection failed';
     if (error instanceof Error) {

@@ -15,6 +15,11 @@ import {
 } from '@/lib/config/feature-flags';
 import { createLogger } from '@/lib/logger';
 import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
+import {
   getPiMaxActionsPerAgent,
   getPiMaxAgentTurns,
   resolveAgentConfigs,
@@ -48,6 +53,7 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
   let chatModel: string | undefined;
   let chatMessageCount: number | undefined;
+  let managedKey = false;
 
   try {
     const body: StatelessChatRequest = await req.json();
@@ -100,6 +106,7 @@ export async function POST(req: NextRequest) {
       providerId,
       modelInfo,
       thinkingConfig: resolvedThinkingConfig,
+      managedKey: operatorKeyUsed,
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
@@ -110,6 +117,7 @@ export async function POST(req: NextRequest) {
       // wins, an unrouted one honors this client thinking (see resolve-model.ts).
       thinkingConfig: body.thinkingConfig ?? body.thinking,
     });
+    managedKey = operatorKeyUsed;
 
     if (isProviderKeyRequired(providerId) && !resolvedApiKey) {
       return apiError('MISSING_API_KEY', 401, 'API Key is required');
@@ -281,7 +289,7 @@ export async function POST(req: NextRequest) {
         try {
           await send({
             type: 'error',
-            data: { message: error instanceof Error ? error.message : String(error) },
+            data: { message: visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT) },
           });
           await writer.close();
         } catch {
@@ -300,13 +308,12 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     log.error(
-      `Pi chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
-      error,
+      `Pi chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]: ${describeUnexpectedError(error)}`,
     );
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Failed to process request',
+      visitorErrorText(error, managedKey, 'Failed to process request'),
     );
   }
 }

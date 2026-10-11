@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { fetchModels, ModelFetchError } from '@/lib/server/model-fetch';
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       }
       return apiError('INTERNAL_ERROR', 502, error.message);
     }
-    log.error('Model probe failed:', error);
+    log.error(`Model probe failed: ${describeUnexpectedError(error)}`);
     return apiError(
       'INTERNAL_ERROR',
       500,

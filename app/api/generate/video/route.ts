@@ -29,6 +29,7 @@ import {
 } from '@/lib/server/provider-config';
 import type { VideoProviderId, VideoGenerationOptions } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
+import { CONTENT_BLOCKED_TEXT, MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 
@@ -37,6 +38,7 @@ const log = createLogger('VideoGeneration API');
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
+  let managed = false;
   try {
     const body = (await request.json()) as VideoGenerationOptions;
 
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest) {
       return apiError('PROVIDER_DISABLED', 403, 'This video provider is disabled by the server');
     }
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('video', providerId);
+    managed = isServerConfiguredProvider('video', providerId);
     const clientApiKey = managed ? undefined : request.headers.get('x-api-key') || undefined;
     const clientBaseUrl = managed ? undefined : request.headers.get('x-base-url') || undefined;
     const clientModel = request.headers.get('x-video-model')?.trim() || undefined;
@@ -122,9 +124,9 @@ export async function POST(request: NextRequest) {
     // Detect content safety filter rejections (e.g. Seedance SensitiveContent errors)
     if (message.includes('SensitiveContent') || message.includes('sensitive information')) {
       log.warn(`Video blocked by content safety filter: ${message}`);
-      return apiError('CONTENT_SENSITIVE', 400, message);
+      return apiError('CONTENT_SENSITIVE', 400, managed ? CONTENT_BLOCKED_TEXT : message);
     }
     log.error(`Video generation failed: ${message}`, error);
-    return apiError('INTERNAL_ERROR', 500, message);
+    return apiError('INTERNAL_ERROR', 500, managed ? MODEL_FAILURE_TEXT : message);
   }
 }

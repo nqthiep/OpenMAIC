@@ -27,6 +27,7 @@ import {
 import type { ImageProviderId } from '@/lib/media/types';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 
 const log = createLogger('VerifyImageProvider');
@@ -37,6 +38,7 @@ const log = createLogger('VerifyImageProvider');
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
+  let managed = false;
   try {
     const providerId = (request.headers.get('x-image-provider')?.trim() ||
       resolveServerImageProviderId()) as ImageProviderId;
@@ -50,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
     const clientModel = request.headers.get('x-image-model')?.trim() || undefined;
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('image', providerId);
+    managed = isServerConfiguredProvider('image', providerId);
     const clientApiKey = managed ? undefined : request.headers.get('x-api-key') || undefined;
     const clientBaseUrl = managed ? undefined : request.headers.get('x-base-url') || undefined;
 
@@ -88,12 +90,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      return apiError('UPSTREAM_ERROR', 500, result.message);
+      return apiError('UPSTREAM_ERROR', 500, managed ? MODEL_FAILURE_TEXT : result.message);
     }
 
     return apiSuccess({ message: result.message });
   } catch (err) {
     log.error(`Image provider verification failed: ${err}`, err);
-    return apiError('INTERNAL_ERROR', 500, `Connectivity test error: ${err}`);
+    return apiError(
+      'INTERNAL_ERROR',
+      500,
+      managed ? MODEL_FAILURE_TEXT : `Connectivity test error: ${err}`,
+    );
   }
 }
