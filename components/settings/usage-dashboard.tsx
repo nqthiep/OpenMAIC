@@ -61,6 +61,8 @@ export function UsageDashboard() {
   const isDark = resolvedTheme === 'dark';
   const [data, setData] = useState<UsageResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  // Set when the deployment only shows usage to administrators and this visitor is not one.
+  const [forbidden, setForbidden] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
 
@@ -68,6 +70,10 @@ export function UsageDashboard() {
     setLoading(true);
     try {
       const res = await fetch('/api/usage');
+      if (res.status === 403) {
+        setForbidden(true);
+        return;
+      }
       const json = await res.json();
       if (json.success !== false) setData(json as UsageResponse);
     } catch {
@@ -175,6 +181,8 @@ export function UsageDashboard() {
   }, []);
 
   const totals = data?.totals;
+
+  if (forbidden) return null;
 
   return (
     <div className="flex flex-col gap-6">

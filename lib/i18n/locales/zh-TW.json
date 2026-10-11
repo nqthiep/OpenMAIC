@@ -1990,7 +1990,8 @@
   "accessCode": {
     "title": "請輸入課堂碼",
     "placeholder": "課堂碼",
-    "error": "課堂碼錯誤，請重試。"
+    "error": "課堂碼錯誤，請重試。",
+    "rateLimited": "嘗試次數過多，請稍候幾分鐘後再試。"
   },
   "account": {
     "trigger": {
@@ -2035,7 +2036,8 @@
       "notConfigured": "此伺服器未啟用帳號功能。",
       "invalidRequest": "無法處理此要求，請重試。",
       "internal": "伺服器無法完成此要求，請稍後重試。",
-      "generic": "發生問題，請重試。"
+      "generic": "發生問題，請重試。",
+      "sessionEnded": "登入已結束，請重新登入後繼續。"
     }
   },
   "classroomComplete": {

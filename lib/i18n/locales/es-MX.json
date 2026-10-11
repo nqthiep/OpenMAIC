@@ -2005,7 +2005,8 @@
   "accessCode": {
     "title": "Ingresa el código de acceso",
     "placeholder": "Código de acceso",
-    "error": "Código de acceso no válido. Inténtalo de nuevo."
+    "error": "Código de acceso no válido. Inténtalo de nuevo.",
+    "rateLimited": "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."
   },
   "account": {
     "trigger": {
@@ -2050,7 +2051,8 @@
       "notConfigured": "Las cuentas no están disponibles en este servidor.",
       "invalidRequest": "No se pudo procesar la solicitud. Inténtalo de nuevo.",
       "internal": "El servidor no pudo completar la solicitud. Inténtalo más tarde.",
-      "generic": "Algo salió mal. Inténtalo de nuevo."
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "sessionEnded": "Tu sesión ha terminado. Vuelve a iniciar sesión para continuar."
     }
   },
   "proMode": {

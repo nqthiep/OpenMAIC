@@ -2023,7 +2023,8 @@
   "accessCode": {
     "title": "Enter Access Code",
     "placeholder": "Access code",
-    "error": "Invalid access code. Please try again."
+    "error": "Invalid access code. Please try again.",
+    "rateLimited": "Too many attempts. Wait a few minutes, then try again."
   },
   "account": {
     "trigger": {
@@ -2068,7 +2069,8 @@
       "notConfigured": "Accounts are not available on this server.",
       "invalidRequest": "That request could not be processed. Please try again.",
       "internal": "The server could not complete this request. Please try again later.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "sessionEnded": "Your sign-in has ended. Sign in again to continue."
     }
   },
   "workbench": {

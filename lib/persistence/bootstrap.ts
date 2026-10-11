@@ -6,6 +6,7 @@ import {
   type HttpDocumentHeadersHook,
 } from '@openmaic/storage';
 import { HttpRuntimeStore, type HttpRuntimeHeadersHook } from '@openmaic/storage/runtime/http';
+import { SESSION_ENDED_EVENT, watchForEndedSessions } from './session-end';
 
 import {
   assertDocumentStorageConfigurable,
@@ -22,6 +23,14 @@ import { getLearnerKey } from '@/lib/runtime/learner-key';
 
 let deviceKv: BrowserKVStore | undefined;
 let learnerKeyPromise: Promise<string> | undefined;
+let learnerKeyReadAt = 0;
+
+/**
+ * A session can end while the page is open: signed out in another tab, or expired.
+ * The memoised key is re-read after this long, and whenever the window regains focus,
+ * so requests stop carrying a key the server no longer accepts.
+ */
+const LEARNER_KEY_MAX_AGE_MS = 5 * 60 * 1000;
 
 export function isBrowserPersistenceEnabled(): boolean {
   return typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PERSISTENCE === '1';
@@ -83,16 +92,27 @@ async function resolveLearnerKey(): Promise<string> {
   return getLearnerKey((deviceKv ??= new BrowserKVStore()));
 }
 
+function forgetLearnerKey(): void {
+  learnerKeyPromise = undefined;
+}
+
 export function getPersistenceLearnerKey(): Promise<string> {
   if (!isBrowserPersistenceEnabled()) {
     return Promise.reject(new Error('Browser persistence is not enabled'));
   }
-  // Memoised for the page's lifetime. A rejection clears the memo so the next
+  if (learnerKeyPromise && Date.now() - learnerKeyReadAt > LEARNER_KEY_MAX_AGE_MS) {
+    forgetLearnerKey();
+  }
+  // Memoised until it goes stale. A rejection clears the memo so the next
   // caller retries the session read rather than inheriting the failure.
-  return (learnerKeyPromise ??= resolveLearnerKey().catch((error) => {
-    learnerKeyPromise = undefined;
-    throw error;
-  }));
+  if (!learnerKeyPromise) {
+    learnerKeyReadAt = Date.now();
+    learnerKeyPromise = resolveLearnerKey().catch((error) => {
+      forgetLearnerKey();
+      throw error;
+    });
+  }
+  return learnerKeyPromise;
 }
 
 export async function getPersistenceRequestHeaders(): Promise<Record<string, string>> {
@@ -108,6 +128,14 @@ export async function getPersistenceRequestHeaders(): Promise<Record<string, str
 if (isBrowserPersistenceEnabled()) {
   const learnerKey = getPersistenceLearnerKey;
   const headers = getPersistenceRequestHeaders;
+
+  // Returning to the page is when a sign-out made in another tab shows up, so the key is re-read then.
+  if (typeof window !== 'undefined') {
+    window.addEventListener?.('focus', forgetLearnerKey);
+    // A server-reported end of session also drops the memoised key, and every API response is watched for it.
+    window.addEventListener?.(SESSION_ENDED_EVENT, forgetLearnerKey);
+    if (typeof window.fetch === 'function') watchForEndedSessions(window);
+  }
 
   const runtimeOptions = {
     store: () =>

@@ -29,3 +29,12 @@ Not every key needs explanation, but the following have non-obvious UX context t
 | `generation.textTruncated` / `generation.imageTruncated` | Toast warnings during PDF-based course generation | These are technical warnings shown briefly. Keep them short and factual. `textTruncated` has `{{n}}` (character count), `imageTruncated` has `{{total}}` and `{{max}}`. |
 | `agentBar.readyToLearn` | Classroom page, above the agent role list | Conversational prompt to set the mood before class starts. Should feel inviting, not instructional. |
 | `settings.agentsCollaboratingCount` | Settings panel, multi-agent mode description | Contains `{{count}}`. This is a status label, not a button — keep it descriptive. |
+
+## Release gate for machine drafts
+
+The `account` block in the eleven non-English locales is a machine draft. Native review is a release gate before those strings ship:
+
+- **First, `accessCode.*`.** A wrong string there can lead a visitor to type an account password into the access gate, so it is reviewed before anything else.
+- **Then `account.*`.** Sign-in and registration copy, including `account.errors.*`.
+
+Until a locale is reviewed, its drafts ship as they are. The fallback language is `en-US`, so a key missing from a locale shows English, not Chinese.

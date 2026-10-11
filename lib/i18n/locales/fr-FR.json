@@ -2005,7 +2005,8 @@
   "accessCode": {
     "title": "Saisissez le code d’accès",
     "placeholder": "Code d’accès",
-    "error": "Code d’accès invalide. Veuillez réessayer."
+    "error": "Code d’accès invalide. Veuillez réessayer.",
+    "rateLimited": "Trop de tentatives. Patientez quelques minutes, puis réessayez."
   },
   "account": {
     "trigger": {
@@ -2050,7 +2051,8 @@
       "notConfigured": "Les comptes ne sont pas disponibles sur ce serveur.",
       "invalidRequest": "La demande n’a pas pu être traitée. Veuillez réessayer.",
       "internal": "Le serveur n’a pas pu terminer cette demande. Veuillez réessayer plus tard.",
-      "generic": "Une erreur est survenue. Veuillez réessayer."
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "sessionEnded": "Votre session a pris fin. Reconnectez-vous pour continuer."
     }
   },
   "proMode": {

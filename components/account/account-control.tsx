@@ -14,6 +14,7 @@ import {
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { createLogger } from '@/lib/logger';
 import { isBrowserPersistenceEnabled } from '@/lib/persistence/bootstrap';
+import { SESSION_ENDED_EVENT } from '@/lib/persistence/session-end';
 import { cn } from '@/lib/utils';
 import { AccountDialog } from './account-dialog';
 import { fetchAccountSession, signOut, type AccountSession } from './account-api';
@@ -53,6 +54,24 @@ export function AccountControl() {
       active = false;
     };
   }, []);
+
+  // The server reports an ended session on any API request. Show the signed-out state and say why.
+  useEffect(() => {
+    const onSessionEnded = () => {
+      setSession((current) =>
+        current
+          ? {
+              enabled: current.enabled,
+              registrationOpen: current.registrationOpen,
+              authenticated: false,
+            }
+          : current,
+      );
+      toast(t('account.errors.sessionEnded'));
+    };
+    window.addEventListener(SESSION_ENDED_EVENT, onSessionEnded);
+    return () => window.removeEventListener(SESSION_ENDED_EVENT, onSessionEnded);
+  }, [t]);
 
   if (!session?.enabled) return null;
 

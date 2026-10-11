@@ -2005,7 +2005,8 @@
   "accessCode": {
     "title": "Digite o Código de Acesso",
     "placeholder": "Código de acesso",
-    "error": "Código inválido. Tente novamente."
+    "error": "Código inválido. Tente novamente.",
+    "rateLimited": "Muitas tentativas. Aguarde alguns minutos e tente novamente."
   },
   "account": {
     "trigger": {
@@ -2050,7 +2051,8 @@
       "notConfigured": "As contas não estão disponíveis neste servidor.",
       "invalidRequest": "Não foi possível processar a solicitação. Tente novamente.",
       "internal": "O servidor não conseguiu concluir a solicitação. Tente novamente mais tarde.",
-      "generic": "Algo deu errado. Tente novamente."
+      "generic": "Algo deu errado. Tente novamente.",
+      "sessionEnded": "Sua sessão terminou. Entre novamente para continuar."
     }
   },
   "proMode": {

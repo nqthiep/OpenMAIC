@@ -194,6 +194,12 @@ export function AccountDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {!registrationOpen && (
+          <p className="text-sm text-muted-foreground">
+            {t('account.errors.registrationDisabled')}
+          </p>
+        )}
+
         {registrationOpen && (
           <div
             role="group"

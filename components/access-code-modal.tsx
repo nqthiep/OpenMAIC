@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { ArrowRight, ShieldCheck, LoaderCircle } from 'lucide-react';
@@ -17,12 +17,23 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // A failed attempt disables the input while it is in flight, so focus can only return once loading ends.
+  const refocusAfterAttempt = useRef(false);
+  const inputId = useId();
+  const errorId = useId();
 
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.focus();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!loading && refocusAfterAttempt.current) {
+      refocusAfterAttempt.current = false;
+      inputRef.current?.focus();
+    }
+  }, [loading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,12 +52,14 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
         setSuccess(true);
         setTimeout(onSuccess, 600);
       } else {
-        setError(t('accessCode.error'));
+        // 429 means this network has spent its attempts; a wrong code gets the plain message.
+        setError(t(res.status === 429 ? 'accessCode.rateLimited' : 'accessCode.error'));
         setCode('');
-        inputRef.current?.focus();
+        refocusAfterAttempt.current = true;
       }
     } catch {
       setError(t('accessCode.error'));
+      refocusAfterAttempt.current = true;
     } finally {
       setLoading(false);
     }
@@ -130,8 +143,12 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
                 transition={{ delay: 0.3, duration: 0.4 }}
               >
                 <div className="relative">
+                  <label htmlFor={inputId} className="sr-only">
+                    {t('accessCode.title')}
+                  </label>
                   <input
                     ref={inputRef}
+                    id={inputId}
                     type="password"
                     placeholder={t('accessCode.placeholder')}
                     value={code}
@@ -147,6 +164,8 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
                       ${error ? 'border-destructive/50 focus:border-destructive/50 focus:ring-destructive/10' : 'border-border/60'}
                     `}
                     disabled={loading || success}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? errorId : undefined}
                     autoComplete="off"
                   />
                   <button
@@ -174,20 +193,22 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
                   </button>
                 </div>
 
-                {/* Error message */}
-                <AnimatePresence mode="wait">
-                  {error && (
-                    <motion.p
-                      className="text-center text-sm text-destructive"
-                      initial={{ opacity: 0, y: -4, height: 0 }}
-                      animate={{ opacity: 1, y: 0, height: 'auto' }}
-                      exit={{ opacity: 0, y: -4, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                {/* Error message. The region is always mounted, so a screen reader announces the text when it arrives. */}
+                <div role="alert" id={errorId}>
+                  <AnimatePresence mode="wait">
+                    {error && (
+                      <motion.p
+                        className="text-center text-sm text-destructive"
+                        initial={{ opacity: 0, y: -4, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: -4, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {error}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.form>
             </div>
           </motion.div>

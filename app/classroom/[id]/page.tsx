@@ -198,9 +198,9 @@ export default function ClassroomDetailPage() {
   // Auto-resume generation for pending outlines
   useEffect(() => {
     if (loading || error || generationStartedRef.current) return;
-    // Generation spends the operator's provider budget, and a server-backed
-    // course is readable by anyone it was shared with, so a viewer must never
-    // start it. `generationStartedRef` is deliberately NOT set here, so the
+    // Generation spends the operator's provider budget. A server-backed course can
+    // be read by anyone who holds its id, because the link is the only credential,
+    // so a viewer must never start generation. `generationStartedRef` is deliberately NOT set here, so the
     // effect re-runs and starts once the sidecar's answer arrives.
     if (!mayGenerate) return;
 

@@ -2005,7 +2005,8 @@
   "accessCode": {
     "title": "Nhập mã truy cập",
     "placeholder": "Mã truy cập",
-    "error": "Mã truy cập không đúng. Vui lòng thử lại."
+    "error": "Mã truy cập không đúng. Vui lòng thử lại.",
+    "rateLimited": "Quá nhiều lần thử. Vui lòng đợi vài phút rồi thử lại."
   },
   "account": {
     "trigger": {
@@ -2050,7 +2051,8 @@
       "notConfigured": "Tài khoản không khả dụng trên máy chủ này.",
       "invalidRequest": "Không thể xử lý yêu cầu. Vui lòng thử lại.",
       "internal": "Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại sau.",
-      "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+      "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "sessionEnded": "Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại để tiếp tục."
     }
   },
   "proMode": {

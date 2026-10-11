@@ -2005,7 +2005,8 @@
   "accessCode": {
     "title": "Zugangscode eingeben",
     "placeholder": "Zugangscode",
-    "error": "Ungültiger Zugangscode. Bitte versuche es erneut."
+    "error": "Ungültiger Zugangscode. Bitte versuche es erneut.",
+    "rateLimited": "Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut."
   },
   "account": {
     "trigger": {
@@ -2050,7 +2051,8 @@
       "notConfigured": "Konten sind auf diesem Server nicht verfügbar.",
       "invalidRequest": "Diese Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
       "internal": "Der Server konnte diese Anfrage nicht abschließen. Bitte versuche es später erneut.",
-      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "sessionEnded": "Ihre Anmeldung ist beendet. Melden Sie sich erneut an, um fortzufahren."
     }
   },
   "proMode": {
