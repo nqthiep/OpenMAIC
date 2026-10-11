@@ -58,6 +58,16 @@ function getDefaultKv(): KVStore {
   return (defaultKv ??= new BrowserKVStore());
 }
 
+/**
+ * The learner partition for a drain: the app's configured identity (a signed-in
+ * account when server persistence is on), unless the caller injected a store, in
+ * which case that store's identity applies. Watermarks stay on the device store;
+ * an explicit store passed to getLearnerKey would pin the device identity instead.
+ */
+function configuredLearnerKey(injectedKv: KVStore | undefined): Promise<string> {
+  return injectedKv ? getLearnerKey(injectedKv) : getLearnerKey();
+}
+
 function watermarkKey(stageId: string, sceneId: string, learnerKey: string): string {
   return `runtime.pblDrain.${stageId}.${sceneId}.${learnerKey}`;
 }
@@ -251,7 +261,7 @@ async function drainProjectRuntimeWork(
   deadline: PBLDrainDeadline,
 ): Promise<void> {
   const kv = injectedKv ?? getDefaultKv();
-  const learnerKey = injectedLearnerKey ?? (await getLearnerKey(kv));
+  const learnerKey = injectedLearnerKey ?? (await configuredLearnerKey(injectedKv));
   const store = injectedStore ?? getRuntimeStore();
   const key = watermarkKey(stageId, sceneId, learnerKey);
   const watermark = await readWatermark(kv, key);
@@ -328,7 +338,7 @@ async function waitForActiveDrainWork(key: string): Promise<void> {
 
 async function drainProjectRuntimeSerialized(args: DrainProjectRuntimeArgs): Promise<void> {
   const kv = args.kv ?? getDefaultKv();
-  const learnerKey = args.learnerKey ?? (await getLearnerKey(kv));
+  const learnerKey = args.learnerKey ?? (await configuredLearnerKey(args.kv));
   const store = args.store ?? getRuntimeStore();
   const inFlightKey = `${args.stageId}:${args.sceneId}:${learnerKey}`;
   const previous = inFlightPblDrains.get(inFlightKey) ?? Promise.resolve();
@@ -380,7 +390,7 @@ export async function withDrainedProjectRuntime<T>(
 ): Promise<T> {
   const run = async (): Promise<T> => {
     const kv = args.kv ?? getDefaultKv();
-    const learnerKey = args.learnerKey ?? (await getLearnerKey(kv));
+    const learnerKey = args.learnerKey ?? (await configuredLearnerKey(args.kv));
     const store = args.store ?? getRuntimeStore();
     const inFlightKey = `${args.stageId}:${args.sceneId}:${learnerKey}`;
     const previous = inFlightPblDrains.get(inFlightKey) ?? Promise.resolve();

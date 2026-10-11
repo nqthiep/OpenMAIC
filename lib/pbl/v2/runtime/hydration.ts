@@ -47,6 +47,15 @@ function getDefaultKv(): KVStore {
   return (defaultKv ??= new BrowserKVStore());
 }
 
+/**
+ * The learner partition for hydration: the app's configured identity (a signed-in
+ * account when server persistence is on), unless the caller injected a store, in
+ * which case that store's identity applies. See drain.ts for the same rule.
+ */
+function configuredLearnerKey(injectedKv: KVStore | undefined): Promise<string> {
+  return injectedKv ? getLearnerKey(injectedKv) : getLearnerKey();
+}
+
 async function withPBLRuntimeTransaction<T>(
   store: RuntimeStore,
   key: string,
@@ -183,7 +192,7 @@ function hasWriteCutoverSnapshot(records: readonly RuntimeRecord[]): boolean {
 export async function synchronizePBLProjectRuntime(args: HydratePBLProjectArgs): Promise<void> {
   await withRuntimeStorageSharedLockUntilSettled(async () => {
     const kv = args.kv ?? getDefaultKv();
-    const learnerKey = args.learnerKey ?? (await getLearnerKey(kv));
+    const learnerKey = args.learnerKey ?? (await configuredLearnerKey(args.kv));
     const store = args.store ?? getRuntimeStore();
     const transactionKey = `${args.stageId}:${args.sceneId}:${learnerKey}`;
 
@@ -236,7 +245,7 @@ export async function hydratePBLProjectFromRuntime(
 ): Promise<HydratePBLProjectResult> {
   return withRuntimeStorageSharedLockUntilSettled(async () => {
     const kv = args.kv ?? getDefaultKv();
-    const learnerKey = args.learnerKey ?? (await getLearnerKey(kv));
+    const learnerKey = args.learnerKey ?? (await configuredLearnerKey(args.kv));
     const store = args.store ?? getRuntimeStore();
     const transactionKey = `${args.stageId}:${args.sceneId}:${learnerKey}`;
 
