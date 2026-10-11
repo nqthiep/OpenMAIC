@@ -293,6 +293,8 @@ ACCESS_CODE=your-secret-code
 
 When set, visitors see a password prompt before accessing the app. All API routes are also protected. If not set, the app works as before.
 
+The access cookie lasts seven days, and changing the code signs every visitor out at once. Wrong codes are limited to ten per 15 minutes. Without `TRUST_PROXY_HEADERS=true` that limit is shared by all visitors, so a flood of wrong guesses can lock everyone out of the prompt for 15 minutes. Set `TRUST_PROXY_HEADERS=true` only behind a reverse proxy that overwrites `x-forwarded-for`, which gives each client its own limit.
+
 ### Vercel Deployment
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FTHU-MAIC%2FOpenMAIC&envDescription=Configure%20at%20least%20one%20LLM%20provider%20API%20key%20(e.g.%20OPENAI_API_KEY%2C%20ANTHROPIC_API_KEY).%20All%20providers%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FTHU-MAIC%2FOpenMAIC%2Fblob%2Fmain%2F.env.example&project-name=openmaic&framework=nextjs)
@@ -383,12 +385,28 @@ provides **no confidentiality and no user isolation whatsoever** — anyone who
 can load the page can extract it and read or write **every** learner partition
 and **all** documents by choosing an `x-learner-key`. Its only purpose is to
 keep unrelated network scanners out of an endpoint on a trusted network. This
-is suitable only for localhost or trusted-network, single-user deployments. Before production,
-replace
-[`lib/persistence/server-auth.ts`](lib/persistence/server-auth.ts) with real
-session verification that derives the learner partition from server-controlled
-identity, and change the document/merge/admin authorization policies as
-appropriate.
+is suitable only for localhost or trusted-network, single-user deployments.
+
+**Accounts.** When `DATABASE_URL` is set, username and password sign-in gives
+each account its own partition. For a signed-in request, a live server-side
+session decides the owner of courses, agent sessions, skills and runtime data,
+and client-supplied identity headers are ignored. Signed-out visitors keep the
+anonymous per-browser owner and still rely on the development token, which
+provides no isolation for them. Open limits, not yet addressed:
+
+- Anyone who holds a course id can read that course, because sharing by link is
+  the current design. Only writes and deletes are owner-only.
+- Courses created before signing in stay with the anonymous browser; they are
+  not moved into the account.
+- The sign-in throttle lives in each server process, so a multi-instance
+  deployment gets one budget per instance.
+
+For a sign-in-only deployment, leave `PERSISTENCE_DEV_TOKEN` unset. Every
+signed-out persistence request then answers 503, and signed-in requests are
+served without the token. The browser's behaviour for signed-out visitors in
+that setup has not been checked in a real browser. `ACCOUNT_REGISTRATION=closed`
+stops new sign-ups while existing accounts keep signing in. Settings are listed
+in `.env.example`.
 
 `PERSISTENCE_POSTGRES_PASSWORD` initializes the PostgreSQL role only when the
 data directory is empty; changing it later does not rotate an existing
