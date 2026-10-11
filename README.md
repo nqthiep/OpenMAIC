@@ -293,7 +293,7 @@ ACCESS_CODE=your-secret-code
 
 When set, visitors see a password prompt before accessing the app. All API routes are also protected. If not set, the app works as before.
 
-The access cookie lasts seven days, and changing the code signs every visitor out at once. Wrong codes are limited to ten per 15 minutes. Without `TRUST_PROXY_HEADERS=true` that limit is shared by all visitors, so a flood of wrong guesses can lock everyone out of the prompt for 15 minutes. Set `TRUST_PROXY_HEADERS=true` only behind a reverse proxy that overwrites `x-forwarded-for`, which gives each client its own limit.
+The access cookie lasts seven days, and changing the code signs every visitor out at once. Without `ACCESS_COOKIE_SECRET` (32 characters or more, set separately from the code), a captured cookie can be checked offline against guesses of the code. Set it on any deployment where that matters. Wrong codes are limited to ten per 15 minutes. Without `TRUST_PROXY_HEADERS=true` that limit is shared by all visitors, so a flood of wrong guesses can lock everyone out of the prompt for 15 minutes. Set `TRUST_PROXY_HEADERS=true` only behind a reverse proxy that overwrites `x-forwarded-for`, which gives each client its own limit.
 
 ### Vercel Deployment
 

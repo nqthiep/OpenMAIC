@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured, isProWorkbenchEnabled } from '@/lib/config/feature-flags';
-import { isAccessTokenTimestampFresh } from '@/lib/server/access-token-policy';
+import { accessSigningKey, isAccessTokenTimestampFresh } from '@/lib/server/access-token-policy';
 
 /** Convert string to Uint8Array */
 function encode(str: string): Uint8Array {
@@ -16,7 +16,7 @@ function bufToHex(buf: ArrayBuffer): string {
 }
 
 /** Verify an HMAC-signed token using Web Crypto API (Edge-compatible) */
-async function verifyToken(token: string, accessCode: string): Promise<boolean> {
+async function verifyToken(token: string, signingKey: string): Promise<boolean> {
   const dotIndex = token.indexOf('.');
   if (dotIndex === -1) return false;
 
@@ -26,7 +26,7 @@ async function verifyToken(token: string, accessCode: string): Promise<boolean> 
   // stops working after the cookie lifetime instead of when the code rotates.
   if (!isAccessTokenTimestampFresh(timestamp, Date.now())) return false;
 
-  const keyData = encode(accessCode);
+  const keyData = encode(signingKey);
   const key = await crypto.subtle.importKey(
     'raw',
     keyData.buffer as ArrayBuffer,
@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
 
   // Check cookie — validate HMAC signature, not just existence
   const cookie = request.cookies.get('openmaic_access');
-  if (cookie?.value && (await verifyToken(cookie.value, accessCode))) {
+  if (cookie?.value && (await verifyToken(cookie.value, accessSigningKey(accessCode)))) {
     return NextResponse.next();
   }
 

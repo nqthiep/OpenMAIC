@@ -14,6 +14,35 @@ export const ACCESS_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 /** Tolerates a client or server clock running slightly ahead of the other. */
 export const ACCESS_TOKEN_CLOCK_SKEW_MS = 60 * 1000;
 
+/** Shortest ACCESS_COOKIE_SECRET accepted. A shorter value is ignored, with a one-time warning. */
+export const ACCESS_COOKIE_SECRET_MIN_LENGTH = 32;
+
+let warnedAboutShortSecret = false;
+
+/**
+ * The key that signs access cookies. With ACCESS_COOKIE_SECRET set to at least
+ * 32 characters, cookies are signed with that secret, so a captured cookie cannot
+ * be checked against guesses of the access code. Without it the access code is the
+ * key, as before: the signature then reveals nothing beyond the code's own strength.
+ */
+export function accessSigningKey(
+  accessCode: string,
+  secret: string | undefined = process.env.ACCESS_COOKIE_SECRET,
+): string {
+  const trimmed = secret?.trim() ?? '';
+  if (trimmed === '') return accessCode;
+  if (trimmed.length < ACCESS_COOKIE_SECRET_MIN_LENGTH) {
+    if (!warnedAboutShortSecret) {
+      warnedAboutShortSecret = true;
+      console.warn(
+        `ACCESS_COOKIE_SECRET is shorter than ${ACCESS_COOKIE_SECRET_MIN_LENGTH} characters and is ignored; access cookies are signed with ACCESS_CODE.`,
+      );
+    }
+    return accessCode;
+  }
+  return trimmed;
+}
+
 const TIMESTAMP_PATTERN = /^\d{1,15}$/;
 
 /** True when `timestamp` (ms since epoch, as minted) is within the accepted window at `now`. */
