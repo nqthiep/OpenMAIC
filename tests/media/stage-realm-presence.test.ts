@@ -407,6 +407,16 @@ describe('stage realm presence leases', () => {
     replies.release();
   });
 
+  it('does not let a failing stage getter escape into the edit that marks the stage dirty', async () => {
+    const realm = await loadRealm();
+    realm.bindStageRealmPresence(() => {
+      throw new Error('store unavailable');
+    });
+
+    expect(() => realm.markStageRealmDirty('stage-1')).not.toThrow();
+    expect(() => realm.markStageRealmClean('stage-1')).not.toThrow();
+  });
+
   it('reports unknown, not absent, when the storage API throws', async () => {
     vi.stubGlobal('localStorage', {
       get length() {

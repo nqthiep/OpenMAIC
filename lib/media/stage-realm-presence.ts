@@ -261,9 +261,10 @@ function leaseFor(stageId: string, now: number): LeaseRecord {
 /** Writes this realm's lease for the stage it has open, and moves it when that stage changes. */
 function renewLease(): void {
   if (!realmId) return;
-  const stageId = openStageId?.();
-  const nextKey = stageId ? leaseKey(stageId, realmId) : undefined;
   try {
+    // The stage getter runs inside the store's own edit path, so a failure here must not escape.
+    const stageId = openStageId?.();
+    const nextKey = stageId ? leaseKey(stageId, realmId) : undefined;
     const storage = browserStorage();
     if (ownLeaseKey && ownLeaseKey !== nextKey) storage?.removeItem(ownLeaseKey);
     ownLeaseKey = nextKey;
@@ -271,7 +272,8 @@ function renewLease(): void {
     if (stageId && nextKey) storage?.setItem(nextKey, JSON.stringify(leaseFor(stageId, now)));
     if (storage) removeLapsedLeases(storage, now);
   } catch {
-    // A refused write leaves peers to the probe. This realm's own answer is unchanged.
+    // A refused write, or a failed read of the open stage, leaves peers to the probe.
+    // This realm's own answer is unchanged, and the edit that triggered the renewal proceeds.
   }
 }
 
