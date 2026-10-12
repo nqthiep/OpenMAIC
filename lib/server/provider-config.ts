@@ -8,7 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
-import { createLogger } from '@/lib/logger';
+import { createLogger, registerLogSecret } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
 import {
   DEFAULT_QWEN_TTS_VOICE_CLONE_MODEL,
@@ -18,6 +18,25 @@ import {
 } from '@/lib/audio/constants';
 
 const log = createLogger('ServerProviderConfig');
+
+/** Field names in the server's provider file whose values are secrets. */
+const SECRET_YAML_FIELD = /^(apiKey|accessKeyId|secretAccessKey|secret|token|password)$/i;
+
+/** Registers the secret-valued fields of the provider file, so no log line carries them. */
+function registerYamlSecrets(node: unknown): void {
+  if (Array.isArray(node)) {
+    for (const child of node) registerYamlSecrets(child);
+    return;
+  }
+  if (node === null || typeof node !== 'object') return;
+  for (const [name, child] of Object.entries(node)) {
+    if (typeof child === 'string' && SECRET_YAML_FIELD.test(name)) {
+      registerLogSecret(child, 'operator');
+    } else {
+      registerYamlSecrets(child);
+    }
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -211,6 +230,7 @@ function loadYamlFile(filename: string): YamlData {
     if (!fs.existsSync(filePath)) return {};
     const raw = fs.readFileSync(filePath, 'utf-8');
     const parsed = yaml.load(raw) as Record<string, unknown> | null;
+    registerYamlSecrets(parsed);
     if (!parsed || typeof parsed !== 'object') return {};
     return parsed as YamlData;
   } catch (e) {
@@ -642,6 +662,7 @@ export function getServerProviders(): Record<string, { models?: string[] }> {
 
 /** Resolve API key. Managed provider ⇒ server key; otherwise client key. */
 export function resolveApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('providers', providerId, clientKey);
 }
 
@@ -685,6 +706,7 @@ export function enabledServerTTSProviderIds(): string[] {
 }
 
 export function resolveTTSApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('tts', providerId, clientKey);
 }
 
@@ -783,6 +805,7 @@ export function getServerASRProviders(): Record<string, { disabled?: boolean }> 
 }
 
 export function resolveASRApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('asr', providerId, clientKey);
 }
 
@@ -820,6 +843,7 @@ export function getServerPDFProviders(): Record<string, Record<string, never>> {
 }
 
 export function resolvePDFApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('pdf', providerId, clientKey);
 }
 
@@ -851,6 +875,7 @@ export function getServerImageProviders(): Record<
 }
 
 export function resolveImageApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('image', providerId, clientKey);
 }
 
@@ -910,6 +935,7 @@ export function getServerVideoProviders(): Record<
 }
 
 export function resolveVideoApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('video', providerId, clientKey);
 }
 
