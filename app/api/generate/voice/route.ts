@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Auto-voice registration API (provider-neutral).
  *
@@ -67,6 +68,9 @@ function childSignal(
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let providerId: string | undefined;
   let voiceId: string | undefined;
   let managed = false;

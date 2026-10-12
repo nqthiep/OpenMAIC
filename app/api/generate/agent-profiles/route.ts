@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Agent Profiles Generation API
  *
@@ -133,6 +134,9 @@ function stripCodeFences(text: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let stageName: string | undefined;
   let modelString: string | undefined;
   // True once the operator's key is chosen. Upstream error text then stays on the server.

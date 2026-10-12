@@ -342,6 +342,7 @@ vi.mock('@/lib/orchestration/registry/store', () => ({
   ),
 }));
 vi.mock('@/lib/config/feature-flags', () => ({
+  isServerPersistenceConfigured: () => false,
   isPiChatEnabled: () => mocks.piEnabled,
   isCoursewareReferenceEnabled: () => mocks.coursewareReferenceEnabled,
 }));

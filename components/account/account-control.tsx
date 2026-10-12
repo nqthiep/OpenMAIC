@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { LogIn, LogOut, UserRound } from 'lucide-react';
+import { BookOpen, LogIn, LogOut, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -84,6 +84,15 @@ export function AccountControl() {
   if (!session.authenticated) {
     return (
       <>
+        <a
+          href="/catalog"
+          aria-label={t('catalog.title')}
+          title={t('catalog.title')}
+          className={cn(TRIGGER_CLASS, 'w-9 px-0 sm:px-3')}
+        >
+          <BookOpen className="size-4" aria-hidden="true" />
+          <span className="hidden sm:inline">{t('catalog.title')}</span>
+        </a>
         <button
           ref={signInTriggerRef}
           type="button"
@@ -107,6 +116,8 @@ export function AccountControl() {
   }
 
   const username = session.account?.username ?? '';
+  const role = session.role;
+  const isStaff = role === 'operator' || role === 'admin';
 
   const handleSignOut = () => {
     if (signingOutRef.current) return;
@@ -159,8 +170,25 @@ export function AccountControl() {
         <DropdownMenuLabel className="flex flex-col gap-0.5 font-normal">
           <span className="text-xs text-muted-foreground">{t('account.signedInAs')}</span>
           <span className="truncate text-sm font-medium text-foreground">{username}</span>
+          {role ? (
+            <span className="text-xs text-muted-foreground">{t(`account.roles.${role}`)}</span>
+          ) : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => window.location.assign('/catalog')}
+          className="cursor-pointer gap-2"
+        >
+          {t('catalog.title')}
+        </DropdownMenuItem>
+        {isStaff ? (
+          <DropdownMenuItem
+            onSelect={() => window.location.assign('/admin')}
+            className="cursor-pointer gap-2"
+          >
+            {t('account.administration')}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem
           disabled={signingOut}
           onSelect={handleSignOut}

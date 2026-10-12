@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Single TTS Generation API
  *
@@ -42,6 +43,9 @@ const log = createLogger('TTS API');
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let ttsProviderId: string | undefined;
   let ttsVoice: string | undefined;
   let audioId: string | undefined;

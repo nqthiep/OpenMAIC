@@ -5,10 +5,12 @@ import { Loader2, RefreshCw, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AccountRequestError,
+  changeAccountRole,
   disableAccount,
   enableAccount,
   fetchAccountSession,
   fetchAdminAccounts,
+  type AccountRole,
   type AdminAccount,
 } from '@/components/account/account-api';
 import {
@@ -34,14 +36,18 @@ type PanelStatus = 'checking' | 'hidden' | 'shown';
 interface AccountRow {
   readonly id: string;
   readonly username: string;
+  readonly role: AccountRole;
   readonly createdAt: string;
   readonly disabled: boolean;
 }
+
+const ROLE_OPTIONS: readonly AccountRole[] = ['learner', 'operator', 'admin'];
 
 function toRow(account: AdminAccount): AccountRow {
   return {
     id: account.id,
     username: account.username,
+    role: account.role,
     createdAt: account.createdAt,
     disabled: account.disabledAt !== null,
   };
@@ -73,6 +79,8 @@ export function AccountAdminPanel() {
   const { t, locale } = useI18n();
   const [status, setStatus] = useState<PanelStatus>('checking');
   const [viewer, setViewer] = useState<string | undefined>(undefined);
+  // Only an administrator changes roles. An operator sees the list and the disable control.
+  const [isAdministrator, setIsAdministrator] = useState(false);
   const [rows, setRows] = useState<AccountRow[] | null>(null);
   const [nextAfter, setNextAfter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -116,12 +124,14 @@ export function AccountAdminPanel() {
     fetchAccountSession()
       .then((session) => {
         if (!active) return;
-        // An anonymous visitor, a deployment without accounts, or a signed-in account that
-        // is not an administrator makes no admin request.
-        if (!session.enabled || !session.authenticated || session.administrator !== true) {
+        // An anonymous visitor, a deployment without accounts, or a learner makes no admin request.
+        const administrator = session.role === 'admin' || session.administrator === true;
+        const staff = administrator || session.role === 'operator';
+        if (!session.enabled || !session.authenticated || !staff) {
           setStatus('hidden');
           return;
         }
+        setIsAdministrator(administrator);
         setViewer(session.account?.username);
         void reload();
       })
@@ -133,6 +143,23 @@ export function AccountAdminPanel() {
       active = false;
     };
   }, [reload]);
+
+  const changeRole = async (row: AccountRow, role: AccountRole) => {
+    if (role === row.role) return;
+    try {
+      await changeAccountRole(row.id, role);
+      setRows(
+        (current) =>
+          current?.map((item) => (item.id === row.id ? { ...item, role } : item)) ?? null,
+      );
+      toast.success(t('account.admin.roleChanged'));
+    } catch (error) {
+      log.warn('Role change failed', errorName(error));
+      toast.error(t('account.admin.errors.roleFailed'));
+      // Reload so the select shows the role the server still has.
+      void reload();
+    }
+  };
 
   const loadMore = async () => {
     if (nextAfter === null) return;
@@ -226,6 +253,22 @@ export function AccountAdminPanel() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
+                {isAdministrator && row.username !== viewer ? (
+                  <select
+                    aria-label={t('account.admin.changeRoleLabel', { username: row.username })}
+                    value={row.role}
+                    onChange={(event) => void changeRole(row, event.target.value as AccountRole)}
+                    className="h-8 rounded-md border bg-background px-2 text-sm"
+                  >
+                    {ROLE_OPTIONS.map((role) => (
+                      <option key={role} value={role}>
+                        {t(`account.roles.${role}`)}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <Badge variant="outline">{t(`account.roles.${row.role}`)}</Badge>
+                )}
                 <Badge variant={row.disabled ? 'destructive' : 'secondary'}>
                   {t(
                     row.disabled ? 'account.admin.status.disabled' : 'account.admin.status.active',
@@ -233,7 +276,7 @@ export function AccountAdminPanel() {
                 </Badge>
                 {row.username === viewer ? (
                   <span className="text-xs text-muted-foreground">{t('account.admin.you')}</span>
-                ) : (
+                ) : isAdministrator || row.role !== 'admin' ? (
                   <Button
                     variant="outline"
                     size="sm"
@@ -245,7 +288,7 @@ export function AccountAdminPanel() {
                   >
                     {t(row.disabled ? 'account.admin.enable' : 'account.admin.disable')}
                   </Button>
-                )}
+                ) : null}
               </div>
             </li>
           ))}

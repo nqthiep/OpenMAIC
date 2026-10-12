@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
+  isServerPersistenceConfigured: () => false,
   isAgentRuntimeEnabled: () => true,
   isAgentRuntimeConfigured: () => true,
 }));

@@ -14,6 +14,7 @@ import { ensureOwnerMaterialSchema } from '@/lib/persistence/owner-materials';
 import { ensureStageMetaSchema } from '@/lib/persistence/stage-meta';
 import { APP_RUNTIME_PAYLOAD_VALIDATORS } from '@/lib/runtime/payload-validators';
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
+import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 export type PersistencePoolFactory = (connectionString: string) => Pool;
 
@@ -52,6 +53,7 @@ async function createServerPersistenceProvider(
     await ensureStageMetaSchema(queryable);
     await ensureOwnerMaterialSchema(queryable);
     await ensureAccountSchema(queryable);
+    await ensureLearningSchema(queryable);
     await ensureAssetSchema(queryable);
     const withTransaction = nodePostgresTransaction(queryable);
     const byteStore = lazyAssetByteStore(process.env.ASSET_S3_BUCKET, queryable);

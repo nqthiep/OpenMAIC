@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Quiz Grading API
  *
@@ -26,6 +27,9 @@ interface GradeResponse {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let questionLength: number | undefined;
   let resolvedPoints: number | undefined;
   try {

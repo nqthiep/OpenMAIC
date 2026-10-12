@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import { transcribeAudio } from '@/lib/audio/asr-providers';
 import {
@@ -18,6 +19,9 @@ const log = createLogger('Transcription');
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let resolvedProviderId: string | undefined;
   let resolvedModelId: string | undefined;
   let managed = false;

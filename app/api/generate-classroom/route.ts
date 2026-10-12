@@ -1,6 +1,7 @@
 import { after, type NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { requireSpender, resolveViewer } from '@/lib/server/authz/viewer';
 import { type GenerateClassroomInput } from '@/lib/server/classroom-generation';
 import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
@@ -12,6 +13,9 @@ const log = createLogger('GenerateClassroom API');
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let requirementLength: number | undefined;
   try {
     const rawBody = (await req.json()) as Partial<GenerateClassroomInput>;
@@ -42,10 +46,11 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = buildRequestOrigin(req);
     const jobId = nanoid(10);
-    const job = await createClassroomGenerationJob(jobId, body);
+    const viewer = await resolveViewer(req.headers);
+    const job = await createClassroomGenerationJob(jobId, body, viewer.ownerId);
     const pollUrl = `${baseUrl}/api/generate-classroom/${jobId}`;
 
-    after(() => runClassroomGenerationJob(jobId, body, baseUrl));
+    after(() => runClassroomGenerationJob(jobId, body, baseUrl, viewer.ownerId));
 
     return apiSuccess(
       {

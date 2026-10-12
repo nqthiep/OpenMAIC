@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Web Search API
  *
@@ -31,6 +32,9 @@ import { resolveWebSearchRouteBaseUrl } from '@/lib/server/web-search-config';
 const log = createLogger('WebSearch');
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let query: string | undefined;
   let managed = false;
   try {

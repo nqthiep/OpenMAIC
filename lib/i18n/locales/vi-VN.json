@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "Không đổi được vai trò. Thử lại."
+      },
+      "roleChanged": "Đã cập nhật vai trò.",
+      "changeRoleLabel": "Đổi vai trò của {{username}}"
+    },
+    "roles": {
+      "learner": "Học viên",
+      "operator": "Vận hành",
+      "admin": "Quản trị viên"
+    },
+    "administration": "Quản trị",
+    "adminPage": {
+      "title": "Quản trị",
+      "description": "Tài khoản, mức sử dụng và vai trò của hệ thống này.",
+      "denied": "Trang này dành cho người vận hành và quản trị viên."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "Chưa có gói thành viên",
+      "suspended": "Đã tạm khoá",
+      "active": "Đang hoạt động",
+      "expired": "Đã hết hạn"
+    },
+    "expiresOn": "Đến {{date}}",
+    "granted": "Đã lưu gói thành viên.",
+    "exportMembersOnly": "Chỉ thành viên đang hoạt động mới được xuất."
+  },
+  "admin": {
+    "members": {
+      "title": "Gói thành viên",
+      "description": "Cấp hoặc gia hạn gói thành viên, tạm khoá hoặc mở lại. Mọi thay đổi đều được ghi vào nhật ký kiểm tra.",
+      "days": "Số ngày",
+      "quota": "Token mỗi tháng",
+      "quotaValue": "{{tokens}} token mỗi tháng",
+      "grant": "Cấp hoặc gia hạn",
+      "resume": "Mở lại",
+      "suspend": "Tạm khoá"
+    },
+    "shares": {
+      "title": "Yêu cầu chia sẻ",
+      "description": "Duyệt yêu cầu để mở khoá học cho mọi thành viên.",
+      "empty": "Không có yêu cầu nào đang chờ.",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "approved": "Đã chia sẻ khoá học cho thành viên.",
+      "rejected": "Đã từ chối yêu cầu.",
+      "requested": "Yêu cầu ngày {{date}}"
+    },
+    "previews": {
+      "title": "Bài xem thử miễn phí",
+      "description": "Khoá học được đánh dấu ở đây có thể mở mà không cần tài khoản.",
+      "courseId": "Mã khoá học",
+      "add": "Đánh dấu xem thử",
+      "remove": "Gỡ",
+      "empty": "Chưa có bài xem thử nào."
+    },
+    "classes": {
+      "title": "Lớp học",
+      "description": "Thành viên tham gia lớp bằng mã lớp. Gắn khoá học để thành viên lớp có thể mở.",
+      "name": "Tên lớp",
+      "create": "Tạo lớp",
+      "joinCode": "Mã tham gia: {{code}}. Mã chỉ hiện một lần, hãy sao chép ngay.",
+      "empty": "Chưa có lớp nào.",
+      "members": "{{count}} thành viên",
+      "courses": "{{count}} khoá học",
+      "attach": "Gắn khoá học"
+    },
+    "audit": {
+      "title": "Nhật ký kiểm tra",
+      "description": "Các thay đổi gần đây về tài khoản, gói thành viên, chia sẻ và lớp học.",
+      "empty": "Chưa có bản ghi nào."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "Đã có lỗi. Hãy thử lại.",
+      "FORBIDDEN": "Bạn không có quyền thực hiện việc này.",
+      "UNAUTHENTICATED": "Đăng nhập để tiếp tục.",
+      "INVALID_REQUEST": "Kiểm tra lại nội dung đã nhập và thử lại.",
+      "NOT_FOUND": "Không tìm thấy.",
+      "MEMBERSHIP_REQUIRED": "Cần gói thành viên đang hoạt động để thực hiện việc này.",
+      "QUOTA_EXCEEDED": "Đã hết hạn mức AI trong tháng này.",
+      "ACCOUNTS_NOT_CONFIGURED": "Hệ thống này chưa bật tài khoản."
+    }
+  },
+  "catalog": {
+    "title": "Danh mục",
+    "description": {
+      "member": "Bài xem thử miễn phí, khoá học được chia sẻ và khoá học của lớp bạn.",
+      "guest": "Bài xem thử miễn phí. Đăng nhập để xem thêm."
+    },
+    "signInToSee": "Đăng nhập để xem khoá học được chia sẻ và tham gia lớp.",
+    "join": {
+      "title": "Tham gia lớp",
+      "code": "Mã tham gia",
+      "submit": "Tham gia",
+      "done": "Bạn đã tham gia {{name}}."
+    },
+    "empty": "Chưa có nội dung để xem.",
+    "kind": {
+      "preview": "Xem thử miễn phí",
+      "shared": "Đã chia sẻ",
+      "class": "Lớp của bạn"
+    },
+    "open": "Mở",
+    "unavailable": "Danh mục không khả dụng trên hệ thống này."
+  },
+  "courseShare": {
+    "request": "Chia sẻ cho thành viên",
+    "pending": "Đang chờ duyệt",
+    "stop": "Ngừng chia sẻ",
+    "requested": "Đã gửi yêu cầu. Người vận hành sẽ xem xét.",
+    "withdrawn": "Đã ngừng chia sẻ. Học viên đã có khoá học vẫn giữ bản sao.",
+    "failed": "Không thể chia sẻ khoá học. Hãy thử lại."
   }
 }

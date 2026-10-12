@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "Die Rolle konnte nicht geändert werden. Bitte versuchen Sie es erneut."
+      },
+      "roleChanged": "Rolle aktualisiert.",
+      "changeRoleLabel": "Rolle von {{username}} ändern"
+    },
+    "roles": {
+      "learner": "Lernende",
+      "operator": "Betreiber",
+      "admin": "Administrator"
+    },
+    "administration": "Verwaltung",
+    "adminPage": {
+      "title": "Verwaltung",
+      "description": "Konten, Nutzung und Rollen dieser Instanz.",
+      "denied": "Diese Seite ist nur für Betreiber und Administratoren."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "Keine Mitgliedschaft",
+      "suspended": "Gesperrt",
+      "active": "Aktiv",
+      "expired": "Abgelaufen"
+    },
+    "expiresOn": "Bis {{date}}",
+    "granted": "Mitgliedschaft gespeichert.",
+    "exportMembersOnly": "Export ist nur für aktive Mitglieder verfügbar."
+  },
+  "admin": {
+    "members": {
+      "title": "Mitgliedschaften",
+      "description": "Mitgliedschaft erteilen oder verlängern, sperren oder wieder aktivieren. Jede Änderung wird im Audit-Protokoll festgehalten.",
+      "days": "Tage",
+      "quota": "Token pro Monat",
+      "quotaValue": "{{tokens}} Token pro Monat",
+      "grant": "Erteilen oder verlängern",
+      "resume": "Wieder aktivieren",
+      "suspend": "Sperren"
+    },
+    "shares": {
+      "title": "Freigabeanfragen",
+      "description": "Genehmigen Sie eine Anfrage, um den Kurs allen Mitgliedern zu öffnen.",
+      "empty": "Keine offenen Anfragen.",
+      "approve": "Genehmigen",
+      "reject": "Ablehnen",
+      "approved": "Kurs für Mitglieder freigegeben.",
+      "rejected": "Anfrage abgelehnt.",
+      "requested": "Angefragt am {{date}}"
+    },
+    "previews": {
+      "title": "Kostenlose Vorschauen",
+      "description": "Ein hier markierter Kurs kann von Besuchern ohne Konto geöffnet werden.",
+      "courseId": "Kurs-ID",
+      "add": "Als Vorschau markieren",
+      "remove": "Entfernen",
+      "empty": "Noch keine Vorschauen."
+    },
+    "classes": {
+      "title": "Klassen",
+      "description": "Mitglieder treten einer Klasse mit dem Code bei. Kurse zuordnen, damit die Klasse sie öffnen kann.",
+      "name": "Klassenname",
+      "create": "Klasse erstellen",
+      "joinCode": "Beitrittscode: {{code}}. Er wird nur einmal angezeigt, kopieren Sie ihn jetzt.",
+      "empty": "Noch keine Klassen.",
+      "members": "{{count}} Mitglieder",
+      "courses": "{{count}} Kurse",
+      "attach": "Kurs zuordnen"
+    },
+    "audit": {
+      "title": "Audit-Protokoll",
+      "description": "Letzte Änderungen an Konten, Mitgliedschaften, Freigaben und Klassen.",
+      "empty": "Noch nichts aufgezeichnet."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "Etwas ist schiefgegangen. Bitte versuchen Sie es erneut.",
+      "FORBIDDEN": "Dafür fehlt Ihnen die Berechtigung.",
+      "UNAUTHENTICATED": "Bitte melden Sie sich an, um fortzufahren.",
+      "INVALID_REQUEST": "Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+      "NOT_FOUND": "Nicht gefunden.",
+      "MEMBERSHIP_REQUIRED": "Dafür ist eine aktive Mitgliedschaft erforderlich.",
+      "QUOTA_EXCEEDED": "Das KI-Kontingent für diesen Monat ist aufgebraucht.",
+      "ACCOUNTS_NOT_CONFIGURED": "Konten sind auf dieser Installation nicht eingerichtet."
+    }
+  },
+  "catalog": {
+    "title": "Katalog",
+    "description": {
+      "member": "Kostenlose Vorschauen, geteilte Kurse und die Kurse Ihrer Klassen.",
+      "guest": "Kostenlose Vorschauen. Melden Sie sich an, um mehr zu sehen."
+    },
+    "signInToSee": "Melden Sie sich an, um geteilte Kurse zu sehen und einer Klasse beizutreten.",
+    "join": {
+      "title": "Einer Klasse beitreten",
+      "code": "Beitrittscode",
+      "submit": "Beitreten",
+      "done": "Sie sind {{name}} beigetreten."
+    },
+    "empty": "Noch nichts zum Durchstöbern.",
+    "kind": {
+      "preview": "Kostenlose Vorschau",
+      "shared": "Geteilt",
+      "class": "Ihre Klasse"
+    },
+    "open": "Öffnen",
+    "unavailable": "Der Katalog ist auf dieser Installation nicht verfügbar."
+  },
+  "courseShare": {
+    "request": "Mit Mitgliedern teilen",
+    "pending": "Warten auf Genehmigung",
+    "stop": "Teilen beenden",
+    "requested": "Anfrage gesendet. Ein Betreiber prüft sie.",
+    "withdrawn": "Freigabe beendet. Lernende, die den Kurs bereits haben, behalten ihre Kopie.",
+    "failed": "Der Kurs konnte nicht geteilt werden. Bitte versuchen Sie es erneut."
   }
 }

@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "역할을 변경할 수 없습니다. 다시 시도하세요."
+      },
+      "roleChanged": "역할을 변경했습니다.",
+      "changeRoleLabel": "{{username}}의 역할 변경"
+    },
+    "roles": {
+      "learner": "학습자",
+      "operator": "운영자",
+      "admin": "관리자"
+    },
+    "administration": "관리",
+    "adminPage": {
+      "title": "관리",
+      "description": "이 배포의 계정, 사용량, 역할을 관리합니다.",
+      "denied": "이 페이지는 운영자와 관리자만 볼 수 있습니다."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "회원권 없음",
+      "suspended": "일시 중지",
+      "active": "사용 중",
+      "expired": "만료됨"
+    },
+    "expiresOn": "{{date}}까지",
+    "granted": "회원권을 저장했습니다.",
+    "exportMembersOnly": "내보내기는 활성 회원만 사용할 수 있습니다."
+  },
+  "admin": {
+    "members": {
+      "title": "회원권",
+      "description": "회원권을 부여, 연장, 일시 중지 또는 재개합니다. 모든 변경은 감사 로그에 기록됩니다.",
+      "days": "일수",
+      "quota": "월간 토큰",
+      "quotaValue": "월 {{tokens}} 토큰",
+      "grant": "부여 또는 연장",
+      "resume": "재개",
+      "suspend": "일시 중지"
+    },
+    "shares": {
+      "title": "공유 요청",
+      "description": "승인하면 해당 강좌를 모든 회원에게 공개합니다.",
+      "empty": "대기 중인 요청이 없습니다.",
+      "approve": "승인",
+      "reject": "거부",
+      "approved": "강좌를 회원에게 공개했습니다.",
+      "rejected": "요청을 거부했습니다.",
+      "requested": "{{date}} 요청"
+    },
+    "previews": {
+      "title": "무료 미리보기",
+      "description": "여기서 표시한 강좌는 계정 없이도 방문자가 열 수 있습니다.",
+      "courseId": "강좌 ID",
+      "add": "미리보기로 표시",
+      "remove": "제거",
+      "empty": "아직 미리보기가 없습니다."
+    },
+    "classes": {
+      "title": "클래스",
+      "description": "회원은 클래스 코드로 참여합니다. 강좌를 연결하면 클래스 회원이 열 수 있습니다.",
+      "name": "클래스 이름",
+      "create": "클래스 만들기",
+      "joinCode": "참여 코드: {{code}}. 한 번만 표시되므로 지금 복사하세요.",
+      "empty": "아직 클래스가 없습니다.",
+      "members": "회원 {{count}}명",
+      "courses": "강좌 {{count}}개",
+      "attach": "강좌 연결"
+    },
+    "audit": {
+      "title": "감사 로그",
+      "description": "계정, 회원권, 공유, 클래스의 최근 변경 사항.",
+      "empty": "아직 기록이 없습니다."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "문제가 발생했습니다. 다시 시도하세요.",
+      "FORBIDDEN": "이 작업에 대한 권한이 없습니다.",
+      "UNAUTHENTICATED": "계속하려면 로그인하세요.",
+      "INVALID_REQUEST": "입력 내용을 확인하고 다시 시도하세요.",
+      "NOT_FOUND": "찾을 수 없습니다.",
+      "MEMBERSHIP_REQUIRED": "이 작업에는 활성 회원권이 필요합니다.",
+      "QUOTA_EXCEEDED": "이번 달 AI 사용량을 모두 사용했습니다.",
+      "ACCOUNTS_NOT_CONFIGURED": "이 배포에서는 계정 기능이 설정되어 있지 않습니다."
+    }
+  },
+  "catalog": {
+    "title": "카탈로그",
+    "description": {
+      "member": "무료 미리보기, 공유 강좌, 내 클래스의 강좌.",
+      "guest": "무료 미리보기입니다. 로그인하면 더 볼 수 있습니다."
+    },
+    "signInToSee": "로그인하면 공유 강좌를 보고 클래스에 참여할 수 있습니다.",
+    "join": {
+      "title": "클래스 참여",
+      "code": "참여 코드",
+      "submit": "참여",
+      "done": "{{name}}에 참여했습니다."
+    },
+    "empty": "아직 둘러볼 항목이 없습니다.",
+    "kind": {
+      "preview": "무료 미리보기",
+      "shared": "공유됨",
+      "class": "내 클래스"
+    },
+    "open": "열기",
+    "unavailable": "이 배포에서는 카탈로그를 사용할 수 없습니다."
+  },
+  "courseShare": {
+    "request": "회원과 공유",
+    "pending": "승인 대기 중",
+    "stop": "공유 중지",
+    "requested": "요청을 보냈습니다. 운영자가 검토합니다.",
+    "withdrawn": "공유를 중지했습니다. 이미 가진 학습자는 사본을 계속 사용합니다.",
+    "failed": "강좌를 공유할 수 없습니다. 다시 시도하세요."
   }
 }

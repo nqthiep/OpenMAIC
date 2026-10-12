@@ -104,9 +104,48 @@ export interface PersistedClassroomData {
   createdAt: string;
 }
 
+/**
+ * Who a classroom belongs to, kept beside the classroom in `<id>.access.json`. The
+ * classroom file itself stays as it was. A classroom with no sidecar has no recorded
+ * owner, so only staff read it.
+ */
+export interface ClassroomAccessRecord {
+  ownerId: string;
+}
+
 /** Allowlisted characters, capped length. Generated ids are UUIDs (36 characters). */
 export function isValidClassroomId(id: string): boolean {
   return /^[a-zA-Z0-9_-]{1,128}$/.test(id);
+}
+
+/** The sidecar path for an id. Ids carry no dots, so `<id>.access.json` cannot name another classroom. */
+export function resolveClassroomAccessPath(id: string, dir: string = CLASSROOMS_DIR): string {
+  if (!isValidClassroomId(id)) throw new Error(`Invalid classroom id "${id}"`);
+  return path.join(dir, `${id}.access.json`);
+}
+
+/** The recorded owner of a classroom, or undefined when no owner was recorded. */
+export async function readClassroomAccess(
+  id: string,
+  dir: string = CLASSROOMS_DIR,
+): Promise<ClassroomAccessRecord | undefined> {
+  if (!isValidClassroomId(id)) return undefined;
+  try {
+    const content = await fs.readFile(resolveClassroomAccessPath(id, dir), 'utf-8');
+    const record = JSON.parse(content) as Partial<ClassroomAccessRecord>;
+    return typeof record.ownerId === 'string' ? { ownerId: record.ownerId } : undefined;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    throw error;
+  }
+}
+
+export async function writeClassroomAccess(
+  id: string,
+  record: ClassroomAccessRecord,
+  dir: string = CLASSROOMS_DIR,
+): Promise<void> {
+  await writeJsonFileAtomic(resolveClassroomAccessPath(id, dir), record);
 }
 
 /**
@@ -151,7 +190,7 @@ export async function persistClassroom(
     scenes: Scene[];
   },
   baseUrl: string,
-  options: { createOnly?: boolean } = {},
+  options: { createOnly?: boolean; ownerId?: string } = {},
 ): Promise<PersistedClassroomData & { url: string }> {
   const classroomData: PersistedClassroomData = {
     id: data.id,
@@ -166,6 +205,11 @@ export async function persistClassroom(
     await writeJsonFileCreateOnly(filePath, classroomData);
   } else {
     await writeJsonFileAtomic(filePath, classroomData);
+  }
+  // Written after the classroom itself: a crash between the two leaves an ownerless
+  // classroom, which only staff can read. That fails closed.
+  if (options.ownerId) {
+    await writeClassroomAccess(data.id, { ownerId: options.ownerId });
   }
 
   return {

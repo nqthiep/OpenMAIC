@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "Impossible de modifier le rôle. Réessayez."
+      },
+      "roleChanged": "Rôle mis à jour.",
+      "changeRoleLabel": "Modifier le rôle de {{username}}"
+    },
+    "roles": {
+      "learner": "Apprenant",
+      "operator": "Opérateur",
+      "admin": "Administrateur"
+    },
+    "administration": "Administration",
+    "adminPage": {
+      "title": "Administration",
+      "description": "Comptes, utilisation et rôles de cette instance.",
+      "denied": "Cette page est réservée aux opérateurs et aux administrateurs."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "Aucune adhésion",
+      "suspended": "Suspendue",
+      "active": "Active",
+      "expired": "Expirée"
+    },
+    "expiresOn": "Jusqu'au {{date}}",
+    "granted": "Adhésion enregistrée.",
+    "exportMembersOnly": "L'export est réservé aux membres actifs."
+  },
+  "admin": {
+    "members": {
+      "title": "Adhésions",
+      "description": "Accorder ou prolonger une adhésion, la suspendre ou la reprendre. Chaque changement est consigné dans le journal d'audit.",
+      "days": "Jours",
+      "quota": "Jetons par mois",
+      "quotaValue": "{{tokens}} jetons par mois",
+      "grant": "Accorder ou prolonger",
+      "resume": "Reprendre",
+      "suspend": "Suspendre"
+    },
+    "shares": {
+      "title": "Demandes de partage",
+      "description": "Approuvez une demande pour ouvrir un cours à tous les membres.",
+      "empty": "Aucune demande en attente.",
+      "approve": "Approuver",
+      "reject": "Refuser",
+      "approved": "Cours partagé avec les membres.",
+      "rejected": "Demande refusée.",
+      "requested": "Demandé le {{date}}"
+    },
+    "previews": {
+      "title": "Aperçus gratuits",
+      "description": "Un cours marqué ici peut être ouvert par les visiteurs sans compte.",
+      "courseId": "Identifiant du cours",
+      "add": "Marquer comme aperçu",
+      "remove": "Retirer",
+      "empty": "Aucun aperçu pour l'instant."
+    },
+    "classes": {
+      "title": "Classes",
+      "description": "Les membres rejoignent une classe avec son code. Associez des cours pour qu'ils soient accessibles à la classe.",
+      "name": "Nom de la classe",
+      "create": "Créer la classe",
+      "joinCode": "Code pour rejoindre : {{code}}. Il n'est affiché qu'une fois, copiez-le maintenant.",
+      "empty": "Aucune classe pour l'instant.",
+      "members": "{{count}} membres",
+      "courses": "{{count}} cours",
+      "attach": "Associer un cours"
+    },
+    "audit": {
+      "title": "Journal d'audit",
+      "description": "Modifications récentes des comptes, adhésions, partages et classes.",
+      "empty": "Rien n'a encore été consigné."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "Une erreur est survenue. Réessayez.",
+      "FORBIDDEN": "Vous n'avez pas le droit de faire cela.",
+      "UNAUTHENTICATED": "Connectez-vous pour continuer.",
+      "INVALID_REQUEST": "Vérifiez la saisie et réessayez.",
+      "NOT_FOUND": "Introuvable.",
+      "MEMBERSHIP_REQUIRED": "Une adhésion active est nécessaire.",
+      "QUOTA_EXCEEDED": "Le quota d'IA de ce mois est épuisé.",
+      "ACCOUNTS_NOT_CONFIGURED": "Les comptes ne sont pas configurés sur ce déploiement."
+    }
+  },
+  "catalog": {
+    "title": "Catalogue",
+    "description": {
+      "member": "Aperçus gratuits, cours partagés et cours de vos classes.",
+      "guest": "Aperçus gratuits. Connectez-vous pour en voir davantage."
+    },
+    "signInToSee": "Connectez-vous pour voir les cours partagés et rejoindre une classe.",
+    "join": {
+      "title": "Rejoindre une classe",
+      "code": "Code d'accès",
+      "submit": "Rejoindre",
+      "done": "Vous avez rejoint {{name}}."
+    },
+    "empty": "Rien à parcourir pour l'instant.",
+    "kind": {
+      "preview": "Aperçu gratuit",
+      "shared": "Partagé",
+      "class": "Votre classe"
+    },
+    "open": "Ouvrir",
+    "unavailable": "Le catalogue n'est pas disponible sur ce déploiement."
+  },
+  "courseShare": {
+    "request": "Partager avec les membres",
+    "pending": "En attente d'approbation",
+    "stop": "Arrêter le partage",
+    "requested": "Demande envoyée. Un opérateur va l'examiner.",
+    "withdrawn": "Partage arrêté. Les apprenants qui l'ont déjà gardent leur copie.",
+    "failed": "Le cours n'a pas pu être partagé. Réessayez."
   }
 }

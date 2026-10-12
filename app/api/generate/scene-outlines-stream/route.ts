@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Scene Outlines Streaming API (SSE)
  *
@@ -40,6 +41,8 @@ import { resolveModelFromRequest } from '@/lib/server/resolve-model';
 import {
   describeUnexpectedError,
   MODEL_FAILURE_TEXT,
+  providerFailureText,
+  providerStatusOf,
   visitorErrorText,
 } from '@/lib/server/error-summary';
 import { sortDocumentImagesForVision } from '@/lib/document/bundle';
@@ -290,6 +293,9 @@ function ensureUniqueOutlineId(outline: SceneOutline, usedIds: Set<string>): Sce
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let requirementLength: number | undefined;
   let resolvedModelString: string | undefined;
   // True once the operator's key is chosen. Upstream error text then stays on the server.
@@ -497,6 +503,13 @@ export async function POST(req: NextRequest) {
         try {
           startHeartbeat();
 
+          // The SDK reports a provider refusal (such as HTTP 402) through onError and ends the
+          // text stream empty, so the status is kept here for the empty-result path below.
+          let providerStatus: number | undefined;
+          const onProviderError = ({ error }: { error: unknown }) => {
+            providerStatus = providerStatusOf(error) ?? providerStatus;
+          };
+
           const streamParams = visionImages?.length
             ? {
                 model: languageModel,
@@ -511,6 +524,7 @@ export async function POST(req: NextRequest) {
                 // Tear down the upstream LLM request when the client disconnects,
                 // instead of letting it run to completion for a dead connection.
                 abortSignal: req.signal,
+                onError: onProviderError,
               }
             : {
                 model: languageModel,
@@ -518,6 +532,7 @@ export async function POST(req: NextRequest) {
                 prompt: prompts.user,
                 maxOutputTokens: modelInfo?.outputWindow,
                 abortSignal: req.signal,
+                onError: onProviderError,
               };
 
           let parsedOutlines: SceneOutline[] = [];
@@ -619,13 +634,18 @@ export async function POST(req: NextRequest) {
                 break;
               }
 
-              // Empty result — retry if we have attempts left
-              lastError = fullText.trim()
-                ? 'LLM response could not be parsed into outlines'
-                : 'LLM returned empty response';
+              // Empty result. A refusal the visitor can act on (balance, key) gets its own text
+              // and is not retried: a retry cannot succeed until someone fixes it.
+              const failureText = providerFailureText(providerStatus, managedKey);
+              lastError =
+                failureText ??
+                (fullText.trim()
+                  ? 'LLM response could not be parsed into outlines'
+                  : 'LLM returned empty response');
               log.warn(
-                `Outlines attempt ${attempt} diagnostics: textLen=${fullText.length}, outlines=${parsedOutlines.length}, languageDirective=${languageDirective ? 'yes' : 'no'}`,
+                `Outlines attempt ${attempt} diagnostics: textLen=${fullText.length}, outlines=${parsedOutlines.length}, languageDirective=${languageDirective ? 'yes' : 'no'}, providerStatus=${providerStatus ?? 'none'}`,
               );
+              if (failureText !== undefined) break;
 
               if (attempt <= MAX_STREAM_RETRIES) {
                 log.warn(
@@ -646,10 +666,13 @@ export async function POST(req: NextRequest) {
                 stopHeartbeat();
                 return;
               }
-              lastError = visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT);
+              const thrownStatus = providerStatusOf(error) ?? providerStatus;
+              const failureText = providerFailureText(thrownStatus, managedKey);
+              lastError = failureText ?? visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT);
               log.warn(
                 `Outlines stream error detail (attempt ${attempt}/${MAX_STREAM_RETRIES + 1}): ${lastError}`,
               );
+              if (failureText !== undefined) break;
 
               if (attempt <= MAX_STREAM_RETRIES) {
                 log.warn(

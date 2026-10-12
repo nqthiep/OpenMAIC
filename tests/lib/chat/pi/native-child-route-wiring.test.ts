@@ -24,6 +24,9 @@ vi.mock('@/lib/ai/providers', async (importOriginal) => {
   return { ...actual, isProviderKeyRequired: vi.fn(() => false) };
 });
 vi.mock('@/lib/live-mode', () => ({ isLiveMode: false }));
+// The spend gate has its own tests in tests/authz. This file checks the chat route's wiring
+// for a signed-in learner, so the gate is let through.
+vi.mock('@/lib/server/authz/viewer', () => ({ requireSpender: async () => undefined }));
 vi.mock('@/lib/persistence/server-provider', () => ({
   getServerPersistenceProvider: mocks.getServerPersistenceProvider,
 }));

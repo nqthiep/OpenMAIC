@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * POST /api/pbl/v2/open-task
  *
@@ -38,6 +39,9 @@ interface OpenTaskRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let body: OpenTaskRequest;
   try {
     body = (await req.json()) as OpenTaskRequest;

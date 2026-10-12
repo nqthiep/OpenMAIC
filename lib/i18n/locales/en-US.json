@@ -2100,8 +2100,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "The role could not be changed. Try again."
+      },
+      "roleChanged": "Role updated.",
+      "changeRoleLabel": "Change role of {{username}}"
+    },
+    "roles": {
+      "learner": "Learner",
+      "operator": "Operator",
+      "admin": "Administrator"
+    },
+    "administration": "Administration",
+    "adminPage": {
+      "title": "Administration",
+      "description": "Accounts, usage and roles for this deployment.",
+      "denied": "This page is for operators and administrators."
     }
   },
   "workbench": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "No membership",
+      "suspended": "Suspended",
+      "active": "Active",
+      "expired": "Expired"
+    },
+    "expiresOn": "Until {{date}}",
+    "granted": "Membership saved.",
+    "exportMembersOnly": "Export is for active members."
+  },
+  "admin": {
+    "members": {
+      "title": "Memberships",
+      "description": "Grant or extend a membership, suspend or resume it. Every change is written to the audit log.",
+      "days": "Days",
+      "quota": "Monthly tokens",
+      "quotaValue": "{{tokens}} tokens a month",
+      "grant": "Grant or extend",
+      "resume": "Resume",
+      "suspend": "Suspend"
+    },
+    "shares": {
+      "title": "Share requests",
+      "description": "Approve a request to open a course to all members.",
+      "empty": "No pending requests.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Course shared with members.",
+      "rejected": "Request rejected.",
+      "requested": "Requested {{date}}"
+    },
+    "previews": {
+      "title": "Free previews",
+      "description": "A course marked here can be opened by visitors without an account.",
+      "courseId": "Course id",
+      "add": "Mark as preview",
+      "remove": "Remove",
+      "empty": "No previews yet."
+    },
+    "classes": {
+      "title": "Classes",
+      "description": "Members join a class with its code. Attach courses so the class can open them.",
+      "name": "Class name",
+      "create": "Create class",
+      "joinCode": "Join code for {{code}}. It is shown once, so copy it now.",
+      "empty": "No classes yet.",
+      "members": "{{count}} members",
+      "courses": "{{count}} courses",
+      "attach": "Attach course"
+    },
+    "audit": {
+      "title": "Audit log",
+      "description": "Recent changes to accounts, memberships, sharing and classes.",
+      "empty": "Nothing recorded yet."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "Something went wrong. Try again.",
+      "FORBIDDEN": "You do not have permission for this.",
+      "UNAUTHENTICATED": "Sign in to continue.",
+      "INVALID_REQUEST": "Check the entry and try again.",
+      "NOT_FOUND": "Not found.",
+      "MEMBERSHIP_REQUIRED": "An active membership is needed for this.",
+      "QUOTA_EXCEEDED": "This month's AI allowance is used up.",
+      "ACCOUNTS_NOT_CONFIGURED": "Accounts are not set up on this deployment."
+    }
+  },
+  "catalog": {
+    "title": "Catalog",
+    "description": {
+      "member": "Free previews, shared courses, and the courses of your classes.",
+      "guest": "Free previews. Sign in to see more."
+    },
+    "signInToSee": "Sign in to see shared courses and join a class.",
+    "join": {
+      "title": "Join a class",
+      "code": "Join code",
+      "submit": "Join",
+      "done": "You joined {{name}}."
+    },
+    "empty": "Nothing to browse yet.",
+    "kind": {
+      "preview": "Free preview",
+      "shared": "Shared",
+      "class": "Your class"
+    },
+    "open": "Open",
+    "unavailable": "The catalog is not available on this deployment."
+  },
+  "courseShare": {
+    "request": "Share with members",
+    "pending": "Waiting for approval",
+    "stop": "Stop sharing",
+    "requested": "Request sent. An operator will review it.",
+    "withdrawn": "Sharing stopped. Learners who already have it keep their copy.",
+    "failed": "The course could not be shared. Try again."
   }
 }

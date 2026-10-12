@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "権限を変更できませんでした。もう一度お試しください。"
+      },
+      "roleChanged": "権限を更新しました。",
+      "changeRoleLabel": "{{username}} の権限を変更"
+    },
+    "roles": {
+      "learner": "学習者",
+      "operator": "運用担当",
+      "admin": "管理者"
+    },
+    "administration": "管理",
+    "adminPage": {
+      "title": "管理",
+      "description": "このデプロイのアカウント、利用状況、権限を管理します。",
+      "denied": "このページは運用担当者と管理者のみ利用できます。"
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "会員ではありません",
+      "suspended": "停止中",
+      "active": "有効",
+      "expired": "期限切れ"
+    },
+    "expiresOn": "{{date}} まで",
+    "granted": "会員情報を保存しました。",
+    "exportMembersOnly": "エクスポートは有効な会員のみ利用できます。"
+  },
+  "admin": {
+    "members": {
+      "title": "会員",
+      "description": "会員資格の付与・延長・停止・再開ができます。すべての変更は監査ログに記録されます。",
+      "days": "日数",
+      "quota": "月間トークン数",
+      "quotaValue": "月 {{tokens}} トークン",
+      "grant": "付与・延長",
+      "resume": "再開",
+      "suspend": "停止"
+    },
+    "shares": {
+      "title": "共有リクエスト",
+      "description": "承認すると、そのコースはすべての会員に公開されます。",
+      "empty": "保留中のリクエストはありません。",
+      "approve": "承認",
+      "reject": "却下",
+      "approved": "コースを会員に公開しました。",
+      "rejected": "リクエストを却下しました。",
+      "requested": "{{date}} にリクエスト"
+    },
+    "previews": {
+      "title": "無料プレビュー",
+      "description": "ここで指定したコースは、アカウントなしで訪問者が開けます。",
+      "courseId": "コース ID",
+      "add": "プレビューに設定",
+      "remove": "削除",
+      "empty": "まだプレビューはありません。"
+    },
+    "classes": {
+      "title": "クラス",
+      "description": "会員はクラスのコードで参加します。クラスにコースを追加すると、メンバーが開けるようになります。",
+      "name": "クラス名",
+      "create": "クラスを作成",
+      "joinCode": "参加コード: {{code}}。一度しか表示されないので、今すぐコピーしてください。",
+      "empty": "まだクラスはありません。",
+      "members": "{{count}} 人",
+      "courses": "{{count}} コース",
+      "attach": "コースを追加"
+    },
+    "audit": {
+      "title": "監査ログ",
+      "description": "アカウント、会員、共有、クラスの最近の変更。",
+      "empty": "まだ記録はありません。"
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "問題が発生しました。もう一度お試しください。",
+      "FORBIDDEN": "この操作の権限がありません。",
+      "UNAUTHENTICATED": "続けるにはサインインしてください。",
+      "INVALID_REQUEST": "入力内容を確認して、もう一度お試しください。",
+      "NOT_FOUND": "見つかりません。",
+      "MEMBERSHIP_REQUIRED": "この操作には有効な会員資格が必要です。",
+      "QUOTA_EXCEEDED": "今月のAI利用枠を使い切りました。",
+      "ACCOUNTS_NOT_CONFIGURED": "このデプロイでは アカウント機能が有効ではありません。"
+    }
+  },
+  "catalog": {
+    "title": "カタログ",
+    "description": {
+      "member": "無料プレビュー、共有コース、所属クラスのコース。",
+      "guest": "無料プレビューです。サインインするとさらに表示されます。"
+    },
+    "signInToSee": "サインインすると、共有コースを見たりクラスに参加できます。",
+    "join": {
+      "title": "クラスに参加",
+      "code": "参加コード",
+      "submit": "参加",
+      "done": "{{name}} に参加しました。"
+    },
+    "empty": "まだ閲覧できるものがありません。",
+    "kind": {
+      "preview": "無料プレビュー",
+      "shared": "共有",
+      "class": "所属クラス"
+    },
+    "open": "開く",
+    "unavailable": "このデプロイではカタログを利用できません。"
+  },
+  "courseShare": {
+    "request": "会員と共有",
+    "pending": "承認待ち",
+    "stop": "共有を停止",
+    "requested": "リクエストを送信しました。運用担当者が確認します。",
+    "withdrawn": "共有を停止しました。すでに持っている学習者は、コピーを引き続き利用できます。",
+    "failed": "コースを共有できませんでした。もう一度お試しください。"
   }
 }

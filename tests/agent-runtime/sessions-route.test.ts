@@ -18,9 +18,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/config/feature-flags', () => ({
   isAgentRuntimeEnabled: () => mocks.runtimeEnabled,
   isAgentRuntimeConfigured: () => mocks.runtimeEnabled,
+  // No database in these tests, so the account spend guard passes through.
+  isServerPersistenceConfigured: () => false,
 }));
 vi.mock('@/lib/server/agent-runtime/owner', () => ({
   resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+  readAnonymousOwnerId: () => undefined,
 }));
 // The route reads skills off the explicit `skill` param AND the prompt; pin the
 // lookup to a fixed installed set so no user-skill store or skill directory is

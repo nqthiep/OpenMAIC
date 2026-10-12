@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "No se pudo cambiar el rol. Inténtalo de nuevo."
+      },
+      "roleChanged": "Rol actualizado.",
+      "changeRoleLabel": "Cambiar el rol de {{username}}"
+    },
+    "roles": {
+      "learner": "Estudiante",
+      "operator": "Operador",
+      "admin": "Administrador"
+    },
+    "administration": "Administración",
+    "adminPage": {
+      "title": "Administración",
+      "description": "Cuentas, uso y roles de esta instalación.",
+      "denied": "Esta página es para operadores y administradores."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "Sin membresía",
+      "suspended": "Suspendida",
+      "active": "Activa",
+      "expired": "Vencida"
+    },
+    "expiresOn": "Hasta {{date}}",
+    "granted": "Membresía guardada.",
+    "exportMembersOnly": "La exportación es para miembros activos."
+  },
+  "admin": {
+    "members": {
+      "title": "Membresías",
+      "description": "Otorga o extiende una membresía, y la suspende o reactiva. Cada cambio queda registrado en la bitácora de auditoría.",
+      "days": "Días",
+      "quota": "Tokens al mes",
+      "quotaValue": "{{tokens}} tokens al mes",
+      "grant": "Otorgar o extender",
+      "resume": "Reactivar",
+      "suspend": "Suspender"
+    },
+    "shares": {
+      "title": "Solicitudes para compartir",
+      "description": "Aprueba una solicitud para abrir un curso a todos los miembros.",
+      "empty": "No hay solicitudes pendientes.",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "approved": "Curso compartido con los miembros.",
+      "rejected": "Solicitud rechazada.",
+      "requested": "Solicitado el {{date}}"
+    },
+    "previews": {
+      "title": "Vistas previas gratuitas",
+      "description": "Un curso marcado aquí puede abrirlo cualquier visitante sin cuenta.",
+      "courseId": "ID del curso",
+      "add": "Marcar como vista previa",
+      "remove": "Quitar",
+      "empty": "Todavía no hay vistas previas."
+    },
+    "classes": {
+      "title": "Clases",
+      "description": "Los miembros se unen a una clase con su código. Asocia cursos para que la clase pueda abrirlos.",
+      "name": "Nombre de la clase",
+      "create": "Crear clase",
+      "joinCode": "Código para unirse: {{code}}. Se muestra una sola vez, cópialo ahora.",
+      "empty": "Todavía no hay clases.",
+      "members": "{{count}} miembros",
+      "courses": "{{count}} cursos",
+      "attach": "Asociar curso"
+    },
+    "audit": {
+      "title": "Bitácora de auditoría",
+      "description": "Cambios recientes en cuentas, membresías, comparticiones y clases.",
+      "empty": "Todavía no hay registros."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "FORBIDDEN": "No tienes permiso para esto.",
+      "UNAUTHENTICATED": "Inicia sesión para continuar.",
+      "INVALID_REQUEST": "Revisa lo escrito e inténtalo de nuevo.",
+      "NOT_FOUND": "No encontrado.",
+      "MEMBERSHIP_REQUIRED": "Se necesita una membresía activa.",
+      "QUOTA_EXCEEDED": "Se agotó la cuota de IA de este mes.",
+      "ACCOUNTS_NOT_CONFIGURED": "Las cuentas no están configuradas en esta instalación."
+    }
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "description": {
+      "member": "Vistas previas gratuitas, cursos compartidos y los cursos de tus clases.",
+      "guest": "Vistas previas gratuitas. Inicia sesión para ver más."
+    },
+    "signInToSee": "Inicia sesión para ver cursos compartidos y unirte a una clase.",
+    "join": {
+      "title": "Unirse a una clase",
+      "code": "Código de acceso",
+      "submit": "Unirse",
+      "done": "Te uniste a {{name}}."
+    },
+    "empty": "Todavía no hay nada que explorar.",
+    "kind": {
+      "preview": "Vista previa gratuita",
+      "shared": "Compartido",
+      "class": "Tu clase"
+    },
+    "open": "Abrir",
+    "unavailable": "El catálogo no está disponible en esta instalación."
+  },
+  "courseShare": {
+    "request": "Compartir con los miembros",
+    "pending": "Esperando aprobación",
+    "stop": "Dejar de compartir",
+    "requested": "Solicitud enviada. Un operador la revisará.",
+    "withdrawn": "Se dejó de compartir. Quienes ya lo tienen conservan su copia.",
+    "failed": "No se pudo compartir el curso. Inténtalo de nuevo."
   }
 }

@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "无法更改角色，请重试。"
+      },
+      "roleChanged": "角色已更新。",
+      "changeRoleLabel": "更改 {{username}} 的角色"
+    },
+    "roles": {
+      "learner": "学员",
+      "operator": "运营人员",
+      "admin": "管理员"
+    },
+    "administration": "管理",
+    "adminPage": {
+      "title": "管理",
+      "description": "本部署的账户、用量与角色管理。",
+      "denied": "此页面仅供运营人员和管理员访问。"
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "无会员",
+      "suspended": "已暂停",
+      "active": "有效",
+      "expired": "已过期"
+    },
+    "expiresOn": "有效期至 {{date}}",
+    "granted": "会员信息已保存。",
+    "exportMembersOnly": "导出仅对有效会员开放。"
+  },
+  "admin": {
+    "members": {
+      "title": "会员",
+      "description": "授予或延长会员资格，暂停或恢复会员。每项更改都会写入审计日志。",
+      "days": "天数",
+      "quota": "每月 token 数",
+      "quotaValue": "每月 {{tokens}} 个 token",
+      "grant": "授予或延长",
+      "resume": "恢复",
+      "suspend": "暂停"
+    },
+    "shares": {
+      "title": "分享申请",
+      "description": "批准后，该课程将向所有会员开放。",
+      "empty": "没有待处理的申请。",
+      "approve": "批准",
+      "reject": "拒绝",
+      "approved": "课程已分享给会员。",
+      "rejected": "申请已拒绝。",
+      "requested": "申请于 {{date}}"
+    },
+    "previews": {
+      "title": "免费预览",
+      "description": "在此标记的课程，访客无需账号即可打开。",
+      "courseId": "课程 ID",
+      "add": "标记为预览",
+      "remove": "移除",
+      "empty": "还没有预览。"
+    },
+    "classes": {
+      "title": "班级",
+      "description": "会员使用班级代码加入班级。为班级添加课程，班级成员即可打开。",
+      "name": "班级名称",
+      "create": "创建班级",
+      "joinCode": "加入代码：{{code}}。只显示一次，请立即复制。",
+      "empty": "还没有班级。",
+      "members": "{{count}} 名会员",
+      "courses": "{{count}} 门课程",
+      "attach": "添加课程"
+    },
+    "audit": {
+      "title": "审计日志",
+      "description": "账号、会员、分享和班级的最近更改。",
+      "empty": "还没有记录。"
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "出错了，请重试。",
+      "FORBIDDEN": "你没有此操作的权限。",
+      "UNAUTHENTICATED": "请登录后继续。",
+      "INVALID_REQUEST": "请检查输入后重试。",
+      "NOT_FOUND": "未找到。",
+      "MEMBERSHIP_REQUIRED": "此操作需要有效的会员资格。",
+      "QUOTA_EXCEEDED": "本月的 AI 额度已用完。",
+      "ACCOUNTS_NOT_CONFIGURED": "此部署未启用账号功能。"
+    }
+  },
+  "catalog": {
+    "title": "课程目录",
+    "description": {
+      "member": "免费预览、分享课程，以及你所在班级的课程。",
+      "guest": "免费预览。登录后可查看更多。"
+    },
+    "signInToSee": "登录后可查看分享课程并加入班级。",
+    "join": {
+      "title": "加入班级",
+      "code": "加入代码",
+      "submit": "加入",
+      "done": "你已加入 {{name}}。"
+    },
+    "empty": "暂时没有可浏览的内容。",
+    "kind": {
+      "preview": "免费预览",
+      "shared": "已分享",
+      "class": "你的班级"
+    },
+    "open": "打开",
+    "unavailable": "此部署不提供课程目录。"
+  },
+  "courseShare": {
+    "request": "与会员分享",
+    "pending": "等待批准",
+    "stop": "停止分享",
+    "requested": "申请已发送，运营人员将审核。",
+    "withdrawn": "已停止分享。已经拥有此课程的学员仍保留其副本。",
+    "failed": "无法分享此课程，请重试。"
   }
 }

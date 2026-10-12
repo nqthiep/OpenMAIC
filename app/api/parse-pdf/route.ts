@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import {
   isServerConfiguredProvider,
@@ -14,6 +15,9 @@ import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Parse PDF');
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let pdfFileName: string | undefined;
   let resolvedProviderId: string | undefined;
   let managed = false;

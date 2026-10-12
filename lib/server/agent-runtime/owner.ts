@@ -19,6 +19,15 @@ function readCookie(headers: Headers, name: string): string | undefined {
   return undefined;
 }
 
+/**
+ * The owner of a request that carries a valid anonymous cookie, without minting one.
+ * Undefined when there is no cookie: such a request owns nothing yet.
+ */
+export function readAnonymousOwnerId(headers: Headers): string | undefined {
+  const existingId = readCookie(headers, ANONYMOUS_COOKIE);
+  return existingId && UUID_V4.test(existingId) ? `anon:${existingId}` : undefined;
+}
+
 function anonymousCookieHeader(id: string): string {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   return (

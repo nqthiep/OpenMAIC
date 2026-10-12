@@ -26,6 +26,8 @@ import { isVideoExportEnabled } from '@/lib/config/feature-flags';
 import { useVideoRenderStore } from '@/lib/store/video-render';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { VideoExportDialog } from './video-export-dialog';
+import { CourseShareButton } from '@/components/learning/course-share-button';
+import { useExportEntitlement } from '@/lib/membership/use-export-entitlement';
 import { LanguageSwitcher } from '../language-switcher';
 import { SettingsDialog } from '../settings';
 import {
@@ -89,6 +91,8 @@ export function HeaderControls({
   // across mode swaps (was previously in `Header` only, missing from
   // CommandBar's right cluster).
   const scenes = useStageStore((s) => s.scenes);
+  const stageId = useStageStore((s) => s.stage?.id);
+  const exportEntitlement = useExportEntitlement();
   const generatingOutlines = useStageStore((s) => s.generatingOutlines);
   const failedOutlines = useStageStore((s) => s.failedOutlines);
   const mediaTasks = useMediaGenerationStore((s) => s.tasks);
@@ -107,8 +111,16 @@ export function HeaderControls({
   // Keep the original full-generation gate for the export menu. Script files
   // are text-only, but the latest review confirmed that this menu intentionally
   // stays unavailable until all media tasks have completed or failed.
-  const canExport = isScriptExportReady({ scenes, generatingOutlines, failedOutlines }, mediaTasks);
-  const exportLabel = canExport ? t('export.pptx') : t('share.notReady');
+  // Export is for active members when accounts are on; see use-export-entitlement.
+  const canExport =
+    exportEntitlement === 'open' &&
+    isScriptExportReady({ scenes, generatingOutlines, failedOutlines }, mediaTasks);
+  const exportLabel =
+    exportEntitlement === 'members-only'
+      ? t('membership.exportMembersOnly')
+      : canExport
+        ? t('export.pptx')
+        : t('share.notReady');
 
   const compact = variant === 'compact';
   const proChecked = proModeActive ?? mode === 'edit';
@@ -259,6 +271,9 @@ export function HeaderControls({
           />
         </label>
       )}
+
+      {/* Share with members. Shows only to the course owner, with accounts on. */}
+      <CourseShareButton courseId={stageId} />
 
       {/* Export / Download — lives to the right of the Pro Switch.
           Not a settings function so it does not belong inside the

@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   isServerConfiguredProvider,
@@ -443,6 +444,9 @@ async function runExtraction(
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   const logState: ExtractLogState = {};
   // Whether this request took the asset-id (JSON) form. The multipart byte
   // form keeps its observable behavior apart from fixed text on operator-key

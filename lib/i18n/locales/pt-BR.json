@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "Não foi possível alterar a função. Tente novamente."
+      },
+      "roleChanged": "Função atualizada.",
+      "changeRoleLabel": "Alterar a função de {{username}}"
+    },
+    "roles": {
+      "learner": "Aluno",
+      "operator": "Operador",
+      "admin": "Administrador"
+    },
+    "administration": "Administração",
+    "adminPage": {
+      "title": "Administração",
+      "description": "Contas, uso e funções desta instalação.",
+      "denied": "Esta página é para operadores e administradores."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "Sem assinatura",
+      "suspended": "Suspensa",
+      "active": "Ativa",
+      "expired": "Expirada"
+    },
+    "expiresOn": "Até {{date}}",
+    "granted": "Assinatura salva.",
+    "exportMembersOnly": "A exportação é para membros ativos."
+  },
+  "admin": {
+    "members": {
+      "title": "Assinaturas",
+      "description": "Conceda ou prorrogue uma assinatura, suspenda ou retome. Cada alteração é registrada no log de auditoria.",
+      "days": "Dias",
+      "quota": "Tokens por mês",
+      "quotaValue": "{{tokens}} tokens por mês",
+      "grant": "Conceder ou prorrogar",
+      "resume": "Retomar",
+      "suspend": "Suspender"
+    },
+    "shares": {
+      "title": "Pedidos de compartilhamento",
+      "description": "Aprove um pedido para abrir um curso a todos os membros.",
+      "empty": "Nenhum pedido pendente.",
+      "approve": "Aprovar",
+      "reject": "Recusar",
+      "approved": "Curso compartilhado com os membros.",
+      "rejected": "Pedido recusado.",
+      "requested": "Solicitado em {{date}}"
+    },
+    "previews": {
+      "title": "Prévias gratuitas",
+      "description": "Um curso marcado aqui pode ser aberto por visitantes sem conta.",
+      "courseId": "ID do curso",
+      "add": "Marcar como prévia",
+      "remove": "Remover",
+      "empty": "Ainda não há prévias."
+    },
+    "classes": {
+      "title": "Turmas",
+      "description": "Os membros entram em uma turma com o código. Anexe cursos para que a turma possa abri-los.",
+      "name": "Nome da turma",
+      "create": "Criar turma",
+      "joinCode": "Código de entrada: {{code}}. Ele é mostrado uma única vez, copie agora.",
+      "empty": "Ainda não há turmas.",
+      "members": "{{count}} membros",
+      "courses": "{{count}} cursos",
+      "attach": "Anexar curso"
+    },
+    "audit": {
+      "title": "Log de auditoria",
+      "description": "Alterações recentes em contas, assinaturas, compartilhamentos e turmas.",
+      "empty": "Nada registrado ainda."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "Algo deu errado. Tente novamente.",
+      "FORBIDDEN": "Você não tem permissão para isso.",
+      "UNAUTHENTICATED": "Entre para continuar.",
+      "INVALID_REQUEST": "Verifique o que foi digitado e tente novamente.",
+      "NOT_FOUND": "Não encontrado.",
+      "MEMBERSHIP_REQUIRED": "É preciso ter uma assinatura ativa.",
+      "QUOTA_EXCEEDED": "A cota de IA deste mês foi usada.",
+      "ACCOUNTS_NOT_CONFIGURED": "As contas não estão configuradas nesta instalação."
+    }
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "description": {
+      "member": "Prévias gratuitas, cursos compartilhados e os cursos das suas turmas.",
+      "guest": "Prévias gratuitas. Entre para ver mais."
+    },
+    "signInToSee": "Entre para ver os cursos compartilhados e entrar em uma turma.",
+    "join": {
+      "title": "Entrar em uma turma",
+      "code": "Código de entrada",
+      "submit": "Entrar",
+      "done": "Você entrou em {{name}}."
+    },
+    "empty": "Nada para explorar ainda.",
+    "kind": {
+      "preview": "Prévia gratuita",
+      "shared": "Compartilhado",
+      "class": "Sua turma"
+    },
+    "open": "Abrir",
+    "unavailable": "O catálogo não está disponível nesta instalação."
+  },
+  "courseShare": {
+    "request": "Compartilhar com os membros",
+    "pending": "Aguardando aprovação",
+    "stop": "Parar de compartilhar",
+    "requested": "Pedido enviado. Um operador vai analisá-lo.",
+    "withdrawn": "Compartilhamento interrompido. Quem já tem o curso mantém a cópia.",
+    "failed": "Não foi possível compartilhar o curso. Tente novamente."
   }
 }

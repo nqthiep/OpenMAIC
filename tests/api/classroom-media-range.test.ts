@@ -65,7 +65,7 @@ describe('GET /api/classroom-media range support', () => {
     expect(res.headers.get('Content-Length')).toBe(String(FILE_SIZE));
     expect(res.headers.get('Content-Type')).toBe('video/mp4');
     expect(res.headers.get('Accept-Ranges')).toBe('bytes');
-    expect(res.headers.get('Cache-Control')).toBe('public, max-age=86400, immutable');
+    expect(res.headers.get('Cache-Control')).toBe('private, max-age=86400, immutable');
     expect(mocks.createReadStream).toHaveBeenCalledWith(expect.any(String));
     expect(await res.text()).toBe('x'.repeat(FILE_SIZE));
   });
@@ -77,7 +77,7 @@ describe('GET /api/classroom-media range support', () => {
     expect(res.headers.get('Content-Range')).toBe(`bytes 10-19/${FILE_SIZE}`);
     expect(res.headers.get('Content-Length')).toBe('10');
     expect(res.headers.get('Accept-Ranges')).toBe('bytes');
-    expect(res.headers.get('Cache-Control')).toBe('public, max-age=86400, immutable');
+    expect(res.headers.get('Cache-Control')).toBe('private, max-age=86400, immutable');
     expect(mocks.createReadStream).toHaveBeenCalledWith(expect.any(String), {
       start: 10,
       end: 19,

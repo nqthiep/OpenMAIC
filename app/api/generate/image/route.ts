@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Image Generation API
  *
@@ -43,6 +44,9 @@ const log = createLogger('ImageGeneration API');
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
+  const denied = await requireSpender(request.headers);
+  if (denied) return denied;
+
   let managed = false;
   try {
     const body = (await request.json()) as ImageGenerationOptions;

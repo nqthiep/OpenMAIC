@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Agent runtime control plane for session creation and listing.
  *
@@ -43,6 +44,9 @@ interface CreateSessionBody {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   if (!isAgentRuntimeConfigured()) {
     return new Response('Not found', { status: 404 });
   }

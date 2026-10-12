@@ -1,4 +1,5 @@
 import { createLogger } from '@/lib/logger';
+import { enterSpendOwner } from '@/lib/server/authz/spend-context';
 import { generateClassroom, type GenerateClassroomInput } from '@/lib/server/classroom-generation';
 import {
   markClassroomGenerationJobFailed,
@@ -15,6 +16,7 @@ export function runClassroomGenerationJob(
   jobId: string,
   input: GenerateClassroomInput,
   baseUrl: string,
+  ownerId?: string,
 ): Promise<void> {
   const existing = runningJobs.get(jobId);
   if (existing) {
@@ -22,12 +24,15 @@ export function runClassroomGenerationJob(
   }
 
   const jobPromise = (async () => {
+    // Runs after the response, so the request's spend owner does not reach it: set it again here.
+    if (ownerId) enterSpendOwner(ownerId);
     let managedKey = false;
     try {
       await markClassroomGenerationJobRunning(jobId);
 
       const result = await generateClassroom(input, {
         baseUrl,
+        ownerId,
         onProgress: async (progress) => {
           await updateClassroomGenerationJobProgress(jobId, progress);
         },

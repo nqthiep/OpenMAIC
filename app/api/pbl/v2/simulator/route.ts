@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * POST /api/pbl/v2/simulator   (SCENARIO ONLY)
  *
@@ -37,6 +38,9 @@ interface SimulatorRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let body: SimulatorRequest;
   try {
     body = (await req.json()) as SimulatorRequest;

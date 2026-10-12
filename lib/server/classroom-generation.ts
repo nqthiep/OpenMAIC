@@ -181,6 +181,8 @@ export async function generateClassroom(
   input: GenerateClassroomInput,
   options: {
     baseUrl: string;
+    /** The partition that owns the classroom this run produces. */
+    ownerId?: string;
     onProgress?: (progress: ClassroomGenerationProgress) => Promise<void> | void;
     /** Reports whether each model the run resolves uses the operator's key. */
     onManagedKey?: (managedKey: boolean) => void;
@@ -725,6 +727,7 @@ export async function generateClassroom(
       scenes,
     },
     options.baseUrl,
+    { ownerId: options.ownerId },
   );
 
   log.info(`Classroom persisted: ${persisted.id}, URL: ${persisted.url}`);

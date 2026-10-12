@@ -24,6 +24,11 @@ describe('embedded persistence route', () => {
       ...(await importOriginal<typeof import('@/lib/server/accounts/store')>()),
       ensureAccountSchema: vi.fn().mockResolvedValue(undefined),
     }));
+    // Same for the learning schema: membership, sharing and rewards are exercised by tests/learning.
+    vi.doMock('@/lib/server/learning/schema', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('@/lib/server/learning/schema')>()),
+      ensureLearningSchema: vi.fn().mockResolvedValue(undefined),
+    }));
   });
 
   it('returns a clear 404 when DATABASE_URL is unset', async () => {

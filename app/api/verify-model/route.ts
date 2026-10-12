@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
@@ -7,6 +8,9 @@ import { callLLM } from '@/lib/ai/llm';
 const log = createLogger('Verify Model');
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let model: string | undefined;
   // Set once the operator's key is chosen. Upstream text from that key is never sent to the visitor.
   let managedKey = false;

@@ -1,5 +1,8 @@
 import { type NextRequest } from 'next/server';
+import { accountsEnabled } from '@/lib/server/accounts/runtime';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { can } from '@/lib/server/authz/policy';
+import { resolveViewer } from '@/lib/server/authz/viewer';
 import {
   isValidClassroomJobId,
   readClassroomGenerationJob,
@@ -22,7 +25,12 @@ export async function GET(req: NextRequest, context: { params: Promise<{ jobId: 
     }
 
     const job = await readClassroomGenerationJob(jobId);
-    if (!job) {
+    // A job the caller did not start is reported as missing. Its result names the classroom.
+    if (
+      !job ||
+      (accountsEnabled() &&
+        !can(await resolveViewer(req.headers), 'job.read', { ownerId: job.ownerId }))
+    ) {
       return apiError('INVALID_REQUEST', 404, 'Classroom generation job not found');
     }
 

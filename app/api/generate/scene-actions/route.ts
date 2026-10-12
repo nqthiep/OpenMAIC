@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Scene Actions Generation API
  *
@@ -35,6 +36,9 @@ const log = createLogger('Scene Actions API');
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let outlineTitle: string | undefined;
   let resolvedModelString: string | undefined;
   try {

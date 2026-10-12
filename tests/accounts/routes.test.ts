@@ -2,6 +2,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
+import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 type RouteHandler = (request: Request) => Promise<Response>;
 
@@ -66,6 +67,7 @@ beforeAll(async () => {
   db = new PGlite();
   await db.waitReady;
   await ensureAccountSchema(new PGlitePool(db));
+  await ensureLearningSchema(new PGlitePool(db));
 }, ROUTE_TIMEOUT_MS);
 
 beforeEach(async () => {
@@ -78,7 +80,7 @@ beforeEach(async () => {
   // The login throttle is a process-wide singleton on globalThis. Clear it so
   // failures recorded by one test cannot throttle the next.
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
-  await db!.exec('TRUNCATE account_sessions, accounts');
+  await db!.exec('TRUNCATE account_sessions, accounts CASCADE');
 });
 
 afterEach(() => {

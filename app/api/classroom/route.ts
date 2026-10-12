@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server';
 import { randomUUID } from 'crypto';
 import { validateScene } from '@openmaic/dsl';
 import { apiSuccess, apiError, API_ERROR_CODES } from '@/lib/server/api-response';
+import { canReadClassroom, resolveViewer, rewardReaderIfEligible } from '@/lib/server/authz/viewer';
 import { readBoundedJson } from '@/lib/server/bounded-json';
 import {
   buildRequestOrigin,
@@ -120,10 +121,11 @@ export async function POST(request: NextRequest) {
     // replaced through this route: create-only, and a taken id is a conflict.
     let persisted: Awaited<ReturnType<typeof persistClassroom>>;
     try {
+      const viewer = await resolveViewer(request.headers);
       persisted = await persistClassroom(
         { id, stage: { ...safeStage, id }, scenes: safeScenes },
         baseUrl,
-        { createOnly: true },
+        { createOnly: true, ownerId: viewer.ownerId },
       );
     } catch (error) {
       if (isAlreadyExistsError(error)) {
@@ -162,6 +164,13 @@ export async function GET(request: NextRequest) {
     if (!isValidClassroomId(id)) {
       return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'Invalid classroom id');
     }
+
+    // A classroom the caller may not read is reported as missing, so the id is not an oracle.
+    if (!(await canReadClassroom(request.headers, id))) {
+      return apiError(API_ERROR_CODES.INVALID_REQUEST, 404, 'Classroom not found');
+    }
+    // The first read of a shared course by a member credits its author. Never blocks the read.
+    await rewardReaderIfEligible(request.headers, id);
 
     const classroom = await readClassroom(id);
     if (!classroom) {

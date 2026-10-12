@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
 import {
@@ -18,6 +19,9 @@ import { MINERU_CLOUD_DEFAULT_BASE } from '@/lib/pdf/constants';
 const log = createLogger('Verify PDF Provider');
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let providerId: string | undefined;
   let managed = false;
   try {

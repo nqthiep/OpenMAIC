@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Verify Image Provider API
  *
@@ -38,6 +39,9 @@ const log = createLogger('VerifyImageProvider');
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
+  const denied = await requireSpender(request.headers);
+  if (denied) return denied;
+
   let managed = false;
   try {
     const providerId = (request.headers.get('x-image-provider')?.trim() ||

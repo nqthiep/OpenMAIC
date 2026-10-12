@@ -109,6 +109,7 @@ describe('registerAccount', () => {
       await expect(resolveAccountSession(deps, session.token)).resolves.toEqual({
         accountId: session.accountId,
         username: 'alice',
+        role: 'learner',
       });
       expect(accountOwnerId(session.accountId)).toBe(`acct:${session.accountId}`);
       await expect(resolveAccountSession(deps, undefined)).resolves.toBeUndefined();

@@ -105,6 +105,7 @@ describe('sessions', () => {
     await expect(findSessionAccount(queryable, 'hash-live', NOW)).resolves.toEqual({
       accountId,
       username: 'alice',
+      role: 'learner',
     });
     await expect(findSessionAccount(queryable, 'hash-unknown', NOW)).resolves.toBeUndefined();
   });
@@ -133,6 +134,7 @@ describe('sessions', () => {
     await expect(findSessionAccount(queryable, 'hash-live', NOW)).resolves.toEqual({
       accountId,
       username: 'alice',
+      role: 'learner',
     });
   });
 

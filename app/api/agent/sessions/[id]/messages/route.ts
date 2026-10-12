@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /** Agent runtime control plane for durable follow-up messages. */
 import { AgentSessionAccessError } from '@openmaic/storage';
 import type { NextRequest } from 'next/server';
@@ -26,6 +27,9 @@ export const runtime = 'nodejs';
 const SESSION_MESSAGE_MAX_BYTES = 1024 * 1024;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   if (!isAgentRuntimeConfigured()) {
     return new Response('Not found', { status: 404 });
   }

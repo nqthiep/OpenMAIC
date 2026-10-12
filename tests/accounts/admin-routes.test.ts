@@ -2,6 +2,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
+import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 const PASSWORD = 'correct horse battery staple';
 const ROOT = { username: 'root', password: PASSWORD };
@@ -27,6 +28,7 @@ beforeAll(async () => {
   db = new PGlite();
   await db.waitReady;
   await ensureAccountSchema(new PGlitePool(db));
+  await ensureLearningSchema(new PGlitePool(db));
 }, ROUTE_TIMEOUT_MS);
 
 beforeEach(async () => {
@@ -37,7 +39,9 @@ beforeEach(async () => {
   vi.stubEnv('ACCOUNT_REGISTRATION', 'open');
   vi.stubEnv('ADMIN_USERNAMES', 'root');
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
-  await db!.exec('TRUNCATE account_admin_audit, account_sessions, accounts RESTART IDENTITY');
+  await db!.exec(
+    'TRUNCATE account_admin_audit, account_sessions, accounts RESTART IDENTITY CASCADE',
+  );
 });
 
 afterAll(async () => {
@@ -115,7 +119,7 @@ async function accountIdOf(username: string): Promise<string> {
 }
 
 describe('administrator account routes', () => {
-  it('lists accounts for an administrator only, and never returns password material', async () => {
+  it('lists accounts for operators and administrators only, and never returns password material', async () => {
     const handlers = await loadHandlers();
     const root = await signUp(handlers, ROOT);
     await signUp(handlers, ALICE);
@@ -123,7 +127,7 @@ describe('administrator account routes', () => {
     const refusedForAlice = await handlers.list(
       getRequest('/api/admin/accounts', await signUp(handlers, BOB)),
     );
-    expect(await errorOf(refusedForAlice)).toEqual({ status: 403, errorCode: 'ADMIN_ONLY' });
+    expect(await errorOf(refusedForAlice)).toEqual({ status: 403, errorCode: 'STAFF_ONLY' });
 
     const anonymous = await handlers.list(getRequest('/api/admin/accounts'));
     expect(await errorOf(anonymous)).toEqual({ status: 401, errorCode: 'UNAUTHENTICATED' });
@@ -232,7 +236,7 @@ describe('administrator account routes', () => {
         params: Promise.resolve({ id: rootId }),
       },
     );
-    expect(await errorOf(byAlice)).toEqual({ status: 403, errorCode: 'ADMIN_ONLY' });
+    expect(await errorOf(byAlice)).toEqual({ status: 403, errorCode: 'STAFF_ONLY' });
   });
 
   it('refuses a reason longer than 200 characters', async () => {
@@ -254,12 +258,12 @@ describe('administrator account routes', () => {
     vi.stubEnv('ADMIN_USERNAMES', '');
 
     const response = await handlers.list(getRequest('/api/admin/accounts', root));
-    expect(await errorOf(response)).toEqual({ status: 403, errorCode: 'ADMIN_ONLY' });
+    expect(await errorOf(response)).toEqual({ status: 403, errorCode: 'STAFF_ONLY' });
   });
 });
 
 describe('usage endpoint with accounts enabled', () => {
-  it('is administrator-only: anonymous and ordinary accounts get 403, an administrator gets the data', async () => {
+  it('is staff-only: anonymous and learner accounts get 403, an administrator gets the data', async () => {
     const handlers = await loadHandlers();
     const root = await signUp(handlers, ROOT);
     const alice = await signUp(handlers, ALICE);
@@ -269,11 +273,11 @@ describe('usage endpoint with accounts enabled', () => {
 
     expect(await errorOf(await handlers.usage(usageRequest()))).toEqual({
       status: 403,
-      errorCode: 'ADMIN_ONLY',
+      errorCode: 'STAFF_ONLY',
     });
     expect(await errorOf(await handlers.usage(usageRequest(alice)))).toEqual({
       status: 403,
-      errorCode: 'ADMIN_ONLY',
+      errorCode: 'STAFF_ONLY',
     });
     expect((await handlers.usage(usageRequest(root))).status).toBe(200);
   });
@@ -284,6 +288,6 @@ describe('usage endpoint with accounts enabled', () => {
     const { NextRequest } = await import('next/server');
 
     const response = await handlers.usage(new NextRequest(`${ORIGIN}/api/usage`));
-    expect(await errorOf(response)).toEqual({ status: 403, errorCode: 'ADMIN_ONLY' });
+    expect(await errorOf(response)).toEqual({ status: 403, errorCode: 'STAFF_ONLY' });
   });
 });

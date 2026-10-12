@@ -16,6 +16,8 @@ export type ClassroomGenerationJobStatus = 'queued' | 'running' | 'succeeded' | 
 
 export interface ClassroomGenerationJob {
   id: string;
+  /** The partition that started the job. Never returned to clients; see the job route. */
+  ownerId?: string;
   status: ClassroomGenerationJobStatus;
   step: ClassroomGenerationStep | 'queued' | 'failed';
   progress: number;
@@ -100,10 +102,12 @@ export function isValidClassroomJobId(jobId: string): boolean {
 export async function createClassroomGenerationJob(
   jobId: string,
   input: GenerateClassroomInput,
+  ownerId?: string,
 ): Promise<ClassroomGenerationJob> {
   const now = new Date().toISOString();
   const job: ClassroomGenerationJob = {
     id: jobId,
+    ...(ownerId ? { ownerId } : {}),
     status: 'queued',
     step: 'queued',
     progress: 0,

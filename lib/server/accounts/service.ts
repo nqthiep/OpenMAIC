@@ -6,6 +6,8 @@
  */
 import { randomUUID } from 'node:crypto';
 
+import { effectiveRole } from '@/lib/server/authz/roles';
+
 import type { LoginThrottle } from './login-throttle';
 import { createSessionToken, hashSessionToken, SESSION_TTL_SECONDS } from './session';
 import {
@@ -216,7 +218,9 @@ export async function resolveAccountSession(
   token: string | undefined,
 ): Promise<SessionAccount | undefined> {
   if (!token) return undefined;
-  return findSessionAccount(deps.db, hashSessionToken(token), clock(deps));
+  const account = await findSessionAccount(deps.db, hashSessionToken(token), clock(deps));
+  if (!account) return undefined;
+  return { ...account, role: effectiveRole(account.username, account.role) };
 }
 
 /** Removes sessions that have expired. Callers decide how often to run it. */

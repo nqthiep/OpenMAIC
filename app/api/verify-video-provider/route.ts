@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Verify Video Provider API
  *
@@ -33,6 +34,9 @@ import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('VerifyVideoProvider');
 
 export async function POST(request: NextRequest) {
+  const denied = await requireSpender(request.headers);
+  if (denied) return denied;
+
   let managed = false;
   try {
     const providerId = (request.headers.get('x-video-provider')?.trim() ||

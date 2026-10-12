@@ -1,6 +1,7 @@
 import { promises as fs, createReadStream, type ReadStream } from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
+import { canReadClassroom } from '@/lib/server/authz/viewer';
 import { CLASSROOMS_DIR, isValidClassroomId } from '@/lib/server/classroom-storage';
 import { parseRangeHeader } from '@/lib/server/http-range';
 import { createLogger } from '@/lib/logger';
@@ -21,7 +22,8 @@ const MIME_TYPES: Record<string, string> = {
   '.aac': 'audio/aac',
 };
 
-const CACHE_HEADERS = { 'Cache-Control': 'public, max-age=86400, immutable' } as const;
+// Private: the media belongs to one classroom's owner, so a shared cache must not hold it.
+const CACHE_HEADERS = { 'Cache-Control': 'private, max-age=86400, immutable' } as const;
 
 /** Bridge a fs ReadStream into a web ReadableStream, propagating errors and cancel. */
 function toWebStream(stream: ReadStream): ReadableStream {
@@ -46,6 +48,10 @@ export async function GET(
   // Validate classroomId
   if (!isValidClassroomId(classroomId)) {
     return NextResponse.json({ error: 'Invalid classroom ID' }, { status: 400 });
+  }
+
+  if (!(await canReadClassroom(req.headers, classroomId))) {
+    return NextResponse.json({ error: 'Classroom not found' }, { status: 404 });
   }
 
   // Validate path segments — no traversal

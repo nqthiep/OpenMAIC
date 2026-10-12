@@ -43,6 +43,34 @@ export function visitorErrorText(error: unknown, managedKey: boolean, fallback: 
   return error.message;
 }
 
+/** The HTTP status of an upstream provider failure, when the SDK reports one. */
+export function providerStatusOf(error: unknown): number | undefined {
+  const status = (error as { statusCode?: unknown } | null | undefined)?.statusCode;
+  return typeof status === 'number' ? status : undefined;
+}
+
+/**
+ * Text for a provider failure a visitor can act on. The text is fixed: it never carries
+ * upstream text, so it is safe with the operator's key too. Undefined for every other
+ * status, and the caller keeps its own fallback.
+ */
+export function providerFailureText(
+  status: number | undefined,
+  managedKey: boolean,
+): string | undefined {
+  if (status === 402) {
+    return managedKey
+      ? 'The AI provider account has run out of balance. Ask the administrator to top it up.'
+      : 'Your AI provider account has run out of balance. Top it up, then try again.';
+  }
+  if (status === 401 || status === 403) {
+    return managedKey
+      ? 'The AI provider rejected the server key. Ask the administrator to check it.'
+      : 'Your AI provider rejected the API key. Check it in settings.';
+  }
+  return undefined;
+}
+
 /** Shown to a visitor when the operator's key is used and the provider refuses the content. */
 export const CONTENT_BLOCKED_TEXT = 'The provider blocked this content under its safety policy.';
 

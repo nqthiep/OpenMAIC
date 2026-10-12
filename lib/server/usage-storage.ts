@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { createLogger } from '@/lib/logger';
 import { hasBillableTokens, type NormalizedUsage } from '@/lib/usage/normalize';
+import { currentSpendOwner } from '@/lib/server/authz/spend-context';
 
 const log = createLogger('UsageStorage');
 
@@ -56,6 +57,8 @@ export interface UsageRecord {
   // Non-token usage (e.g. image count, video seconds, TTS characters).
   quantity?: number;
   unit?: UsageUnit;
+  /** The owner the call was charged to (`acct:<id>` or `anon:<uuid>`). Absent without accounts. */
+  ownerId?: string;
 }
 
 interface RecordOptions {
@@ -110,6 +113,7 @@ export async function recordUsage(
     }
 
     const now = opts.now ?? new Date();
+    const owner = currentSpendOwner();
     const record: UsageRecord = {
       id: makeId(now),
       createdAt: now.getTime(),
@@ -125,6 +129,7 @@ export async function recordUsage(
       reasoningTokens: usage.reasoningTokens,
       ...(input.quantity != null ? { quantity: input.quantity } : {}),
       ...(input.unit ? { unit: input.unit } : {}),
+      ...(owner ? { ownerId: owner } : {}),
     };
 
     const dir = usageDir(opts.baseDir);
@@ -208,4 +213,18 @@ export async function readUsageRecords(opts: ReadOptions = {}): Promise<UsageRec
     }
   }
   return records;
+}
+
+/**
+ * Tokens one owner spent on text generation in one month (`YYYY-MM`, UTC), read from the usage
+ * log. Reads the month's file on every call, which is fine at this scale; see plans/access-control.md.
+ */
+export async function monthlyLlmTokens(ownerId: string, month: string): Promise<number> {
+  const records = await readUsageRecords({ months: [month] });
+  let total = 0;
+  for (const record of records) {
+    if (record.kind !== 'llm' || record.ownerId !== ownerId) continue;
+    total += record.inputTokens + record.outputTokens + record.reasoningTokens;
+  }
+  return total;
 }

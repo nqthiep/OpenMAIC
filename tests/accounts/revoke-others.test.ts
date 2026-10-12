@@ -2,6 +2,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
+import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 const PASSWORD = 'correct horse battery staple';
 const ALICE = { username: 'alice', password: PASSWORD };
@@ -24,6 +25,7 @@ beforeAll(async () => {
   db = new PGlite();
   await db.waitReady;
   await ensureAccountSchema(new PGlitePool(db));
+  await ensureLearningSchema(new PGlitePool(db));
 }, ROUTE_TIMEOUT_MS);
 
 beforeEach(async () => {
@@ -33,7 +35,7 @@ beforeEach(async () => {
   vi.stubEnv('DATABASE_URL', DATABASE_URL);
   vi.stubEnv('ACCOUNT_REGISTRATION', 'open');
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
-  await db!.exec('TRUNCATE account_sessions, accounts RESTART IDENTITY');
+  await db!.exec('TRUNCATE account_sessions, accounts RESTART IDENTITY CASCADE');
 });
 
 afterAll(async () => {

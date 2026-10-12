@@ -1,3 +1,4 @@
+import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * POST /api/pbl/v2/instructor
  *
@@ -36,6 +37,9 @@ interface InstructorRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSpender(req.headers);
+  if (denied) return denied;
+
   let body: InstructorRequest;
   try {
     body = (await req.json()) as InstructorRequest;

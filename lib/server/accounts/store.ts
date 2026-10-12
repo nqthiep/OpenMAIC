@@ -3,6 +3,7 @@
  * parameterized; timestamps travel as ISO-8601 strings and are cast in SQL so
  * the same code runs on `pg` and on the in-process PGlite used by tests.
  */
+import type { AccountRole } from '@/lib/server/authz/roles';
 
 /** The subset of a pg Pool or client this module needs. */
 export interface AccountQueryable {
@@ -17,6 +18,9 @@ CREATE TABLE IF NOT EXISTS accounts (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   disabled_at TIMESTAMPTZ
 );
+
+ALTER TABLE accounts
+  ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'learner' CHECK (role IN ('learner', 'operator', 'admin'));
 
 CREATE TABLE IF NOT EXISTS account_sessions (
   token_hash TEXT PRIMARY KEY,
@@ -57,6 +61,8 @@ export interface AccountRecord {
 export interface SessionAccount {
   accountId: string;
   username: string;
+  /** The stored role. The effective role adds ADMIN_USERNAMES; see roles.ts. */
+  role: AccountRole;
 }
 
 interface AccountRow {
@@ -69,6 +75,7 @@ interface AccountRow {
 interface SessionAccountRow {
   account_id: string;
   username: string;
+  role: AccountRole;
 }
 
 /**
@@ -135,7 +142,7 @@ export async function findSessionAccount(
   now: Date,
 ): Promise<SessionAccount | undefined> {
   const result = await db.query(
-    `SELECT s.account_id, a.username
+    `SELECT s.account_id, a.username, a.role
        FROM account_sessions s
        JOIN accounts a ON a.id = s.account_id
       WHERE s.token_hash = $1
@@ -145,7 +152,7 @@ export async function findSessionAccount(
     [tokenHash, now.toISOString()],
   );
   const row = result.rows[0] as SessionAccountRow | undefined;
-  return row ? { accountId: row.account_id, username: row.username } : undefined;
+  return row ? { accountId: row.account_id, username: row.username, role: row.role } : undefined;
 }
 
 export async function revokeSession(
@@ -172,6 +179,7 @@ export async function deleteExpiredSessions(db: AccountQueryable, now: Date): Pr
 export interface AccountListRow {
   id: string;
   username: string;
+  role: AccountRole;
   createdAt: string;
   disabledAt: string | null;
 }
@@ -179,6 +187,7 @@ export interface AccountListRow {
 interface AccountListDbRow {
   id: string;
   username: string;
+  role: AccountRole;
   created_at: Date | string;
   disabled_at: Date | string | null;
 }
@@ -190,7 +199,7 @@ export async function listAccounts(
   limit: number,
 ): Promise<AccountListRow[]> {
   const result = await db.query(
-    `SELECT id, username, created_at, disabled_at
+    `SELECT id, username, role, created_at, disabled_at
        FROM accounts
       WHERE ($1::text IS NULL OR id > $1::text)
       ORDER BY id
@@ -200,9 +209,42 @@ export async function listAccounts(
   return (result.rows as AccountListDbRow[]).map((row) => ({
     id: row.id,
     username: row.username,
+    role: row.role,
     createdAt: new Date(row.created_at).toISOString(),
     disabledAt: row.disabled_at ? new Date(row.disabled_at).toISOString() : null,
   }));
+}
+
+/**
+ * Stores a new role and writes its audit row in one statement. Returns false when the
+ * account does not exist or already has that role, so the caller can say which.
+ */
+export async function setAccountRole(
+  db: AccountQueryable,
+  input: {
+    actorId: string;
+    targetId: string;
+    role: AccountRole;
+    reason: string | undefined;
+    now: Date;
+  },
+): Promise<boolean> {
+  const result = await db.query(
+    `WITH target AS (
+       UPDATE accounts
+          SET role = $3::text
+        WHERE id = $2::text
+          AND role <> $3::text
+        RETURNING id
+     ), audit AS (
+       INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
+       SELECT $1::text, id, 'set_role:' || $3::text, $4::text, $5::timestamptz FROM target
+       RETURNING id
+     )
+     SELECT id FROM target`,
+    [input.actorId, input.targetId, input.role, input.reason ?? null, input.now.toISOString()],
+  );
+  return result.rows.length > 0;
 }
 
 /**
@@ -250,6 +292,18 @@ export async function setAccountDisabled(
     ],
   );
   return result.rows.length > 0;
+}
+
+/** The username and stored role of one account, for checks made before an account action. */
+export async function findAccountRoleById(
+  db: AccountQueryable,
+  accountId: string,
+): Promise<{ username: string; role: AccountRole } | undefined> {
+  const result = await db.query(`SELECT username, role FROM accounts WHERE id = $1::text`, [
+    accountId,
+  ]);
+  const row = result.rows[0] as { username: string; role: AccountRole } | undefined;
+  return row ? { username: row.username, role: row.role } : undefined;
 }
 
 /** Records an administrator read, such as a page of the account list. */

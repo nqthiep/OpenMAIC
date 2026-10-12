@@ -22,6 +22,7 @@ vi.mock('@/lib/server/resolve-model', () => ({
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
+  isServerPersistenceConfigured: () => false,
   resolveVocationalActive: mocks.resolveVocationalActive,
 }));
 

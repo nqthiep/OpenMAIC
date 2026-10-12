@@ -2067,8 +2067,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "無法變更角色，請再試一次。"
+      },
+      "roleChanged": "角色已更新。",
+      "changeRoleLabel": "變更 {{username}} 的角色"
+    },
+    "roles": {
+      "learner": "學員",
+      "operator": "營運人員",
+      "admin": "管理員"
+    },
+    "administration": "管理",
+    "adminPage": {
+      "title": "管理",
+      "description": "本部署的帳號、用量與角色管理。",
+      "denied": "此頁面僅供營運人員與管理員使用。"
     }
   },
   "classroomComplete": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "無會員",
+      "suspended": "已暫停",
+      "active": "有效",
+      "expired": "已過期"
+    },
+    "expiresOn": "有效期至 {{date}}",
+    "granted": "會員資料已儲存。",
+    "exportMembersOnly": "匯出僅限有效會員。"
+  },
+  "admin": {
+    "members": {
+      "title": "會員",
+      "description": "授予或延長會員資格，暫停或恢復會員。每項變更都會寫入稽核紀錄。",
+      "days": "天數",
+      "quota": "每月 token 數",
+      "quotaValue": "每月 {{tokens}} 個 token",
+      "grant": "授予或延長",
+      "resume": "恢復",
+      "suspend": "暫停"
+    },
+    "shares": {
+      "title": "分享申請",
+      "description": "核准後，該課程將向所有會員開放。",
+      "empty": "沒有待處理的申請。",
+      "approve": "核准",
+      "reject": "拒絕",
+      "approved": "課程已分享給會員。",
+      "rejected": "申請已拒絕。",
+      "requested": "申請於 {{date}}"
+    },
+    "previews": {
+      "title": "免費預覽",
+      "description": "在此標記的課程，訪客無需帳號即可開啟。",
+      "courseId": "課程 ID",
+      "add": "標記為預覽",
+      "remove": "移除",
+      "empty": "還沒有預覽。"
+    },
+    "classes": {
+      "title": "班級",
+      "description": "會員使用班級代碼加入班級。為班級加入課程，班級成員即可開啟。",
+      "name": "班級名稱",
+      "create": "建立班級",
+      "joinCode": "加入代碼：{{code}}。只會顯示一次，請立即複製。",
+      "empty": "還沒有班級。",
+      "members": "{{count}} 位會員",
+      "courses": "{{count}} 門課程",
+      "attach": "加入課程"
+    },
+    "audit": {
+      "title": "稽核紀錄",
+      "description": "帳號、會員、分享與班級的最近變更。",
+      "empty": "還沒有紀錄。"
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "發生錯誤，請再試一次。",
+      "FORBIDDEN": "你沒有此操作的權限。",
+      "UNAUTHENTICATED": "請登入後繼續。",
+      "INVALID_REQUEST": "請檢查輸入後再試一次。",
+      "NOT_FOUND": "未找到。",
+      "MEMBERSHIP_REQUIRED": "此操作需要有效的會員資格。",
+      "QUOTA_EXCEEDED": "本月的 AI 額度已用完。",
+      "ACCOUNTS_NOT_CONFIGURED": "此部署未啟用帳號功能。"
+    }
+  },
+  "catalog": {
+    "title": "課程目錄",
+    "description": {
+      "member": "免費預覽、分享課程，以及你所在班級的課程。",
+      "guest": "免費預覽。登入後可查看更多。"
+    },
+    "signInToSee": "登入後可查看分享課程並加入班級。",
+    "join": {
+      "title": "加入班級",
+      "code": "加入代碼",
+      "submit": "加入",
+      "done": "你已加入 {{name}}。"
+    },
+    "empty": "暫時沒有可瀏覽的內容。",
+    "kind": {
+      "preview": "免費預覽",
+      "shared": "已分享",
+      "class": "你的班級"
+    },
+    "open": "開啟",
+    "unavailable": "此部署不提供課程目錄。"
+  },
+  "courseShare": {
+    "request": "與會員分享",
+    "pending": "等待核准",
+    "stop": "停止分享",
+    "requested": "申請已送出，營運人員將審核。",
+    "withdrawn": "已停止分享。已擁有此課程的學員仍保留其副本。",
+    "failed": "無法分享此課程，請再試一次。"
   }
 }

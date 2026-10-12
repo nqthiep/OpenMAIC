@@ -28,18 +28,21 @@ vi.mock('@/lib/hooks/use-i18n', async () => {
 const ROOT = {
   id: 'id-root',
   username: 'root',
+  role: 'admin',
   createdAt: '2026-01-05T09:00:00.000Z',
   disabledAt: null,
 };
 const ALICE = {
   id: 'id-alice',
   username: 'alice',
+  role: 'learner',
   createdAt: '2026-02-10T09:00:00.000Z',
   disabledAt: null,
 };
 const BOB = {
   id: 'id-bob',
   username: 'bob',
+  role: 'operator',
   createdAt: '2026-03-01T09:00:00.000Z',
   disabledAt: '2026-03-02T09:00:00.000Z',
 };
@@ -50,11 +53,13 @@ const SIGNED_IN_AS_ROOT = {
   registrationOpen: false,
   authenticated: true,
   account: { username: 'root' },
+  role: 'admin',
   administrator: true,
 };
 const SIGNED_IN_AS_BOB = {
   ...SIGNED_IN_AS_ROOT,
   account: { username: 'bob' },
+  role: 'learner',
   administrator: false,
 };
 const ANONYMOUS = { success: true, enabled: true, registrationOpen: false, authenticated: false };
@@ -137,6 +142,18 @@ afterEach(async () => {
 });
 
 describe('AccountAdminPanel', () => {
+  it('an operator sees a disable control on learners but none on an administrator, and no role select', async () => {
+    stubFetch({
+      'GET /api/auth/session': { status: 200, body: { ...SIGNED_IN_AS_BOB, role: 'operator' } },
+      'GET /api/admin/accounts': { status: 200, body: LIST },
+    });
+    await renderPanel();
+
+    expect(container.querySelector('select')).toBeNull();
+    expect(container.querySelector('[aria-label="Disable alice"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Disable root"]')).toBeNull();
+  });
+
   it('lists accounts for an administrator and offers no change on the signed-in account', async () => {
     stubFetch({
       'GET /api/auth/session': { status: 200, body: SIGNED_IN_AS_ROOT },

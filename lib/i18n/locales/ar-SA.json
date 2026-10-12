@@ -2082,8 +2082,22 @@
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again."
-      }
+        "changeFailed": "The account could not be updated. Try again.",
+        "roleFailed": "تعذّر تغيير الدور. حاول مرة أخرى."
+      },
+      "roleChanged": "تم تحديث الدور.",
+      "changeRoleLabel": "تغيير دور {{username}}"
+    },
+    "roles": {
+      "learner": "متعلم",
+      "operator": "مشغّل",
+      "admin": "مسؤول"
+    },
+    "administration": "الإدارة",
+    "adminPage": {
+      "title": "الإدارة",
+      "description": "الحسابات والاستخدام والأدوار لهذه النسخة.",
+      "denied": "هذه الصفحة للمشغّلين والمسؤولين فقط."
     }
   },
   "proMode": {
@@ -2114,5 +2128,104 @@
         "materialExtraction": null
       }
     }
+  },
+  "membership": {
+    "status": {
+      "none": "لا توجد عضوية",
+      "suspended": "موقوفة",
+      "active": "نشطة",
+      "expired": "منتهية"
+    },
+    "expiresOn": "حتى {{date}}",
+    "granted": "تم حفظ العضوية.",
+    "exportMembersOnly": "التصدير متاح للأعضاء النشطين فقط."
+  },
+  "admin": {
+    "members": {
+      "title": "العضويات",
+      "description": "منح العضوية أو تمديدها، أو إيقافها أو استئنافها. تُسجَّل كل تغيير في سجل التدقيق.",
+      "days": "أيام",
+      "quota": "رموز شهرياً",
+      "quotaValue": "{{tokens}} رمز شهرياً",
+      "grant": "منح أو تمديد",
+      "resume": "استئناف",
+      "suspend": "إيقاف"
+    },
+    "shares": {
+      "title": "طلبات المشاركة",
+      "description": "وافِق على الطلب لفتح الدورة لجميع الأعضاء.",
+      "empty": "لا توجد طلبات معلقة.",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "approved": "تمت مشاركة الدورة مع الأعضاء.",
+      "rejected": "تم رفض الطلب.",
+      "requested": "طُلب في {{date}}"
+    },
+    "previews": {
+      "title": "معاينات مجانية",
+      "description": "يمكن للزوار فتح الدورة المعلَّمة هنا دون حساب.",
+      "courseId": "معرّف الدورة",
+      "add": "وسم كمعاينة",
+      "remove": "إزالة",
+      "empty": "لا توجد معاينات بعد."
+    },
+    "classes": {
+      "title": "الفصول",
+      "description": "ينضم الأعضاء إلى الفصل بالرمز الخاص به. أرفق الدورات حتى يتمكن الفصل من فتحها.",
+      "name": "اسم الفصل",
+      "create": "إنشاء فصل",
+      "joinCode": "رمز الانضمام: {{code}}. يُعرض مرة واحدة فقط، فانسخه الآن.",
+      "empty": "لا توجد فصول بعد.",
+      "members": "{{count}} عضواً",
+      "courses": "{{count}} دورة",
+      "attach": "إرفاق دورة"
+    },
+    "audit": {
+      "title": "سجل التدقيق",
+      "description": "التغييرات الأخيرة في الحسابات والعضويات والمشاركة والفصول.",
+      "empty": "لم يُسجَّل شيء بعد."
+    }
+  },
+  "learning": {
+    "errors": {
+      "generic": "حدث خطأ. حاول مرة أخرى.",
+      "FORBIDDEN": "ليس لديك صلاحية لذلك.",
+      "UNAUTHENTICATED": "سجّل الدخول للمتابعة.",
+      "INVALID_REQUEST": "تحقّق من الإدخال وحاول مرة أخرى.",
+      "NOT_FOUND": "غير موجود.",
+      "MEMBERSHIP_REQUIRED": "تحتاج إلى عضوية نشطة لذلك.",
+      "QUOTA_EXCEEDED": "استُنفدت حصة الذكاء الاصطناعي لهذا الشهر.",
+      "ACCOUNTS_NOT_CONFIGURED": "الحسابات غير مُعدّة على هذه النسخة."
+    }
+  },
+  "catalog": {
+    "title": "الكتالوج",
+    "description": {
+      "member": "معاينات مجانية، ودورات مشتركة، ودورات فصولك.",
+      "guest": "معاينات مجانية. سجّل الدخول لرؤية المزيد."
+    },
+    "signInToSee": "سجّل الدخول لرؤية الدورات المشتركة والانضمام إلى فصل.",
+    "join": {
+      "title": "الانضمام إلى فصل",
+      "code": "رمز الانضمام",
+      "submit": "انضم",
+      "done": "انضممت إلى {{name}}."
+    },
+    "empty": "لا يوجد ما يُتصفَّح بعد.",
+    "kind": {
+      "preview": "معاينة مجانية",
+      "shared": "مشترك",
+      "class": "فصلك"
+    },
+    "open": "فتح",
+    "unavailable": "الكتالوج غير متاح على هذه النسخة."
+  },
+  "courseShare": {
+    "request": "مشاركة مع الأعضاء",
+    "pending": "بانتظار الموافقة",
+    "stop": "إيقاف المشاركة",
+    "requested": "تم إرسال الطلب. سيراجعه المشغّل.",
+    "withdrawn": "توقفت المشاركة. يحتفظ المتعلمون الذين لديهم الدورة بنسختهم.",
+    "failed": "تعذّرت مشاركة الدورة. حاول مرة أخرى."
   }
 }

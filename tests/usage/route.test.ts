@@ -14,7 +14,7 @@ vi.mock('@/lib/server/usage-storage', async (importOriginal) => {
 // The usage log is for administrators, and only when accounts are on. This file tests the totals,
 // so it stands in for an administrator. The gate itself is covered in tests/accounts/admin-routes.test.ts.
 vi.mock('@/lib/server/accounts/admin', () => ({
-  requireAdministrator: async () => ({ accountId: 'administrator', username: 'root' }),
+  requireStaff: async () => ({ accountId: 'administrator', username: 'root', role: 'admin' }),
 }));
 
 afterEach(() => {

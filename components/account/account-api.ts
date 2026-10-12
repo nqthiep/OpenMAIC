@@ -9,8 +9,20 @@ export interface AccountSession {
   readonly registrationOpen: boolean;
   readonly authenticated: boolean;
   readonly account?: { readonly username: string };
+  /** The effective role of the signed-in account. */
+  readonly role?: AccountRole;
+  /** The account's membership, or null when it has none. Only the account's own session sees it. */
+  readonly membership?: AccountMembership | null;
   /** True only when the signed-in account is an administrator. */
   readonly administrator?: boolean;
+}
+
+export interface AccountMembership {
+  readonly status: 'active' | 'suspended';
+  /** True when the membership is not suspended and has not expired. */
+  readonly active: boolean;
+  readonly expiresAt: string;
+  readonly monthlyQuota: number;
 }
 
 export interface AccountCredentials {
@@ -74,6 +86,16 @@ export async function fetchAccountSession(): Promise<AccountSession> {
     registrationOpen: body.registrationOpen === true,
     authenticated: body.authenticated === true,
     account,
+    role: isAccountRole(body.role) ? body.role : undefined,
+    membership: isRecord(body.membership)
+      ? {
+          status: body.membership.status === 'suspended' ? 'suspended' : 'active',
+          active: body.membership.active === true,
+          expiresAt: typeof body.membership.expiresAt === 'string' ? body.membership.expiresAt : '',
+          monthlyQuota:
+            typeof body.membership.monthlyQuota === 'number' ? body.membership.monthlyQuota : 0,
+        }
+      : null,
     administrator: body.administrator === true,
   };
 }
@@ -134,10 +156,20 @@ export async function signOutOtherSessions(): Promise<number> {
   return typeof body.revoked === 'number' ? body.revoked : 0;
 }
 
+/** An account role. `admin` and `operator` can open the administration page. */
+export type AccountRole = 'learner' | 'operator' | 'admin';
+
+const ACCOUNT_ROLES: readonly AccountRole[] = ['learner', 'operator', 'admin'];
+
+function isAccountRole(value: unknown): value is AccountRole {
+  return typeof value === 'string' && (ACCOUNT_ROLES as readonly string[]).includes(value);
+}
+
 /** One account as the administrator list reports it. The list never carries password material. */
 export interface AdminAccount {
   readonly id: string;
   readonly username: string;
+  readonly role: AccountRole;
   readonly createdAt: string;
   readonly disabledAt: string | null;
 }
@@ -152,6 +184,7 @@ function isAdminAccount(value: unknown): value is AdminAccount {
     isRecord(value) &&
     typeof value.id === 'string' &&
     typeof value.username === 'string' &&
+    isAccountRole(value.role) &&
     typeof value.createdAt === 'string' &&
     (value.disabledAt === null || typeof value.disabledAt === 'string')
   );
@@ -187,6 +220,19 @@ export function disableAccount(accountId: string): Promise<void> {
 /** Enables an account. Sessions that the disable ended stay ended; the account signs in again. */
 export function enableAccount(accountId: string): Promise<void> {
   return postAccountDisabled(accountId, 'enable');
+}
+
+/** Sets the stored role of an account. Only an administrator may call this; the server refuses everyone else. */
+export async function changeAccountRole(accountId: string, role: AccountRole): Promise<void> {
+  const response = await fetch(`/api/admin/accounts/${encodeURIComponent(accountId)}/role`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ role }),
+  });
+  const body = await readJson(response);
+  if (!response.ok || !isRecord(body) || body.success !== true) {
+    throw failureFrom(response, body);
+  }
 }
 
 async function postAccountDisabled(accountId: string, action: 'disable' | 'enable'): Promise<void> {
