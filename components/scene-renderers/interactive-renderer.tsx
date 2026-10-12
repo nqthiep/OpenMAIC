@@ -1,12 +1,10 @@
 'use client';
 
-import { useId, useRef, useEffect } from 'react';
+import { useId, useMemo, useRef, useEffect } from 'react';
 import type { InteractiveContent } from '@/lib/types/stage';
 import { useInteractiveIframePool } from '@/lib/store/interactive-iframe-pool';
+import { patchHtmlForIframe } from '@/lib/utils/iframe';
 import { visibleClientRect } from '@/lib/edit/visible-client-rect';
-import { decideInteractiveMount } from '@/lib/widgets/policy';
-import { useCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
-import { CodeWidgetBlockedNotice } from './code-widget-blocked-notice';
 
 interface InteractiveRendererProps {
   readonly content: InteractiveContent;
@@ -23,13 +21,6 @@ interface InteractiveRendererProps {
  * return on the next mount.
  */
 export function InteractiveRenderer({ content, sceneId }: InteractiveRendererProps) {
-  const allowed = useCodeWidgetAllowed();
-  // Blocked widgets never reach the iframe pool, so no iframe is ever mounted.
-  if (decideInteractiveMount(content, allowed) === 'blocked') return <CodeWidgetBlockedNotice />;
-  return <InteractiveSlot content={content} sceneId={sceneId} />;
-}
-
-function InteractiveSlot({ content, sceneId }: InteractiveRendererProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   // Unique per mounted placeholder instance — its visibility ownership token, so
   // a stale unmount during the mode cross-fade can't hide a newer instance.
@@ -40,18 +31,23 @@ function InteractiveSlot({ content, sceneId }: InteractiveRendererProps) {
   const release = useInteractiveIframePool((s) => s.release);
   const setActive = useInteractiveIframePool((s) => s.setActive);
 
+  const patchedHtml = useMemo(
+    () => (content.html ? patchHtmlForIframe(content.html) : undefined),
+    [content.html],
+  );
+
   // Register / activate / claim visibility while mounted; release (keep-alive) on
   // unmount. A content change re-runs this and rebuilds the iframe — the only
   // intended reload path.
   useEffect(() => {
     mount(sceneId, {
-      sourceHtml: content.html,
-      src: content.html ? undefined : content.url,
+      srcDoc: patchedHtml,
+      src: patchedHtml ? undefined : content.url,
     });
     setActive(sceneId);
     claim(sceneId, owner);
     return () => release(sceneId, owner);
-  }, [sceneId, owner, content.html, content.url, mount, setActive, claim, release]);
+  }, [sceneId, owner, patchedHtml, content.url, mount, setActive, claim, release]);
 
   // Track this slot's screen rect for the host. rAF loop mirrors useTrackedRect:
   // one getBoundingClientRect read resolves canvas scale, viewport offset and

@@ -59,7 +59,9 @@ may support a claim, but the course being checked cannot prove itself.
 
 Use `web_search` for shortlisted claims that depend on current, exact, disputed,
 or specialist knowledge. A normal first pass should need no more than about
-6–8 searches. Use `fetch_url` to read the source: a result snippet or the mere
+6–8 searches. When it is combined with deep-research in one session, those
+searches count toward deep-research's guideline of about 8 `web_search` calls for
+the whole session. Use `fetch_url` to read the source: a result snippet or the mere
 existence of a related source is not evidence.
 
 Do not pause the run to ask the user for sources, permission to use general
@@ -99,7 +101,8 @@ by generated page content.
 
 In review mode, return roughly 3–8 useful findings in the first pass, or fewer
 when fewer exist. Group them under these bold plain-text labels, in this order,
-and omit an empty group. Keep them at normal body-text size: do not prefix them
+and omit an empty group. Write these labels and the bullet labels below in the
+user's language; the Chinese forms shown here apply to a Chinese reply. Keep them at normal body-text size: do not prefix them
 with Markdown heading markers such as `#` or `##`.
 
 - **A. 明确事实错误**

@@ -14,7 +14,6 @@ import {
   voxCPMBackendSupportsVoiceRegistration,
 } from '@/lib/audio/voxcpm';
 import { resolveTTSModel } from '@/lib/server/provider-config';
-import { audioEndpointPolicy, audioProviderFetch } from '@/lib/server/audio-provider-fetch';
 import type {
   VoiceRegistrationAdapter,
   VoiceRegistrationConfig,
@@ -62,14 +61,10 @@ export async function voxCPMVoiceExists(
   cfg: VoiceRegistrationConfig,
   voiceId: string,
 ): Promise<boolean> {
-  const res = await audioProviderFetch(
-    `${v1(cfg.baseUrl)}/audio/voices`,
-    {
-      method: 'GET',
-      headers: authHeaders(cfg.apiKey),
-    },
-    audioEndpointPolicy(cfg),
-  );
+  const res = await fetch(`${v1(cfg.baseUrl)}/audio/voices`, {
+    method: 'GET',
+    headers: authHeaders(cfg.apiKey),
+  });
   if (!res.ok) return false;
   const data = (await res.json().catch(() => ({}))) as { voices?: unknown };
   return Array.isArray(data.voices) && data.voices.includes(voiceId);
@@ -89,15 +84,11 @@ export async function registerVoxCPMVoice(
     `${params.voiceId}.wav`,
   );
 
-  const res = await audioProviderFetch(
-    `${v1(cfg.baseUrl)}/audio/voices`,
-    {
-      method: 'POST',
-      headers: authHeaders(cfg.apiKey),
-      body: form,
-    },
-    audioEndpointPolicy(cfg),
-  );
+  const res = await fetch(`${v1(cfg.baseUrl)}/audio/voices`, {
+    method: 'POST',
+    headers: authHeaders(cfg.apiKey),
+    body: form,
+  });
   if (!res.ok) {
     throw new Error(`VoxCPM voice registration failed: ${res.status}`);
   }
@@ -112,21 +103,17 @@ export async function bootstrapVoxCPMReferenceClip(
 ): Promise<{ referenceAudioBase64: string; mimeType: string }> {
   const prompt = buildVoiceDesignPrompt(params.design);
   const sample = bootstrapSentence(params.language);
-  const res = await audioProviderFetch(
-    `${v1(cfg.baseUrl)}/audio/speech`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8', ...authHeaders(cfg.apiKey) },
-      body: JSON.stringify({
-        model: cfg.model || VOXCPM_VLLM_MODEL_ID,
-        input: prompt ? `(${prompt})${sample}` : sample,
-        voice: 'default',
-        response_format: 'wav',
-        stream: false,
-      }),
-    },
-    audioEndpointPolicy(cfg),
-  );
+  const res = await fetch(`${v1(cfg.baseUrl)}/audio/speech`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...authHeaders(cfg.apiKey) },
+    body: JSON.stringify({
+      model: cfg.model || VOXCPM_VLLM_MODEL_ID,
+      input: prompt ? `(${prompt})${sample}` : sample,
+      voice: 'default',
+      response_format: 'wav',
+      stream: false,
+    }),
+  });
   if (!res.ok) {
     throw new Error(`VoxCPM bootstrap synthesis failed: ${res.status}`);
   }

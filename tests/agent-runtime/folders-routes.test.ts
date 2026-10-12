@@ -4,19 +4,17 @@ import { NextRequest } from 'next/server';
 import { createFakeDocumentStore } from './_fake-document-store';
 
 const mocks = vi.hoisted(() => ({
-  persistenceConfigured: true,
+  runtimeConfigured: true,
   resolveRequestOwnerId: vi.fn(),
   fakeStore: null as ReturnType<typeof createFakeDocumentStore> | null,
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
-  isServerPersistenceConfigured: () => mocks.persistenceConfigured,
+  isAgentRuntimeConfigured: () => mocks.runtimeConfigured,
 }));
-vi.mock('@/lib/server/identity/resolve', async () =>
-  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
-    mocks.resolveRequestOwnerId,
-  ),
-);
+vi.mock('@/lib/server/agent-runtime/owner', () => ({
+  resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+}));
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
   getOwnerScopedDocumentStore: async () => mocks.fakeStore!.store,
 }));
@@ -38,14 +36,14 @@ const params = (id: string) => ({ params: Promise.resolve({ id }) });
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.persistenceConfigured = true;
+  mocks.runtimeConfigured = true;
   mocks.resolveRequestOwnerId.mockReturnValue('owner-1');
   mocks.fakeStore = createFakeDocumentStore();
 });
 
 describe('GET /api/folders', () => {
-  it('gates on configured server persistence', async () => {
-    mocks.persistenceConfigured = false;
+  it('gates on the configured runtime', async () => {
+    mocks.runtimeConfigured = false;
     const response = await GET(routeRequest('http://localhost/api/folders'));
     expect(response.status).toBe(404);
   });

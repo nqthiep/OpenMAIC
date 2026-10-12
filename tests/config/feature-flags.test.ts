@@ -10,7 +10,6 @@ import {
   isPiNativeChildRuntimeEnabled,
   isPiNativeChildSpotlightEnabled,
   isPptxImportEnabled,
-  isTutorHintFirstEnabled,
   isVideoExportEnabled,
   isVocationalTaskEngineEnabled,
   resolveVocationalActive,
@@ -211,12 +210,9 @@ describe('isPiChatEnabled', () => {
     }
   });
 
-  it('defaults on when unset or empty', () => {
+  it('defaults off when unset', () => {
     delete process.env[flag];
-    expect(isPiChatEnabled()).toBe(true);
-
-    process.env[flag] = '';
-    expect(isPiChatEnabled()).toBe(true);
+    expect(isPiChatEnabled()).toBe(false);
   });
 
   it("returns true for 'true' and '1'", () => {
@@ -227,11 +223,8 @@ describe('isPiChatEnabled', () => {
     expect(isPiChatEnabled()).toBe(true);
   });
 
-  it("returns false for 'false', '0', and other values", () => {
+  it('returns false for other values', () => {
     process.env[flag] = 'false';
-    expect(isPiChatEnabled()).toBe(false);
-
-    process.env[flag] = '0';
     expect(isPiChatEnabled()).toBe(false);
 
     process.env[flag] = 'yes';
@@ -440,37 +433,5 @@ describe('isPptxImportEnabled', () => {
     expect(isPptxImportEnabled()).toBe(false);
     process.env[flag] = 'false';
     expect(isPptxImportEnabled()).toBe(false);
-  });
-});
-
-describe('isTutorHintFirstEnabled', () => {
-  const flag = 'OPENMAIC_TUTOR_HINT_FIRST';
-  let original: string | undefined;
-
-  beforeEach(() => {
-    original = process.env[flag];
-  });
-
-  afterEach(() => {
-    if (original === undefined) delete process.env[flag];
-    else process.env[flag] = original;
-  });
-
-  it('is on by default, and for true or 1', () => {
-    delete process.env[flag];
-    expect(isTutorHintFirstEnabled()).toBe(true);
-    process.env[flag] = '';
-    expect(isTutorHintFirstEnabled()).toBe(true);
-    process.env[flag] = 'true';
-    expect(isTutorHintFirstEnabled()).toBe(true);
-    process.env[flag] = '1';
-    expect(isTutorHintFirstEnabled()).toBe(true);
-  });
-
-  it('is off for false, 0 or any other value', () => {
-    for (const v of ['false', '0', 'no']) {
-      process.env[flag] = v;
-      expect(isTutorHintFirstEnabled(), v).toBe(false);
-    }
   });
 });

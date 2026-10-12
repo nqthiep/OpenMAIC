@@ -1,9 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSettingsStore } from '@/lib/store/settings';
-import { useTTSSelection } from '@/lib/audio/use-tts-selection';
-import { slotTTSProvidersConfig } from '@/lib/audio/tts-selection';
 import { useBrowserTTS } from '@/lib/hooks/use-browser-tts';
 import {
   resolveAgentVoice,
@@ -12,10 +10,6 @@ import {
   type ResolvedVoice,
 } from '@/lib/audio/voice-resolver';
 import { isTTSProviderEnabled } from '@/lib/audio/provider-enablement';
-import {
-  getDiscussionAudioElement,
-  releaseDiscussionAudioLine,
-} from '@/lib/audio/discussion-audio';
 import { useAllVoiceProfiles } from '@/lib/audio/voxcpm-voices';
 import { resolveAgentVoiceOptions } from '@/lib/audio/agent-voice';
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
@@ -57,13 +51,7 @@ interface PreparedSegment {
 
 export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: DiscussionTTSOptions) {
   const { locale, t } = useI18n();
-  // The tts slot's provider (the only one the server synthesizes with) and
-  // the user's voice for it.
-  const ttsSelectionValue = useTTSSelection();
-  const ttsProvidersConfig = useMemo(
-    () => ttsSelectionValue?.providersConfig ?? slotTTSProvidersConfig(null),
-    [ttsSelectionValue],
-  );
+  const ttsProvidersConfig = useSettingsStore((s) => s.ttsProvidersConfig);
   const ttsSpeed = useSettingsStore((s) => s.ttsSpeed);
   const ttsMuted = useSettingsStore((s) => s.ttsMuted);
   const ttsVolume = useSettingsStore((s) => s.ttsVolume);
@@ -71,9 +59,8 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
   const playbackSettingsRef = useRef({ playbackSpeed, ttsMuted, ttsVolume });
   playbackSettingsRef.current = { playbackSpeed, ttsMuted, ttsVolume };
   // Global lecture voice — used as fallback for teacher agent
-  const globalTtsProviderId = (ttsSelectionValue?.providerId ??
-    'browser-native-tts') as TTSProviderId;
-  const globalTtsVoice = ttsSelectionValue?.voice ?? 'default';
+  const globalTtsProviderId = useSettingsStore((s) => s.ttsProviderId);
+  const globalTtsVoice = useSettingsStore((s) => s.ttsVoice);
   const agentVoiceOverrides = useSettingsStore((s) => s.agentVoiceOverrides);
   const { profiles: voiceProfiles } = useAllVoiceProfiles();
 
@@ -89,13 +76,6 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
   const segmentDoneCounterRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  /**
-   * Identifies the line that currently owns the reused element. Element identity
-   * can no longer tell lines apart (there is one element), so a stale `ended` /
-   * `error` / rejected-play path from an earlier line must be recognised by its
-   * token instead of by which element it came from.
-   */
-  const playbackTokenRef = useRef(0);
   const onAudioStateChangeRef = useRef(onAudioStateChange);
   onAudioStateChangeRef.current = onAudioStateChange;
   const processQueueRef = useRef<() => void>(() => {});
@@ -182,7 +162,7 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       );
       // Teacher's voice = the global lecture selection, honored VERBATIM (incl.
       // its model) whenever that provider is enabled — identical to what the
-      // lecture narration sends (lib/audio/narration-tts), so lecture and
+      // pre-generated lecture sends (use-scene-generator), so lecture and
       // discussion teacher never diverge. No voiceId re-validation/fallback that
       // could swap the user's chosen voice. Only if the global provider is itself
       // disabled does the teacher fall back to an enabled provider.
@@ -254,12 +234,17 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       const res = await fetch('/api/generate/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // The tts slot names the provider and model on the server.
         body: JSON.stringify({
           text: item.text,
           audioId: item.partId,
+          ttsProviderId: item.providerId,
+          ttsModelId: item.modelId || providerConfig?.modelId,
           ttsVoice: item.voiceId,
           ttsSpeed: ttsSpeed,
+          ttsApiKey: providerConfig?.apiKey,
+          // Managed providers resolve their base URL server-side; only send the
+          // client's own base URL (custom providers).
+          ttsBaseUrl: providerConfig?.baseUrl || providerConfig?.customDefaultBaseUrl,
           ttsProviderOptions: providerOptions,
         }),
         signal: controller.signal,
@@ -341,24 +326,21 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       if ('error' in result) throw result.error;
       abortControllerRef.current = null;
       const audioUrl = result.audioUrl;
-      // Reuse this playback module's element rather than creating one per line:
-      // a fresh element's programmatic play() is what mobile autoplay policies
-      // refuse, which left the discussion silent from the second line on.
-      const audio = getDiscussionAudioElement();
-      const token = ++playbackTokenRef.current;
-      audio.src = audioUrl;
+      const audio = new Audio(audioUrl);
       const settings = playbackSettingsRef.current;
-      audio.defaultPlaybackRate = settings.playbackSpeed;
       audio.playbackRate = settings.playbackSpeed;
       audio.volume = settings.ttsMuted ? 0 : settings.ttsVolume;
       audioRef.current = audio;
       const finish = () => {
-        if (token !== playbackTokenRef.current) return;
+        if (audioRef.current !== audio) return;
         audioRef.current = null;
         finishAudioRef.current = null;
         currentItemRef.current = null;
         currentProviderRef.current = null;
-        releaseDiscussionAudioLine(audio);
+        audio.removeEventListener('ended', finish);
+        audio.removeEventListener('error', finish);
+        audio.pause();
+        audio.src = '';
         isPlayingRef.current = false;
         segmentDoneCounterRef.current++;
         onAudioStateChangeRef.current?.(item.agentId, 'idle');
@@ -367,11 +349,8 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
         }
       };
       finishAudioRef.current = finish;
-      // Assignment rather than addEventListener: the element is reused, so a
-      // listener would otherwise accumulate once per line and fire this callback
-      // several times for one line.
-      audio.onended = finish;
-      audio.onerror = finish;
+      audio.addEventListener('ended', finish);
+      audio.addEventListener('error', finish);
 
       // If paused during TTS generation, keep audio ready but don't play
       if (pausedRef.current) {
@@ -382,8 +361,7 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
 
       onAudioStateChangeRef.current?.(item.agentId, 'playing');
       await audio.play();
-      // Identity no longer distinguishes lines (one element), so the token does.
-      if (token === playbackTokenRef.current) prefetchNextRef.current();
+      if (audioRef.current === audio) prefetchNextRef.current();
     } catch (err) {
       if (controller.signal.aborted || currentItemRef.current !== item) return;
       if (finishAudioRef.current) {
@@ -495,13 +473,11 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
     prefetchedRef.current = null;
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
-    // The element outlives this line now, so the line's handlers have to go with
-    // it: a leftover handler would let a late event finish the *next* line.
-    playbackTokenRef.current++;
     if (audioRef.current) {
       const audio = audioRef.current;
       audioRef.current = null;
-      releaseDiscussionAudioLine(audio);
+      audio.pause();
+      audio.src = '';
     }
     browserCancelRef.current();
     queueRef.current = [];
@@ -529,11 +505,9 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       browserResumeRef.current();
     } else if (audioRef.current && audioRef.current.paused) {
       const audio = audioRef.current;
-      // Take this line's own finish closure: it carries the line's token, so a
-      // rejection that arrives after another line took the element cannot finish
-      // the line that is playing now.
-      const lineFinish = finishAudioRef.current;
-      void audio.play().catch(() => lineFinish?.());
+      void audio.play().catch(() => {
+        if (audioRef.current === audio) finishAudioRef.current?.();
+      });
     } else if (!isPlayingRef.current) {
       // Audio finished while paused — kick-start the queue
       processQueueRef.current();
@@ -544,7 +518,6 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
   // Sync playbackSpeed to currently playing audio in real-time
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.defaultPlaybackRate = playbackSpeed;
       audioRef.current.playbackRate = playbackSpeed;
     }
   }, [playbackSpeed]);

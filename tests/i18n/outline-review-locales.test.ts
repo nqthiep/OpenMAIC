@@ -23,7 +23,6 @@ const outlineReviewKeys = [
   'generation.reviewOutlineTitle',
   'generation.reviewOutlineDesc',
   'generation.reviewOutlineAutoContinue',
-  'generation.outlineAlreadyContinued',
   'generation.outlineEditorTitle',
   'generation.outlineEditorSummary',
   'generation.addFirstScene',

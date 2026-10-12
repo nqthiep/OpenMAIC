@@ -182,7 +182,7 @@ async function directorNode(
     );
 
     const content = result.generations[0]?.text || '';
-    log.info(`[Director] Raw decision: ${content}`);
+    log.info(`[Director] Raw decision: ${content.length} characters`);
 
     const decision = parseDirectorDecision(content);
 

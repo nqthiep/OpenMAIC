@@ -51,6 +51,7 @@ with an empty widget outline degrades into a generic page, which in this style
 takes the course's whole point with it.
 
 - `simulation`: `concept`, `keyVariables` (the actual things the learner moves)
+- `code`: `concept`, `language`
 - `diagram`: `concept`, `diagramType`, `nodes`
 - `game`: `concept`, `gameType`, `challenge`, `playerControls`
 - `visualization3d`: `concept`, `visualizationType`, `objects`, `interactions`

@@ -56,6 +56,9 @@ function clearConfigEnv() {
   delete process.env.DEFAULT_MODEL;
   delete process.env.OPENMAIC_AGENT_RUNTIME_ENABLED;
   delete process.env.DATABASE_URL;
+  delete process.env.ACCESS_CODE;
+  delete process.env.ACCESS_COOKIE_SECRET;
+  delete process.env.PUBLIC_APP_ORIGIN;
   for (const prefix of LLM_ENV_PREFIXES) {
     delete process.env[`${prefix}_API_KEY`];
     delete process.env[`${prefix}_BASE_URL`];
@@ -86,28 +89,130 @@ describe('validateServerConfig — warning matrix', () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('emits no warnings on a fully valid config', async () => {
+  it('warns when the access code has no cookie secret, since the cookie is then signed with the code', async () => {
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('ACCESS_COOKIE_SECRET');
+  });
+
+  it('warns on a short access code by length only, never echoing the code', async () => {
+    vi.stubEnv('ACCESS_CODE', 'hunter2');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain('7 characters');
+    expect(message).not.toContain('hunter2');
+  });
+
+  it('warns that server keys are spendable without an access code, naming providers and not key values', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'sk-secret-value-123');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    const messages = warnSpy.mock.calls.map((call: unknown[]) => String(call[0]));
+    const managed = messages.find((message: string) => message.includes('ACCESS_CODE is not set'));
+    expect(managed).toBeDefined();
+    expect(managed).toContain('openai');
+    expect(messages.join('\n')).not.toContain('sk-secret-value-123');
+  });
+
+  it('does not warn about server keys once an access code is set', async () => {
     vi.stubEnv('OPENAI_API_KEY', 'sk-test');
-    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-test');
-    vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.4-mini');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('warns for an unknown provider prefix in DEFAULT_MODEL', async () => {
-    vi.stubEnv('DEFAULT_MODEL', 'anhtropic:claude-sonnet-4');
+  it('warns in production when PUBLIC_APP_ORIGIN is unset', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('PUBLIC_APP_ORIGIN');
+  });
+
+  it('warns on a PUBLIC_APP_ORIGIN that is not a bare origin', async () => {
+    vi.stubEnv('PUBLIC_APP_ORIGIN', 'classroom.example.edu');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('PUBLIC_APP_ORIGIN must be an origin');
+  });
+
+  it('emits no warnings on a fully valid config', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'sk-test');
+    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-test');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+    vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.4-mini');
+    vi.stubEnv(
+      'MODEL_ROUTES',
+      JSON.stringify({
+        'scene-content': 'openai:gpt-5.4',
+        'pbl-chat': { model: 'anthropic:claude-sonnet-4', thinking: { enabled: false } },
+      }),
+    );
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('warns when MODEL_ROUTES is not valid JSON', async () => {
+    vi.stubEnv('MODEL_ROUTES', '{not valid json');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('MODEL_ROUTES');
+    expect(String(warnSpy.mock.calls[0][0])).toContain('JSON');
+  });
+
+  it('warns naming an unknown stage key (typo detection)', async () => {
+    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-contnet': 'openai:gpt-5.4' }));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('scene-contnet');
+  });
+
+  it('warns for an unknown provider prefix in a route', async () => {
+    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'anhtropic:claude-sonnet-4' }));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(String(warnSpy.mock.calls[0][0])).toContain('anhtropic');
   });
 
+  it('warns when a routed provider has no API key configured', async () => {
+    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' }));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain('deepseek');
+    expect(String(warnSpy.mock.calls[0][0])).toContain('API key');
+  });
+
   it('does not warn about a keyless provider (ollama)', async () => {
-    vi.stubEnv('DEFAULT_MODEL', 'ollama:llama3.3');
+    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'ollama:llama3.3' }));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('emits the deprecation warning for a bare model id in a route', async () => {
+    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'gpt-5.4' }));
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0][0])).toContain(BARE_MODEL_ID_DEPRECATION_MSG);
   });
 
   it('emits the deprecation warning for a bare DEFAULT_MODEL', async () => {
@@ -140,6 +245,8 @@ describe('validateServerConfig — warning matrix', () => {
   it('does not warn when <PREFIX>_MODELS is set with the key present', async () => {
     vi.stubEnv('DEEPSEEK_API_KEY', 'sk-test');
     vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
@@ -162,6 +269,7 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('does not throw on garbage config (warn-only)', async () => {
+    vi.stubEnv('MODEL_ROUTES', '{{{');
     vi.stubEnv('DEFAULT_MODEL', ':::::');
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     expect(() => validateServerConfig()).not.toThrow();
@@ -169,19 +277,27 @@ describe('validateServerConfig — warning matrix', () => {
 
   it('does not warn when a provider is configured via server-providers.yml', async () => {
     yamlOverride = 'providers:\n  deepseek:\n    apiKey: sk-yaml\n';
-    vi.stubEnv('DEFAULT_MODEL', 'deepseek:deepseek-v4-pro');
+    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' }));
     vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('warns once per distinct problem when a config has several', async () => {
-    vi.stubEnv('DEFAULT_MODEL', 'anhtropic:claude-sonnet-4'); // unknown provider
-    vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro'); // pinned models, no key
+    vi.stubEnv(
+      'MODEL_ROUTES',
+      JSON.stringify({
+        'scene-contnet': 'openai:gpt-5.4', // unknown stage
+        'scene-content': 'anhtropic:claude-sonnet-4', // unknown provider
+        'pbl-chat': 'claude-sonnet-4', // bare id
+      }),
+    );
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
-    expect(warnSpy).toHaveBeenCalledTimes(2);
+    expect(warnSpy).toHaveBeenCalledTimes(3);
   });
 
   describe('agent runtime configuration', () => {
@@ -253,7 +369,7 @@ describe('parseModelString — request-derived strings never warn', () => {
       expect(warnBareModelIdDeprecation('gpt-5.5', 'DEFAULT_MODEL')).toBe(false);
       expect(warnSpy).toHaveBeenCalledTimes(1);
 
-      expect(warnBareModelIdDeprecation('gpt-4.1', 'DEFAULT_MODEL')).toBe(true);
+      expect(warnBareModelIdDeprecation('gpt-4.1', 'MODEL_ROUTES stage "pbl-chat"')).toBe(true);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     } finally {
       warnSpy.mockRestore();

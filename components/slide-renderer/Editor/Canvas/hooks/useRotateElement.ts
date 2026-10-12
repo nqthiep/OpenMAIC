@@ -8,7 +8,6 @@ import type {
 } from '@openmaic/dsl';
 import { useHistorySnapshot } from '@/lib/hooks/use-history-snapshot';
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
-import { isTouchEvent } from './touch-event';
 
 /**
  * Calculate the angle (in radians) of the line from the origin to the given coordinates
@@ -49,8 +48,8 @@ export function useRotateElement(
       >,
     ) => {
       const native = e.nativeEvent;
-      const isTouch = isTouchEvent(native);
-      if (isTouch && !native.changedTouches?.length) return;
+      const isTouchEvent = native instanceof TouchEvent;
+      if (isTouchEvent && !native.changedTouches?.length) return;
 
       let isMouseDown = true;
       let angle = 0;
@@ -119,7 +118,7 @@ export function useRotateElement(
         addHistorySnapshot();
       };
 
-      if (isTouch) {
+      if (isTouchEvent) {
         document.ontouchmove = handleMouseMove;
         document.ontouchend = handleMouseUp;
       } else {

@@ -53,7 +53,7 @@ body:
       label: Deployment Method
       options:
         - Local development (npm run dev / pnpm dev / yarn dev)
-        - Vercel deployment (1.1.x)
+        - Vercel deployment
         - Docker
         - Other
     validations:

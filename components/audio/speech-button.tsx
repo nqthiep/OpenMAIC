@@ -63,11 +63,6 @@ export function SpeechButton({
   }, [continuous, disabled, isRecording, cancelRecording]);
 
   const active = isRecording || isProcessing;
-  const label = isProcessing
-    ? t('roundtable.processing')
-    : isRecording
-      ? t('voice.stopListening')
-      : t('voice.startListening');
 
   // Gate on ASR availability (toggle + provider configured + browser support)
   // so every call site is disabled uniformly when ASR is off/unusable — but
@@ -96,7 +91,6 @@ export function SpeechButton({
           type="button"
           disabled={isDisabled || isProcessing}
           onClick={handleClick}
-          aria-label={label}
           className={cn(
             'relative flex items-center justify-center rounded-lg transition-all duration-200 shrink-0 cursor-pointer',
             sizeClasses,
@@ -163,7 +157,11 @@ export function SpeechButton({
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
-        {label}
+        {isProcessing
+          ? t('roundtable.processing')
+          : isRecording
+            ? t('voice.stopListening')
+            : t('voice.startListening')}
       </TooltipContent>
     </Tooltip>
   );

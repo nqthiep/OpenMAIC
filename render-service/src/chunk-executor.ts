@@ -14,7 +14,6 @@ import {
   plan as producerPlan,
   renderChunk as producerRenderChunk,
   hashProjectDir,
-  resolvePlanAudioPath,
   type AssembleResult,
   type ChunkResult,
   type DistributedRenderConfig,
@@ -859,17 +858,11 @@ export async function executeRenderChunks(
     let assembly: AssembleResult;
     const assembleStartedAt = Date.now();
     try {
-      const producerMetadata = JSON.parse(
-        await readFile(join(plan.planDir, 'plan.json'), 'utf8'),
-      ) as { hasAudio?: boolean };
-      const audioPath = producerMetadata.hasAudio ? resolvePlanAudioPath(plan.planDir) : null;
-      if (producerMetadata.hasAudio && !audioPath) {
-        throw new Error('Plan declares audio but its audio artifact is missing');
-      }
+      const audioPath = join(plan.planDir, 'audio.aac');
       assembly = await (dependencies.assemble ?? defaultDeps.assemble)(
         plan.planDir,
         results.map((result) => result.outputPath),
-        audioPath,
+        (await exists(audioPath)) ? audioPath : null,
         plan.outputPath,
         { abortSignal: request.signal },
       );

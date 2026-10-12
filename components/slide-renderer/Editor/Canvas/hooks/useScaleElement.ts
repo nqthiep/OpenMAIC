@@ -12,7 +12,6 @@ import { SHAPE_PATH_FORMULAS } from '@/configs/shapes';
 import { type AlignLine, uniqAlignLines } from '@/lib/utils/element';
 import { useHistorySnapshot } from '@/lib/hooks/use-history-snapshot';
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
-import { isTouchEvent } from './touch-event';
 
 interface RotateElementData {
   left: number;
@@ -144,8 +143,8 @@ export function useScaleElement(
       command: OperateResizeHandlers,
     ) => {
       const native = e.nativeEvent;
-      const isTouch = isTouchEvent(native);
-      if (isTouch && !native.changedTouches?.length) return;
+      const isTouchEvent = native instanceof TouchEvent;
+      if (isTouchEvent && !native.changedTouches?.length) return;
 
       let isMouseDown = true;
       setScalingState(true);
@@ -163,8 +162,8 @@ export function useScaleElement(
       const fixedRatio = ctrlOrShiftKeyActive || ('fixedRatio' in element && element.fixedRatio);
       const aspectRatio = elOriginWidth / elOriginHeight;
 
-      const startPageX = isTouch ? native.changedTouches[0].pageX : native.pageX;
-      const startPageY = isTouch ? native.changedTouches[0].pageY : native.pageY;
+      const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
+      const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
 
       // Minimum scale size limit for element
       const minSize = MIN_SIZE[element.type] || 20;
@@ -542,7 +541,7 @@ export function useScaleElement(
         addHistorySnapshot();
       };
 
-      if (isTouch) {
+      if (isTouchEvent) {
         document.ontouchmove = handleMouseMove;
         document.ontouchend = handleMouseUp;
       } else {

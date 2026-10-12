@@ -230,26 +230,4 @@ describe('prepareInteractiveHtmlScenes', () => {
     expect(prepared.html(scene())).toMatchObject({ present: true });
     expect(prepared.content('interactive:widget')).not.toContain('about:invalid');
   });
-
-  it('never packages a blocked code widget, and packages it only when code is allowed', async () => {
-    const code = scene('<!doctype html><html><body><script>1</script></body></html>');
-    (code.content as { widgetType?: string }).widgetType = 'code';
-
-    const blocked = await prepareInteractiveHtmlScenes([code]);
-    expect(blocked.html(code)).toMatchObject({
-      present: false,
-      failure: 'packaging-failed',
-      message: 'interactive-code-widget-blocked',
-    });
-    expect(blocked.content('interactive:widget')).toBeUndefined();
-
-    const viaConfig = scene('<p>x</p>');
-    (viaConfig.content as { widgetConfig?: unknown }).widgetConfig = { type: 'code' };
-    expect((await prepareInteractiveHtmlScenes([viaConfig])).content('interactive:widget')).toBe(
-      undefined,
-    );
-
-    const allowed = await prepareInteractiveHtmlScenes([code], { codeAllowed: true });
-    expect(allowed.html(code)?.present).toBe(true);
-  });
 });

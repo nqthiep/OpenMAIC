@@ -24,8 +24,6 @@ import type {
 } from './types.js';
 
 export interface RenderExecutor {
-  /** False after resource quarantine, ancestor pressure, or owner loss. */
-  accepting?(): boolean;
   execute(request: RenderExecutionRequest): Promise<RenderExecutionResult>;
 }
 

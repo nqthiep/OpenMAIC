@@ -1,6 +1,4 @@
-import type { Scene } from '@openmaic/dsl';
 import type { StatelessChatRequest } from '@/lib/types/chat';
-import { widgetRegistry } from '@/lib/widgets';
 import { buildWhiteboardConflicts } from './whiteboard-conflicts';
 import { type CodeLine, createCodeRenderBudget, renderCodeLines } from './code-line-budget';
 
@@ -136,8 +134,7 @@ export function summarizeElements(
  * Build context string from store state
  */
 export function buildStateContext(storeState: StatelessChatRequest['storeState']): string {
-  const { stage, scenes, currentSceneId, mode, whiteboardOpen, quizResults, widgetState } =
-    storeState;
+  const { stage, scenes, currentSceneId, mode, whiteboardOpen, quizResults } = storeState;
 
   const lines: string[] = [];
 
@@ -172,18 +169,6 @@ export function buildStateContext(storeState: StatelessChatRequest['storeState']
         lines.push(`Current slide elements (${elements.length}):\n${summarizeElements(elements)}`);
       }
 
-      // Interactive scene claimed by a widget provider: the provider's catalog-derived text
-      // (position only when the reported state belongs to this scene), not the iframe HTML.
-      if (currentScene.content.type === 'interactive') {
-        const scene = currentScene as unknown as Scene;
-        const runtime =
-          widgetState?.sceneId === currentScene.id
-            ? { preset: widgetState.preset, frame: widgetState.frame, input: widgetState.input }
-            : undefined;
-        const text = widgetRegistry.providerForScene(scene)?.describe(scene, runtime);
-        if (text) lines.push(text);
-      }
-
       // Quiz scene: include question summary, or post-submit results when the
       // student has finished. Hydration of `quizResults` happens client-side in
       // use-chat-sessions; absent here means the student has not submitted (or
@@ -206,12 +191,7 @@ export function buildStateContext(storeState: StatelessChatRequest['storeState']
             const studentAnswer = Array.isArray(ans) ? ans.join(', ') : (ans ?? '');
             const correctAnswer =
               Array.isArray(q.answer) && q.answer.length > 0 ? q.answer.join(', ') : '(open-ended)';
-            // Grader failure, not a wrong answer: status 'ungraded', or the null `correct`
-            // that records written before 'ungraded' carry.
-            const ungraded = r?.status === 'ungraded' || r?.correct === null;
-            const verdict = ungraded
-              ? 'UNGRADED (grader error, not wrong: do not tell the student it is wrong)'
-              : (r?.status.toUpperCase() ?? 'UNGRADED');
+            const verdict = r ? r.status.toUpperCase() : 'UNGRADED';
             const points = q.points ?? 1;
             const earned = r?.earned ?? 0;
             const entry: string[] = [

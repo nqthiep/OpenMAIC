@@ -64,7 +64,6 @@ import { resolveCourseChatBootstrap } from '@/lib/workbench/course-chat-bootstra
 import { startConversationWithFirstMessage } from '@/lib/workbench/first-message-session';
 import { startProSwap } from '@/lib/workbench/pro-swap';
 import { createdCourseTabsToOpen } from '@/lib/workbench/created-course-tabs';
-import { isCourseReadOnly } from '@/lib/workbench/course-read-only';
 import {
   clampRailWidth,
   parseRailWidth,
@@ -111,9 +110,6 @@ import type { CourseRef } from '@/lib/workbench/course-refs';
 import { useStageFreshnessSync, useWorkbenchStream } from '@/lib/workbench/use-workbench-session';
 import { useGeneratedCourseDiscoverySync } from '@/lib/workbench/course-discovery-sync';
 import { useStageStore } from '@/lib/store/stage';
-import { useOwnerRuns } from '@/lib/generation-run-client/use-owner-runs';
-import { discardGenerationRun } from '@/lib/generation-run-client/api';
-import { pendingCourseRuns, runsByCourse } from '@/lib/generation-run-client/course-card';
 import { WorkspaceRail } from './WorkspaceRail';
 import { WorkspaceHome } from './WorkspaceHome';
 import { WorkspaceChatPane } from './WorkspaceChatPane';
@@ -177,41 +173,6 @@ function WorkspaceShellController({ initialPanes }: { readonly initialPanes: Wor
 
   // Discover-only: course management lives in the navigation tree.
   const courses = useHomeDiscovery({ mode: 'discover-only' });
-  /*
-   * Courses a classic generation run is still producing, live through the
-   * owner's run stream — the source the home page's cards read. Such a course
-   * is read-only until its run completes, so the rail shows its progress and
-   * does not open it, and the `@` picker does not offer it. A run that gains
-   * its course or finishes reads the course list again, so the row turns into
-   * an ordinary one (with its final page count) without a reload.
-   */
-  const { runs: ownerRuns, forget: forgetRun } = useOwnerRuns({
-    onCourseChanged: () => void courses.reload(),
-  });
-  const courseRuns = useMemo(() => runsByCourse(ownerRuns), [ownerRuns]);
-  // A run whose course is not listed yet is a row of its own, as it is a card
-  // of its own on the home page — from the moment the run starts.
-  const listedCourseIds = useMemo(
-    () => new Set(courses.classrooms.map((course) => course.id)),
-    [courses.classrooms],
-  );
-  const pendingRuns = useMemo(
-    () => pendingCourseRuns(ownerRuns, listedCourseIds),
-    [ownerRuns, listedCourseIds],
-  );
-  const generatingCourseIds = useMemo(() => new Set(courseRuns.keys()), [courseRuns]);
-  /** Discard a run whose course does not exist yet — the home card's delete. */
-  const discardPendingRun = useCallback(
-    async (runId: string) => {
-      try {
-        await discardGenerationRun(runId);
-        forgetRun(runId);
-      } catch {
-        toast.error(t('workspace.deleteFailed'));
-      }
-    },
-    [forgetRun, t],
-  );
   const [sessions, setSessions] = useState<ProHomeSessionItem[]>(EMPTY_SESSIONS);
   /**
    * The latest list, readable from queued callbacks without waiting for React
@@ -950,17 +911,19 @@ function WorkspaceShellController({ initialPanes }: { readonly initialPanes: Wor
   }, [panes.courseId, playbackOn, setPlaybackOn]);
 
   // ── Read-only ─────────────────────────────────────────────────────────
-  // See `isCourseReadOnly`: the course list's `isOwner` (false for a course
-  // saved from Discover) and a generation run still producing the course.
+  // The tree already knows: a course saved from Discover carries
+  // `isOwner === false`. The stage store's own answer arrives after the load
+  // and is authoritative once it does; before that the tree's flag keeps the
+  // header from claiming an edit deck it is about to lose. The real store
+  // carries that answer as `outlineProducer` (the reference's `isOwner` was
+  // not ported): a course whose document a server job produced is server-owned,
+  // not client-authored, and therefore not the current user's own to edit.
+  const storeIsOwner = useStageStore((s) => s.outlineProducer) !== 'server-job';
   const courseIsOwner = useMemo(
     () => courses.classrooms.find((course) => course.id === panes.courseId)?.isOwner,
     [courses.classrooms, panes.courseId],
   );
-  const courseGenerating = useStageStore((s) => s.courseGenerating);
-  const readOnlyCourse = isCourseReadOnly({
-    isOwner: courseIsOwner,
-    generating: courseGenerating,
-  });
+  const readOnlyCourse = courseIsOwner === false || storeIsOwner === false;
 
   /* ── What a course is CALLED ───────────────────────────────────────────
      Tabs and in-chat links both need a name and a page count for an id, and
@@ -988,11 +951,10 @@ function WorkspaceShellController({ initialPanes }: { readonly initialPanes: Wor
    */
   const courseOptions = useMemo(
     () =>
-      courses.classrooms
-        .filter((course) => !generatingCourseIds.has(course.id))
+      [...courses.classrooms]
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .map((course) => ({ id: course.id, name: course.name })),
-    [courses.classrooms, generatingCourseIds],
+    [courses.classrooms],
   );
 
   const courseTabItems = useMemo(
@@ -1020,9 +982,8 @@ function WorkspaceShellController({ initialPanes }: { readonly initialPanes: Wor
       activeCourseId: panes.courseId,
       lookupCourse,
       courseOptions,
-      generatingCourseIds,
     }),
-    [courseOptions, generatingCourseIds, lookupCourse, openCourse, panes.courseId],
+    [courseOptions, lookupCourse, openCourse, panes.courseId],
   );
 
   return (
@@ -1042,9 +1003,6 @@ function WorkspaceShellController({ initialPanes }: { readonly initialPanes: Wor
       {classroomOpen && playbackOn ? null : (
         <WorkspaceRail
           courses={courses}
-          courseRuns={courseRuns}
-          pendingRuns={pendingRuns}
-          onDiscardRun={discardPendingRun}
           sessions={visibleSessions}
           sessionState={sessionState}
           onReloadSessions={() => {

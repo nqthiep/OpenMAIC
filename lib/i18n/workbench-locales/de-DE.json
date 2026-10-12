@@ -41,11 +41,7 @@
     "maxSelected": "Du kannst höchstens {{count}} Materialien gleichzeitig auswählen",
     "remove": "{{name}} entfernen",
     "removeFailed": "Fehlgeschlagenen Upload entfernen",
-    "uploadFailed": "{{name}} konnte nicht hochgeladen werden. Bitte erneut versuchen.",
-    "fileTooLarge": "Die Datei ist zu groß. Komprimiere oder teile sie und versuche es erneut.",
-    "fileTooLargeWithLimit": "Die Datei ist zu groß. Wähle eine Datei mit höchstens {{limit}} MB aus.",
-    "unsupportedType": "Dieser Dateityp wird nicht unterstützt. Wähle eine unterstützte Datei aus.",
-    "quotaExceeded": "Upload-Limit für Materialien erreicht."
+    "uploadFailed": "{{name}} konnte nicht hochgeladen werden. Bitte erneut versuchen."
   },
   "skill": {
     "listFailed": "Die Skill-Liste konnte nicht geladen werden",
@@ -79,10 +75,7 @@
     },
     "title": {
       "build-personal-skill": "Eigenen Skill bauen",
-      "competitive-programming": "Wettbewerbsprogrammierung",
-      "olympiad-math": "Mathematik-Olympiade",
       "curriculum-planner": "Reihenplanung",
-      "zone-of-proximal-development": "Übungsstunde (Zone der nächsten Entwicklung)",
       "stage-dsl": "Klassendokumentstruktur",
       "deep-interactive": "Tief interaktiv",
       "deep-research": "Tiefe Recherche",

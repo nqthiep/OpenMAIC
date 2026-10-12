@@ -31,14 +31,9 @@ function encodeKimiReasoning(text: string): string {
   return `${KIMI_REASONING_MARKER}${text.length}:${text}`;
 }
 
-function extractKimiReasoning(content: string): {
-  content: string;
-  reasoning: string;
-  found: boolean;
-} {
+function extractKimiReasoning(content: string): { content: string; reasoning?: string } {
   let remaining = content;
   let reasoning = '';
-  let found = false;
 
   for (;;) {
     const markerIndex = remaining.indexOf(KIMI_REASONING_MARKER);
@@ -56,22 +51,19 @@ function extractKimiReasoning(content: string): {
     const reasoningEnd = reasoningStart + reasoningLength;
     if (reasoningEnd > remaining.length) break;
 
-    found = true;
     reasoning += remaining.slice(reasoningStart, reasoningEnd);
     remaining = remaining.slice(0, markerIndex) + remaining.slice(reasoningEnd);
   }
 
-  return { content: remaining, reasoning, found };
+  return reasoning ? { content: remaining, reasoning } : { content };
 }
 
 /**
  * The OpenAI chat adapter drops standardized reasoning prompt parts. Encode
  * them as private text markers until the request reaches our fetch wrapper,
- * where they are restored to the provider's native `reasoning_content` field.
- * Shared by Kimi and DeepSeek: both require reasoning_content to be passed
- * back verbatim on the next turn while their thinking mode is on.
+ * where they are restored to Kimi's `reasoning_content` field.
  */
-export function createReasoningPreservationMiddleware(): LanguageModelMiddleware {
+export function createKimiReasoningPreservationMiddleware(): LanguageModelMiddleware {
   return {
     specificationVersion: 'v3',
     transformParams: async ({ params }) => ({
@@ -82,7 +74,7 @@ export function createReasoningPreservationMiddleware(): LanguageModelMiddleware
           : {
               ...message,
               content: message.content.map((part) =>
-                part.type === 'reasoning' && part.text
+                part.type === 'reasoning'
                   ? { type: 'text' as const, text: encodeKimiReasoning(part.text) }
                   : part,
               ),
@@ -92,7 +84,8 @@ export function createReasoningPreservationMiddleware(): LanguageModelMiddleware
   };
 }
 
-function processReasoningMarkersInRequestBody(body: unknown, restore: boolean): void {
+/** Restore private Kimi reasoning markers after OpenAI chat serialization. */
+export function restoreKimiReasoningInRequestBody(body: unknown): void {
   if (!body || typeof body !== 'object') return;
   const messages = (body as { messages?: unknown }).messages;
   if (!Array.isArray(messages)) return;
@@ -102,29 +95,13 @@ function processReasoningMarkersInRequestBody(body: unknown, restore: boolean): 
     const record = message as Record<string, unknown>;
     if (record.role !== 'assistant' || typeof record.content !== 'string') continue;
 
-    const processed = extractKimiReasoning(record.content);
-    if (!processed.found) continue;
+    const restored = extractKimiReasoning(record.content);
+    if (!restored.reasoning) continue;
 
-    if (restore) {
-      record.reasoning_content = processed.reasoning;
-    }
+    record.reasoning_content = restored.reasoning;
     record.content =
-      processed.content === '' && Array.isArray(record.tool_calls) ? null : processed.content;
+      restored.content === '' && Array.isArray(record.tool_calls) ? null : restored.content;
   }
-}
-
-/** Restore private reasoning markers after OpenAI chat serialization. */
-export function restoreReasoningContentInRequestBody(body: unknown): void {
-  processReasoningMarkersInRequestBody(body, true);
-}
-
-/**
- * Decode the private reasoning markers and drop them without emitting
- * `reasoning_content`: a disabled thinking turn must carry neither the field
- * nor the sentinel that stands in for it.
- */
-export function stripReasoningContentInRequestBody(body: unknown): void {
-  processReasoningMarkersInRequestBody(body, false);
 }
 
 /**

@@ -57,10 +57,7 @@ ${createTextProseStyles('.slide-renderer-prose')}
    so multi-paragraph cells don't collapse into a single visual block. The
    <p> margin reset above sets the baseline to 0; this rule re-adds spacing
    only between adjacent siblings, leaving the first/last paragraph flush. */
-/* The editor adds a ProseMirror wrapper with its own paragraph reset. Keep
-   the same gap there with enough specificity to beat that reset. */
-.slide-renderer-cell-text p + p,
-.slide-renderer-cell-text .ProseMirror p + p {
+.slide-renderer-cell-text p + p {
   margin-top: 0.4em;
 }
 @keyframes slide-renderer-pulse {

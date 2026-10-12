@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   getState: vi.fn(),
 }));
 
-vi.mock('@/lib/device-storage/database', () => ({
+vi.mock('@/lib/utils/database', () => ({
   db: { mediaFiles: { get: mocks.mediaGet } },
   mediaFileKey: (stageId: string, ref: string) => `${stageId}:${ref}`,
 }));
@@ -20,7 +20,7 @@ vi.mock('@/lib/store/media-generation', () => ({
 }));
 
 import { resolveStoredBytes } from '@/lib/media/resolve-stored-bytes';
-import type { MediaFileRecord } from '@/lib/device-storage/database';
+import type { MediaFileRecord } from '@/lib/utils/database';
 
 const STRICT = { requireOk: true, requireNonEmpty: true } as const;
 

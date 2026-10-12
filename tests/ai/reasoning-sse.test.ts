@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
-  createReasoningPreservationMiddleware,
+  createKimiReasoningPreservationMiddleware,
   createReasoningContentRewriter,
-  restoreReasoningContentInRequestBody,
-  stripReasoningContentInRequestBody,
+  restoreKimiReasoningInRequestBody,
   wrapJsonResponseWithReasoning,
   wrapResponseWithReasoning,
 } from '@/lib/ai/reasoning-sse';
@@ -156,7 +155,7 @@ describe('wrapResponseWithReasoning', () => {
 
 describe('Kimi reasoning preservation', () => {
   it('round-trips reasoning prompt parts through OpenAI-compatible serialization markers', async () => {
-    const middleware = createReasoningPreservationMiddleware();
+    const middleware = createKimiReasoningPreservationMiddleware();
     const params = await middleware.transformParams!({
       type: 'stream',
       model: {} as never,
@@ -188,7 +187,7 @@ describe('Kimi reasoning preservation', () => {
       ],
     };
 
-    restoreReasoningContentInRequestBody(body);
+    restoreKimiReasoningInRequestBody(body);
 
     expect(body.messages[0]).toMatchObject({
       content: null,
@@ -221,33 +220,5 @@ describe('Kimi reasoning preservation', () => {
       tool_calls: [{ id: 'call-1' }],
     });
     expect(body.choices[0].message).not.toHaveProperty('reasoning_content');
-  });
-});
-
-describe('empty reasoning markers', () => {
-  const EMPTY_MARKER = String.fromCharCode(0) + 'openmaic:kimi-reasoning:';
-
-  it('restore sets an empty reasoning_content and removes the marker', () => {
-    const body = {
-      messages: [{ role: 'assistant', content: `before ${EMPTY_MARKER}0: after` }],
-    };
-
-    restoreReasoningContentInRequestBody(body);
-
-    expect(body.messages[0]).toMatchObject({
-      content: 'before  after',
-      reasoning_content: '',
-    });
-  });
-
-  it('strip removes the marker without emitting the field', () => {
-    const body = {
-      messages: [{ role: 'assistant', content: `before ${EMPTY_MARKER}0: after` }],
-    };
-
-    stripReasoningContentInRequestBody(body);
-
-    expect(body.messages[0]).toMatchObject({ content: 'before  after' });
-    expect(body.messages[0]).not.toHaveProperty('reasoning_content');
   });
 });

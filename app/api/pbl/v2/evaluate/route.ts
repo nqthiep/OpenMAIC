@@ -40,6 +40,8 @@ import {
 } from '@/lib/pbl/v2/agents/evaluator';
 import type { PBLProjectV2 } from '@/lib/pbl/v2/types';
 
+export const maxDuration = 300;
+
 const log = createLogger('PBL v2 Evaluate API');
 
 type EvalKind = 'task' | 'milestone' | 'final';
@@ -84,7 +86,7 @@ export async function POST(req: NextRequest) {
     log.error('Model resolution failed:', err);
     return apiError('INVALID_REQUEST', 400, err instanceof Error ? err.message : String(err));
   }
-  const { model, thinkingConfig, modelInfo } = resolved;
+  const { model, thinkingConfig, modelInfo, managedKey } = resolved;
   const hasVision = !!modelInfo?.capabilities?.vision;
 
   if (body.kind === 'task') {
@@ -99,7 +101,7 @@ export async function POST(req: NextRequest) {
         hasVision,
         signal: req.signal,
       }),
-      { signal: req.signal },
+      { signal: req.signal, managedKey },
     );
   }
   if (body.kind === 'milestone') {
@@ -112,7 +114,7 @@ export async function POST(req: NextRequest) {
         recentChatSummary: body.recentChatSummary,
         signal: req.signal,
       }),
-      { signal: req.signal },
+      { signal: req.signal, managedKey },
     );
   }
   // final
@@ -124,6 +126,6 @@ export async function POST(req: NextRequest) {
       recentChatSummary: body.recentChatSummary,
       signal: req.signal,
     }),
-    { signal: req.signal },
+    { signal: req.signal, managedKey },
   );
 }

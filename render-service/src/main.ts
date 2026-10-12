@@ -36,9 +36,8 @@ import {
   RenderRejectedError,
   makeProjectDir as defaultMakeProjectDir,
 } from './render-coordinator.js';
-import { InProcessExecutor, type RenderExecutor } from './render-executor.js';
+import { InProcessExecutor } from './render-executor.js';
 import { InvalidProjectError, unzipProject as defaultUnzipProject } from './unzip.js';
-import { hardenProjectDirectory } from './project-html-hardening.js';
 import { capBodyStream } from './capped-stream.js';
 import { Semaphore } from './semaphore.js';
 import { emitRenderEvent, type RenderEventSink } from './events.js';
@@ -83,8 +82,6 @@ export interface AppDeps {
   extractionGate: Semaphore;
   /** Independent preview admission, injectable for focused route tests. */
   previewGate?: PreviewGate;
-  /** Preview execution capacity, independent of the video render queue. */
-  previewExecutionGate?: Semaphore;
   /** Render one validated persisted scene to PNG. */
   previewRenderer?: PreviewRenderer;
   /** Preview wall-clock deadline, injectable for focused route tests. */
@@ -93,8 +90,6 @@ export interface AppDeps {
   previewMaxJsonBytes?: number;
   /** Extract a validated archive into a dir. Overridable in tests. */
   unzipProject?: (zip: Uint8Array, destDir: string) => Promise<void>;
-  /** Inject the untrusted render CSP into an extracted project. Overridable in tests. */
-  hardenProject?: (projectDir: string) => Promise<void>;
   /** Create a fresh per-render scratch dir. Overridable in tests. */
   makeProjectDir?: () => Promise<string>;
   /**
@@ -105,8 +100,6 @@ export interface AppDeps {
   onEvent?: RenderEventSink;
   /** Runtime identity reported by health and copied into per-render metrics. */
   runtimeVersions?: RuntimeVersions;
-  /** The systemd resource executor fences video renders only; previews are disabled. */
-  resourceMode?: boolean;
 }
 
 interface PreviewPayload {
@@ -243,7 +236,6 @@ function parseOptions(form: FormData): RenderOptions | string {
 export function createApp(deps: AppDeps): Hono {
   const { jobs, artifacts, coordinator, extractionGate } = deps;
   const unzipProject = deps.unzipProject ?? defaultUnzipProject;
-  const hardenProject = deps.hardenProject ?? hardenProjectDirectory;
   const makeProjectDir = deps.makeProjectDir ?? defaultMakeProjectDir;
   const previewRenderer = deps.previewRenderer ?? new ChromiumPreviewRenderer();
   const previewDeadlineMs = deps.previewDeadlineMs ?? config.previewDeadlineMs;
@@ -251,8 +243,6 @@ export function createApp(deps: AppDeps): Hono {
   const onEvent = deps.onEvent ?? emitRenderEvent;
   const previewGate =
     deps.previewGate ?? new PreviewGate(config.previewMaxInFlight, config.previewMaxPerUser);
-  const previewExecutionGate =
-    deps.previewExecutionGate ?? new Semaphore(config.previewMaxConcurrency);
 
   const app = new Hono();
 
@@ -342,8 +332,6 @@ export function createApp(deps: AppDeps): Hono {
         projectDir = await makeProjectDir();
         const bytes = new Uint8Array(await file.arrayBuffer());
         await unzipProject(bytes, projectDir);
-        // Harden the extracted HTML before the producer reads any of it.
-        await hardenProject(projectDir);
         return coordinator.submit(reservation, projectDir, options);
       });
       return c.json({ jobId }, 202);
@@ -381,17 +369,6 @@ export function createApp(deps: AppDeps): Hono {
   });
 
   app.post('/preview', async (c) => {
-    // Resource mode cannot run Chromium here: this HTTP process is outside the
-    // per-task cgroup. Reject before inspecting or buffering the request body.
-    if (deps.resourceMode) {
-      return c.json(
-        {
-          error: 'Preview is unavailable while per-task resource budgets are enabled',
-          reason: 'resource_mode_unsupported',
-        },
-        503,
-      );
-    }
     const declared = Number(c.req.header('content-length') ?? '0');
     if (Number.isFinite(declared) && declared > previewMaxJsonBytes) {
       return c.json({ error: 'Upload too large' }, 413);
@@ -436,26 +413,24 @@ export function createApp(deps: AppDeps): Hono {
       if (typeof payload === 'string') throw new BadRequestError(payload);
       const unpreviewable = previewabilityError(payload.scene);
       if (unpreviewable) throw new UnprocessablePreviewError(unpreviewable);
-      signal.throwIfAborted();
-      const releaseExecution = previewExecutionGate.tryAcquire();
-      if (!releaseExecution) {
+      const execution = coordinator.tryRunWithExecutionSlot(
+        () =>
+          previewRenderer.render({
+            scene: payload.scene,
+            stage: payload.stage,
+            viewport: payload.viewport,
+            signal,
+            deadlineMs: previewDeadlineMs,
+          }),
+        signal,
+      );
+      if (!execution) {
         throw new PreviewRejectedError(
-          'Preview capacity is busy with another preview; retry shortly.',
+          'Preview capacity is busy with another render; retry shortly.',
           'capacity_busy',
         );
       }
-      let png: Uint8Array;
-      try {
-        png = await previewRenderer.render({
-          scene: payload.scene,
-          stage: payload.stage,
-          viewport: payload.viewport,
-          signal,
-          deadlineMs: previewDeadlineMs,
-        });
-      } finally {
-        releaseExecution();
-      }
+      const png = await execution;
       if (png.byteLength === 0) throw new Error('Preview renderer returned an empty image');
 
       const body = new Uint8Array(png.byteLength);
@@ -506,13 +481,6 @@ export function createApp(deps: AppDeps): Hono {
       framesRendered: job.framesRendered,
       totalFrames: job.totalFrames,
       metrics: job.metrics,
-      resources: job.resources && {
-        published: job.resources.published,
-        cleanupVerified: job.resources.cleanupVerified,
-        reservationReturned: job.resources.reservationReturned,
-        admissionClosed: job.resources.admissionClosed,
-        ...(job.resources.diagnosticCode ? { diagnosticCode: job.resources.diagnosticCode } : {}),
-      },
       error: job.error,
       done: isTerminal(job.status),
     });
@@ -555,29 +523,26 @@ export function createApp(deps: AppDeps): Hono {
 }
 
 /** Wire the production collaborators and start the server (skipped under tests). */
-export async function startService(resourceExecutor?: RenderExecutor): Promise<void> {
+async function main(): Promise<void> {
   const artifacts = new LocalDiskArtifactStore();
   validateResourceProfileStartup(config.resourceProfile);
   const runtimeVersions = await collectRuntimeVersions();
-  if (resourceExecutor) runtimeVersions.producer = '0.8.37 (official, outer resource fence)';
-  const executor =
-    resourceExecutor ??
-    new InProcessExecutor({
-      runtimeVersions,
-      ...(config.chunkExecutionEnabled
-        ? {
-            chunkExecution: {
-              chunkCount: config.chunkCount,
-              chunkWorkers: config.chunkWorkers,
-              maxParallelChunks: config.maxParallelChunks,
-              ...(config.chunkSizeFrames > 0 ? { chunkSizeFrames: config.chunkSizeFrames } : {}),
-              ...(config.targetChunkFrames > 0
-                ? { targetChunkFrames: config.targetChunkFrames }
-                : {}),
-            },
-          }
-        : {}),
-    });
+  const executor = new InProcessExecutor({
+    runtimeVersions,
+    ...(config.chunkExecutionEnabled
+      ? {
+          chunkExecution: {
+            chunkCount: config.chunkCount,
+            chunkWorkers: config.chunkWorkers,
+            maxParallelChunks: config.maxParallelChunks,
+            ...(config.chunkSizeFrames > 0 ? { chunkSizeFrames: config.chunkSizeFrames } : {}),
+            ...(config.targetChunkFrames > 0
+              ? { targetChunkFrames: config.targetChunkFrames }
+              : {}),
+          },
+        }
+      : {}),
+  });
   // Assigned after `jobs` so its reap callback can close over the coordinator.
   // eslint-disable-next-line prefer-const
   let coordinator: RenderCoordinator;
@@ -590,7 +555,7 @@ export async function startService(resourceExecutor?: RenderExecutor): Promise<v
 
   // Build the browser mount off the request path so the first preview does not
   // pay the cold esbuild cost while holding admission and execution permits.
-  if (!resourceExecutor) await buildSlideClientBundle();
+  await buildSlideClientBundle();
 
   const app = createApp({
     jobs,
@@ -600,7 +565,6 @@ export async function startService(resourceExecutor?: RenderExecutor): Promise<v
     // can't stack across a burst of admitted requests.
     extractionGate: new Semaphore(config.maxConcurrentExtractions),
     runtimeVersions,
-    resourceMode: resourceExecutor !== undefined,
   });
 
   // Ensure the scratch root exists before accepting work. On the documented
@@ -629,5 +593,5 @@ export async function startService(resourceExecutor?: RenderExecutor): Promise<v
 
 // Only auto-start when run as the entrypoint, not when imported by tests.
 if (process.env.RENDER_SERVICE_NO_LISTEN !== 'true') {
-  await startService();
+  await main();
 }

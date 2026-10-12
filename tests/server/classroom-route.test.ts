@@ -1,0 +1,263 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { NextRequest } from 'next/server';
+
+// POST /api/classroom must reject an id that would escape the classrooms
+// directory before any persistence happens, and must keep accepting generated
+// uuids and ordinary allowlisted ids.
+
+const mocks = vi.hoisted(() => ({
+  persistClassroom: vi.fn(),
+  readClassroom: vi.fn(),
+}));
+
+vi.mock('@/lib/server/classroom-storage', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/server/classroom-storage')>();
+  return {
+    ...actual,
+    persistClassroom: mocks.persistClassroom,
+    readClassroom: mocks.readClassroom,
+  };
+});
+
+vi.mock('@/lib/logger', () => ({
+  createLogger: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
+
+function postClassroom(stage: Record<string, unknown>, scenes: unknown[] = []) {
+  const request = new NextRequest('http://localhost/api/classroom', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ stage, scenes }),
+  });
+  return request;
+}
+
+describe('POST /api/classroom — id validation before persistence', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    mocks.persistClassroom.mockReset();
+    mocks.readClassroom.mockReset();
+    mocks.persistClassroom.mockImplementation(async ({ id }: { id: string }) => ({
+      id,
+      url: `http://localhost/classroom/${id}`,
+    }));
+  });
+
+  it('returns 400 for a traversal-style stage id and never persists', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom({
+        id: '../../../../tmp/openmaic-escape',
+        title: 'Lesson',
+      }),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json).toMatchObject({
+      success: false,
+      errorCode: 'INVALID_REQUEST',
+      error: 'Invalid classroom id',
+    });
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('accepts an omitted stage id and persists with a generated uuid', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom(
+        {
+          title: 'Lesson',
+          type: 'slide',
+        },
+        [
+          {
+            id: 'scene-1',
+            stageId: 'classroom-1',
+            title: 'Scene 1',
+            order: 0,
+            type: 'slide',
+            content: { type: 'slide', canvas: {} },
+          },
+        ],
+      ),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(json).toMatchObject({ success: true });
+    expect(typeof json.id).toBe('string');
+    expect(mocks.persistClassroom).toHaveBeenCalledTimes(1);
+    const [persisted] = mocks.persistClassroom.mock.calls[0];
+    expect(persisted.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+    expect(persisted.stage.id).toBe(persisted.id);
+  });
+
+  it('still persists an ordinary allowlisted id', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom(
+        {
+          id: 'abc-123_XYZ-0001',
+          title: 'Lesson',
+        },
+        [
+          {
+            id: 'scene-1',
+            stageId: 'abc-123_XYZ-0001',
+            title: 'Scene 1',
+            order: 0,
+            type: 'slide',
+            content: { type: 'slide', canvas: {} },
+          },
+        ],
+      ),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(json).toMatchObject({ success: true, id: 'abc-123_XYZ-0001' });
+    expect(mocks.persistClassroom).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'abc-123_XYZ-0001' }),
+      'http://localhost',
+      { createOnly: true },
+    );
+  });
+
+  it('answers 500 without the absolute storage path in the body', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    mocks.persistClassroom.mockRejectedValueOnce(
+      new Error("EACCES: permission denied, open '/srv/openmaic/data/classrooms/abc.json'"),
+    );
+
+    const res = await POST(postClassroom({ id: 'abc-123_XYZ-0001', title: 'Lesson' }, []));
+    const text = await res.text();
+
+    expect(res.status).toBe(500);
+    expect(text).toContain('Failed to store classroom');
+    expect(text).not.toContain('/srv/openmaic');
+    expect(text).not.toContain('EACCES');
+  });
+
+  it('answers 409 instead of replacing a classroom that the client id already names', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    mocks.persistClassroom.mockRejectedValueOnce(
+      Object.assign(new Error('EEXIST: file already exists'), { code: 'EEXIST' }),
+    );
+
+    const res = await POST(
+      postClassroom(
+        {
+          id: 'abc-123_XYZ-0001',
+          title: 'Lesson',
+        },
+        [
+          {
+            id: 'scene-1',
+            stageId: 'abc-123_XYZ-0001',
+            title: 'Scene 1',
+            order: 0,
+            type: 'slide',
+            content: { type: 'slide', canvas: {} },
+          },
+        ],
+      ),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(json).toMatchObject({ success: false, errorCode: 'INVALID_REQUEST' });
+  });
+
+  it('refuses a payload over the byte cap before reading it, and never persists it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    const oversized = new NextRequest('http://localhost/api/classroom', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'content-length': String(10 * 1024 * 1024 + 1),
+      },
+      body: '{}',
+    });
+
+    const res = await POST(oversized);
+
+    expect(res.status).toBe(413);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('answers 400 for a body that is not JSON, and never persists it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+    const malformed = new NextRequest('http://localhost/api/classroom', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{"stage": ',
+    });
+
+    const res = await POST(malformed);
+
+    expect(res.status).toBe(400);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('refuses a client-chosen id under 16 characters and never persists it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(postClassroom({ id: 'short-id-1', title: 'Lesson' }, []));
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json).toMatchObject({ success: false, errorCode: 'INVALID_REQUEST' });
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('refuses an id longer than the allowed length', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom({ id: 'a'.repeat(129), title: 'Lesson' }, [
+        {
+          id: 'scene-1',
+          stageId: 'a',
+          title: 'Scene 1',
+          order: 0,
+          type: 'slide',
+          content: { type: 'slide', canvas: {} },
+        },
+      ]),
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+
+  it('refuses a non-string id before the allowlist can coerce it', async () => {
+    const { POST } = await import('@/app/api/classroom/route');
+
+    const res = await POST(
+      postClassroom({ id: ['abc-123_XYZ-0001'], title: 'Lesson' }, [
+        {
+          id: 'scene-1',
+          stageId: 'abc-123_XYZ-0001',
+          title: 'Scene 1',
+          order: 0,
+          type: 'slide',
+          content: { type: 'slide', canvas: {} },
+        },
+      ]),
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.persistClassroom).not.toHaveBeenCalled();
+  });
+});

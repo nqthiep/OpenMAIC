@@ -41,7 +41,7 @@ import {
 } from '@/lib/audio/voice-catalog';
 import { supportsVoiceRegistration } from '@/lib/audio/voice-registration';
 import { AGENT_COLOR_PALETTE, AGENT_DEFAULT_AVATARS } from '@/lib/constants/agent-defaults';
-import type { MediaConnection } from '@/lib/server/model-config/media';
+import { enabledServerTTSProviderIds, resolveTTSApiKey } from '@/lib/server/provider-config';
 import type { CheckpointInfo } from './course-tools';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
 import { markDocumentWritersSequential } from './course-tools';
@@ -64,8 +64,6 @@ export interface RosterToolDeps {
    * `buildVoiceCloneTools` and `buildRosterTools`.
    */
   registeredVoices?: RegisteredVoiceInfo[];
-  /** The tts slot for the run's owner: voices come from its provider only. */
-  ttsConnection?: MediaConnection | 'off' | null;
 }
 
 // ── Roster helpers ──────────────────────────────────────────────────────────
@@ -96,27 +94,21 @@ export function parseVoiceConfig(
  * voice it was actually shown (or just registered). One shared implementation
  * for both.
  */
-export function agentVoiceCatalog(
-  registeredVoices: RegisteredVoiceInfo[] = [],
-  tts?: MediaConnection | 'off' | null,
-): CatalogVoice[] {
+export function agentVoiceCatalog(registeredVoices: RegisteredVoiceInfo[] = []): CatalogVoice[] {
   const providers: VoiceCatalogProvider[] = [];
-  // The provider narration synthesizes with: the tts slot's, and only it.
-  const slot = tts && tts !== 'off' ? tts : undefined;
-  const hasKey = () => Boolean(slot?.apiKey);
-  for (const id of slot ? [slot.providerId] : []) {
+  for (const id of enabledServerTTSProviderIds()) {
     const config = TTS_PROVIDERS[id as keyof typeof TTS_PROVIDERS];
     if (!config) continue;
     if (config.excludeFromAgentVoiceCatalog === true) {
       // Paid showcase presets never reach the agent, but a clone registered
       // this session through the provider's registration adapter must stay
       // bindable — offer the provider with an empty preset list.
-      if (config.requiresApiKey && !hasKey()) continue;
+      if (config.requiresApiKey && !resolveTTSApiKey(id)) continue;
       if (!supportsVoiceRegistration(id)) continue;
       providers.push({ id, voices: [] });
       continue;
     }
-    if (config.requiresApiKey && !hasKey()) continue;
+    if (config.requiresApiKey && !resolveTTSApiKey(id)) continue;
     providers.push(config);
   }
   // A registration backend means clone-kind registered voices are
@@ -218,7 +210,7 @@ export function buildRosterTools(deps: RosterToolDeps): AgentTool<never, never>[
       'A cloned voice registered this session with register_voice appears here too.',
     parameters: LIST_VOICES_PARAMS,
     async execute() {
-      const catalog = agentVoiceCatalog(deps.registeredVoices, deps.ttsConnection);
+      const catalog = agentVoiceCatalog(deps.registeredVoices);
       const voices = catalog.map((voice) => ({
         binding: voice.binding,
         providerId: voice.providerId,
@@ -304,7 +296,7 @@ export function buildRosterTools(deps: RosterToolDeps): AgentTool<never, never>[
       // synthesizable. A voice registered in an earlier session is NOT in the
       // catalog (registration is session-scoped by design): re-register it,
       // bind a catalog voice, or omit `voice`.
-      const catalog = agentVoiceCatalog(deps.registeredVoices, deps.ttsConnection);
+      const catalog = agentVoiceCatalog(deps.registeredVoices);
       const catalogBindings = new Set(catalog.map((voice) => voice.binding));
       const unusableBinding = params.agents
         .map((agent) => parseVoiceConfig(agent.voice))

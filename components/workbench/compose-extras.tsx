@@ -11,11 +11,7 @@ import { toast } from 'sonner';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils/cn';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  uploadWorkbenchMaterial,
-  WorkbenchMaterialUploadError,
-  type WorkbenchMaterial,
-} from '@/lib/workbench/session-store';
+import { uploadWorkbenchMaterial, type WorkbenchMaterial } from '@/lib/workbench/session-store';
 import { skillTitle, useAgentSkills, type AgentSkillInfo } from '@/lib/workbench/agent-skills';
 import {
   createMaterialUploadIdentityGate,
@@ -288,7 +284,7 @@ let materialsProbe: Promise<boolean> | null = null;
  * The branch substitution: the reference's probe reads `materialsEnabled`
  * (its runtime answers `enabled && isAgentMaterialsEnabled()`). This port has
  * no separate materials flag — the materials routes gate on the runtime
- * itself (materials are consumed by agent sessions) — so the probe reads the runtime's `enabled` field,
+ * itself, like the stages — so the probe reads the runtime's `enabled` field,
  * which IS the upload action's precondition (`POST /api/materials` 404s when
  * it is false).
  */
@@ -329,7 +325,7 @@ export function useMaterialUploadsEnabled(): boolean {
 export function useComposerMaterials(
   initialMaterials: readonly WorkbenchMaterial[] = [],
 ): ComposerMaterials {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const enabled = useMaterialUploadsEnabled();
   const initial = useRef<WorkbenchMaterial[] | null>(null);
   if (initial.current === null) {
@@ -379,11 +375,9 @@ export function useComposerMaterials(
       } catch (err) {
         setFailed((items) => [...items, entry]);
         toast.error(
-          err instanceof WorkbenchMaterialUploadError
-            ? err.userMessage(t, locale)
-            : err instanceof Error
-              ? err.message
-              : t('workbench.material.uploadFailed', { name: file.name }),
+          err instanceof Error
+            ? err.message
+            : t('workbench.material.uploadFailed', { name: file.name }),
         );
         return false;
       } finally {

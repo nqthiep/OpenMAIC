@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
 import type { StatelessChatRequest } from '@/lib/types/chat';
 import {
@@ -8,7 +8,6 @@ import {
   buildNativeChildPrompt,
   buildNativeChildTurnPrompt,
 } from '@/lib/chat/pi/prompts';
-import { TUTOR_COACHING, WALKTHROUGH_ANSWER_POLICY } from '@/lib/orchestration/prompt-builder';
 
 const agents: AgentConfig[] = [
   {
@@ -799,74 +798,5 @@ describe('buildChildPrompt whiteboard code is bounded end-to-end', () => {
     expect(prompt).toContain('more line(s) omitted');
     expect(prompt).not.toContain('old_line_4999 = 4999');
     expect(prompt.length).toBeLessThan(12000);
-  });
-});
-
-describe('walkthrough answer policy', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  const walkthroughScene = {
-    id: 'wt-1',
-    type: 'interactive',
-    title: 'Binary search',
-    order: 0,
-    content: { type: 'interactive', widgetConfig: { kind: 'walkthrough' } },
-  };
-  const onWalkthrough = () =>
-    makeBody({
-      storeState: {
-        stage: { id: 'stage-1', name: 'Binary search' },
-        scenes: [walkthroughScene],
-        currentSceneId: 'wt-1',
-        whiteboardOpen: false,
-      } as never,
-    });
-
-  it('child prompt: hints first on a walkthrough, no direct-answer or key-insight line', () => {
-    const prompt = buildChildPrompt(onWalkthrough(), agents[0], [], [], []);
-    expect(prompt).toContain(WALKTHROUGH_ANSWER_POLICY);
-    expect(prompt).toContain(TUTOR_COACHING);
-    expect(prompt).not.toContain('Lead with the direct answer');
-    expect(prompt).not.toContain('Give the key insight in one crisp sentence');
-  });
-
-  it('child prompt: any other scene keeps the direct-answer and key-insight lines', () => {
-    const prompt = buildChildPrompt(makeBody(), agents[0], [], [], []);
-    expect(prompt).toContain(
-      'Lead with the direct answer when the user asked a concrete question.',
-    );
-    expect(prompt).toContain('Give the key insight in one crisp sentence');
-    expect(prompt).not.toContain(WALKTHROUGH_ANSWER_POLICY);
-    expect(prompt).not.toContain(TUTOR_COACHING);
-  });
-
-  it('native prompt follows the same rule by the request-start scene', () => {
-    const start = { sceneId: 'wt-1', sceneType: 'interactive' };
-    const wt = buildNativeChildPrompt(onWalkthrough(), agents[0], [], [], start);
-    expect(wt).toContain(WALKTHROUGH_ANSWER_POLICY);
-    expect(wt).toContain('Ask at most one short follow-up question.');
-    expect(wt).not.toContain('Lead with the direct answer');
-    expect(wt).not.toContain('Give the key insight in one crisp sentence');
-
-    const plain = buildNativeChildPrompt(makeBody(), agents[0], [], []);
-    expect(plain).toContain(
-      'Lead with the direct answer and ask at most one short follow-up question.',
-    );
-    expect(plain).not.toContain(WALKTHROUGH_ANSWER_POLICY);
-  });
-  it('OPENMAIC_TUTOR_HINT_FIRST=false restores the direct-answer lines on a walkthrough', () => {
-    vi.stubEnv('OPENMAIC_TUTOR_HINT_FIRST', 'false');
-    const start = { sceneId: 'wt-1', sceneType: 'interactive' };
-    const legacy = buildChildPrompt(onWalkthrough(), agents[0], [], [], []);
-    const native = buildNativeChildPrompt(onWalkthrough(), agents[0], [], [], start);
-    for (const prompt of [legacy, native]) {
-      expect(prompt).not.toContain(WALKTHROUGH_ANSWER_POLICY);
-      expect(prompt).toContain('Lead with the direct answer');
-      expect(prompt).toContain('Give the key insight in one crisp sentence');
-      // the hint ladder itself is not part of the flag
-      expect(prompt).toContain(TUTOR_COACHING);
-    }
   });
 });

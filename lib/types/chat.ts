@@ -1,4 +1,3 @@
-import type { InteractiveStateEvidence } from '@/lib/interactive/chat-observation';
 /**
  * Shared Type Definitions for Multi-Agent Orchestration
  *
@@ -321,29 +320,7 @@ export interface InteractiveComponentReference {
   selector: string;
 }
 
-/** Identity only; content is resolved from this request's Stage snapshot. */
-export interface WhiteboardElementReference {
-  kind: 'whiteboard_element';
-  whiteboardId: string;
-  elementId: string;
-}
-
-export type ElementReference =
-  | SlideElementReference
-  | InteractiveComponentReference
-  | WhiteboardElementReference;
-
-/**
- * Where a walkthrough widget of the current scene is (ADR 0009 step 1). Ids and numbers only —
- * the server re-derives every word from the catalog. `input` exists only for preset `student`.
- */
-export interface ChatWidgetState {
-  sceneId: string;
-  walkthroughId: string;
-  preset: string;
-  frame: number;
-  input?: unknown;
-}
+export type ElementReference = SlideElementReference | InteractiveComponentReference;
 
 /**
  * Request body for the stateless chat API
@@ -377,18 +354,14 @@ export interface StatelessChatRequest {
       results: Array<{
         questionId: string;
         correct: boolean | null;
-        status: 'correct' | 'incorrect' | 'ungraded';
+        status: 'correct' | 'incorrect';
         earned: number;
         aiComment?: string;
       }>;
     };
-    /** Widget position of the CURRENT scene, only once its iframe is `ready`. Absent otherwise. */
-    widgetState?: ChatWidgetState;
   };
   /** Optional Pi-only, identity-only reference to one classroom component. */
   elementReference?: ElementReference;
-  /** Request-scoped browser evidence, never a tool permission or static definition. */
-  interactiveState?: InteractiveStateEvidence;
   /** Agent configuration */
   config: {
     agentIds: string[];

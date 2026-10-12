@@ -1,7 +1,6 @@
 import { test, expect } from '../fixtures/base';
 import { createSettingsStorage } from '../fixtures/test-data/settings';
 import type { Page } from '@playwright/test';
-import { seedServerDocument, setCurrentScene, uniqueStageId } from '../fixtures/server-seed';
 
 /**
  * Targeted live verification of playback cursor persistence (#869 cutover):
@@ -12,18 +11,40 @@ import { seedServerDocument, setCurrentScene, uniqueStageId } from '../fixtures/
  * asserted here.
  */
 
-const STAGE_PREFIX = 'stage-playback-e2e';
+const STAGE_ID = 'stage-playback-e2e';
 const SCENE_ID = 'scene-playback-e2e';
 
-async function seedStage(page: Page): Promise<string> {
+async function seedStage(page: Page) {
   await page.goto('/classroom/warmup-nonexistent');
-  const stageId = uniqueStageId(STAGE_PREFIX);
-  const now = Date.now();
-  await seedServerDocument(page, {
-    stage: { id: stageId, name: 'Playback E2E Stage', createdAt: now, updatedAt: now },
-    scenes: [
-      {
-        id: SCENE_ID,
+  await page.evaluate(
+    async ({ stageId, sceneId }) => {
+      const open = indexedDB.open('maic-documents', 1);
+      open.onupgradeneeded = () => {
+        const db = open.result;
+        db.createObjectStore('stages', { keyPath: 'id' });
+        const scenes = db.createObjectStore('scenes', { keyPath: ['stageId', 'id'] });
+        scenes.createIndex('by-stage', 'stageId');
+        db.createObjectStore('outlines', { keyPath: 'stageId' });
+      };
+      const db: IDBDatabase = await new Promise((resolve, reject) => {
+        open.onsuccess = () => resolve(open.result);
+        open.onerror = () => reject(open.error);
+      });
+      const now = Date.now();
+      const tx = db.transaction(['stages', 'scenes'], 'readwrite');
+      tx.objectStore('stages').put({
+        id: stageId,
+        name: 'Playback E2E Stage',
+        createdAt: now,
+        updatedAt: now,
+        dslVersion: '0.1.0',
+      });
+      localStorage.setItem(
+        `maic:device:editor-current-scene:${stageId}`,
+        JSON.stringify({ sceneId, updatedAt: new Date(now).toISOString() }),
+      );
+      tx.objectStore('scenes').put({
+        id: sceneId,
         stageId,
         type: 'slide',
         title: 'Playback E2E Scene',
@@ -36,17 +57,18 @@ async function seedStage(page: Page): Promise<string> {
         ],
         createdAt: now,
         updatedAt: now,
-      },
-    ],
-  });
-  await setCurrentScene(page, stageId, SCENE_ID);
-  return stageId;
+      });
+      await new Promise((resolve, reject) => {
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    },
+    { stageId: STAGE_ID, sceneId: SCENE_ID },
+  );
 }
 
-async function readCursor(
-  page: Page,
-  stageId: string,
-): Promise<{ sceneId: string; actionIndex: number } | null> {
+async function readCursor(page: Page): Promise<{ sceneId: string; actionIndex: number } | null> {
   return page.evaluate((stageId) => {
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i)!;
@@ -57,7 +79,7 @@ async function readCursor(
       }
     }
     return null;
-  }, stageId);
+  }, STAGE_ID);
 }
 
 test('playback cursor persists to device KV and survives a fresh page', async ({
@@ -69,11 +91,11 @@ test('playback cursor persists to device KV and survives a fresh page', async ({
     (settings) => {
       localStorage.setItem('maic:account:settings-storage', settings);
     },
-    createSettingsStorage({ autoPlayLecture: true }),
+    createSettingsStorage({ autoPlayLecture: true, ttsEnabled: false }),
   );
-  const stageId = await seedStage(page);
+  await seedStage(page);
 
-  await page.goto(`/classroom/${stageId}`);
+  await page.goto(`/classroom/${STAGE_ID}`);
   await expect(page.getByTestId('scene-title').first()).toBeAttached({ timeout: 30_000 });
 
   // The central play affordance is a non-semantic motion.div overlay
@@ -85,7 +107,7 @@ test('playback cursor persists to device KV and survives a fresh page', async ({
   // Speech actions advance on reading-time timers; the cursor save is
   // debounced 1s behind progress.
   await expect
-    .poll(async () => (await readCursor(page, stageId))?.sceneId ?? null, {
+    .poll(async () => (await readCursor(page))?.sceneId ?? null, {
       timeout: 60_000,
       message: 'the device cursor should be persisted while the lecture plays',
     })
@@ -94,9 +116,9 @@ test('playback cursor persists to device KV and survives a fresh page', async ({
   // Fresh page = empty sessionStorage → the KV cursor is the resume source
   // and must still be readable.
   const fresh = await context.newPage();
-  await fresh.goto(`/classroom/${stageId}`);
+  await fresh.goto(`/classroom/${STAGE_ID}`);
   await expect(fresh.getByTestId('scene-title').first()).toBeAttached({ timeout: 30_000 });
-  const cursorAfterReload = await readCursor(fresh, stageId);
+  const cursorAfterReload = await readCursor(fresh);
   expect(cursorAfterReload?.sceneId).toBe(SCENE_ID);
 
   await fresh.close();

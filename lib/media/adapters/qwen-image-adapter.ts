@@ -16,9 +16,7 @@ import type {
   ImageGenerationOptions,
   ImageGenerationResult,
 } from '../types';
-import { mediaFetchFor } from '../media-fetch';
 import { probeAuth } from '../probe-auth';
-import { assertNotRedirected } from '../redirect-guard';
 import { requireModel } from '../require-model';
 
 const DEFAULT_MODEL = 'qwen-image-max';
@@ -45,7 +43,7 @@ export async function testQwenImageConnectivity(
   return probeAuth({
     providerName: 'Qwen Image',
     request: () =>
-      mediaFetchFor(config)(`${baseUrl}/api/v1/services/aigc/multimodal-generation/generation`, {
+      fetch(`${baseUrl}/api/v1/services/aigc/multimodal-generation/generation`, {
         method: 'POST',
         redirect: 'manual',
         headers: {
@@ -67,40 +65,34 @@ export async function generateWithQwenImage(
 ): Promise<ImageGenerationResult> {
   const baseUrl = config.baseUrl || DEFAULT_BASE_URL;
 
-  const response = await mediaFetchFor(config)(
-    `${baseUrl}/api/v1/services/aigc/multimodal-generation/generation`,
-    {
-      method: 'POST',
-      redirect: 'manual',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: requireModel(config.model, 'Qwen Image'),
-        input: {
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  text: options.prompt,
-                },
-              ],
-            },
-          ],
-        },
-        parameters: {
-          negative_prompt: options.negativePrompt || undefined,
-          prompt_extend: true,
-          watermark: false,
-          size: resolveDashScopeSize(options),
-        },
-      }),
+  const response = await fetch(`${baseUrl}/api/v1/services/aigc/multimodal-generation/generation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.apiKey}`,
     },
-  );
-
-  assertNotRedirected(response, 'Qwen Image');
+    body: JSON.stringify({
+      model: requireModel(config.model, 'Qwen Image'),
+      input: {
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                text: options.prompt,
+              },
+            ],
+          },
+        ],
+      },
+      parameters: {
+        negative_prompt: options.negativePrompt || undefined,
+        prompt_extend: true,
+        watermark: false,
+        size: resolveDashScopeSize(options),
+      },
+    }),
+  });
 
   if (!response.ok) {
     const text = await response.text();

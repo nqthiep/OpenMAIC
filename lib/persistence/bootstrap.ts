@@ -1,5 +1,12 @@
-import { HttpAssetStore, HttpDocumentStore } from '@openmaic/storage';
-import { HttpRuntimeStore } from '@openmaic/storage/runtime/http';
+import {
+  BrowserKVStore,
+  HttpAssetStore,
+  HttpDocumentStore,
+  type HttpAssetHeadersHook,
+  type HttpDocumentHeadersHook,
+} from '@openmaic/storage';
+import { HttpRuntimeStore, type HttpRuntimeHeadersHook } from '@openmaic/storage/runtime/http';
+import { SESSION_ENDED_EVENT, watchForEndedSessions } from './session-end';
 
 import {
   assertDocumentStorageConfigurable,
@@ -12,76 +19,153 @@ import {
   type AssetPoolStorageOptions,
 } from '@/lib/media/asset-pool-config';
 import { assertRuntimeStorageConfigurable, configureRuntimeStorage } from '@/lib/runtime/config';
+import { getLearnerKey } from '@/lib/runtime/learner-key';
+
+let deviceKv: BrowserKVStore | undefined;
+let learnerKeyPromise: Promise<string> | undefined;
+let learnerKeyReadAt = 0;
 
 /**
- * Where the browser learns its runtime learner key under server persistence.
- *
- * The server derives the key from the request owner (the owner identity seam),
- * and the runtime contract names it in paths and bodies, so the browser has to
- * use exactly that value: any other key is refused with 403
- * FORBIDDEN_LEARNER. The browser therefore asks instead of minting one.
- * Requests carry no credential of their own; the owner cookie rides them.
+ * A session can end while the page is open: signed out in another tab, or expired.
+ * The memoised key is re-read after this long, and whenever the window regains focus,
+ * so requests stop carrying a key the server no longer accepts.
  */
-export const PERSISTENCE_LEARNER_KEY_URL = '/api/persistence/learner-key';
+const LEARNER_KEY_MAX_AGE_MS = 5 * 60 * 1000;
 
-let learnerKeyPromise: Promise<string> | undefined;
+export function isBrowserPersistenceEnabled(): boolean {
+  return typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PERSISTENCE === '1';
+}
 
-async function fetchServerLearnerKey(): Promise<string> {
-  const response = await fetch(PERSISTENCE_LEARNER_KEY_URL, {
+/** Same-origin account session route (app/api/auth/session). */
+const ACCOUNT_SESSION_PATH = '/api/auth/session';
+
+interface AccountSessionBody {
+  readonly success: true;
+  readonly enabled: boolean;
+  readonly authenticated: boolean;
+  readonly learnerKey?: unknown;
+}
+
+function isAccountSessionBody(value: unknown): value is AccountSessionBody {
+  if (value === null || typeof value !== 'object') return false;
+  const body = value as Record<string, unknown>;
+  return (
+    body.success === true &&
+    typeof body.enabled === 'boolean' &&
+    typeof body.authenticated === 'boolean'
+  );
+}
+
+/**
+ * Reads the account session. A transport failure, a non-2xx status or a
+ * malformed body rejects: the caller must not guess which learner this is.
+ */
+async function readAccountSession(): Promise<AccountSessionBody> {
+  const response = await fetch(ACCOUNT_SESSION_PATH, {
     method: 'GET',
-    credentials: 'same-origin',
+    headers: { Accept: 'application/json' },
     cache: 'no-store',
   });
   if (!response.ok) {
-    throw new Error(`Runtime learner key request failed: ${response.status}`);
+    throw new Error(`Account session request failed with HTTP ${response.status}`);
   }
-  const body = (await response.json()) as { learnerKey?: unknown } | null;
-  const learnerKey = body?.learnerKey;
-  if (typeof learnerKey !== 'string' || learnerKey === '') {
-    throw new Error('Runtime learner key response is malformed');
+  const body: unknown = await response.json();
+  if (!isAccountSessionBody(body)) {
+    throw new Error('Account session response is malformed');
   }
-  return learnerKey;
+  return body;
 }
 
 /**
- * The server-derived runtime learner key, fetched once per page. A failure is
- * not cached, so a transient error does not pin every later call.
+ * A signed-in account's partition key, otherwise the device key. A signed-in
+ * learner never falls back to the device key: those writes would land in a
+ * partition that the account cannot reach.
  */
+async function resolveLearnerKey(): Promise<string> {
+  const session = await readAccountSession();
+  if (session.enabled && session.authenticated) {
+    if (typeof session.learnerKey === 'string' && session.learnerKey.length > 0) {
+      return session.learnerKey;
+    }
+    throw new Error('Signed-in account session carries no learner key');
+  }
+  return getLearnerKey((deviceKv ??= new BrowserKVStore()));
+}
+
+function forgetLearnerKey(): void {
+  learnerKeyPromise = undefined;
+}
+
 export function getPersistenceLearnerKey(): Promise<string> {
-  if (typeof window === 'undefined') {
-    return Promise.reject(new Error('The runtime learner key is requested by the browser only'));
+  if (!isBrowserPersistenceEnabled()) {
+    return Promise.reject(new Error('Browser persistence is not enabled'));
   }
-  return (learnerKeyPromise ??= fetchServerLearnerKey().catch((error) => {
-    learnerKeyPromise = undefined;
-    throw error;
-  }));
+  if (learnerKeyPromise && Date.now() - learnerKeyReadAt > LEARNER_KEY_MAX_AGE_MS) {
+    forgetLearnerKey();
+  }
+  // Memoised until it goes stale. A rejection clears the memo so the next
+  // caller retries the session read rather than inheriting the failure.
+  if (!learnerKeyPromise) {
+    learnerKeyReadAt = Date.now();
+    learnerKeyPromise = resolveLearnerKey().catch((error) => {
+      forgetLearnerKey();
+      throw error;
+    });
+  }
+  return learnerKeyPromise;
 }
 
-/**
- * Every durable read and write in the browser goes through these seams: course
- * documents, learner runtime (chat, quiz attempts, PBL, playback) and asset
- * bytes all live on the server, behind the embedded endpoint. There is no
- * browser-storage backend to fall back to. Server code never reaches this
- * branch; it constructs its own stores.
- */
-if (typeof window !== 'undefined') {
+export async function getPersistenceRequestHeaders(): Promise<Record<string, string>> {
+  if (!isBrowserPersistenceEnabled()) return {};
+  const resolvedLearnerKey = await getPersistenceLearnerKey();
+  const token = process.env.NEXT_PUBLIC_PERSISTENCE_TOKEN;
+  return {
+    'x-learner-key': resolvedLearnerKey,
+    ...(token ? { authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+if (isBrowserPersistenceEnabled()) {
+  const learnerKey = getPersistenceLearnerKey;
+  const headers = getPersistenceRequestHeaders;
+
+  // Returning to the page is when a sign-out made in another tab shows up, so the key is re-read then.
+  if (typeof window !== 'undefined') {
+    window.addEventListener?.('focus', forgetLearnerKey);
+    // A server-reported end of session also drops the memoised key, and every API response is watched for it.
+    window.addEventListener?.(SESSION_ENDED_EVENT, forgetLearnerKey);
+    if (typeof window.fetch === 'function') watchForEndedSessions(window);
+  }
+
   const runtimeOptions = {
-    store: () => new HttpRuntimeStore({ baseUrl: '/api/persistence' }),
-    learnerKey: getPersistenceLearnerKey,
+    store: () =>
+      new HttpRuntimeStore({
+        baseUrl: '/api/persistence',
+        headers: headers satisfies HttpRuntimeHeadersHook,
+      }),
+    learnerKey,
   };
   const documentOptions: DocumentStorageOptions = {
     store: ({ validateScene, validateStage }) =>
       new HttpDocumentStore({
         baseUrl: '/api/persistence',
+        headers: headers satisfies HttpDocumentHeadersHook,
         validateScene,
         validateStage,
       }),
   };
   // The document outlives the browser that produced it, so the media it
   // references must too: generated bytes go to the same endpoint under the
-  // same owner, and the document holds the id the pool allocated.
+  // same credentials, and the document holds the id the pool allocated.
+  // `serverBacked` is what tells local-cache cleanup that these refs are not
+  // this browser's to delete.
   const assetOptions: AssetPoolStorageOptions = {
-    store: () => new HttpAssetStore({ baseUrl: '/api/persistence' }),
+    store: () =>
+      new HttpAssetStore({
+        baseUrl: '/api/persistence',
+        headers: headers satisfies HttpAssetHeadersHook,
+      }),
+    serverBacked: true,
   };
   try {
     // All checks are mutation-free. Once they pass, the synchronous configure
@@ -98,10 +182,4 @@ if (typeof window !== 'undefined') {
       error,
     );
   }
-
-  // One-way import of what earlier builds stored in this browser. Temporary;
-  // loaded on demand after the page is idle. See lib/legacy-browser-import.
-  void import('@/lib/legacy-browser-import')
-    .then(({ scheduleLegacyBrowserImport }) => scheduleLegacyBrowserImport())
-    .catch((error: unknown) => console.warn('[legacy-browser-import] Could not load:', error));
 }

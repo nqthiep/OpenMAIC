@@ -24,13 +24,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
-import { coerceCodeWidgetType } from '@/lib/widgets/policy';
 import type { SceneOutline } from '@/lib/types/generation';
 import type { WidgetType } from '@/lib/types/widgets';
-import { changeOutlineType } from '@openmaic/generation/browser';
+import { changeOutlineType } from '@openmaic/generation';
 import { countBlockingOutlines, validateOutline } from '@/lib/edit/content-validation';
 
 type SceneType = SceneOutline['type'];
@@ -1153,24 +1151,16 @@ function InteractiveConfigDisclosure({
   theme: (typeof TYPE_THEME)[SceneType];
 }) {
   const { t } = useI18n();
-  // `code` is hidden unless the server says it is allowed (undefined = not answered = blocked).
-  const codeAllowed = useCodeWidgetAllowed() === true;
-  const rawWidgetType = outline.widgetType ?? 'simulation';
-  const widgetType = (
-    codeAllowed ? rawWidgetType : coerceCodeWidgetType(rawWidgetType)
-  ) as WidgetType;
+  const widgetType = outline.widgetType ?? 'simulation';
   const concept = outline.widgetOutline?.concept ?? '';
 
   // A gated procedural-skill outline isn't manually selectable, but it can reach
   // here via preservation; surface it as the current (selected) kind so it isn't
   // mislabeled, and never clobber its task-engine fields on a same-kind re-select.
-  const selectableKinds = codeAllowed
-    ? WIDGET_KINDS
-    : WIDGET_KINDS.filter(([value]) => value !== 'code');
   const kinds: ReadonlyArray<readonly [WidgetType, string]> =
     widgetType === 'procedural-skill'
-      ? [['procedural-skill', 'generation.widgetProceduralSkill'], ...selectableKinds]
-      : selectableKinds;
+      ? [['procedural-skill', 'generation.widgetProceduralSkill'], ...WIDGET_KINDS]
+      : WIDGET_KINDS;
 
   const setWidgetType = (next: WidgetType) => {
     if (next === widgetType) return; // same kind — keep the existing widgetOutline as-is

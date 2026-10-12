@@ -19,32 +19,19 @@ import { pctToDecimal, angleToDeg, emuToPx } from '../parser/units';
 // ---------------------------------------------------------------------------
 
 /**
- * Attributes that carry a color's identity across the OOXML color types:
- *   srgbClr/schemeClr/prstClr@val, sysClr@lastClr (falls back to @val),
- *   hslClr@hue/@sat/@lum, scrgbClr@r/@g/@b, and modifiers (lumMod, tint, …)@val.
- * Keying on @val alone makes every scrgbClr and hslClr (and any sysClr differing
- * only by @lastClr) collide in the cache, so the first such color resolved is
- * wrongly reused for all later ones. Including these attributes keeps the key
- * faithful to what resolveColorUncached actually reads.
- */
-const COLOR_KEY_ATTRS = ['val', 'lastClr', 'r', 'g', 'b', 'hue', 'sat', 'lum'] as const;
-
-function colorNodeSignature(node: SafeXmlNode): string {
-  const attrs = COLOR_KEY_ATTRS.map((name) => node.attr(name) ?? '').join(',');
-  return `${node.localName}:${attrs}`;
-}
-
-/**
- * Build a cache key for a color node based on its tag, identifying attributes,
- * and nested modifier children.
+ * Build a cache key for a color node based on its tag, value, and modifiers.
  */
 function buildColorCacheKey(colorNode: SafeXmlNode): string {
-  const parts: string[] = [colorNodeSignature(colorNode)];
+  const parts: string[] = [colorNode.localName, colorNode.attr('val') ?? ''];
   for (const child of colorNode.allChildren()) {
-    if (child.localName) parts.push(colorNodeSignature(child));
+    const tag = child.localName;
+    const val = child.attr('val');
+    if (tag) parts.push(`${tag}:${val ?? ''}`);
     // Include nested color children for wrapper nodes
     for (const grandchild of child.allChildren()) {
-      if (grandchild.localName) parts.push(colorNodeSignature(grandchild));
+      const gtag = grandchild.localName;
+      const gval = grandchild.attr('val');
+      if (gtag) parts.push(`${gtag}:${gval ?? ''}`);
     }
   }
   return parts.join('|');
@@ -200,21 +187,6 @@ function resolveColorUncached(
     const name = colorNode.attr('val') || 'black';
     const hex = presetColorToHex(name) || '#000000';
     return applyColorModifiers(hex.replace('#', ''), collectModifiers(colorNode));
-  }
-  if (selfTag === 'hslClr') {
-    const hue = (colorNode.numAttr('hue') ?? 0) / 60000;
-    const sat = (colorNode.numAttr('sat') ?? 0) / 100000;
-    const lum = (colorNode.numAttr('lum') ?? 0) / 100000;
-    const rgb = hslToRgb(hue, sat, lum);
-    const hex = rgbToHex(rgb.r, rgb.g, rgb.b).replace('#', '');
-    return applyColorModifiers(hex, collectModifiers(colorNode));
-  }
-  if (selfTag === 'scrgbClr') {
-    const r = Math.round(((colorNode.numAttr('r') ?? 0) / 100000) * 255);
-    const g = Math.round(((colorNode.numAttr('g') ?? 0) / 100000) * 255);
-    const b = Math.round(((colorNode.numAttr('b') ?? 0) / 100000) * 255);
-    const hex = rgbToHex(r, g, b).replace('#', '');
-    return applyColorModifiers(hex, collectModifiers(colorNode));
   }
 
   return { color: '#000000', alpha: 1 };

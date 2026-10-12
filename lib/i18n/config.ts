@@ -36,7 +36,9 @@ i18n
   )
   .init({
     lng: defaultLocale,
-    fallbackLng: defaultLocale,
+    // English, not the default locale: a key missing from a machine-drafted locale
+    // should fall back to text the team reviews first. See TRANSLATION_GUIDE.md.
+    fallbackLng: 'en-US',
     supportedLngs: supportedLocales.map((l) => l.code),
     interpolation: {
       escapeValue: false,

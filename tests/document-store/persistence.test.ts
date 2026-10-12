@@ -5,6 +5,7 @@ import {
 } from '@openmaic/dsl';
 import type { DocumentStore } from '@openmaic/storage';
 import { describe, expect, test, vi } from 'vitest';
+import { IDBFactory } from 'fake-indexeddb';
 
 import {
   canonicalizeLegacyOutline,
@@ -18,13 +19,8 @@ import { upgradeLegacyPBLConfigToProjectV2, type PBLProjectConfig } from '@/lib/
 import type { SceneOutline } from '@/lib/types/generation';
 import type { AppScene, InteractiveContent, PBLContent } from '@/lib/types/stage';
 import type { SimulationConfig } from '@/lib/types/widgets';
-import type {
-  SceneRecord,
-  StageOutlinesRecord,
-  StageRecord,
-} from '@/lib/legacy-browser-storage/schema';
+import type { SceneRecord, StageOutlinesRecord, StageRecord } from '@/lib/utils/database';
 import { legacyPBLSceneFixture } from '@/tests/fixtures/pbl-v1-scene';
-import { inMemoryDocumentStore } from '@/tests/helpers/in-memory-document-store';
 
 const stageRecord: StageRecord = {
   id: 'stage-1',
@@ -112,7 +108,8 @@ describe('app document persistence seam', () => {
       scenes: [{ ...legacyPBLSceneFixture, stageId: stageRecord.id }],
     };
     const store = getDocumentStore({
-      store: inMemoryDocumentStore('app-document-legacy-pbl-roundtrip'),
+      indexedDB: new IDBFactory(),
+      dbName: 'app-document-legacy-pbl-roundtrip',
     });
 
     await store.saveDocument(document);
@@ -129,7 +126,8 @@ describe('app document persistence seam', () => {
       scenes: [{ ...damagedHybrid, stageId: stageRecord.id }],
     };
     const store = getDocumentStore({
-      store: inMemoryDocumentStore('app-document-damaged-hybrid-roundtrip'),
+      indexedDB: new IDBFactory(),
+      dbName: 'app-document-damaged-hybrid-roundtrip',
     });
 
     expect(validateAppScene(document.scenes[0])).toEqual({ valid: true });
@@ -193,7 +191,8 @@ describe('app document persistence seam', () => {
       scenes: [slideScene()],
     };
     const store = getDocumentStore({
-      store: inMemoryDocumentStore('app-document-stage-roundtrip'),
+      indexedDB: new IDBFactory(),
+      dbName: 'app-document-stage-roundtrip',
     });
 
     await store.saveDocument(document);
@@ -221,7 +220,8 @@ describe('app document persistence seam', () => {
     };
     const canonical = canonicalizeLegacyOutline(legacy);
     const store = getDocumentStore({
-      store: inMemoryDocumentStore('app-document-outline-roundtrip'),
+      indexedDB: new IDBFactory(),
+      dbName: 'app-document-outline-roundtrip',
     });
     await store.saveDocument({
       stage: canonicalizeLegacyStage(stageRecord).stage,

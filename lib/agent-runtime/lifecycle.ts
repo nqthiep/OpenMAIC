@@ -32,8 +32,6 @@ export interface MediaReadyLifecycleData {
   durationSec?: number;
   /** Stable provider-neutral code from MEDIA_TOOL_ERROR_REASONS when failed. */
   errorCode?: string;
-  /** A short plain-text suggestion for the agent after a failure, such as the nearest ready-made clip preset. */
-  hint?: string;
 }
 
 export const HOST_AGENT_LIFECYCLE = {

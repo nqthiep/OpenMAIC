@@ -1,3 +1,5 @@
+import { redactLogSecrets } from '@/lib/log-secrets';
+
 const LOG_LEVELS = { debug: 0, info: 1, warn: 2, error: 3 } as const;
 type LogLevel = keyof typeof LOG_LEVELS;
 
@@ -13,11 +15,13 @@ function isJsonFormat(): boolean {
 function formatLine(level: LogLevel, tag: string, args: unknown[]): string {
   const timestamp = new Date().toISOString();
   const upperLevel = level.toUpperCase();
-  const msg = args
-    .map((a) =>
-      a instanceof Error ? (a.stack ?? a.message) : typeof a === 'string' ? a : JSON.stringify(a),
-    )
-    .join(' ');
+  const msg = redactLogSecrets(
+    args
+      .map((a) =>
+        a instanceof Error ? (a.stack ?? a.message) : typeof a === 'string' ? a : JSON.stringify(a),
+      )
+      .join(' '),
+  );
 
   if (isJsonFormat()) {
     return JSON.stringify({ timestamp, level: upperLevel, tag, message: msg });

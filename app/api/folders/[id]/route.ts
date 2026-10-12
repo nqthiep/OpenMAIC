@@ -7,24 +7,27 @@
  * course ids are returned, so the caller can run its own cascade (the
  * workbench deletes the owner courses it captured).
  *
- * Every handler is owner-scoped exactly like the other folder routes (see
- * `app/api/folders/route.ts`), and the whole family is gated on server
- * persistence (a DATABASE_URL), not on the agent runtime.
+ * Every handler is owner-scoped exactly like the other workbench routes (see
+ * `app/api/folders/route.ts`), and the whole family is gated on the
+ * configured runtime.
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import type { DocumentFolder, DocumentFolderStore } from '@openmaic/storage';
 
-import { isServerPersistenceConfigured } from '@/lib/config/feature-flags';
+import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
-import { withRequestOwner } from '@/lib/server/identity/with-owner';
-import { ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
+import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { folderNameErrorResponse } from '@/lib/server/folder-name-errors';
 import { validateFolderName } from '@/lib/utils/folder-name-validation';
 
 export const runtime = 'nodejs';
+
+/** Largest folder rename body, refused before it is buffered. The app sends one name. */
+const FOLDER_RENAME_MAX_BYTES = 1024 * 1024;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -39,15 +42,19 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 
 // PATCH /api/folders/[id] — rename { name }.
 export async function PATCH(req: NextRequest, { params }: Params) {
-  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return jsonError(400, 'INVALID_BODY', 'request body must be JSON');
+  const read = await readBoundedJson(req, FOLDER_RENAME_MAX_BYTES);
+  if (!read.ok) {
+    return jsonError(
+      read.status,
+      'INVALID_BODY',
+      read.code === 'PAYLOAD_TOO_LARGE'
+        ? `request body exceeds ${FOLDER_RENAME_MAX_BYTES} bytes`
+        : 'request body must be JSON',
+    );
   }
-  const name = (body as { name?: unknown })?.name;
+  const name = (read.value as { name?: unknown })?.name;
   if (typeof name !== 'string') {
     return jsonError(400, 'FOLDER_NAME_INVALID', 'name must be a string');
   }
@@ -61,7 +68,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id } = await params;
     try {
       const store = (await getOwnerScopedDocumentStore(ownerId)) as unknown as DocumentFolderStore;
@@ -85,8 +92,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
       return ownerJson({ folder: folderResponse(updated, ownerId) }, 200, responseHeaders);
     } catch (error) {
-      const claimed = ownerWriteErrorResponse(error, responseHeaders);
-      if (claimed) return claimed;
       // The rename re-checks the name through the unique index; a duplicate
       // that slipped past the pre-check answers the same 409.
       const nameError = folderNameErrorResponse(error);
@@ -94,7 +99,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         for (const [key, value] of responseHeaders) nameError.headers.append(key, value);
         return nameError;
       }
-      console.error(`[Folders] Failed to rename [id=${id}]:`, error);
+      console.error(`[Folders] Failed to rename [owner=${ownerId}, id=${id}]:`, error);
       return jsonError(500, 'FOLDER_RENAME_FAILED', 'Failed to rename folder', responseHeaders);
     }
   });
@@ -102,12 +107,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 // DELETE /api/folders/[id]?mode=ungroup|remove
 export async function DELETE(req: NextRequest, { params }: Params) {
-  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
   const modeParam = req.nextUrl.searchParams.get('mode');
   const mode: 'ungroup' | 'remove' = modeParam === 'remove' ? 'remove' : 'ungroup';
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id } = await params;
     try {
       const store = (await getOwnerScopedDocumentStore(ownerId)) as unknown as DocumentFolderStore;
@@ -117,9 +122,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       }
       return ownerJson({ ok: true, removedStageIds: result.removedStageIds }, 200, responseHeaders);
     } catch (error) {
-      const claimed = ownerWriteErrorResponse(error, responseHeaders);
-      if (claimed) return claimed;
-      console.error(`[Folders] Failed to delete [id=${id}]:`, error);
+      console.error(`[Folders] Failed to delete [owner=${ownerId}, id=${id}]:`, error);
       return jsonError(500, 'FOLDER_DELETE_FAILED', 'Failed to delete folder', responseHeaders);
     }
   });

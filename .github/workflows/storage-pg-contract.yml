@@ -4,8 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches:
-      [main, runtime-server-backend, feat/maic-editor-v0, feat/maic-editor-v1]
+    branches: [main, runtime-server-backend, feat/maic-editor-v0, feat/maic-editor-v1]
 
 concurrency:
   group: storage-pg-contract-${{ github.ref }}
@@ -20,17 +19,17 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: openmaic_contract
+          POSTGRES_DB: openmaic
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d openmaic_contract"
+          --health-cmd "pg_isready -U postgres -d openmaic"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
     env:
-      PG_CONTRACT_URL: postgresql://postgres:postgres@localhost:5432/openmaic_contract
+      PG_CONTRACT_URL: postgresql://postgres:postgres@localhost:5432/openmaic
       STORAGE_PG_CONTRACT_REQUIRED: '1'
     steps:
       - uses: actions/checkout@v5
@@ -64,44 +63,5 @@ jobs:
           node scripts/assert-pg-contract-suites.mjs "$STORAGE_VITEST_RESULTS" \
             --baseline "$STORAGE_PG_BASELINE"
 
-      # App-domain PostgreSQL contracts, in the same database as the package
-      # suite above. Each of these files is responsible for not colliding with
-      # it: the asset ones provision `stage_meta`, whose foreign key to
-      # `document_stages` would break the package suite's non-cascading
-      # TRUNCATE, so each works inside a schema of its own and drops it again.
-      # Both orders were checked, because nothing here guarantees one. The
-      # others work in a schema or database of their own, or truncate only
-      # tables of their own. This list is every app PostgreSQL contract suite
-      # except the known gaps in tests/ci/storage-pg-contract-list.test.ts: a
-      # suite left off it skips everywhere, since no other job runs the app
-      # suites against a database.
-      - name: App-domain PostgreSQL contracts
-        run: |
-          pnpm exec vitest run \
-            tests/lib/whiteboard/runtime-store.pg.test.ts \
-            tests/persistence/document-asset-references.pg.test.ts \
-            tests/persistence/asset-reference-backfill.pg.test.ts \
-            tests/persistence/workbench-tool-asset-references.pg.test.ts \
-            tests/persistence/host-create-hooks.pg.test.ts \
-            tests/persistence/stage-meta-tenancy.pg.test.ts \
-            tests/persistence/schema-bootstrap-concurrency.pg.test.ts \
-            tests/persistence/schema-migrations.pg.test.ts \
-            tests/persistence/owner-claims.pg.test.ts \
-            tests/persistence/owner-assets-legacy-race.pg.test.ts \
-            tests/persistence/owner-materials.pg.test.ts \
-            tests/persistence/workspace-model-config.pg.test.ts \
-            tests/server/agents/owner-agents.pg.test.ts \
-            tests/persistence/runtime-tombstone-collision.pg.test.ts \
-            tests/agent-runtime/event-notify.pg.test.ts \
-            tests/agent-runtime/park-attempt-budget.pg.test.ts \
-            tests/agent-runtime/session-events-live.pg.test.ts \
-            tests/agent-runtime/prior-run-record.pg.test.ts \
-            tests/agent-runtime/entry-tree-storage.test.ts \
-            tests/legacy-browser-import/import-routes.pg.test.ts \
-            tests/server/classroom-persistence.pg.test.ts \
-            tests/server/generate-classroom-api.pg.test.ts \
-            tests/server/generation-runs.pg.test.ts \
-            tests/server/material-extraction.pg.test.ts \
-            tests/server/legacy-classroom-import.pg.test.ts \
-            tests/persistence/exclusive-create-invariant.pg.test.ts \
-            tests/security/owner-read-gate.pg.test.ts
+      - name: Whiteboard RuntimeStore PostgreSQL app-domain contract
+        run: pnpm exec vitest run tests/lib/whiteboard/runtime-store.pg.test.ts

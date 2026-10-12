@@ -8,7 +8,6 @@ import type { Scene } from '@/lib/types/stage';
 import { inlineHtmlAssets, type FetchAsset } from '@/lib/export/inline-assets';
 import { injectIntoDocumentHead } from '@/lib/utils/html-document';
 import { patchHtmlForIframe } from '@/lib/utils/iframe';
-import { decideInteractiveMount } from '@/lib/widgets/policy';
 import type { InteractiveHtmlMeta, InteractiveHtmlSource } from '@/lib/video-export/deps';
 import {
   INTERACTIVE_READY_TIMEOUT_MS,
@@ -26,11 +25,6 @@ export interface PreparedInteractiveHtmlSet extends InteractiveHtmlSource {
 export interface PrepareInteractiveHtmlOptions {
   fetcher?: FetchAsset;
   maxHtmlBytes?: number;
-  /**
-   * Whether this deployment allows the student-code widget (as in use-export-pptx). Only `true`
-   * packages a `code` widget; unknown/omitted = blocked (ADR 0010).
-   */
-  codeAllowed?: boolean;
 }
 
 function staticCaptureInjection(): string {
@@ -225,16 +219,6 @@ export async function prepareInteractiveHtmlScenes(
   for (const scene of scenes) {
     if (scene.content.type !== 'interactive') continue;
     const assetId = `interactive:${scene.id}`;
-    if (decideInteractiveMount(scene.content, options.codeAllowed) === 'blocked') {
-      // Never package or run blocked code-widget HTML: the emitter shows its static fallback.
-      bySceneId.set(scene.id, {
-        id: assetId,
-        present: false,
-        failure: 'packaging-failed',
-        message: 'interactive-code-widget-blocked',
-      });
-      continue;
-    }
     const authored = scene.content.html;
     if (!authored?.trim()) {
       bySceneId.set(scene.id, {

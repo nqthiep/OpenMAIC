@@ -12,13 +12,17 @@ import type { NextRequest } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
-import { authenticateRequestOwner } from '@/lib/server/identity/with-owner';
+import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
-import { isRetiredStoredOwner, retiredCredentialCookies } from '@/lib/persistence/owner-merges';
-import { resolveSetCookies } from '@/lib/server/identity/set-cookie';
+import {
+  resolveSignedInSession,
+  sessionEndedResponse,
+} from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
-// The 25s heartbeat keeps this sparse stream active through idle periods.
+// Self-hosted `next start` ignores maxDuration; Vercel's adapter can still use
+// it. The 25s heartbeat keeps this sparse stream active through idle periods.
+export const maxDuration = 300;
 
 // LISTEN/NOTIFY supplies low latency. This is deliberately retained as a
 // correctness fallback because NOTIFY is lossy across listener disconnects.
@@ -40,30 +44,13 @@ export async function GET(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
   // Identity belongs to the request, not the URL. EventSource reconnects to
-  // this same stable path with whatever credential the owner auth methods
-  // reads — by default the anonymous cookie minted on first attach.
-  const owner = await authenticateRequestOwner(req);
-  if (!owner.ok) return owner.response;
-  const {
-    principal: { ownerId },
-    responseHeaders,
-  } = owner;
-  // An identity a claim already retired gets no stream: one `owner_moved`,
-  // then end of stream, with the Set-Cookie values that drop the retired
-  // credential. A tab that learned of the move on a heartbeat reconnects with
-  // the old credential and lands here, so the reconnect loop ends after one
-  // round trip. Nothing about the account is disclosed.
-  if (await isRetiredStoredOwner(ownerId)) {
-    for (const cookie of retiredCredentialCookies()) responseHeaders.append('Set-Cookie', cookie);
-    // Drop the renewal of the cookie these values clear.
-    resolveSetCookies(responseHeaders);
-    responseHeaders.set('Content-Type', 'text/event-stream; charset=utf-8');
-    responseHeaders.set('Cache-Control', 'no-cache, no-transform');
-    return new Response(
-      `event: owner_moved\ndata: ${JSON.stringify({ type: 'owner_moved', action: 'reconnect' })}\n\n`,
-      { headers: responseHeaders },
-    );
-  }
+  // this same stable path with the same cookies. A signed-in request is
+  // partitioned by its session; any other request by the anonymous cookie minted
+  // on first attach. The owner is resolved before any store read.
+  const responseHeaders = new Headers();
+  const session = await resolveSignedInSession(req.headers);
+  if (session.ended) return sessionEndedResponse();
+  const ownerId = resolveRequestOwnerId(req, responseHeaders, session.ownerId);
   const store = await getAgentSessionStore();
 
   const url = new URL(req.url);
@@ -294,11 +281,6 @@ export async function GET(req: NextRequest) {
           .readRetirement(ownerId)
           .then((newOwnerId) => {
             if (!newOwnerId || closed) return;
-            // The stream's owner was claimed into an account. Say only that it
-            // moved: whoever still holds the retired identity (a stale tab, a
-            // shared browser) must not learn the account's owner id, which is
-            // often a login or an email. The client reconnects, and a
-            // signed-in client reconnects as the account.
             // Native EventSource reconnects a clean 200 EOF with the same
             // Last-Event-ID. The client MUST close this instance, construct a
             // new EventSource without that cursor, and perform one full session
@@ -307,6 +289,7 @@ export async function GET(req: NextRequest) {
             write(
               `event: owner_moved\ndata: ${JSON.stringify({
                 type: 'owner_moved',
+                newOwnerId,
                 action: 'reconnect',
               })}\n\n`,
             );

@@ -191,7 +191,6 @@ for (const subpath of [
   'document/http',
   'document/pg',
   'runtime/pg',
-  'pg-migrations',
   'server',
   'server/reference',
 ]) {

@@ -23,7 +23,6 @@ export {
 } from './store';
 export {
   accessDocument,
-  canonicalizeLegacySnapshot,
   documentLockName,
   getLegacyDocumentStore,
   mutateDocument,

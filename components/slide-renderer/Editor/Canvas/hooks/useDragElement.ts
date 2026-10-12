@@ -3,14 +3,8 @@ import { useCanvasStore, useKeyboardStore } from '@/lib/store';
 import { useHistorySnapshot } from '@/lib/hooks/use-history-snapshot';
 import type { PPTElement } from '@openmaic/dsl';
 import type { AlignmentLineProps } from '@/lib/types/edit';
-import {
-  getElementRange,
-  getElementListRange,
-  uniqAlignLines,
-  type AlignLine,
-} from '@/lib/utils/element';
+import { getRectRotatedRange, uniqAlignLines, type AlignLine } from '@/lib/utils/element';
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
-import { isTouchEvent } from './touch-event';
 
 /**
  * Drag element hook
@@ -38,8 +32,8 @@ export function useDragElement(
   const dragElement = useCallback(
     (e: React.MouseEvent | React.TouchEvent, element: PPTElement) => {
       const native = e.nativeEvent;
-      const isTouch = isTouchEvent(native);
-      if (isTouch && !native.changedTouches?.length) return;
+      const isTouchEvent = native instanceof TouchEvent;
+      if (isTouchEvent && !native.changedTouches?.length) return;
 
       if (!activeElementIdList.includes(element.id)) return;
 
@@ -57,17 +51,16 @@ export function useDragElement(
 
       const elOriginLeft = element.left;
       const elOriginTop = element.top;
+      const elOriginWidth = element.width;
+      const elOriginHeight = 'height' in element && element.height ? element.height : 0;
+      const elOriginRotate = 'rotate' in element && element.rotate ? element.rotate : 0;
 
-      const startPageX = isTouch ? native.changedTouches[0].pageX : native.pageX;
-      const startPageY = isTouch ? native.changedTouches[0].pageY : native.pageY;
+      const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
+      const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
 
       let isMisoperation: boolean | null = null;
 
       const isActiveGroupElement = element.id === activeGroupElementId;
-      const originRange =
-        activeElementIdList.length === 1 || isActiveGroupElement
-          ? getElementRange(element)
-          : getElementListRange(originActiveElementList);
 
       // Collect alignment snap lines
       // Includes snap positions of other elements on canvas (excluding the target): top/bottom/left/right edges, horizontal/vertical centers
@@ -80,10 +73,28 @@ export function useDragElement(
         if (isActiveGroupElement && el.id === element.id) continue;
         if (!isActiveGroupElement && activeElementIdList.includes(el.id)) continue;
 
-        const { minX: left, minY: top, maxX: right, maxY: bottom } = getElementRange(el);
-        const width = right - left;
-        const height = bottom - top;
+        let left, top, width, height;
+        if ('rotate' in el && el.rotate) {
+          const { xRange, yRange } = getRectRotatedRange({
+            left: el.left,
+            top: el.top,
+            width: el.width,
+            height: el.height,
+            rotate: el.rotate,
+          });
+          left = xRange[0];
+          top = yRange[0];
+          width = xRange[1] - xRange[0];
+          height = yRange[1] - yRange[0];
+        } else {
+          left = el.left;
+          top = el.top;
+          width = el.width;
+          height = el.height;
+        }
 
+        const right = left + width;
+        const bottom = top + height;
         const centerX = top + height / 2;
         const centerY = left + width / 2;
 
@@ -157,11 +168,78 @@ export function useDragElement(
         let targetLeft = elOriginLeft + moveX;
         let targetTop = elOriginTop + moveY;
 
-        // Translate the original single-element or selection bounds with the gesture.
-        const targetMinX = originRange.minX + moveX;
-        const targetMaxX = originRange.maxX + moveX;
-        const targetMinY = originRange.minY + moveY;
-        const targetMaxY = originRange.maxY + moveY;
+        // Calculate target element's bounding range on canvas for alignment snapping
+        // Must distinguish single-select vs multi-select; single-select further distinguishes line, normal, and rotated elements
+        let targetMinX: number, targetMaxX: number, targetMinY: number, targetMaxY: number;
+
+        if (activeElementIdList.length === 1 || isActiveGroupElement) {
+          if (elOriginRotate) {
+            const { xRange, yRange } = getRectRotatedRange({
+              left: targetLeft,
+              top: targetTop,
+              width: elOriginWidth,
+              height: elOriginHeight,
+              rotate: elOriginRotate,
+            });
+            targetMinX = xRange[0];
+            targetMaxX = xRange[1];
+            targetMinY = yRange[0];
+            targetMaxY = yRange[1];
+          } else if (element.type === 'line') {
+            targetMinX = targetLeft;
+            targetMaxX = targetLeft + Math.max(element.start[0], element.end[0]);
+            targetMinY = targetTop;
+            targetMaxY = targetTop + Math.max(element.start[1], element.end[1]);
+          } else {
+            targetMinX = targetLeft;
+            targetMaxX = targetLeft + elOriginWidth;
+            targetMinY = targetTop;
+            targetMaxY = targetTop + elOriginHeight;
+          }
+        } else {
+          const leftValues = [];
+          const topValues = [];
+          const rightValues = [];
+          const bottomValues = [];
+
+          for (let i = 0; i < originActiveElementList.length; i++) {
+            const element = originActiveElementList[i];
+            const left = element.left + moveX;
+            const top = element.top + moveY;
+            const width = element.width;
+            const height = 'height' in element && element.height ? element.height : 0;
+            const rotate = 'rotate' in element && element.rotate ? element.rotate : 0;
+
+            if ('rotate' in element && element.rotate) {
+              const { xRange, yRange } = getRectRotatedRange({
+                left,
+                top,
+                width,
+                height,
+                rotate,
+              });
+              leftValues.push(xRange[0]);
+              topValues.push(yRange[0]);
+              rightValues.push(xRange[1]);
+              bottomValues.push(yRange[1]);
+            } else if (element.type === 'line') {
+              leftValues.push(left);
+              topValues.push(top);
+              rightValues.push(left + Math.max(element.start[0], element.end[0]));
+              bottomValues.push(top + Math.max(element.start[1], element.end[1]));
+            } else {
+              leftValues.push(left);
+              topValues.push(top);
+              rightValues.push(left + width);
+              bottomValues.push(top + height);
+            }
+          }
+
+          targetMinX = Math.min(...leftValues);
+          targetMaxX = Math.max(...rightValues);
+          targetMinY = Math.min(...topValues);
+          targetMaxY = Math.max(...bottomValues);
+        }
 
         const targetCenterX = targetMinX + (targetMaxX - targetMinX) / 2;
         const targetCenterY = targetMinY + (targetMaxY - targetMinY) / 2;
@@ -297,7 +375,7 @@ export function useDragElement(
         addHistorySnapshot();
       };
 
-      if (isTouch) {
+      if (isTouchEvent) {
         document.ontouchmove = handleMouseMove;
         document.ontouchend = handleMouseUp;
       } else {

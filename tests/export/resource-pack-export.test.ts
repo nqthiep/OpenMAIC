@@ -38,10 +38,10 @@ function decode(bytes: Uint8Array): string {
 
 describe('buildResourcePackZip', () => {
   describe('interactive-only deck (no slides)', () => {
-    it('still invokes the PPTX builder for the placeholder slide', async () => {
-      const getPptxBlob = vi.fn(async () => new Blob([new Uint8Array([1, 2, 3])]));
+    it('does not invoke the PPTX builder', async () => {
+      const getPptxBlob = vi.fn(async () => new Blob(['pptx-bytes']));
 
-      const result = await buildResourcePackZip([interactiveScene()], {
+      const result = await buildResourcePackZip([interactiveScene()], [], [], {
         viewportRatio: 0.5625,
         viewportSize: 960,
         ratioPx2Inch: 96,
@@ -51,13 +51,13 @@ describe('buildResourcePackZip', () => {
       });
 
       expect(result.empty).toBe(false);
-      expect(getPptxBlob).toHaveBeenCalledTimes(1);
+      expect(getPptxBlob).not.toHaveBeenCalled();
     });
 
-    it('ships a ZIP containing the interactive HTML page and the PPTX', async () => {
-      const getPptxBlob = vi.fn(async () => new Blob([new Uint8Array([1, 2, 3])]));
+    it('ships a ZIP containing the interactive HTML page and no PPTX', async () => {
+      const getPptxBlob = vi.fn(async () => new Blob(['pptx-bytes']));
 
-      const result = await buildResourcePackZip([interactiveScene()], {
+      const result = await buildResourcePackZip([interactiveScene()], [], [], {
         viewportRatio: 0.5625,
         viewportSize: 960,
         ratioPx2Inch: 96,
@@ -67,6 +67,7 @@ describe('buildResourcePackZip', () => {
       });
 
       expect(result.blob).not.toBeNull();
+      expect(result.skippedPptx).toBe(true);
 
       const files = await readZipFiles(result.blob!);
       const names = Object.keys(files);
@@ -74,8 +75,8 @@ describe('buildResourcePackZip', () => {
       expect(names.some((n) => n.startsWith('interactive/'))).toBe(true);
       const htmlEntry = names.find((n) => n.startsWith('interactive/'))!;
       expect(decode(files[htmlEntry])).toBe(interactiveHtml);
-      // The PPTX holds the interactive scene's placeholder slide.
-      expect(names).toContain('demo.pptx');
+      // No PPTX shipped for an interactive-only deck.
+      expect(names.some((n) => n.endsWith('.pptx'))).toBe(false);
     });
   });
 
@@ -95,8 +96,13 @@ describe('buildResourcePackZip', () => {
         content: { type: 'slide', canvas: { width: 960, height: 540, elements: [] } },
       } as unknown as Scene;
 
-      // getPptxBlob is mocked, so the slide content is never read.
-      const result = await buildResourcePackZip([slideScene], {
+      // The real slides' content isn't read — getPptxBlob is mocked, so the
+      // builder only needs slides.length > 0 to decide PPTX is included.
+      const placeholderSlide = { id: 'sl1' } as unknown as Parameters<
+        typeof buildResourcePackZip
+      >[1][number];
+
+      const result = await buildResourcePackZip([slideScene], [placeholderSlide], [slideScene], {
         viewportRatio: 0.5625,
         viewportSize: 960,
         ratioPx2Inch: 96,
@@ -106,6 +112,7 @@ describe('buildResourcePackZip', () => {
       });
 
       expect(result.empty).toBe(false);
+      expect(result.skippedPptx).toBe(false);
       expect(getPptxBlob).toHaveBeenCalledTimes(1);
 
       // The PPTX entry is present in the generated ZIP.
@@ -119,7 +126,7 @@ describe('buildResourcePackZip', () => {
     it('returns empty and does not build anything', async () => {
       const getPptxBlob = vi.fn(async () => new Blob(['pptx-bytes']));
 
-      const result = await buildResourcePackZip([], {
+      const result = await buildResourcePackZip([], [], [], {
         viewportRatio: 0.5625,
         viewportSize: 960,
         ratioPx2Inch: 96,
@@ -141,7 +148,7 @@ describe('buildResourcePackZip', () => {
         content: { type: 'interactive', url: 'https://example.com', html: '' },
       });
 
-      const result = await buildResourcePackZip([sceneNoHtml], {
+      const result = await buildResourcePackZip([sceneNoHtml], [], [], {
         viewportRatio: 0.5625,
         viewportSize: 960,
         ratioPx2Inch: 96,
@@ -159,14 +166,14 @@ describe('buildResourcePackZip', () => {
 
   describe('multiple interactive scenes', () => {
     it('numbers each HTML page and sanitizes titles in the filename', async () => {
-      const getPptxBlob = vi.fn(async () => new Blob([new Uint8Array([1])]));
+      const getPptxBlob = vi.fn(async () => new Blob(['pptx-bytes']));
       const scenes = [
         interactiveScene({ id: 'a', title: 'First/Widget', order: 1 }),
         interactiveScene({ id: 'b', title: 'Second', order: 2 }),
         interactiveScene({ id: 'c', title: 'Third: Map', order: 3 }),
       ];
 
-      const result = await buildResourcePackZip(scenes, {
+      const result = await buildResourcePackZip(scenes, [], [], {
         viewportRatio: 0.5625,
         viewportSize: 960,
         ratioPx2Inch: 96,

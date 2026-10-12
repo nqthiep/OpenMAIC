@@ -1,10 +1,8 @@
-import { attachInteractiveState } from '@/lib/chat/pi/interactive-state-evidence';
 /**
  * Pi Director Chat API Endpoint
  *
- * POST /api/chat/pi - default path for running the in-class multi-agent chain
- * as a single server-side Pi agent loop. The build-time flag can disable this
- * route together with the corresponding client path for legacy rollback.
+ * POST /api/chat/pi - parallel PoC path for running the in-class multi-agent
+ * chain as a single server-side pi agent loop.
  */
 
 import { NextRequest } from 'next/server';
@@ -12,11 +10,15 @@ import { isProviderKeyRequired } from '@/lib/ai/providers';
 import {
   isCoursewareReferenceEnabled,
   isPiChatEnabled,
-  isTutorModerationEnabled,
   isPiNativeChildRuntimeEnabled,
   isPiNativeChildSpotlightEnabled,
 } from '@/lib/config/feature-flags';
 import { createLogger } from '@/lib/logger';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import {
   getPiMaxActionsPerAgent,
   getPiMaxAgentTurns,
@@ -24,21 +26,12 @@ import {
 } from '@/lib/chat/pi/config';
 import { runPiDirectorLoop } from '@/lib/chat/pi/director-loop';
 import type { SendEvent } from '@/lib/chat/pi/types';
-import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 import { resolveModel } from '@/lib/server/resolve-model';
-import { parseUserStageRoutes } from '@/lib/server/model-routes';
 import { apiError } from '@/lib/server/api-response';
-import { eventsFromProducer, withTutorModeration } from '@/lib/tutor/chat-moderation';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import type { StatelessChatRequest } from '@/lib/types/chat';
 import { resolveClassroomWebSearchConfig } from '@/lib/server/web-search-config';
-import { resolveRequestOwner } from '@/lib/server/identity/resolve';
-import {
-  attachOwnerCookies,
-  invalidOwnerCredentialResponse,
-} from '@/lib/server/identity/with-owner';
-import type { OwnerPrincipal } from '@/lib/server/identity/types';
-import { guardedServerRuntimeStore } from '@/lib/persistence/runtime-tombstone-guard';
+import { resolveLearnerKeyForRequest } from '@/lib/persistence/server-auth';
 import { getServerPersistenceProvider } from '@/lib/persistence/server-provider';
 import { createWhiteboardRuntimeService } from '@/lib/whiteboard/runtime/store';
 import { hasNativeWhiteboardAction } from '@/lib/chat/pi/tools/native-whiteboard';
@@ -49,35 +42,18 @@ import {
 } from '@/lib/chat/pi/element-reference';
 
 const log = createLogger('Pi Chat API');
-// Shown to the client for any failed turn; the cause is only in the server log.
-const PI_CHAT_FAILED_MESSAGE = 'Không thể xử lý yêu cầu, vui lòng thử lại.';
+
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   if (!isPiChatEnabled()) {
-    log.warn('Pi chat request rejected: the runtime is disabled');
-    return apiError('INVALID_REQUEST', 404, PI_CHAT_FAILED_MESSAGE);
+    return apiError('INVALID_REQUEST', 404, 'Pi chat runtime is disabled');
   }
 
-  // Like every owner-resolving route, a request whose credential an owner
-  // auth method refuses is refused here, before any model work. With the
-  // default anonymous fallback resolution always succeeds, so this only
-  // refuses requests under a host method that can reject (an expired token,
-  // say) or with the fallback off. Memoized, so the whiteboard branch below
-  // reuses this resolution.
-  const owner = await resolveRequestOwner(req);
-  if (!owner.ok) {
-    return invalidOwnerCredentialResponse();
-  }
-  // Every answer carries the resolution's cookies (the anonymous owner's
-  // renewal), errors included; the stream gets them on its headers before
-  // its body starts.
-  return attachOwnerCookies(await chat(req, owner.principal), owner.setCookies);
-}
-
-async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Response> {
   const encoder = new TextEncoder();
   let chatModel: string | undefined;
   let chatMessageCount: number | undefined;
+  let managedKey = false;
 
   try {
     const body: StatelessChatRequest = await req.json();
@@ -85,26 +61,19 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
     chatMessageCount = body.messages?.length;
 
     if (!body.messages || !Array.isArray(body.messages)) {
-      log.warn('Pi chat request rejected: messages missing or not an array');
-      return apiError('MISSING_REQUIRED_FIELD', 400, PI_CHAT_FAILED_MESSAGE);
+      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: messages');
     }
 
     if (!body.storeState) {
-      log.warn('Pi chat request rejected: storeState missing');
-      return apiError('MISSING_REQUIRED_FIELD', 400, PI_CHAT_FAILED_MESSAGE);
+      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: storeState');
     }
 
     if (!body.config || body.config.agentIds == null) {
-      log.warn('Pi chat request rejected: config.agentIds missing');
-      return apiError('MISSING_REQUIRED_FIELD', 400, PI_CHAT_FAILED_MESSAGE);
+      return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: config.agentIds');
     }
 
-    if (
-      (body.elementReference !== undefined || body.interactiveState !== undefined) &&
-      !isCoursewareReferenceEnabled()
-    ) {
-      log.warn('Pi chat request rejected: courseware references are disabled');
-      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
+    if (body.elementReference !== undefined && !isCoursewareReferenceEnabled()) {
+      return apiError('INVALID_REQUEST', 400, 'Courseware references are disabled');
     }
 
     let elementReference;
@@ -112,30 +81,7 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       elementReference = resolveElementReference(body);
     } catch (error) {
       if (error instanceof ElementReferenceValidationError) {
-        log.warn('Pi chat element reference rejected:', error);
-        return apiError(
-          'INVALID_REQUEST',
-          400,
-          PI_CHAT_FAILED_MESSAGE,
-          undefined,
-          body.elementReference?.kind === 'whiteboard_element'
-            ? 'whiteboard_reference_changed'
-            : undefined,
-        );
-      }
-      throw error;
-    }
-
-    let interactiveStateNote;
-    try {
-      ({ elementReference, stateNote: interactiveStateNote } = attachInteractiveState(
-        body,
-        elementReference,
-      ));
-    } catch (error) {
-      if (error instanceof ElementReferenceValidationError) {
-        log.warn('Pi chat interactive state rejected:', error);
-        return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
+        return apiError('INVALID_REQUEST', 400, error.message);
       }
       throw error;
     }
@@ -147,8 +93,11 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       agentIds.some((id) => typeof id !== 'string' || id.trim().length === 0 || id !== id.trim()) ||
       new Set(agentIds).size !== agentIds.length
     ) {
-      log.warn('Pi chat request rejected: config.agentIds is not a list of unique strings');
-      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
+      return apiError(
+        'INVALID_REQUEST',
+        400,
+        'config.agentIds must be a non-empty array of unique, non-empty strings',
+      );
     }
 
     const {
@@ -157,13 +106,10 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       providerId,
       modelInfo,
       thinkingConfig: resolvedThinkingConfig,
+      managedKey: operatorKeyUsed,
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
-      workspaceId: await requestWorkspaceId(req),
-      // Honor the classroom-interaction per-stage override the client sends in
-      // `x-model-routes`. A routed stage brings its own key and base URL; otherwise the body credentials are used (never x-* headers).
-      userRoutes: parseUserStageRoutes(req.headers.get('x-model-routes')),
       apiKey: body.apiKey,
       baseUrl: body.baseUrl,
       providerType: body.providerType,
@@ -171,25 +117,28 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       // wins, an unrouted one honors this client thinking (see resolve-model.ts).
       thinkingConfig: body.thinkingConfig ?? body.thinking,
     });
+    managedKey = operatorKeyUsed;
 
     if (isProviderKeyRequired(providerId) && !resolvedApiKey) {
-      log.warn('Pi chat request rejected: no API key for the resolved provider');
-      return apiError('MISSING_API_KEY', 401, PI_CHAT_FAILED_MESSAGE);
+      return apiError('MISSING_API_KEY', 401, 'API Key is required');
     }
 
     const agentConfigs = resolveAgentConfigs(body);
     const resolvedAgentIds = new Set(agentConfigs.map((agent) => agent.id));
     const unresolvedAgentIds = agentIds.filter((id) => !resolvedAgentIds.has(id));
-    // JSON.stringify keeps client-sent ids on one log line.
     if (unresolvedAgentIds.length > 0) {
-      log.warn(
-        `Pi chat request rejected: unknown classroom agents ${JSON.stringify(unresolvedAgentIds)}`,
+      return apiError(
+        'INVALID_REQUEST',
+        400,
+        `Unknown classroom agents in config.agentIds: ${unresolvedAgentIds.join(', ')}`,
       );
-      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
     }
     if (agentConfigs.length === 0) {
-      log.warn(`Pi chat request rejected: no valid classroom agents ${JSON.stringify(agentIds)}`);
-      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
+      return apiError(
+        'INVALID_REQUEST',
+        400,
+        `No valid classroom agents found for config.agentIds: ${body.config.agentIds.join(', ')}`,
+      );
     }
 
     const signal = req.signal;
@@ -230,29 +179,32 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       enableWhiteboardTools &&
       nativeWhiteboardRequested &&
       validRequestStartStageId &&
+      process.env.NEXT_PUBLIC_PERSISTENCE === '1' &&
       process.env.DATABASE_URL
     ) {
-      // The runtime learner key is the request owner, exactly as on
-      // /api/persistence/runtime/*; nothing the client sends chooses it.
-      const learnerKey = principal.ownerId;
       try {
-        const provider = await getServerPersistenceProvider(process.env.DATABASE_URL);
-        nativeWhiteboardLearnerKey = learnerKey;
-        nativeWhiteboardService = createWhiteboardRuntimeService({
-          // Guarded like /api/persistence/runtime/*: a deleted course takes
-          // no new runtime from the whiteboard either.
-          store: guardedServerRuntimeStore(provider.runtimeStore, provider.pool),
-          resolveLearnerKey: () => learnerKey,
-        });
+        // A signed-in request is partitioned by its session and never by the
+        // x-learner-key header. Anonymous requests keep the development binding,
+        // which still needs its token. A session that cannot be checked throws
+        // here, so the whiteboard is left out and no partition is taken from the header.
+        const learnerKey = await resolveLearnerKeyForRequest(req.headers);
+        if (learnerKey) {
+          const provider = await getServerPersistenceProvider(process.env.DATABASE_URL);
+          nativeWhiteboardLearnerKey = learnerKey;
+          nativeWhiteboardService = createWhiteboardRuntimeService({
+            store: provider.runtimeStore,
+            resolveLearnerKey: () => learnerKey,
+          });
+        }
       } catch {
-        log.warn('Native whiteboard capability unavailable: persistence initialization failed');
+        log.warn('Native whiteboard capability unavailable: persistence or session check failed');
       }
     }
-    let nativeWebSearchConfig: Awaited<ReturnType<typeof resolveClassroomWebSearchConfig>>;
+    let nativeWebSearchConfig: ReturnType<typeof resolveClassroomWebSearchConfig>;
     try {
       nativeWebSearchConfig =
         childRuntimeMode === 'native'
-          ? await resolveClassroomWebSearchConfig(await requestWorkspaceId(req), {
+          ? resolveClassroomWebSearchConfig({
               webSearchProviderId: body.webSearchProviderId,
               webSearchApiKey: body.webSearchApiKey,
               webSearchBaseUrl: body.webSearchBaseUrl,
@@ -261,8 +213,8 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
             })
           : undefined;
     } catch (error) {
-      log.warn('Pi chat web search configuration rejected:', error);
-      return apiError('INVALID_REQUEST', 400, PI_CHAT_FAILED_MESSAGE);
+      const message = error instanceof Error ? error.message : 'Invalid Web Search configuration';
+      return apiError('INVALID_REQUEST', 400, message);
     }
 
     log.info(
@@ -286,45 +238,32 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
       try {
         startHeartbeat();
 
-        const runLoop = (sendEvent: SendEvent) =>
-          runPiDirectorLoop({
-            body,
-            elementReference,
-            interactiveStateNote,
-            agentConfigs,
-            send: sendEvent,
-            languageModel,
-            thinkingConfig,
-            maxOutputTokens: modelInfo?.outputWindow,
-            contextWindow: modelInfo?.contextWindow,
-            abortSignal: abortController.signal,
-            signal,
-            maxAgentTurns,
-            maxActionsPerAgent,
-            enableWhiteboardTools,
-            childRuntimeMode,
-            enableNativeChildSpotlight,
-            nativeWebSearchConfig,
-            nativeWhiteboardService,
-            nativeWhiteboardStageId: nativeWhiteboardService ? validRequestStartStageId : undefined,
-            nativeWhiteboardLearnerKey,
-            requestStartManualVisibilityRevision:
-              Number.isSafeInteger(body.storeState.whiteboardManualVisibilityRevision) &&
-              (body.storeState.whiteboardManualVisibilityRevision ?? -1) >= 0
-                ? body.storeState.whiteboardManualVisibilityRevision
-                : 0,
-          });
-
-        // OPENMAIC_TUTOR_MODERATION: same input/output filter as /api/chat. Blocked input => the
-        // loop never starts; replies are held until filtered. Off (default) = streaming unchanged.
-        if (isTutorModerationEnabled()) {
-          for await (const event of withTutorModeration(body, eventsFromProducer(runLoop))) {
-            if (signal.aborted) break;
-            await send(event);
-          }
-        } else {
-          await runLoop(send);
-        }
+        await runPiDirectorLoop({
+          body,
+          elementReference,
+          agentConfigs,
+          send,
+          languageModel,
+          thinkingConfig,
+          maxOutputTokens: modelInfo?.outputWindow,
+          contextWindow: modelInfo?.contextWindow,
+          abortSignal: abortController.signal,
+          signal,
+          maxAgentTurns,
+          maxActionsPerAgent,
+          enableWhiteboardTools,
+          childRuntimeMode,
+          enableNativeChildSpotlight,
+          nativeWebSearchConfig,
+          nativeWhiteboardService,
+          nativeWhiteboardStageId: nativeWhiteboardService ? validRequestStartStageId : undefined,
+          nativeWhiteboardLearnerKey,
+          requestStartManualVisibilityRevision:
+            Number.isSafeInteger(body.storeState.whiteboardManualVisibilityRevision) &&
+            (body.storeState.whiteboardManualVisibilityRevision ?? -1) >= 0
+              ? body.storeState.whiteboardManualVisibilityRevision
+              : 0,
+        });
 
         if (signal.aborted) {
           stopHeartbeat();
@@ -350,7 +289,7 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
         try {
           await send({
             type: 'error',
-            data: { message: PI_CHAT_FAILED_MESSAGE },
+            data: { message: visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT) },
           });
           await writer.close();
         } catch {
@@ -369,9 +308,12 @@ async function chat(req: NextRequest, principal: OwnerPrincipal): Promise<Respon
     });
   } catch (error) {
     log.error(
-      `Pi chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
-      error,
+      `Pi chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]: ${describeUnexpectedError(error)}`,
     );
-    return apiError('INTERNAL_ERROR', 500, PI_CHAT_FAILED_MESSAGE);
+    return apiError(
+      'INTERNAL_ERROR',
+      500,
+      visitorErrorText(error, managedKey, 'Failed to process request'),
+    );
   }
 }

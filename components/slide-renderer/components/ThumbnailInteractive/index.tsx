@@ -1,9 +1,6 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
 import type { InteractiveContent } from '@/lib/types/stage';
 import { patchHtmlForIframe } from '@/lib/utils/iframe';
-import { decideInteractiveMount } from '@/lib/widgets/policy';
-import { useCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
-import { CodeWidgetBlockedNotice } from '@/components/scene-renderers/code-widget-blocked-notice';
 
 interface ThumbnailInteractiveProps {
   /** Interactive content to render */
@@ -28,8 +25,6 @@ export function ThumbnailInteractive({
 }: ThumbnailInteractiveProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const allowed = useCodeWidgetAllowed();
-  const blocked = decideInteractiveMount(content, allowed) === 'blocked';
 
   // Intersection observer for lazy loading
   useEffect(() => {
@@ -53,8 +48,8 @@ export function ThumbnailInteractive({
 
   // Patch HTML for iframe rendering (only when visible to save memory)
   const patchedHtml = useMemo(
-    () => (isVisible && !blocked && content.html ? patchHtmlForIframe(content.html) : undefined),
-    [isVisible, blocked, content.html],
+    () => (isVisible && content.html ? patchHtmlForIframe(content.html) : undefined),
+    [isVisible, content.html],
   );
 
   // Calculate thumbnail height (16:9 aspect ratio)
@@ -69,9 +64,7 @@ export function ThumbnailInteractive({
         height: `${height}px`,
       }}
     >
-      {blocked ? (
-        <CodeWidgetBlockedNotice compact />
-      ) : !isVisible ? (
+      {!isVisible ? (
         // Placeholder when not visible
         <div className="w-full h-full flex justify-center items-center bg-gray-100 dark:bg-gray-800 text-gray-400 text-xs">
           Interactive

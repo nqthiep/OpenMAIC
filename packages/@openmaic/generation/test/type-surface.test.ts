@@ -26,8 +26,6 @@ type _SceneContentKeys = Assert<
     | 'targetLanguage'
     | 'userRequirements'
     | 'allowProceduralSkill'
-    | 'diagramOutput'
-    | 'diagramVisualRules'
     | 'editDirective'
     | 'baselineContent'
     | 'pblLoopFallback'

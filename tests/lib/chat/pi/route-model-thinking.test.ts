@@ -13,7 +13,6 @@ let originalCoursewareReferenceFlag: string | undefined;
 const mocks = vi.hoisted(() => ({
   resolveModel: vi.fn(),
   runPiDirectorLoop: vi.fn(),
-  logWarn: vi.fn(),
 }));
 
 vi.mock('@/lib/server/resolve-model', () => ({
@@ -35,18 +34,16 @@ vi.mock('@/lib/chat/pi/director-loop', () => ({
 vi.mock('@/lib/logger', () => ({
   createLogger: () => ({
     info: vi.fn(),
-    warn: mocks.logWarn,
+    warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
   }),
 }));
 
-function makeRequest(body: Record<string, unknown>, modelRoutes?: string): NextRequest {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (modelRoutes) headers['x-model-routes'] = modelRoutes;
+function makeRequest(body: Record<string, unknown>): NextRequest {
   return new Request('http://localhost/api/chat/pi', {
     method: 'POST',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }) as unknown as NextRequest;
 }
@@ -127,19 +124,8 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     }
   });
 
-  it('uses the Pi route when the feature flag is unset', async () => {
+  it('returns 404 without invoking the runtime when the feature flag is disabled', async () => {
     delete process.env[PI_CHAT_FLAG];
-    const { POST } = await import('@/app/api/chat/pi/route');
-    const response = await POST(makeRequest(makeBody()));
-
-    expect(response.status).toBe(200);
-    await response.text();
-    expect(mocks.resolveModel).toHaveBeenCalledOnce();
-    expect(mocks.runPiDirectorLoop).toHaveBeenCalledOnce();
-  });
-
-  it('returns 404 without invoking the runtime when legacy rollback is explicit', async () => {
-    process.env[PI_CHAT_FLAG] = 'false';
     const { POST } = await import('@/app/api/chat/pi/route');
     const response = await POST(makeRequest(makeBody()));
 
@@ -147,7 +133,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
+      error: 'Pi chat runtime is disabled',
     });
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
@@ -163,7 +149,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
+      error: 'config.agentIds must be a non-empty array of unique, non-empty strings',
     });
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
@@ -179,7 +165,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
+      error: 'Unknown classroom agents in config.agentIds: missing-agent',
     });
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
   });
@@ -207,25 +193,6 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     );
   });
 
-  it('forwards parsed x-model-routes user routes into chat-adapter resolution', async () => {
-    const { POST } = await import('@/app/api/chat/pi/route');
-    const response = await POST(
-      makeRequest(
-        makeBody(),
-        JSON.stringify({ 'chat-adapter': { model: 'anthropic:claude-sonnet-4' } }),
-      ),
-    );
-    await response.text();
-
-    expect(response.status).toBe(200);
-    expect(mocks.resolveModel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        stage: 'chat-adapter',
-        userRoutes: { 'chat-adapter': { model: 'anthropic:claude-sonnet-4' } },
-      }),
-    );
-  });
-
   it('keeps ordinary Pi chat available but rejects references when their gate is disabled', async () => {
     process.env[COURSEWARE_REFERENCE_FLAG] = 'false';
     const { POST } = await import('@/app/api/chat/pi/route');
@@ -249,7 +216,7 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(referencedResponse.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
+      error: 'Courseware references are disabled',
     });
     expect(referencedResponse.headers.get('X-OpenMAIC-Element-Reference-Accepted')).toBeNull();
     expect(mocks.resolveModel).toHaveBeenCalledOnce();
@@ -498,14 +465,8 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
+      error: expect.stringContaining('exactly one source node; found 0'),
     });
-    expect(mocks.logWarn).toHaveBeenCalledWith(
-      'Pi chat element reference rejected:',
-      expect.objectContaining({
-        message: expect.stringContaining('exactly one source node; found 0'),
-      }),
-    );
     expect(response.headers.get('X-OpenMAIC-Element-Reference-Accepted')).toBeNull();
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();
@@ -584,12 +545,8 @@ describe('POST /api/chat/pi model and thinking resolution', () => {
     await expect(response.json()).resolves.toMatchObject({
       success: false,
       errorCode: 'INVALID_REQUEST',
-      error: 'Không thể xử lý yêu cầu, vui lòng thử lại.',
+      error: expect.stringContaining(error),
     });
-    expect(mocks.logWarn).toHaveBeenCalledWith(
-      'Pi chat element reference rejected:',
-      expect.objectContaining({ message: expect.stringContaining(error) }),
-    );
     expect(response.headers.get('X-OpenMAIC-Element-Reference-Accepted')).toBeNull();
     expect(mocks.resolveModel).not.toHaveBeenCalled();
     expect(mocks.runPiDirectorLoop).not.toHaveBeenCalled();

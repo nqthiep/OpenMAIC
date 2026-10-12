@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 // A client-supplied provider base URL must be validated in every environment,
@@ -37,16 +37,13 @@ const IMAGE_ENV_PREFIXES = [
   'IMAGE_COMFYUI',
 ];
 
-function stubImageEnvAbsent() {
+function clearImageEnv() {
   for (const prefix of IMAGE_ENV_PREFIXES) {
-    vi.stubEnv(`${prefix}_API_KEY`, undefined);
-    vi.stubEnv(`${prefix}_BASE_URL`, undefined);
-    vi.stubEnv(`${prefix}_MODELS`, undefined);
-    vi.stubEnv(`${prefix}_ENABLED`, undefined);
+    delete process.env[`${prefix}_API_KEY`];
+    delete process.env[`${prefix}_BASE_URL`];
+    delete process.env[`${prefix}_MODELS`];
+    delete process.env[`${prefix}_ENABLED`];
   }
-  // OpenAI also has a generic image fallback outside the IMAGE_* namespace.
-  vi.stubEnv('OPENAI_API_KEY', undefined);
-  vi.stubEnv('OPENAI_BASE_URL', undefined);
 }
 
 function imageRequest(headers: Record<string, string> = {}): NextRequest {
@@ -59,16 +56,12 @@ function imageRequest(headers: Record<string, string> = {}): NextRequest {
 
 describe('generate image — client-supplied base URL guard applies in every environment', () => {
   beforeEach(() => {
-    vi.unstubAllEnvs();
-    stubImageEnvAbsent();
-    vi.stubEnv('ALLOW_LOCAL_NETWORKS', undefined);
     vi.resetModules();
+    vi.unstubAllEnvs();
+    clearImageEnv();
+    delete process.env.ALLOW_LOCAL_NETWORKS;
     mocks.generateImage.mockReset();
     mocks.generateImage.mockResolvedValue({ url: 'https://example.com/img.png' });
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
   });
 
   it('rejects a private-network base URL when NODE_ENV is not production', async () => {
@@ -108,28 +101,10 @@ describe('generate image — client-supplied base URL guard applies in every env
     expect(mocks.generateImage).toHaveBeenCalledWith(
       expect.objectContaining({
         providerId: 'openai-image',
-        apiKey: 'client-key',
         model: 'gpt-image-2',
         baseUrl: 'http://192.168.1.10/v1/',
       }),
       expect.anything(),
     );
-  });
-
-  it("applies the request's model to the server's default provider, as before slots", async () => {
-    vi.stubEnv('IMAGE_OPENAI_API_KEY', 'server-key');
-    const { POST } = await import('@/app/api/generate/image/route');
-
-    const res = await POST(imageRequest({ 'x-image-model': 'gpt-image-1' }));
-    expect(res.status).toBe(200);
-    expect(mocks.generateImage).toHaveBeenCalledWith(
-      expect.objectContaining({ providerId: 'openai-image', model: 'gpt-image-1' }),
-      expect.anything(),
-    );
-
-    // Without one, the default provider still needs a model.
-    const missing = await POST(imageRequest());
-    expect(missing.status).toBe(400);
-    expect(await missing.json()).toMatchObject({ errorCode: 'MISSING_MODEL' });
   });
 });

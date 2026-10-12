@@ -189,7 +189,7 @@ function syntheticProxyError(status: number): Response {
     JSON.stringify({
       success: false,
       errorCode: 'UPSTREAM_ERROR',
-      error: 'Nguồn không trả về tệp đa phương tiện.',
+      error: `Upstream returned ${status}`,
     }),
     { status, headers: { 'content-type': 'application/json' } },
   );

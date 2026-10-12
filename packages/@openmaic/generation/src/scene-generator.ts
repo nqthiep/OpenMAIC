@@ -15,7 +15,7 @@ import type {
   SlideBackground,
   WidgetType,
 } from '@openmaic/dsl';
-import { isWidgetType, normalizeElement, safeKatexOptions } from '@openmaic/dsl';
+import { isWidgetType, normalizeElement } from '@openmaic/dsl';
 import { MAX_VISION_IMAGES } from './constants.js';
 import {
   formatImageDescription,
@@ -31,11 +31,8 @@ import type {
 } from './outline-types.js';
 import { DEFAULT_LANGUAGE_DIRECTIVE } from './outline-generator.js';
 import { postProcessInteractiveHtml } from './interactive-post-processor.js';
-import { findInteractiveScriptSyntaxFailure } from './interactive-script-validator.js';
 import { parseActionsFromStructuredOutput } from './action-parser.js';
 import { parseJsonResponse } from './json-repair.js';
-import { renderFlowHtml } from './diagram/flowchart.js';
-import { parseFlowchartResponse } from './diagram/flowchart-response.js';
 import {
   buildCourseContext,
   formatAgentsForPrompt,
@@ -103,10 +100,6 @@ export interface SceneContentOptions {
   /** Original course request/profile, used by PBL v2 for explicit learner-level signals. */
   userRequirements?: UserRequirements;
   allowProceduralSkill?: boolean;
-  /** Flowchart widgets: 'graph' asks the model for nodes and edges and the platform draws them. */
-  diagramOutput?: 'html' | 'graph';
-  /** HTML diagrams: include the visual rules in the prompt. Defaults to on. */
-  diagramVisualRules?: boolean;
   /**
    * Natural-language edit instruction for whole-slide regeneration (MAIC Editor
    * agent `regenerate_scene`). When set, the slide content prompt switches to
@@ -254,8 +247,6 @@ export async function generateSceneContent(
     targetLanguage,
     userRequirements,
     allowProceduralSkill = false,
-    diagramOutput,
-    diagramVisualRules,
     editDirective,
     baselineContent,
   } = options;
@@ -283,8 +274,6 @@ export async function generateSceneContent(
     // Route to widget generation (handles all 5 types)
     return generateWidgetContent(outline, aiCall, languageDirective, {
       allowProceduralSkill,
-      diagramOutput,
-      diagramVisualRules,
       logger: log,
       onFailure: options.onFailure,
     });
@@ -588,14 +577,11 @@ function processLatexElements(
       }
 
       try {
-        const html = katex.renderToString(
-          latexStr,
-          safeKatexOptions({
-            throwOnError: false,
-            displayMode: true,
-            output: 'html',
-          }),
-        );
+        const html = katex.renderToString(latexStr, {
+          throwOnError: false,
+          displayMode: true,
+          output: 'html',
+        });
 
         return {
           ...el,
@@ -839,12 +825,7 @@ async function generateSlideContent(
   const processedElements: PPTElement[] = videoNormalizedElements.map((el) => ({
     ...el,
     id: `${el.type}_${nanoid(8)}`,
-    // Shape rotation is part of the model-facing geometry contract. Preserve
-    // finite angles while keeping the legacy zero default for other elements.
-    rotate:
-      el.type === 'shape' && typeof el.rotate === 'number' && Number.isFinite(el.rotate)
-        ? el.rotate
-        : 0,
+    rotate: 0,
   })) as PPTElement[];
 
   // Process background
@@ -910,8 +891,7 @@ async function generateQuizContent(
 
   log.debug(`Got ${generatedQuestions.length} questions for: ${outline.title}`);
 
-  // Ensure each question has an ID and normalize options format.
-  // Plain strings become letter/content pairs. Object fields stay as written.
+  // Ensure each question has an ID and normalize options format
   const questions: QuizQuestion[] = generatedQuestions.map((q) => {
     const isText = q.type === 'short_answer';
     const options = isText ? undefined : normalizeQuizOptions(q.options);
@@ -926,79 +906,17 @@ async function generateQuizContent(
     };
   });
 
-  const contractFailure = findQuizOptionsContractFailure(questions);
-  if (contractFailure) {
-    log.error(`Quiz option contract failed for "${outline.title}": ${contractFailure}`);
-    onFailure?.({ code: 'invalid-model-output' });
-    return null;
-  }
-
   return { questions };
 }
-
-const QUIZ_OPTION_VALUE = /^[A-Z]$/;
-
-/**
- * Reason a built quiz breaks the choice-option contract, or null when it holds.
- *
- * Choice questions (everything except `short_answer`) need a non-empty option
- * list whose `value`s are single ASCII letters A-Z, and every answer entry
- * must equal one of those values exactly. Short-answer questions are skipped.
- */
-export function findQuizOptionsContractFailure(questions: readonly QuizQuestion[]): string | null {
-  for (let index = 0; index < questions.length; index += 1) {
-    const question = questions[index];
-    if (!question || question.type === 'short_answer') continue;
-
-    const where = question.id ? `question ${index + 1} (${question.id})` : `question ${index + 1}`;
-    const options = question.options;
-    if (!options || options.length === 0) {
-      return `${where}: choice question has no options`;
-    }
-
-    const optionValues = new Set<string>();
-
-    for (let optionIndex = 0; optionIndex < options.length; optionIndex += 1) {
-      const value = options[optionIndex]?.value;
-      if (typeof value !== 'string' || !QUIZ_OPTION_VALUE.test(value)) {
-        const shown = JSON.stringify(value);
-        return `${where}: option ${optionIndex + 1} value ${shown} is not a single letter A-Z`;
-      }
-
-      if (optionValues.has(value)) {
-        return `${where}: option ${optionIndex + 1} repeats value ${JSON.stringify(value)}`;
-      }
-
-      optionValues.add(value);
-    }
-
-    const answer = question.answer;
-    if (!answer || answer.length === 0) {
-      return `${where}: answer key does not reference an option value`;
-    }
-
-    for (const entry of answer) {
-      if (!optionValues.has(entry)) {
-        return `${where}: answer ${JSON.stringify(entry)} does not match an option value`;
-      }
-    }
-  }
-
-  return null;
-}
-
-type NormalizedQuizOption = { value: string; label: string };
 
 /**
  * Normalize quiz options from AI response.
  * AI may generate plain strings ["OptionA", "OptionB"] or QuizOption objects.
- * Plain strings become { value: "A", label: "OptionA" }. Object `value` and
- * `label` are kept as provided — a letter in `label` with content in `value`
- * is not swapped.
+ * This normalizes to QuizOption[] format: { value: "A", label: "OptionA" }
  */
-export function normalizeQuizOptions(
+function normalizeQuizOptions(
   options: unknown[] | undefined,
-): NormalizedQuizOption[] | undefined {
+): { value: string; label: string }[] | undefined {
   if (!options || !Array.isArray(options)) return undefined;
 
   return options.map((opt, index) => {
@@ -1221,49 +1139,6 @@ function extractHtml(
   return null;
 }
 
-/**
- * Flowchart as data: ask for a graph and draw it with the platform renderer. Returns null when the
- * response is unusable, so the caller can fall back to the HTML prompt.
- */
-async function generateFlowchartFromGraph(
-  outline: SceneOutline,
-  aiCall: AICallFn,
-  languageDirective: string | undefined,
-  log: GenerationLogger,
-): Promise<string | null> {
-  const nodeCount = outline.widgetOutline?.nodeCount;
-  const prompts = buildPrompt(PROMPT_IDS.DIAGRAM_GRAPH, {
-    title: outline.title,
-    description: outline.description,
-    keyPoints: (outline.keyPoints || []).join('\n'),
-    nodeCount: nodeCount ?? 0,
-    hasNodeCount: typeof nodeCount === 'number' && nodeCount > 0,
-    languageDirective: languageDirective || '',
-  });
-  if (!prompts) return null;
-
-  log.info(`Generating flowchart graph for: ${outline.title}`);
-  const response = await aiCall(prompts.system, prompts.user);
-  const parsed = parseFlowchartResponse(response, {
-    maxNodes: typeof nodeCount === 'number' && nodeCount > 0 ? nodeCount : undefined,
-  });
-  if (!parsed) {
-    log.error(`Flowchart graph response is not a valid graph for: ${outline.title}`);
-    return null;
-  }
-  try {
-    return renderFlowHtml(parsed.graph, {
-      title: outline.title,
-      direction: parsed.direction,
-      labels: parsed.labels,
-      lang: parsed.lang,
-    });
-  } catch (error) {
-    log.error(`Flowchart graph is inconsistent for: ${outline.title}`, error);
-    return null;
-  }
-}
-
 // ==================== Ultra Mode Widget Generation ====================
 
 /**
@@ -1275,8 +1150,6 @@ export async function generateWidgetContent(
   languageDirective?: string,
   options: {
     allowProceduralSkill?: boolean;
-    diagramOutput?: 'html' | 'graph';
-    diagramVisualRules?: boolean;
     logger?: GenerationLogger;
     onFailure?: (failure: SceneContentFailure) => void;
   } = {},
@@ -1319,7 +1192,6 @@ export async function generateWidgetContent(
         prescribedNodes,
         hasNodeCount: typeof widgetOutline.nodeCount === 'number' && widgetOutline.nodeCount > 0,
         hasPrescribedNodes: prescribedNodes.length > 0,
-        visualRules: options.diagramVisualRules !== false,
         languageDirective: languageDirective || '',
       };
       break;
@@ -1389,43 +1261,19 @@ export async function generateWidgetContent(
       return null;
   }
 
-  // Flowchart as data (opt-in): the model returns a graph and the renderer draws it. An unusable
-  // graph falls back to the HTML prompt; transport errors propagate, as they do on the HTML path.
-  let html: string | null = null;
-  if (
-    widgetType === 'diagram' &&
-    options.diagramOutput === 'graph' &&
-    (widgetOutline.diagramType || 'flowchart') === 'flowchart'
-  ) {
-    html = await generateFlowchartFromGraph(outline, aiCall, languageDirective, log);
-    if (!html) log.warn(`Flowchart graph failed for: ${outline.title}; using the HTML prompt`);
-  }
-
-  if (!html) {
-    const prompts = buildPrompt(promptId, variables);
-    if (!prompts) {
-      log.error(`Failed to build ${widgetType} prompt for: ${outline.title}`);
-      options.onFailure?.({ code: 'prompt-unavailable' });
-      return null;
-    }
-
-    log.info(`Generating ${widgetType} widget for: ${outline.title}`);
-    const response = await aiCall(prompts.system, prompts.user);
-    html = extractHtml(response, log);
-  }
-
-  if (!html) {
-    log.error(`Failed to extract HTML from ${widgetType} response for: ${outline.title}`);
-    options.onFailure?.({ code: 'invalid-model-output' });
+  const prompts = buildPrompt(promptId, variables);
+  if (!prompts) {
+    log.error(`Failed to build ${widgetType} prompt for: ${outline.title}`);
+    options.onFailure?.({ code: 'prompt-unavailable' });
     return null;
   }
 
-  // Reject visually valid but inert widgets whose classic inline JS cannot parse.
-  const scriptSyntaxFailure = findInteractiveScriptSyntaxFailure(html);
-  if (scriptSyntaxFailure) {
-    log.error(
-      `Generated ${widgetType} widget contains invalid inline JavaScript in script #${scriptSyntaxFailure.scriptIndex}: ${scriptSyntaxFailure.message}`,
-    );
+  log.info(`Generating ${widgetType} widget for: ${outline.title}`);
+  const response = await aiCall(prompts.system, prompts.user);
+  const html = extractHtml(response, log);
+
+  if (!html) {
+    log.error(`Failed to extract HTML from ${widgetType} response for: ${outline.title}`);
     options.onFailure?.({ code: 'invalid-model-output' });
     return null;
   }

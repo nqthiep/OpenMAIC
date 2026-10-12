@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => {
     }
   }
   return {
-    resolveRequestOwnerId: vi.fn(),
+    withRequestOwnerId: vi.fn(),
     findUserSkill: vi.fn(),
     deleteUserSkill: vi.fn(),
     UserSkillError,
@@ -21,11 +21,9 @@ vi.mock('@/lib/config/feature-flags', () => ({
   isAgentRuntimeEnabled: () => true,
   isAgentRuntimeConfigured: () => true,
 }));
-vi.mock('@/lib/server/identity/resolve', async () =>
-  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
-    mocks.resolveRequestOwnerId,
-  ),
-);
+vi.mock('@/lib/server/agent-runtime/with-owner', () => ({
+  withRequestOwnerId: mocks.withRequestOwnerId,
+}));
 vi.mock('@/lib/server/agent-runtime/user-skills', () => ({
   findUserSkill: mocks.findUserSkill,
   deleteUserSkill: mocks.deleteUserSkill,
@@ -39,7 +37,12 @@ const context = { params: Promise.resolve({ id: 'usk_1' }) };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.resolveRequestOwnerId.mockReturnValue('user:u1');
+  mocks.withRequestOwnerId.mockImplementation(
+    async (
+      _req: NextRequest,
+      handler: (ownerId: string, responseHeaders: Headers) => Promise<Response>,
+    ) => handler('user:u1', new Headers()),
+  );
   mocks.findUserSkill.mockResolvedValue({
     id: 'usk_1',
     content: '# Full body\n\nNone of it missing',

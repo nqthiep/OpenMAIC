@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PPTElement } from '@openmaic/dsl';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import type { Scene } from '@/lib/types/stage';
@@ -103,11 +103,8 @@ export function getSlideElementPresentation(element: PPTElement, t: Translate) {
   };
 }
 
-function rendererPaintNode(elementId: string, root?: HTMLElement | null): HTMLElement | null {
-  const id = `${ELEMENT_ID_PREFIX}${elementId}`;
-  const host = root
-    ? Array.from(root.querySelectorAll<HTMLElement>('[id]')).find((node) => node.id === id)
-    : document.getElementById(id);
+function rendererPaintNode(elementId: string): HTMLElement | null {
+  const host = document.getElementById(`${ELEMENT_ID_PREFIX}${elementId}`);
   if (!host) return null;
 
   const hitTarget = Array.from(host.children).find(
@@ -125,8 +122,8 @@ function rendererPaintNode(elementId: string, root?: HTMLElement | null): HTMLEl
   );
 }
 
-function measurableRect(elementId: string, root?: HTMLElement | null): DOMRect | null {
-  const paintNode = rendererPaintNode(elementId, root);
+function measurableRect(elementId: string): DOMRect | null {
+  const paintNode = rendererPaintNode(elementId);
   if (!paintNode) return null;
   const rect = paintNode.getBoundingClientRect();
   if (
@@ -164,28 +161,7 @@ export interface SlideElementPickOverlayProps {
   onCancel: () => void;
 }
 
-export function SlideElementPickOverlay({ scene, ...props }: SlideElementPickOverlayProps) {
-  return <ElementPickOverlay elements={scene.content.canvas.elements} {...props} />;
-}
-
-/** Geometry comes from rendered paint nodes, including whiteboard pan and zoom. */
-export function ElementPickOverlay({
-  elements,
-  scopeRef,
-  onPick,
-  onCancel,
-  testId = 'slide-element-pick-overlay',
-  picking = true,
-  selectedElementId,
-}: {
-  elements: PPTElement[];
-  scopeRef?: RefObject<HTMLDivElement | null>;
-  onPick: (element: PPTElement) => void;
-  onCancel: () => void;
-  testId?: string;
-  picking?: boolean;
-  selectedElementId?: string;
-}) {
+export function SlideElementPickOverlay({ scene, onPick, onCancel }: SlideElementPickOverlayProps) {
   const { t } = useI18n();
   const overlayRef = useRef<HTMLDivElement>(null);
   const [outlines, setOutlines] = useState<Outline[]>([]);
@@ -193,8 +169,8 @@ export function ElementPickOverlay({
   const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 });
   const [showFallback, setShowFallback] = useState(false);
   const elementsById = useMemo(
-    () => new Map(elements.map((element) => [element.id, element])),
-    [elements],
+    () => new Map(scene.content.canvas.elements.map((element) => [element.id, element])),
+    [scene.content.canvas.elements],
   );
 
   const measureOutlines = useCallback((): Outline[] => {
@@ -202,9 +178,8 @@ export function ElementPickOverlay({
     if (!overlay) return [];
     const overlayRect = overlay.getBoundingClientRect();
     const next: Outline[] = [];
-    for (const element of elements) {
-      if (!picking && element.id !== selectedElementId) continue;
-      const rect = measurableRect(element.id, scopeRef?.current);
+    for (const element of scene.content.canvas.elements) {
+      const rect = measurableRect(element.id);
       if (!rect) continue;
       next.push({
         id: element.id,
@@ -215,7 +190,7 @@ export function ElementPickOverlay({
       });
     }
     return next;
-  }, [elements, scopeRef, picking, selectedElementId]);
+  }, [scene.content.canvas.elements]);
 
   const refreshOutlines = useCallback(() => {
     const next = measureOutlines();
@@ -235,7 +210,6 @@ export function ElementPickOverlay({
   }, [refreshOutlines]);
 
   useEffect(() => {
-    if (!picking) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
@@ -244,15 +218,15 @@ export function ElementPickOverlay({
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [onCancel, picking]);
+  }, [onCancel]);
 
   const renderedIds = useMemo(() => new Set(outlines.map((outline) => outline.id)), [outlines]);
   const fallbackElements = useMemo(
     () =>
-      elements.filter(
+      scene.content.canvas.elements.filter(
         (element) => CANONICAL_ELEMENT_TYPES.has(element.type) && !renderedIds.has(element.id),
       ),
-    [renderedIds, elements],
+    [renderedIds, scene.content.canvas.elements],
   );
 
   const pickById = (id: string) => {
@@ -260,37 +234,10 @@ export function ElementPickOverlay({
     if (element) onPick(element);
   };
 
-  if (!picking) {
-    return (
-      <div
-        ref={overlayRef}
-        className="absolute inset-0 z-[109] pointer-events-none"
-        aria-hidden="true"
-      >
-        {outlines
-          .filter((outline) => outline.id === selectedElementId)
-          .map((outline) => (
-            <div
-              key={outline.id}
-              data-testid="whiteboard-element-reference-outline"
-              data-element-id={outline.id}
-              className="absolute rounded-sm border-2 border-violet-500 bg-violet-400/10"
-              style={{
-                left: outline.left,
-                top: outline.top,
-                width: outline.width,
-                height: outline.height,
-              }}
-            />
-          ))}
-      </div>
-    );
-  }
-
   return (
     <div
       ref={overlayRef}
-      data-testid={testId}
+      data-testid="slide-element-pick-overlay"
       className="absolute inset-0 z-[109] cursor-crosshair touch-none"
       onPointerDown={(event) => {
         event.preventDefault();
@@ -310,11 +257,11 @@ export function ElementPickOverlay({
         // and re-measure paint nodes for every click so zoom/transform cannot stale hit tests.
         const measured = measureOutlines();
         setOutlines((current) => (sameOutlines(current, measured) ? current : measured));
-        const ids = [...elements]
+        const ids = [...scene.content.canvas.elements]
           .reverse()
           .filter((element) => {
             if (!CANONICAL_ELEMENT_TYPES.has(element.type)) return false;
-            const rect = measurableRect(element.id, scopeRef?.current);
+            const rect = measurableRect(element.id);
             return Boolean(
               rect &&
               event.clientX >= rect.left &&

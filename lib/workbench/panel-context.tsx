@@ -99,11 +99,6 @@ export interface WorkbenchCourseNavigation {
    * tier.
    */
   readonly courseOptions: readonly WorkbenchCourseOption[];
-  /**
-   * Courses a generation run is still producing. They are read-only until it
-   * completes, so the `@` picker never offers them (not even the one on screen).
-   */
-  readonly generatingCourseIds?: ReadonlySet<string>;
 }
 
 const WorkbenchCourseNavigationContext = createContext<WorkbenchCourseNavigation | null>(null);

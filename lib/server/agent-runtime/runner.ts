@@ -5,8 +5,6 @@
  * claims, lease generations, event ordering, cancellation, and conversation
  * recovery. A client connection is never part of the execution lifetime.
  */
-import { serverMediaConnection } from '@/lib/server/model-config/media';
-import { backgroundWorkspaceId } from '@/lib/server/model-config/runtime';
 import { randomUUID } from 'node:crypto';
 import { Session, type AgentEvent, type AgentMessage } from '@earendil-works/pi-agent-core';
 import {
@@ -21,6 +19,7 @@ import { buildAgent } from '@/lib/agent/runtime/build-agent';
 import { createCallLlmStreamFn } from '@/lib/agent/runtime/stream-fn';
 import { HOST_AGENT_LIFECYCLE as LIFECYCLE } from '@/lib/agent-runtime/lifecycle';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 import { parseCourseRefs, type CourseRef } from '@/lib/workbench/course-refs';
 import { parseElementRefs, type ElementRef } from '@/lib/workbench/element-refs';
 import type { Scene, SlideContent } from '@/lib/types/stage';
@@ -77,7 +76,6 @@ import { buildScenePreviewTools } from './scene-preview';
 import {
   AgentSessionEntryStorage,
   loadSessionEntryHistory,
-  readPriorRunRecord,
   type SessionEntryHistory,
 } from './entry-tree-storage';
 import { planResume, type ResumeAction } from './resume';
@@ -90,14 +88,7 @@ import {
 import { getAgentSessionStore } from './store';
 import { listAgentUserMessages } from './user-messages';
 import { subscribeAgentEventWakeup } from './event-notify-bus';
-import { getBackgroundDocumentStore } from './owner-scoped-documents';
-import { canonicalizeStoredOwner } from '@/lib/persistence/owner-merges';
-import {
-  courseGenerationNotice,
-  listCourseGenerations,
-  withCourseGenerationNotice,
-  type CourseGeneration,
-} from './course-generation';
+import { getOwnerScopedDocumentStore } from './owner-scoped-documents';
 import { assertCurrentStageMutationActive } from './mutation-fence';
 import { inventorySlide } from './course-edit/apply';
 import {
@@ -298,6 +289,24 @@ export function snapshotEventDataForLog(type: string, data: unknown): unknown {
   };
 }
 
+/**
+ * Provider error text sits in `errorMessage` on assistant frames, such as the `error`
+ * frame of a message_update. With the operator's key it is replaced before the event
+ * is persisted for the owner's replay.
+ */
+export function redactProviderErrors(value: unknown, managedKey: boolean): unknown {
+  if (!managedKey || !value || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map((item) => redactProviderErrors(item, managedKey));
+  return Object.fromEntries(
+    Object.entries(value).map(([key, field]) => [
+      key,
+      key === 'errorMessage' && typeof field === 'string'
+        ? MODEL_FAILURE_TEXT
+        : redactProviderErrors(field, managedKey),
+    ]),
+  );
+}
+
 /** Empty start frames must not consume the 150 ms slot before the first delta. */
 export function hasRenderableAssistantUpdate(data: unknown): boolean {
   const message = (data as { message?: { role?: string; content?: unknown[] } } | null)?.message;
@@ -381,12 +390,6 @@ export interface FollowUpMessage {
    * name rather than the snapshot the composer captured at pick time.
    */
   courseRefs?: readonly CourseRef[];
-  /**
-   * The named classrooms a generation run is still producing, by stage id
-   * (see `resolveCourseRefContext`). Prompt input only: the durable receipt
-   * keeps the refs alone.
-   */
-  courseRefGenerations?: Readonly<Record<string, CourseGeneration>>;
 }
 
 export type ResolvedElementRef =
@@ -733,46 +736,12 @@ export async function resolveCourseRefsForContext(
   return resolved;
 }
 
-/**
- * The message's classrooms resolved for the prompt: their current names, and
- * which of them a generation run is still producing.
- */
-export async function resolveCourseRefContext(
-  ownerId: string,
-  message: FollowUpMessage,
-): Promise<FollowUpMessage> {
-  if (!message.courseRefs?.length) return message;
-  const [courseRefs, generations] = await Promise.all([
-    resolveCourseRefsForContext(ownerId, message.courseRefs),
-    listCourseGenerations(ownerId),
-  ]);
-  const named = Object.fromEntries(
-    courseRefs.flatMap((ref) => {
-      const generation = generations.get(ref.stageId);
-      return generation ? [[ref.stageId, generation] as const] : [];
-    }),
-  );
-  return {
-    ...message,
-    courseRefs,
-    ...(Object.keys(named).length ? { courseRefGenerations: named } : {}),
-  };
-}
-
 /** Append the named classrooms to a message the runner is about to deliver. */
-export function composeCourseRefsText(
-  text: string,
-  refs: readonly CourseRef[],
-  generations: Readonly<Record<string, CourseGeneration>> = {},
-): string {
+export function composeCourseRefsText(text: string, refs: readonly CourseRef[]): string {
   if (refs.length === 0) return text;
   const label = refs.length === 1 ? 'classroom' : 'classrooms';
   const list = refs.map((ref) => `"${ref.title}" (${ref.stageId})`).join(', ');
-  const notices = refs.flatMap((ref) => {
-    const generation = generations[ref.stageId];
-    return generation ? [` "${ref.title}": ${courseGenerationNotice(generation)}`] : [];
-  });
-  return `${text}\n\n[The user named this ${label}: ${list}. Work on the named ${label} for this message.${notices.join('')}]`;
+  return `${text}\n\n[The user named this ${label}: ${list}. Work on the named ${label} for this message.]`;
 }
 
 export function composeFollowUpText(message: FollowUpMessage): string {
@@ -798,7 +767,7 @@ export function composeFollowUpText(message: FollowUpMessage): string {
     );
   }
   if (message.courseRefs?.length) {
-    blocks.push(composeCourseRefsText('', message.courseRefs, message.courseRefGenerations).trim());
+    blocks.push(composeCourseRefsText('', message.courseRefs).trim());
   }
   return blocks.join('\n\n');
 }
@@ -819,33 +788,15 @@ export async function composeFollowUpTextWithElementRefs(
   return composeFollowUpText({ ...message, resolvedElementRefs });
 }
 
-/**
- * The session's opening message among the pending ones: the first, unless
- * earlier runs left the tree empty and it was posted after the first of them
- * (then it is a follow-up, and the session was created without one).
- */
-export function openingMessage(
-  pending: readonly FollowUpMessage[],
-  firstRunSeq?: number,
-): FollowUpMessage | undefined {
-  const first = pending[0];
-  if (!first || firstRunSeq === undefined) return first;
-  return first.durableMessageSeq !== undefined && first.durableMessageSeq < firstRunSeq
-    ? first
-    : undefined;
-}
-
 export function planRunStart(input: {
   plan: ResumeAction;
   claimReason: AgentSessionClaimReason;
   pending: FollowUpMessage[];
   prompt: string;
   idleAttach?: boolean;
-  /** {@link SessionEntryHistory.firstRunSeq}: earlier runs left the tree empty. */
-  firstRunSeq?: number;
 }): RunStart {
-  const opening = openingMessage(input.pending, input.firstRunSeq);
-  if (input.plan.kind === 'start' && opening && input.idleAttach) {
+  if (input.plan.kind === 'start' && input.pending.length > 0 && input.idleAttach) {
+    const opening = input.pending[0]!;
     return {
       kind: 'prompt',
       text: composeFollowUpText(opening),
@@ -858,7 +809,7 @@ export function planRunStart(input: {
     // message. Its classrooms must reach the model, or the run would not know
     // which classroom the user named. Nothing else changes: the raw prompt is
     // still the base, and materials are already listed in the system block.
-    // Messages that are not the opening one are delivered as follow-ups.
+    const opening = input.pending[0];
     if (opening?.courseRefs?.length || opening?.elementRefs?.length) {
       return {
         kind: 'prompt',
@@ -975,6 +926,8 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
   let criticalWriteError: unknown;
   let entryWritesHealthy = true;
   let terminalFrameEmitted = false;
+  // Set once the driver model resolves; no model output is emitted before then.
+  let managedKey = false;
 
   const markLeaseLost = () => {
     leaseLost = true;
@@ -1014,7 +967,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     );
     return loadSessionEntryHistory(entrySession, {
       sessionId: id,
-      priorRuns: () => readPriorRunRecord(store, id),
+      hasPriorRun: await store.hasSessionRunHistory(id),
     });
   };
 
@@ -1026,7 +979,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
   let thinkingEndEmitted = false;
 
   const appendEvent = (type: string, data: unknown, ts: number): void => {
-    const snapshot = snapshotEventDataForLog(type, data);
+    const snapshot = redactProviderErrors(snapshotEventDataForLog(type, data), managedKey);
     enqueue(async () => {
       const seq = await store.appendRunEvent(id, WORKER_ID, {
         ts,
@@ -1278,7 +1231,15 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     const pending = await Promise.all(
       loggedMessages
         .filter((message) => message.seq > deliveredThrough)
-        .map((message) => resolveCourseRefContext(meta.ownerId, toFollowUp(message))),
+        .map(async (message) => {
+          const followUp = toFollowUp(message);
+          return followUp.courseRefs?.length
+            ? {
+                ...followUp,
+                courseRefs: await resolveCourseRefsForContext(meta.ownerId, followUp.courseRefs),
+              }
+            : followUp;
+        }),
     );
     const idleAttach = meta.existingCourse;
 
@@ -1297,14 +1258,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
       return;
     }
 
-    // `session_start` opens the conversation once. A run that starts over on
-    // a tree earlier runs left empty (they failed before completing anything)
-    // resumes it instead, so the opening prompt is not painted again.
-    if (
-      plan.kind === 'start' &&
-      recovery.firstRunSeq === undefined &&
-      (pending.length === 0 || !idleAttach)
-    ) {
+    if (plan.kind === 'start' && (pending.length === 0 || !idleAttach)) {
       emit(LIFECYCLE.sessionStart, {
         workerId: WORKER_ID,
         pid: process.pid,
@@ -1326,10 +1280,10 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
       });
     }
 
-    const driver = await resolveAgentDriverModel(await backgroundWorkspaceId(meta.ownerId));
+    const driver = await resolveAgentDriverModel();
+    managedKey = driver.connection.managedKey;
     const streamFn = createCallLlmStreamFn({
       languageModel: driver.connection.model,
-      supportsToolImages: driver.connection.modelInfo?.capabilities?.vision,
       maxOutputTokens: driver.wireMaxOutputTokens,
       omitMaxOutputTokens: driver.wireMaxOutputTokens === undefined,
       thinkingConfig: driver.connection.thinkingConfig,
@@ -1351,7 +1305,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     // unconfigured deployment gets no tool, so the model never sees a dead one.
     // Every result URL is registered with this session's durable URL trust
     // gate before the tool result is returned (reference semantics).
-    const search = await resolveWebSearchCapability(await backgroundWorkspaceId(meta.ownerId));
+    const search = resolveWebSearchCapability();
     const webSearchTools = search
       ? [
           buildWebSearchTool(search, (urls) =>
@@ -1362,13 +1316,13 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     // The owner-bound document store: ONE store per run, bound to the claimed
     // session's owner, shared by every stage tool. The owner id is
     // deliberately absent from every model-visible parameter — the model cannot
-    // forge a target owner. Reads go by id: a draft answers its owner only, a published
-    // course anyone. Foreign writes are refused. `withPlainJsonDocumentWrites` strips
+    // forge a target owner. Reads are capability-by-id and foreign writes are
+    // refused. `withPlainJsonDocumentWrites` strips
     // undefined-valued members at the write boundary so a JSON pointer `set`
     // that carries them never persists a JSON-null key (reference semantics).
     // `getAgentSessionStore` above already guards on DATABASE_URL, so the
     // provider can only be reached with a configured connection string.
-    const ownerScopedStore = (await getBackgroundDocumentStore(
+    const ownerScopedStore = (await getOwnerScopedDocumentStore(
       meta.ownerId,
       async (transaction) => {
         assertCurrentStageMutationActive();
@@ -1382,11 +1336,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     // legitimately patches the document minutes after its run ended, when
     // the lease is already released; wiring the run's store there would make
     // every post-run patch throw AgentSessionLeaseLostError.
-    // The owner the run's courses belong to now. A claim can move the run's
-    // owner to an account mid-run; the probe then sees the moved courses as
-    // the run's own, as the forwarding stores above do.
-    const currentOwner = () => canonicalizeStoredOwner(meta.ownerId);
-    const mediaJobStore = (await getBackgroundDocumentStore(meta.ownerId, async () => {
+    const mediaJobStore = (await getOwnerScopedDocumentStore(meta.ownerId, async () => {
       assertCurrentStageMutationActive();
     })) as CourseStore;
     const resolveFollowUpElementContext = async (
@@ -1394,7 +1344,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     ): Promise<FollowUpMessage> => {
       if (!message.elementRefs?.length) return message;
       const stageId = message.elementRefs[0]!.stageId;
-      const access = await probeStageAccess(await currentOwner(), stageId).catch(() => null);
+      const access = await probeStageAccess(meta.ownerId, stageId).catch(() => null);
       const stageTitle = access?.kind === 'owned' ? access.stage.name : undefined;
       const targets = await resolveElementRefsForContext(
         message.elementRefs,
@@ -1415,7 +1365,6 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
       pending,
       prompt: meta.prompt,
       idleAttach,
-      firstRunSeq: recovery.firstRunSeq,
     });
     // The owner probe is the tool layer's legality boundary: every course call
     // declares its stageId, and stageAccess resolves that stage against the
@@ -1423,28 +1372,18 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     // touches the store. One probe factory is threaded into the course+DSL
     // toolset, the curriculum toolset, and the scene-preview tool (reference
     // semantics: three call sites, one probe).
-    const stageAccess = async (stageId: string) => probeStageAccess(await currentOwner(), stageId);
-    // The owner's courses generation runs are still producing: the reader
-    // tools say so before their results, and the list tools mark them.
-    const courseGenerations = async () => listCourseGenerations(await currentOwner());
+    const stageAccess = (stageId: string) => probeStageAccess(meta.ownerId, stageId);
     // The stage read/patch toolset and the stage-level CRUD it needs. All of
     // them write through `ownerScopedStore`; every stageId-bearing tool is
     // owner-gated by `withOwnerStageAuthorization`, and patch_stage is marked
     // sequential by the shared STAGE_WRITER_TOOL_NAMES registry
     // (course-tools.ts).
-    // The tts slot for this run's owner: narration, the voice catalog and
-    // voice registration all use its provider.
-    const ttsConnection = await serverMediaConnection('tts', meta.ownerId);
     const dslTools = buildDslCourseToolset({
       store: ownerScopedStore,
       backgroundStore: mediaJobStore,
-      // The video slot for this run's owner; generate_video exists only when
-      // it resolves to a usable provider.
-      videoConnection: await serverMediaConnection('video', meta.ownerId),
       stageAccess,
       onCheckpoint: (info) => emit(LIFECYCLE.checkpoint, info),
       sessionId: id,
-      ownerId: meta.ownerId,
       abortSignal: abort.signal,
       getActiveSkill: () => activeSkill,
     });
@@ -1456,7 +1395,6 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
       onStageLink: (course) => emit(LIFECYCLE.stageLink, course),
       onLibraryChanged: (change) => emit(LIFECYCLE.libraryChanged, change),
       onCheckpoint: (info) => emit(LIFECYCLE.checkpoint, info),
-      courseGenerations,
     });
     // Scene preview is registered beside the course toolset with its own
     // owner probe (reference semantics) — it is not wrapped by the generic
@@ -1489,7 +1427,6 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
         onCheckpoint: (info) => emit(LIFECYCLE.checkpoint, info),
         sessionId: id,
         registeredVoices: sessionRegisteredVoices,
-        ttsConnection,
       }),
       { stageAccess },
     );
@@ -1501,9 +1438,8 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     const voiceCloneTools = buildVoiceCloneTools({
       sessionId: id,
       registeredVoices: sessionRegisteredVoices,
-      ttsConnection,
     });
-    const voiceRegistrationEnabled = hasConfiguredVoiceRegistrationCapability(ttsConnection);
+    const voiceRegistrationEnabled = hasConfiguredVoiceRegistrationCapability();
     const personalHistoryTools = buildPersonalHistoryTools(
       meta.ownerId,
       createPersonalHistorySource({
@@ -1511,40 +1447,36 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
         getSessionStore: async () => store,
       }),
       id,
-      courseGenerations,
     );
-    const tools = withCourseGenerationNotice(
-      assembleRunnerTools(
-        [askUserTool],
-        webSearchTools,
-        // ownerId is captured from the claimed durable session. It is deliberately
-        // absent from the model-visible parameters, so the model cannot forge a
-        // target owner.
-        [buildCreateSkillTool(meta.ownerId)],
-        // read_skill / patch_skill close the loop create_skill opens. Registered
-        // unconditionally rather than gated on "the user already has Skills": a
-        // Skill created earlier IN THIS RUN is not in `installedSkills` (loaded
-        // once at start), and a tool that appears only on the next run would be a
-        // capability the model cannot discover when it needs it.
-        buildSkillEditTools(meta.ownerId, currentOwner),
-        // The native `read` tool is restricted to installed skill resources; it is
-        // present exactly when skills exist. Discovery and invocation stay pi-native.
-        skillReadTool ? [skillReadTool] : [],
-        // fetch_url is registered unconditionally (reference semantics: the
-        // material tools are always registered alongside the capability-gated
-        // web_search). The URL trust gate — not registration — is what keeps a
-        // fetch inside the session's observed origins, and it is the tool's core
-        // security property.
-        [buildFetchUrlTool({ sessionId: id, ownerId: meta.ownerId })],
-        dslTools,
-        curriculumTools,
-        scenePreviewTools,
-        materialTools,
-        rosterTools,
-        voiceCloneTools,
-        personalHistoryTools,
-      ),
-      courseGenerations,
+    const tools = assembleRunnerTools(
+      [askUserTool],
+      webSearchTools,
+      // ownerId is captured from the claimed durable session. It is deliberately
+      // absent from the model-visible parameters, so the model cannot forge a
+      // target owner.
+      [buildCreateSkillTool(meta.ownerId)],
+      // read_skill / patch_skill close the loop create_skill opens. Registered
+      // unconditionally rather than gated on "the user already has Skills": a
+      // Skill created earlier IN THIS RUN is not in `installedSkills` (loaded
+      // once at start), and a tool that appears only on the next run would be a
+      // capability the model cannot discover when it needs it.
+      buildSkillEditTools(meta.ownerId),
+      // The native `read` tool is restricted to installed skill resources; it is
+      // present exactly when skills exist. Discovery and invocation stay pi-native.
+      skillReadTool ? [skillReadTool] : [],
+      // fetch_url is registered unconditionally (reference semantics: the
+      // material tools are always registered alongside the capability-gated
+      // web_search). The URL trust gate — not registration — is what keeps a
+      // fetch inside the session's observed origins, and it is the tool's core
+      // security property.
+      [buildFetchUrlTool({ sessionId: id })],
+      dslTools,
+      curriculumTools,
+      scenePreviewTools,
+      materialTools,
+      rosterTools,
+      voiceCloneTools,
+      personalHistoryTools,
     );
     const askUserLatch = createAskUserTerminateLatch();
     let toolCalls = 0;
@@ -1668,7 +1600,12 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
         // Same resolution as the start path: a steered message names its
         // classrooms on the durable event, and the model must be told the
         // course's current name, not the pick-time snapshot.
-        const courseResolved = await resolveCourseRefContext(meta.ownerId, followUp);
+        const courseResolved = followUp.courseRefs?.length
+          ? {
+              ...followUp,
+              courseRefs: await resolveCourseRefsForContext(meta.ownerId, followUp.courseRefs),
+            }
+          : followUp;
         const resolved = await resolveFollowUpElementContext(courseResolved);
         agent.steer(
           tagDurableUserMessage(
@@ -1831,7 +1768,11 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
       queueInterruptedToolResults();
       await flushAll();
 
-      const loopError = terminalLoopError(agent.state.messages, agent.state.errorMessage);
+      // Provider error text reaches the session error only with a visitor's own key.
+      const loopError = terminalLoopError(
+        agent.state.messages,
+        managedKey && agent.state.errorMessage ? MODEL_FAILURE_TEXT : agent.state.errorMessage,
+      );
       const shutdown = ctx.shuttingDown && abort.signal.aborted && !cancelled;
       if (shutdown || tripwireViolated || (leaseLost && abort.signal.aborted)) {
         emit(LIFECYCLE.sessionInterrupted, {
@@ -1875,7 +1816,11 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     } catch (error) {
       queueInterruptedToolResults();
       if (isLeaseLostError(error)) markLeaseLost();
-      const message = error instanceof Error ? error.message : String(error);
+      const message = managedKey
+        ? MODEL_FAILURE_TEXT
+        : error instanceof Error
+          ? error.message
+          : String(error);
       if (ctx.shuttingDown || leaseLost || tripwireViolated) {
         emit(LIFECYCLE.sessionInterrupted, {
           reason: tripwireViolated

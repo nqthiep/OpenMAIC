@@ -20,17 +20,6 @@ import type { AppDocumentOutline } from '@/lib/document-store/persistence-types'
 import type { SceneOutline } from '@/lib/types/generation';
 import type { Action } from '@/lib/types/action';
 import type { Scene } from '@/lib/types/stage';
-import { isCodeWidgetAllowed } from '@/lib/config/feature-flags';
-import { diagramGenerationOptions } from '@/lib/server/diagram-config';
-import {
-  copiedActions,
-  screenCopiedScene,
-  screenGeneratedActions,
-  screenNewScene,
-  walkthroughActions,
-  walkthroughOutlineRejection,
-  walkthroughStaleRejection,
-} from './generation-guards';
 import { COURSE_STAGE_ID_DESCRIPTION } from './course-stage';
 import type { CourseToolDeps } from './course-tools';
 import { runStageMutation } from './mutation-fence';
@@ -39,58 +28,59 @@ import { createGenerationAiCallFactory, sceneContentStage } from './generation-a
 import { synthesizeSceneNarration } from './scene-tts';
 import { toGenerationContent } from './generation-content';
 import { checkScenesAgainstSkill } from './skills';
-import { mayNameAPoolAsset } from '@/lib/media/media-placeholder';
 import { isMediaPlaceholder } from '@/lib/store/media-generation';
 import { createLogger } from '@/lib/logger';
 
 const MAX_GENERATE_SCENE_MEDIA = 8;
-export const SUPPORTED_SCENE_TYPES = new Set(['slide', 'quiz', 'interactive', 'pbl']);
+const SUPPORTED_SCENE_TYPES = new Set(['slide', 'quiz', 'interactive', 'pbl']);
 const log = createLogger('AgentGenerationTools');
 
-function sceneParams(codeAllowed: boolean) {
-  return Type.Object({
-    stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
-    order: Type.Integer({ minimum: 1 }),
-    title: Type.String({ minLength: 1 }),
-    type: Type.Union([
-      Type.Literal('slide'),
-      Type.Literal('quiz'),
-      Type.Literal('interactive'),
-      Type.Literal('pbl'),
-    ]),
-    widgetType: Type.Optional(
-      Type.Union(
-        (['simulation', 'diagram', 'code', 'game', 'visualization3d'] as const)
-          .filter((type) => codeAllowed || type !== 'code')
-          .map((type) => Type.Literal(type)),
-        {
-          description: `Interactive pages only: which widget to build. simulation = parameter explorer, diagram = flowchart/mindmap/hierarchy/system graph,${codeAllowed ? ' code = programming challenge,' : ''} game = quiz/puzzle/strategy/card/action, visualization3d = 3D scene. Defaults to simulation when omitted. procedural-skill stays gated behind task-engine mode and is not accepted here.`,
-        },
-      ),
-    ),
-    widgetOutline: Type.Optional(
-      Type.Unknown({
+const SceneParams = Type.Object({
+  stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
+  order: Type.Integer({ minimum: 1 }),
+  title: Type.String({ minLength: 1 }),
+  type: Type.Union([
+    Type.Literal('slide'),
+    Type.Literal('quiz'),
+    Type.Literal('interactive'),
+    Type.Literal('pbl'),
+  ]),
+  widgetType: Type.Optional(
+    Type.Union(
+      [
+        Type.Literal('simulation'),
+        Type.Literal('diagram'),
+        Type.Literal('code'),
+        Type.Literal('game'),
+        Type.Literal('visualization3d'),
+      ],
+      {
         description:
-          'Interactive pages only: widget configuration object matching widgetType (e.g. { concept, keyVariables } for simulation, { diagramType, nodes } for diagram, { language } for code, { gameType, challenge } for game, { visualizationType, objects } for visualization3d). Must be a plain object. Defaults to { concept: title } when widgetType is set; when only widgetOutline is set, widgetType defaults to simulation.',
+          'Interactive pages only: which widget to build. simulation = parameter explorer, diagram = flowchart/mindmap/hierarchy/system graph, code = programming challenge, game = quiz/puzzle/strategy/card/action, visualization3d = 3D scene. Defaults to simulation when omitted. procedural-skill stays gated behind task-engine mode and is not accepted here.',
+      },
+    ),
+  ),
+  widgetOutline: Type.Optional(
+    Type.Unknown({
+      description:
+        'Interactive pages only: widget configuration object matching widgetType (e.g. { concept, keyVariables } for simulation, { diagramType, nodes } for diagram, { language } for code, { gameType, challenge } for game, { visualizationType, objects } for visualization3d). Must be a plain object. Defaults to { concept: title } when widgetType is set; when only widgetOutline is set, widgetType defaults to simulation.',
+    }),
+  ),
+  brief: Type.String({ minLength: 1 }),
+  instruction: Type.Optional(Type.String()),
+  materialFacts: Type.Optional(Type.Array(Type.String())),
+  media: Type.Optional(
+    Type.Array(
+      Type.Object({
+        src: Type.String({ minLength: 1 }),
+        description: Type.String({ minLength: 1 }),
+        width: Type.Optional(Type.Number({ minimum: 1 })),
+        height: Type.Optional(Type.Number({ minimum: 1 })),
       }),
+      { maxItems: 8 },
     ),
-    brief: Type.String({ minLength: 1 }),
-    instruction: Type.Optional(Type.String()),
-    materialFacts: Type.Optional(Type.Array(Type.String())),
-    media: Type.Optional(
-      Type.Array(
-        Type.Object({
-          src: Type.String({ minLength: 1 }),
-          description: Type.String({ minLength: 1 }),
-          width: Type.Optional(Type.Number({ minimum: 1 })),
-          height: Type.Optional(Type.Number({ minimum: 1 })),
-        }),
-        { maxItems: 8 },
-      ),
-    ),
-  });
-}
-type SceneParamsType = ReturnType<typeof sceneParams>;
+  ),
+});
 const ListParams = Type.Object({
   stageId: Type.String({ description: COURSE_STAGE_ID_DESCRIPTION }),
 });
@@ -163,40 +153,10 @@ function concreteMediaSrc(src: string): boolean {
   }
 }
 
-/**
- * A media src this tool will pass through onto a page element.
- *
- * An allocated asset id counts, alongside an HTTP(S) URL and a same-origin
- * path. `generate_image` returns an id now that it stores its bytes in the
- * asset pool (#1522), and the documented flow hands that src straight to
- * `generate_scene.media`; the generation package writes a mapping value onto
- * the element verbatim (`resolveImageIds`) and the renderer leases the id from
- * the pool, so it needs no other treatment here. `isMediaPlaceholder` still
- * answers true for it — an id does need resolving before it renders — which is
- * why the id is admitted ahead of that question rather than by changing what
- * it means. What stays refused is what was always refused: a generation
- * placeholder, a data URL, and anything naming nothing.
- */
-function acceptableMediaSrc(src: string): boolean {
-  if (mayNameAPoolAsset(src)) return !/\s/.test(src);
-  return !isMediaPlaceholder(src) && concreteMediaSrc(src);
-}
-
 export interface UnresolvedMediaPlaceholder {
   elementId: string;
   type: 'image' | 'video';
   placeholder: string;
-}
-
-/**
- * Whether a document reference would still render as a skeleton.
- *
- * An allocated asset id would not: its bytes are in the pool and the renderer
- * leases them. Only a reference nothing can resolve — a generation placeholder
- * waiting on a job — is a skeleton.
- */
-function unresolvedRef(ref: string): boolean {
-  return isMediaPlaceholder(ref) && !mayNameAPoolAsset(ref);
 }
 
 /** Find slide media elements that would still render as skeletons. */
@@ -211,7 +171,7 @@ export function collectUnresolvedMediaPlaceholders(scene: Scene): UnresolvedMedi
       mediaRef?: string;
     };
     if (!candidate.id) continue;
-    if (candidate.type === 'image' && candidate.src && unresolvedRef(candidate.src)) {
+    if (candidate.type === 'image' && candidate.src && isMediaPlaceholder(candidate.src)) {
       placeholders.push({
         elementId: candidate.id,
         type: 'image',
@@ -221,15 +181,15 @@ export function collectUnresolvedMediaPlaceholders(scene: Scene): UnresolvedMedi
     if (
       candidate.type === 'video' &&
       (!candidate.src ||
-        unresolvedRef(candidate.src) ||
-        (candidate.mediaRef ? unresolvedRef(candidate.mediaRef) : false))
+        isMediaPlaceholder(candidate.src) ||
+        (candidate.mediaRef ? isMediaPlaceholder(candidate.mediaRef) : false))
     ) {
       placeholders.push({
         elementId: candidate.id,
         type: 'video',
         placeholder:
-          (candidate.src && unresolvedRef(candidate.src) ? candidate.src : undefined) ??
-          (candidate.mediaRef && unresolvedRef(candidate.mediaRef)
+          (candidate.src && isMediaPlaceholder(candidate.src) ? candidate.src : undefined) ??
+          (candidate.mediaRef && isMediaPlaceholder(candidate.mediaRef)
             ? candidate.mediaRef
             : undefined) ??
           candidate.mediaRef ??
@@ -262,19 +222,16 @@ export function filterKnownActions(actions: readonly Action[]): Action[] {
 }
 
 export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never, never>[] {
-  const routed = createGenerationAiCallFactory({
-    abortSignal: deps.abortSignal,
-    ownerId: deps.ownerId,
-  });
+  const routed = createGenerationAiCallFactory({ abortSignal: deps.abortSignal });
   const aiCallFor = (stage: Parameters<typeof routed>[0]) => deps.aiCall ?? routed(stage);
   const actionGenerator = deps.generateActions ?? generateSceneActions;
 
-  const generateScene: AgentTool<SceneParamsType> = {
+  const generateScene: AgentTool<typeof SceneParams> = {
     name: 'generate_scene',
     label: 'Generate page',
     description:
-      'Generate and durably persist one page from an explicit title, type, and brief. Reusing an order replaces that page. Interactive pages accept widgetType (simulation/diagram/game/visualization3d, plus code only where allowed) plus a matching widgetOutline object; both are rejected for other page types. Walkthrough pages come from generate_walkthrough.',
-    parameters: sceneParams(isCodeWidgetAllowed()),
+      'Generate and durably persist one page from an explicit title, type, and brief. Reusing an order replaces that page. Interactive pages accept widgetType (simulation/diagram/code/game/visualization3d) plus a matching widgetOutline object; both are rejected for other page types.',
+    parameters: SceneParams,
     async execute(_callId, params, signal) {
       if (!Number.isInteger(params.order) || params.order < 1) {
         return result(
@@ -342,10 +299,6 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
           true,
         );
       }
-      const walkthroughRejected = walkthroughOutlineRejection(params.widgetOutline);
-      if (walkthroughRejected) {
-        return result(walkthroughRejected.message, walkthroughRejected.details, true);
-      }
       const requestedMedia = params.media ?? [];
       if (requestedMedia.length > MAX_GENERATE_SCENE_MEDIA) {
         return result(
@@ -405,9 +358,9 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
             true,
           );
         }
-        if (!acceptableMediaSrc(src)) {
+        if (isMediaPlaceholder(src) || !concreteMediaSrc(src)) {
           return result(
-            'Every media item needs a stored-asset id from generate_image, an HTTP(S) URL, or a same-origin path — not a generation placeholder or a data URL.',
+            'Every media item needs a concrete HTTP(S) URL or same-origin path, not a placeholder or data URL.',
             {
               error: isMediaPlaceholder(src) ? 'media-placeholder-src' : 'invalid-media-src',
               index,
@@ -435,7 +388,6 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
           agents,
           languageDirective: doc.stage.languageDirective ?? '',
           allowProceduralSkill: true,
-          ...diagramGenerationOptions(),
           ...(assignedImages.length ? { assignedImages, imageMapping } : {}),
           ...(params.instruction ? { editDirective: params.instruction } : {}),
           ...(baseline ? { baselineContent: baseline } : {}),
@@ -500,8 +452,6 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
       });
       if (!built) return result('Page assembly failed; nothing was written.', {}, true);
       const scene = built as Scene;
-      const rejected = await screenNewScene(scene, doc.stage.languageDirective);
-      if (rejected) return result(rejected.message, rejected.details, true);
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, scene),
       );
@@ -571,28 +521,23 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         ? doc?.scenes.find((item) => item.id === params.sceneId)
         : doc?.scenes.find((item) => item.order === params.order);
       if (!doc || !scene) return result('Page not found. Call list_scenes.', {}, true);
-      const stale = walkthroughStaleRejection(scene);
-      if (stale) return result(stale.message, stale.details, true);
       const outline = outlineFromScene(scene, doc.outline);
       const actions = filterKnownActions(
-        walkthroughActions(scene) ??
-          (await actionGenerator(
-            outline,
-            toGenerationContent(scene.content),
-            aiCallFor('scene-actions'),
-            {
-              ctx: actionContext(doc.scenes, scene),
-              agents: doc.stage.generatedAgentConfigs,
-              languageDirective: doc.stage.languageDirective ?? '',
-              userProfile: params.styleDirective,
-            },
-          )),
+        await actionGenerator(
+          outline,
+          toGenerationContent(scene.content),
+          aiCallFor('scene-actions'),
+          {
+            ctx: actionContext(doc.scenes, scene),
+            agents: doc.stage.generatedAgentConfigs,
+            languageDirective: doc.stage.languageDirective ?? '',
+            userProfile: params.styleDirective,
+          },
+        ),
       );
       if (!actions.length)
         return result('No known actions were generated; the page was unchanged.', {}, true);
       const next = { ...scene, actions } as Scene;
-      const flagged = await screenGeneratedActions(next, doc.stage.languageDirective);
-      if (flagged) return result(flagged.message, flagged.details, true);
       await runStageMutation(signal, () =>
         putSceneBringingCurrent(deps.store, params.stageId, next),
       );
@@ -610,7 +555,6 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
           force: false,
           roster: doc.stage.generatedAgentConfigs,
           signal,
-          ownerId: deps.ownerId,
         });
         if (audio.changed) {
           await runStageMutation(signal, () =>
@@ -637,7 +581,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
     name: 'duplicate_scene',
     label: 'Duplicate page',
     description:
-      'Copy an existing page to a new position (walkthrough pages keep their narration; other pages get no actions). Replaying the same tool call is idempotent.',
+      'Copy an existing page to a new position without actions. Replaying the same tool call is idempotent.',
     parameters: DuplicateParams,
     async execute(callId, params, signal) {
       const doc = await deps.store.loadDocument(params.stageId);
@@ -655,8 +599,6 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         ? scenes.find((scene) => scene.id === params.templateSceneId)
         : scenes.find((scene) => scene.order === params.templateOrder);
       if (!template) return result('Template page not found.', {}, true);
-      const copyRejected = screenCopiedScene(template);
-      if (copyRejected) return result(copyRejected.message, copyRejected.details, true);
       const at = Math.min(params.targetOrder, scenes.length + 1);
       const shifted = shiftCourseOrders(
         scenes,
@@ -672,7 +614,7 @@ export function buildGenerationTools(deps: GenerationToolDeps): AgentTool<never,
         stageId: params.stageId,
         order: at,
         title: params.title?.trim() || template.title,
-        actions: copiedActions(template),
+        actions: [],
         createdAt: now,
         updatedAt: now,
       } as Scene;

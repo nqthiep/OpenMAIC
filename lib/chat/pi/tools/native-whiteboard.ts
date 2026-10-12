@@ -15,7 +15,6 @@ import { Type, type Static, type TSchema } from 'typebox';
 import { Value } from 'typebox/value';
 import { createHash } from 'node:crypto';
 import katex from 'katex';
-import { safeKatexOptions } from '@openmaic/dsl';
 
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
 import {
@@ -860,14 +859,11 @@ export function buildNativeWhiteboardTools(opts: NativeWhiteboardToolOptions): A
           height: params.height ?? 80,
           rotate: 0,
           latex: params.latex,
-          html: katex.renderToString(
-            params.latex,
-            safeKatexOptions({
-              throwOnError: false,
-              displayMode: true,
-              output: 'html',
-            }),
-          ),
+          html: katex.renderToString(params.latex, {
+            throwOnError: false,
+            displayMode: true,
+            output: 'html',
+          }),
           color: params.color ?? '#000000',
           fixedRatio: true,
         }),

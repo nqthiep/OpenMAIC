@@ -7,7 +7,6 @@ import {
 } from '../src/preview-validation.js';
 import type { RenderExecutor } from '../src/render-executor.js';
 import { Semaphore } from '../src/semaphore.js';
-import { waitUntil } from './support/async.js';
 import {
   createMemoryArtifactStore,
   createMemoryJobStore,
@@ -84,10 +83,8 @@ function appWith(
   previewGate = new PreviewGate(8, 2),
   options: {
     extractionGate?: Semaphore;
-    previewExecutionGate?: Semaphore;
     previewDeadlineMs?: number;
     previewMaxJsonBytes?: number;
-    resourceMode?: boolean;
   } = {},
 ) {
   const jobs = createMemoryJobStore();
@@ -98,33 +95,14 @@ function appWith(
     artifacts,
     coordinator,
     extractionGate: options.extractionGate ?? new Semaphore(1),
-    previewExecutionGate: options.previewExecutionGate,
     previewGate,
     previewRenderer,
     previewDeadlineMs: options.previewDeadlineMs,
     previewMaxJsonBytes: options.previewMaxJsonBytes,
-    resourceMode: options.resourceMode,
   });
 }
 
 describe('POST /preview', () => {
-  it('rejects resource mode before parsing the request or starting Chromium', async () => {
-    const render = vi.fn<PreviewRenderer['render']>();
-    const response = await appWith({ render }, undefined, {
-      resourceMode: true,
-      // A normal route would reject this body as oversized first. Resource mode
-      // must win before even declared-length/body processing.
-      previewMaxJsonBytes: 1,
-    }).fetch(previewRequest());
-
-    expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toEqual({
-      error: 'Preview is unavailable while per-task resource budgets are enabled',
-      reason: 'resource_mode_unsupported',
-    });
-    expect(render).not.toHaveBeenCalled();
-  });
-
   it('returns the rendered PNG synchronously', async () => {
     const render = vi.fn<PreviewRenderer['render']>(async () => new Uint8Array([137, 80, 78, 71]));
     const response = await appWith({ render }).fetch(previewRequest());
@@ -541,7 +519,7 @@ describe('POST /preview', () => {
     expect(renderCalls).toBe(1);
   });
 
-  it('serves a preview while a video render holds the export execution slot', async () => {
+  it('fast-rejects when a video render holds the shared Chromium execution limit', async () => {
     const videoStarted = deferred();
     const finishVideo = deferred();
     const executor: RenderExecutor = {
@@ -570,113 +548,22 @@ describe('POST /preview', () => {
       previewRenderer: { render },
       previewDeadlineMs: 1_000,
     });
-    try {
-      const preview = await app.fetch(previewRequest());
-      expect(preview.status).toBe(200);
-      expect(preview.headers.get('content-type')).toBe('image/png');
-      expect(new Uint8Array(await preview.arrayBuffer())).toEqual(new Uint8Array([1]));
-      expect((await jobs.get(videoId))?.status).toBe('running');
-    } finally {
-      finishVideo.resolve();
-    }
-    await waitUntil(
-      async () => (await jobs.get(videoId))?.status === 'succeeded' || null,
-      'video completion',
-    );
-  });
+    const started = Date.now();
+    const preview = await app.fetch(previewRequest());
 
-  it('starts an export while a preview burst saturates its own execution slot', async () => {
-    const previewStarted = deferred();
-    const finishPreview = deferred();
-    const finishVideo = deferred();
-    const jobs = createMemoryJobStore();
-    const artifacts = createMemoryArtifactStore().store;
-    const coordinator = new RenderCoordinator(
-      {
-        async execute() {
-          await finishVideo.promise;
-          return { status: 'succeeded' };
-        },
-      },
-      jobs,
-      artifacts,
-      { maxConcurrency: 1 },
-    );
-    const app = createApp({
-      jobs,
-      artifacts,
-      coordinator,
-      extractionGate: new Semaphore(1),
-      previewRenderer: {
-        async render() {
-          previewStarted.resolve();
-          await finishPreview.promise;
-          return new Uint8Array([1]);
-        },
-      },
-    });
-    const preview = app.fetch(previewRequest());
-    await previewStarted.promise;
+    expect(Date.now() - started).toBeLessThan(500);
+    expect(render).not.toHaveBeenCalled();
+    expect(preview.status).toBe(429);
+    await expect(preview.json()).resolves.toMatchObject({ reason: 'capacity_busy' });
 
-    try {
-      const burst = await Promise.all(
-        Array.from({ length: 4 }, (_, index) =>
-          app.fetch(previewRequest(previewPayload(), `burst-${index}`)),
-        ),
-      );
-      for (const response of burst) {
-        expect(response.status).toBe(429);
-        await expect(response.json()).resolves.toMatchObject({ reason: 'capacity_busy' });
-      }
-      const videoId = await coordinator.submit(
-        coordinator.reserve('video-user'),
-        '/tmp/openmaic-preview-burst-video-test',
-        { fps: 30, quality: 'standard', format: 'mp4' },
-      );
-      await waitUntil(
-        async () => (await jobs.get(videoId))?.status === 'running' || null,
-        'export to start while preview is running',
-      );
-    } finally {
-      finishPreview.resolve();
-      finishVideo.resolve();
-      expect((await preview).status).toBe(200);
+    finishVideo.resolve();
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      if ((await jobs.get(videoId))?.status === 'succeeded') break;
+      await new Promise((resolve) => setTimeout(resolve, 5));
     }
-  });
-
-  it('uses the configured preview concurrency and fast-fails beyond it', async () => {
-    const finish = deferred();
-    let running = 0;
-    const app = appWith(
-      {
-        async render() {
-          running += 1;
-          try {
-            await finish.promise;
-            return new Uint8Array([1]);
-          } finally {
-            running -= 1;
-          }
-        },
-      },
-      undefined,
-      { previewExecutionGate: new Semaphore(2) },
-    );
-    const first = app.fetch(previewRequest(previewPayload(), 'first'));
-    const second = app.fetch(previewRequest(previewPayload(), 'second'));
-    try {
-      await waitFor(() => running === 2);
-      const rejected = await app.fetch(previewRequest(previewPayload(), 'third'));
-      expect(rejected.status).toBe(429);
-      await expect(rejected.json()).resolves.toMatchObject({ reason: 'capacity_busy' });
-      expect(running).toBe(2);
-    } finally {
-      finish.resolve();
-      await Promise.all([first, second]);
-    }
-    expect((await first).status).toBe(200);
-    expect((await second).status).toBe(200);
+    expect((await jobs.get(videoId))?.status).toBe('succeeded');
     expect((await app.fetch(previewRequest())).status).toBe(200);
+    expect(render).toHaveBeenCalledOnce();
   });
 
   it('aborts rendering and releases admission when the client disconnects', async () => {
@@ -704,29 +591,4 @@ describe('POST /preview', () => {
 
     expect((await app.fetch(previewRequest())).status).toBe(200);
   });
-
-  it.each(['failure', 'deadline'])(
-    'releases preview execution capacity after a renderer %s',
-    async (outcome) => {
-      let calls = 0;
-      const app = appWith(
-        {
-          async render({ signal }) {
-            calls += 1;
-            if (calls > 1) return new Uint8Array([1]);
-            if (outcome === 'failure') throw new Error('Chromium launch failed');
-            return new Promise<Uint8Array>((_resolve, reject) => {
-              signal.addEventListener('abort', () => reject(signal.reason), { once: true });
-            });
-          },
-        },
-        new PreviewGate(1, 0),
-        { previewDeadlineMs: 20 },
-      );
-
-      const failed = await app.fetch(previewRequest());
-      expect(failed.status).toBe(outcome === 'deadline' ? 504 : 500);
-      expect((await app.fetch(previewRequest())).status).toBe(200);
-    },
-  );
 });

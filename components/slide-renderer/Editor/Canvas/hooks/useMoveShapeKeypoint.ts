@@ -3,7 +3,6 @@ import type { PPTElement, PPTShapeElement } from '@openmaic/dsl';
 import { useHistorySnapshot } from '@/lib/hooks/use-history-snapshot';
 import { SHAPE_PATH_FORMULAS } from '@/configs/shapes';
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
-import { isTouchEvent } from './touch-event';
 
 interface ShapePathData {
   baseSize: number;
@@ -32,13 +31,13 @@ export function useMoveShapeKeypoint(
   const moveShapeKeypoint = useCallback(
     (e: React.MouseEvent | React.TouchEvent, element: PPTShapeElement, index = 0) => {
       const native = e.nativeEvent;
-      const isTouch = isTouchEvent(native);
-      if (isTouch && !native.changedTouches?.length) return;
+      const isTouchEvent = native instanceof TouchEvent;
+      if (isTouchEvent && !native.changedTouches?.length) return;
 
       let isMouseDown = true;
 
-      const startPageX = isTouch ? native.changedTouches[0].pageX : native.pageX;
-      const startPageY = isTouch ? native.changedTouches[0].pageY : native.pageY;
+      const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
+      const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
 
       const originKeypoints = element.keypoints!;
 
@@ -123,7 +122,7 @@ export function useMoveShapeKeypoint(
         addHistorySnapshot();
       };
 
-      if (isTouch) {
+      if (isTouchEvent) {
         document.ontouchmove = handleMouseMove;
         document.ontouchend = handleMouseUp;
       } else {

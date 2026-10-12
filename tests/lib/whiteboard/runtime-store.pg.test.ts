@@ -18,10 +18,7 @@ import {
   type WhiteboardRuntimePayloadV1,
 } from '@/lib/whiteboard/runtime/types';
 
-import { endContractPool, openContractPool } from '../../persistence/_contract-database';
-
 const contractUrl = process.env.PG_CONTRACT_URL;
-const SCHEMA = 'whiteboard_runtime_contract';
 
 if (process.env.STORAGE_PG_CONTRACT_REQUIRED === '1' && !contractUrl) {
   throw new Error(
@@ -207,7 +204,7 @@ describe.skipIf(!contractUrl)('whiteboard app-domain contract with PostgreSQL 16
 
   beforeAll(async () => {
     vi.stubGlobal('IDBKeyRange', IDBKeyRange);
-    pool = await openContractPool(contractUrl!, SCHEMA);
+    pool = new Pool({ connectionString: contractUrl, max: 8 });
     await ensureSchema(pool as Queryable);
   });
 
@@ -220,7 +217,7 @@ describe.skipIf(!contractUrl)('whiteboard app-domain contract with PostgreSQL 16
   });
 
   afterAll(async () => {
-    await endContractPool(pool, SCHEMA);
+    await pool.end();
     vi.unstubAllGlobals();
   });
 

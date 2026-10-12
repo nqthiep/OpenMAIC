@@ -40,19 +40,7 @@ const mocks = vi.hoisted(() => {
           }
         : null,
     ),
-    // The event log as the runner reads it: the user messages listUserMessages
-    // models, as `user_message` events, and no earlier run.
-    readEventsAfter: vi.fn(async (sessionId: string, afterSeq: number) =>
-      afterSeq > 0
-        ? []
-        : (await store.listUserMessages(sessionId)).map((message) => ({
-            id: message.seq,
-            ts: message.ts,
-            attempt: 1,
-            type: 'user_message',
-            data: { text: message.text, delivery: message.delivery, materials: message.materials },
-          })),
-    ),
+    hasSessionRunHistory: vi.fn(async () => false),
     heartbeat: vi.fn(async () => true),
     markUserMessageDelivered: vi.fn(async (_id, _worker, _attempt, messageSeq: number) => {
       deliveredUserMessageSeq = Math.max(deliveredUserMessageSeq, messageSeq);
@@ -61,9 +49,7 @@ const mocks = vi.hoisted(() => {
     getCancelRequestedAt: vi.fn(async () => null),
     isCancelRequested: vi.fn(async () => false),
     listUserMessages: vi.fn(
-      async (
-        _sessionId?: string,
-      ): Promise<
+      async (): Promise<
         Array<{ seq: number; ts: number; text: string; delivery: string; materials: unknown[] }>
       > => [],
     ),
@@ -140,7 +126,7 @@ vi.mock('@/lib/server/agent-runtime/user-skills', async (importActual) => {
 // The owner-bound document store is setup-only in this harness; the tools
 // built around it are never invoked.
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
-  getBackgroundDocumentStore: vi.fn(async () => ({})),
+  getOwnerScopedDocumentStore: vi.fn(async () => ({})),
 }));
 
 // Capability resolution stays hermetic: no web search and no voice

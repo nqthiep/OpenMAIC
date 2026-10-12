@@ -81,10 +81,9 @@ describe('fetchModels', () => {
         data: [{ id: 'z-model', owned_by: 'provider' }, { id: 'a-model' }],
       }),
     } as unknown as Response);
+    vi.stubGlobal('fetch', fetchMock);
 
-    await expect(
-      fetchModels('https://api.example.com', 'test-key', { fetchImpl: fetchMock as never }),
-    ).resolves.toEqual([
+    await expect(fetchModels('https://api.example.com', 'test-key')).resolves.toEqual([
       { id: 'a-model', ownedBy: undefined },
       { id: 'z-model', ownedBy: 'provider' },
     ]);
@@ -109,10 +108,12 @@ describe('fetchModels', () => {
         text,
         json,
       } as unknown as Response);
+      vi.stubGlobal('fetch', fetchMock);
 
-      const error = await fetchModels('https://gateway.example.com/api/anthropic', 'test-key', {
-        fetchImpl: fetchMock as never,
-      }).catch((caught: unknown) => caught);
+      const error = await fetchModels(
+        'https://gateway.example.com/api/anthropic',
+        'test-key',
+      ).catch((caught: unknown) => caught);
 
       expect(error).toBeInstanceOf(ModelFetchError);
       expect(error).toMatchObject({ status });
@@ -138,11 +139,10 @@ describe('fetchModels', () => {
           status: 200,
           json: vi.fn().mockResolvedValue({ data: [{ id: 'fallback-model' }] }),
         } as unknown as Response);
+      vi.stubGlobal('fetch', fetchMock);
 
       await expect(
-        fetchModels('https://gateway.example.com/api/anthropic', 'test-key', {
-          fetchImpl: fetchMock as never,
-        }),
+        fetchModels('https://gateway.example.com/api/anthropic', 'test-key'),
       ).resolves.toEqual([{ id: 'fallback-model', ownedBy: undefined }]);
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -160,25 +160,22 @@ describe('fetchModels', () => {
     },
   );
 
-  it.each([401, 403])(
-    'keeps upstream %i terminal, preserves its status and skips the body',
-    async (status) => {
-      const text = vi.fn().mockResolvedValue('invalid key');
-      const fetchMock = vi.fn().mockResolvedValue({
-        ok: false,
-        status,
-        text,
-      } as unknown as Response);
+  it.each([401, 403])('keeps upstream %i terminal and preserves its status', async (status) => {
+    const text = vi.fn().mockResolvedValue('invalid key');
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status,
+      text,
+    } as unknown as Response);
+    vi.stubGlobal('fetch', fetchMock);
 
-      const error = await fetchModels('https://api.example.com', 'bad-key', {
-        fetchImpl: fetchMock as never,
-      }).catch((caught: unknown) => caught);
+    const error = await fetchModels('https://api.example.com', 'bad-key').catch(
+      (caught: unknown) => caught,
+    );
 
-      expect(error).toBeInstanceOf(ModelFetchError);
-      expect(error).toMatchObject({ status });
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-      // The error body is never read, so it cannot reach the caller.
-      expect(text).not.toHaveBeenCalled();
-    },
-  );
+    expect(error).toBeInstanceOf(ModelFetchError);
+    expect(error).toMatchObject({ status });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(text).toHaveBeenCalledTimes(1);
+  });
 });

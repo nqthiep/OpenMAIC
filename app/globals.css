@@ -77,13 +77,13 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.47 0 0);
+  --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.58 0.22 27);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -97,7 +97,7 @@
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
@@ -108,17 +108,17 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: #8b47ea;
-  --primary-foreground: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.75 0 0);
+  --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.371 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -136,7 +136,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring;
+    @apply border-border outline-ring/50;
   }
   html {
     /* Always render the vertical scrollbar so layout doesn't horizontally
@@ -169,7 +169,7 @@
 
 /* The slide editor draws a text element's frame via the renderer's Operate
    layer. The focused contenteditable must not also paint a UA focus ring on
-   top of it (the base `* { @apply outline-ring }` rule gives every focused
+   top of it (the base `* { @apply outline-ring/50 }` rule gives every focused
    element an outline). `.prosemirror-editor` is an editor-only class —
    playback's BaseTextElement never carries it, so playback is unaffected. */
 .prosemirror-editor :focus,

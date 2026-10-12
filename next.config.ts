@@ -1,20 +1,12 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  env: {
-    // Pin even the unset/default value in both client and server bundles.
-    // A runtime-only override must not disable the route the built client uses.
-    NEXT_PUBLIC_PI_CHAT_ENABLED: process.env.NEXT_PUBLIC_PI_CHAT_ENABLED ?? '',
-  },
-  output: 'standalone',
+  output: process.env.VERCEL ? undefined : 'standalone',
   outputFileTracingIncludes: {
     '/*': [
       'lib/server/agent-runtime/import-pptx-worker.mjs',
       'skills/openmaic/**',
       'skills/agent-runtime/**',
-      // Release-gate review files (lib/subjects/release.ts) are read from disk at runtime
-      // (OPENMAIC_REQUIRE_REVIEW), so the tracer cannot see them.
-      'lib/subjects/*/reviews/**',
       // Loaded through a runtime-only `import('undici')` (see the LLM
       // dispatcher in lib/ai/providers.ts and the Google proxy transport), so
       // the output tracer never sees it and standalone builds ship without it.
@@ -26,7 +18,8 @@ const nextConfig: NextConfig = {
       // and the runtime dlopen of sharp 0.35.4 failed with
       // "libvips-cpp.so.8.18.6: No such file or directory" on self-hosted
       // Docker (Alpine/musl) deployments. Force-include every sharp-libvips
-      // native lib dir.
+      // native lib dir so the version matching the loaded sharp binary is
+      // always present, across platforms and sharp versions.
       'node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/lib/**',
     ],
   },
@@ -71,16 +64,6 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: `frame-ancestors ${frameAncestors}`,
           },
-        ],
-      },
-      {
-        // Provider logos are drawn wherever services are listed, and each tab
-        // switch mounts a fresh set of them. With Next's default `max-age=0`
-        // every one is revalidated first and stays blank until the server
-        // answers. They are not content-hashed, so cache for a day, not forever.
-        source: '/logos/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
         ],
       },
     ];

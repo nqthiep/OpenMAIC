@@ -6,7 +6,7 @@
     { "type": "interactive", "min": 3, "minRatio": 0.4 },
     { "type": "quiz", "min": 2 }
   ],
-  "allowedWidgetTypes": ["simulation", "diagram", "game", "visualization3d"],
+  "allowedWidgetTypes": ["simulation", "diagram", "code", "game", "visualization3d"],
   "requiredWidgetOutlineFields": ["concept"],
   "noConsecutiveSameWidgetType": true
 }

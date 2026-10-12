@@ -64,7 +64,6 @@ async function parseWithAliDocMind(input: MediaParseInput): Promise<MediaArtifac
       fileName: input.fileName,
       option: 'advance',
       multimediaParameters: { enableSynopsisParse: true },
-      signal: input.signal,
     },
   );
 

@@ -18,7 +18,6 @@ const PROMPT_IDS = [
   'quiz-content',
   'simulation-content',
   'diagram-content',
-  'diagram-graph',
   'code-content',
   'game-content',
   'visualization3d-content',
@@ -34,12 +33,9 @@ const SNIPPET_IDS = [
   'image-instructions',
   'video-instructions',
   'media-safety-guidelines',
-  'interactive-observation',
   'slide-image-instructions',
   'slide-generated-image-instructions',
   'slide-video-instructions',
-  'speech-tts-readability',
-  'diagram-visual-rules',
 ] as const satisfies readonly SnippetId[];
 
 const GRANDFATHERED_NON_CAMEL_CASE_PLACEHOLDERS = [
@@ -75,7 +71,7 @@ describe('packaged prompt assets', () => {
       ...listFiles(join(PACKAGE_ROOT, 'templates')),
       ...listFiles(join(PACKAGE_ROOT, 'snippets')),
     ]
-      .map((file) => relative(PACKAGE_ROOT, file).replace(/\\/g, '/'))
+      .map((file) => relative(PACKAGE_ROOT, file))
       .sort();
 
     expect(actualFiles).toEqual(expectedFiles);

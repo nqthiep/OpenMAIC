@@ -24,6 +24,8 @@ import { runInstructorTurn } from '@/lib/pbl/v2/agents/instructor';
 import { applyQuizSignalsToProject } from '@/lib/pbl/v2/operations/runtime/quiz-snapshot';
 import type { PBLProjectV2, PriorQuizResult } from '@/lib/pbl/v2/types';
 
+export const maxDuration = 300;
+
 const log = createLogger('PBL v2 OpenTask API');
 
 interface OpenTaskRequest {
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
     return apiError('INVALID_REQUEST', 400, err instanceof Error ? err.message : String(err));
   }
 
-  const { model, thinkingConfig } = resolved;
+  const { model, thinkingConfig, managedKey } = resolved;
   applyRequestLocaleToProject(req, body.project);
 
   // Stage 2 (pre-play) recalibration: fold prior-quiz accuracy into
@@ -86,6 +88,6 @@ export async function POST(req: NextRequest) {
       thinkingConfig,
       signal: req.signal,
     }),
-    { signal: req.signal },
+    { signal: req.signal, managedKey },
   );
 }

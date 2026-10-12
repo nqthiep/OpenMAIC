@@ -1,7 +1,7 @@
 ---
 name: deep-interactive
 title: "深度交互"
-description: Deep Interactive courses. Plans the course so the learner manipulates something on most pages — simulations, diagrams they explore, guided walkthroughs, games, 3D scenes — with slides reserved for the opening frame and the closing consolidation. Use when the topic has a mechanism, a variable to vary, a process to trace, or a structure to inspect.
+description: Deep Interactive courses. Plans the course so the learner manipulates something on most pages — simulations, diagrams they explore, code they run, games, 3D scenes — with slides reserved for the opening frame and the closing consolidation. Use when the topic has a mechanism, a variable to vary, a process to trace, or a structure to inspect.
 ---
 
 # Deep Interactive course design
@@ -27,6 +27,7 @@ learner has nothing to manipulate on it.
 | ----------------- | ---------------------------------------------------------------- |
 | `simulation`      | vary parameters and watch a system respond in real time          |
 | `diagram`         | explore structure, flow or hierarchy by expanding and following  |
+| `code`            | read, modify and run a short program that embodies the idea      |
 | `game`            | make repeated decisions under a rule set and see the score move  |
 | `visualization3d` | inspect a spatial object or scene from angles a slide cannot show |
 
@@ -38,6 +39,7 @@ defeats the whole point.
 
 - `simulation`: `concept`, `keyVariables` (the actual sliders/inputs)
 - `diagram`: `diagramType`, `nodes` (with `label`, and `parentId` for hierarchy)
+- `code`: `language`, `concept`
 - `game`: `gameType`, `challenge`, `playerControls`
 - `visualization3d`: `visualizationType`, `objects`, `interactions`
 

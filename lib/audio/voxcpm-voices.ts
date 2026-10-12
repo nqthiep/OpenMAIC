@@ -1,16 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { db, type VoiceProfileRecord } from '@/lib/device-storage/database';
+import { db, type VoiceProfileRecord } from '@/lib/utils/database';
 import type { TTSVoiceInfo } from '@/lib/audio/types';
 import {
   VOXCPM_AUTO_VOICE,
   VOXCPM_AUTO_VOICE_ID,
   VOXCPM_TTS_PROVIDER_ID,
+  buildAutoVoxCPMVoicePrompt,
   getVoxCPMProfileIdFromVoiceId,
   getVoxCPMProfileVoiceId,
   voxCPMBackendSupportsVoiceRegistration,
-  voxCPMPromptProviderOptions,
   type VoxCPMProviderOptions,
   type VoxCPMVoicePromptContext,
 } from '@/lib/audio/voxcpm';
@@ -362,7 +362,10 @@ export function useQwenVoiceProfiles() {
   }, [refresh]);
 
   const addCloneVoice = useCallback(
-    async (input: { name: string; referenceAudio: File; refText: string }) => {
+    async (
+      input: { name: string; referenceAudio: File; refText: string },
+      request: VoiceRegistrationRequestConfig,
+    ) => {
       const normalized = await normalizeQwenReferenceAudio(
         input.referenceAudio,
         input.referenceAudio.name,
@@ -370,11 +373,15 @@ export function useQwenVoiceProfiles() {
       const referenceAudio = new File([normalized.blob], normalized.name, {
         type: normalized.mimeType,
       });
-      const voiceId = await registerVoiceFromReference('qwen-tts', {
-        name: input.name,
-        referenceAudio,
-        refText: input.refText,
-      });
+      const voiceId = await registerVoiceFromReference(
+        'qwen-tts',
+        {
+          name: input.name,
+          referenceAudio,
+          refText: input.refText,
+        },
+        request,
+      );
       const now = Date.now();
       await db.voiceProfiles.put({
         id: voiceId,
@@ -396,8 +403,8 @@ export function useQwenVoiceProfiles() {
   );
 
   const deleteVoice = useCallback(
-    async (id: string) => {
-      const vendorDeleted = await deleteRegisteredVoice('qwen-tts', id);
+    async (id: string, request: VoiceRegistrationRequestConfig) => {
+      const vendorDeleted = await deleteRegisteredVoice('qwen-tts', id, request);
       if (!vendorDeleted) {
         console.warn('[QwenVoiceProfiles] Provider deletion failed; removing local profile');
       }
@@ -432,17 +439,27 @@ export async function getVoxCPMProviderOptions(
         ).catch(() => undefined)
       : undefined;
     return {
-      // The inline fallback is always set.
-      ...voxCPMPromptProviderOptions(voiceId, context),
+      voiceMode: 'auto',
+      voicePrompt: buildAutoVoxCPMVoicePrompt(context), // inline fallback always set
       ...(registeredVoiceId ? { registeredVoiceId } : {}),
     };
   }
 
   const profileId = getVoxCPMProfileIdFromVoiceId(voiceId);
-  if (!profileId) return voxCPMPromptProviderOptions(voiceId, context);
+  if (!profileId) {
+    return {
+      voiceMode: 'prompt',
+      voicePrompt: voiceId,
+    };
+  }
 
   const profile = await db.voiceProfiles.get(profileId);
-  if (!profile) return voxCPMPromptProviderOptions(voiceId, context);
+  if (!profile) {
+    return {
+      voiceMode: 'auto',
+      voicePrompt: buildAutoVoxCPMVoicePrompt(context),
+    };
+  }
 
   if (profile.kind === 'clone' && profile.referenceAudio) {
     return {

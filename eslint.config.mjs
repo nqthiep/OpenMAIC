@@ -161,19 +161,19 @@ const eslintConfig = defineConfig([
         },
         {
           selector:
-            'ImportDeclaration > Literal.source[value=/^(?!@openmaic\\/dsl(\\/|$)|(jsonrepair|katex|nanoid|parse5|partial-json)(\\/|$)|node:|\\.\\.?\\/).+/]',
+            'ImportDeclaration > Literal.source[value=/^(?!@openmaic\\/dsl(\\/|$)|(jsonrepair|katex|nanoid|partial-json)(\\/|$)|node:|\\.\\.?\\/).+/]',
           message:
             '@openmaic/generation may import only from @openmaic/dsl, approved leaf runtime dependencies, Node built-ins, or relative modules (./… or ../…).',
         },
         {
           selector:
-            'ExportNamedDeclaration > Literal.source[value=/^(?!@openmaic\\/dsl(\\/|$)|(jsonrepair|katex|nanoid|parse5|partial-json)(\\/|$)|node:|\\.\\.?\\/).+/]',
+            'ExportNamedDeclaration > Literal.source[value=/^(?!@openmaic\\/dsl(\\/|$)|(jsonrepair|katex|nanoid|partial-json)(\\/|$)|node:|\\.\\.?\\/).+/]',
           message:
             '@openmaic/generation may re-export only from @openmaic/dsl, approved leaf runtime dependencies, Node built-ins, or relative modules (./… or ../…).',
         },
         {
           selector:
-            'ExportAllDeclaration > Literal.source[value=/^(?!@openmaic\\/dsl(\\/|$)|(jsonrepair|katex|nanoid|parse5|partial-json)(\\/|$)|node:|\\.\\.?\\/).+/]',
+            'ExportAllDeclaration > Literal.source[value=/^(?!@openmaic\\/dsl(\\/|$)|(jsonrepair|katex|nanoid|partial-json)(\\/|$)|node:|\\.\\.?\\/).+/]',
           message:
             '@openmaic/generation may re-export only from @openmaic/dsl, approved leaf runtime dependencies, Node built-ins, or relative modules (./… or ../…).',
         },
@@ -663,49 +663,6 @@ const eslintConfig = defineConfig([
     ],
     rules: {
       'no-restricted-syntax': ['error', ...AI_SDK_DYNAMIC_IMPORT_BAN],
-    },
-  },
-  // Deterministic subject catalog (ADR 0006 decision 7): `run` executes on both the
-  // server and the browser and must yield the same frames. Uses
-  // no-restricted-globals / no-restricted-properties and deliberately NOT
-  // no-restricted-syntax: flat config replaces options per rule key, so setting it
-  // here would drop the AI SDK dynamic-import ban above for these files.
-  {
-    files: ['lib/subjects/**/catalog/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-globals': [
-        'error',
-        {
-          name: 'Intl',
-          message:
-            'Catalog code must be deterministic: Intl output differs between server and browser (ADR 0006).',
-        },
-        {
-          name: 'Date',
-          message:
-            'Catalog code must be deterministic: Date depends on the clock and timezone, so server and browser would produce different frames (ADR 0006).',
-        },
-      ],
-      'no-restricted-properties': [
-        'error',
-        ...['random', 'sin', 'cos', 'tan', 'exp', 'log', 'log2', 'log10', 'pow'].map(
-          (property) => ({
-            object: 'Math',
-            property,
-            message: `Math.${property} is non-deterministic or not bit-identical across engines; server and browser must produce the same frames (ADR 0006).`,
-          }),
-        ),
-        {
-          property: 'toLocaleString',
-          message:
-            'toLocaleString is locale-dependent; server and browser must produce the same frames (ADR 0006).',
-        },
-        {
-          property: 'localeCompare',
-          message:
-            'localeCompare is locale-dependent; server and browser must produce the same frames (ADR 0006).',
-        },
-      ],
     },
   },
 ]);

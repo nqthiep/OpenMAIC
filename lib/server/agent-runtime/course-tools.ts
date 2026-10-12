@@ -52,9 +52,6 @@ import {
   type GenerateVideoToolDeps,
 } from './generate-video';
 import type { SceneTtsInput, SceneTtsSummary } from './scene-tts';
-import { WALKTHROUGH_TOOL_NAME, buildWalkthroughTool } from './walkthrough-tools';
-import { isWidgetProvidersDisabled } from '@/lib/config/feature-flags';
-import { widgetRegistry } from '@/lib/widgets';
 import type { LoadedSkill } from './skills';
 
 export type CourseDocument = MaicDocument<Scene, Stage>;
@@ -92,11 +89,6 @@ export interface CourseToolDeps {
   onCheckpoint: (info: CheckpointInfo) => void;
   /** The session id, recorded on the document as the producer reference. */
   sessionId?: string;
-  /**
-   * The owner recorded on the run's durable session. Media the run generates is
-   * allocated in this owner's asset partition.
-   */
-  ownerId?: string;
   /** Cancel generation, preview, and synthesis when the run stops. */
   abortSignal?: AbortSignal;
   /** Test seam for the neutral TTS path. */
@@ -217,7 +209,6 @@ export function buildDslCourseToolset(
 ): AgentTool<never, never>[] {
   const tools = [
     ...buildGenerationTools(deps),
-    ...(walkthroughToolEnabled() ? [buildWalkthroughTool(deps)] : []),
     buildImportPptxTool(deps),
     buildGenerateImageTool(deps),
     ...(hasConfiguredVideoGeneration(deps) ? [buildGenerateVideoTool(deps)] : []),
@@ -228,11 +219,6 @@ export function buildDslCourseToolset(
   return markDocumentWritersSequential(withOwnerStageAuthorization(tools, deps));
 }
 
-/** generate_walkthrough exists only with providers on and at least one catalog id (no empty Type.Union). */
-function walkthroughToolEnabled(): boolean {
-  return !isWidgetProvidersDisabled() && widgetRegistry.walkthroughIds().length > 0;
-}
-
 /** The exact registered tool names of this slice's toolset. */
 export function buildCourseAllowlist(
   videoDeps: Partial<GenerateVideoToolDeps> = {},
@@ -240,7 +226,6 @@ export function buildCourseAllowlist(
   return new Set([
     ...DSL_COURSE_TOOL_NAMES,
     ...GENERATION_TOOL_NAMES,
-    ...(walkthroughToolEnabled() ? [WALKTHROUGH_TOOL_NAME] : []),
     IMPORT_PPTX_TOOL_NAME,
     GENERATE_IMAGE_TOOL_NAME,
     ...(hasConfiguredVideoGeneration(videoDeps) ? [GENERATE_VIDEO_TOOL_NAME] : []),

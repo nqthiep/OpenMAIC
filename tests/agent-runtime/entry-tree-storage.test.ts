@@ -10,10 +10,7 @@ import { Pool } from 'pg';
 
 import { AgentSessionEntryStorage } from '@/lib/server/agent-runtime/entry-tree-storage';
 
-import { endContractPool, openContractPool } from '../persistence/_contract-database';
-
 const contractUrl = process.env.PG_CONTRACT_URL;
-const SCHEMA = 'entry_tree_storage_contract';
 
 function transactionFor(pool: Pool): WithTransaction {
   return async <T>(body: (queryable: Queryable) => Promise<T>): Promise<T> => {
@@ -37,7 +34,7 @@ describe.skipIf(!contractUrl)('AgentSessionEntryStorage with PostgreSQL 16', () 
   let store: PgAgentSessionStore;
 
   beforeAll(async () => {
-    pool = await openContractPool(contractUrl!, SCHEMA);
+    pool = new Pool({ connectionString: contractUrl });
     await ensureAgentSessionSchema(pool);
     store = new PgAgentSessionStore(pool, { withTransaction: transactionFor(pool) });
   });
@@ -50,7 +47,7 @@ describe.skipIf(!contractUrl)('AgentSessionEntryStorage with PostgreSQL 16', () 
   });
 
   afterAll(async () => {
-    if (pool) await endContractPool(pool, SCHEMA);
+    await pool?.end();
   });
 
   it('delegates append and path reads to an opened package tree', async () => {

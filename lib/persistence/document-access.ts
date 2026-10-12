@@ -14,11 +14,7 @@ export type DocumentExistenceReader = (stageId: string) => Promise<boolean>;
 
 const LONE_SURROGATE = /[\uD800-\uDFFF]/u;
 
-/**
- * Whether a stage id is one the document read path can address at all. The
- * library listing applies the same rule to the ids a host provider returns.
- */
-export function isQueryableSegment(value: string): boolean {
+function isQueryableSegment(value: string): boolean {
   return (
     value !== '' &&
     value !== '.' &&
@@ -72,21 +68,19 @@ export async function decideDocumentAccess(
     case 'unknown':
       return 'forbid';
     case 'read': {
-      // A draft answers its owner only; a published course answers anyone, until it is deleted.
       const meta = await readMeta(action.stageId);
-      if (!meta || meta.deletedAt !== null) return 'not-found';
-      return meta.ownerId === ownerId || meta.isPublic ? 'allow' : 'not-found';
+      if (!meta) return 'not-found';
+      return meta.deletedAt === null ? 'allow' : 'not-found';
     }
     case 'write': {
-      // Another owner's course answers as a missing one does: no existence leak.
       const meta = await readMeta(action.stageId);
-      if (!meta || meta.ownerId !== ownerId) return 'not-found';
+      if (!meta) return 'not-found';
+      if (meta.ownerId !== ownerId) return 'forbid';
       return meta.deletedAt === null ? 'allow' : 'not-found';
     }
     case 'delete': {
-      // Another owner's course answers as a missing one does, as for writes.
       const meta = await readMeta(action.stageId);
-      if (!meta || meta.ownerId !== ownerId) return 'not-found';
+      if (!meta || meta.ownerId !== ownerId) return 'forbid';
       return 'allow';
     }
     case 'create': {

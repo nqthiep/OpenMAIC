@@ -2,6 +2,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+// The gate is inert in browser-only mode, where one viewer is by construction
+// the author. These cases are about the server-backed reading.
+vi.mock('@/lib/persistence/media-persistence', () => ({
+  isServerBackedMediaPersistence: () => true,
+}));
+
 import {
   classroomGenerationOwnership,
   mayStartOwnerGeneration,
@@ -42,6 +48,10 @@ describe('sidecar outcome to generation ownership', () => {
 });
 
 describe('classroom generation owner gate', () => {
+  it.each(OWNERSHIPS)('is inert in browser-only mode: %s', (ownership) => {
+    expect(mayStartOwnerGeneration(false, ownership)).toBe(true);
+  });
+
   it.each([
     ['owner', true],
     ['not-owner', false],
@@ -50,12 +60,12 @@ describe('classroom generation owner gate', () => {
     // guesses a shared course URL must never bill the operator.
     ['ownerless', false],
     ['unresolved', false],
-  ] as const)('%s => %s', (ownership, allowed) => {
-    expect(mayStartOwnerGeneration(ownership)).toBe(allowed);
+  ] as const)('under server-backed persistence, %s => %s', (ownership, allowed) => {
+    expect(mayStartOwnerGeneration(true, ownership)).toBe(allowed);
   });
 
   it('admits exactly one state, so a new one cannot be silently permitted', () => {
-    const permitted = OWNERSHIPS.filter((ownership) => mayStartOwnerGeneration(ownership));
+    const permitted = OWNERSHIPS.filter((ownership) => mayStartOwnerGeneration(true, ownership));
     expect(permitted).toEqual(['owner']);
   });
 });
@@ -88,7 +98,7 @@ describe('asking the sidecar until it answers', () => {
       const result = answers.shift() ?? found(true);
       const ownership = classroomGenerationOwnership(result);
       noteStageGenerationOwnership(stageId, ownership);
-      seen.push(mayStartOwnerGeneration(ownership));
+      seen.push(mayStartOwnerGeneration(true, ownership));
       return ownership;
     };
 
@@ -155,59 +165,35 @@ describe('asking the sidecar until it answers', () => {
 });
 
 describe('classroom surfaces feed the sidecar into the gate', () => {
-  it('the shared session owns the sidecar and generation gate', () => {
-    const session = readFileSync(
-      join(process.cwd(), 'lib/classroom/use-classroom-session.ts'),
-      'utf8',
-    );
-    const surface = readFileSync(
-      join(process.cwd(), 'components/classroom/ClassroomSurface.tsx'),
-      'utf8',
-    );
-    expect(session).toContain('fetchStageMeta');
-    expect(session).toContain('classroomGenerationOwnership(result)');
-    expect(session).toContain('noteStageGenerationOwnership');
-    expect(session).toContain('useMayGenerateForStage(classroomId)');
-    // Reset on course switch, so a previous course's answer never carries over.
-    expect(session).toContain("noteStageGenerationOwnership(classroomId, 'unresolved')");
-    // An unresolved answer is asked again rather than accepted for the load.
-    expect(session).toContain('retryWhileOwnershipUnresolved');
-    // The outline-retry affordance is withheld, not merely refused.
-    expect(surface).toMatch(
-      /onRetryOutline=\{mayGenerate && runCourse\.runId \? runCourse\.retryOutline : undefined\}/,
-    );
-  });
+  it.each(['app/classroom/[id]/page.tsx', 'components/classroom/ClassroomSurface.tsx'])(
+    '%s asks the sidecar and gates on the shared permission',
+    (path) => {
+      const source = readFileSync(join(process.cwd(), path), 'utf8');
+      expect(source).toContain('fetchStageMeta');
+      expect(source).toContain('classroomGenerationOwnership(result)');
+      expect(source).toContain('noteStageGenerationOwnership');
+      // Reset on course switch, so a previous course's answer never carries over.
+      expect(source).toContain("noteStageGenerationOwnership(classroomId, 'unresolved')");
+      // The resume effect re-runs when the answer lands.
+      expect(source).toMatch(/\}, \[loading, error, mayGenerate, generateRemaining\]\);/);
+      // An unresolved answer is asked again rather than accepted for the load:
+      // both surfaces recover from a transient sidecar failure without a
+      // reload, the pane by re-asking after every settled load.
+      expect(source).toMatch(/retryWhileOwnershipUnresolved|refreshOwnership/);
+      // The outline-retry affordance is withheld, not merely refused.
+      expect(source).toMatch(/onRetryOutline=\{mayGenerate \? retrySingleOutline : undefined\}/);
+    },
+  );
 
-  it('the standalone route mounts the shared page variant', () => {
-    const source = readFileSync(join(process.cwd(), 'app/classroom/[id]/page.tsx'), 'utf8');
-    expect(source).toContain('import { ClassroomSurface }');
-    expect(source).toContain('variant="page"');
-  });
-
-  it('the workspace mounts the same session-owning surface', () => {
-    const pane = readFileSync(
-      join(process.cwd(), 'components/workbench/workspace/WorkspaceClassroomPane.tsx'),
-      'utf8',
-    );
-    const surface = readFileSync(
-      join(process.cwd(), 'components/classroom/ClassroomSurface.tsx'),
-      'utf8',
-    );
-    expect(pane).toContain('<ClassroomSurface');
-    expect(pane).toContain('variant="pane"');
-    expect(surface).toContain('useClassroomSession({');
-  });
-
-  it('asks the sidecar from the shared surface, retrying while it is unresolved', () => {
+  it('does not ask the sidecar from the pane in browser-only mode', () => {
     const source = readFileSync(
-      join(process.cwd(), 'lib/classroom/use-classroom-session.ts'),
+      join(process.cwd(), 'components/classroom/ClassroomSurface.tsx'),
       'utf8',
     );
-    const refreshStart = source.indexOf('const refreshOwnership = useCallback(');
-    const refresh = source.slice(refreshStart);
-    expect(refreshStart).toBeGreaterThan(0);
-    expect(refresh).toContain('fetchStageMeta(classroomId)');
-    expect(refresh).toContain('retryWhileOwnershipUnresolved');
+    const fetchIndex = source.indexOf('void fetchStageMeta(');
+    expect(fetchIndex).toBeGreaterThan(0);
+    const guardIndex = source.lastIndexOf('!isServerBackedMediaPersistence()) return;', fetchIndex);
+    expect(guardIndex).toBeGreaterThan(0);
   });
 
   // The load is what brings a course into the server store the first time it is
@@ -215,63 +201,34 @@ describe('classroom surfaces feed the sidecar into the gate', () => {
   // not exist yet - and a 404 locks its genuine author out for the mount.
   // Asserted as a property of where the call sites are, not of how the file is
   // laid out: no renderer harness exists to drive the effect itself.
-  it('asks the sidecar only after an initial or manual load succeeds', () => {
+  it('asks the sidecar only from inside the load, never before it', () => {
     const source = readFileSync(
       join(process.cwd(), 'components/classroom/ClassroomSurface.tsx'),
       'utf8',
     );
-    const retryStart = source.indexOf('const retryClassroom = useCallback(');
-    const effectStart = source.indexOf('useEffect(() => {', retryStart);
+    const definition = source.indexOf('const refreshOwnership = () => {');
     const loadStart = source.indexOf('const loadUntilAvailable = async () => {');
-    const loadEnd = source.indexOf('void loadUntilAvailable();', loadStart);
-    expect(retryStart).toBeGreaterThan(0);
-    expect(effectStart).toBeGreaterThan(retryStart);
-    expect(loadStart).toBeGreaterThan(retryStart);
+    expect(definition).toBeGreaterThan(0);
+    expect(loadStart).toBeGreaterThan(definition);
 
-    const retry = source.slice(retryStart, effectStart);
-    const initialLoad = source.slice(loadStart, loadEnd);
-    for (const loadPath of [retry, initialLoad]) {
-      expect(loadPath).toMatch(/if \(outcome === 'loaded'\) \{\s*refreshOwnership\(isCurrent\);/);
-    }
-
-    const callSites = [...source.matchAll(/\brefreshOwnership\(isCurrent\)/g)].map(
+    const callSites = [...source.matchAll(/(?<!const )\brefreshOwnership\(\)/g)].map(
       (match) => match.index ?? -1,
     );
-    expect(callSites).toHaveLength(2);
-    expect(callSites.some((at) => at > retryStart && at < effectStart)).toBe(true);
-    expect(callSites.some((at) => at > loadStart && at < loadEnd)).toBe(true);
+    // At least one, and every one of them inside the load routine.
+    expect(callSites.length).toBeGreaterThan(0);
+    for (const at of callSites) expect(at).toBeGreaterThan(loadStart);
     // No longer conditional on an availability retry having happened.
     expect(source).not.toContain('availabilityAttempt > 0');
   });
 
-  it('permanently invalidates stale ownership refreshes across A-B-A navigation', () => {
-    const source = readFileSync(
-      join(process.cwd(), 'components/classroom/ClassroomSurface.tsx'),
-      'utf8',
-    );
-    const retryStart = source.indexOf('const retryClassroom = useCallback(');
-    const effectStart = source.indexOf('useEffect(() => {', retryStart);
-    const cleanupStart = source.indexOf('return () => {', effectStart);
-    const cleanupEnd = source.indexOf('};', cleanupStart);
-    const retry = source.slice(retryStart, effectStart);
-    const effect = source.slice(effectStart, cleanupStart);
-    const cleanup = source.slice(cleanupStart, cleanupEnd);
-
-    expect(source).toContain('const loadEpochRef = useRef(0)');
-    for (const loadPath of [retry, effect]) {
-      expect(loadPath).toContain('loadEpochRef.current = loadEpoch');
-      expect(loadPath).toContain('loadEpochRef.current === loadEpoch');
-    }
-    expect(cleanup).toContain('loadEpochRef.current += 1');
-  });
-
   it('clears parked media allocations when a course is (re)opened', () => {
-    const source = readFileSync(
-      join(process.cwd(), 'lib/classroom/use-classroom-session.ts'),
-      'utf8',
-    );
-    expect(source).toContain('clearPendingMediaAllocations(classroomId)');
-    expect(source).toContain('clearNarrationAllocations(classroomId)');
+    for (const path of [
+      'app/classroom/[id]/page.tsx',
+      'components/classroom/ClassroomSurface.tsx',
+    ]) {
+      const source = readFileSync(join(process.cwd(), path), 'utf8');
+      expect(source).toContain('clearPendingMediaAllocations(classroomId)');
+    }
   });
 
   // Listening back to narration and seeing whether a line has any spend nothing,
@@ -290,5 +247,18 @@ describe('classroom surfaces feed the sidecar into the gate', () => {
     // Both regenerate affordances are withheld rather than merely refused.
     expect(bar).toMatch(/\{mayRegenerate \?/);
     expect(bar).toMatch(/ttsActive && mayGenerate &&/);
+  });
+
+  // A pass that is superseded must stop, or it goes on calling providers and
+  // storing assets for a course the user has left. What happens once it stops
+  // is covered behaviourally in the orchestrator suite ("picks up every element
+  // an aborted pass never reached"); this guards only that the surface does
+  // stop it, which no harness here can drive.
+  it('aborts the previous media pass before starting another', () => {
+    const source = readFileSync(join(process.cwd(), 'lib/hooks/use-scene-generator.ts'), 'utf8');
+    const abortAt = source.indexOf('mediaAbortRef.current?.abort()');
+    const installAt = source.indexOf('mediaAbortRef.current = new AbortController()');
+    expect(abortAt).toBeGreaterThan(0);
+    expect(installAt).toBeGreaterThan(abortAt);
   });
 });

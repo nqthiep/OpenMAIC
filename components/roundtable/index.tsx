@@ -25,8 +25,6 @@ import { useAudioRecorder } from '@/lib/hooks/use-audio-recorder';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { toast } from 'sonner';
 import { useSettingsStore, PLAYBACK_SPEEDS } from '@/lib/store/settings';
-import { useModelCapabilities } from '@/lib/model-settings/use-model-settings';
-import { useASRAvailable } from '@/lib/hooks/use-asr-available';
 import { ProactiveCard } from '@/components/chat/proactive-card';
 import { PresentationSpeechOverlay } from '@/components/roundtable/presentation-speech-overlay';
 import { AvatarDisplay } from '@/components/ui/avatar-display';
@@ -67,7 +65,6 @@ interface RoundtableProps {
   readonly isSoftClosing?: boolean;
   readonly softCloseDeadline?: number;
   readonly isTopicPending?: boolean;
-  readonly canSendMessage?: () => boolean;
   readonly onMessageSend?: (message: string) => void;
   readonly onDiscussionStart?: (request: DiscussionAction) => void;
   readonly onDiscussionSkip?: () => void;
@@ -176,7 +173,6 @@ export function Roundtable({
   softCloseDeadline,
   isTopicPending,
   onMessageSend,
-  canSendMessage,
   onDiscussionStart,
   onDiscussionSkip,
   onStopDiscussion,
@@ -214,10 +210,8 @@ export function Roundtable({
   const { t } = useI18n();
   const ttsMuted = useSettingsStore((s) => s.ttsMuted);
   const setTTSMuted = useSettingsStore((s) => s.setTTSMuted);
-  // The workspace's tts and asr slots decide whether narration and speech
-  // input are available.
-  const ttsEnabled = !!useModelCapabilities().tts;
-  const asrEnabled = useASRAvailable();
+  const ttsEnabled = useSettingsStore((state) => state.ttsEnabled);
+  const asrEnabled = useSettingsStore((state) => state.asrEnabled);
   const chatAreaWidth = useSettingsStore((s) => s.chatAreaWidth);
   const ttsVolume = useSettingsStore((s) => s.ttsVolume);
   const setTTSVolume = useSettingsStore((s) => s.setTTSVolume);
@@ -394,12 +388,6 @@ export function Roundtable({
           setIsVoiceOpen(false);
           return;
         }
-        if (canSendMessage?.() === false) {
-          setInputValue(text);
-          setIsInputOpen(true);
-          setIsVoiceOpen(false);
-          return;
-        }
         showLocalUserMessage(text);
         onMessageSend?.(text);
         setIsSendCooldown(true);
@@ -413,7 +401,7 @@ export function Roundtable({
     });
 
   const handleSendMessage = () => {
-    if (!inputValue.trim() || isSendCooldown || canSendMessage?.() === false) return;
+    if (!inputValue.trim() || isSendCooldown) return;
 
     showLocalUserMessage(inputValue);
     onMessageSend?.(inputValue);

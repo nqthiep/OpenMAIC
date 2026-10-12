@@ -32,17 +32,6 @@ async function resolveBytes(audioId: string): Promise<Blob | null> {
  */
 export class AudioPlayer {
   private audio: HTMLAudioElement | null = null;
-  /**
-   * The element narration plays through, created once per player.
-   *
-   * Playback must not mint a new element per line: mobile autoplay policies
-   * only cover an element that a user gesture has reached, so a fresh element
-   * gets its programmatic `play()` refused with NotAllowedError mid-lesson and
-   * the narration goes silent from the second line on, while the lesson keeps
-   * advancing on the reading-time fallback. One element, handed every line,
-   * stays playable for the rest of the lesson.
-   */
-  private element: HTMLAudioElement | null = null;
   private onEndedCallback: (() => void) | null = null;
   private muted: boolean = false;
   private volume: number = 1;
@@ -77,39 +66,11 @@ export class AudioPlayer {
     if (this.blobUrl === blobUrl) this.blobUrl = null;
   }
 
-  /**
-   * The narration element, created on first use and reused by every line.
-   * Deliberately not dropped by stopAudioElement(): discarding it is what made
-   * each following line a fresh element whose play() the policy refuses.
-   */
-  private getAudioElement(): HTMLAudioElement {
-    if (!this.element) {
-      this.element = new Audio();
-      this.element.preload = 'auto';
-    }
-    return this.element;
-  }
-
   private stopAudioElement(): void {
     if (this.audio) {
       this.audio.pause();
-      try {
-        this.audio.currentTime = 0;
-      } catch {
-        /* Not seekable yet (nothing loaded): there is nothing to rewind. */
-      }
+      this.audio.currentTime = 0;
       this.audio = null;
-    }
-    // The element outlives this line now, so the line's own state has to be
-    // released with it: a stale ended handler would report speech that is no
-    // longer playing, and a revoked object URL still loaded keeps the narration
-    // buffer alive until the next play() replaces it.
-    if (this.element) {
-      this.element.onended = null;
-      if (typeof this.element.removeAttribute === 'function') {
-        this.element.removeAttribute('src');
-      }
-      this.element.load?.();
     }
     // Stop or replacement before natural end must not leak the fetched
     // narration: the element is dropped here, so its URL is released with it.
@@ -180,10 +141,8 @@ export class AudioPlayer {
       this.stopAudioElement();
       if (requestToken !== this.requestToken) return false;
 
-      // Reuse this player's element rather than creating one per line: a new
-      // element's programmatic play() is what mobile autoplay policies refuse,
-      // which left the narration silent from the second line on.
-      this.audio = this.getAudioElement();
+      // Create audio element
+      this.audio = new Audio();
 
       // Set audio source
       const blobUrl = blob ? URL.createObjectURL(blob) : undefined;
@@ -197,13 +156,10 @@ export class AudioPlayer {
       this.audio.playbackRate = this.playbackRate;
 
       // Set ended callback
-      // Assignment rather than addEventListener: the element is reused, so a
-      // listener would otherwise accumulate once per segment and fire the
-      // callback several times for one line.
-      this.audio.onended = () => {
+      this.audio.addEventListener('ended', () => {
         this.releaseBlobUrl(blobUrl);
         this.onEndedCallback?.();
-      };
+      });
 
       // Play. If play() rejects (autoplay policy, decode error, interrupted
       // load) the 'ended' listener never fires, so revoke the blob URL here to

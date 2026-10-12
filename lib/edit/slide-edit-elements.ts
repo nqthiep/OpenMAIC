@@ -1,5 +1,4 @@
 import katex from 'katex';
-import { safeKatexOptions } from '@openmaic/dsl';
 import type {
   ChartType,
   PPTChartElement,
@@ -154,14 +153,11 @@ export function createDefaultLatexElement(id: string, result: LatexEditorResult)
  */
 export function renderLatexElementHtml(latex: string): string | null {
   try {
-    return katex.renderToString(
-      latex,
-      safeKatexOptions({
-        throwOnError: false,
-        displayMode: true,
-        output: 'html',
-      }),
-    );
+    return katex.renderToString(latex, {
+      throwOnError: false,
+      displayMode: true,
+      output: 'html',
+    });
   } catch {
     return null;
   }

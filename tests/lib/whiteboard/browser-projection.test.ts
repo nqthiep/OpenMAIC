@@ -4,7 +4,12 @@ import { useCanvasStore } from '@/lib/store/canvas';
 import { useStageStore } from '@/lib/store/stage';
 
 const mocks = vi.hoisted(() => ({
+  persistenceEnabled: true,
   read: vi.fn(),
+}));
+
+vi.mock('@/lib/persistence/bootstrap', () => ({
+  isBrowserPersistenceEnabled: () => mocks.persistenceEnabled,
 }));
 vi.mock('@/lib/whiteboard/runtime/store', () => ({
   getWhiteboardRuntimeService: () => ({ read: mocks.read }),
@@ -51,8 +56,7 @@ function runtimeState(lastSeq: number | null, label: string) {
 
 describe('Browser RuntimeStore whiteboard projection', () => {
   beforeEach(() => {
-    vi.unstubAllGlobals();
-    vi.stubGlobal('window', globalThis);
+    mocks.persistenceEnabled = true;
     mocks.read.mockReset();
     useStageStore.setState({ stage: { id: 'stage-1' } as never });
     useCanvasStore.setState({
@@ -131,7 +135,7 @@ describe('Browser RuntimeStore whiteboard projection', () => {
     });
   });
 
-  it('clears Runtime presentation during a server render, where there is no runtime to read', async () => {
+  it('clears Runtime presentation when the existing persistence topology is disabled', async () => {
     useCanvasStore.setState({
       runtimeWhiteboardProjection: {
         stageId: 'stage-1',
@@ -139,7 +143,7 @@ describe('Browser RuntimeStore whiteboard projection', () => {
         whiteboard: runtimeState(1, 'existing').whiteboard,
       },
     });
-    vi.stubGlobal('window', undefined);
+    mocks.persistenceEnabled = false;
 
     await expect(refreshWhiteboardRuntimeProjection('stage-1')).resolves.toBe(false);
     expect(mocks.read).not.toHaveBeenCalled();

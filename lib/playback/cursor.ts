@@ -2,9 +2,9 @@
  * Device-scoped playback cursor persistence.
  *
  * The cursor is mutable resume state, not a learner-runtime fact. It therefore
- * lives in the KV `device` scope and remains last-write-wins. A legacy playback
- * row is migrated only from an injected `legacyStore` (the one-way importer
- * hands one in); the regular load path has none.
+ * lives in the KV `device` scope and remains last-write-wins. Legacy Dexie
+ * migration is delegated lazily so importing this module never opens either
+ * browser store.
  */
 import { BrowserKVStore, type KVStore } from '@openmaic/storage';
 
@@ -77,6 +77,22 @@ export function saveCursorValue(
   return kv.set(cursorKey(stageId), cursor, 'device');
 }
 
+async function defaultLegacyStore(): Promise<PlaybackLegacyStore> {
+  if (typeof window === 'undefined') {
+    throw new Error('Legacy playback migration is client-only');
+  }
+  const { db } = await import('@/lib/utils/database');
+  return {
+    async get(stageId) {
+      const row: unknown = await db.playbackState.get(stageId);
+      return row as LegacyPlaybackState | undefined;
+    },
+    async delete(stageId) {
+      await db.playbackState.delete(stageId);
+    },
+  };
+}
+
 /**
  * One-time lazy migration of a legacy Dexie playback row. Only the cursor
  * half carries over: consumed-discussion state is volatile by decision
@@ -86,9 +102,9 @@ export function saveCursorValue(
 async function migrateLegacyCursor(
   stageId: string,
   kv: KVStore,
-  store: PlaybackLegacyStore | undefined,
+  legacyStore?: PlaybackLegacyStore,
 ): Promise<void> {
-  if (!store) return;
+  const store = legacyStore ?? (await defaultLegacyStore());
   const legacy = await store.get(stageId);
   if (!legacy) return;
   if (!(await loadCursorValue(stageId, kv)) && legacy.sceneId) {

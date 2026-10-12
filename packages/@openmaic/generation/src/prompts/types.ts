@@ -9,7 +9,6 @@ export type PromptId =
   | 'quiz-content'
   | 'simulation-content'
   | 'diagram-content'
-  | 'diagram-graph'
   | 'code-content'
   | 'game-content'
   | 'visualization3d-content'
@@ -21,16 +20,13 @@ export type PromptId =
 
 /** Snippets referenced by generation-owned prompt templates. */
 export type SnippetId =
-  | 'interactive-observation'
   | 'json-output-rules'
   | 'image-instructions'
   | 'video-instructions'
   | 'media-safety-guidelines'
   | 'slide-image-instructions'
   | 'slide-generated-image-instructions'
-  | 'slide-video-instructions'
-  | 'speech-tts-readability'
-  | 'diagram-visual-rules';
+  | 'slide-video-instructions';
 
 /** Loaded prompt template. */
 export interface LoadedPrompt {

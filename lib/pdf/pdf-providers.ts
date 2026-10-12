@@ -146,11 +146,6 @@ import { createLogger } from '@/lib/logger';
 import { extractMinerUResult } from './mineru-parser';
 import { parseWithMinerUCloud } from './mineru-cloud';
 import { parseWithAliDocMindClient } from './alidocmind-client';
-import { providerFetch, type ProviderFetchPolicy } from '@/lib/server/provider-fetch';
-import { redactSecretsForLog, urlOriginForLog } from '@/lib/server/log-redaction';
-
-// Re-exported for existing importers; the definitions live in lib/server/log-redaction.ts.
-export { redactSecretsForLog, urlOriginForLog };
 
 const log = createLogger('PDFProviders');
 const DEFAULT_MINERU_BACKEND = 'pipeline';
@@ -188,25 +183,11 @@ export function describeSelfHostedMinerUError(status: number, rawBody: string): 
     );
   }
 
-  // Unknown failure: report the status only. The body is logged by the caller
-  // and never echoed, so the parse route cannot relay a target's content.
-  return `MinerU API error (${status})`;
+  // Unknown failure — keep the raw detail but bound its length so the UI stays
+  // readable rather than showing an entire JSON blob or traceback.
+  const detail = rawBody.trim().slice(0, 300);
+  return `MinerU API error (${status})${detail ? `: ${detail}` : ''}`;
 }
-
-// A caller-supplied self-hosted MinerU URL runs under the operator address
-// policy (the same one the routes validated it against: `allowLocalNetworks`
-// unset falls back to ALLOW_LOCAL_NETWORKS); a server-managed one is operator
-// configuration and may reach a local network without the opt-in. Either way
-// the strict transport pins the connect address to the vetted DNS answers and
-// refuses a 3xx instead of following it.
-function selfHostedMinerUPolicy(managed: boolean | undefined): ProviderFetchPolicy {
-  return { allowLocalNetworks: managed ? true : undefined, rejectRedirects: true };
-}
-
-const SELF_HOSTED_MINERU_CONNECTION_FAILED =
-  'Cannot connect to the self-hosted MinerU server, please check the Base URL';
-const SELF_HOSTED_MINERU_INVALID_RESPONSE =
-  'The self-hosted MinerU server returned an invalid response';
 
 /**
  * Parse PDF using specified provider
@@ -389,7 +370,6 @@ async function parseWithAliDocMind(
       llmEnhancement: true,
       enhancementMode: 'VLM',
       outputHtmlTable: true,
-      signal: config.signal,
     },
   );
 
@@ -440,7 +420,7 @@ function isTrustedAliyunOssUrl(url: string): boolean {
  */
 export async function fetchAliDocMindImageAsBase64(url: string): Promise<string | null> {
   if (!isTrustedAliyunOssUrl(url)) {
-    log.warn(`[AliDocMind] refusing non-OSS image URL: ${urlOriginForLog(url)}`);
+    log.warn(`[AliDocMind] refusing non-OSS image URL: ${url.slice(0, 80)}`);
     return null;
   }
   const controller = new AbortController();
@@ -451,7 +431,7 @@ export async function fetchAliDocMindImageAsBase64(url: string): Promise<string 
       redirect: 'error', // signed OSS URLs are direct; a redirect is suspicious
     });
     if (!res.ok) {
-      log.warn(`[AliDocMind] image fetch ${res.status} for ${urlOriginForLog(url)}`);
+      log.warn(`[AliDocMind] image fetch ${res.status} for ${url.slice(0, 80)}`);
       return null;
     }
     // Reject early on a declared oversized length…
@@ -650,7 +630,7 @@ export async function parseWithMinerUDocument(
     );
   }
 
-  log.info(`[MinerU] Parsing document with MinerU server: ${urlOriginForLog(config.baseUrl)}`);
+  log.info(`[MinerU] Parsing document with MinerU server: ${config.baseUrl}`);
 
   // Create FormData for file upload
   const formData = new FormData();
@@ -682,53 +662,57 @@ export async function parseWithMinerUDocument(
   }
 
   // POST /file_parse
-  let response: Response;
-  try {
-    response = await providerFetch(
-      `${config.baseUrl}/file_parse`,
-      { method: 'POST', headers, body: formData, signal: config.signal },
-      selfHostedMinerUPolicy(config.managed),
-    );
-  } catch (error) {
-    // Refused, unresolvable, policy-blocked and redirecting targets all get
-    // the same message; the transport detail stays in the server log.
-    log.error('[MinerU] Request to the self-hosted server failed:', error);
-    throw new Error(SELF_HOSTED_MINERU_CONNECTION_FAILED, { cause: error });
-  }
+  const response = await fetch(`${config.baseUrl}/file_parse`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => '');
-    // The body can echo credentials, so only the status and a redacted snippet are logged.
-    log.error(
-      `[MinerU] file_parse failed [status=${response.status}]: ${redactSecretsForLog(errorText).slice(0, 500)}`,
-    );
+    const errorText = await response.text().catch(() => response.statusText);
     throw new Error(describeSelfHostedMinerUError(response.status, errorText));
   }
 
-  // A body that is not JSON must not surface the parser's message: Node's
-  // SyntaxError quotes the start of the input, so only the status is logged.
-  let json: { results?: Record<string, Record<string, unknown>> };
-  try {
-    json = await response.json();
-  } catch {
-    log.error(`[MinerU] file_parse returned a non-JSON body [status=${response.status}]`);
-    throw new Error(SELF_HOSTED_MINERU_INVALID_RESPONSE);
-  }
+  const json = await response.json();
 
   // Response: { results: { "<fileName>": { md_content, images, content_list, ... } } }
-  const fileResult = json?.results?.[options.fileName];
+  const fileResult = json.results?.[options.fileName];
   if (!fileResult) {
-    const keys = json?.results ? Object.keys(json.results) : [];
+    const keys = json.results ? Object.keys(json.results) : [];
     // Try first available key in case filename doesn't match exactly
-    const fallback = keys.length > 0 ? json.results![keys[0]] : null;
+    const fallback = keys.length > 0 ? json.results[keys[0]] : null;
     if (!fallback) {
-      throw new Error('MinerU returned no results');
+      throw new Error(`MinerU returned no results. Response keys: ${JSON.stringify(keys)}`);
     }
     log.warn(`[MinerU] Filename mismatch, using key "${keys[0]}" instead of "${options.fileName}"`);
     return extractMinerUResult(fallback);
   }
 
   return extractMinerUResult(fileResult);
+}
+
+/**
+ * Get current PDF parser configuration from settings store
+ * Note: This function should only be called in browser context
+ */
+export async function getCurrentPDFConfig(): Promise<PDFParserConfig> {
+  if (typeof window === 'undefined') {
+    throw new Error('getCurrentPDFConfig() can only be called in browser context');
+  }
+
+  // Dynamic import to avoid circular dependency
+  const { useSettingsStore } = await import('@/lib/store/settings');
+  const { pdfProviderId, pdfProvidersConfig } = useSettingsStore.getState();
+
+  const providerConfig = pdfProvidersConfig?.[pdfProviderId];
+
+  return {
+    providerId: pdfProviderId,
+    apiKey: providerConfig?.apiKey,
+    baseUrl: providerConfig?.baseUrl,
+    accessKeyId: (providerConfig as { accessKeyId?: string })?.accessKeyId,
+    accessKeySecret: (providerConfig as { accessKeySecret?: string })?.accessKeySecret,
+  };
 }
 
 // Re-export from constants for convenience

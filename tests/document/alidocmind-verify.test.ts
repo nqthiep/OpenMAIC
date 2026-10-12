@@ -53,11 +53,7 @@ describe('verifyAliDocMindCredentials', () => {
     });
     const result = await verifyAliDocMindCredentials(CREDS);
     expect(result.ok).toBe(false);
-    // The service code is logged, not returned.
-    if (!result.ok) {
-      expect(result.error).toMatch(/DocMind permission/);
-      expect(result.error).not.toMatch(/NoPermission/);
-    }
+    if (!result.ok) expect(result.error).toMatch(/NoPermission/);
   });
 
   it('accepts a success body (code 200)', async () => {
@@ -85,11 +81,7 @@ describe('verifyAliDocMindCredentials', () => {
     );
     const result = await verifyAliDocMindCredentials(CREDS);
     expect(result.ok).toBe(false);
-    // The SDK error is logged, not returned.
-    if (!result.ok) {
-      expect(result.error).toMatch(/Could not verify with AliDocMind/);
-      expect(result.error).not.toMatch(/InvalidAccessKeyId/);
-    }
+    if (!result.ok) expect(result.error).toMatch(/InvalidAccessKeyId/);
   });
 
   it('accepts a thrown job-not-found business error', async () => {

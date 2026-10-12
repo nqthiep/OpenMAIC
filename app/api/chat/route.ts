@@ -18,15 +18,18 @@ import { isProviderKeyRequired } from '@/lib/ai/providers';
 import type { StatelessChatRequest, StatelessEvent } from '@/lib/types/chat';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
-import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 import { resolveModel } from '@/lib/server/resolve-model';
-import { parseUserStageRoutes } from '@/lib/server/model-routes';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+  visitorStreamEvent,
+} from '@/lib/server/error-summary';
 import type { ThinkingConfig } from '@/lib/types/provider';
-import { isTutorModerationEnabled } from '@/lib/config/feature-flags';
-import { withTutorModeration } from '@/lib/tutor/chat-moderation';
 const log = createLogger('Chat API');
-// Shown to the client for any failed turn; the cause is only in the server log.
-const CHAT_FAILED_MESSAGE = 'Không thể xử lý yêu cầu, vui lòng thử lại.';
+
+// Allow streaming responses up to 60 seconds
+export const maxDuration = 60;
 
 /**
  * POST /api/chat
@@ -48,6 +51,8 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
   let chatModel: string | undefined;
   let chatMessageCount: number | undefined;
+  // True once the operator's key is chosen. Upstream error text then stays on the server.
+  let managedKey = false;
 
   try {
     const body: StatelessChatRequest = await req.json();
@@ -72,13 +77,10 @@ export async function POST(req: NextRequest) {
       apiKey: resolvedApiKey,
       providerId,
       thinkingConfig: resolvedThinking,
+      managedKey: operatorKeyUsed,
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
-      workspaceId: await requestWorkspaceId(req),
-      // Honor the classroom-interaction per-stage override the client sends in
-      // `x-model-routes`. A routed stage brings its own key and base URL; otherwise the body credentials are used (never x-* headers).
-      userRoutes: parseUserStageRoutes(req.headers.get('x-model-routes')),
       apiKey: body.apiKey,
       baseUrl: body.baseUrl,
       providerType: body.providerType,
@@ -86,6 +88,8 @@ export async function POST(req: NextRequest) {
       // wins, an unrouted one honors this client thinking (see resolve-model.ts).
       thinkingConfig: body.thinkingConfig ?? body.thinking,
     });
+
+    managedKey = operatorKeyUsed;
 
     if (isProviderKeyRequired(providerId) && !resolvedApiKey) {
       return apiError('MISSING_API_KEY', 401, 'API Key is required');
@@ -146,19 +150,13 @@ export async function POST(req: NextRequest) {
           thinkingConfig,
         );
 
-        // OPENMAIC_TUTOR_MODERATION: filter the student message first (blocked => the agent never
-        // runs) and hold each reply until it is filtered. Off by default = streaming unchanged.
-        const events = isTutorModerationEnabled()
-          ? withTutorModeration(body, generator)
-          : generator;
-
-        for await (const event of events) {
+        for await (const event of generator) {
           if (signal.aborted) {
             log.info('Request was aborted');
             break;
           }
 
-          const data = `data: ${JSON.stringify(event)}\n\n`;
+          const data = `data: ${JSON.stringify(visitorStreamEvent(event, managedKey))}\n\n`;
           await writer.write(encoder.encode(data));
         }
 
@@ -180,14 +178,16 @@ export async function POST(req: NextRequest) {
 
         log.error(
           `Chat stream error [model=${body.model ?? 'unknown'}, agents=${body.config?.agentIds?.length ?? 0}, messages=${body.messages?.length ?? 0}]:`,
-          error,
+          managedKey ? describeUnexpectedError(error) : error,
         );
 
         // Try to send error event
         try {
           const errorEvent: StatelessEvent = {
             type: 'error',
-            data: { message: CHAT_FAILED_MESSAGE },
+            data: {
+              message: visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT),
+            },
           };
           await writer.write(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
           await writer.close();
@@ -206,9 +206,12 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     log.error(
-      `Chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
-      error,
+      `Chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]: ${describeUnexpectedError(error)}`,
     );
-    return apiError('INTERNAL_ERROR', 500, CHAT_FAILED_MESSAGE);
+    return apiError(
+      'INTERNAL_ERROR',
+      500,
+      visitorErrorText(error, managedKey, 'Failed to process request'),
+    );
   }
 }

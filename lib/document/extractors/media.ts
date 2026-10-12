@@ -41,7 +41,6 @@ function createMediaBackedExtractor(id: MediaParseProviderId): MediaExtractorPro
         buffer: input.buffer,
         fileName: input.fileName ?? 'media',
         mimeType: input.mimeType,
-        signal: input.config.signal,
         config: {
           providerId: id,
           apiKey: input.config.apiKey,

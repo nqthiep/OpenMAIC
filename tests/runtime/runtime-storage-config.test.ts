@@ -11,16 +11,20 @@ describe('configureRuntimeStorage', () => {
     vi.unstubAllGlobals();
   });
 
-  it('has no browser-storage fallback: an unconfigured runtime store refuses to resolve', async () => {
+  it('retains the lazy BrowserRuntimeStore singleton by default', async () => {
+    const { BrowserRuntimeStore } = await import('@openmaic/storage');
     const { getRuntimeStore } = await import('@/lib/runtime/store');
-    const { getLearnerKey } = await import('@/lib/runtime/learner-key');
 
-    expect(() => getRuntimeStore()).toThrow(/Runtime storage is not configured/);
-    // Nor does the learner key fall back to a key minted in this browser.
-    await expect(getLearnerKey()).rejects.toThrow(/learner key is not configured/);
+    const first = getRuntimeStore();
+
+    expect(first).toBeInstanceOf(BrowserRuntimeStore);
+    expect(getRuntimeStore()).toBe(first);
   });
 
   it('routes an existing consumer through an injected RuntimeStore', async () => {
+    vi.stubGlobal('indexedDB', {
+      databases: vi.fn().mockResolvedValue([]),
+    });
     const deleteStageRuntime = vi.fn().mockResolvedValue(undefined);
     const injected = stubStore(deleteStageRuntime);
     const { configureRuntimeStorage, deleteStageRuntimeSafely, getRuntimeStore } =
@@ -64,7 +68,7 @@ describe('configureRuntimeStorage', () => {
 
   it('throws when configured after runtime storage has been used', async () => {
     const { configureRuntimeStorage, getRuntimeStore } = await import('@/lib/runtime/store');
-    expect(() => getRuntimeStore()).toThrow(/not configured/);
+    getRuntimeStore();
 
     expect(() => configureRuntimeStorage({ store: stubStore() })).toThrow(
       'configureRuntimeStorage must be called at module-level bootstrap, before any runtime consumer runs — a component effect is too late.',

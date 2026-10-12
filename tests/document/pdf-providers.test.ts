@@ -35,13 +35,15 @@ describe('describeSelfHostedMinerUError', () => {
     expect(message).toContain('mineru[core]');
   });
 
-  it('reports only the status for unknown errors', () => {
+  it('keeps a bounded raw detail for unknown errors', () => {
     const message = describeSelfHostedMinerUError(502, 'Bad Gateway');
-    expect(message).toBe('MinerU API error (502)');
+    expect(message).toBe('MinerU API error (502): Bad Gateway');
   });
 
-  it('never quotes an unknown error body', () => {
-    const message = describeSelfHostedMinerUError(500, 'internal-secret-body '.repeat(50));
-    expect(message).toBe('MinerU API error (500)');
+  it('truncates long unknown error bodies', () => {
+    const longBody = 'x'.repeat(1000);
+    const message = describeSelfHostedMinerUError(500, longBody);
+    expect(message.length).toBeLessThan(360);
+    expect(message).toContain('MinerU API error (500)');
   });
 });

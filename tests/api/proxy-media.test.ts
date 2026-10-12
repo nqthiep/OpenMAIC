@@ -2,10 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
 
 const mocks = vi.hoisted(() => ({ validateUrlForSSRF: vi.fn() }));
-vi.mock('@/lib/server/ssrf-guard', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/server/ssrf-guard')>();
-  return { ...actual, validateUrlForSSRF: mocks.validateUrlForSSRF };
-});
+vi.mock('@/lib/server/ssrf-guard', () => ({ validateUrlForSSRF: mocks.validateUrlForSSRF }));
 vi.mock('@/lib/logger', () => ({
   createLogger: () => ({
     info: vi.fn(),
@@ -104,10 +101,7 @@ describe('POST /api/proxy-media', () => {
     const json = await res.json();
 
     expect(res.status).toBe(403);
-    expect(json).toMatchObject({
-      errorCode: 'INVALID_URL',
-      error: 'Địa chỉ tệp không được phép truy cập.',
-    });
+    expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
   });
 
   it('4. too many redirects returns 502 TOO_MANY_REDIRECTS', async () => {
@@ -139,10 +133,7 @@ describe('POST /api/proxy-media', () => {
     const json = await res.json();
 
     expect(res.status).toBe(403);
-    expect(json).toMatchObject({
-      errorCode: 'INVALID_URL',
-      error: 'Địa chỉ tệp không được phép truy cập.',
-    });
+    expect(json).toMatchObject({ errorCode: 'INVALID_URL' });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -173,10 +164,7 @@ describe('POST /api/proxy-media', () => {
     const json = await res.json();
 
     expect(res.status).toBe(404);
-    expect(json).toMatchObject({
-      errorCode: 'UPSTREAM_ERROR',
-      error: 'Nguồn không trả về tệp đa phương tiện.',
-    });
+    expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
   });
 
   it('8. upstream 503 is collapsed to 502', async () => {
@@ -190,24 +178,25 @@ describe('POST /api/proxy-media', () => {
     expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
   });
 
-  it('9. upstream Content-Length exceeding cap returns 413', async () => {
+  it('9. upstream Content-Length exceeding cap returns 502', async () => {
     mocks.validateUrlForSSRF.mockResolvedValue(null);
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(null, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          'Content-Length': String(26 * 1024 * 1024), // 26 MiB > 25 MiB cap
-        },
-      }),
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(null, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Length': String(26 * 1024 * 1024), // 26 MiB > 25 MiB cap
+          },
+        }),
+      ),
     );
-    vi.stubGlobal('fetch', fetchMock);
 
     const res = await postProxy({ url: 'https://example.com/huge-asset' });
     const json = await res.json();
 
-    expect(res.status).toBe(413);
+    expect(res.status).toBe(502);
     expect(json).toMatchObject({ errorCode: 'UPSTREAM_ERROR' });
-    expect(fetchMock).toHaveBeenCalledTimes(1); // no retry of the oversized asset
   });
 });

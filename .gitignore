@@ -2,7 +2,6 @@
 
 CLAUDE.local.md
 .claude
-.omo
 .superpowers
 
 # dependencies
@@ -36,7 +35,6 @@ CLAUDE.local.md
 
 # generated: synced from packages/@openmaic/importer/dist for runtime URL import
 /public/vendor/maic-importer
-/public/vendor/standalone-player
 
 # misc
 .DS_Store
@@ -74,10 +72,8 @@ next-env.d.ts
 /data
 /logs
 
-# docs (design docs under docs/tutor are tracked)
-/docs/*
-!/docs/accounts/
-!/docs/tutor/
+# docs
+/docs
 # Eval results
 eval/whiteboard-layout/results/
 eval/outline-language/results/
@@ -94,7 +90,3 @@ e2e/screenshots/
 # local e2e screenshots for #619 review
 e2e/__screenshots-619/
 /.playwright-mcp/
-
-# Operator model configuration (see openmaic.yml in RFC #1701); it names secrets via ${VAR}
-/openmaic.yml
-/openmaic.local.yml

@@ -282,7 +282,6 @@ export const RendererTableEditor = forwardRef<
                 >
                   {isActive ? (
                     <div
-                      className="slide-renderer-cell-text"
                       data-table-cell-editor={cell.id}
                       style={{ ...cellTextStyle, cursor: 'text', outline: 'none' }}
                     >
@@ -308,7 +307,6 @@ export const RendererTableEditor = forwardRef<
                     </div>
                   ) : (
                     <div
-                      className="slide-renderer-cell-text"
                       style={{ ...cellTextStyle, cursor: 'text' }}
                       dangerouslySetInnerHTML={{ __html: cell.text }}
                     />

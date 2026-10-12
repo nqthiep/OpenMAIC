@@ -352,6 +352,3 @@ Before finalizing the HTML, verify that:
 ## Language
 
 Follow the requested language directive exactly when provided.
-
-
-{{snippet:interactive-observation}}

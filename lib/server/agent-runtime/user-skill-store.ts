@@ -13,15 +13,12 @@ import { getServerPersistenceProvider } from '@/lib/persistence/server-provider'
 
 import type { Queryable, WithTransaction } from '@openmaic/storage/skill/pg';
 import type { Pool } from 'pg';
-import type { ConnectableQueryable } from '@openmaic/storage/server/reference';
-import { fenceOwnerWrite, forwardOwnerWrite } from '@/lib/persistence/owner-merges';
-import { withSchemaBootstrapLock } from '@/lib/persistence/schema-bootstrap-lock';
 
 export type { Queryable, WithTransaction } from '@openmaic/storage/skill/pg';
 
 interface UserSkillStoreState {
   connectionString?: string;
-  storePromise?: Promise<UserSkillStores>;
+  storePromise?: Promise<PgUserSkillStore>;
 }
 
 const USER_SKILL_STORE_STATE_KEY = Symbol.for('openmaic.agent-user-skill.store');
@@ -51,36 +48,18 @@ export function nodePostgresTransaction(pool: Pool): WithTransaction {
   };
 }
 
-interface UserSkillStores {
-  /** For agent runs: a retired owner forwards to the account it was claimed into. */
-  background: PgUserSkillStore;
-  /** For requests: a request that still presents a retired owner is refused. */
-  request: PgUserSkillStore;
-}
-
-async function createUserSkillStores(connectionString: string): Promise<UserSkillStores> {
+async function createUserSkillStore(connectionString: string): Promise<PgUserSkillStore> {
   const { pool } = await getServerPersistenceProvider(connectionString);
-  await withSchemaBootstrapLock(pool as unknown as ConnectableQueryable, ensureUserSkillSchema);
-  const withTransaction = nodePostgresTransaction(pool);
-  // Both take the owner's identity lock as the create transaction's first
-  // statement (lib/persistence/owner-merges.ts), so a create cannot commit
-  // under an owner a concurrent claim retires.
-  return {
-    background: new PgUserSkillStore(pool, {
-      withTransaction,
-      resolveFinalOwner: (transaction, ownerId) => forwardOwnerWrite(transaction, ownerId),
-    }),
-    request: new PgUserSkillStore(pool, {
-      withTransaction,
-      resolveFinalOwner: async (transaction, ownerId) => {
-        await fenceOwnerWrite(transaction, ownerId);
-        return ownerId;
-      },
-    }),
-  };
+  await ensureUserSkillSchema(pool);
+  return new PgUserSkillStore(pool, { withTransaction: nodePostgresTransaction(pool) });
 }
 
-function getUserSkillStores(): Promise<UserSkillStores> {
+/**
+ * Return the process-wide user-skill store, initializing its schema lazily.
+ * Failed initialization is cleared so a later request can retry after the
+ * database becomes available.
+ */
+export function getUserSkillStore(): Promise<PgUserSkillStore> {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     return Promise.reject(new Error('Agent runtime requires DATABASE_URL'));
@@ -90,7 +69,7 @@ function getUserSkillStores(): Promise<UserSkillStores> {
   }
 
   storeState.connectionString = connectionString;
-  const initialization = createUserSkillStores(connectionString).catch((error) => {
+  const initialization = createUserSkillStore(connectionString).catch((error) => {
     if (storeState.storePromise === initialization) {
       storeState.storePromise = undefined;
       storeState.connectionString = undefined;
@@ -99,19 +78,4 @@ function getUserSkillStores(): Promise<UserSkillStores> {
   });
   storeState.storePromise = initialization;
   return initialization;
-}
-
-/**
- * Return the process-wide user-skill store, initializing its schema lazily.
- * Failed initialization is cleared so a later request can retry after the
- * database becomes available. Its creates forward a retired owner, as agent
- * runs need; a request creates through {@link getRequestUserSkillStore}.
- */
-export async function getUserSkillStore(): Promise<PgUserSkillStore> {
-  return (await getUserSkillStores()).background;
-}
-
-/** The same store for request-driven creates, which refuse a retired owner. */
-export async function getRequestUserSkillStore(): Promise<PgUserSkillStore> {
-  return (await getUserSkillStores()).request;
 }

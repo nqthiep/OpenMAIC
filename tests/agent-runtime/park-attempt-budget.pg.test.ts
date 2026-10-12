@@ -8,10 +8,7 @@ import {
   type WithTransaction,
 } from '../../packages/@openmaic/storage/src/agent-session/pg';
 
-import { endContractPool, openContractPool } from '../persistence/_contract-database';
-
 const contractUrl = process.env.PG_CONTRACT_URL;
-const SCHEMA = 'park_attempt_budget_contract';
 
 function transactionFor(pool: Pool): WithTransaction {
   return async (body) => {
@@ -40,14 +37,14 @@ describe.skipIf(!contractUrl)('session attempt budget takeovers', () => {
   let store: PgAgentSessionStore;
 
   beforeAll(async () => {
-    pool = await openContractPool(contractUrl!, SCHEMA);
+    pool = new Pool({ connectionString: contractUrl });
     await ensureAgentSessionSchema(pool as Queryable);
   });
 
   beforeEach(async () => {
     // CASCADE absorbs every table that has since gained an FK to agent_sessions
     // (agent_session_urls from the URL trust gate, agent_session_materials from
-    // the material store); the suite owns its schema.
+    // the material store); the suite owns the whole database.
     await pool.query(
       `TRUNCATE agent_session_entries, agent_session_events,
                 agent_owner_session_events, agent_owner_session_event_counters,
@@ -57,7 +54,7 @@ describe.skipIf(!contractUrl)('session attempt budget takeovers', () => {
   });
 
   afterAll(async () => {
-    await endContractPool(pool, SCHEMA);
+    await pool.end();
   });
 
   it('survives six clean park and takeover cycles with a cap of five', async () => {

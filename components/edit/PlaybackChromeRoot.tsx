@@ -1,13 +1,10 @@
 'use client';
 
-import { useModelCapabilities } from '@/lib/model-settings/use-model-settings';
-import { toast } from 'sonner';
 import {
   forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -41,8 +38,6 @@ import { ActionEngine } from '@/lib/action/engine';
 import { createAudioPlayer } from '@/lib/utils/audio-player';
 import { useDiscussionTTS } from '@/lib/hooks/use-discussion-tts';
 import { useWidgetIframeStore } from '@/lib/store/widget-iframe';
-import { recordDesiredPayload } from '@/lib/store/widget-runtime-state';
-import { walkthroughIdOf } from '@/components/scene-renderers/InteractiveIframeHost';
 import type { AudioIndicatorState } from '@/components/roundtable/audio-indicator';
 import type { Action, DiscussionAction, SpeechAction } from '@/lib/types/action';
 import { cn } from '@/lib/utils';
@@ -61,10 +56,6 @@ import {
 import { AlertTriangle } from 'lucide-react';
 import { VisuallyHidden } from 'radix-ui';
 import type { PPTElement } from '@openmaic/dsl';
-import {
-  getDisplayedWhiteboard,
-  isWhiteboardReferenceAvailable,
-} from '@/lib/whiteboard/element-reference';
 import type { ElementReference } from '@/lib/types/chat';
 import type {
   PlaybackInteractiveComponentPick,
@@ -105,7 +96,6 @@ export interface PlaybackChromeRootHandle {
 
 interface PlaybackChromeRootProps {
   readonly onRetryOutline?: (outlineId: string) => Promise<void>;
-  readonly generationFailureMessage?: string;
   /** Whether the Pro Switch in Header should be enabled. */
   readonly canEnterProMode?: boolean;
   /** Pro Switch click handler — parent coordinates teardown + mode flip. */
@@ -120,29 +110,6 @@ interface PlaybackChromeRootProps {
 }
 
 /**
- * The scene auto-play moves to after `completedSceneId`, or null to stay put.
- * It moves only while the completed scene is still the current one, so picking
- * another lesson during the pause cancels the advance. Quiz, interactive and PBL
- * scenes wait for the user.
- */
-export function autoAdvanceTarget(args: {
-  scenes: ReadonlyArray<{ id: string; type: string }>;
-  completedSceneId: string;
-  currentSceneId: string | null;
-  pendingOutlineCount: number;
-}): string | null {
-  const { scenes, completedSceneId, currentSceneId, pendingOutlineCount } = args;
-  if (currentSceneId !== completedSceneId) return null;
-  const idx = scenes.findIndex((scene) => scene.id === completedSceneId);
-  if (idx < 0) return null;
-  const { type } = scenes[idx];
-  if (type === 'quiz' || type === 'interactive' || type === 'pbl') return null;
-  if (idx < scenes.length - 1) return scenes[idx + 1].id;
-  // Last scene done while the next outline is still generating: wait on the pending page.
-  return pendingOutlineCount > 0 ? PENDING_SCENE_ID : null;
-}
-
-/**
  * PlaybackChromeRoot — owns the entire playback/autonomous chrome and
  * its state. Mounted whenever `mode !== 'edit'`. The Pro Switch in
  * `Header` calls `onEnterProMode`; the parent `Stage` is responsible
@@ -153,7 +120,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
   function PlaybackChromeRoot(
     {
       onRetryOutline,
-      generationFailureMessage,
       canEnterProMode,
       onEnterProMode,
       proModeActive,
@@ -179,7 +145,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     } = useStageStore();
     const failedOutlines = useStageStore.use.failedOutlines();
     const generationComplete = useStageStore.use.generationComplete();
-    const generationInterrupted = useStageStore.use.generationInterrupted();
 
     const currentScene = getCurrentScene();
     const piChatEnabled = isPiChatEnabled();
@@ -267,17 +232,12 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
 
     // Whiteboard state (from canvas store so AI tools can open it)
     const whiteboardOpen = useCanvasStore.use.whiteboardOpen();
-    const runtimeProjection = useCanvasStore.use.runtimeWhiteboardProjection();
-    const whiteboardClearing = useCanvasStore.use.whiteboardClearing();
-    const { whiteboard: displayedWhiteboard, source: displayedWhiteboardSource } =
-      getDisplayedWhiteboard(stage, runtimeProjection);
     const setWhiteboardOpenManually = useCanvasStore.use.setWhiteboardOpenManually();
 
     // Selected agents from settings store (Zustand)
     const selectedAgentIds = useSettingsStore((s) => s.selectedAgentIds);
     const ttsMuted = useSettingsStore((s) => s.ttsMuted);
-    // Narration is on when the workspace's tts slot resolves to a provider.
-    const ttsEnabled = !!useModelCapabilities().tts;
+    const ttsEnabled = useSettingsStore((s) => s.ttsEnabled);
 
     // Generate participants from selected agents
     const participants = useMemo(
@@ -334,7 +294,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     const discussionAbortRef = useRef<AbortController | null>(null);
     const presentationIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cursorSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pendingCursorRef = useRef<{ stageId: string; cursor: PlaybackCursor } | null>(null);
     const stageRef = useRef<HTMLDivElement>(null);
     // Guard to prevent double flash when manual stop triggers onDiscussionEnd
@@ -605,7 +564,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
             discussionAbortRef.current.abort();
             discussionAbortRef.current = null;
           }
-          engineRef.current?.dispose();
+          engineRef.current?.stop();
           discussionTTS.cleanup();
           resetSceneState();
         },
@@ -715,10 +674,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     useEffect(() => {
       let cancelled = false;
       const initializeScene = async () => {
-        const previousEngine = engineRef.current;
-        engineRef.current = null;
-        previousEngine?.dispose();
-
         const previousSceneId = activeSceneIdRef.current;
         if (previousSceneId && previousSceneId !== currentScene?.id) {
           saveSceneResumePosition(previousSceneId, currentPlaybackActionIndexRef.current);
@@ -790,10 +745,16 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
           !!currentScene?.actions &&
           (currentScene.actions.length > 0 || currentScene.type === 'slide');
         if (!currentScene || !hasPlayableActions) {
+          engineRef.current = null;
           setEngineMode('idle');
           activeSceneIdRef.current = currentSceneId;
 
           return;
+        }
+
+        // Stop previous engine
+        if (engineRef.current) {
+          engineRef.current.stop();
         }
 
         // Widget iframe messaging callback for interactive scenes, resolved lazily
@@ -803,15 +764,8 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         // on a scene's first visit and silently drop every widget action. Looking it
         // up per-send always sees the live registration.
         const sceneIdForWidget = currentScene.id;
-        const widgetSendMessage = (type: string, payload: Record<string, unknown>) => {
-          const send = useWidgetIframeStore.getState().getSendMessage(sceneIdForWidget);
-          // Walkthrough: before the pooled iframe registers `send`, still remember the request
-          // as `desired` so it is replayed on `widget-ready`.
-          if (!send && walkthroughIdOf(currentScene)) {
-            recordDesiredPayload(sceneIdForWidget, type, payload);
-          }
-          send?.(type, payload);
-        };
+        const widgetSendMessage = (type: string, payload: Record<string, unknown>) =>
+          useWidgetIframeStore.getState().getSendMessage(sceneIdForWidget)?.(type, payload);
 
         // Create ActionEngine for playback (with audioPlayer for TTS and widget messaging)
         const actionEngine = new ActionEngine(
@@ -829,7 +783,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
             // Identity guard: a superseded engine (scene switch during an
             // async resume) must not publish its old scene's position over
             // the installed engine's cursor.
-            if (engineRef.current !== engine) return;
+            if (engineRef.current !== null && engineRef.current !== engine) return;
             updateCurrentPlaybackActionIndex(snapshot.actionIndex);
             saveSceneResumePosition(snapshot.sceneId, snapshot.actionIndex);
             if (playbackStageId && snapshot.sceneId) {
@@ -949,21 +903,39 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
             // Auto-play: advance to next scene after a short pause
             const { autoPlayLecture } = useSettingsStore.getState();
             if (autoPlayLecture) {
-              if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
-              const completedSceneId = currentScene.id;
-              autoAdvanceTimerRef.current = setTimeout(() => {
-                autoAdvanceTimerRef.current = null;
+              setTimeout(() => {
                 const stageState = useStageStore.getState();
                 if (!useSettingsStore.getState().autoPlayLecture) return;
-                const target = autoAdvanceTarget({
-                  scenes: stageState.scenes,
-                  completedSceneId,
-                  currentSceneId: stageState.currentSceneId,
-                  pendingOutlineCount: stageState.generatingOutlines.length,
-                });
-                if (!target) return;
-                autoStartRef.current = true;
-                stageState.setCurrentSceneId(target);
+                const allScenes = stageState.scenes;
+                const curId = stageState.currentSceneId;
+                const idx = allScenes.findIndex((s) => s.id === curId);
+                if (idx >= 0 && idx < allScenes.length - 1) {
+                  const currentScene = allScenes[idx];
+                  if (
+                    currentScene.type === 'quiz' ||
+                    currentScene.type === 'interactive' ||
+                    currentScene.type === 'pbl'
+                  ) {
+                    return;
+                  }
+                  autoStartRef.current = true;
+                  stageState.setCurrentSceneId(allScenes[idx + 1].id);
+                } else if (
+                  idx === allScenes.length - 1 &&
+                  stageState.generatingOutlines.length > 0
+                ) {
+                  // Last scene exhausted but next is still generating — go to pending page
+                  const currentScene = allScenes[idx];
+                  if (
+                    currentScene.type === 'quiz' ||
+                    currentScene.type === 'interactive' ||
+                    currentScene.type === 'pbl'
+                  ) {
+                    return;
+                  }
+                  autoStartRef.current = true;
+                  stageState.setCurrentSceneId(PENDING_SCENE_ID);
+                }
               }, 1500);
             }
           },
@@ -976,17 +948,11 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         if (autoStartRef.current) {
           autoStartRef.current = false;
           (async () => {
-            const chatArea = chatAreaRef.current;
-            if (currentScene && chatArea) {
-              const sessionId = await chatArea.startLecture(currentScene.id);
-              if (engineRef.current !== engine) {
-                await chatArea.endSession(sessionId);
-                return;
-              }
+            if (currentScene && chatAreaRef.current) {
+              const sessionId = await chatAreaRef.current.startLecture(currentScene.id);
               lectureSessionIdRef.current = sessionId;
               lectureActionCounterRef.current = 0;
             }
-            if (engineRef.current !== engine) return;
             engine.start();
           })();
         } else {
@@ -1013,15 +979,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
       // eslint-disable-next-line react-hooks/exhaustive-deps -- Only re-run when scene changes, functions are stable refs
     }, [currentScene]);
 
-    // Picking another lesson or unmounting drops a pending auto-advance. Keyed on the
-    // scene id, so a refreshed scene object does not cancel it.
-    useEffect(() => {
-      return () => {
-        if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
-        autoAdvanceTimerRef.current = null;
-      };
-    }, [currentSceneId]);
-
     // Cleanup on unmount
     useEffect(() => {
       const audioPlayer = audioPlayerRef.current;
@@ -1034,7 +991,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         if (pendingCursor) persistCursorSafely(pendingCursor);
         saveSceneResumePosition(activeSceneIdRef.current, currentPlaybackActionIndexRef.current);
         if (engineRef.current) {
-          engineRef.current.dispose();
+          engineRef.current.stop();
         }
         audioPlayer.destroy();
         if (discussionAbortRef.current) {
@@ -1208,16 +1165,10 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         const wasCompleted = playbackCompleted;
         setPlaybackCompleted(false);
         // Starting playback - create/reuse lecture session
-        const chatArea = chatAreaRef.current;
-        if (currentScene && chatArea) {
-          const sessionId = await chatArea.startLecture(currentScene.id);
-          if (engineRef.current !== engine) {
-            await chatArea.endSession(sessionId);
-            return;
-          }
+        if (currentScene && chatAreaRef.current) {
+          const sessionId = await chatAreaRef.current.startLecture(currentScene.id);
           lectureSessionIdRef.current = sessionId;
         }
-        if (engineRef.current !== engine) return;
         if (wasCompleted) {
           // Restart from beginning (user clicked restart after completion)
           lectureActionCounterRef.current = 0;
@@ -1292,63 +1243,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     const canPickInteractiveComponent = Boolean(
       showElementReference && !whiteboardOpen && isHtmlBackedInteractiveScene,
     );
-    const canPickWhiteboardElement = Boolean(
-      showElementReference &&
-      whiteboardOpen &&
-      !whiteboardClearing &&
-      displayedWhiteboardSource === 'stage_snapshot' &&
-      displayedWhiteboard?.elements.length,
-    );
-    const canPickElement =
-      canPickSlideElement || canPickInteractiveComponent || canPickWhiteboardElement;
-
-    const handlePickWhiteboardElement = useCallback(
-      (element: PPTElement) => {
-        if (!elementPickActiveRef.current || !canPickWhiteboardElement || !stage) return;
-        if (
-          !displayedWhiteboard ||
-          displayedWhiteboard.elements.filter((item) => item.id === element.id).length !== 1
-        )
-          return;
-        setElementPickActive(false);
-        const selectionVersion = ++selectionVersionRef.current;
-        setDraftElementReference({
-          reference: {
-            kind: 'whiteboard_element',
-            whiteboardId: displayedWhiteboard.id,
-            elementId: element.id,
-          },
-          selectionVersion,
-          elementType: element.type,
-          displaySummary: getSlideElementPresentation(element, t).displaySummary,
-        });
-      },
-      [
-        canPickWhiteboardElement,
-        stage,
-        displayedWhiteboard,
-        setElementPickActive,
-        setDraftElementReference,
-        t,
-      ],
-    );
-
-    const canSendReferencedMessage = useCallback(() => {
-      const reference = draftElementReferenceRef.current?.reference;
-      if (reference?.kind !== 'whiteboard_element') return true;
-      const canvas = useCanvasStore.getState();
-      if (
-        !canvas.whiteboardClearing &&
-        isWhiteboardReferenceAvailable(
-          reference,
-          useStageStore.getState().stage,
-          canvas.runtimeWhiteboardProjection,
-        )
-      )
-        return true;
-      toast.info(t('chat.elementReference.whiteboardChanged'));
-      return false;
-    }, [t]);
+    const canPickElement = canPickSlideElement || canPickInteractiveComponent;
 
     useEffect(() => {
       if (!elementPickActive || !canPickInteractiveComponent) return;
@@ -1441,27 +1336,14 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     );
     interactivePickHandlerRef.current = handlePickInteractiveComponent;
 
-    // Declaring a state interface adds evidence to a reference; it never replaces
-    // the component picker with a whole-area reference.
     const handleToggleElementPick = useCallback(() => {
       if (!canPickElement) return;
       setElementPickActive((active) => !active);
     }, [canPickElement, setElementPickActive]);
 
     useEffect(() => {
-      if (!canPickElement) setElementPickActive(false);
+      if (whiteboardOpen || !canPickElement) setElementPickActive(false);
     }, [canPickElement, setElementPickActive, whiteboardOpen]);
-
-    // An armed picker belongs to the surface it was armed on. Opening or closing
-    // the whiteboard (student toggle, Teacher action, or runtime visibility) ends
-    // it instead of moving it to the other surface; a selected draft is kept.
-    // Layout timing keeps the destination picker from painting for a frame.
-    const previousWhiteboardOpenRef = useRef(whiteboardOpen);
-    useLayoutEffect(() => {
-      if (previousWhiteboardOpenRef.current === whiteboardOpen) return;
-      previousWhiteboardOpenRef.current = whiteboardOpen;
-      setElementPickActive(false);
-    }, [setElementPickActive, whiteboardOpen]);
 
     useEffect(() => {
       if (showElementReference) return;
@@ -1509,11 +1391,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     useEffect(() => {
       const previousSceneId = elementReferenceSceneIdRef.current;
       elementReferenceSceneIdRef.current = currentSceneId;
-      if (
-        previousSceneId === currentSceneId ||
-        draftElementReferenceRef.current?.reference.kind === 'whiteboard_element'
-      )
-        return;
+      if (previousSceneId === currentSceneId) return;
       setDraftElementReference(null);
     }, [currentSceneId, setDraftElementReference]);
 
@@ -1550,6 +1428,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
 
     // whiteboard toggle
     const handleWhiteboardToggle = () => {
+      if (!whiteboardOpen) setElementPickActive(false);
       setWhiteboardOpenManually(!whiteboardOpen);
     };
 
@@ -1793,13 +1672,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
               elementPickActive={elementPickActive}
               onToggleElementPick={handleToggleElementPick}
               onPickElement={handlePickElement}
-              whiteboardElementReference={
-                showElementReference &&
-                draftElementReference?.reference.kind === 'whiteboard_element'
-                  ? draftElementReference.reference
-                  : undefined
-              }
-              onPickWhiteboardElement={handlePickWhiteboardElement}
               onCancelElementPick={() => setElementPickActive(false)}
               hideToolbar={mode === 'playback' || (isPresenting && !controlsVisible)}
               isPendingScene={isPendingScene}
@@ -1807,8 +1679,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
               isGenerationFailed={
                 isPendingScene && failedOutlines.some((f) => f.id === generatingOutlines[0]?.id)
               }
-              isGenerationInterrupted={isPendingScene && generationInterrupted}
-              generationFailureMessage={generationFailureMessage}
               onRetryGeneration={
                 onRetryOutline && generatingOutlines[0]
                   ? () => onRetryOutline(generatingOutlines[0].id)
@@ -1855,7 +1725,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
                 isSoftClosing={chatIsSoftClosing}
                 softCloseDeadline={softCloseDeadline}
                 isTopicPending={isTopicPending}
-                canSendMessage={canSendReferencedMessage}
                 onMessageSend={async (msg) => {
                   const draft = showElementReference ? draftElementReferenceRef.current : null;
                   const elementReferenceSnapshot: ElementReferenceSendSnapshot | undefined = draft
@@ -1981,12 +1850,9 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
                 elementReferencePill={
                   draftElementReference
                     ? {
-                        sceneLabel:
-                          draftElementReference.reference.kind === 'whiteboard_element'
-                            ? t('whiteboard.title')
-                            : t('chat.lectureNotes.pageLabel', {
-                                n: (draftElementReference.sceneOrder ?? 0) + 1,
-                              }),
+                        sceneLabel: t('chat.lectureNotes.pageLabel', {
+                          n: (draftElementReference.sceneOrder ?? 0) + 1,
+                        }),
                         elementType:
                           draftElementReference.elementType === 'interactive'
                             ? t('edit.sceneType.interactive')

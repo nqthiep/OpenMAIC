@@ -27,7 +27,6 @@ export interface PresentationData {
   embeddings: Map<string, Uint8Array>;
   tableStyles?: SafeXmlNode;
   charts: Map<string, SafeXmlNode>;
-  chartRels?: Map<string, Map<string, RelEntry>>;
   isWps: boolean;
 }
 
@@ -278,12 +277,6 @@ export function buildPresentation(files: PptxFiles): PresentationData {
     embeddings: files.embeddings,
     tableStyles,
     charts,
-    chartRels: new Map(
-      [...charts.keys()].map((path) => [
-        path,
-        parseRels(files.chartRels?.get(relsPathFor(path)) ?? ''),
-      ]),
-    ),
     isWps,
   };
 

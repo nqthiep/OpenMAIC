@@ -1,6 +1,6 @@
 /**
- * One resolver for the base origin used to build absolute classroom media
- * serving URLs.
+ * One resolver for the base origin used to build classroom media serving
+ * URLs (`mediaServingUrl` in `classroom-media-generation.ts`).
  *
  * Providers that hand back a hosted URL are stored directly and never touch
  * this resolver. It exists for the BYTE-FALLBACK branch only: byte-only
@@ -20,14 +20,15 @@
  * That env stays available for its other legitimate uses (auth redirects
  * etc.) — it must simply never be used to build media URLs.
  *
- * The agent RUNTIME persist paths never call this resolver: they run without
- * an HTTP request, so they persist references that carry no origin at all.
- * `classroom-media-bytes.ts` writes a RELATIVE `/api/classroom-media/...`
- * path, and `generate-image.ts` / `generate-video.ts` write the id the asset
- * pool allocated (#1522). Both stay valid no matter which origin serves the
- * app.
+ * The agent RUNTIME persist paths (`classroom-media-bytes.ts`,
+ * `generate-image.ts`, `generate-video.ts`) never call this resolver: they
+ * run without an HTTP request and persist origin-independent RELATIVE
+ * `/api/classroom-media/...` references instead, which stay valid no matter
+ * which origin serves the app.
  */
 import type { NextRequest } from 'next/server';
+
+import { requestPublicOrigin } from '@/lib/server/public-origin';
 
 /**
  * Final fallback origin when nothing is threaded and no request exists.
@@ -73,9 +74,5 @@ export function resolveMediaServingOrigin(
  * proxy-forwarded host when present, else the request URL's own origin.
  */
 export function requestOrigin(req: NextRequest): string {
-  const forwardedHost = req.headers.get('x-forwarded-host');
-  if (forwardedHost) {
-    return `${req.headers.get('x-forwarded-proto') || 'http'}://${forwardedHost}`;
-  }
-  return req.nextUrl.origin;
+  return requestPublicOrigin(req);
 }

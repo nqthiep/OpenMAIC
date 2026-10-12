@@ -38,27 +38,6 @@ describe('server web search config', () => {
     );
   });
 
-  it('allows the web-search base URL every built-in token plan writes to client settings', async () => {
-    const { resolveSafeClientWebSearchBaseUrl } = await import('@/lib/server/web-search-config');
-    const { TOKEN_PLAN_PRESETS } = await import('@/lib/config/token-plan-presets');
-    const targets = TOKEN_PLAN_PRESETS.flatMap((preset) =>
-      preset.modalities.webSearch ? [preset.modalities.webSearch] : [],
-    );
-
-    expect(targets.length).toBeGreaterThan(0);
-    for (const target of targets) {
-      expect(
-        resolveSafeClientWebSearchBaseUrl(
-          target.providerId as Parameters<typeof resolveSafeClientWebSearchBaseUrl>[0],
-          target.baseUrl,
-        ),
-      ).toBe(target.baseUrl.replace(/\/+$/, ''));
-    }
-    expect(() =>
-      resolveSafeClientWebSearchBaseUrl('bocha', 'https://tokendance.space/gateway/other'),
-    ).toThrow('Unsupported Bocha base URL');
-  });
-
   it('allows official Exa client base URLs and resolves client credentials', async () => {
     const { resolveClassroomWebSearchConfig, resolveSafeClientWebSearchBaseUrl } =
       await import('@/lib/server/web-search-config');
@@ -67,7 +46,7 @@ describe('server web search config', () => {
       'https://api.exa.ai/search',
     );
     expect(
-      await resolveClassroomWebSearchConfig(null, {
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'exa',
         webSearchApiKey: 'exa-client-key',
         webSearchBaseUrl: 'https://api.exa.ai',
@@ -84,7 +63,7 @@ describe('server web search config', () => {
     vi.stubEnv('EXA_BASE_URL', 'https://proxy.example.com/exa');
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(await resolveClassroomWebSearchConfig(null, { webSearchProviderId: 'exa' })).toEqual({
+    expect(resolveClassroomWebSearchConfig({ webSearchProviderId: 'exa' })).toEqual({
       providerId: 'exa',
       apiKey: 'exa-server-key',
       baseUrl: 'https://proxy.example.com/exa',
@@ -106,7 +85,7 @@ describe('server web search config', () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
     expect(
-      await resolveClassroomWebSearchConfig(null, {
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'bocha',
         webSearchApiKey: 'bocha-client-key',
         webSearchBaseUrl: 'https://api.bochaai.com/v1',
@@ -118,32 +97,16 @@ describe('server web search config', () => {
     });
   });
 
-  it("keeps a classroom request's own provider and key over the server's configured one", async () => {
-    vi.stubEnv('TAVILY_API_KEY', 'server-tavily');
-    const { resolveClassroomWebSearchConfig, resolveWebSearchConnection } =
-      await import('@/lib/server/web-search-config');
-    const requested = { webSearchProviderId: 'exa' as const, webSearchApiKey: 'exa-client-key' };
-
-    expect(await resolveClassroomWebSearchConfig(null, requested)).toMatchObject({
-      providerId: 'exa',
-      apiKey: 'exa-client-key',
-    });
-    // The 1.1.x /api/web-search route preferred the operator's backend.
-    expect(
-      await resolveWebSearchConnection(null, requested, { preferServerProvider: true }),
-    ).toMatchObject({ providerId: 'tavily', apiKey: 'server-tavily' });
-  });
-
   it('rejects unsupported client base URLs at the classroom server boundary', async () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    await expect(
-      resolveClassroomWebSearchConfig(null, {
+    expect(() =>
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'bocha',
         webSearchApiKey: 'bocha-client-key',
         webSearchBaseUrl: 'https://evil.example.com/steal-key',
       }),
-    ).rejects.toThrow('Unsupported Bocha base URL');
+    ).toThrow('Unsupported Bocha base URL');
   });
 
   it('uses server base URL for classroom web search config instead of client-controlled URLs', async () => {
@@ -153,7 +116,7 @@ describe('server web search config', () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
     expect(
-      await resolveClassroomWebSearchConfig(null, {
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'bocha',
         webSearchApiKey: 'stale-client-key',
         webSearchBaseUrl: 'https://api.bochaai.com/v1',
@@ -168,7 +131,7 @@ describe('server web search config', () => {
   it('resolves Brave classroom web search config without an API key', async () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(await resolveClassroomWebSearchConfig(null, { webSearchProviderId: 'brave' })).toEqual({
+    expect(resolveClassroomWebSearchConfig({ webSearchProviderId: 'brave' })).toEqual({
       providerId: 'brave',
       apiKey: '',
       baseUrl: undefined,
@@ -181,13 +144,11 @@ describe('server web search config', () => {
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(await resolveClassroomWebSearchConfig(null, { webSearchProviderId: 'minimax' })).toEqual(
-      {
-        providerId: 'minimax',
-        apiKey: 'minimax-server-key',
-        baseUrl: 'https://api.minimaxi.com',
-      },
-    );
+    expect(resolveClassroomWebSearchConfig({ webSearchProviderId: 'minimax' })).toEqual({
+      providerId: 'minimax',
+      apiKey: 'minimax-server-key',
+      baseUrl: 'https://api.minimaxi.com',
+    });
   });
 
   it('allows official Claude client base URLs and rejects others', async () => {
@@ -208,7 +169,7 @@ describe('server web search config', () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
     expect(
-      await resolveClassroomWebSearchConfig(null, {
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'claude',
         webSearchApiKey: 'sk-client-key',
         webSearchModelId: 'claude-opus-5',
@@ -221,15 +182,6 @@ describe('server web search config', () => {
     });
   });
 
-  it("applies the request's Claude model to the server's default search provider", async () => {
-    vi.stubEnv('WEB_SEARCH_CLAUDE_API_KEY', 'sk-server-key');
-    const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
-
-    expect(
-      await resolveClassroomWebSearchConfig(null, { webSearchModelId: 'claude-opus-5' }),
-    ).toMatchObject({ providerId: 'claude', claudeModelId: 'claude-opus-5' });
-  });
-
   it('pins the Claude model from WEB_SEARCH_CLAUDE_MODELS over the client model', async () => {
     vi.stubEnv('WEB_SEARCH_CLAUDE_API_KEY', 'sk-server-key');
     vi.stubEnv('WEB_SEARCH_CLAUDE_BASE_URL', 'https://api.anthropic.com/v1');
@@ -238,7 +190,7 @@ describe('server web search config', () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
     expect(
-      await resolveClassroomWebSearchConfig(null, {
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'claude',
         webSearchModelId: 'claude-haiku-4-5',
       }),
@@ -268,21 +220,17 @@ describe('server web search config', () => {
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(await resolveClassroomWebSearchConfig(null, { webSearchProviderId: 'searxng' })).toEqual(
-      {
-        providerId: 'searxng',
-        apiKey: '',
-        baseUrl: 'http://192.168.161.100:6060',
-      },
-    );
+    expect(resolveClassroomWebSearchConfig({ webSearchProviderId: 'searxng' })).toEqual({
+      providerId: 'searxng',
+      apiKey: '',
+      baseUrl: 'http://192.168.161.100:6060',
+    });
   });
 
   it('returns undefined for SearXNG classroom config without a base URL', async () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(
-      await resolveClassroomWebSearchConfig(null, { webSearchProviderId: 'searxng' }),
-    ).toBeUndefined();
+    expect(resolveClassroomWebSearchConfig({ webSearchProviderId: 'searxng' })).toBeUndefined();
   });
 
   it('keeps Baidu sub-source toggles in classroom web search config', async () => {
@@ -291,7 +239,7 @@ describe('server web search config', () => {
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
     expect(
-      await resolveClassroomWebSearchConfig(null, {
+      resolveClassroomWebSearchConfig({
         webSearchProviderId: 'baidu',
         baiduSubSources: { webSearch: false, baike: true, scholar: false },
       }),

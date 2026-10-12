@@ -26,10 +26,6 @@ Generate a self-contained HTML diagram with connected nodes.
 6. **No jitter**: Never apply a CSS `transform` to an element that already carries an SVG `transform` attribute
 7. **All nodes connected**: No orphan nodes
 
-{{#if visualRules}}
-{{snippet:diagram-visual-rules}}
-{{/if}}
-
 ## Node Structure
 
 Positioning and animation MUST live on separate elements.
@@ -161,5 +157,3 @@ So highlight/annotate/reveal can target nodes, give each node a stable id:
 ## Output
 
 Return exactly ONE complete HTML document. No markdown fences, no duplication.
-
-{{snippet:interactive-observation}}

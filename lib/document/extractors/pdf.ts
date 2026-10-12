@@ -33,8 +33,6 @@ function createPdfBackedDocumentExtractor(id: PDFProviderId): DocumentExtractorP
         accessKeySecret: input.config.accessKeySecret,
         allowEnvFallback: input.config.allowEnvFallback,
         textOnly: input.config.textOnly,
-        managed: input.config.managed,
-        signal: input.config.signal,
       };
       let parsed;
       if (id === 'alidocmind') {

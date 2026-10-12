@@ -78,7 +78,7 @@ vi.mock('@/lib/server/agent-runtime/runner-contract', () => ({
 }));
 
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
-  getBackgroundDocumentStore: mocks.getOwnerScopedDocumentStore,
+  getOwnerScopedDocumentStore: mocks.getOwnerScopedDocumentStore,
 }));
 
 // Skills are orthogonal to the behaviour under test; pin the runner to a
@@ -175,7 +175,7 @@ function makeStore(meta: ClaimedAgentSession, options: { cancelRequested?: () =>
       async (_id: string, _workerId: string, _patch: { status: string }) => true,
     ),
     getSession: vi.fn(async () => ({ ...meta, lease: { workerId: WORKER_ID } })),
-    readEventsAfter: vi.fn(async () => []),
+    hasSessionRunHistory: vi.fn(async () => false),
     heartbeat: vi.fn(async () => true),
     getCancelRequestedAt: vi.fn(async () => (options.cancelRequested?.() ? 123 : null)),
     isCancelRequested: vi.fn(async () => options.cancelRequested?.() ?? false),

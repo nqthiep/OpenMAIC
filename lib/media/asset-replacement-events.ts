@@ -1,6 +1,6 @@
-import type { AssetPoolStore } from './asset-pool-config';
+import type { BrowserAssetStore } from '@openmaic/storage';
 
-export type AssetReplacementPool = Pick<AssetPoolStore, 'invalidate' | 'resolve' | 'release'>;
+export type AssetReplacementPool = Pick<BrowserAssetStore, 'invalidate' | 'resolve' | 'release'>;
 
 type AssetReplacementObserver = (ref: string, pool: AssetReplacementPool) => Promise<void> | void;
 

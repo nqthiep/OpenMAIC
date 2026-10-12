@@ -14,35 +14,13 @@ import { Config } from '@alicloud/openapi-client';
 import { RuntimeOptions } from '@alicloud/tea-util';
 import { createLogger } from '@/lib/logger';
 import { ALIDOCMIND_DEFAULT_BASE } from '@/lib/pdf/constants';
-import { redactSecretsForLog } from '@/lib/server/log-redaction';
 
 const log = createLogger('AliDocMind');
 
 const POLL_INTERVAL_MS = 3_000;
 const POLL_MAX_MS = 15 * 60 * 1_000;
 
-const sleep = (ms: number, signal?: AbortSignal) =>
-  new Promise<void>((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(signal.reason ?? new DOMException('Aborted', 'AbortError'));
-      return;
-    }
-    const timer = setTimeout(() => {
-      signal?.removeEventListener('abort', onAbort);
-      resolve();
-    }, ms);
-    const onAbort = () => {
-      clearTimeout(timer);
-      reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'));
-    };
-    signal?.addEventListener('abort', onAbort, { once: true });
-  });
-
-// Fixed verification messages: SDK and service error text stays in the log.
-const PROBE_REJECTED_MESSAGE =
-  'AliDocMind rejected the request, please check that the AccessKey has DocMind permission';
-const PROBE_FAILED_MESSAGE =
-  'Could not verify with AliDocMind, please check the AccessKey ID/Secret and endpoint';
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface AliDocMindCredentials {
   accessKeyId: string;
@@ -58,8 +36,6 @@ export interface AliDocMindCredentials {
 }
 
 export interface AliDocMindSubmitOptions {
-  /** Stops polling (and fails) once the caller stops waiting; a submitted job is left to expire. */
-  signal?: AbortSignal;
   buffer: Buffer;
   fileName: string;
   /** Extension without dot, e.g. 'pdf', 'mp4'. If omitted, inferred from fileName. */
@@ -151,23 +127,17 @@ export async function parseWithAliDocMindClient(
     connectTimeout: 30_000,
     readTimeout: 5 * 60_000,
   });
-  options.signal?.throwIfAborted();
   log.info(`Submitting ${options.fileName} (${options.buffer.byteLength} bytes)`);
   const submitRes = await client.submitDocParserJobAdvance(request, runtime);
-  // The SDK cannot abort a call: a caller that stopped waiting meanwhile gets
-  // no further request (the submitted job expires on its own).
-  options.signal?.throwIfAborted();
   const jobId = submitRes.body?.data?.id;
   if (!jobId) {
-    const body = redactSecretsForLog(String(JSON.stringify(submitRes.body)));
-    throw new Error(`AliDocMind submit returned no job id: ${body}`);
+    throw new Error(`AliDocMind submit returned no job id: ${JSON.stringify(submitRes.body)}`);
   }
   log.info(`Job ${jobId} submitted, polling…`);
 
   const deadline = Date.now() + POLL_MAX_MS;
   let lastStatus = '';
   while (Date.now() < deadline) {
-    options.signal?.throwIfAborted();
     const statusRes = await client.queryDocParserStatus(
       new $Docmind.QueryDocParserStatusRequest({ id: jobId }),
     );
@@ -182,7 +152,7 @@ export async function parseWithAliDocMindClient(
       const benign = lower === '200' || lower === 'success';
       if (!benign) {
         throw new Error(
-          `AliDocMind status query failed (code ${code}): ${redactSecretsForLog(statusRes.body?.message ?? 'unknown')}`,
+          `AliDocMind status query failed (code ${code}): ${statusRes.body?.message ?? 'unknown'}`,
         );
       }
     }
@@ -193,12 +163,10 @@ export async function parseWithAliDocMindClient(
       lastStatus = status;
     }
     if (status === 'fail' || status === 'failed') {
-      throw new Error(
-        `AliDocMind job ${jobId} failed: ${redactSecretsForLog(statusRes.body?.message ?? 'unknown')}`,
-      );
+      throw new Error(`AliDocMind job ${jobId} failed: ${statusRes.body?.message ?? 'unknown'}`);
     }
     if (status === 'success') {
-      const result = await fetchResult(client, jobId, options.signal);
+      const result = await fetchResult(client, jobId);
       return {
         jobId,
         data: result,
@@ -209,20 +177,12 @@ export async function parseWithAliDocMindClient(
         tokens: data?.tokens,
       };
     }
-    await sleep(POLL_INTERVAL_MS, options.signal);
+    await sleep(POLL_INTERVAL_MS);
   }
   throw new Error(`AliDocMind job ${jobId} timed out after ${POLL_MAX_MS / 1000}s`);
 }
 
-/**
- * Every page of a finished job's result. The SDK takes no abort signal, so a
- * request in flight runs to its own timeout; `signal` stops the next one.
- */
-async function fetchResult(
-  client: Client,
-  jobId: string,
-  signal?: AbortSignal,
-): Promise<Record<string, unknown>> {
+async function fetchResult(client: Client, jobId: string): Promise<Record<string, unknown>> {
   const STEP = 100;
   const merged: {
     layouts?: unknown[];
@@ -233,7 +193,6 @@ async function fetchResult(
   let layoutNum = 0;
 
   while (true) {
-    signal?.throwIfAborted();
     const res = await client.getDocParserResult(
       new $Docmind.GetDocParserResultRequest({
         id: jobId,
@@ -248,7 +207,7 @@ async function fetchResult(
     const code = res.body?.code;
     if (code !== undefined && code !== null && String(code) !== '200') {
       throw new Error(
-        `AliDocMind getDocParserResult failed (code ${code}): ${redactSecretsForLog(res.body?.message ?? 'unknown')}`,
+        `AliDocMind getDocParserResult failed (code ${code}): ${res.body?.message ?? 'unknown'}`,
       );
     }
 
@@ -328,13 +287,10 @@ export async function verifyAliDocMindCredentials(
     if (isProbeOk) {
       return { ok: true };
     }
-    log.warn(
-      `Credential probe rejected [code=${codeStr || 'empty'}]: ${redactSecretsForLog(res.body?.message ?? '')}`,
-    );
     return {
       ok: false,
       error: codeStr
-        ? PROBE_REJECTED_MESSAGE
+        ? `${codeStr}: ${res.body?.message ?? 'AliDocMind rejected the request'}`
         : 'AliDocMind returned an unrecognized response (empty status code)',
     };
   } catch (err) {
@@ -354,9 +310,6 @@ export async function verifyAliDocMindCredentials(
     if (isBizNotFound) {
       return { ok: true };
     }
-    // The SDK error (service code, transport errno, TLS or timeout detail) is
-    // logged only; the caller gets one fixed message.
-    log.warn(`Credential probe failed [code=${code || 'none'}]: ${redactSecretsForLog(msg)}`);
-    return { ok: false, error: PROBE_FAILED_MESSAGE };
+    return { ok: false, error: code ? `${code}: ${msg}` : msg };
   }
 }

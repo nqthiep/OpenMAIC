@@ -542,6 +542,7 @@ describe('owner session client', () => {
     client.start();
     sources[0]!.emit('owner_moved', {
       type: 'owner_moved',
+      newOwnerId: 'user:new',
       action: 'reconnect',
     });
     oldOwnerFetch.resolve([row('failed', 300)]);
@@ -759,6 +760,7 @@ describe('owner session client', () => {
 
     sources[0]!.emit('owner_moved', {
       type: 'owner_moved',
+      newOwnerId: 'user:new',
       action: 'reconnect',
     });
     await flushPromises();

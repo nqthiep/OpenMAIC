@@ -4,18 +4,22 @@ import { NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { apiError } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
-import { withRequestOwner } from '@/lib/server/identity/with-owner';
+import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { normalizeSessionTitleOverride } from '@/lib/workbench/session-title';
 
 export const runtime = 'nodejs';
+
+/** Largest title body, refused before it is buffered. Titles are capped at 120 characters. */
+const SESSION_TITLE_MAX_BYTES = 1024 * 1024;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) {
     return new Response('Not found', { status: 404 });
   }
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id } = await params;
     const store = await getAgentSessionStore();
     const meta = await store.getSession(id);
@@ -31,18 +35,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return new Response('Not found', { status: 404 });
   }
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id } = await params;
     const store = await getAgentSessionStore();
 
-    let body: { title?: unknown } | null;
-    try {
-      body = (await req.json()) as typeof body;
-    } catch {
-      const response = apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+    const read = await readBoundedJson(req, SESSION_TITLE_MAX_BYTES);
+    if (!read.ok) {
+      const response = apiError(
+        'INVALID_REQUEST',
+        read.status,
+        read.code === 'PAYLOAD_TOO_LARGE'
+          ? `request body exceeds ${SESSION_TITLE_MAX_BYTES} bytes`
+          : 'invalid JSON body',
+      );
       responseHeaders.forEach((value, name) => response.headers.append(name, value));
       return response;
     }
+    const body = read.value as { title?: unknown } | null;
     if (!body || typeof body !== 'object' || !Object.hasOwn(body, 'title')) {
       const response = apiError('MISSING_REQUIRED_FIELD', 400, 'title is required');
       responseHeaders.forEach((value, name) => response.headers.append(name, value));

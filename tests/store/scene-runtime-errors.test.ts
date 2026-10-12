@@ -34,11 +34,13 @@ describe('useSceneRuntimeErrors', () => {
     expect(e[7]).toBe('err 11');
   });
 
-  it('clearScene drops only that scene', () => {
-    const { addError, clearScene } = useSceneRuntimeErrors.getState();
+  it('clearScene drops only that scene; clearAll drops everything', () => {
+    const { addError, clearScene, clearAll } = useSceneRuntimeErrors.getState();
     addError('s1', 'a');
     addError('s2', 'b');
     clearScene('s1');
     expect(useSceneRuntimeErrors.getState().errors).toEqual({ s2: ['b'] });
+    clearAll();
+    expect(useSceneRuntimeErrors.getState().errors).toEqual({});
   });
 });

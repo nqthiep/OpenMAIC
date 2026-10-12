@@ -17,7 +17,6 @@
 import { compileVideoTimeline, emitHyperframes, toSrt, toVtt } from '@/lib/video-export';
 import { useStageStore } from '@/lib/store';
 import type { Locale } from '@/lib/i18n';
-import { resolveCodeWidgetAllowed } from '@/lib/hooks/use-code-widget-allowed';
 import { resolveExportStageName } from './resolve-stage-name';
 import { createVideoTimelineDeps } from './timeline-deps';
 import { collectVideoAssets } from './collect';
@@ -92,16 +91,12 @@ async function compileStageIr(options: {
   const stageName = await resolveExportStageName(stage);
   const { width, height } = VIDEO_RESOLUTIONS[options.resolution];
 
-  // The student-code widget is blocked unless the server says otherwise; the subtitles-only path packages no HTML.
-  const codeAllowed = options.skipInteractiveHtml ? false : await resolveCodeWidgetAllowed();
-
   const [deps, quizLayout] = await Promise.all([
     createVideoTimelineDeps({
       stage: { id: stage.id },
       scenes,
       skipGeometry: options.skipGeometry,
       skipInteractiveHtml: options.skipInteractiveHtml,
-      codeAllowed,
     }),
     createQuizLayoutProbe({
       scenes,

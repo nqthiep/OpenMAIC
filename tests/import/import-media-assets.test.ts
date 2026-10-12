@@ -18,7 +18,7 @@ vi.mock('@/lib/media/asset-pool', () => ({
   removeAsset: (...args: unknown[]) => mocks.getPool().remove(...args),
 }));
 
-vi.mock('@/lib/device-storage/database', () => ({
+vi.mock('@/lib/utils/database', () => ({
   mediaFileKey: (stageId: string, ref: string) => `${stageId}:${ref}`,
   db: {
     mediaFiles: { put: mocks.mediaPut },
@@ -655,8 +655,7 @@ describe('classroom import media allocation', () => {
 
     expect(mappings.pathToId.get(missingPath)).toBeUndefined();
     expect(mappings.pathToId.get(presentPath)).toMatch(/^[A-Za-z0-9_-]+$/);
-    // Only the entry the ZIP actually holds reaches the pool.
-    expect(put).toHaveBeenCalledOnce();
+    expect(put).not.toHaveBeenCalled();
     expect(allocations).toEqual([mappings.pathToId.get(presentPath)]);
     expect(mocks.audioPut).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -760,7 +760,7 @@ describe('pedagogy style skills', () => {
   /** Hands-on every other page, slides only as task briefs — a workshop. */
   const workshopShaped = [
     page('slide', 1),
-    page('interactive', 2, 'game'),
+    page('interactive', 2, 'code'),
     page('quiz', 3),
     page('slide', 4),
     page('interactive', 5, 'simulation'),

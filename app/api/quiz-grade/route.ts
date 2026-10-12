@@ -3,18 +3,13 @@
  *
  * POST: Receives a text question + user answer, calls LLM for scoring and feedback.
  * Used for short-answer (text) questions that cannot be graded locally.
- * A failed model call, a failed input filter or a reply without a usable score answers 503
- * GRADING_UNAVAILABLE with no score, so the client keeps the question ungraded.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { callLLM } from '@/lib/ai/llm';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
-import { isTutorModerationEnabled } from '@/lib/config/feature-flags';
-import { screenText } from '@/lib/tutor/chat-moderation';
-import { moderate, type ModerationVerdict } from '@/lib/tutor/moderation';
 const log = createLogger('Quiz Grade');
 
 interface GradeRequest {
@@ -30,96 +25,30 @@ interface GradeResponse {
   comment: string;
 }
 
-/** Plain decimal text such as "3". Number() alone reads "" as 0 and "0x3" as 3. */
-const DECIMAL_TEXT = /^\s*\d+(?:\.\d+)?\s*$/;
-
-/**
- * Reads the grade from a model reply. Null unless the reply holds a JSON object whose score is a
- * finite number, or decimal text of one, within 0..points. A missing, non-numeric or out-of-range
- * score is never a grade.
- */
-function parseGrade(text: string, points: number): GradeResponse | null {
-  // Try to extract JSON from the response
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return null;
-  let parsed: { score?: unknown; comment?: unknown };
-  try {
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch {
-    return null;
-  }
-  const { score, comment } = parsed;
-  const value = typeof score === 'string' && DECIMAL_TEXT.test(score) ? Number(score) : score;
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > points) {
-    return null;
-  }
-  return {
-    score: Math.min(points, Math.round(value)),
-    comment: typeof comment === 'string' ? comment : '',
-  };
-}
-
-/** 503 with no score, so the client keeps the question ungraded. */
-function gradingUnavailable(): NextResponse {
-  return apiError(
-    'GRADING_UNAVAILABLE',
-    503,
-    'Dịch vụ chấm điểm tạm thời không khả dụng, vui lòng thử lại sau.',
-  );
-}
-
 export async function POST(req: NextRequest) {
-  let questionSnippet: string | undefined;
+  let questionLength: number | undefined;
   let resolvedPoints: number | undefined;
   try {
     const body = (await req.json()) as GradeRequest;
     const { question, userAnswer, points, commentPrompt, language } = body;
-    if (
-      typeof question !== 'string' ||
-      typeof userAnswer !== 'string' ||
-      !question ||
-      !userAnswer
-    ) {
+    questionLength = question?.length;
+    resolvedPoints = points;
+
+    if (!question || !userAnswer) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'question and userAnswer are required');
     }
-    questionSnippet = question.substring(0, 60);
-    resolvedPoints = points;
 
     // Validate points is a positive finite number
     if (!points || !Number.isFinite(points) || points <= 0) {
       return apiError('INVALID_REQUEST', 400, 'points must be a positive number');
     }
 
-    // Tutor content filter (ADR 0014): the student's free-text answer goes in, the feedback comes out.
-    const moderated = isTutorModerationEnabled();
-    if (moderated) {
-      // screenText replies to a filter error like a block, so the verdict is kept here.
-      const verdicts: ModerationVerdict[] = [];
-      const blockedIn = await screenText(userAnswer, 'in', language, {
-        moderate: async (text, ctx) => {
-          const verdict = await moderate(text, ctx);
-          verdicts.push(verdict);
-          return verdict;
-        },
-      });
-      // No verdict means the filter threw; an error verdict is its fail-closed marker. Neither is a
-      // block: the question stays ungraded instead of getting a score of 0.
-      const [verdict] = verdicts;
-      if (!verdict || verdict.error) {
-        log.error(
-          `Quiz grading content filter failed [question="${questionSnippet ?? 'unknown'}..."]`,
-        );
-        return gradingUnavailable();
-      }
-      if (blockedIn) return apiSuccess({ score: 0, comment: blockedIn });
-    }
-
     // Resolve model from request headers/body
-    const {
-      model: languageModel,
-      thinkingConfig,
-      serverManaged,
-    } = await resolveModelFromRequest(req, body, 'quiz-grade');
+    const { model: languageModel, thinkingConfig } = await resolveModelFromRequest(
+      req,
+      body,
+      'quiz-grade',
+    );
 
     const isZh = language === 'zh-CN';
 
@@ -139,45 +68,44 @@ ${commentPrompt ? `评分要点：${commentPrompt}\n` : ''}学生答案：${user
 Full marks: ${points} points
 ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${userAnswer}`;
 
-    // No fallback grade: a failed call or an unusable reply answers 503.
-    let gradeResult: GradeResponse | null;
-    try {
-      const result = await callLLM(
-        {
-          model: languageModel,
-          system: systemPrompt,
-          prompt: userPrompt,
-        },
-        'quiz-grade',
-        undefined,
-        thinkingConfig,
-        { serverManaged },
-      );
-      gradeResult = parseGrade(result.text.trim(), points);
-    } catch (error) {
-      log.error(
-        `Quiz grading AI call failed [question="${questionSnippet ?? 'unknown'}..."]:`,
-        error,
-      );
-      return gradingUnavailable();
-    }
-    if (!gradeResult) {
-      // The reply itself is not logged: it can echo the student's answer.
-      log.error(
-        `Quiz grading reply has no valid score [question="${questionSnippet ?? 'unknown'}..."]`,
-      );
-      return gradingUnavailable();
-    }
+    const result = await callLLM(
+      {
+        model: languageModel,
+        system: systemPrompt,
+        prompt: userPrompt,
+      },
+      'quiz-grade',
+      undefined,
+      thinkingConfig,
+    );
 
-    if (moderated && gradeResult.comment) {
-      const blockedOut = await screenText(gradeResult.comment, 'out', language);
-      if (blockedOut) gradeResult.comment = blockedOut;
+    // Parse the LLM response as JSON
+    const text = result.text.trim();
+    let gradeResult: GradeResponse;
+
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found');
+      const parsed = JSON.parse(jsonMatch[0]);
+      gradeResult = {
+        score: Math.max(0, Math.min(points, Math.round(Number(parsed.score)))),
+        comment: String(parsed.comment || ''),
+      };
+    } catch {
+      // Fallback: give partial credit with a generic comment
+      gradeResult = {
+        score: Math.round(points * 0.5),
+        comment: isZh
+          ? '已作答，请参考标准答案。'
+          : 'Answer received. Please refer to the standard answer.',
+      };
     }
 
     return apiSuccess({ ...gradeResult });
   } catch (error) {
     log.error(
-      `Quiz grading failed [question="${questionSnippet ?? 'unknown'}...", points=${resolvedPoints ?? 'unknown'}]:`,
+      `Quiz grading failed [questionLength=${questionLength ?? 'unknown'}, points=${resolvedPoints ?? 'unknown'}]:`,
       error,
     );
     return apiError('INTERNAL_ERROR', 500, 'Failed to grade answer');

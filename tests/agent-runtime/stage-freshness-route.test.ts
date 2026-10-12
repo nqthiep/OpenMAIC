@@ -5,19 +5,17 @@ import { createFakeDocumentStore } from './_fake-document-store';
 import { FIXED_NOW, makeDocument, makeSlideScene } from './_stage-fixtures';
 
 const mocks = vi.hoisted(() => ({
-  persistenceConfigured: true,
+  runtimeConfigured: true,
   resolveRequestOwnerId: vi.fn(),
   fakeStore: null as ReturnType<typeof createFakeDocumentStore> | null,
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
-  isServerPersistenceConfigured: () => mocks.persistenceConfigured,
+  isAgentRuntimeConfigured: () => mocks.runtimeConfigured,
 }));
-vi.mock('@/lib/server/identity/resolve', async () =>
-  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
-    mocks.resolveRequestOwnerId,
-  ),
-);
+vi.mock('@/lib/server/agent-runtime/owner', () => ({
+  resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+}));
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
   getOwnerScopedDocumentStore: async () => mocks.fakeStore!.store,
 }));
@@ -52,7 +50,7 @@ async function readUntilFreshness(
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
-  mocks.persistenceConfigured = true;
+  mocks.runtimeConfigured = true;
   mocks.resolveRequestOwnerId.mockReturnValue('owner-1');
   mocks.fakeStore = createFakeDocumentStore();
   mocks.fakeStore.docs.set(
@@ -134,8 +132,8 @@ describe('GET /api/stages/[id]/freshness', () => {
     expect(response.headers.get('set-cookie')).toContain('anonymous_id=anon-2');
   });
 
-  it('answers 404 when server persistence is not configured', async () => {
-    mocks.persistenceConfigured = false;
+  it('answers 404 when the agent runtime is not configured', async () => {
+    mocks.runtimeConfigured = false;
     expect((await call()).status).toBe(404);
   });
 });

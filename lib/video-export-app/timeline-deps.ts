@@ -14,7 +14,7 @@
  *
  * This module lives in `lib/video-export-app/` — the impure, app-side companion
  * to the pure `lib/video-export/` compiler — precisely because it reaches into
- * `@/lib/device-storage/database` and (for video probing) the DOM, the two concerns the
+ * `@/lib/utils/database` and (for video probing) the DOM, the two concerns the
  * compiler's purity boundary keeps out.
  */
 import type {
@@ -37,12 +37,7 @@ import type { Scene, SlideContent, Stage } from '@/lib/types/stage';
 import { enumerateAssetManifest } from '@openmaic/dsl';
 import { isMediaPlaceholder } from '@/lib/store/media-generation';
 import { measureSlideElementGeometry, type MeasuredGeometry } from '@openmaic/renderer/snapshot';
-import {
-  db,
-  mediaFileKey,
-  type AudioFileRecord,
-  type MediaFileRecord,
-} from '@/lib/device-storage/database';
+import { db, mediaFileKey, type AudioFileRecord, type MediaFileRecord } from '@/lib/utils/database';
 import {
   emptyPreparedInteractiveHtmlSet,
   prepareInteractiveHtmlScenes,
@@ -52,7 +47,6 @@ import { useMediaGenerationStore } from '@/lib/store/media-generation';
 import { resolveVideoMediaForElement } from '@/lib/media/media-task-resolution';
 import { resolveAudioBlob } from '@/lib/media/resolve-audio-bytes';
 import { fetchMediaUrl } from '@/lib/media/fetch-media-url';
-import { mapWithConcurrency } from '@/lib/utils/concurrency';
 
 /** Loaded source records, keyed for both metadata (compiler) and byte collection. */
 export interface VideoTimelineRecords {
@@ -118,6 +112,26 @@ function elementMediaRef(
 const PROBE_TIMEOUT_MS = 10_000;
 /** How many media-duration probes run at once (bounded so a big deck can't thrash). */
 const PROBE_CONCURRENCY = 6;
+
+/**
+ * Run `worker` over `items` with bounded concurrency, collecting results. Order
+ * is not significant to callers (they key results into a Map), so this drains a
+ * shared cursor from `PROBE_CONCURRENCY` lanes.
+ */
+async function mapWithConcurrency<T>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
+  let cursor = 0;
+  const lanes = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const i = cursor++;
+      await worker(items[i]);
+    }
+  });
+  await Promise.all(lanes);
+}
 
 /**
  * Probe a video blob's natural duration (ms) via an off-document `<video>`.
@@ -202,14 +216,12 @@ export async function createVideoTimelineDeps(input: {
   skipGeometry?: boolean;
   /** Skip HTML inlining for subtitle-only compilation. */
   skipInteractiveHtml?: boolean;
-  /** Server policy for the student-code widget; anything but `true` packages its static fallback only. */
-  codeAllowed?: boolean;
 }): Promise<VideoTimelineDeps> {
-  const { stage, scenes, skipGeometry = false, skipInteractiveHtml = false, codeAllowed } = input;
+  const { stage, scenes, skipGeometry = false, skipInteractiveHtml = false } = input;
 
   const interactiveHtml = skipInteractiveHtml
     ? emptyPreparedInteractiveHtmlSet()
-    : await prepareInteractiveHtmlScenes(scenes, { codeAllowed });
+    : await prepareInteractiveHtmlScenes(scenes);
 
   // The standardized asset manifest names exactly the media references this
   // document holds. Video compilation consumes audio only through speech
@@ -244,29 +256,20 @@ export async function createVideoTimelineDeps(input: {
     ),
   );
   const audioById = new Map<string, AudioFileRecord>();
-  const resolvedAudio = await mapWithConcurrency(
-    [...audioIds],
-    PROBE_CONCURRENCY,
-    async (audioId) => {
-      // Bytes come only from the shared resolver: pool-first, so a stable-id
-      // regeneration whose mirror write failed (the row then holds the
-      // superseded narration) still exports what the classroom plays; the row's
-      // own blob is the resolver's legacy fallback. The row read here supplies
-      // duration/format/ossKey metadata for the compiler's sync lookups.
-      const record = await db.audioFiles.get(audioId);
-      const blob = await resolveAudioBlob(audioId);
-      return { audioId, blob, record };
-    },
-  );
-  for (const resolved of resolvedAudio) {
-    if (!resolved) continue;
-    const { audioId, blob, record } = resolved;
-    if (blob) {
+  for (const audioId of audioIds) {
+    // Bytes come only from the shared resolver: pool-first, so a stable-id
+    // regeneration whose mirror write failed (the row then holds the
+    // superseded narration) still exports what the classroom plays; the row's
+    // own blob is the resolver's legacy fallback. The row read here supplies
+    // duration/format/ossKey metadata for the compiler's sync lookups.
+    const record = await db.audioFiles.get(audioId);
+    const blob = await resolveAudioBlob(audioId);
+    if (blob)
       audioById.set(
         audioId,
         record ? { ...record, blob } : ({ id: audioId, blob } as AudioFileRecord),
       );
-    }
+    else if (record) audioById.set(audioId, record);
   }
   // An unconverted document can carry narration only as a legacy URL: the
   // playback paths fall back to it, and the export must too, or a playable
@@ -279,7 +282,7 @@ export async function createVideoTimelineDeps(input: {
   for (const pair of speechPairs) {
     if (!pair.audioUrl) continue;
     const record = pair.audioId ? audioById.get(pair.audioId) : undefined;
-    if (record?.blob.size) continue;
+    if (record && (record.blob?.size > 0 || record.ossKey)) continue;
     legacyAudioUrls.add(pair.audioUrl);
   }
   await mapWithConcurrency([...legacyAudioUrls], PROBE_CONCURRENCY, async (url) => {
@@ -300,12 +303,11 @@ export async function createVideoTimelineDeps(input: {
 
   // Probe real audio durations from the local blobs up front, so the compiler's
   // sync `audioDurationMs` is an accurate table lookup rather than a text-length
-  // estimate. Every retained record has bytes from the shared resolver; a
-  // failed CDN-backed resolution stays missing for both compilation and byte
-  // collection, rather than letting collection retry it after the timeline has
-  // already fallen back to an estimate. Probes run with bounded concurrency
-  // (each has its own timeout) so a large deck resolves quickly without one
-  // stuck blob wedging the export.
+  // estimate. Only local blobs can be probed here; an ossKey-only (evicted)
+  // record has no bytes to read, so it falls back to the stored duration (or
+  // estimate) — the same asymmetry the video probe accepts. Probes run with
+  // bounded concurrency (each has its own timeout) so a large deck resolves
+  // quickly without one stuck blob wedging the export.
   const audioDurationMsByAudioId = new Map<string, number>();
   const probableAudio = [...audioById].filter(([, record]) => record.blob.size > 0);
   await mapWithConcurrency(probableAudio, PROBE_CONCURRENCY, async ([audioId, record]) => {
@@ -427,8 +429,8 @@ export async function createVideoTimelineDeps(input: {
         format: record.format || 'mp3',
         durationMs:
           probed ?? (typeof record.duration === 'number' ? record.duration * 1000 : undefined),
-        // Retained records always contain bytes resolved before compilation.
-        present: record.blob.size > 0,
+        // Present when locally held or fetchable from its CDN ossKey at collect time.
+        present: record.blob.size > 0 || !!record.ossKey,
       };
     },
     media(elementId: string, scene: SceneCore): AssetMeta | null {

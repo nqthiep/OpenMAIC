@@ -12,7 +12,7 @@ vi.mock('@/lib/server/agent-runtime/store', () => ({
     clearCancel: vi.fn(async () => undefined),
     finishSession: mocks.finishSession,
     getSession: vi.fn(async () => null),
-    readEventsAfter: vi.fn(async () => []),
+    hasSessionRunHistory: vi.fn(async () => false),
     heartbeat: vi.fn(async () => true),
     getCancelRequestedAt: vi.fn(async () => null),
     isCancelRequested: vi.fn(async () => false),

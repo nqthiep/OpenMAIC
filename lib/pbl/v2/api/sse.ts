@@ -22,6 +22,8 @@ import type {
   PBLRuntimeEvent,
 } from '../types';
 
+import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
+
 // ---------------------------------------------------------------------------
 // Event types — discriminated union, shared between client and server
 // ---------------------------------------------------------------------------
@@ -207,13 +209,16 @@ const HEARTBEAT = `: keepalive\n\n`;
  *     knows the stream finished cleanly.
  *   - If the generator throws, an `error` + `done` event are emitted
  *     before the stream closes.
+ *   - With `managedKey` (the operator's key), error messages carry the
+ *     fixed text: they are upstream provider text otherwise.
  */
 export function createSSEResponse(
   generator: AsyncGenerator<PBLSSEEvent, void, void>,
-  options: { heartbeatMs?: number; signal?: AbortSignal } = {},
+  options: { heartbeatMs?: number; signal?: AbortSignal; managedKey: boolean },
 ): Response {
   const heartbeatMs = options.heartbeatMs ?? 15_000;
   const signal = options.signal;
+  const managedKey = options.managedKey;
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -260,14 +265,19 @@ export function createSSEResponse(
       try {
         for await (const event of generator) {
           if (closed) break;
-          enqueueText(encodeEvent(event));
+          const visible =
+            managedKey && event.type === 'error'
+              ? { ...event, message: MODEL_FAILURE_TEXT }
+              : event;
+          enqueueText(encodeEvent(visible));
         }
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
         enqueueText(
           encodeEvent({
             type: 'error',
             code: 'STREAM_ERROR',
-            message: err instanceof Error ? err.message : String(err),
+            message: managedKey ? MODEL_FAILURE_TEXT : message,
           }),
         );
         enqueueText(encodeEvent({ type: 'done' }));

@@ -100,24 +100,6 @@ vi.mock('@/lib/server/provider-config', async (importActual) => {
   };
 });
 
-// The run's tts and video slots, as the mocked server listing describes them.
-vi.mock('@/lib/server/model-config/media', async (importActual) => ({
-  ...(await importActual<typeof import('@/lib/server/model-config/media')>()),
-  serverMediaConnection: async (slot: string) => {
-    if (slot !== 'tts') return null;
-    const [providerId] = (mocks.enabledServerTTSProviderIds() as string[] | undefined) ?? [];
-    if (!providerId) return null;
-    const apiKey = mocks.resolveTTSApiKey(providerId) as string | undefined;
-    return {
-      providerId,
-      ...(apiKey ? { apiKey } : {}),
-      managed: true,
-      userEndpoint: false,
-      origin: 'configuration',
-    };
-  },
-}));
-
 vi.mock('@/lib/audio/voice-registration', async (importActual) => {
   const actual = await importActual<typeof import('@/lib/audio/voice-registration')>();
   return {
@@ -192,7 +174,7 @@ function makeStore(meta: ClaimedAgentSession) {
     clearCancel: vi.fn(async () => undefined),
     finishSession: vi.fn(async () => true),
     getSession: vi.fn(async () => ({ ...meta, lease: { workerId: WORKER_ID } })),
-    readEventsAfter: vi.fn(async () => []),
+    hasSessionRunHistory: vi.fn(async () => false),
     heartbeat: vi.fn(async () => true),
     getCancelRequestedAt: vi.fn(async () => null),
     isCancelRequested: vi.fn(async () => false),
@@ -310,7 +292,6 @@ describe('voice tool runner registration', () => {
       'list_scenes',
       'generate_actions',
       'duplicate_scene',
-      'generate_walkthrough',
       'import_pptx',
       'generate_image',
       'generate_tts',
@@ -354,7 +335,6 @@ describe('voice tool runner registration', () => {
         'generate_image',
         'generate_scene',
         'generate_tts',
-        'generate_walkthrough',
         'grep_stage',
         'import_pptx',
         'list_folder_stages',
@@ -401,7 +381,6 @@ describe('voice tool runner registration', () => {
       'list_scenes',
       'generate_actions',
       'duplicate_scene',
-      'generate_walkthrough',
       'import_pptx',
       'generate_image',
       'generate_tts',
@@ -444,7 +423,6 @@ describe('voice tool runner registration', () => {
         'generate_image',
         'generate_scene',
         'generate_tts',
-        'generate_walkthrough',
         'grep_stage',
         'import_pptx',
         'list_folder_stages',

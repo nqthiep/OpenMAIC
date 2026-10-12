@@ -1,12 +1,8 @@
 import { NextRequest } from 'next/server';
 
 import { settleWhiteboardVisibility } from '@/lib/chat/pi/whiteboard-visibility';
+import { resolveLearnerKeyForRequest } from '@/lib/persistence/server-auth';
 import { apiError } from '@/lib/server/api-response';
-import { resolveRequestOwner } from '@/lib/server/identity/resolve';
-import {
-  attachOwnerCookies,
-  invalidOwnerCredentialResponse,
-} from '@/lib/server/identity/with-owner';
 
 export const runtime = 'nodejs';
 
@@ -33,18 +29,14 @@ function validBody(value: unknown): value is {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
-  // The pending query is keyed by the learner key the Pi request resolved,
-  // which is the request owner; only that owner can settle it.
-  const owner = await resolveRequestOwner(req);
-  if (!owner.ok) {
-    return invalidOwnerCredentialResponse();
+  // A signed-in caller settles only queries of its own account partition.
+  // Anonymous callers keep the development binding. A session that cannot be
+  // checked rejects here.
+  const learnerKey = await resolveLearnerKeyForRequest(req.headers);
+  if (!learnerKey) {
+    return apiError('INVALID_CREDENTIALS', 401, 'Invalid persistence development binding');
   }
-  // Every answer carries the resolution's cookies (the anonymous owner's
-  // renewal), errors included.
-  return attachOwnerCookies(await settle(req, owner.principal.ownerId), owner.setCookies);
-}
 
-async function settle(req: NextRequest, learnerKey: string): Promise<Response> {
   let body: unknown;
   try {
     body = await req.json();

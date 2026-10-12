@@ -7,9 +7,9 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { isAgentRuntimeConfigured, isTutorModerationEnabled } from '@/lib/config/feature-flags';
-import { screenText } from '@/lib/tutor/chat-moderation';
+import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { apiError } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { MAX_SESSION_TEXT_LENGTH } from '@/lib/server/agent-runtime/limits';
 import { findSkill, inferSkillIdFromPrompt, listSkills } from '@/lib/server/agent-runtime/skills';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
@@ -18,12 +18,17 @@ import {
   bindOwnerMaterialsToSession,
   SessionMaterialBindingError,
 } from '@/lib/server/agent-runtime/session-materials';
-import { withRequestOwner } from '@/lib/server/identity/with-owner';
-import { ownerRetiredResponse, ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
+import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { buildRequestOrigin, isValidClassroomId } from '@/lib/server/classroom-storage';
 import { decodeCourseRefs } from '@/lib/workbench/course-refs';
 
 export const runtime = 'nodejs';
+
+/**
+ * Largest session create body, refused before it is buffered. The prompt is capped at
+ * MAX_SESSION_TEXT_LENGTH characters and the other fields are short ids and refs.
+ */
+const SESSION_CREATE_MAX_BYTES = 1024 * 1024;
 
 interface CreateSessionBody {
   prompt?: string;
@@ -42,12 +47,17 @@ export async function POST(req: NextRequest) {
     return new Response('Not found', { status: 404 });
   }
 
-  let body: CreateSessionBody = {};
-  try {
-    body = ((await req.json()) ?? {}) as CreateSessionBody;
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  const read = await readBoundedJson(req, SESSION_CREATE_MAX_BYTES);
+  if (!read.ok) {
+    return apiError(
+      'INVALID_REQUEST',
+      read.status,
+      read.code === 'PAYLOAD_TOO_LARGE'
+        ? `request body exceeds ${SESSION_CREATE_MAX_BYTES} bytes`
+        : 'invalid JSON body',
+    );
   }
+  const body = (read.value ?? {}) as CreateSessionBody;
 
   const existingCourse = body.existingCourse === true;
   const stageId = body.stageId?.toString().trim() || undefined;
@@ -69,11 +79,6 @@ export async function POST(req: NextRequest) {
       400,
       `prompt exceeds the ${MAX_SESSION_TEXT_LENGTH} character limit`,
     );
-  }
-  // Tutor content filter (ADR 0014): the student's opening message, before any agent runs.
-  if (explicitPrompt && isTutorModerationEnabled()) {
-    const blocked = await screenText(explicitPrompt, 'in', undefined);
-    if (blocked) return apiError('CONTENT_SENSITIVE', 422, blocked);
   }
   if (
     body.materialIds !== undefined &&
@@ -97,7 +102,7 @@ export async function POST(req: NextRequest) {
     return apiError('INVALID_REQUEST', 400, decodedCourseRefs.error);
   }
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     // An EXPLICIT skill — a `?skill=` launch link, not composer UI — is
     // rejected here rather than at claim time: a session created with a typo'd
     // skill would otherwise sit queued and then quietly build an ordinary
@@ -143,34 +148,19 @@ export async function POST(req: NextRequest) {
     // ownership validation is deferred until a later slice consumes stageId —
     // the upstream document store has no owner partition yet.
     const store = await getAgentSessionStore();
-    // A request still presenting an anonymous identity that was claimed into
-    // an account starts nothing under it (lib/persistence/owner-merges.ts).
-    if ((await store.readRetirement(ownerId)) !== null) {
-      return ownerRetiredResponse(responseHeaders);
-    }
     const hasOpeningContext = materialIds.length > 0 || decodedCourseRefs.refs.length > 0;
-    // A create racing a claim of this owner is written for the account, as if
-    // it had committed just before the claim (the store forwards under the
-    // owner's identity lock); a busy claim answers 503 OWNER_BUSY.
-    let meta: Awaited<ReturnType<typeof store.createSession>>;
-    try {
-      meta = await store.createSession({
-        ownerId,
-        prompt,
-        ...(stageId ? { stageId } : {}),
-        ...(skillId ? { skillId } : {}),
-        existingCourse,
-        titleState: 'pending',
-        origin: buildRequestOrigin(req),
-        // Keep the runner from claiming the session until its opening materials
-        // and references are durable. postUserMessage below atomically requeues it.
-        ...(existingCourse || hasOpeningContext ? { status: 'succeeded' as const } : {}),
-      });
-    } catch (error) {
-      const claimed = ownerWriteErrorResponse(error, responseHeaders);
-      if (claimed) return claimed;
-      throw error;
-    }
+    const meta = await store.createSession({
+      ownerId,
+      prompt,
+      ...(stageId ? { stageId } : {}),
+      ...(skillId ? { skillId } : {}),
+      existingCourse,
+      titleState: 'pending',
+      origin: buildRequestOrigin(req),
+      // Keep the runner from claiming the session until its opening materials
+      // and references are durable. postUserMessage below atomically requeues it.
+      ...(existingCourse || hasOpeningContext ? { status: 'succeeded' as const } : {}),
+    });
 
     if (!hasOpeningContext) {
       if (!existingCourse) scheduleConversationTitle(meta.id, ownerId);
@@ -215,7 +205,7 @@ export async function GET(req: NextRequest) {
     return new Response('Not found', { status: 404 });
   }
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const store = await getAgentSessionStore();
     const sessions = await store.listSessionsByOwner(ownerId);
     return NextResponse.json(sessions, { headers: responseHeaders });

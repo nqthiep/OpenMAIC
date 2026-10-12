@@ -3,8 +3,7 @@ import type { QuizQuestion } from '@/lib/types/stage';
 export interface QuestionResult {
   questionId: string;
   correct: boolean | null;
-  /** 'ungraded': the AI grader failed. Neither right nor wrong; `correct` is null. */
-  status: 'correct' | 'incorrect' | 'ungraded';
+  status: 'correct' | 'incorrect';
   earned: number;
   aiComment?: string;
 }

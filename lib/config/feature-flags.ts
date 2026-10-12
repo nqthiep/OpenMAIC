@@ -3,27 +3,12 @@
  * Next.js inlines at build time so they are safe to read from client
  * components. Server-only flags must not use the `NEXT_PUBLIC_` prefix.
  *
- * Truthy values: `'true'` or `'1'`. Unless a flag documents a different
- * default, anything else (including unset) is treated as disabled.
+ * Truthy values: `'true'` or `'1'`. Anything else (including unset) is
+ * treated as disabled.
  */
 
 function readBoolean(envValue: string | undefined): boolean {
   return envValue === 'true' || envValue === '1';
-}
-
-function readDefaultOnBoolean(envValue: string | undefined): boolean {
-  return envValue === undefined || envValue === '' || readBoolean(envValue);
-}
-
-/**
- * Tutor answer mode on walkthrough scenes (server-only: the chat prompts are built on the
- * server). Default ON: the teacher opens with a question or a hint and only states the answer
- * when the student asks for it (WALKTHROUGH_ANSWER_POLICY). `OPENMAIC_TUTOR_HINT_FIRST=false`
- * (or `0`) restores the generic "lead with the direct answer" behaviour. Other scene types are
- * unaffected either way.
- */
-export function isTutorHintFirstEnabled(): boolean {
-  return readDefaultOnBoolean(process.env.OPENMAIC_TUTOR_HINT_FIRST);
 }
 
 /**
@@ -51,9 +36,6 @@ export function isAgentRuntimeConfigured(): boolean {
  * route resolves an owner for every request and the owner-bound document store
  * records one for every course, so those facts exist whether or not the runtime
  * is enabled.
- *
- * The course library and folder routes (`/api/stages/**`, `/api/folders/**`)
- * gate on this too: they need the database and nothing the runtime adds.
  */
 export function isServerPersistenceConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL?.trim());
@@ -101,14 +83,11 @@ export function isEditorRendererEnabled(): boolean {
 }
 
 /**
- * Pi-based classroom chat runtime. Default ON. The same public flag selects
- * the client runtime and gates the corresponding server route. Operators can
- * set it to `false` or `0` and rebuild to roll back to the legacy runtime.
- * next.config.ts pins the default too, so runtime-only overrides cannot split
- * the built client's choice from the server route gate.
+ * Experimental Pi-based classroom chat runtime. Default OFF. The same public
+ * flag selects the client runtime and gates the corresponding server route.
  */
 export function isPiChatEnabled(): boolean {
-  return readDefaultOnBoolean(process.env.NEXT_PUBLIC_PI_CHAT_ENABLED);
+  return readBoolean(process.env.NEXT_PUBLIC_PI_CHAT_ENABLED);
 }
 
 /**
@@ -171,56 +150,4 @@ export function isVideoExportEnabled(): boolean {
 /** Experimental PPTX import entry point. Default OFF. */
 export function isPptxImportEnabled(): boolean {
   return readBoolean(process.env.NEXT_PUBLIC_ENABLE_PPTX_IMPORT);
-}
-
-/**
- * Server-only gate for the student-code widget ("code" widget type). Default
- * OFF: the widget is blocked on a deployment unless this is set explicitly.
- */
-export function isCodeWidgetAllowed(): boolean {
-  return readBoolean(process.env.OPENMAIC_ALLOW_CODE_WIDGET);
-}
-
-/**
- * Server-only gate for the tutor content filter on `/api/chat` (INTERFACES 8.1). Default OFF:
- * chat behaves exactly as before. When ON, every chat turn goes through the filter and it is
- * fail-closed (a missing `tutor-moderation` route blocks chat with a safe message). Tutor
- * deployments are dedicated deployments, so this is a per-deployment switch, not per-request.
- */
-export function isTutorModerationEnabled(): boolean {
-  return readBoolean(process.env.OPENMAIC_TUTOR_MODERATION);
-}
-
-/** Server-only kill-switch that disables all widget providers. Default OFF. */
-export function isWidgetProvidersDisabled(): boolean {
-  return readBoolean(process.env.OPENMAIC_DISABLE_WIDGET_PROVIDERS);
-}
-
-/**
- * Student deployment (`OPENMAIC_HOME=learn`), read on the server: `/` opens the lesson picker. Boot
- * checks the learner-facing settings (lib/server/config-validation.ts).
- */
-export function isLearnHome(): boolean {
-  return process.env.OPENMAIC_HOME === 'learn';
-}
-
-/**
- * The student deployment as built into the browser bundle. The Settings button is a client component
- * and cannot read `OPENMAIC_HOME`, so the build sets this too. Boot refuses a student deployment whose
- * build lacks it.
- */
-export function isLearnHomeBuild(): boolean {
-  return process.env.NEXT_PUBLIC_OPENMAIC_HOME === 'learn';
-}
-
-/**
- * Server-only release gate for subject catalog entries (INTERFACES 8.2). Default OFF: dev, tests and
- * e2e expose every entry. A release deployment sets it, and then only entries with a passing review
- * for their exact entryRev are exposed (`lib/subjects/release.ts`). A student deployment keeps it on
- * unless the flag is explicitly `false` or `0`; boot warns about that override.
- */
-export function isReviewRequired(): boolean {
-  const value = process.env.OPENMAIC_REQUIRE_REVIEW;
-  if (isLearnHome()) return value !== 'false' && value !== '0';
-  return readBoolean(value);
 }

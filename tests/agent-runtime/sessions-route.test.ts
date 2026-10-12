@@ -1,12 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const mocks = vi.hoisted(() => ({
   runtimeEnabled: true,
-  moderationEnabled: false,
-  screenText: vi.fn(),
   createSession: vi.fn(),
-  readRetirement: vi.fn(async (_ownerId: string): Promise<string | null> => null),
   postUserMessage: vi.fn(),
   softDeleteSession: vi.fn(),
   bindOwnerMaterialsToSession: vi.fn(),
@@ -21,14 +18,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/config/feature-flags', () => ({
   isAgentRuntimeEnabled: () => mocks.runtimeEnabled,
   isAgentRuntimeConfigured: () => mocks.runtimeEnabled,
-  isTutorModerationEnabled: () => mocks.moderationEnabled,
 }));
-vi.mock('@/lib/tutor/chat-moderation', () => ({ screenText: mocks.screenText }));
-vi.mock('@/lib/server/identity/resolve', async () =>
-  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
-    mocks.resolveRequestOwnerId,
-  ),
-);
+vi.mock('@/lib/server/agent-runtime/owner', () => ({
+  resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+}));
 // The route reads skills off the explicit `skill` param AND the prompt; pin the
 // lookup to a fixed installed set so no user-skill store or skill directory is
 // touched. `findSkill` is the route's (and the runner's) id-or-name lookup.
@@ -44,7 +37,6 @@ vi.mock('@/lib/server/agent-runtime/store', () => ({
     postUserMessage: mocks.postUserMessage,
     softDeleteSession: mocks.softDeleteSession,
     listSessionsByOwner: mocks.listSessionsByOwner,
-    readRetirement: mocks.readRetirement,
   }),
 }));
 vi.mock('@/lib/server/agent-runtime/session-materials', () => ({
@@ -97,35 +89,6 @@ beforeEach(() => {
   mocks.postUserMessage.mockResolvedValue({ seq: 1, delivery: 'queued', requeued: true });
   mocks.softDeleteSession.mockResolvedValue(true);
   mocks.bindOwnerMaterialsToSession.mockResolvedValue([]);
-});
-
-describe('agent session collection route: tutor content filter', () => {
-  beforeEach(() => {
-    mocks.moderationEnabled = true;
-    mocks.screenText.mockReset();
-    mocks.screenText.mockResolvedValue(null);
-  });
-  afterEach(() => {
-    mocks.moderationEnabled = false;
-  });
-
-  it('screens the opening message in and never creates a session for a blocked one', async () => {
-    mocks.screenText.mockResolvedValueOnce('safe reply');
-    const response = await post({ prompt: 'something not allowed' });
-    expect(response.status).toBe(422);
-    expect(await response.json()).toMatchObject({
-      errorCode: 'CONTENT_SENSITIVE',
-      error: 'safe reply',
-    });
-    expect(mocks.screenText).toHaveBeenCalledWith('something not allowed', 'in', undefined);
-    expect(mocks.createSession).not.toHaveBeenCalled();
-  });
-
-  it('does nothing when the flag is off', async () => {
-    mocks.moderationEnabled = false;
-    await post({ prompt: 'teach me binary search' });
-    expect(mocks.screenText).not.toHaveBeenCalled();
-  });
 });
 
 describe('agent session collection route', () => {

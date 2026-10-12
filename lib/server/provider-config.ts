@@ -9,6 +9,8 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { createLogger } from '@/lib/logger';
+import { registerLogSecret } from '@/lib/log-secrets';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import {
   DEFAULT_QWEN_TTS_VOICE_CLONE_MODEL,
   isQwenCatalogVoice,
@@ -18,11 +20,30 @@ import {
 
 const log = createLogger('ServerProviderConfig');
 
+/** Field names in the server's provider file whose values are secrets. */
+const SECRET_YAML_FIELD = /^(apiKey|accessKeyId|secretAccessKey|secret|token|password)$/i;
+
+/** Registers the secret-valued fields of the provider file, so no log line carries them. */
+function registerYamlSecrets(node: unknown): void {
+  if (Array.isArray(node)) {
+    for (const child of node) registerYamlSecrets(child);
+    return;
+  }
+  if (node === null || typeof node !== 'object') return;
+  for (const [name, child] of Object.entries(node)) {
+    if (typeof child === 'string' && SECRET_YAML_FIELD.test(name)) {
+      registerLogSecret(child, 'operator');
+    } else {
+      registerYamlSecrets(child);
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export interface ServerProviderEntry {
+interface ServerProviderEntry {
   apiKey: string;
   baseUrl?: string;
   models?: string[];
@@ -39,7 +60,7 @@ export interface ServerProviderEntry {
   enabled?: boolean;
 }
 
-export interface ServerConfig {
+interface ServerConfig {
   providers: Record<string, ServerProviderEntry>;
   tts: Record<string, ServerProviderEntry>;
   asr: Record<string, ServerProviderEntry>;
@@ -79,7 +100,6 @@ export const LLM_ENV_MAP: Record<string, string> = {
   TENCENT_HUNYUAN: 'tencent-hunyuan',
   XIAOMI: 'xiaomi',
   MIMO: 'xiaomi',
-  TOKENDANCE: 'tokendance',
   OLLAMA: 'ollama',
   LEMONADE: 'lemonade',
   BEDROCK: 'bedrock',
@@ -94,7 +114,6 @@ const TTS_ENV_MAP: Record<string, string> = {
   TTS_DOUBAO: 'doubao-tts',
   TTS_ELEVENLABS: 'elevenlabs-tts',
   TTS_MINIMAX: 'minimax-tts',
-  TTS_GOOGLE: 'google-tts',
   TTS_LEMONADE: 'lemonade-tts',
 };
 
@@ -120,7 +139,6 @@ const IMAGE_ENV_MAP: Record<string, string> = {
   IMAGE_MINIMAX: 'minimax-image',
   IMAGE_GROK: 'grok-image',
   IMAGE_LEMONADE: 'lemonade',
-  IMAGE_OPENROUTER: 'openrouter-image',
 };
 
 const VIDEO_ENV_MAP: Record<string, string> = {
@@ -130,7 +148,6 @@ const VIDEO_ENV_MAP: Record<string, string> = {
   VIDEO_MINIMAX: 'minimax-video',
   VIDEO_GROK: 'grok-video',
   VIDEO_HAPPYHORSE: 'happyhorse',
-  VIDEO_OPENROUTER: 'openrouter-video',
 };
 
 const WEB_SEARCH_ENV_MAP: Record<string, string> = {
@@ -214,10 +231,11 @@ function loadYamlFile(filename: string): YamlData {
     if (!fs.existsSync(filePath)) return {};
     const raw = fs.readFileSync(filePath, 'utf-8');
     const parsed = yaml.load(raw) as Record<string, unknown> | null;
+    registerYamlSecrets(parsed);
     if (!parsed || typeof parsed !== 'object') return {};
     return parsed as YamlData;
   } catch (e) {
-    log.warn(`[ServerProviderConfig] Failed to load ${filename}:`, e);
+    log.warn(`[ServerProviderConfig] Failed to load ${filename}: ${describeUnexpectedError(e)}`);
     return {};
   }
 }
@@ -561,13 +579,7 @@ function getConfig(): ServerConfig {
 
   const yamlData = loadYamlFile(DEFAULT_FILENAME);
   const config = buildConfig(yamlData);
-  // Environment variables are always read; the file only when it has content.
-  logConfig(
-    config,
-    Object.keys(yamlData).length > 0
-      ? `${DEFAULT_FILENAME} and environment variables`
-      : 'environment variables',
-  );
+  logConfig(config, DEFAULT_FILENAME);
   _configs.set('', config);
   return config;
 }
@@ -586,22 +598,9 @@ function getConfig(): ServerConfig {
 
 type ProviderSection = 'providers' | 'tts' | 'asr' | 'pdf' | 'image' | 'video' | 'webSearch';
 
-/**
- * The operator's entry for a provider, or undefined. Provider ids come from
- * requests, so only the section's own keys count: an id such as `constructor`
- * or `__proto__` must not resolve to an inherited object property.
- */
-function serverEntry(
-  section: ProviderSection,
-  providerId: string,
-): ServerProviderEntry | undefined {
-  const entries = getConfig()[section];
-  return Object.hasOwn(entries, providerId) ? entries[providerId] : undefined;
-}
-
 /** Whether the operator configured this provider in the given section. */
 export function isServerConfiguredProvider(section: ProviderSection, providerId: string): boolean {
-  return serverEntry(section, providerId) !== undefined;
+  return !!getConfig()[section][providerId];
 }
 
 /** Whether the operator force-disabled this provider in the given capability section (server precedence). */
@@ -628,7 +627,7 @@ function resolveSectionApiKey(
   providerId: string,
   clientKey?: string,
 ): string {
-  const entry = serverEntry(section, providerId);
+  const entry = getConfig()[section][providerId];
   if (entry) return entry.apiKey || ''; // managed: server key is authoritative
   return clientKey || ''; // unmanaged: client-supplied key only
 }
@@ -638,7 +637,7 @@ function resolveSectionBaseUrl(
   providerId: string,
   clientBaseUrl?: string,
 ): string | undefined {
-  const entry = serverEntry(section, providerId);
+  const entry = getConfig()[section][providerId];
   if (entry) return entry.baseUrl; // managed: server base URL is authoritative
   return clientBaseUrl; // unmanaged: client-supplied base URL only
 }
@@ -646,15 +645,6 @@ function resolveSectionBaseUrl(
 // ---------------------------------------------------------------------------
 // Public API — LLM
 // ---------------------------------------------------------------------------
-
-/**
- * The resolved server provider configuration (YAML plus environment, with the
- * operator's force-off switches), for translating it into the model
- * configuration of RFC #1701. Read-only: callers must not mutate it.
- */
-export function getServerProviderConfig(): Readonly<ServerConfig> {
-  return getConfig();
-}
 
 /**
  * Returns server-configured LLM providers. Exposes only the allowed model list
@@ -673,6 +663,7 @@ export function getServerProviders(): Record<string, { models?: string[] }> {
 
 /** Resolve API key. Managed provider ⇒ server key; otherwise client key. */
 export function resolveApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('providers', providerId, clientKey);
 }
 
@@ -683,7 +674,7 @@ export function resolveBaseUrl(providerId: string, clientBaseUrl?: string): stri
 
 /** Resolve proxy URL for a provider (server config only) */
 export function resolveProxy(providerId: string): string | undefined {
-  return serverEntry('providers', providerId)?.proxy;
+  return getConfig().providers[providerId]?.proxy;
 }
 
 // ---------------------------------------------------------------------------
@@ -716,6 +707,7 @@ export function enabledServerTTSProviderIds(): string[] {
 }
 
 export function resolveTTSApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('tts', providerId, clientKey);
 }
 
@@ -747,20 +739,6 @@ export class TTSModelNotAllowedError extends Error {
 }
 
 /**
- * The TTS model of a configured slot: its own model, with only the voice
- * compatibility rules of `resolveTTSModel` applied (a cloned voice speaks
- * through the clone model, a catalog voice never does). Legacy server pins do
- * not apply.
- */
-export function slotTTSModel(
-  providerId: string,
-  modelId: string | undefined,
-  voiceId?: string,
-): string | undefined {
-  return ttsModelFor(providerId, [], modelId, voiceId);
-}
-
-/**
  * Resolve the TTS model. A managed provider may pin its model server-side
  * (`${PREFIX}_MODELS`, first entry) — authoritative like its key/baseUrl, since
  * the managed-provider UI does not expose a model field. Otherwise the client
@@ -771,16 +749,9 @@ export function resolveTTSModel(
   clientModel?: string,
   voiceId?: string,
 ): string | undefined {
-  const pinnedModels = serverEntry('tts', providerId)?.models?.filter(Boolean) ?? [];
-  return ttsModelFor(providerId, pinnedModels, clientModel, voiceId);
-}
+  const entry = getConfig().tts[providerId];
+  const pinnedModels = entry?.models?.filter(Boolean) ?? [];
 
-function ttsModelFor(
-  providerId: string,
-  pinnedModels: string[],
-  clientModel?: string,
-  voiceId?: string,
-): string | undefined {
   if (providerId === 'qwen-tts') {
     const vcModel = resolveQwenVoiceCloneModel();
     const requestedIsVCSentinel = !!clientModel && isQwenVoiceCloneModel(clientModel, vcModel);
@@ -835,6 +806,7 @@ export function getServerASRProviders(): Record<string, { disabled?: boolean }> 
 }
 
 export function resolveASRApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('asr', providerId, clientKey);
 }
 
@@ -854,7 +826,7 @@ export function resolveServerASRProviderId(): string | undefined {
  * entry is the managed default; otherwise the client model wins.
  */
 export function resolveASRModel(providerId: string, clientModel?: string): string | undefined {
-  const serverModels = serverEntry('asr', providerId)?.models;
+  const serverModels = getConfig().asr[providerId]?.models;
   if (serverModels?.length) {
     if (clientModel && serverModels.includes(clientModel)) return clientModel;
     return serverModels[0];
@@ -872,6 +844,7 @@ export function getServerPDFProviders(): Record<string, Record<string, never>> {
 }
 
 export function resolvePDFApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('pdf', providerId, clientKey);
 }
 
@@ -903,6 +876,7 @@ export function getServerImageProviders(): Record<
 }
 
 export function resolveImageApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('image', providerId, clientKey);
 }
 
@@ -930,7 +904,7 @@ export function resolveServerImageProviderId(): string | undefined {
  * entry is the managed default; otherwise the client model wins.
  */
 export function resolveImageModel(providerId: string, clientModel?: string): string | undefined {
-  const serverModels = serverEntry('image', providerId)?.models;
+  const serverModels = getConfig().image[providerId]?.models;
   if (serverModels?.length) {
     if (clientModel && serverModels.includes(clientModel)) return clientModel;
     return serverModels[0];
@@ -962,6 +936,7 @@ export function getServerVideoProviders(): Record<
 }
 
 export function resolveVideoApiKey(providerId: string, clientKey?: string): string {
+  registerLogSecret(clientKey, 'visitor');
   return resolveSectionApiKey('video', providerId, clientKey);
 }
 
@@ -989,7 +964,7 @@ export function resolveServerVideoProviderId(): string | undefined {
  * entry is the managed default; otherwise the client model wins.
  */
 export function resolveVideoModel(providerId: string, clientModel?: string): string | undefined {
-  const serverModels = serverEntry('video', providerId)?.models;
+  const serverModels = getConfig().video[providerId]?.models;
   if (serverModels?.length) {
     if (clientModel && serverModels.includes(clientModel)) return clientModel;
     return serverModels[0];
@@ -1046,7 +1021,7 @@ export function resolveWebSearchModel(
   providerId: string,
   clientModel?: string,
 ): string | undefined {
-  const entry = serverEntry('webSearch', providerId);
+  const entry = getConfig().webSearch[providerId];
   if (entry?.models && entry.models.length > 0) return entry.models[0];
   return clientModel;
 }

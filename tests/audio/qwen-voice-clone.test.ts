@@ -19,28 +19,6 @@ import { getEnabledProvidersWithVoices } from '@/lib/audio/voice-resolver';
 import { validateReferenceAudio } from '@/lib/audio/wav-validate';
 import { generateTTS } from '@/lib/audio/tts-providers';
 
-// The Qwen voice-clone helpers issue their API calls through undici's fetch
-// (with a pinned dispatcher); the audio download keeps using the global fetch.
-// One shared double stands in for both so call assertions stay in one place.
-const fetchMock = vi.hoisted(() => vi.fn());
-vi.mock('undici', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('undici')>();
-  return { ...actual, fetch: fetchMock };
-});
-vi.stubGlobal('fetch', fetchMock);
-
-// `downloadAudio` now runs the URL-layer SSRF guard (then pins the connect via
-// the dispatcher). The transport is doubled above, so only the URL-layer DNS
-// lookup is reachable; answer it with a public address.
-const dnsMocks = vi.hoisted(() => ({ promisesLookup: vi.fn() }));
-vi.mock('node:dns', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:dns')>();
-  return {
-    ...actual,
-    promises: { ...actual.promises, lookup: dnsMocks.promisesLookup },
-  };
-});
-
 const CONFIG = {
   apiKey: 'sk-qwen',
   baseUrl: 'https://dashscope.example.com/api/v1',
@@ -71,17 +49,12 @@ function pcmWav(seconds = 1): Uint8Array {
 }
 
 describe('Qwen voice cloning', () => {
-  beforeEach(() => {
-    clearQwenVoiceRegistrationMemoForTests();
-    fetchMock.mockReset();
-    dnsMocks.promisesLookup.mockReset();
-    dnsMocks.promisesLookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
-  });
+  beforeEach(() => clearQwenVoiceRegistrationMemoForTests());
   afterEach(() => vi.restoreAllMocks());
 
   it('posts the enrollment request and uses output.voice as the authoritative id', async () => {
     const audio = pcmWav();
-    const fetchSpy = fetchMock.mockResolvedValue(
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ output: { voice: 'qwen_vc_authoritative' } }), {
         status: 200,
       }),
@@ -120,9 +93,9 @@ describe('Qwen voice cloning', () => {
     'https://dashscope.example.com/api/v1',
     'https://dashscope.example.com/api/v1/',
   ])('normalizes base URL %s without duplicating api/v1', async (baseUrl) => {
-    const fetchSpy = fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ output: { voice: 'voice_1' } })),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ output: { voice: 'voice_1' } })));
     await registerQwenVoice(
       { ...CONFIG, baseUrl },
       { name: 'Teacher', audio: pcmWav(), text: 'Reference.' },
@@ -148,7 +121,7 @@ describe('Qwen voice cloning', () => {
     'ftp://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/result.wav',
     'https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com:8443/result.wav',
   ])('rejects an untrusted audio URL: %s', async (url) => {
-    const fetchSpy = fetchMock;
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
     await expect(downloadAudio(url)).rejects.toMatchObject({
       code: 'QWEN_VC_AUDIO_URL_INVALID',
     });
@@ -156,9 +129,9 @@ describe('Qwen voice cloning', () => {
   });
 
   it('upgrades trusted HTTP URLs and refuses redirects', async () => {
-    const fetchSpy = fetchMock.mockResolvedValue(
-      new Response(new Uint8Array([1, 2, 3]), { status: 200 }),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
     await downloadAudio(
       'http://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/result.wav?signature=value',
     );
@@ -169,15 +142,15 @@ describe('Qwen voice cloning', () => {
   });
 
   it('allows international DashScope result hosts', async () => {
-    const fetchSpy = fetchMock.mockResolvedValue(
-      new Response(new Uint8Array([1]), { status: 200 }),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(new Uint8Array([1]), { status: 200 }));
     await downloadAudio('https://dashscope-result-us.oss-us-west-1.aliyuncs.com/result.wav');
     expect(fetchSpy).toHaveBeenCalledOnce();
   });
 
   it('rejects an oversized declared download before reading it', async () => {
-    fetchMock.mockResolvedValue(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(new Uint8Array([1]), {
         status: 200,
         headers: { 'content-length': String(50 * 1024 * 1024 + 1) },
@@ -196,14 +169,15 @@ describe('Qwen voice cloning', () => {
         controller.close();
       },
     });
-    fetchMock.mockResolvedValue(new Response(body, { status: 200 }));
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(body, { status: 200 }));
     await expect(
       downloadAudio('https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/a.wav'),
     ).rejects.toMatchObject({ code: 'QWEN_VC_AUDIO_TOO_LARGE' });
   });
 
   it('posts VC synthesis without parameters and returns downloaded bytes', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -233,7 +207,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('normalizes non-default VC speed and still synthesizes', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -252,9 +227,9 @@ describe('Qwen voice cloning', () => {
   });
 
   it('allows a custom Qwen base URL to serve its own audio without weakening redirects', async () => {
-    const fetchSpy = fetchMock.mockResolvedValue(
-      new Response(new Uint8Array([1]), { status: 200 }),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(new Uint8Array([1]), { status: 200 }));
     await downloadAudio(
       'https://proxy.example.com/storage/result.wav',
       undefined,
@@ -264,7 +239,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('lists and deletes provider-side Qwen voices with documented request shapes', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -290,7 +266,7 @@ describe('Qwen voice cloning', () => {
   });
 
   it('matches both voice id and target model during existence checks', async () => {
-    fetchMock.mockResolvedValue(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(
         JSON.stringify({
           output: {
@@ -304,7 +280,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('continues pagination when the vendor clamps page size below the request', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -332,7 +309,7 @@ describe('Qwen voice cloning', () => {
   });
 
   it('retries an unexpectedly empty page once and returns unknown if it stays ambiguous', async () => {
-    const fetchSpy = fetchMock.mockImplementation(
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
       async () =>
         new Response(
           JSON.stringify({
@@ -348,19 +325,19 @@ describe('Qwen voice cloning', () => {
   });
 
   it('treats a vendor 5xx on the existence lookup as unknown', async () => {
-    fetchMock.mockResolvedValue(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ code: 'UpstreamFailure' }), { status: 500 }),
     );
     await expect(qwenVoiceExists(CONFIG, 'v1')).resolves.toBe('unknown');
   });
 
   it('treats a network error on the existence lookup as unknown', async () => {
-    fetchMock.mockRejectedValue(new TypeError('fetch failed'));
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('fetch failed'));
     await expect(qwenVoiceExists(CONFIG, 'v1')).resolves.toBe('unknown');
   });
 
   it('fails loudly on a 401 existence lookup', async () => {
-    fetchMock.mockResolvedValue(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ code: 'InvalidApiKey' }), { status: 401 }),
     );
     await expect(qwenVoiceExists(CONFIG, 'v1')).rejects.toMatchObject({
@@ -371,7 +348,7 @@ describe('Qwen voice cloning', () => {
 
   it('does not couple a shared enrollment to the first waiter aborting', async () => {
     let resolveVendor!: (response: Response) => void;
-    const fetchSpy = fetchMock.mockImplementation(
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
       () =>
         new Promise<Response>((resolve) => {
           resolveVendor = resolve;
@@ -396,7 +373,7 @@ describe('Qwen voice cloning', () => {
 
   it('memoizes a background enrollment after its only waiter aborts', async () => {
     let resolveVendor!: (response: Response) => void;
-    const fetchSpy = fetchMock.mockImplementation(
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
       () =>
         new Promise<Response>((resolve) => {
           resolveVendor = resolve;
@@ -422,9 +399,11 @@ describe('Qwen voice cloning', () => {
   });
 
   it('bounds the successful registration memo and evicts the least recently used entry', async () => {
-    const fetchSpy = fetchMock.mockImplementation(
-      async () => new Response(JSON.stringify({ output: { voice: 'vendor_voice' } })),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(
+        async () => new Response(JSON.stringify({ output: { voice: 'vendor_voice' } })),
+      );
     const adapter = getVoiceRegistrationAdapter('qwen-tts')!;
     const cfg = { baseUrl: CONFIG.baseUrl, apiKey: CONFIG.apiKey, model: CONFIG.targetModel };
     const referenceAudioBase64 = Buffer.from(pcmWav()).toString('base64');
@@ -444,7 +423,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('uses a successful memo to avoid duplicate enrollment after an ambiguous lookup', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify({ output: { voice: 'vendor_voice' } })))
       .mockImplementation(
         async () => new Response(JSON.stringify({ output: { total_count: 1, voice_list: [] } })),
@@ -466,7 +446,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('does not use an ambiguous registration memo from another account', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify({ output: { voice: 'vendor_voice' } })))
       .mockImplementation(
         async () => new Response(JSON.stringify({ output: { total_count: 1, voice_list: [] } })),
@@ -487,7 +468,8 @@ describe('Qwen voice cloning', () => {
   it('does not use an expired memo after an ambiguous lookup', async () => {
     let now = 1_000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify({ output: { voice: 'vendor_voice' } })))
       .mockImplementation(
         async () => new Response(JSON.stringify({ output: { total_count: 1, voice_list: [] } })),
@@ -506,7 +488,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('dispatches from the voice identity, not a stale model id', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -538,7 +521,7 @@ describe('Qwen voice cloning', () => {
   });
 
   it('uses a neutral error identity for ordinary Qwen audio download failures', async () => {
-    fetchMock.mockResolvedValueOnce(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(
         JSON.stringify({ output: { audio: { url: 'https://untrusted.example.com/audio.wav' } } }),
       ),
@@ -562,7 +545,8 @@ describe('Qwen voice cloning', () => {
   });
 
   it('evicts the registration memo when synthesis reports that the voice is gone', async () => {
-    const fetchSpy = fetchMock
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify({ output: { voice: 'vendor_voice_1' } })))
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ code: 'VoiceNotFound', message: 'voice does not exist' }), {
@@ -598,7 +582,7 @@ describe('Qwen voice cloning', () => {
   it('shares a synthesis deadline across the vendor request and download', async () => {
     vi.useFakeTimers();
     try {
-      fetchMock.mockImplementation(
+      vi.spyOn(globalThis, 'fetch').mockImplementation(
         (_input, init) =>
           new Promise((_resolve, reject) => {
             init?.signal?.addEventListener('abort', () => reject(init.signal?.reason), {
@@ -632,9 +616,9 @@ describe('Qwen voice cloning', () => {
   });
 
   it('memoizes identical adapter registrations and returns the vendor id', async () => {
-    const fetchSpy = fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ output: { voice: 'vendor_voice_1' } })),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ output: { voice: 'vendor_voice_1' } })));
     const adapter = getVoiceRegistrationAdapter('qwen-tts')!;
     const params = {
       voiceId: 'Friendly Teacher',

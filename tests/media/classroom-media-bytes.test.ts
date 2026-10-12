@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { isConcreteMediaAddress } from '@/lib/media/resolve-media-ref';
@@ -56,7 +55,7 @@ describe('persistClassroomMediaBytes', () => {
       signal: new AbortController().signal,
     });
 
-    expect(mocks.mkdir).toHaveBeenCalledWith(join(CLASSROOMS_DIR, 'stage-owner', 'media'), {
+    expect(mocks.mkdir).toHaveBeenCalledWith(`${CLASSROOMS_DIR}/stage-owner/media`, {
       recursive: true,
     });
     expect(mocks.writeFile).toHaveBeenCalledWith(

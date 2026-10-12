@@ -52,6 +52,15 @@ For every `procedural-skill` scene fill `widgetOutline` with the real contract:
 - `errorConsequences`: what actually goes wrong if a step is skipped or done
   unsafely
 
+## Conversational path
+
+The rules above describe the classroom builder's outline. The chat agent's
+`generate_scene` tool does not accept `procedural-skill`: that widget type stays
+gated behind task-engine mode. In a chat turn, do not promise a procedure page.
+Teach the procedure with the page types that tool accepts (`simulation`,
+`diagram`, `code`, `game`, `visualization3d`), or with an ordinary page, and say
+in one sentence that hands-on procedure pages come from the classroom builder.
+
 ## Prohibited
 
 - Pure theory scenes, concept lectures, formula derivations.

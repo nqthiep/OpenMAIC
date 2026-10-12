@@ -5,12 +5,7 @@ import {
   type AssetManifestMetadata,
 } from '@openmaic/dsl';
 import type { Scene, Stage } from '@/lib/types/stage';
-import {
-  db,
-  mediaFileKey,
-  type AudioFileRecord,
-  type MediaFileRecord,
-} from '@/lib/device-storage/database';
+import { db, mediaFileKey, type AudioFileRecord, type MediaFileRecord } from '@/lib/utils/database';
 
 /**
  * The stage document's asset manifest with the metadata the compatibility

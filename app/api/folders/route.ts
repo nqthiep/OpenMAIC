@@ -1,12 +1,12 @@
 /**
- * GET/POST /api/folders — the server course library's folder API (server-side
- * counterpart of the local `lib/utils/stage-storage.ts` folder API; with
- * server persistence on, the seam routes through these handlers instead of the
+ * GET/POST /api/folders — the workbench's course-folder API (server-side
+ * counterpart of the local `lib/utils/stage-storage.ts` folder API; the
+ * configured runtime routes the seam through these handlers instead of the
  * Dexie tables).
  *
- * Every handler is owner-scoped exactly like the stage routes: the
- * owner resolves through the owner identity seam (`withRequestOwner`) and is
- * never a request parameter, and all reads and writes go through the owner-bound
+ * Every handler is owner-scoped exactly like the other workbench routes: the
+ * owner resolves from the anonymous cookie (`withRequestOwnerId`) and is never
+ * a request parameter, and all reads and writes go through the owner-bound
  * document store (`getOwnerScopedDocumentStore`), the same seam the runner
  * binds for the stage tools. A folder created here is visible to this browser
  * and to nobody else.
@@ -15,25 +15,27 @@
  * = 1, ≤ 40) from `lib/utils/folder-name-validation.ts` — the same module the
  * client dialogs import, so the two ends cannot drift.
  *
- * Server persistence gates the whole family (see `app/api/stages/route.ts`):
- * without a DATABASE_URL it answers a plain 404; the agent runtime is not
- * required.
+ * The configured runtime gates the whole family (see `app/api/stages/route.ts`):
+ * off, or on without a DATABASE_URL, answers the same plain 404.
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import type { DocumentFolder, DocumentFolderStore } from '@openmaic/storage';
 
-import { isServerPersistenceConfigured } from '@/lib/config/feature-flags';
+import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
-import { withRequestOwner } from '@/lib/server/identity/with-owner';
-import { ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
+import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 import { folderNameErrorResponse } from '@/lib/server/folder-name-errors';
 import { createFolderForOwner, listFoldersForOwner } from '@/lib/server/folder-persistence';
 import { validateFolderName } from '@/lib/utils/folder-name-validation';
 
 export const runtime = 'nodejs';
+
+/** Largest folder create body, refused before it is buffered. The app sends one name. */
+const FOLDER_CREATE_MAX_BYTES = 1024 * 1024;
 
 /**
  * The wire shape is the reference's `FolderItem`: the owner id the folder
@@ -52,9 +54,9 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 
 // GET /api/folders — list the caller's folders, ordered by `order` asc.
 export async function GET(req: NextRequest) {
-  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     try {
       const store = (await getOwnerScopedDocumentStore(ownerId)) as unknown as DocumentFolderStore;
       const folders = await listFoldersForOwner(store);
@@ -64,7 +66,7 @@ export async function GET(req: NextRequest) {
         responseHeaders,
       );
     } catch (error) {
-      console.error('[Folders] Failed to list:', error);
+      console.error(`[Folders] Failed to list [owner=${ownerId}]:`, error);
       return jsonError(500, 'FOLDER_LIST_FAILED', 'Failed to list folders', responseHeaders);
     }
   });
@@ -76,15 +78,19 @@ export async function GET(req: NextRequest) {
 // malformed body must not mint an anonymous cookie partition for a request
 // that will not proceed.
 export async function POST(req: NextRequest) {
-  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return jsonError(400, 'INVALID_BODY', 'request body must be JSON');
+  const read = await readBoundedJson(req, FOLDER_CREATE_MAX_BYTES);
+  if (!read.ok) {
+    return jsonError(
+      read.status,
+      'INVALID_BODY',
+      read.code === 'PAYLOAD_TOO_LARGE'
+        ? `request body exceeds ${FOLDER_CREATE_MAX_BYTES} bytes`
+        : 'request body must be JSON',
+    );
   }
-  const name = (body as { name?: unknown })?.name;
+  const name = (read.value as { name?: unknown })?.name;
   if (typeof name !== 'string') {
     return jsonError(400, 'FOLDER_NAME_INVALID', 'name must be a string');
   }
@@ -98,14 +104,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     try {
       const store = (await getOwnerScopedDocumentStore(ownerId)) as unknown as DocumentFolderStore;
       const { folder } = await createFolderForOwner(store, trimmed, { reuseExisting: false });
       return ownerJson({ folder: folderResponse(folder, ownerId) }, 200, responseHeaders);
     } catch (error) {
-      const claimed = ownerWriteErrorResponse(error, responseHeaders);
-      if (claimed) return claimed;
       // The storage re-checks duplicates + count limit inside its owner-scoped
       // transaction; map its refusals onto the same machine codes the
       // pre-checks use.
@@ -114,7 +118,7 @@ export async function POST(req: NextRequest) {
         for (const [key, value] of responseHeaders) nameError.headers.append(key, value);
         return nameError;
       }
-      console.error('[Folders] Failed to create:', error);
+      console.error(`[Folders] Failed to create [owner=${ownerId}]:`, error);
       return jsonError(500, 'FOLDER_CREATE_FAILED', 'Failed to create folder', responseHeaders);
     }
   });

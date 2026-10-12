@@ -8,5 +8,12 @@
     { "type": "slide", "max": 3 }
   ],
   "requiredWidgetTypes": ["procedural-skill"],
-  "requiredWidgetOutlineFields": ["task", "steps", "successCriteria"]
+  "requiredWidgetOutlineFields": [
+    "procedureType",
+    "task",
+    "tools",
+    "steps",
+    "successCriteria",
+    "errorConsequences"
+  ]
 }

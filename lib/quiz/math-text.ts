@@ -1,5 +1,4 @@
 import katex from 'katex';
-import { safeKatexOptions } from '@openmaic/dsl';
 
 export type QuizMathTextSegment =
   | {
@@ -57,15 +56,12 @@ export function isLikelyStandaloneMathText(value: string): boolean {
 
 export function renderLatexToHtml(value: string, displayMode = false): string | null {
   try {
-    return katex.renderToString(
-      escapeLiteralPercents(value),
-      safeKatexOptions({
-        displayMode,
-        output: 'html',
-        strict: false,
-        throwOnError: true,
-      }),
-    );
+    return katex.renderToString(escapeLiteralPercents(value), {
+      displayMode,
+      output: 'html',
+      strict: false,
+      throwOnError: true,
+    });
   } catch {
     return null;
   }

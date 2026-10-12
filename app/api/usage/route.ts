@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
-import { requireAdmin } from '@/lib/accounts/admin-routes';
-import { accountsEnabled } from '@/lib/accounts/gate';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { requireAdministrator } from '@/lib/server/accounts/admin';
+import { accountsEnabled } from '@/lib/server/accounts/runtime';
 import {
   readUsageRecords,
   type UsageRecord,
@@ -69,15 +69,21 @@ function dayKey(createdAt: number): string {
  *
  * Aggregates the deployment-wide usage log (data/usage/*.jsonl) by model, by
  * day, and by modality. Pure usage — no cost. Optional `?months=YYYY-MM,...`.
- * With accounts on, this covers every person's usage, so only an administrator
- * may read it.
  */
 export async function GET(req: NextRequest) {
-  if (accountsEnabled()) {
-    const gate = await requireAdmin(req);
-    if (!gate.ok) return gate.response;
-  }
   try {
+    // The deployment-wide log is for administrators. Without accounts nobody can be one,
+    // so the endpoint is off: a gate-only visitor is not shown deployment spend.
+    if (!accountsEnabled()) {
+      return apiError(
+        'ADMIN_ONLY',
+        403,
+        'Usage is shown to administrators, and this deployment has no accounts.',
+      );
+    }
+    const admin = await requireAdministrator(req.headers);
+    if (admin instanceof Response) return apiError('ADMIN_ONLY', 403, 'Administrators only.');
+
     const monthsParam = req.nextUrl.searchParams.get('months');
     const months = monthsParam ? monthsParam.split(',').map((s) => s.trim()) : undefined;
 

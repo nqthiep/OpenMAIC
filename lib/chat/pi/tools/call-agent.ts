@@ -555,12 +555,7 @@ export function buildCallAgentTool(opts: {
   isUserCued?: () => boolean;
   isSessionClosed?: () => boolean;
   takeSceneEvidence?: () => RuntimeEvidenceAttachment<DirectorSceneEvidenceMetadata[]> | undefined;
-  // `metadata` is absent when only area state travels, so no element identity and
-  // no Spotlight authorization can be derived from it.
-  elementReferenceEvidence?: Readonly<{
-    content: string;
-    metadata?: Readonly<ElementReferenceEvidence>;
-  }>;
+  elementReferenceEvidence?: RuntimeEvidenceAttachment<ElementReferenceEvidence>;
 }): AgentTool<typeof CallAgentParams> {
   // Loop-guard (model-agnostic): an empty/errored child turn used to bypass onAgentDone,
   // so the completed-turn count never advanced and the maxAgentTurns guard was defeated — a model
@@ -685,7 +680,7 @@ export function buildCallAgentTool(opts: {
         : [];
       if (
         capturedScene &&
-        elementReferenceEvidence?.metadata?.kind === 'slide_element' &&
+        elementReferenceEvidence?.metadata.kind === 'slide_element' &&
         elementReferenceEvidence.metadata.sceneId === capturedScene.sceneId &&
         !spotlightElementIds.includes(elementReferenceEvidence.metadata.elementId)
       ) {
@@ -848,7 +843,7 @@ export function buildCallAgentTool(opts: {
             availableToolNames,
             nativeChildRun: nativeResult,
             ...(sceneEvidence ? { sceneEvidence: sceneEvidence.metadata } : {}),
-            ...(elementReferenceEvidence?.metadata
+            ...(elementReferenceEvidence
               ? {
                   elementReferenceEvidence: elementReferenceEvidence.metadata,
                 }
@@ -871,7 +866,7 @@ export function buildCallAgentTool(opts: {
         maxActionsPerAgent: opts.maxActionsPerAgent,
         enableWhiteboardTools: opts.enableWhiteboardTools,
         whiteboardState: getLegacyWhiteboardState(),
-        ...(elementReferenceEvidence?.metadata?.kind === 'slide_element'
+        ...(elementReferenceEvidence?.metadata.kind === 'slide_element'
           ? { authorizedSpotlightElementIds: new Set(spotlightElementIds) }
           : {}),
       });
@@ -998,7 +993,7 @@ export function buildCallAgentTool(opts: {
           text: finalText,
           actionWarnings,
           ...(sceneEvidence ? { sceneEvidence: sceneEvidence.metadata } : {}),
-          ...(elementReferenceEvidence?.metadata
+          ...(elementReferenceEvidence
             ? {
                 elementReferenceEvidence: elementReferenceEvidence.metadata,
               }

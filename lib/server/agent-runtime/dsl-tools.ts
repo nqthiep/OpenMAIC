@@ -1,13 +1,8 @@
-import { isDeepStrictEqual } from 'node:util';
 import { Type, type Static } from 'typebox';
 import type { AgentTool } from '@earendil-works/pi-agent-core';
 import type { Action } from '@/lib/types/action';
 import type { Scene, SlideContent } from '@/lib/types/stage';
 import { validateAppScene } from '@/lib/document-store/validators';
-import { isCodeWidgetAllowed, isTutorModerationEnabled } from '@/lib/config/feature-flags';
-import { resolveLocale } from '@/lib/tutor/locale';
-import { extractVisibleText, moderateScene } from './content-moderation';
-import { assertScenePolicy, isCodeWidget, isWalkthroughScene } from '@/lib/widgets/policy';
 import type { CourseDocument, CourseToolDeps } from './course-tools';
 import { putSceneBringingCurrent } from './document-writes';
 import { runStageMutation } from './mutation-fence';
@@ -134,18 +129,6 @@ export const GREP_COURSE_SCHEMA = Type.Object({
 type ReadParams = Static<typeof READ_COURSE_SCHEMA>;
 type PatchParams = Static<typeof PATCH_COURSE_SCHEMA>;
 type GrepParams = Static<typeof GREP_COURSE_SCHEMA>;
-
-const WALKTHROUGH_LOCKED_HINT = 'call generate_walkthrough with another preset';
-
-/** ADR 0013 decision 7: html/widgetConfig of a walkthrough scene (before or after) are tool-owned. */
-function walkthroughLocked(before: Scene, after: Scene): boolean {
-  if (!isWalkthroughScene(before) && !isWalkthroughScene(after)) return false;
-  const pick = (scene: Scene) => {
-    const c = scene.content as unknown as { html?: unknown; widgetConfig?: unknown } | undefined;
-    return { html: c?.html, widgetConfig: c?.widgetConfig };
-  };
-  return !isDeepStrictEqual(pick(before), pick(after));
-}
 
 function toolResult(text: string, details: Record<string, unknown>, isError = false) {
   return {
@@ -841,34 +824,6 @@ export function buildDslCourseTools(deps: CourseToolDeps): AgentTool<never, neve
           true,
         );
       }
-      if (walkthroughLocked(resolved.scene, next)) {
-        return toolResult(
-          `patch_stage rejected: walkthrough-locked (${WALKTHROUGH_LOCKED_HINT})`,
-          { intent: params.intent, error: 'walkthrough-locked', hint: WALKTHROUGH_LOCKED_HINT },
-          true,
-        );
-      }
-      const codeAllowed = isCodeWidgetAllowed();
-      // Relabelling a blocked code widget (widgetType / widgetConfig.type) must not leave its html renderable.
-      const relabelled =
-        !codeAllowed &&
-        isCodeWidget(resolved.scene.content) &&
-        !isCodeWidget(next.content) &&
-        isDeepStrictEqual(
-          (resolved.scene.content as { html?: unknown }).html,
-          (next.content as { html?: unknown }).html,
-        );
-      const blocked = assertScenePolicy(relabelled ? resolved.scene : next, { codeAllowed });
-      if (blocked) {
-        const hint = relabelled
-          ? `${blocked.hint} Relabelling is not enough: the batch must also replace /content/html.`
-          : blocked.hint;
-        return toolResult(
-          `patch_stage rejected: ${blocked.error} (${hint})`,
-          { intent: params.intent, error: blocked.error, hint },
-          true,
-        );
-      }
       const issue = validationError(next);
       if (issue) {
         return toolResult(
@@ -876,22 +831,6 @@ export function buildDslCourseTools(deps: CourseToolDeps): AgentTool<never, neve
           { intent: params.intent, failedOp: params.ops.length },
           true,
         );
-      }
-      // Only a changed visible text is re-filtered (untouched pages stay writable when the filter is down).
-      if (
-        isTutorModerationEnabled() &&
-        !isDeepStrictEqual(extractVisibleText(resolved.scene), extractVisibleText(next))
-      ) {
-        const flagged = await moderateScene(next, {
-          locale: resolveLocale(loaded.doc.stage.languageDirective),
-        });
-        if (flagged) {
-          return toolResult(
-            `patch_stage rejected: content-blocked (${flagged.hint})`,
-            { intent: params.intent, ...flagged },
-            true,
-          );
-        }
       }
       try {
         await runStageMutation(signal, () =>

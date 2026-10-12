@@ -24,6 +24,8 @@ import { applyRequestLocaleToProject } from '@/lib/pbl/v2/api/locale';
 import { runSimulatorTurn, type SimulatorPhase } from '@/lib/pbl/v2/agents/simulator';
 import type { PBLProjectV2 } from '@/lib/pbl/v2/types';
 
+export const maxDuration = 300;
+
 const log = createLogger('PBL v2 Simulator API');
 
 interface SimulatorRequest {
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
     return apiError('INVALID_REQUEST', 400, err instanceof Error ? err.message : String(err));
   }
 
-  const { model, thinkingConfig } = resolved;
+  const { model, thinkingConfig, managedKey } = resolved;
   const phase: SimulatorPhase = body.phase === 'greeting' ? 'greeting' : 'instructing';
   applyRequestLocaleToProject(req, body.project);
 
@@ -67,6 +69,6 @@ export async function POST(req: NextRequest) {
       thinkingConfig,
       signal: req.signal,
     }),
-    { signal: req.signal },
+    { signal: req.signal, managedKey },
   );
 }

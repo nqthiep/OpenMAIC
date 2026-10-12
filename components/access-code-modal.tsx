@@ -17,14 +17,23 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const titleId = useId();
+  // A failed attempt disables the input while it is in flight, so focus can only return once loading ends.
+  const refocusAfterAttempt = useRef(false);
   const inputId = useId();
+  const errorId = useId();
 
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.focus();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!loading && refocusAfterAttempt.current) {
+      refocusAfterAttempt.current = false;
+      inputRef.current?.focus();
+    }
+  }, [loading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,12 +52,14 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
         setSuccess(true);
         setTimeout(onSuccess, 600);
       } else {
-        setError(t('accessCode.error'));
+        // 429 means this network has spent its attempts; a wrong code gets the plain message.
+        setError(t(res.status === 429 ? 'accessCode.rateLimited' : 'accessCode.error'));
         setCode('');
-        inputRef.current?.focus();
+        refocusAfterAttempt.current = true;
       }
     } catch {
       setError(t('accessCode.error'));
+      refocusAfterAttempt.current = true;
     } finally {
       setLoading(false);
     }
@@ -87,9 +98,6 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
 
           {/* Content card */}
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
             className="relative z-10 w-full max-w-sm mx-4"
             initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -109,7 +117,6 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
 
               {/* Title */}
               <motion.h1
-                id={titleId}
                 className="mb-1 text-center text-lg font-semibold tracking-tight text-foreground"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -137,11 +144,11 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
               >
                 <div className="relative">
                   <label htmlFor={inputId} className="sr-only">
-                    {t('accessCode.placeholder')}
+                    {t('accessCode.title')}
                   </label>
                   <input
-                    id={inputId}
                     ref={inputRef}
+                    id={inputId}
                     type="password"
                     placeholder={t('accessCode.placeholder')}
                     value={code}
@@ -157,11 +164,12 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
                       ${error ? 'border-destructive/50 focus:border-destructive/50 focus:ring-destructive/10' : 'border-border/60'}
                     `}
                     disabled={loading || success}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? errorId : undefined}
                     autoComplete="off"
                   />
                   <button
                     type="submit"
-                    aria-label={t('common.confirm')}
                     disabled={!code || loading || success}
                     className={`
                       absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center
@@ -185,21 +193,22 @@ export function AccessCodeModal({ open, onSuccess }: AccessCodeModalProps) {
                   </button>
                 </div>
 
-                {/* Error message */}
-                <AnimatePresence mode="wait">
-                  {error && (
-                    <motion.p
-                      role="alert"
-                      className="text-center text-sm text-destructive"
-                      initial={{ opacity: 0, y: -4, height: 0 }}
-                      animate={{ opacity: 1, y: 0, height: 'auto' }}
-                      exit={{ opacity: 0, y: -4, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                {/* Error message. The region is always mounted, so a screen reader announces the text when it arrives. */}
+                <div role="alert" id={errorId}>
+                  <AnimatePresence mode="wait">
+                    {error && (
+                      <motion.p
+                        className="text-center text-sm text-destructive"
+                        initial={{ opacity: 0, y: -4, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: -4, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {error}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.form>
             </div>
           </motion.div>

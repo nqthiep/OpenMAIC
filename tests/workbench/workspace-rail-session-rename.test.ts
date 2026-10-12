@@ -14,7 +14,6 @@
 import { act, createElement, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { WorkspaceRail } from '@/components/workbench/workspace/WorkspaceRail';
 import { RAIL_TAB_STORAGE_KEY } from '@/lib/workbench/workspace-rail-tab';
 
 vi.mock('@/lib/hooks/use-i18n', () => ({
@@ -26,6 +25,7 @@ vi.mock('@/lib/brand/brand-context', () => ({
 vi.mock('@/components/workbench/ProBadge', () => ({ ProBadge: () => null }));
 vi.mock('@/components/language-switcher', () => ({ LanguageSwitcher: () => null }));
 vi.mock('@/components/site-header/theme-toggle', () => ({ ThemeToggle: () => null }));
+vi.mock('@/components/account/account-control', () => ({ AccountControl: () => null }));
 vi.mock('@/lib/workbench/workspace-actions', () => ({
   deleteWorkspaceSession: vi.fn(async () => ({ deleted: true })),
 }));
@@ -41,7 +41,11 @@ const roots: Root[] = [];
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
-beforeAll(() => {
+beforeAll(async () => {
+  // Load the rail's module graph here, under the hook's own timeout. Loading it inside
+  // the first test made that test's five-second budget depend on cold-import speed,
+  // which the full suite's load regularly exceeds.
+  await import('@/components/workbench/workspace/WorkspaceRail');
   if (!globalThis.PointerEvent) vi.stubGlobal('PointerEvent', MouseEvent);
   vi.stubGlobal(
     'ResizeObserver',
@@ -51,7 +55,7 @@ beforeAll(() => {
       disconnect() {}
     },
   );
-});
+}, 60_000);
 
 afterEach(() => {
   for (const root of roots.splice(0)) {
@@ -66,6 +70,7 @@ const NAMED = 'session-named';
 const UNNAMED = 'session-unnamed';
 
 async function renderRail(): Promise<{ onRenameSession: ReturnType<typeof vi.fn> }> {
+  const { WorkspaceRail } = await import('@/components/workbench/workspace/WorkspaceRail');
   const onRenameSession = vi.fn(async () => null);
   window.localStorage.setItem(RAIL_TAB_STORAGE_KEY, 'sessions');
 

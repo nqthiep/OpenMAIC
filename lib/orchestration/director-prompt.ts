@@ -231,7 +231,7 @@ export function parseDirectorDecision(content: string): {
       return { nextAgentId: nextAgent, shouldEnd: false };
     }
   } catch (_e) {
-    log.warn('[Director] Failed to parse decision:', content.slice(0, 200));
+    log.warn(`[Director] Failed to parse decision: ${content.length} characters`);
   }
 
   // Default: end the round if we can't parse
