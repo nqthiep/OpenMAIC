@@ -98,7 +98,7 @@ The reviewer found no Critical issues. Dispositions:
 | B5 | Medium-high | Decision needed (verified by reading) | Any caller who names a server-configured provider spends that provider's server key; the route does not check the caller. `resolveSectionApiKey` returns the server key whenever the provider is configured (`lib/server/provider-config.ts:603-611`; `lib/server/resolve-model.ts:91-108`). If the deployment is open (no `ACCESS_CODE`) this is anonymous spend. Options: managed keys only for signed-in accounts when accounts are enabled; a per-account quota; or leave as a shared-key design the operator opts into. | Cycle 2 read |
 | B6 | Medium | Partly done | The access-cookie HMAC key was the access code, so a captured cookie allowed offline guessing. **Done (opt-in):** `ACCESS_COOKIE_SECRET` (32 characters or more) signs cookies instead; tested end to end with the verify route and the middleware (`tests/server/access-cookie-secret.test.ts`). **Open:** the default is still code-keyed, and a per-process random secret would break multi-instance deployments, so the default needs an operator setting. | `lib/server/access-token-policy.ts` `accessSigningKey`; `middleware.ts`; `app/api/access-code/*` |
 | B7 | Medium | Open | `x-forwarded-host` is trusted unconditionally when building classroom and scene media URLs. Fix: honour it only with `TRUST_PROXY_HEADERS=true`. | `lib/server/classroom-storage.ts` `buildRequestOrigin` |
-| B8 | Medium | Open | Render-job endpoints let any gated caller poll or cancel any job. Needs ownership once accounts are the norm. | Audit item 6 [Unverified upstream id scheme] |
+| B8 | Medium | Deferred (cycle 6, D-29) | Render-job endpoints let any gated caller poll or cancel any job. Needs ownership once accounts are the norm. | Audit item 6 [Unverified upstream id scheme] |
 | B9 | Medium | Open | Render service takes the leftmost `x-forwarded-for` entry, the same pattern fixed for the access-code route. | `app/api/export-video/render/route.ts` `clientIdentity` |
 | B10 | Medium | Accepted | Throttles are per process; the access-code bucket is shared by all visitors unless `TRUST_PROXY_HEADERS=true`. A shared store would remove the per-instance budget. | `lib/server/accounts/login-throttle.ts`; README |
 | B11 | Medium | Open | Per-client limit for registration and sign-in on top of the per-username throttle and the queue cap. | Review round |
@@ -108,7 +108,7 @@ The reviewer found no Critical issues. Dispositions:
 | B15 | Medium | Decision needed | Scrypt cost 2^16 versus OWASP's 2^17 recommendation. Depends on the container memory budget. | `lib/server/accounts/password.ts` |
 | B16 | Medium | Open | No administrator role exists. The mission requires limited administrator privileges. Design: operator-listed account identifiers from the environment, server-side checks on every admin route, audit log. | `packages/@openmaic/storage/src/server/index.ts` (`authorizeAdmin`) |
 | B17 | Medium | Open | Educational content review has not started (accuracy, objectives, examples, feedback). | Not started |
-| B18 | Low-medium | Unverified | Error responses return `details`, often upstream error text, to clients. Whether upstream bodies carry credentials is not established. | `lib/server/api-response.ts`; audit item 9 |
+| B18 | Low-medium | Partly done (cycle 6, D-30, D-31) | Error responses return `details`, often upstream error text, to clients. Whether upstream bodies carry credentials is not established. | `lib/server/api-response.ts`; audit item 9 |
 | B19 | Low-medium | Unverified | `proxy-media` fetches any public URL for any gated caller and buffers the body before the size check. DNS-rebinding resistance not established. | audit item 8; `app/api/proxy-media/route.ts` |
 | B20 | Low | Unverified | Several routes lack an in-handler body-size cap (chat, generate-classroom, parse-pdf, transcription). Framework limits not established. | audit item 10 |
 | B21 | Low | Open | `GET /api/usage` returns deployment-wide aggregates to any gated caller. | `app/api/usage/route.ts` |
@@ -128,6 +128,7 @@ The reviewer found no Critical issues. Dispositions:
 | 3 | 2026-10-11 | Team meeting 01: decide the open items and implement the decided changes | Decision record in `scrum/DECISIONS.md`; rebuttal round; 8 commits pushed; full run had one timing failure, fixed with an explicit limit |
 | 4 | 2026-10-11 | Close the security gaps the cycle 3 rebuttals named; measure the throttle derivation cost; verify the content fixes; clean full run (A16) | B28, B31, B32, B33 (classroom), B38, B39 done; independent review round (15 findings, all triaged); presence probe window widened (B40 open); final run on the final tree: exit 0; 735 test files passed (9 skipped); 8,131 tests passed (79 skipped); 0 failures; type check, lint and format pass |
 | 5 | 2026-10-11 | Presence lease for B40; administrator panel (B37); metadata body caps (B33 part 2); log hygiene and operator-key text (B43) | B40, B41, B42 done; B37 built; B33 part 2 (six handlers) done; B43 partly done (six routes and nine log sites fixed; B45, B46 open). Two independent reviews (`scrum/reviews/cycle5-review.md`). Full suite on the final tree: exit 0; 739 files passed, 9 skipped; 8,188 tests passed, 79 skipped; type check, ESLint and Prettier clean on changed files |
+| 6 | 2026-10-12 | Visitor-facing upstream text (B18); log hygiene (B45, B46); unflushed-edit lease (B44); procedural-skill scope (B34); render-job decision (B8) | B18 fixed for the audit's 11 routes and persisted text (228d146); B44 dirty window (76ccf4e, 2828f55); B45 central redaction (2c138b8, 2791ba1); B46 lengths in logs (3e7788c); B34 skill (26c271d); B8 deferred (D-29). Full suite on the final tree: exit 0; 744 files passed, 9 skipped; 8,227 tests passed, 79 skipped; type check, ESLint, Prettier and i18n check pass |
 
 ## Process notes (retrospective, cycle 1)
 
@@ -317,3 +318,60 @@ Still open from earlier cycles: B29 (the relative-URL recommendation stays NO-GO
 - **What helped:** disjoint file ownership for the two workers, with the targeted suites re-run before each commit; read-only reviewers who gave file and line for each finding and checked the claims against the code, including one of the coordinator's own tests that passed on the previous code.
 - **What hindered:** the session worker restarted mid-cycle, so the work resumed from the committed state; the workers ran for about ten minutes each, and the coordinator waited for the last reports for much longer; a variable set inside a backgrounded chain was not visible to the parent shell, so the first log path was wrong and had to be found through the process table.
 - **Change for the next cycle:** record, in the commit message, what each check covered (targeted or full). When a backlog entry says "covered", name the sites that were checked, so the next review can test the claim.
+
+## Cycle 6: visitor-facing upstream text, log hygiene, and the dirty window
+
+Full record: `scrum/DECISIONS-03.md`. Review: `scrum/reviews/cycle6-review.md`.
+
+Sprint goal: close the leak class the cycle 5 review left open (B18); finish log hygiene (B45, B46); close the frozen-tab residual of the lease (B44); settle the procedural-skill scope (B34) and the render-job ownership question (B8) with decisions.
+
+### Items completed this cycle
+
+| Item | What changed | Commits | Evidence |
+|---|---|---|---|
+| B18 | Under the operator's key, visitors get fixed text for 11 routes and for persisted text: PBL streams, agent session errors and assistant frames, classroom job errors, material extraction, transcription, parse-pdf, extract-document (multipart), verify-pdf-provider, generate/tts, generate/voice, web-search. The visitor's own key keeps their message | 228d146 | `tests/api/managed-key-upstream-text-routes.test.ts` (11), `tests/managed-key-pbl-sse.test.ts` (4), `tests/managed-key-persisted-text.test.ts` (8) |
+| B44 | Unflushed edits keep the realm's lease live for 10 min after the last edit. The stage store marks the realm dirty and clean | 76ccf4e, 2828f55 | `tests/media/stage-realm-presence.test.ts` (22); `tests/store/stage-realm-dirty-marks.test.ts` (4) |
+| B45 (part) | The logger redacts registered and environment secrets from every line. The provider file's secret fields and the visitor-key resolvers register values. The registry is in `lib/log-secrets.ts` | 2c138b8, 2791ba1 | `tests/server/log-redaction.test.ts` (6) |
+| B46 | Logs carry lengths, counts and ids, not visitor text, generated titles, model output or query strings. URLs are logged as origin and path. Seventeen log calls in sixteen files | 3e7788c | 40 test files covering the changed modules (644 tests) |
+| B34 | The vocational skill states the chat path's gate (task-engine mode) and names the page types the chat agent can use | 26c271d | `skills/agent-runtime/vocational/SKILL.md`; the gate is in `lib/server/agent-runtime/generation-tools.ts` |
+| B8 | Decided: deferred to cycle 7 (D-29) | none | `scrum/DECISIONS-03.md` |
+
+### Verification
+
+- Full suite on the final tree: exit 0; 744 files passed, 9 skipped; 8,227 tests passed, 79 skipped. [Measured: `npx vitest run`, this session.] Cycle 5 final: 739 files and 8,188 tests.
+- `npx tsc --noEmit`: 0 errors. ESLint and Prettier are clean on every changed file. `check:i18n-keys` passes. [Measured]
+- Two regressions were found by the suite and fixed in this cycle. First, a test that replaces the logger lacked the new registry export, so two routes returned 500; the registry moved to its own module. Second, the dirty mark read the stage getter outside its `try`, so cue mode in the element-pick tests stopped; the read moved inside the `try`, with a regression case.
+- Not verified: the adapter-level error text behind voice and extract-document `[Unverified]`; a live provider call, because this environment has no network access to providers `[Unverified]`; the 360 px admin panel `[Unverified]`; two real tabs for the lease `[Unverified]`.
+- Two timing-sensitive tests failed once each under parallel load and passed alone: `tests/server/classroom-generation-retry.test.ts` (5 s timeout) and the local media real pipeline (4 s). Recorded as B50.
+
+### Review round
+
+- A read-only audit of every route for visitor-facing upstream text (77 route files) found 11 A rows. All are fixed. The B and C rows were assessed and left unchanged. Details: `scrum/reviews/cycle6-review.md`.
+- The workers' proposal for the materials path (fixed text only for the document path) was changed by the coordinator. The ASR wrapper stored adapter text, which is the leak class, so the wrapper now keeps only our own messages (D-31).
+
+### Backlog status after cycle 6
+
+| Item | Status | Note |
+|---|---|---|
+| B8 | Deferred | D-29: needs a shared store, the external service's job-id scheme (`[Unverified]`), and a decision on signed-out submits |
+| B18 | Partly done | The audit's rows are fixed. Behaviour note B49; adapter text B48 |
+| B34 | Done | D-28. The premise was corrected: the gap is the widget gate, not a missing tool |
+| B37 | Code done; 360 px check open | `[Unverified]` |
+| B44 | Done | Residual beyond the 10 min window, in `scrum/specs/presence-lease.md` |
+| B45 | Partly done | Central redaction. Raw error sites open as B52 |
+| B46 | Done for the scanned sites | A regex scan, not a proof (D-27) |
+| B47 | Open | Body caps for the stage, chat, generate, classroom and pbl routes; needs measured request sizes |
+| B48 (new) | Open | An adapter-level `MaterialExtractionError` may carry vendor text `[Unverified]` |
+| B49 (new) | Open, low | A non-Error throw under the visitor's key gets the "model provider" wording on non-model routes |
+| B50 (new) | Open, low-medium | Timing-sensitive tests under parallel load (`classroom-generation-retry`, the local media pipeline), and the 250 ms presence probe window |
+| B51 (new) | Open, low | Redaction matches names by suffix. A secret stored under another name is not redacted |
+| B52 (new) | Open, medium | About fifty raw error objects are still logged in provider-touching files. Decide per site whether the message stays (upstream echo `[Unverified]`) |
+| B53 (new) | Open, low | The agent entry tree stores raw frames. No route reads it today `[Inference]` |
+
+Still open from earlier cycles: B29 (the NO-GO recommendation stands), B30, B13, B17, B35, B36, B1–B3, B26 (watch), B2.
+
+### Process notes (retrospective, cycle 6)
+
+- **What helped:** the read-only audit gave file and line for every row, so the fixes were mechanical. The coordinator's diff review caught two changes that were too broad before they were committed: the logger registry and the ASR wrapper. Bisecting with temporary worktrees found both regressions in minutes.
+- **What hindered:** the workers stopped on a session rate limit and were resumed by message. A worker's proposal conflicted with two existing assertions, which needed a decision. A test's logger mock broke when a shared module gained a new export.
+- **Change for the next cycle:** do not add a named export to a module that tests replace with a factory, and do not add work to a store's edit path that can throw outside a `try`. Run the full suite after any change to the store or the logger, not only the targeted suites.
