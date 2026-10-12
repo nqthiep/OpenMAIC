@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { __resetLogSecretsForTesting, createLogger, registerLogSecret } from '@/lib/logger';
+import { createLogger } from '@/lib/logger';
+import { __resetLogSecretsForTesting, registerLogSecret } from '@/lib/log-secrets';
 
 const OPERATOR_KEY = 'sk-operator-0123456789';
 const VISITOR_KEY = 'sk-visitor-abcdefghij';

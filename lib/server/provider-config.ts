@@ -8,7 +8,8 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
-import { createLogger, registerLogSecret } from '@/lib/logger';
+import { createLogger } from '@/lib/logger';
+import { registerLogSecret } from '@/lib/log-secrets';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
 import {
   DEFAULT_QWEN_TTS_VOICE_CLONE_MODEL,
