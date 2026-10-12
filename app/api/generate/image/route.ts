@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     log.info(
       `Generating image: provider=${providerId}, model=${model || 'default'}, ` +
-        `prompt="${sizedOptions.prompt.slice(0, 80)}...", size=${sizedOptions.width ?? 'auto'}x${sizedOptions.height ?? 'auto'}`,
+        `promptLength=${sizedOptions.prompt.length}, size=${sizedOptions.width ?? 'auto'}x${sizedOptions.height ?? 'auto'}`,
     );
 
     const result = await generateImage({ providerId, apiKey, baseUrl, model }, sizedOptions);

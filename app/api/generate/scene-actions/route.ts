@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     };
 
     // ── Generate actions ──
-    log.info(`Generating actions: "${outline.title}" (${outline.type}) [model=${modelString}]`);
+    log.info(`Generating actions: type=${outline.type} [model=${modelString}]`);
 
     const generationContent = (
       'type' in content && content.type === 'pbl' ? normalizeLegacyPBLContent(content) : content
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
       languageDirective,
     });
 
-    log.info(`Generated ${actions.length} actions for: "${outline.title}"`);
+    log.info(`Generated ${actions.length} actions`);
 
     // ── Build complete scene ──
     const scene = buildCompleteScene(outline, generationContent, actions, stageId);

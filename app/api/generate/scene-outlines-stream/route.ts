@@ -290,7 +290,7 @@ function ensureUniqueOutlineId(outline: SceneOutline, usedIds: Set<string>): Sce
 }
 
 export async function POST(req: NextRequest) {
-  let requirementSnippet: string | undefined;
+  let requirementLength: number | undefined;
   let resolvedModelString: string | undefined;
   // True once the operator's key is chosen. Upstream error text then stays on the server.
   let managedKey = false;
@@ -320,7 +320,7 @@ export async function POST(req: NextRequest) {
       researchContext?: string;
       agents?: AgentInfo[];
     };
-    requirementSnippet = requirements?.requirement?.substring(0, 60);
+    requirementLength = requirements?.requirement?.length;
 
     // Build user profile string for language inference context
     const userProfileText =
@@ -461,7 +461,7 @@ export async function POST(req: NextRequest) {
     }
 
     log.info(
-      `Generating outlines: "${requirements.requirement.substring(0, 50)}" [model=${modelString}]`,
+      `Generating outlines: requirementLength=${requirements.requirement.length} [model=${modelString}]`,
     );
 
     // Create SSE stream with heartbeat to prevent connection timeout
@@ -624,7 +624,7 @@ export async function POST(req: NextRequest) {
                 ? 'LLM response could not be parsed into outlines'
                 : 'LLM returned empty response';
               log.warn(
-                `Outlines attempt ${attempt} diagnostics: textLen=${fullText.length}, outlines=${parsedOutlines.length}, languageDirective=${languageDirective ? 'yes' : 'no'}, preview=${JSON.stringify(fullText.slice(0, 240))}`,
+                `Outlines attempt ${attempt} diagnostics: textLen=${fullText.length}, outlines=${parsedOutlines.length}, languageDirective=${languageDirective ? 'yes' : 'no'}`,
               );
 
               if (attempt <= MAX_STREAM_RETRIES) {
@@ -717,7 +717,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     log.error(
-      `Outline streaming failed [requirement="${requirementSnippet ?? 'unknown'}...", model=${resolvedModelString ?? 'unknown'}]:`,
+      `Outline streaming failed [requirementLength=${requirementLength ?? 'unknown'}, model=${resolvedModelString ?? 'unknown'}]:`,
       managedKey ? describeUnexpectedError(error) : error,
     );
     return apiError('INTERNAL_ERROR', 500, visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT));

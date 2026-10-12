@@ -37,11 +37,15 @@ import type { UserRequirements } from '@/lib/types/generation';
 import type { Scene, Stage } from '@/lib/types/stage';
 import { AGENT_COLOR_PALETTE, AGENT_DEFAULT_AVATARS } from '@/lib/constants/agent-defaults';
 
+import { describeUnexpectedError } from '@/lib/server/error-summary';
+
 const log = createLogger('Classroom');
 
 export function containPBLGenerationError(error: unknown, sceneTitle: string): null {
   if (!(error instanceof PBLGenerationError)) throw error;
-  log.warn(`PBL generation failed for scene "${sceneTitle}": ${error.message}`);
+  log.warn(
+    `PBL generation failed (titleLength=${sceneTitle.length}): ${describeUnexpectedError(error)}`,
+  );
   return null;
 }
 
@@ -621,7 +625,7 @@ export async function generateClassroom(
       }
     })();
     if (!content) {
-      log.warn(`Skipping scene "${safeOutline.title}" — content generation failed`);
+      log.warn('Skipping a scene: content generation failed');
       continue;
     }
 

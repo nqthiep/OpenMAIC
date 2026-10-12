@@ -297,7 +297,7 @@ Return a JSON object with this exact structure:
     try {
       parsed = JSON.parse(rawText);
     } catch {
-      log.error('Failed to parse LLM response as JSON:', rawText.substring(0, 500));
+      log.error(`Failed to parse LLM response as JSON: textLength=${rawText.length}`);
       return apiError('PARSE_FAILED', 500, 'Failed to parse agent profiles from LLM response');
     }
 

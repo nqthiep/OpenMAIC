@@ -146,7 +146,7 @@ export async function proxyFetch(input: string | URL, init?: RequestInit): Promi
  * Origin and path only. Userinfo and the query string can carry credentials or keys, so
  * neither is logged.
  */
-function loggableUrl(value: string | undefined): string {
+export function loggableUrl(value: string | undefined): string {
   if (!value) return 'unset';
   try {
     const parsed = new URL(value);

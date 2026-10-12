@@ -361,9 +361,7 @@ export function finalizeParser(state: ParserState): ParseResult {
     } else {
       // JSON-ish fragment that did not parse cleanly → suppress (never leak raw
       // JSON). Log so this path stays observable instead of silently dropping.
-      log.debug(
-        `[finalizeParser] Suppressed structured-output residue (${content.length} chars): ${content.slice(0, 80)}`,
-      );
+      log.debug(`[finalizeParser] Suppressed structured-output residue (${content.length} chars)`);
     }
   } else {
     // JSON array started but never closed — flush whatever the incremental

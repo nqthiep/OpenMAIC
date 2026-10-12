@@ -351,9 +351,7 @@ export async function* runTaskEvaluation(
     args.hasVision && latest?.fileUrl && (latest.mimeType?.startsWith('image/') ?? false)
       ? latest.fileUrl
       : undefined;
-  log.info(
-    `Task eval start: project=${project.title.slice(0, 40)} milestone=${milestone.title.slice(0, 40)} task=${microtask.title.slice(0, 40)}${visionImageSrc ? ' [vision]' : ''}`,
-  );
+  log.info(`Task eval start${visionImageSrc ? ' [vision]' : ''}`);
   for await (const ev of runShared({
     project,
     kind: 'task',
@@ -385,9 +383,7 @@ export async function* runMilestoneEvaluation(
     return;
   }
   const { system, user } = buildMilestoneEvalPrompt(project, milestone, { recentChatSummary });
-  log.info(
-    `Milestone eval start: project=${project.title.slice(0, 40)} milestone=${milestone.title.slice(0, 40)}`,
-  );
+  log.info('Milestone eval start');
   for await (const ev of runShared({
     project,
     kind: 'milestone',
@@ -407,7 +403,7 @@ export async function* runFinalEvaluation(
 ): AsyncGenerator<PBLSSEEvent, void, void> {
   const { project, languageModel, thinkingConfig, recentChatSummary, signal } = args;
   const { system, user } = buildFinalEvalPrompt(project, { recentChatSummary });
-  log.info(`Final eval start: project=${project.title.slice(0, 40)}`);
+  log.info('Final eval start');
   for await (const ev of runShared({
     project,
     kind: 'final',

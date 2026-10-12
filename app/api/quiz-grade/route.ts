@@ -26,12 +26,12 @@ interface GradeResponse {
 }
 
 export async function POST(req: NextRequest) {
-  let questionSnippet: string | undefined;
+  let questionLength: number | undefined;
   let resolvedPoints: number | undefined;
   try {
     const body = (await req.json()) as GradeRequest;
     const { question, userAnswer, points, commentPrompt, language } = body;
-    questionSnippet = question?.substring(0, 60);
+    questionLength = question?.length;
     resolvedPoints = points;
 
     if (!question || !userAnswer) {
@@ -105,7 +105,7 @@ ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${
     return apiSuccess({ ...gradeResult });
   } catch (error) {
     log.error(
-      `Quiz grading failed [question="${questionSnippet ?? 'unknown'}...", points=${resolvedPoints ?? 'unknown'}]:`,
+      `Quiz grading failed [questionLength=${questionLength ?? 'unknown'}, points=${resolvedPoints ?? 'unknown'}]:`,
       error,
     );
     return apiError('INTERNAL_ERROR', 500, 'Failed to grade answer');

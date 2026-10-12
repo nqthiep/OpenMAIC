@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     log.info(
       `Generating video: provider=${providerId}, model=${model || 'default'}, ` +
-        `prompt="${body.prompt.slice(0, 80)}...", duration=${options.duration ?? 'auto'}, ` +
+        `promptLength=${body.prompt.length}, duration=${options.duration ?? 'auto'}, ` +
         `aspect=${options.aspectRatio ?? 'auto'}, resolution=${options.resolution ?? 'auto'}`,
     );
 

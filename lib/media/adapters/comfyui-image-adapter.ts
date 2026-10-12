@@ -567,7 +567,7 @@ export async function generateWithComfyuiImage(
   const comfyConfig = config as ComfyUIImageGenerationConfig;
 
   log.info(`Starting image generation [baseUrl: ${baseUrl}] [model: ${config.model ?? 'default'}]`);
-  log.info(`Prompt: "${options.prompt.slice(0, 120)}${options.prompt.length > 120 ? '…' : ''}"`);
+  log.info(`Prompt: ${options.prompt.length} characters`);
   log.debug(
     `Options: ${JSON.stringify({ width: options.width, height: options.height, aspectRatio: options.aspectRatio })}`,
   );

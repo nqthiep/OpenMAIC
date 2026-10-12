@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
       responseTime: result.responseTime,
     });
   } catch (err) {
-    log.error(`Web search failed [query="${query?.substring(0, 60) ?? 'unknown'}"]:`, err);
+    log.error(`Web search failed [queryLength=${query?.length ?? 'unknown'}]:`, err);
     const message = err instanceof Error ? err.message : 'Web search failed';
     return apiError('INTERNAL_ERROR', 500, message);
   }
