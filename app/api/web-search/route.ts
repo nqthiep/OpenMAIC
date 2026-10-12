@@ -16,6 +16,7 @@ import {
   resolveWebSearchModel,
 } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import {
   buildSearchQuery,
@@ -31,6 +32,7 @@ const log = createLogger('WebSearch');
 
 export async function POST(req: NextRequest) {
   let query: string | undefined;
+  let managed = false;
   try {
     const body = await req.json();
     const {
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
     // Managed providers are admin-owned: ignore (don't reject) any client-sent
     // key/baseUrl. The server config is authoritative, so a stale client base
     // URL is dropped rather than failing the request.
-    const managed = isServerConfiguredProvider('webSearch', providerId);
+    managed = isServerConfiguredProvider('webSearch', providerId);
     const clientApiKey = managed ? undefined : bodyApiKey;
     // SearXNG base URLs are operator-managed only (SEARXNG_BASE_URL); never trust client input.
     const clientBaseUrl = managed || providerId === 'searxng' ? undefined : bodyBaseUrl;
@@ -181,7 +183,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     log.error(`Web search failed [queryLength=${query?.length ?? 'unknown'}]:`, err);
-    const message = err instanceof Error ? err.message : 'Web search failed';
+    const message = visitorErrorText(err, managed, MODEL_FAILURE_TEXT);
     return apiError('INTERNAL_ERROR', 500, message);
   }
 }

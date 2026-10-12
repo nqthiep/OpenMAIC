@@ -26,7 +26,11 @@ import {
 } from '@/lib/server/provider-config';
 import type { TTSProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
-import { describeUnexpectedError } from '@/lib/server/error-summary';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { VOXCPM_AUTO_VOICE_ID, VOXCPM_TTS_PROVIDER_ID } from '@/lib/audio/voxcpm';
@@ -41,6 +45,7 @@ export async function POST(req: NextRequest) {
   let ttsProviderId: string | undefined;
   let ttsVoice: string | undefined;
   let audioId: string | undefined;
+  let managed = false;
   try {
     const body = await req.json();
     const { text, ttsModelId, ttsSpeed, ttsApiKey, ttsBaseUrl, ttsProviderOptions } = body as {
@@ -98,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('tts', ttsProviderId);
+    managed = isServerConfiguredProvider('tts', ttsProviderId);
     const clientBaseUrl = managed ? undefined : ttsBaseUrl || undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
@@ -170,7 +175,7 @@ export async function POST(req: NextRequest) {
       `TTS generation failed [provider=${ttsProviderId ?? 'unknown'}, voice=${ttsVoice ?? 'unknown'}, audioId=${audioId ?? 'unknown'}]: ${describeUnexpectedError(error)}`,
     );
     if (error instanceof TTSRateLimitError) {
-      return apiError('RATE_LIMITED', 429, error.message);
+      return apiError('RATE_LIMITED', 429, visitorErrorText(error, managed, MODEL_FAILURE_TEXT));
     }
     if (error instanceof TTSInvalidResponseError) {
       return apiError(error.code, error.httpStatus, error.message);
@@ -179,15 +184,15 @@ export async function POST(req: NextRequest) {
       return apiError(error.code, error.httpStatus || 502, qwenVoiceCloneErrorMessage(error));
     }
     if (error instanceof QwenTTSError) {
-      return apiError(error.code, error.httpStatus, error.message);
+      return apiError(
+        error.code,
+        error.httpStatus,
+        visitorErrorText(error, managed, MODEL_FAILURE_TEXT),
+      );
     }
     if (error instanceof TTSModelNotAllowedError) {
       return apiError(error.code, error.httpStatus, error.message);
     }
-    return apiError(
-      'GENERATION_FAILED',
-      500,
-      error instanceof Error ? error.message : String(error),
-    );
+    return apiError('GENERATION_FAILED', 500, visitorErrorText(error, managed, MODEL_FAILURE_TEXT));
   }
 }

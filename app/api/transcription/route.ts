@@ -10,6 +10,7 @@ import {
 } from '@/lib/server/provider-config';
 import type { ASRProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Transcription');
@@ -19,6 +20,7 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   let resolvedProviderId: string | undefined;
   let resolvedModelId: string | undefined;
+  let managed = false;
   try {
     const formData = await req.formData();
     const audioFile = formData.get('audio') as File;
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('asr', effectiveProviderId);
+    managed = isServerConfiguredProvider('asr', effectiveProviderId);
     const clientBaseUrl = managed ? undefined : baseUrl || undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
@@ -88,7 +90,7 @@ export async function POST(req: NextRequest) {
       'TRANSCRIPTION_FAILED',
       500,
       'Transcription failed',
-      error instanceof Error ? error.message : 'Unknown error',
+      visitorErrorText(error, managed, MODEL_FAILURE_TEXT),
     );
   }
 }

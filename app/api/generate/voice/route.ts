@@ -24,7 +24,11 @@ import {
   resolveTTSModel,
 } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
-import { describeUnexpectedError } from '@/lib/server/error-summary';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { normalizeVoiceDesign } from '@/lib/audio/voice-design';
@@ -65,6 +69,7 @@ function childSignal(
 export async function POST(req: NextRequest) {
   let providerId: string | undefined;
   let voiceId: string | undefined;
+  let managed = false;
   const deadline = new AbortController();
   const abortFromRequest = () => deadline.abort(req.signal.reason);
   if (req.signal.aborted) abortFromRequest();
@@ -121,7 +126,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('tts', providerId);
+    managed = isServerConfiguredProvider('tts', providerId);
     const clientBaseUrl = managed ? undefined : body.ttsBaseUrl || undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
@@ -243,11 +248,7 @@ export async function POST(req: NextRequest) {
     if (deadline.signal.aborted) {
       return apiError('QWEN_VC_TIMEOUT', 504, 'The voice registration request timed out.');
     }
-    return apiError(
-      'GENERATION_FAILED',
-      500,
-      error instanceof Error ? error.message : String(error),
-    );
+    return apiError('GENERATION_FAILED', 500, visitorErrorText(error, managed, MODEL_FAILURE_TEXT));
   } finally {
     clearTimeout(deadlineTimer);
     req.signal.removeEventListener('abort', abortFromRequest);

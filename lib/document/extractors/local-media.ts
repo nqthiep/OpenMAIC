@@ -28,6 +28,9 @@ import {
 } from '../../server/material-extraction/errors';
 import { MAX_DERIVED_IMAGES, prepareDerivedImage } from './images';
 import { getMediaExtractorManifestEntry } from './manifest';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('LocalMedia');
 
 export const MEDIA_ASR_CHUNK_SEC = 600;
 const MEDIA_COMMAND_TIMEOUT_MS = 20 * 60 * 1000;
@@ -520,8 +523,13 @@ async function transcribeChunks(
         });
       }
     } catch (error) {
+      // A provider's raw error can carry a vendor response body, so its text stays out of the
+      // stored message. Our own extraction errors keep theirs. The full error stays in the log
+      // and the error cause.
+      log.warn(`ASR chunk ${index + 1}/${chunkPaths.length} failed:`, error);
+      const detail = error instanceof MaterialExtractionError ? `: ${error.message}` : '';
       throw new MaterialExtractionError(
-        `ASR chunk ${index + 1}/${chunkPaths.length} failed: ${error instanceof Error ? error.message : String(error)}`,
+        `ASR chunk ${index + 1}/${chunkPaths.length} failed${detail}`,
         isTransientExtractionError(error),
         { cause: error },
       );

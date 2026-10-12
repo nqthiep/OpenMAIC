@@ -13,6 +13,7 @@ import {
   type MediaArtifact,
   type MediaExtractorProvider,
 } from '@/lib/document';
+import { createLogger } from '@/lib/logger';
 import {
   getServerPDFProviders,
   resolvePDFApiKey,
@@ -26,6 +27,14 @@ import {
 } from '@/lib/server/agent-runtime/session-materials';
 
 import { isTransientExtractionError, MaterialExtractionError } from './errors';
+
+const log = createLogger('MaterialExtraction');
+
+/**
+ * Stored and returned for a failed extraction. Extraction credentials are
+ * operator-owned, so provider text stays in the server log.
+ */
+export const EXTRACTION_FAILURE_TEXT = 'The extraction provider could not process this material.';
 
 export interface MaterialExtractionExecutionDependencies {
   resolveSource?: (
@@ -198,7 +207,6 @@ export async function extractClaimedSessionMaterial(
   const candidates = extractorCandidates(raw.mime, providers, configuredIds);
   if (candidates.length === 0) throw new Error(`no document extractor supports ${raw.mime}`);
 
-  const errors: string[] = [];
   const failures: unknown[] = [];
   let artifact: DocumentArtifact | undefined;
   let selected: DocumentExtractorProvider | undefined;
@@ -219,13 +227,13 @@ export async function extractClaimedSessionMaterial(
       selected = provider;
       break;
     } catch (error) {
-      errors.push(`${provider.id}: ${error instanceof Error ? error.message : String(error)}`);
+      log.warn(`Material ${source.id} extraction by ${provider.id} failed:`, error);
       failures.push(error);
     }
   }
   if (!artifact || !selected) {
     throw new MaterialExtractionError(
-      `document extraction failed (${errors.join('; ')})`,
+      EXTRACTION_FAILURE_TEXT,
       failures.some(isTransientExtractionError),
     );
   }

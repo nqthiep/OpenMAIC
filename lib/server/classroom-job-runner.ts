@@ -6,6 +6,7 @@ import {
   markClassroomGenerationJobSucceeded,
   updateClassroomGenerationJobProgress,
 } from '@/lib/server/classroom-job-store';
+import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 
 const log = createLogger('ClassroomJob');
 const runningJobs = new Map<string, Promise<void>>();
@@ -21,6 +22,7 @@ export function runClassroomGenerationJob(
   }
 
   const jobPromise = (async () => {
+    let managedKey = false;
     try {
       await markClassroomGenerationJobRunning(jobId);
 
@@ -29,11 +31,18 @@ export function runClassroomGenerationJob(
         onProgress: async (progress) => {
           await updateClassroomGenerationJobProgress(jobId, progress);
         },
+        onManagedKey: (resolvedManagedKey) => {
+          if (resolvedManagedKey) managedKey = true;
+        },
       });
 
       await markClassroomGenerationJobSucceeded(jobId, result);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = managedKey
+        ? MODEL_FAILURE_TEXT
+        : error instanceof Error
+          ? error.message
+          : String(error);
       log.error(`Classroom generation job ${jobId} failed:`, error);
       try {
         await markClassroomGenerationJobFailed(jobId, message);

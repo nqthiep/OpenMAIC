@@ -18,6 +18,7 @@ import {
 import type { MediaArtifact } from '@/lib/document';
 import { normalizeDocumentMimeType, SUPPORTED_MEDIA_MIME_TYPES } from '@/lib/document/mime';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
 import {
   resolveServerAsset,
   type ServerAssetResolution,
@@ -72,10 +73,12 @@ const ASSET_ID_EXTRACT_STRING_FIELDS = [
   'accessKeySecret',
 ] as const;
 
-/** Mutable logging context shared with the shared extraction helper. */
+/** Mutable request context shared with the shared extraction helper. */
 interface ExtractLogState {
   fileName?: string;
   resolvedProviderId?: string;
+  /** Set before the operator's key is used, so a failure reply hides upstream text. */
+  managedKey?: boolean;
 }
 
 function isPdfProviderId(providerId: string): providerId is PDFProviderId {
@@ -248,6 +251,7 @@ async function runExtraction(
     const mediaManaged =
       requestConfig.providerId !== 'local-ffmpeg' &&
       isServerConfiguredProvider('pdf', 'alidocmind');
+    logState.managedKey = mediaManaged;
     // When managed, resolve the server-owned AK/SK (env OR YAML) explicitly so
     // a YAML-only deployment works — the client-level env fallback reads env
     // vars only. Client-entered creds are used only when unmanaged.
@@ -390,6 +394,7 @@ async function runExtraction(
     }
   }
 
+  logState.managedKey = managed;
   // For a managed AliDocMind provider, resolve server-owned AK/SK (env OR
   // YAML) explicitly so a YAML-only deployment extracts successfully — the
   // client-level env fallback reads env vars only.
@@ -440,8 +445,9 @@ async function runExtraction(
 export async function POST(req: NextRequest) {
   const logState: ExtractLogState = {};
   // Whether this request took the asset-id (JSON) form. The multipart byte
-  // form's observable behavior is frozen; a few JSON-path-only responses use
-  // this to stay generic (no caller input or raw extractor text echoed).
+  // form keeps its observable behavior apart from fixed text on operator-key
+  // failures; a few JSON-path-only responses use this to stay generic (no
+  // caller input or raw extractor text echoed).
   let isAssetIdForm = false;
   try {
     const contentType = req.headers.get('content-type') || '';
@@ -642,14 +648,18 @@ export async function POST(req: NextRequest) {
     if (isAssetIdForm) {
       // The asset-id form must not leak raw extractor internals to the caller
       // (a provider outage, a malformed upstream response, …); answer a fixed
-      // generic message. Multipart keeps its current behavior exactly.
+      // generic message. Multipart uses the same fixed text for operator-key failures.
       return apiError(
         'PARSE_FAILED',
         500,
         'The course material could not be parsed. Please try again later.',
       );
     }
-    return apiError('PARSE_FAILED', 500, error instanceof Error ? error.message : 'Unknown error');
+    return apiError(
+      'PARSE_FAILED',
+      500,
+      visitorErrorText(error, logState.managedKey === true, MODEL_FAILURE_TEXT),
+    );
   }
 }
 

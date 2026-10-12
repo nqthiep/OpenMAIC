@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
-import { describeUnexpectedError } from '@/lib/server/error-summary';
+import {
+  describeUnexpectedError,
+  MODEL_FAILURE_TEXT,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import {
   isServerConfiguredProvider,
@@ -15,6 +19,7 @@ const log = createLogger('Verify PDF Provider');
 
 export async function POST(req: NextRequest) {
   let providerId: string | undefined;
+  let managed = false;
   try {
     const body = await req.json();
     providerId = body.providerId;
@@ -25,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('pdf', providerId);
+    managed = isServerConfiguredProvider('pdf', providerId);
 
     // AliDocMind: verify AK/SK by issuing a lightweight authenticated probe.
     if (providerId === 'alidocmind') {
@@ -73,7 +78,11 @@ export async function POST(req: NextRequest) {
         endpoint,
       });
       if (!result.ok) {
-        return apiError('INVALID_CREDENTIALS', 400, `Authentication failed: ${result.error}`);
+        return apiError(
+          'INVALID_CREDENTIALS',
+          400,
+          managed ? MODEL_FAILURE_TEXT : `Authentication failed: ${result.error}`,
+        );
       }
       return apiSuccess({ message: 'Connection successful' });
     }
@@ -118,7 +127,7 @@ export async function POST(req: NextRequest) {
         return apiError(
           'INTERNAL_ERROR',
           500,
-          `Authentication failed: ${text || response.statusText}`,
+          managed ? MODEL_FAILURE_TEXT : `Authentication failed: ${text || response.statusText}`,
         );
       }
 
@@ -179,7 +188,7 @@ export async function POST(req: NextRequest) {
       } else if (error.message.includes('timeout') || error.name === 'TimeoutError') {
         errorMessage = 'Connection timed out';
       } else {
-        errorMessage = error.message;
+        errorMessage = visitorErrorText(error, managed, MODEL_FAILURE_TEXT);
       }
     }
 

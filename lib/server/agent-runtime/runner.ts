@@ -19,6 +19,7 @@ import { buildAgent } from '@/lib/agent/runtime/build-agent';
 import { createCallLlmStreamFn } from '@/lib/agent/runtime/stream-fn';
 import { HOST_AGENT_LIFECYCLE as LIFECYCLE } from '@/lib/agent-runtime/lifecycle';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 import { parseCourseRefs, type CourseRef } from '@/lib/workbench/course-refs';
 import { parseElementRefs, type ElementRef } from '@/lib/workbench/element-refs';
 import type { Scene, SlideContent } from '@/lib/types/stage';
@@ -286,6 +287,24 @@ export function snapshotEventDataForLog(type: string, data: unknown): unknown {
       ),
     },
   };
+}
+
+/**
+ * Provider error text sits in `errorMessage` on assistant frames, such as the `error`
+ * frame of a message_update. With the operator's key it is replaced before the event
+ * is persisted for the owner's replay.
+ */
+export function redactProviderErrors(value: unknown, managedKey: boolean): unknown {
+  if (!managedKey || !value || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map((item) => redactProviderErrors(item, managedKey));
+  return Object.fromEntries(
+    Object.entries(value).map(([key, field]) => [
+      key,
+      key === 'errorMessage' && typeof field === 'string'
+        ? MODEL_FAILURE_TEXT
+        : redactProviderErrors(field, managedKey),
+    ]),
+  );
 }
 
 /** Empty start frames must not consume the 150 ms slot before the first delta. */
@@ -907,6 +926,8 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
   let criticalWriteError: unknown;
   let entryWritesHealthy = true;
   let terminalFrameEmitted = false;
+  // Set once the driver model resolves; no model output is emitted before then.
+  let managedKey = false;
 
   const markLeaseLost = () => {
     leaseLost = true;
@@ -958,7 +979,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
   let thinkingEndEmitted = false;
 
   const appendEvent = (type: string, data: unknown, ts: number): void => {
-    const snapshot = snapshotEventDataForLog(type, data);
+    const snapshot = redactProviderErrors(snapshotEventDataForLog(type, data), managedKey);
     enqueue(async () => {
       const seq = await store.appendRunEvent(id, WORKER_ID, {
         ts,
@@ -1260,6 +1281,7 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     }
 
     const driver = await resolveAgentDriverModel();
+    managedKey = driver.connection.managedKey;
     const streamFn = createCallLlmStreamFn({
       languageModel: driver.connection.model,
       maxOutputTokens: driver.wireMaxOutputTokens,
@@ -1746,7 +1768,11 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
       queueInterruptedToolResults();
       await flushAll();
 
-      const loopError = terminalLoopError(agent.state.messages, agent.state.errorMessage);
+      // Provider error text reaches the session error only with a visitor's own key.
+      const loopError = terminalLoopError(
+        agent.state.messages,
+        managedKey && agent.state.errorMessage ? MODEL_FAILURE_TEXT : agent.state.errorMessage,
+      );
       const shutdown = ctx.shuttingDown && abort.signal.aborted && !cancelled;
       if (shutdown || tripwireViolated || (leaseLost && abort.signal.aborted)) {
         emit(LIFECYCLE.sessionInterrupted, {
@@ -1790,7 +1816,11 @@ export async function runSession(ctx: RunContext, meta: ClaimedAgentSession): Pr
     } catch (error) {
       queueInterruptedToolResults();
       if (isLeaseLostError(error)) markLeaseLost();
-      const message = error instanceof Error ? error.message : String(error);
+      const message = managedKey
+        ? MODEL_FAILURE_TEXT
+        : error instanceof Error
+          ? error.message
+          : String(error);
       if (ctx.shuttingDown || leaseLost || tripwireViolated) {
         emit(LIFECYCLE.sessionInterrupted, {
           reason: tripwireViolated

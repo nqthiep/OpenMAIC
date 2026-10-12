@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     return apiError('INVALID_REQUEST', 400, err instanceof Error ? err.message : String(err));
   }
 
-  const { model, thinkingConfig } = resolved;
+  const { model, thinkingConfig, managedKey } = resolved;
   const phase: SimulatorPhase = body.phase === 'greeting' ? 'greeting' : 'instructing';
   applyRequestLocaleToProject(req, body.project);
 
@@ -69,6 +69,6 @@ export async function POST(req: NextRequest) {
       thinkingConfig,
       signal: req.signal,
     }),
-    { signal: req.signal },
+    { signal: req.signal, managedKey },
   );
 }

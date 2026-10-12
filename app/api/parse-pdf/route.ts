@@ -8,6 +8,7 @@ import type { PDFProviderId } from '@/lib/pdf/types';
 import type { ParsedPdfContent } from '@/lib/types/pdf';
 import { documentArtifactToParsedPdfContent, extractDocument } from '@/lib/document';
 import { createLogger } from '@/lib/logger';
+import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Parse PDF');
@@ -15,6 +16,7 @@ const log = createLogger('Parse PDF');
 export async function POST(req: NextRequest) {
   let pdfFileName: string | undefined;
   let resolvedProviderId: string | undefined;
+  let managed = false;
   try {
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
     resolvedProviderId = effectiveProviderId;
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    const managed = isServerConfiguredProvider('pdf', effectiveProviderId);
+    managed = isServerConfiguredProvider('pdf', effectiveProviderId);
     const clientBaseUrl = managed ? undefined : baseUrl || undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
@@ -88,6 +90,6 @@ export async function POST(req: NextRequest) {
       `PDF parsing failed [provider=${resolvedProviderId ?? 'unknown'}, file="${pdfFileName ?? 'unknown'}"]:`,
       error,
     );
-    return apiError('PARSE_FAILED', 500, error instanceof Error ? error.message : 'Unknown error');
+    return apiError('PARSE_FAILED', 500, visitorErrorText(error, managed, MODEL_FAILURE_TEXT));
   }
 }

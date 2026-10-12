@@ -182,6 +182,8 @@ export async function generateClassroom(
   options: {
     baseUrl: string;
     onProgress?: (progress: ClassroomGenerationProgress) => Promise<void> | void;
+    /** Reports whether each model the run resolves uses the operator's key. */
+    onManagedKey?: (managedKey: boolean) => void;
   },
 ): Promise<GenerateClassroomResult> {
   const { requirement, pdfContent } = input;
@@ -199,8 +201,10 @@ export async function generateClassroom(
     modelString,
     providerId,
     apiKey,
+    managedKey,
     thinkingConfig: classroomThinking,
   } = await resolveModel({ stage: 'generate-classroom' });
+  options.onManagedKey?.(managedKey);
   log.info(`Using server-configured model: ${modelString}`);
 
   // Fail fast if the resolved provider has no API key configured
@@ -281,6 +285,7 @@ export async function generateClassroom(
 
     try {
       const resolved = await resolveModel({ stage });
+      options.onManagedKey?.(resolved.managedKey);
       const entry = {
         model: resolved.model,
         outputWindow: resolved.modelInfo?.outputWindow,
@@ -429,6 +434,7 @@ export async function generateClassroom(
       if (rewriteRoute) {
         try {
           const rewriteResolved = await resolveModel({ stage: 'web-search-query-rewrite' });
+          options.onManagedKey?.(rewriteResolved.managedKey);
           searchQueryModel = rewriteResolved.model;
           searchQueryThinking = rewriteResolved.thinkingConfig;
         } catch (err) {
