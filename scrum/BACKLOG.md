@@ -129,6 +129,7 @@ The reviewer found no Critical issues. Dispositions:
 | 4 | 2026-10-11 | Close the security gaps the cycle 3 rebuttals named; measure the throttle derivation cost; verify the content fixes; clean full run (A16) | B28, B31, B32, B33 (classroom), B38, B39 done; independent review round (15 findings, all triaged); presence probe window widened (B40 open); final run on the final tree: exit 0; 735 test files passed (9 skipped); 8,131 tests passed (79 skipped); 0 failures; type check, lint and format pass |
 | 5 | 2026-10-11 | Presence lease for B40; administrator panel (B37); metadata body caps (B33 part 2); log hygiene and operator-key text (B43) | B40, B41, B42 done; B37 built; B33 part 2 (six handlers) done; B43 partly done (six routes and nine log sites fixed; B45, B46 open). Two independent reviews (`scrum/reviews/cycle5-review.md`). Full suite on the final tree: exit 0; 739 files passed, 9 skipped; 8,188 tests passed, 79 skipped; type check, ESLint and Prettier clean on changed files |
 | 6 | 2026-10-12 | Visitor-facing upstream text (B18); log hygiene (B45, B46); unflushed-edit lease (B44); procedural-skill scope (B34); render-job decision (B8) | B18 fixed for the audit's 11 routes and persisted text (228d146); B44 dirty window (76ccf4e, 2828f55); B45 central redaction (2c138b8, 2791ba1); B46 lengths in logs (3e7788c); B34 skill (26c271d); B8 deferred (D-29). Full suite on the final tree: exit 0; 744 files passed, 9 skipped; 8,227 tests passed, 79 skipped; type check, ESLint, Prettier and i18n check pass |
+| 7 | 2026-10-13 | Continue the backlog: test stability (B50), provider wording (B49), AliDocMind body echo (B48), 360 px check (B37) | B50 explicit limits on two failing cases; B49 `PROVIDER_FAILURE_TEXT` on three routes; B48 upstream body kept out of the stored reason; B37 measured at 360 px, Settings clips the Accounts list (B54). Full suite: 745 files passed, 9 skipped; 8,230 tests passed, 79 skipped; type check, ESLint on changed files, Prettier and i18n check pass. Uncommitted when this section was written |
 
 ## Process notes (retrospective, cycle 1)
 
@@ -375,3 +376,48 @@ Still open from earlier cycles: B29 (the NO-GO recommendation stands), B30, B13,
 - **What helped:** the read-only audit gave file and line for every row, so the fixes were mechanical. The coordinator's diff review caught two changes that were too broad before they were committed: the logger registry and the ASR wrapper. Bisecting with temporary worktrees found both regressions in minutes.
 - **What hindered:** the workers stopped on a session rate limit and were resumed by message. A worker's proposal conflicted with two existing assertions, which needed a decision. A test's logger mock broke when a shared module gained a new export.
 - **Change for the next cycle:** do not add a named export to a module that tests replace with a factory, and do not add work to a store's edit path that can throw outside a `try`. Run the full suite after any change to the store or the logger, not only the targeted suites.
+
+## Cycle 7: the backlog continued (B50, B49, B48, B37)
+
+Assignment: "Tiếp tục đi" (continue). It was read as the next cycle of this backlog [Inference]. The task table and handoff are in `HANDOFF.md`. Uncommitted when this section was written.
+
+### Items completed this cycle
+
+| Item | Status | Change | Evidence |
+|---|---|---|---|
+| B50 | Partly done | Explicit 30 s limits on the failing cases: the matrix `it` in `tests/lint-llm-entry-guard.test.ts` and the clear-migration case in `tests/runtime/database-chat-cutover.test.ts`. Precedent `ccaeb6c` | Full run 1 timed out two cases at 5 s (the guard's first case took 12.3 s under load). All four named files pass alone. Full run 2 passes |
+| B49 | Done | `PROVIDER_FAILURE_TEXT` ("The provider could not complete this request.") replaces the model wording in `web-search`, `parse-pdf` and `verify-pdf-provider`. Speech and document routes keep the model wording, since their services are models | `tests/api/managed-key-upstream-text-routes.test.ts` (new non-Error case); the three route test files: 51 passed |
+| B48 | Partly done | `lib/pdf/alidocmind-client.ts`: the upstream body is logged, not put in the thrown message. Path confirmed by reading the code: body → stored failure reason (`lib/server/material-extraction/runner.ts`) → agent tool output (`lib/server/agent-runtime/material-tools.ts`) | `tests/document/alidocmind-submit-error.test.ts`: 2 cases. The first fails on the previous client (checked by restoring it). Residual: short upstream status messages still reach the stored reason, and existing tests pin that. [Decision needed] whether material reasons are hidden on the operator's key |
+| B37 | Checked: fails at 360 px | Sign-in dialog: 306 px wide, no internal overflow. Page: no horizontal scroll. Settings → System → Accounts: the two-column dialog clips the System pane, so the list's Disable and Enable actions cannot be reached at 360 px | Scratch Playwright run against the dev server with PostgreSQL 16 (script not committed). Screenshot reviewed. Opened B54 |
+
+### Verification
+
+- `npx tsc --noEmit`: exit 0.
+- `pnpm test`: 745 files passed, 9 skipped; 8,230 tests passed, 79 skipped; exit 0.
+- `pnpm check`, `pnpm check:i18n-keys`, ESLint on the changed `.ts` files: exit 0.
+- Not verified: the B50 fix under repeated full-suite load. One green full run only [Inference].
+
+### New backlog items from cycle 7
+
+| ID | Priority | Status | Item | Evidence |
+|---|---|---|---|---|
+| B54 | Medium | Open | At 360 px the Settings dialog's fixed two-column layout clips the System pane, so the Accounts actions are unreachable. The home composer row also clips its last control ("Enter Classroom"). A fix needs a narrow-width layout (sidebar collapsed or stacked), with a test | Screenshots from the cycle's scratch run (not committed) |
+| B55 | Low | Open `[Unverified]` | The dev server logs "Ecmascript file had an error" at `process.once('SIGTERM')` in `instrumentation.ts`; the page still returns 200. A signed-in home page showed "Persistence is unavailable" in the dev run. Neither cause was investigated | `scrum/` scratch logs only |
+
+### Backlog status after cycle 7
+
+| Item | Status | Note |
+|---|---|---|
+| B37 | Open | 360 px check done: the Settings dialog fails (B54) |
+| B48 | Partly done | Body echo fixed. Short vendor status messages pass through (decision needed) |
+| B49 | Done | |
+| B50 | Partly done | Two failing cases fixed. The two named files passed in both runs. No repeated load runs |
+| B54, B55 | Open | New this cycle |
+
+Still open: B47 (needs measured request sizes; not started), B51, B52, B53, B8 (deferred, D-29), B29, B30, B13, B17, B35, B36, B1–B3, B26, B2.
+
+### Process notes (retrospective, cycle 7)
+
+- **What helped:** running each failing file alone separated load failures from logic failures in one command. Reading the code path for B48 showed the leak was real before any change.
+- **What hindered:** `pkill -f "next dev"` matched the shell running it, and the command exited with 144. The account control did not render until the dev server had `NEXT_PUBLIC_PERSISTENCE=1`.
+- **Change for the next cycle:** stop processes by PID taken from `ps`, not by `pkill -f` with a name that appears in the command line. Make no further 360 px claim until B54 is settled.
