@@ -16,7 +16,7 @@ import {
   resolveWebSearchModel,
 } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
+import { PROVIDER_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import {
   buildSearchQuery,
@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     log.error(`Web search failed [queryLength=${query?.length ?? 'unknown'}]:`, err);
-    const message = visitorErrorText(err, managed, MODEL_FAILURE_TEXT);
+    const message = visitorErrorText(err, managed, PROVIDER_FAILURE_TEXT);
     return apiError('INTERNAL_ERROR', 500, message);
   }
 }

@@ -80,7 +80,7 @@ describe('LLM entry-point lint guard — coverage matrix', () => {
           const errors = await errorsFor(filePath, code);
           expect(errors, `${filePath} should reject the ${form} form`).not.toHaveLength(0);
         }
-      });
+      }, 30_000); // the first lint pays ESLint's cold start; under full-suite load it exceeds 5 s
     }
   }
 

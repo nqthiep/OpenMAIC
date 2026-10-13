@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
-import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
+import { MODEL_FAILURE_TEXT, PROVIDER_FAILURE_TEXT } from '@/lib/server/error-summary';
 
 // Upstream provider text can echo a key or a vendor body. With the operator's key, that text
 // must not reach the visitor. With the visitor's own key, the upstream message is returned.
@@ -235,7 +235,7 @@ describe('upstream provider text on the operator key', () => {
       expect(response.status).toBe(500);
       expect(JSON.parse(text)).toMatchObject({
         errorCode: 'PARSE_FAILED',
-        error: MODEL_FAILURE_TEXT,
+        error: PROVIDER_FAILURE_TEXT,
       });
       expect(text).not.toContain(UPSTREAM_FRAGMENT);
       expect(mocks.extractDocument.mock.calls[0][0].config).toMatchObject({
@@ -285,10 +285,29 @@ describe('upstream provider text on the operator key', () => {
       expect(response.status).toBe(500);
       expect(JSON.parse(text)).toMatchObject({
         errorCode: 'INTERNAL_ERROR',
-        error: MODEL_FAILURE_TEXT,
+        error: PROVIDER_FAILURE_TEXT,
       });
       expect(text).not.toContain(UPSTREAM_FRAGMENT);
       expect(mocks.searchWeb.mock.calls[0][0]).toMatchObject({ apiKey: OPERATOR_KEY });
+    });
+
+    it('uses the provider wording, not the model wording, for a thrown non-Error on the operator key', async () => {
+      mocks.isServerConfiguredProvider.mockReturnValue(true);
+      mocks.searchWeb.mockRejectedValue(UPSTREAM_FRAGMENT);
+      const { POST } = await import('@/app/api/web-search/route');
+
+      const response = await POST(
+        jsonRequest('/api/web-search', {
+          query: 'photosynthesis lesson',
+          providerId: 'tavily',
+          apiKey: VISITOR_KEY,
+        }),
+      );
+      const text = await response.text();
+
+      expect(JSON.parse(text)).toMatchObject({ error: PROVIDER_FAILURE_TEXT });
+      expect(text).not.toContain(MODEL_FAILURE_TEXT);
+      expect(text).not.toContain(UPSTREAM_FRAGMENT);
     });
 
     it('keeps the upstream text for a visitor who supplied their own key', async () => {
@@ -332,7 +351,7 @@ describe('upstream provider text on the operator key', () => {
       expect(response.status).toBe(500);
       expect(JSON.parse(text)).toMatchObject({
         errorCode: 'INTERNAL_ERROR',
-        error: MODEL_FAILURE_TEXT,
+        error: PROVIDER_FAILURE_TEXT,
       });
       expect(text).not.toContain(UPSTREAM_FRAGMENT);
       expect(fetchMock).toHaveBeenCalledWith(

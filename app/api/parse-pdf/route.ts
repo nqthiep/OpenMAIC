@@ -8,7 +8,7 @@ import type { PDFProviderId } from '@/lib/pdf/types';
 import type { ParsedPdfContent } from '@/lib/types/pdf';
 import { documentArtifactToParsedPdfContent, extractDocument } from '@/lib/document';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
+import { PROVIDER_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Parse PDF');
@@ -90,6 +90,6 @@ export async function POST(req: NextRequest) {
       `PDF parsing failed [provider=${resolvedProviderId ?? 'unknown'}, file="${pdfFileName ?? 'unknown'}"]:`,
       error,
     );
-    return apiError('PARSE_FAILED', 500, visitorErrorText(error, managed, MODEL_FAILURE_TEXT));
+    return apiError('PARSE_FAILED', 500, visitorErrorText(error, managed, PROVIDER_FAILURE_TEXT));
   }
 }

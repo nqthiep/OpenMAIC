@@ -654,7 +654,7 @@ describe('database runtime chat integration', () => {
     releaseDeleteAll();
     await clearing;
     await expect(migrating).resolves.toBeNull();
-  });
+  }, 30_000); // fake-indexeddb round trips; the default 5 s limit is exceeded under full-suite load
 
   it('rejects a stage save that resumes after a database clear and allows a fresh save', async () => {
     vi.stubGlobal('navigator', { locks: fairLockManager() });

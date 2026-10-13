@@ -131,7 +131,10 @@ export async function parseWithAliDocMindClient(
   const submitRes = await client.submitDocParserJobAdvance(request, runtime);
   const jobId = submitRes.body?.data?.id;
   if (!jobId) {
-    throw new Error(`AliDocMind submit returned no job id: ${JSON.stringify(submitRes.body)}`);
+    // The body stays in the log. A thrown message is stored as the material's failure
+    // reason and reaches the agent, so an upstream body must not go into it.
+    log.warn('AliDocMind submit returned no job id:', submitRes.body);
+    throw new Error('AliDocMind submit returned no job id');
   }
   log.info(`Job ${jobId} submitted, polling…`);
 

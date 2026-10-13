@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
 import {
   describeUnexpectedError,
-  MODEL_FAILURE_TEXT,
+  PROVIDER_FAILURE_TEXT,
   visitorErrorText,
 } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         return apiError(
           'INVALID_CREDENTIALS',
           400,
-          managed ? MODEL_FAILURE_TEXT : `Authentication failed: ${result.error}`,
+          managed ? PROVIDER_FAILURE_TEXT : `Authentication failed: ${result.error}`,
         );
       }
       return apiSuccess({ message: 'Connection successful' });
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
         return apiError(
           'INTERNAL_ERROR',
           500,
-          managed ? MODEL_FAILURE_TEXT : `Authentication failed: ${text || response.statusText}`,
+          managed ? PROVIDER_FAILURE_TEXT : `Authentication failed: ${text || response.statusText}`,
         );
       }
 
@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
       } else if (error.message.includes('timeout') || error.name === 'TimeoutError') {
         errorMessage = 'Connection timed out';
       } else {
-        errorMessage = visitorErrorText(error, managed, MODEL_FAILURE_TEXT);
+        errorMessage = visitorErrorText(error, managed, PROVIDER_FAILURE_TEXT);
       }
     }
 

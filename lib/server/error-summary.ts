@@ -35,6 +35,12 @@ export function describeUnexpectedError(value: unknown): string {
 export const MODEL_FAILURE_TEXT = 'The model provider could not complete this request.';
 
 /**
+ * The same, for a route whose upstream is not a language or speech model (web search, PDF
+ * parsing). Model wording there would describe the wrong service.
+ */
+export const PROVIDER_FAILURE_TEXT = 'The provider could not complete this request.';
+
+/**
  * Text a visitor may see for a failure. With the operator's key, upstream text stays on
  * the server: the fallback is sent instead. With the visitor's own key, the message is theirs.
  */
