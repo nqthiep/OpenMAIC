@@ -349,29 +349,76 @@ Sprint goal: close the leak class the cycle 5 review left open (B18); finish log
 - A read-only audit of every route for visitor-facing upstream text (77 route files) found 11 A rows. All are fixed. The B and C rows were assessed and left unchanged. Details: `scrum/reviews/cycle6-review.md`.
 - The workers' proposal for the materials path (fixed text only for the document path) was changed by the coordinator. The ASR wrapper stored adapter text, which is the leak class, so the wrapper now keeps only our own messages (D-31).
 
-### Backlog status after cycle 6
+## Cycle 7: body caps, log hygiene, the anonymous claim, and error-code i18n
+
+Full record: `scrum/DECISIONS-04.md`.
+
+Sprint goal: close every backlog item that can be closed by code; finish the unfinished access-control work (P4.4); leave the app deploy-ready. Items needing the owner or an expert are recorded as decisions, not decided.
+
+### Items completed this cycle
+
+| Item | What changed | Commits | Evidence |
+|---|---|---|---|
+| B47 | Body caps on 19 remaining routes (stage, chat, chat-pi, generate, generate-classroom, pbl). `readBoundedJson` everywhere; new `PAYLOAD_TOO_LARGE` code. Caps measured first: 1 MiB metadata, 10 MiB for content bodies (5–240 KB realistic) | 9786e2f2 | `tests/server/bounded-body-content-routes.test.ts` (80) |
+| B52 | 26 raw-error log sites in provider-touching files now log `describeUnexpectedError` summaries instead of raw objects; local errors keep their messages | f5534e53 | `tests/server/provider-error-log-summary.test.ts` (4); 2603 related tests pass |
+| B48 | Adapter-level `MaterialExtractionError` kept the adapter's message verbatim (vendor text). The wrap now uses our own `EXTRACTION_FAILURE_TEXT`; the original stays as `cause` (drives retryability). Selection failures keep their own helpful text | b271f650 | `tests/server/material-extraction-adapter-text.test.ts` (2); 2 expectations updated in `tests/agent-runtime/material-extraction.test.ts` |
+| B49 | Non-model routes (transcription, parse-pdf, extract-document) used the "model provider" wording for non-Error throws under the visitor's key. Each now has its own fixed text | d751973b | `tests/server/non-model-route-fixed-text.test.ts` (3); 2 expectations updated in `tests/api/managed-key-upstream-text-routes.test.ts` |
+| B51 | Suffix redaction missed four real cases: YAML field `accessKeySecret`, env `AWS_BEARER_TOKEN_BEDROCK` and `S3_CONTRACT_SECRET_KEY`, and the password inside `DATABASE_URL`. Aliases registered (`SECRET_ENV_EXACT`, YAML `accessKeySecret`/`secretKey`, DB-password parsing) | 2fba2657 | `tests/server/log-redaction.test.ts` (+5) |
+| B53 | Verified: entry-tree raw frames are read only by the runner and the agent's own history tools; no route reads them. Storage kept; retention policy documented in `entry-tree-storage.ts` | df438574 | Code read, no behaviour change |
+| B50 | The two timing-sensitive retry tests: cold module import moved to `beforeAll` (60 s hook, B27 pattern); the two backoff-waiting tests got explicit 30 s budgets. First test 4.9 s → 1.1 s in-budget | 3c2d8f1b | `tests/server/classroom-generation-retry.test.ts` (8) |
+| P4.4 / B2 | Anonymous data merges into the account on sign-in/register: one transaction moves stages, folders, sessions (+children), owner events (renumbered), skills, materials. Account wins id collisions; name collisions get numeric suffixes; active sessions block the claim; cookie cleared only on success | 5838ad26 | `tests/server/anonymous-claim.test.ts` (5, PGlite) |
+| i18n | All 53 plain-text error responses plus the classroom-media and stage ad-hoc shapes now return the apiError envelope with an errorCode (new `SKILL_BUILTIN_DELETE` code); owner routes keep the minted cookie on errors via `ownerApiError` | 362abcc2 | 9 test assertions updated; `check:i18n-keys` passes (12 locales) |
+| Decisions | D-32 (P4.4 done) through D-38: B30 needs the owner's dated release; B8 stays deferred; B1 options; B3 retirement; P4.5 provider shortlist; B13/B35/B36/B17 need humans | e7e06026 | `scrum/DECISIONS-04.md` |
+
+### Verification
+
+- `npx tsc --noEmit`: 0 errors. ESLint and Prettier clean on every changed file. `check:i18n-keys` passes (12 locales aligned). [Measured]
+- Full suite, two runs on the final tree: run 1 — 765 files (4 failed, 751 passed, 9 skipped), 8463 tests (47 failed, 8300 passed, 79 skipped); run 2 — 765 files (3 failed, 752 passed, 9 skipped), 8463 tests (48 failed, 8306 passed, 79 skipped). [Measured: `pnpm test`, ~17 min per run]
+- Every failure classified, none caused by this cycle: `tests/quiz/runtime.test.ts` (4) and `tests/runtime/chat-storage.test.ts` (40) fail identically on the clean `f24aa7f` tree (verified via a temporary worktree) — pre-existing; `tests/media/server-backed-media-orchestrator.test.ts` (2) fails identically on the clean tree (verified in cycle 6) — pre-existing; `tests/agent-runtime/skill-edit-tools.test.ts` (2) fails only under full-suite load (PGlite hook timeout) and passes alone — load flake.
+- B26 watch: no account-route failure in either full run. Not reproduced; stays open as a watch item.
+- Not verified: a live provider call (no provider network in this environment) `[Unverified]`; two real browsers for the anonymous-claim cookie flow `[Unverified]`; the dated B30 cutover (needs the owner).
+
+### Backlog status after cycle 7
 
 | Item | Status | Note |
 |---|---|---|
-| B8 | Deferred | D-29: needs a shared store, the external service's job-id scheme (`[Unverified]`), and a decision on signed-out submits |
-| B18 | Partly done | The audit's rows are fixed. Behaviour note B49; adapter text B48 |
-| B34 | Done | D-28. The premise was corrected: the gap is the widget gate, not a missing tool |
+| B1 | Decision needed | D-35: options restated; recommendation is owner-or-published reads |
+| B2 | Done | D-32: anonymous claim on sign-in/register (small scope) |
+| B3 | Decision needed | D-36: recommended retirement path for the dev bearer token |
+| B8 | Deferred | D-34: reopen needs the job-id scheme, a shared store, and the signed-out-submits decision |
+| B13 | Open | D-38: needs a native speaker's review of the `account` translations |
+| B17 | Open | D-38: educational content review not started; needs a domain expert |
+| B18 | Done | Cycle 6 audit rows; cycle 7 closed B48/B49 |
+| B26 | Watch | No reproduction in either cycle-7 full run |
+| B29 | NO-GO stands | Relative-URL recommendation stays NO-GO until the browser check passes |
+| B30 | Decision needed | D-33: owner names the dated release that requires `ACCESS_COOKIE_SECRET` |
+| B34 | Done | D-28 |
+| B35 | Open | D-38: 15 defects + 23 flagged claims need subject-matter reviewers |
+| B36 | Open | D-38: template review needs QA/product reviewers |
 | B37 | Code done; 360 px check open | `[Unverified]` |
 | B44 | Done | Residual beyond the 10 min window, in `scrum/specs/presence-lease.md` |
-| B45 | Partly done | Central redaction. Raw error sites open as B52 |
+| B45 | Done | Central redaction (cycle 6) + B51 aliases (cycle 7) |
 | B46 | Done for the scanned sites | A regex scan, not a proof (D-27) |
-| B47 | Open | Body caps for the stage, chat, generate, classroom and pbl routes; needs measured request sizes |
-| B48 (new) | Open | An adapter-level `MaterialExtractionError` may carry vendor text `[Unverified]` |
-| B49 (new) | Open, low | A non-Error throw under the visitor's key gets the "model provider" wording on non-model routes |
-| B50 (new) | Open, low-medium | Timing-sensitive tests under parallel load (`classroom-generation-retry`, the local media pipeline), and the 250 ms presence probe window |
-| B51 (new) | Open, low | Redaction matches names by suffix. A secret stored under another name is not redacted |
-| B52 (new) | Open, medium | About fifty raw error objects are still logged in provider-touching files. Decide per site whether the message stays (upstream echo `[Unverified]`) |
-| B53 (new) | Open, low | The agent entry tree stores raw frames. No route reads it today `[Inference]` |
+| B47 | Done | 19 routes capped; `PAYLOAD_TOO_LARGE` code |
+| B48 | Done | Adapter failures keep only our own message (D-31 precedent) |
+| B49 | Done | Route-specific fixed text on transcription, parse-pdf, extract-document |
+| B50 | Done | B27 pattern applied; remaining full-run flakes are pre-existing or load-only (see Verification) |
+| B51 | Done | Four real suffix misses registered as aliases |
+| B52 | Done | 26 provider-touching log sites now log summaries |
+| B53 | Done | Retention policy documented; no route reads raw frames |
+| P4.4 | Done | D-32 |
+| P4.5 | Open | D-37: owner picks a provider (Stripe/VNPay/MoMo); not implemented |
 
-Still open from earlier cycles: B29 (the NO-GO recommendation stands), B30, B13, B17, B35, B36, B1–B3, B26 (watch), B2.
+Still open and needing a human: B29 (NO-GO), B30 (release date), B1/B3 (product decisions), B13/B35/B36/B17 (reviewers), P4.5 (provider choice), B26 (watch).
 
 ### Process notes (retrospective, cycle 6)
 
 - **What helped:** the read-only audit gave file and line for every row, so the fixes were mechanical. The coordinator's diff review caught two changes that were too broad before they were committed: the logger registry and the ASR wrapper. Bisecting with temporary worktrees found both regressions in minutes.
 - **What hindered:** the workers stopped on a session rate limit and were resumed by message. A worker's proposal conflicted with two existing assertions, which needed a decision. A test's logger mock broke when a shared module gained a new export.
 - **Change for the next cycle:** do not add a named export to a module that tests replace with a factory, and do not add work to a store's edit path that can throw outside a `try`. Run the full suite after any change to the store or the logger, not only the targeted suites.
+
+### Process notes (retrospective, cycle 7)
+
+- **What helped:** doing the tasks strictly sequentially (one In-progress row at a time) avoided the cross-file conflicts the repo's history warns about. Verifying each fix against the clean tree with a temporary worktree settled the pre-existing-vs-regression question for the full-suite failures in minutes.
+- **What hindered:** the full suite takes ~17 minutes on this machine (vs ~4 in earlier cycles), so each classification round is expensive; the vitest output truncation kept hiding the failure summary, which cost an extra full run. PGlite returns `rowCount: undefined` for UPDATEs, which broke the claim's moved-counts until `RETURNING` was used — a test-environment quirk worth remembering.
+- **Change for the next cycle:** redirect full-suite output to a file from the start; treat any `new Response('<text>')` in new routes as a review flag (the apiError envelope is now the house rule); the remaining human-needed items (B13/B35/B36/B17 reviewers, B30 date, P4.5 provider) should be chased with the owner before the next code cycle, or they will roll forward again.

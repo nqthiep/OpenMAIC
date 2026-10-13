@@ -23,9 +23,10 @@ Sprint goal: đóng mọi mục backlog còn làm được bằng code, hoàn th
 | 6 | B53 — agent entry tree raw frames: check for readers; drop or document retention | Done | `df438574`: confirmed no route reads entries (only runner + agent's own history tools); storage kept, retention policy documented in entry-tree-storage.ts |
 | 7 | B50 — timing-sensitive tests: explicit budgets/retry like B27 | Done | `3c2d8f1b`: cold import moved to beforeAll (60s hook); 2 slow retry tests get 30s budgets; first test 4.9s→1.1s; 8/8 pass |
 | 8 | P4.4 — claim anonymous data on sign-in/register (small scope); decision in `scrum/DECISIONS-04.md` | Done | `5838ad26`: new `lib/server/accounts/claim.ts` moves all owner-keyed rows in one tx; account wins id collisions, suffix rename on name collisions, SESSIONS_ACTIVE guard; login+register hooks + cookie clear; 5 PGlite tests pass; tsc 0 |
-| 9 | i18n server error messages: all server error responses must be error codes; UI maps codes → 12 locales | In progress | Auditing server responses for raw English text |
-| 10 | B26 — watch: if full run reproduces the intermittent failure, capture stack, no blind fix | Todo | |
-| 11 | Write decisions/recommendations into `scrum/DECISIONS-04.md` (B30, B8, B1–B3, P4.5, B13/B35/B36/B17) | Todo | No code for P4.5 (no provider chosen) |
+| 9 | i18n server error messages: all server error responses must be error codes; UI maps codes → 12 locales | Done | `362abcc2`: 53 plain-text responses + classroom-media/stage ad-hoc shapes → apiError envelope (new `SKILL_BUILTIN_DELETE` code); ownerApiError keeps cookie on errors; 9 test assertions updated; tsc 0; check:i18n-keys pass |
+| 10 | B26 — watch: if full run reproduces the intermittent failure, capture stack, no blind fix | Done | Watched through 2 full runs: no account-route failure; not reproduced, stays open as watch |
+| 11 | Write decisions/recommendations into `scrum/DECISIONS-04.md` (B30, B8, B1–B3, P4.5, B13/B35/B36/B17) | Done | `e7e06026`: D-32 (P4.4 done) through D-38 |
+| 12 | Final verification: tsc, full `pnpm test`, ESLint, Prettier, `check:i18n-keys`; Cycle 7 entry in `scrum/BACKLOG.md` | Done | tsc 0; ESLint/Prettier clean; check:i18n-keys pass; full suite 2 runs: 8300/8306 pass, 47/48 fail — all classified pre-existing (verified on clean tree) or load flakes; BACKLOG.md Cycle 7 entry + status table updated |
 | 12 | Final verification: `npx tsc --noEmit`, full `pnpm test`, ESLint, Prettier, `pnpm check:i18n-keys`; write "Cycle 7" into `scrum/BACKLOG.md` | Todo | Record measured numbers (test files, tests) |
 
 Not in scope this cycle: B29 (NO-GO stands), B13/B35/B36/B17 (need native reviewers / content experts).
