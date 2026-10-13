@@ -39,6 +39,8 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
+import { apiError } from '@/lib/server/api-response';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 import {
   resolveSignedInSession,
   sessionEndedResponse,
@@ -65,7 +67,7 @@ const BACKLOG_PAGE = 500;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
   const { id } = await params;
   const responseHeaders = new Headers();
@@ -83,10 +85,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const store = await getAgentSessionStore();
   const meta = await store.getSession(id);
   if (!meta) {
-    return new Response('Not found', { status: 404, headers: responseHeaders });
+    return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
   }
   if (meta.ownerId !== ownerId) {
-    return new Response('Not found', { status: 404, headers: responseHeaders });
+    return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
   }
 
   const url = new URL(req.url);

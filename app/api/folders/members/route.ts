@@ -25,6 +25,7 @@ import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-sc
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { readBoundedJson } from '@/lib/server/bounded-json';
+import { apiError } from '@/lib/server/api-response';
 
 export const runtime = 'nodejs';
 
@@ -37,7 +38,7 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 
 // POST /api/folders/members
 export async function POST(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const read = await readBoundedJson(req, FOLDER_MEMBER_MAX_BYTES);
   if (!read.ok) {

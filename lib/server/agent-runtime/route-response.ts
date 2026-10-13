@@ -35,9 +35,9 @@ export function ownerApiError(
 
 /**
  * The no-existence-oracle 404: foreign and missing resources answer the same
- * plain body as every other agent-runtime route (an existence probe must not
+ * coded body as every other agent-runtime route (an existence probe must not
  * be able to distinguish "never existed" from "someone else's").
  */
 export function ownerNotFound(headers: Headers): NextResponse {
-  return new NextResponse('Not found', { status: 404, headers });
+  return ownerApiError('NOT_FOUND', 404, 'Not found', headers);
 }

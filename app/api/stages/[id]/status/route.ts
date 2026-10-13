@@ -6,20 +6,21 @@
  *
  * No auth required — any caller who has the stage ID can read its public flag.
  *
- * Convention: snake_case error codes (e.g. `not_found`, `internal_error`).
+ * Errors use the repo's apiError envelope (errorCode), like every other route.
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { resolveStageAccess } from '@/lib/server/stage-access';
+import { apiError } from '@/lib/server/api-response';
 
 export const runtime = 'nodejs';
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const { id } = await params;
   try {
@@ -29,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     // unauthenticated, so an answer other than plain 404 would let anyone
     // confirm that a given id used to be a real course.
     if (!access) {
-      return NextResponse.json({ error: 'not_found' }, { status: 404 });
+      return apiError('NOT_FOUND', 404, 'Not found');
     }
 
     // Field names are the wire contract; they stay `isPublic` / `publishedAt`
@@ -40,6 +41,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
       stageId: id,
       error: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.json({ error: 'internal_error' }, { status: 500 });
+    return apiError('INTERNAL_ERROR', 500, 'Internal error');
   }
 }

@@ -31,6 +31,7 @@ import { readBoundedJson } from '@/lib/server/bounded-json';
 import { folderNameErrorResponse } from '@/lib/server/folder-name-errors';
 import { createFolderForOwner, listFoldersForOwner } from '@/lib/server/folder-persistence';
 import { validateFolderName } from '@/lib/utils/folder-name-validation';
+import { apiError } from '@/lib/server/api-response';
 
 export const runtime = 'nodejs';
 
@@ -54,7 +55,7 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 
 // GET /api/folders — list the caller's folders, ordered by `order` asc.
 export async function GET(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     try {
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
 // malformed body must not mint an anonymous cookie partition for a request
 // that will not proceed.
 export async function POST(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const read = await readBoundedJson(req, FOLDER_CREATE_MAX_BYTES);
   if (!read.ok) {

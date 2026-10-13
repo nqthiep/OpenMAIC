@@ -28,6 +28,7 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerNotFound } from '@/lib/server/agent-runtime/route-response';
+import { apiError } from '@/lib/server/api-response';
 import {
   resolveSignedInSession,
   sessionEndedResponse,
@@ -48,7 +49,7 @@ export const STAGE_FRESHNESS_RETRY_MS = 3_000;
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const responseHeaders = new Headers();
   const session = await resolveSignedInSession(req.headers);

@@ -69,7 +69,7 @@ function mapSaveError(error: unknown, headers: Headers) {
 
 // GET /api/stages/[id] — the full document.
 export async function GET(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id } = await params;
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // PATCH /api/stages/[id] — rename the course (owner-only).
 export async function PATCH(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const renameRead = await readBoundedJson(req, STAGE_RENAME_MAX_BYTES);
   if (!renameRead.ok) {
@@ -123,7 +123,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 // PUT /api/stages/[id] — save a whole document.
 export async function PUT(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const saveRead = await readBoundedJson(req, STAGE_SAVE_MAX_BYTES);
   if (!saveRead.ok) {
@@ -186,7 +186,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 // DELETE /api/stages/[id] — remove the course and its scenes/outline.
 export async function DELETE(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id } = await params;

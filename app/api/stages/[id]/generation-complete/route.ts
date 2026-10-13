@@ -12,13 +12,15 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { markStageGenerationComplete } from '@/lib/persistence/stage-meta';
 import { getStageAccessDb, resolveStageAccess } from '@/lib/server/stage-access';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { apiError } from '@/lib/server/api-response';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 
 export const runtime = 'nodejs';
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id: stageId } = await params;
@@ -29,19 +31,19 @@ export async function POST(req: NextRequest, { params }: Params) {
       // that an id used to be a real course, and a deleted course has no
       // state left worth repairing.
       if (!access) {
-        return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
+        return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
 
       // Owner only.
       if (access.ownerId !== ownerId) {
-        return NextResponse.json({ error: 'forbidden' }, { status: 403, headers: responseHeaders });
+        return ownerApiError('FORBIDDEN', 403, 'Forbidden', responseHeaders);
       }
 
       const db = await getStageAccessDb();
       const touched = await markStageGenerationComplete(db, stageId);
 
       if (!touched) {
-        return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
+        return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
 
       console.info('Stage generation marked complete', { stageId, ownerId });

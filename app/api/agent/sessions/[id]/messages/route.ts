@@ -13,6 +13,7 @@ import { scheduleConversationTitle } from '@/lib/server/agent-runtime/conversati
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { decodeElementRefs } from '@/lib/workbench/element-refs';
 import { decodeCourseRefs } from '@/lib/workbench/course-refs';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 import {
   bindOwnerMaterialsToSession,
   SessionMaterialBindingError,
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (denied) return denied;
 
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const store = await getAgentSessionStore();
     const meta = await store.getSession(id);
     if (!meta || meta.ownerId !== ownerId) {
-      return new Response('Not found', { status: 404, headers: responseHeaders });
+      return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
     }
 
     const read = await readBoundedJson(req, SESSION_MESSAGE_MAX_BYTES);
@@ -129,10 +130,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       );
     } catch (error) {
       if (error instanceof SessionMaterialBindingError) {
-        return new Response('Not found', { status: 404, headers: responseHeaders });
+        return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
       if (error instanceof AgentSessionAccessError) {
-        return new Response('Forbidden', { status: 403, headers: responseHeaders });
+        return ownerApiError('FORBIDDEN', 403, 'Forbidden', responseHeaders);
       }
       throw error;
     }

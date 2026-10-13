@@ -118,7 +118,7 @@ function parseLimit(raw: string | null): { limit?: number } | { invalid: true } 
 // GET /api/materials?sessionId=&limit=&before= — list one owned session's
 // materials, newest first, keyset-paged (the agent-tools list surface).
 export async function GET(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const url = new URL(req.url);
   const sessionId = url.searchParams.get('sessionId')?.trim();
@@ -178,7 +178,7 @@ export async function POST(req: NextRequest) {
     return response;
   };
 
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     try {

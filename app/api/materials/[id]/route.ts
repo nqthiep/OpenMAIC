@@ -28,7 +28,7 @@ export const runtime = 'nodejs';
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const sessionId = new URL(req.url).searchParams.get('sessionId')?.trim();
   if (!sessionId) return apiError('MISSING_REQUIRED_FIELD', 400, 'sessionId is required');

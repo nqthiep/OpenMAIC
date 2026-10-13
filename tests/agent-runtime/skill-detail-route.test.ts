@@ -96,6 +96,6 @@ describe('DELETE agent skill detail', () => {
       { params: Promise.resolve({ id: 'usk_missing' }) },
     );
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Not found');
+    expect(await response.json()).toMatchObject({ success: false, errorCode: 'NOT_FOUND' });
   });
 });

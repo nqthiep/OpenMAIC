@@ -15,6 +15,8 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { listSkills } from '@/lib/server/agent-runtime/skills';
 import { createUserSkill, UserSkillError } from '@/lib/server/agent-runtime/user-skills';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { apiError } from '@/lib/server/api-response';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 import {
   parseUserSkillMarkdown,
   parseUserSkillZip,
@@ -25,7 +27,7 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const skills = await listSkills(ownerId);
@@ -45,26 +47,30 @@ export async function GET(req: NextRequest) {
 
 /** Upload one owner Skill as the exporter zip or a bare canonical SKILL.md. */
 export async function POST(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     try {
       const form = await req.formData();
       const upload = form.get('file');
       if (!upload || typeof upload === 'string' || typeof upload.arrayBuffer !== 'function') {
-        return new Response('A skill file is required.', {
-          status: 400,
-          headers: responseHeaders,
-        });
+        return ownerApiError(
+          'MISSING_REQUIRED_FIELD',
+          400,
+          'A skill file is required.',
+          responseHeaders,
+        );
       }
       const bytes = Buffer.from(await upload.arrayBuffer());
       // Exported owner zips are at most a little over the 64 KiB content cap.
       // Bound compressed input before JSZip expands it; field validation below
       // remains the authoritative create limit after parsing.
       if (bytes.byteLength > 1_048_576) {
-        return new Response('The skill upload is too large.', {
-          status: 413,
-          headers: responseHeaders,
-        });
+        return ownerApiError(
+          'PAYLOAD_TOO_LARGE',
+          413,
+          'The skill upload is too large.',
+          responseHeaders,
+        );
       }
       const input = upload.name.toLowerCase().endsWith('.zip')
         ? await parseUserSkillZip(bytes)

@@ -102,7 +102,10 @@ describe('GET /api/stage-meta/[stageId]', () => {
       stageMetaParams(STAGE_ID),
     );
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: 'not_found' });
+    await expect(response.json()).resolves.toMatchObject({
+      success: false,
+      errorCode: 'NOT_FOUND',
+    });
   });
 
   // The sidecar reports who owns a persisted course. Every persisted course has
@@ -183,7 +186,10 @@ describe('POST /api/stages/[id]/generation-complete', () => {
       params(STAGE_ID),
     );
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({ error: 'forbidden' });
+    await expect(response.json()).resolves.toMatchObject({
+      success: false,
+      errorCode: 'FORBIDDEN',
+    });
   });
 });
 

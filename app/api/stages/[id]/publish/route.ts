@@ -12,13 +12,15 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { setStagePublished } from '@/lib/persistence/stage-meta';
 import { getStageAccessDb, resolveStageAccess } from '@/lib/server/stage-access';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { apiError } from '@/lib/server/api-response';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 
 export const runtime = 'nodejs';
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { id: stageId } = await params;
@@ -32,10 +34,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
       const access = await resolveStageAccess(stageId);
       if (!access) {
-        return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
+        return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
       if (access.ownerId !== ownerId) {
-        return NextResponse.json({ error: 'forbidden' }, { status: 403, headers: responseHeaders });
+        return ownerApiError('FORBIDDEN', 403, 'Forbidden', responseHeaders);
       }
 
       if (access.isPublic) {

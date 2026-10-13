@@ -8,6 +8,7 @@ import { readBoundedJson } from '@/lib/server/bounded-json';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { normalizeSessionTitleOverride } from '@/lib/workbench/session-title';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 
 export const runtime = 'nodejs';
 
@@ -16,7 +17,7 @@ const SESSION_TITLE_MAX_BYTES = 1024 * 1024;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const store = await getAgentSessionStore();
     const meta = await store.getSession(id);
     if (!meta || meta.ownerId !== ownerId) {
-      return new Response('Not found', { status: 404, headers: responseHeaders });
+      return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
     }
     return NextResponse.json(meta, { headers: responseHeaders });
   });
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
@@ -65,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const title = normalizeSessionTitleOverride(body.title);
     const meta = await store.setManualSessionTitle(id, ownerId, title);
     if (!meta) {
-      return new Response('Not found', { status: 404, headers: responseHeaders });
+      return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
     }
     return NextResponse.json({ title: meta.title ?? null }, { headers: responseHeaders });
   });

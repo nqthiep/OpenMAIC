@@ -129,7 +129,7 @@ describe('GET /api/stages/[id]/freshness', () => {
     });
     const response = await call('stage-absent');
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Not found');
+    expect(await response.json()).toMatchObject({ success: false, errorCode: 'NOT_FOUND' });
     expect(response.headers.get('set-cookie')).toContain('anonymous_id=anon-2');
   });
 

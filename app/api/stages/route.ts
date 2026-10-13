@@ -37,7 +37,7 @@ function createStageId(): string {
 
 // GET /api/stages — list every stage document owned by the caller.
 export async function GET(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const store = await getOwnerScopedDocumentStore(ownerId);
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
 // a malformed body must not mint an anonymous cookie partition for a request
 // that will not proceed.
 export async function POST(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const read = await readBoundedJson(req, STAGE_CREATE_MAX_BYTES);
   if (!read.ok) {

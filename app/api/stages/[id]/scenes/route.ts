@@ -46,7 +46,7 @@ function isQueryableSceneId(sceneId: string): boolean {
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const rawIds = new URL(req.url).searchParams.get('ids');
   const requested = (rawIds ?? '')

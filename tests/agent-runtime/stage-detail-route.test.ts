@@ -71,7 +71,7 @@ describe('GET /api/stages/[id]', () => {
   it('answers 404 for a missing stage', async () => {
     const response = await call(GET, {}, 'stage-absent');
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Not found');
+    expect(await response.json()).toMatchObject({ success: false, errorCode: 'NOT_FOUND' });
   });
 
   it('answers 404 when the agent runtime is not configured', async () => {

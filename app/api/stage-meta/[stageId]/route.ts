@@ -27,6 +27,8 @@ import { NextResponse } from 'next/server';
 import { isServerPersistenceConfigured } from '@/lib/config/feature-flags';
 import { resolveStageAccess } from '@/lib/server/stage-access';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { apiError } from '@/lib/server/api-response';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 
 // Per-viewer and mutable on every publish/unpublish/delete: this response must
 // never be cached, by Next or by anything in front of it.
@@ -44,7 +46,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   // course in that configuration, which left its viewers with no ownership
   // signal at all — indistinguishable, to a client, from "this course has no
   // owner".
-  if (!isServerPersistenceConfigured()) return new Response('Not found', { status: 404 });
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
     const { stageId } = await params;
@@ -53,7 +55,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
       // Absent or tombstoned — indistinguishable, deliberately.
       if (!access) {
-        return NextResponse.json({ error: 'not_found' }, { status: 404, headers: responseHeaders });
+        return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
 
       // Identity comparison, and nothing else: this boolean is the client's

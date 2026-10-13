@@ -107,7 +107,7 @@ describe('GET per-session events', () => {
     const response = await call();
 
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Not found');
+    expect(await response.json()).toMatchObject({ success: false, errorCode: 'NOT_FOUND' });
     expect(mocks.resolveRequestOwnerId).toHaveBeenCalledOnce();
     expect(mocks.readEventsAfterForReplay).not.toHaveBeenCalled();
   });
@@ -124,7 +124,7 @@ describe('GET per-session events', () => {
     mocks.getSession.mockResolvedValue(null);
     const missing = await call();
     expect(missing.status).toBe(404);
-    expect(await missing.text()).toBe('Not found');
+    expect(await missing.json()).toMatchObject({ success: false, errorCode: 'NOT_FOUND' });
     expect(missing.headers.get('set-cookie')).toBe('anonymous_id=test; Path=/; HttpOnly');
     expect(mocks.readEventsAfterForReplay).not.toHaveBeenCalled();
 
@@ -132,7 +132,7 @@ describe('GET per-session events', () => {
     mocks.getSession.mockResolvedValue({ id: 'session-1', ownerId: 'user:someone-else' });
     const notOwned = await call();
     expect(notOwned.status).toBe(404);
-    expect(await notOwned.text()).toBe('Not found');
+    expect(await notOwned.json()).toMatchObject({ success: false, errorCode: 'NOT_FOUND' });
     expect(notOwned.headers.get('set-cookie')).toBe('anonymous_id=test; Path=/; HttpOnly');
     expect(mocks.readEventsAfterForReplay).not.toHaveBeenCalled();
   });

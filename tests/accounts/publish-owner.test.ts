@@ -92,7 +92,10 @@ describe('publishing a course by account', () => {
     const response = await publish(`openmaic_session=${TOKEN_B}`);
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({ error: 'forbidden' });
+    await expect(response.json()).resolves.toMatchObject({
+      success: false,
+      errorCode: 'FORBIDDEN',
+    });
     expect(mocks.setStagePublished).not.toHaveBeenCalled();
   });
 

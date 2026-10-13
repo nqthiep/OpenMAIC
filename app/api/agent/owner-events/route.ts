@@ -14,6 +14,7 @@ import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
 import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
+import { apiError } from '@/lib/server/api-response';
 import {
   resolveSignedInSession,
   sessionEndedResponse,
@@ -41,7 +42,7 @@ function parseLastEventId(value: string | null): bigint {
 }
 
 export async function GET(req: NextRequest) {
-  if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
+  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   // Identity belongs to the request, not the URL. EventSource reconnects to
   // this same stable path with the same cookies. A signed-in request is

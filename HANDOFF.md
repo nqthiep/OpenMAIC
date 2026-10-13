@@ -22,8 +22,8 @@ Sprint goal: đóng mọi mục backlog còn làm được bằng code, hoàn th
 | 5 | B51 — evaluate suffix redaction; register aliases for real misses | Done | `2fba2657`: found 4 real misses (YAML `accessKeySecret`; env `AWS_BEARER_TOKEN_BEDROCK`, `S3_CONTRACT_SECRET_KEY`, `ALIDOCMIND_ACCESS_KEY_ID`; `DATABASE_URL` password parsed); 5 new tests pass; tsc 0 |
 | 6 | B53 — agent entry tree raw frames: check for readers; drop or document retention | Done | `df438574`: confirmed no route reads entries (only runner + agent's own history tools); storage kept, retention policy documented in entry-tree-storage.ts |
 | 7 | B50 — timing-sensitive tests: explicit budgets/retry like B27 | Done | `3c2d8f1b`: cold import moved to beforeAll (60s hook); 2 slow retry tests get 30s budgets; first test 4.9s→1.1s; 8/8 pass |
-| 8 | P4.4 — claim anonymous data on sign-in/register (small scope); decision in `scrum/DECISIONS-04.md` | In progress | Reading `scrum/specs/claim-anonymous-data.md` |
-| 9 | i18n server error messages: all server error responses must be error codes; UI maps codes → 12 locales | Todo | `pnpm check:i18n-keys` must pass |
+| 8 | P4.4 — claim anonymous data on sign-in/register (small scope); decision in `scrum/DECISIONS-04.md` | Done | `5838ad26`: new `lib/server/accounts/claim.ts` moves all owner-keyed rows in one tx; account wins id collisions, suffix rename on name collisions, SESSIONS_ACTIVE guard; login+register hooks + cookie clear; 5 PGlite tests pass; tsc 0 |
+| 9 | i18n server error messages: all server error responses must be error codes; UI maps codes → 12 locales | In progress | Auditing server responses for raw English text |
 | 10 | B26 — watch: if full run reproduces the intermittent failure, capture stack, no blind fix | Todo | |
 | 11 | Write decisions/recommendations into `scrum/DECISIONS-04.md` (B30, B8, B1–B3, P4.5, B13/B35/B36/B17) | Todo | No code for P4.5 (no provider chosen) |
 | 12 | Final verification: `npx tsc --noEmit`, full `pnpm test`, ESLint, Prettier, `pnpm check:i18n-keys`; write "Cycle 7" into `scrum/BACKLOG.md` | Todo | Record measured numbers (test files, tests) |

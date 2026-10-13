@@ -22,6 +22,7 @@ import {
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { buildRequestOrigin, isValidClassroomId } from '@/lib/server/classroom-storage';
 import { decodeCourseRefs } from '@/lib/workbench/course-refs';
+import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
 
 export const runtime = 'nodejs';
 
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
   if (denied) return denied;
 
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
 
   const read = await readBoundedJson(req, SESSION_CREATE_MAX_BYTES);
@@ -197,7 +198,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       await store.softDeleteSession(meta.id, ownerId).catch(() => false);
       if (error instanceof SessionMaterialBindingError) {
-        return new Response('Not found', { status: 404, headers: responseHeaders });
+        return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
       throw error;
     }
@@ -206,7 +207,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) {
-    return new Response('Not found', { status: 404 });
+    return apiError('NOT_FOUND', 404, 'Not found');
   }
 
   return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
