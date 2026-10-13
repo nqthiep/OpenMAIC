@@ -40,7 +40,7 @@ Not in scope this cycle: B29 (NO-GO stands), B13/B35/B36/B17 (need native review
 - Task 1: find routes in groups stage/chat/generate/generate-classroom/pbl that read JSON bodies without a cap; measure realistic request sizes.
 
 ### Open questions and blockers
-- None yet.
+- **Push to GitHub is blocked on authentication.** `git ls-remote` works (read), but push needs auth: no GitHub token in env, no credential helper, `gh` not logged in, and the `github` skill CLI reports `not_connected`. Commits are being made locally on `it-math`. The owner must connect GitHub (device-flow) or push from their machine. This affects every commit in this cycle.
 
 ### How to verify
 - `npx tsc --noEmit`: expected 0 errors.
