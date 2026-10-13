@@ -2,6 +2,56 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Cycle 7 — close remaining code backlog, finish access-control leftovers, deployment readiness
+
+- Requested by: parent agent (scrum coordinator). Owner request (verbatim): "Tôi muốn bạn thiết kế và xây dựng tiếp ứng dụng này cho đến khi hoàn thiện."
+- Assignment status: In progress
+- Branch and commit: `it-math` @ `f24aa7f`, pushed: yes
+- Last updated: 2026-10-13 14:20 UTC
+
+Sprint goal: đóng mọi mục backlog còn làm được bằng code, hoàn thiện phần dở của access-control, để ứng dụng ở trạng thái sẵn sàng deploy; các mục cần quyết định của chủ sở hữu hoặc chuyên gia thì ghi quyết định/khuyến nghị, không tự ý quyết thay.
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 0 | Setup: clone, read AGENTS.md/HANDOFF.md, pnpm install, verify push | In progress | `git clone -b it-math`; pnpm 10.28.0 installed globally via npm; `git ls-remote origin refs/heads/it-math` matches HEAD |
+| 1 | B47 — body caps for remaining routes (stage, chat, generate, generate-classroom, pbl) | Todo | Measure real request sizes first; use `lib/server/bounded-json.ts`; oversize → 413/400 |
+| 2 | B52 — audit ~50 raw error log sites in provider-touching files | Todo | Per site: log summary only or register secret in `lib/log-secrets.ts` |
+| 3 | B48 — verify adapter-level `MaterialExtractionError` vendor text; keep only our message | Todo | Precedent D-31 |
+| 4 | B49 — fix non-Error throw wording under visitor's key on non-model routes | Todo | Route-specific fixed text |
+| 5 | B51 — evaluate suffix redaction; register aliases for real misses | Todo | |
+| 6 | B53 — agent entry tree raw frames: check for readers; drop or document retention | Todo | |
+| 7 | B50 — timing-sensitive tests: explicit budgets/retry like B27 | Todo | `tests/server/classroom-generation-retry.test.ts`, local media real pipeline |
+| 8 | P4.4 — claim anonymous data on sign-in/register (small scope); decision in `scrum/DECISIONS-04.md` | Todo | Read `scrum/specs/claim-anonymous-data.md`; conflict rule: account data wins on id collision |
+| 9 | i18n server error messages: all server error responses must be error codes; UI maps codes → 12 locales | Todo | `pnpm check:i18n-keys` must pass |
+| 10 | B26 — watch: if full run reproduces the intermittent failure, capture stack, no blind fix | Todo | |
+| 11 | Write decisions/recommendations into `scrum/DECISIONS-04.md` (B30, B8, B1–B3, P4.5, B13/B35/B36/B17) | Todo | No code for P4.5 (no provider chosen) |
+| 12 | Final verification: `npx tsc --noEmit`, full `pnpm test`, ESLint, Prettier, `pnpm check:i18n-keys`; write "Cycle 7" into `scrum/BACKLOG.md` | Todo | Record measured numbers (test files, tests) |
+
+Not in scope this cycle: B29 (NO-GO stands), B13/B35/B36/B17 (need native reviewers / content experts).
+
+### Done so far
+- Fresh clone of `it-math` at `f24aa7f` into `~/workspace/OpenMAIC`; `pnpm install` completed; push access verified.
+
+### Decisions and reasons
+- Work strictly serial, one In-progress row at a time (repo lesson: parallel agents editing shared files caused transient failures).
+
+### Next step (exact)
+- Task 1: find routes in groups stage/chat/generate/generate-classroom/pbl that read JSON bodies without a cap; measure realistic request sizes.
+
+### Open questions and blockers
+- None yet.
+
+### How to verify
+- `npx tsc --noEmit`: expected 0 errors.
+- `pnpm test` (Vitest): expected 0 failures.
+- `pnpm lint`, `pnpm check`, `pnpm check:i18n-keys`: all pass.
+
+### Environment notes
+- Node v24.20.0 (repo `.nvmrc` wants 22; engines `>=22.19.0`, so 24 is acceptable). pnpm 10.28.0 installed globally. Required environment variables by name only.
+
+## Closed assignments
+
 ## Assignment: Write task-tracking and handoff rules into AGENTS.md and CLAUDE.md
 
 - Requested by: repository owner (no name given in the request)
