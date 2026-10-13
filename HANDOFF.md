@@ -6,8 +6,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 
 - Requested by: repository owner. Request (verbatim): "Hãy giải quyết tiếp các phần mà bạn chưa làm đi"
 - Interpretation: finish the items listed as not done at the end of cycle 7 (B48 residual, B54, B55, B47, B51, B52, B53, B26), and record a decision or a precise blocker for each of the rest. The owner asked for decisions to be made with the expert team, not asked back. Where a decision needs a person (for example native translators or content reviewers), the blocker is recorded. [Inference]
-- Assignment status: In progress (all tasks done except the push, row 11)
-- Branch and commit: `claude/hopeful-sagan-267tw5` @ `9b57516` (this assignment's commits `dd47ae5`, `b3457ac`, `ac79f5b`, `514dc0c`, `9b57516`, on top of `404a31a`), pushed: no, pending
+- Assignment status: Done (rows 1–11). Open items after this assignment are in "Next step" and the cycle 8 section of `scrum/BACKLOG.md`
+- Branch and commit: `claude/hopeful-sagan-267tw5` @ `e8a9007` (this assignment's commits `dd47ae5`, `b3457ac`, `ac79f5b`, `514dc0c`, `9b57516`, `e8a9007`, on top of `404a31a`), pushed: yes
 - Note on branches: `it-math` is at `f760943`. It is not updated by this assignment.
 - Last updated: 2026-10-13 (UTC)
 
@@ -25,7 +25,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 8 | B26: reproduce the intermittent `tests/accounts/routes.test.ts` failure by repeated runs. Record the result or the root cause | Done | Not reproduced: 6 isolated runs passed (`b26-1..6.log`); full runs passed in cycle 7 (run 2) and this cycle (run 3, `test-run-3.log`). Root cause not found. Recorded as "not reproduced" in `scrum/BACKLOG.md`, cycle 8. Watch item |
 | 9 | Open product and content items (B1, B2, B3, B8, B13, B17, B29, B30, B35, B36): record for each a decision or a blocker with its owner in `scrum/BACKLOG.md` | Done | "Open items: decision or blocker recorded" table in the cycle 8 section of `scrum/BACKLOG.md`. B1, B2, B3, B30: owner decision needed (recommendation for B1 recorded). B8: deferred with reasons. B13, B17, B35: human reviewers needed. B29, B36: verification needs a two-reader browser check or a provider for sample generation |
 | 10 | Verification: `npx tsc --noEmit`, `pnpm test`, `pnpm check`, `pnpm check:i18n-keys`, ESLint on changed files | Done | `tsc` exit 0; `pnpm test`: 747 files passed, 9 skipped; 8239 tests passed, 79 skipped; `pnpm check` exit 0; `pnpm check:i18n-keys` passed (12 locales); ESLint 0 errors (one pre-existing warning at `app/page.tsx`, present at HEAD). Logs: scratchpad `test-run-3.log`, `check-all-2.log` |
-| 11 | Commit, push to `claude/hopeful-sagan-267tw5`, update the backlog and this file | In progress | Five commits on top of `404a31a`: `dd47ae5` (logs), `b3457ac` (UI at 360 px and toast), `ac79f5b` (dev tooling and proxy rename), `514dc0c` (stage body caps), `9b57516` (docs). Push pending |
+| 11 | Commit, push to `claude/hopeful-sagan-267tw5`, update the backlog and this file | Done | Five code and docs commits `dd47ae5`, `b3457ac`, `ac79f5b`, `514dc0c`, `9b57516`, then `e8a9007` (handoff). `git ls-remote origin refs/heads/claude/hopeful-sagan-267tw5` shows `e8a9007`. Fast-forward, no force |
 
 ### Done so far
 
