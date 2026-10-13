@@ -19,11 +19,7 @@ import {
 import type { MediaArtifact } from '@/lib/document';
 import { normalizeDocumentMimeType, SUPPORTED_MEDIA_MIME_TYPES } from '@/lib/document/mime';
 import { createLogger } from '@/lib/logger';
-import {
-  MODEL_FAILURE_TEXT,
-  describeUnexpectedError,
-  visitorErrorText,
-} from '@/lib/server/error-summary';
+import { describeUnexpectedError, visitorErrorText } from '@/lib/server/error-summary';
 import {
   resolveServerAsset,
   type ServerAssetResolution,
@@ -37,6 +33,9 @@ import { MAX_EXTRACT_DOCUMENT_FILE_SIZE_BYTES } from '@/lib/constants/generation
 export const runtime = 'nodejs';
 
 const log = createLogger('Extract Document');
+
+/** B49: route-specific fixed text — "model provider" wording is inaccurate for document extraction. */
+const DOCUMENT_EXTRACTION_FAILURE_TEXT = 'The document extractor could not complete this request.';
 
 /**
  * A normalized extraction input, independent of how the bytes arrived: either
@@ -665,7 +664,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'PARSE_FAILED',
       500,
-      visitorErrorText(error, logState.managedKey === true, MODEL_FAILURE_TEXT),
+      visitorErrorText(error, logState.managedKey === true, DOCUMENT_EXTRACTION_FAILURE_TEXT),
     );
   }
 }

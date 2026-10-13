@@ -9,10 +9,13 @@ import type { PDFProviderId } from '@/lib/pdf/types';
 import type { ParsedPdfContent } from '@/lib/types/pdf';
 import { documentArtifactToParsedPdfContent, extractDocument } from '@/lib/document';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
+import { describeUnexpectedError, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Parse PDF');
+
+/** B49: route-specific fixed text — "model provider" wording is inaccurate for PDF parsing. */
+const PDF_PARSE_FAILURE_TEXT = 'The PDF parser could not complete this request.';
 
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
@@ -91,9 +94,8 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ data: resultWithMetadata });
   } catch (error) {
     log.error(
-      `PDF parsing failed [provider=${resolvedProviderId ?? 'unknown'}, file="${pdfFileName ?? 'unknown'}"]:`,
-      error,
+      `PDF parsing failed [provider=${resolvedProviderId ?? 'unknown'}, file="${pdfFileName ?? 'unknown'}"]: ${describeUnexpectedError(error)}`,
     );
-    return apiError('PARSE_FAILED', 500, visitorErrorText(error, managed, MODEL_FAILURE_TEXT));
+    return apiError('PARSE_FAILED', 500, visitorErrorText(error, managed, PDF_PARSE_FAILURE_TEXT));
   }
 }

@@ -188,7 +188,8 @@ describe('upstream provider text on the operator key', () => {
       expect(response.status).toBe(500);
       expect(JSON.parse(text)).toMatchObject({
         errorCode: 'TRANSCRIPTION_FAILED',
-        details: MODEL_FAILURE_TEXT,
+        // B49: route-specific fixed text, not the generic "model provider" wording.
+        details: 'The transcription service could not complete this request.',
       });
       expect(text).not.toContain(UPSTREAM_FRAGMENT);
       expect(mocks.transcribeAudio.mock.calls[0][0]).toMatchObject({ apiKey: OPERATOR_KEY });
@@ -235,7 +236,8 @@ describe('upstream provider text on the operator key', () => {
       expect(response.status).toBe(500);
       expect(JSON.parse(text)).toMatchObject({
         errorCode: 'PARSE_FAILED',
-        error: MODEL_FAILURE_TEXT,
+        // B49: route-specific fixed text, not the generic "model provider" wording.
+        error: 'The PDF parser could not complete this request.',
       });
       expect(text).not.toContain(UPSTREAM_FRAGMENT);
       expect(mocks.extractDocument.mock.calls[0][0].config).toMatchObject({

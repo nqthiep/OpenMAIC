@@ -11,13 +11,12 @@ import {
 } from '@/lib/server/provider-config';
 import type { ASRProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
-import {
-  MODEL_FAILURE_TEXT,
-  describeUnexpectedError,
-  visitorErrorText,
-} from '@/lib/server/error-summary';
+import { describeUnexpectedError, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+
+/** B49: route-specific fixed text — "model provider" wording is inaccurate for transcription. */
+const TRANSCRIPTION_FAILURE_TEXT = 'The transcription service could not complete this request.';
 const log = createLogger('Transcription');
 
 export const maxDuration = 60;
@@ -97,7 +96,7 @@ export async function POST(req: NextRequest) {
       'TRANSCRIPTION_FAILED',
       500,
       'Transcription failed',
-      visitorErrorText(error, managed, MODEL_FAILURE_TEXT),
+      visitorErrorText(error, managed, TRANSCRIPTION_FAILURE_TEXT),
     );
   }
 }
