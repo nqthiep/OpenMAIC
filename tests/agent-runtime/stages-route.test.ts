@@ -217,3 +217,21 @@ describe('POST /api/stages', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('POST /api/stages body cap (B47)', () => {
+  it('refuses a create body over 1 MiB with 413 and the cap in the message, before parsing it', async () => {
+    const oversized = JSON.stringify({ name: 'x'.repeat(1024 * 1024 + 16) });
+    const response = await POST(
+      new NextRequest('http://localhost/api/stages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: oversized,
+      }),
+    );
+
+    expect(response.status).toBe(413);
+    const body = (await response.json()) as { error?: string };
+    expect(body.error).toBe('Request body exceeds 1048576 bytes');
+    expect(mocks.fakeStore!.docs.size).toBe(0);
+  });
+});

@@ -23,12 +23,18 @@ import { DocumentNotFoundError, DocumentVersionError, type MaicDocument } from '
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { apiError } from '@/lib/server/api-response';
+import { boundedJsonMessage, readBoundedJson } from '@/lib/server/bounded-json';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerApiError, ownerJson, ownerNotFound } from '@/lib/server/agent-runtime/route-response';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
 
 export const runtime = 'nodejs';
+
+/** Byte cap for a rename body (B47): the folder rename cap. */
+const STAGE_RENAME_MAX_BYTES = 1024 * 1024;
+/** Byte cap for a whole-document save (B47): the classroom create cap, which stores the same kind of document. */
+const STAGE_SAVE_MAX_BYTES = 10 * 1024 * 1024;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -78,12 +84,15 @@ export async function GET(req: NextRequest, { params }: Params) {
 export async function PATCH(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  const read = await readBoundedJson(req, STAGE_RENAME_MAX_BYTES);
+  if (!read.ok) {
+    return apiError(
+      'INVALID_REQUEST',
+      read.status,
+      boundedJsonMessage(read, STAGE_RENAME_MAX_BYTES),
+    );
   }
+  const body: unknown = read.value;
   const rawName = (body as { name?: unknown })?.name;
   if (typeof rawName !== 'string' || rawName.trim().length === 0) {
     return apiError('INVALID_REQUEST', 400, 'name must be a non-empty string');
@@ -118,12 +127,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 export async function PUT(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  // A save writes a whole document, as the classroom create route does, so it gets the same cap (B47).
+  const read = await readBoundedJson(req, STAGE_SAVE_MAX_BYTES);
+  if (!read.ok) {
+    return apiError('INVALID_REQUEST', read.status, boundedJsonMessage(read, STAGE_SAVE_MAX_BYTES));
   }
+  const body: unknown = read.value;
   const candidate = body as {
     stage?: { id?: unknown; updatedAt?: unknown };
     scenes?: unknown;

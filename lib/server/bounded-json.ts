@@ -44,3 +44,13 @@ export async function readBoundedJson(
     return { ok: false, status: 400, code: 'INVALID_JSON' };
   }
 }
+
+/** The client message for a refused body. The cap is stated; the body is never echoed. */
+export function boundedJsonMessage(
+  failure: Extract<BoundedJsonResult, { ok: false }>,
+  maxBytes: number,
+): string {
+  return failure.code === 'PAYLOAD_TOO_LARGE'
+    ? `Request body exceeds ${maxBytes} bytes`
+    : 'invalid JSON body';
+}

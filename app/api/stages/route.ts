@@ -19,12 +19,16 @@ import { randomBytes } from 'node:crypto';
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import type { AppDocumentOutline } from '@/lib/document-store/persistence-types';
 import { apiError } from '@/lib/server/api-response';
+import { boundedJsonMessage, readBoundedJson } from '@/lib/server/bounded-json';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
+
+/** Byte cap for a create body (B47). The same 1 MiB as the folder create route. */
+const STAGE_CREATE_MAX_BYTES = 1024 * 1024;
 
 /** Mint a fresh, collision-free course id in the same `stage-` family as the agent tools. */
 function createStageId(): string {
@@ -50,12 +54,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  // A create carries a name and a description, so it gets the small cap of the folder routes (B47).
+  const read = await readBoundedJson(req, STAGE_CREATE_MAX_BYTES);
+  if (!read.ok) {
+    return apiError(
+      'INVALID_REQUEST',
+      read.status,
+      boundedJsonMessage(read, STAGE_CREATE_MAX_BYTES),
+    );
   }
+  const body: unknown = read.value;
   if (typeof body !== 'object' || body === null) {
     return apiError('INVALID_REQUEST', 400, 'request body must be a JSON object');
   }
