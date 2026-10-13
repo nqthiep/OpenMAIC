@@ -469,7 +469,9 @@ export async function generateClassroom(
           log.info(`Web search returned ${searchResult.sources.length} sources`);
         }
       } catch (e) {
-        log.warn('Web search failed, continuing without search context:', e);
+        log.warn(
+          `Web search failed, continuing without search context: ${describeUnexpectedError(e)}`,
+        );
       }
     } else {
       log.warn('enableWebSearch is true but no web search API key configured, skipping web search');
@@ -524,7 +526,9 @@ export async function generateClassroom(
       agents = await generateAgentProfiles(requirement, languageDirective, agentProfilesCall);
       log.info(`Generated ${agents.length} agent profiles`);
     } catch (e) {
-      log.warn('Agent profile generation failed, falling back to defaults:', e);
+      log.warn(
+        `Agent profile generation failed, falling back to defaults: ${describeUnexpectedError(e)}`,
+      );
       agents = getDefaultAgents();
     }
   } else {
@@ -690,7 +694,7 @@ export async function generateClassroom(
       replaceMediaPlaceholders(scenes, mediaMap);
       log.info(`Media generation complete: ${Object.keys(mediaMap).length} files`);
     } catch (err) {
-      log.warn('Media generation phase failed, continuing:', err);
+      log.warn(`Media generation phase failed, continuing: ${describeUnexpectedError(err)}`);
     }
   }
 
@@ -708,7 +712,7 @@ export async function generateClassroom(
       await generateTTSForClassroom(scenes, stageId, options.baseUrl);
       log.info('TTS generation complete');
     } catch (err) {
-      log.warn('TTS generation phase failed, continuing:', err);
+      log.warn(`TTS generation phase failed, continuing: ${describeUnexpectedError(err)}`);
     }
   }
 

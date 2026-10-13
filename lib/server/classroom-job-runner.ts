@@ -7,7 +7,7 @@ import {
   markClassroomGenerationJobSucceeded,
   updateClassroomGenerationJobProgress,
 } from '@/lib/server/classroom-job-store';
-import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
+import { MODEL_FAILURE_TEXT, describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('ClassroomJob');
 const runningJobs = new Map<string, Promise<void>>();
@@ -48,7 +48,7 @@ export function runClassroomGenerationJob(
         : error instanceof Error
           ? error.message
           : String(error);
-      log.error(`Classroom generation job ${jobId} failed:`, error);
+      log.error(`Classroom generation job ${jobId} failed: ${describeUnexpectedError(error)}`);
       try {
         await markClassroomGenerationJobFailed(jobId, message);
       } catch (markFailedError) {

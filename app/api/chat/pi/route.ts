@@ -306,7 +306,7 @@ export async function POST(req: NextRequest) {
           return;
         }
 
-        log.error('Pi chat stream error:', error);
+        log.error(`Pi chat stream error: ${describeUnexpectedError(error)}`);
         try {
           await send({
             type: 'error',

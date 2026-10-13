@@ -2,6 +2,7 @@ import { parseJsonResponse } from '@openmaic/generation';
 import { PROMPT_IDS, buildPrompt } from '@/lib/prompts';
 import type { AICallFn } from '@openmaic/generation';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('SearchQueryBuilder');
 const TAVILY_SOFT_MAX_QUERY_LENGTH = 350;
@@ -93,7 +94,9 @@ export async function buildSearchQuery(
       finalQueryLength: rewrittenQuery.length,
     };
   } catch (error) {
-    log.warn('Query rewrite failed, falling back to raw requirement:', error);
+    log.warn(
+      `Query rewrite failed, falling back to raw requirement: ${describeUnexpectedError(error)}`,
+    );
     return fallback;
   }
 }

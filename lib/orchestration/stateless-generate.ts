@@ -26,6 +26,7 @@ import { createOrchestrationGraph, buildInitialState } from './director-graph';
 import { parse as parsePartialJson, Allow } from 'partial-json';
 import { jsonrepair } from 'jsonrepair';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('StatelessGenerate');
 
@@ -495,7 +496,7 @@ export async function* statelessGenerate(
     if (error instanceof Error && error.name === 'AbortError') {
       yield { type: 'error', data: { message: 'Request interrupted' } };
     } else {
-      log.error('[StatelessGenerate] Error:', error);
+      log.error(`[StatelessGenerate] Error: ${describeUnexpectedError(error)}`);
       yield {
         type: 'error',
         data: {

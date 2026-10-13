@@ -16,6 +16,7 @@ import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { loggableUrl } from '@/lib/server/proxy-fetch';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('ProxyMedia');
 
@@ -84,7 +85,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    log.error(`Proxy media failed [url=${url ? loggableUrl(url) : 'unknown'}]:`, error);
+    log.error(
+      `Proxy media failed [url=${url ? loggableUrl(url) : 'unknown'}]: ${describeUnexpectedError(error)}`,
+    );
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
   }
 }

@@ -14,6 +14,7 @@ import {
   type MediaExtractorProvider,
 } from '@/lib/document';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import {
   getServerPDFProviders,
   resolvePDFApiKey,
@@ -227,7 +228,9 @@ export async function extractClaimedSessionMaterial(
       selected = provider;
       break;
     } catch (error) {
-      log.warn(`Material ${source.id} extraction by ${provider.id} failed:`, error);
+      log.warn(
+        `Material ${source.id} extraction by ${provider.id} failed: ${describeUnexpectedError(error)}`,
+      );
       failures.push(error);
     }
   }

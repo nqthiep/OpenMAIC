@@ -8,6 +8,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { CLASSROOMS_DIR } from '@/lib/server/classroom-storage';
 import { generateImage } from '@/lib/media/image-providers';
 import { generateVideo, normalizeVideoOptions } from '@/lib/media/video-providers';
@@ -155,7 +156,7 @@ export async function generateMediaForClassroom(
         mediaMap[req.elementId] = mediaServingUrl(baseUrl, classroomId, `media/${filename}`);
         log.info(`Generated image: ${filename}`);
       } catch (err) {
-        log.warn(`Image generation failed for ${req.elementId}:`, err);
+        log.warn(`Image generation failed for ${req.elementId}: ${describeUnexpectedError(err)}`);
       }
     }
   };
@@ -194,7 +195,7 @@ export async function generateMediaForClassroom(
         mediaMap[req.elementId] = mediaServingUrl(baseUrl, classroomId, `media/${filename}`);
         log.info(`Generated video: ${filename}`);
       } catch (err) {
-        log.warn(`Video generation failed for ${req.elementId}:`, err);
+        log.warn(`Video generation failed for ${req.elementId}: ${describeUnexpectedError(err)}`);
       }
     }
   };
@@ -319,7 +320,7 @@ export async function generateTTSForClassroom(
         speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);
         log.info(`Generated TTS: ${filename} (${result.audio.length} bytes)`);
       } catch (err) {
-        log.warn(`TTS generation failed for action ${action.id}:`, err);
+        log.warn(`TTS generation failed for action ${action.id}: ${describeUnexpectedError(err)}`);
       }
     }
   }

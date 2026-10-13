@@ -17,7 +17,11 @@ import {
   resolveWebSearchModel,
 } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
+import {
+  MODEL_FAILURE_TEXT,
+  describeUnexpectedError,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import {
   buildSearchQuery,
@@ -152,7 +156,9 @@ export async function POST(req: NextRequest) {
         return result.text;
       };
     } catch (error) {
-      log.warn('Search query rewrite model unavailable, falling back to raw requirement:', error);
+      log.warn(
+        `Search query rewrite model unavailable, falling back to raw requirement: ${describeUnexpectedError(error)}`,
+      );
     }
 
     const searchQuery = await buildSearchQuery(query, boundedPdfText, aiCall);
@@ -186,7 +192,9 @@ export async function POST(req: NextRequest) {
       responseTime: result.responseTime,
     });
   } catch (err) {
-    log.error(`Web search failed [queryLength=${query?.length ?? 'unknown'}]:`, err);
+    log.error(
+      `Web search failed [queryLength=${query?.length ?? 'unknown'}]: ${describeUnexpectedError(err)}`,
+    );
     const message = visitorErrorText(err, managed, MODEL_FAILURE_TEXT);
     return apiError('INTERNAL_ERROR', 500, message);
   }

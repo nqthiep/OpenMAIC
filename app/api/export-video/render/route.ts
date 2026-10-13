@@ -4,6 +4,7 @@ import { proxyFetch } from '@/lib/server/proxy-fetch';
 import { resolveRenderServiceUrl } from '@/lib/server/render-service';
 import { capBodyStream } from '@/lib/server/capped-stream';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('ExportVideo Render API');
 
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
     if (capped.exceeded()) {
       return apiError('INVALID_REQUEST', 413, 'Export archive is too large');
     }
-    log.error('Failed to submit render job:', error);
+    log.error(`Failed to submit render job: ${describeUnexpectedError(error)}`);
     return apiError(
       'UPSTREAM_ERROR',
       502,

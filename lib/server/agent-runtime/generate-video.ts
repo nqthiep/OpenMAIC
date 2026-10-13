@@ -22,6 +22,7 @@ import {
   resolveVideoModel,
 } from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { recordGenerationUsage } from '@/lib/server/usage-storage';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { readResponseBodyWithLimit } from '@/lib/server/bounded-download';
@@ -575,7 +576,9 @@ export function buildGenerateVideoTool(
         // Keep the handler synchronous and only call never-rejecting helpers
         // (emitMediaReadyFrame catches internally): a throw here would become
         // the very unhandled rejection this guard exists to contain.
-        log.error(`[${toolCallId}] Video generation job crashed for ${ref}`, error);
+        log.error(
+          `[${toolCallId}] Video generation job crashed for ${ref}: ${describeUnexpectedError(error)}`,
+        );
         settlePendingMedia(ref, {
           status: 'failed',
           errorCode: MEDIA_TOOL_ERROR_REASONS.generationFailed,

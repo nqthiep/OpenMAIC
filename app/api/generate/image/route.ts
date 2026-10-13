@@ -29,7 +29,11 @@ import {
 } from '@/lib/server/provider-config';
 import type { ImageProviderId, ImageGenerationOptions } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
-import { CONTENT_BLOCKED_TEXT, MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
+import {
+  CONTENT_BLOCKED_TEXT,
+  MODEL_FAILURE_TEXT,
+  describeUnexpectedError,
+} from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { resolveImageSize } from '@/lib/server/image-sizing';
@@ -146,7 +150,9 @@ export async function POST(request: NextRequest) {
       log.warn(`Image blocked by content safety filter: ${message}`);
       return apiError('CONTENT_SENSITIVE', 400, managed ? CONTENT_BLOCKED_TEXT : message);
     }
-    log.error(`Image generation failed: ${message}`, error);
+    // The provider's message may echo request details; the server log keeps a
+    // summary (name/code/frame), not the raw upstream text.
+    log.error(`Image generation failed: ${describeUnexpectedError(error)}`);
     return apiError('INTERNAL_ERROR', 500, managed ? MODEL_FAILURE_TEXT : message);
   }
 }

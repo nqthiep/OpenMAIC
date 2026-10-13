@@ -1,5 +1,6 @@
 import { callLLM } from '@/lib/ai/llm';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { getStageRoute } from '@/lib/server/model-routes';
 import { resolveModel } from '@/lib/server/resolve-model';
 import { sanitizeSessionTitleText } from '@/lib/workbench/session-title';
@@ -77,7 +78,7 @@ export async function generateConversationTitle(visibleUserText: string): Promis
     if (!title) log.warn('Conversation title model returned no usable title.');
     return title;
   } catch (error) {
-    log.error('Failed to generate conversation title.', error);
+    log.error(`Failed to generate conversation title: ${describeUnexpectedError(error)}`);
     return null;
   }
 }

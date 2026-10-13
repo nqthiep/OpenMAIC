@@ -15,6 +15,7 @@ import type { LanguageModel } from 'ai';
 import { callLLM, streamLLM } from '@/lib/ai/llm';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('AISdkAdapter');
 
@@ -114,7 +115,7 @@ export class AISdkLangGraphAdapter extends BaseChatModel {
         llmOutput: {},
       };
     } catch (error) {
-      log.error('[AI SDK Adapter Error]', error);
+      log.error(`[AI SDK Adapter Error] ${describeUnexpectedError(error)}`);
       throw error;
     }
   }

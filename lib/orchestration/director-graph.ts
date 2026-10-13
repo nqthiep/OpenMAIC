@@ -40,6 +40,7 @@ import { getEffectiveActions } from './tool-schemas';
 import type { AgentTurnSummary, WhiteboardActionRecord } from './types';
 import { parseStructuredChunk, createParserState, finalizeParser } from './stateless-generate';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('DirectorGraph');
 
@@ -217,7 +218,7 @@ async function directorNode(
       shouldEnd: false,
     };
   } catch (error) {
-    log.error('[Director] Error:', error);
+    log.error(`[Director] Error: ${describeUnexpectedError(error)}`);
     return { shouldEnd: true };
   }
 }
@@ -409,7 +410,7 @@ async function runAgentGeneration(
     if (error instanceof Error && error.name === 'AbortError') {
       throw error;
     }
-    log.error(`[AgentGenerate] Error for ${agentConfig.name}:`, error);
+    log.error(`[AgentGenerate] Error for ${agentConfig.name}: ${describeUnexpectedError(error)}`);
     write({
       type: 'error',
       data: { message: error instanceof Error ? error.message : String(error) },

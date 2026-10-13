@@ -1,6 +1,7 @@
 import { after } from 'next/server';
 
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { generateConversationTitle } from './conversation-title-generator';
 import { getAgentSessionStore } from './store';
 
@@ -22,7 +23,9 @@ async function runConversationTitleTask(sessionId: string, ownerId: string): Pro
   try {
     title = await generateConversationTitle(visibleUserText);
   } catch (error) {
-    log.error(`session ${sessionId}: automatic title generation failed`, error);
+    log.error(
+      `session ${sessionId}: automatic title generation failed: ${describeUnexpectedError(error)}`,
+    );
     return;
   }
   if (title === null) return;

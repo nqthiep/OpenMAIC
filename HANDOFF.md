@@ -15,8 +15,8 @@ Sprint goal: đóng mọi mục backlog còn làm được bằng code, hoàn th
 | # | Task | Status | Evidence / notes |
 |---|------|--------|------------------|
 | 0 | Setup: clone, read AGENTS.md/HANDOFF.md, pnpm install, verify push | Done | Commits local (20168bd4); push blocked on GitHub auth (see blockers) |
-| 1 | B47 — body caps for remaining routes (stage, chat, generate, generate-classroom, pbl) | In progress | Reading `lib/server/bounded-json.ts`; listing uncapped routes |
-| 2 | B52 — audit ~50 raw error log sites in provider-touching files | Todo | Per site: log summary only or register secret in `lib/log-secrets.ts` |
+| 1 | B47 — body caps for remaining routes (stage, chat, generate, generate-classroom, pbl) | Done | `9786e2f2`: 19 routes + `PAYLOAD_TOO_LARGE` code; measured caps (1 MiB metadata / 10 MiB content); new test `bounded-body-content-routes.test.ts` 80 pass; tsc 0 errors; related suites 825 pass (2 B50 flakes pass alone) |
+| 2 | B52 — audit ~50 raw error log sites in provider-touching files | In progress | Starting the audit; per-site: log summary only or register secret in `lib/log-secrets.ts` |
 | 3 | B48 — verify adapter-level `MaterialExtractionError` vendor text; keep only our message | Todo | Precedent D-31 |
 | 4 | B49 — fix non-Error throw wording under visitor's key on non-model routes | Todo | Route-specific fixed text |
 | 5 | B51 — evaluate suffix redaction; register aliases for real misses | Todo | |

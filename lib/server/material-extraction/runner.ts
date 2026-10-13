@@ -7,6 +7,7 @@ import { getAgentSessionMaterialStore } from '@/lib/server/agent-runtime/session
 
 import { extractClaimedSessionMaterial } from './extract';
 import { isTransientExtractionError } from './errors';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 export interface MaterialExtractionRunnerHandle {
   workerId: string;
@@ -66,13 +67,15 @@ export function startMaterialExtractionRunner(
         const job: Promise<void> = runNextMaterialExtraction(store, workerId, execute)
           .then(() => undefined)
           .catch((error) => {
-            console.error('[material-extraction] job failed before settlement', error);
+            console.error(
+              `[material-extraction] job failed before settlement: ${describeUnexpectedError(error)}`,
+            );
           })
           .finally(() => running.delete(job));
         running.add(job);
       }
     } catch (error) {
-      console.error('[material-extraction] scan failed', error);
+      console.error(`[material-extraction] scan failed: ${describeUnexpectedError(error)}`);
     }
   };
   const timer = setInterval(() => void scan(), agentRuntimeConfig.scanIntervalMs);

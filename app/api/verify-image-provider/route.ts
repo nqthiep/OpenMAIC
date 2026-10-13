@@ -28,7 +28,7 @@ import {
 import type { ImageProviderId } from '@/lib/media/types';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
+import { MODEL_FAILURE_TEXT, describeUnexpectedError } from '@/lib/server/error-summary';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 
 const log = createLogger('VerifyImageProvider');
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess({ message: result.message });
   } catch (err) {
-    log.error(`Image provider verification failed: ${err}`, err);
+    log.error(`Image provider verification failed: ${describeUnexpectedError(err)}`);
     return apiError(
       'INTERNAL_ERROR',
       500,

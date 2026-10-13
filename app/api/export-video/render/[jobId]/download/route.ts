@@ -3,6 +3,7 @@ import { apiError } from '@/lib/server/api-response';
 import { proxyFetch } from '@/lib/server/proxy-fetch';
 import { resolveRenderServiceUrl } from '@/lib/server/render-service';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('ExportVideo Download API');
 
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ jobId: 
     });
   } catch (error) {
     clearTimeout(headerTimeout);
-    log.error(`Failed to download render output ${jobId}:`, error);
+    log.error(`Failed to download render output ${jobId}: ${describeUnexpectedError(error)}`);
     return apiError('UPSTREAM_ERROR', 502, 'Failed to reach render service');
   }
 }

@@ -55,6 +55,7 @@ import {
   pickThinkingEffort,
 } from './thinking-config';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { normalizeAzureBaseUrl } from './azure';
 // NOTE: Do NOT import thinking-context.ts here — it uses node:async_hooks
 // which is server-only, and this file is also used on the client via
@@ -2328,7 +2329,10 @@ export function getModel(config: ModelConfig): ModelWithInfo {
               );
             }
           } catch (error) {
-            log.warn('[Lemonade] Failed to inspect JSON response body:', error);
+            log.warn(
+              '[Lemonade] Failed to inspect JSON response body:',
+              describeUnexpectedError(error),
+            );
           }
 
           return response;

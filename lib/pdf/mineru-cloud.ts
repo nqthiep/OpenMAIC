@@ -16,6 +16,7 @@ import {
   MINERU_IMAGE_MIMES,
 } from '@/lib/document/mime';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('MinerUCloud');
 
@@ -68,7 +69,9 @@ async function fetchWithRetry<T>(fn: () => Promise<T>, context: string, attempts
     } catch (err) {
       lastErr = err;
       if (!isRetryable(err) || i === attempts) break;
-      log.warn(`[MinerU Cloud] ${context} — retry ${i}/${attempts}:`, err);
+      log.warn(
+        `[MinerU Cloud] ${context} — retry ${i}/${attempts}: ${describeUnexpectedError(err)}`,
+      );
       await sleep(400 * i);
     }
   }

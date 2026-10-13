@@ -11,7 +11,11 @@ import {
 } from '@/lib/server/provider-config';
 import type { ASRProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
+import {
+  MODEL_FAILURE_TEXT,
+  describeUnexpectedError,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Transcription');
@@ -87,8 +91,7 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ text: result.text });
   } catch (error) {
     log.error(
-      `Transcription failed [provider=${resolvedProviderId ?? 'unknown'}, model=${resolvedModelId ?? 'default'}]:`,
-      error,
+      `Transcription failed [provider=${resolvedProviderId ?? 'unknown'}, model=${resolvedModelId ?? 'default'}]: ${describeUnexpectedError(error)}`,
     );
     return apiError(
       'TRANSCRIPTION_FAILED',

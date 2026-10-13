@@ -3,6 +3,7 @@ import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { proxyFetch } from '@/lib/server/proxy-fetch';
 import { resolveRenderServiceUrl } from '@/lib/server/render-service';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('ExportVideo Job API');
 
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ jobId: 
     }
     return apiSuccess({ ...data, pollIntervalMs: 3000 });
   } catch (error) {
-    log.error(`Failed to poll render job ${jobId}:`, error);
+    log.error(`Failed to poll render job ${jobId}: ${describeUnexpectedError(error)}`);
     return apiError('UPSTREAM_ERROR', 502, 'Failed to reach render service');
   }
 }
@@ -51,7 +52,7 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ jobI
     }
     return apiSuccess({ cancelled: true });
   } catch (error) {
-    log.error(`Failed to cancel render job ${jobId}:`, error);
+    log.error(`Failed to cancel render job ${jobId}: ${describeUnexpectedError(error)}`);
     return apiError('UPSTREAM_ERROR', 502, 'Failed to reach render service');
   }
 }

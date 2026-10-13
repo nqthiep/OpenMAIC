@@ -28,7 +28,7 @@ import {
 import type { VideoProviderId } from '@/lib/media/types';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
+import { MODEL_FAILURE_TEXT, describeUnexpectedError } from '@/lib/server/error-summary';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 
 const log = createLogger('VerifyVideoProvider');
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     return apiSuccess({ message: result.message });
   } catch (err) {
-    log.error(`Video provider verification failed: ${err}`, err);
+    log.error(`Video provider verification failed: ${describeUnexpectedError(err)}`);
     return apiError(
       'INTERNAL_ERROR',
       500,

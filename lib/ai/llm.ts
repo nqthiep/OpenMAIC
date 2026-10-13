@@ -7,6 +7,7 @@
 import { generateText, streamText } from 'ai';
 import type { GenerateTextResult, JSONValue, LanguageModel, StreamTextResult } from 'ai';
 import { createLogger } from '@/lib/logger';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { PROVIDERS } from './providers';
 import { thinkingContext } from './thinking-context';
 import { getModelMetadataKey } from './model-metadata';
@@ -374,7 +375,9 @@ export async function callLLM<T extends GenerateTextParams>(
       lastError = error;
 
       if (attempt < maxAttempts) {
-        log.warn(`[${source}] Call failed (attempt ${attempt}/${maxAttempts}), retrying...`, error);
+        log.warn(
+          `[${source}] Call failed (attempt ${attempt}/${maxAttempts}), retrying... ${describeUnexpectedError(error)}`,
+        );
         continue;
       }
     }
