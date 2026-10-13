@@ -6,10 +6,10 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 
 - Requested by: repository owner. Request (verbatim): "Tiếp tục đi"
 - Interpretation: the last open assignment was the Scrum mission (accounts, UX, security, reliability, content). Cycle 6 closed with a report. "Continue" means the next cycle from `scrum/BACKLOG.md`. [Inference]
-- Assignment status: In progress
-- Branch and commit: `claude/hopeful-sagan-267tw5` @ `c07b6a1` (two rule commits, local). Pushed: no, this cycle's commits are not pushed yet
-- Note on branches: `it-math` is at `f760943` and has the same tree as this branch. The designated branch for this work is `claude/hopeful-sagan-267tw5`. `it-math` is not updated this cycle, and pushing to it needs a new instruction.
-- Last updated: 2026-10-13 01:40 UTC
+- Assignment status: Done for cycle 7 (B50, B49, B48 partly, B37 checked). Open items are listed in "Next step" and in `scrum/BACKLOG.md`
+- Branch and commit: `claude/hopeful-sagan-267tw5` @ `6cc3d46` (cycle commits `c735894`, `6cc3d46`), pushed: yes
+- Note on branches: `it-math` is at `f760943` and has the same tree as the code on this branch before cycle 7. It is not updated by cycle 7, and pushing to it needs a new instruction.
+- Last updated: 2026-10-13 (UTC, time after the final push not recorded)
 
 ### Task table
 
@@ -22,34 +22,47 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 5 | B37: 360 px layout check of the sign-in and account UI in Chromium (`/opt/pw-browsers/chromium`). Record measured overflow | Done | Setup: PostgreSQL 16 on localhost, a throwaway database, `NEXT_PUBLIC_PERSISTENCE=1`, `ACCOUNT_REGISTRATION=open`, `ADMIN_USERNAMES=admin`. Results at 360 px (scratch script, not in the repo): sign-in dialog 306 px wide, no internal overflow; page has no horizontal scroll (`scrollWidth - clientWidth` = −15). Settings → System → Accounts: the two-column Settings dialog clips the System pane, so the Accounts list actions are not reachable at this width (screenshot checked). Not fixed this cycle; recorded as B54 |
 | 6 | Verification: `npx tsc --noEmit`, `pnpm test`, `pnpm check`, `pnpm check:i18n-keys`, ESLint on changed files | Done | `tsc --noEmit`: exit 0. `pnpm check:i18n-keys`: passed (12 locales). `pnpm test`: 745 files passed, 9 skipped; 8230 tests passed, 79 skipped; exit 0 (log: scratchpad `test-run-2.log`). `pnpm check`: exit 0. ESLint on the 9 changed `.ts` files: exit 0. Prettier fixed one new test file, then passed. Note: one green full run after the earlier red run; not repeated [Inference] |
 | 7 | Record cycle 7 in `scrum/BACKLOG.md` and update this file | Done | New "Cycle 7" section at the end of `scrum/BACKLOG.md`, a row in the cycle log, B54 and B55 added. `prettier --check scrum/BACKLOG.md HANDOFF.md` passed |
-| 8 | Commit and push to `claude/hopeful-sagan-267tw5` | Todo | |
+| 8 | Commit and push to `claude/hopeful-sagan-267tw5` | Done | Commits `c735894` (code and tests) and `6cc3d46` (backlog and handoff). `git ls-remote origin refs/heads/claude/hopeful-sagan-267tw5` shows `6cc3d46`. Fast-forward, no force |
 
 ### Done so far
 
-- Branch reset: `claude/hopeful-sagan-267tw5` now starts at `origin/claude/hopeful-sagan-267tw5` (`4bbcaaf`). The two rule commits were cherry-picked on top (`f598bb5`, `c07b6a1`). The tree equals `it-math`'s tree. The `it-math` history was not added to this branch.
+- Branch reset: `claude/hopeful-sagan-267tw5` starts at `origin/claude/hopeful-sagan-267tw5` (`4bbcaaf`). The two rule commits were cherry-picked on top (`f598bb5`, `c07b6a1`). The `it-math` history was not added to this branch.
+- B50 (`c735894`): explicit 30 s limits on `tests/lint-llm-entry-guard.test.ts` (matrix) and `tests/runtime/database-chat-cutover.test.ts` (clear-migration case).
+- B49 (`c735894`): `PROVIDER_FAILURE_TEXT` in `lib/server/error-summary.ts`, used by `app/api/web-search/route.ts`, `app/api/parse-pdf/route.ts`, `app/api/verify-pdf-provider/route.ts`.
+- B48 (`c735894`): `lib/pdf/alidocmind-client.ts` logs the upstream body instead of putting it in the thrown message. New test `tests/document/alidocmind-submit-error.test.ts`.
+- B37 (checked, not fixed): 360 px. The sign-in dialog fits. The Settings dialog clips the System pane, so the Accounts actions cannot be reached. Opened B54.
+- Backlog recorded (`6cc3d46`): new "Cycle 7" section in `scrum/BACKLOG.md`, B54 and B55 added.
 
 ### Decisions and reasons
 
-- Scope of cycle 7: B50, B49, B48 and B37. Reason: each is small and checkable. B47 needs measured request sizes, which this environment cannot produce. B51, B52 and B53 are not started and remain open in the backlog.
-- Branch: the designated branch is `claude/hopeful-sagan-267tw5`. Earlier fast-forwarding it to `it-math` would have published 435 history commits there. That was reverted, and only the two rule commits were cherry-picked.
+- Scope of cycle 7: B50, B49, B48 and B37. Reason: each is small and checkable. B47 is not started, because it needs measured request sizes that this environment cannot produce. B51, B52 and B53 are not started. Each stays open in the backlog.
+- Branch: the designated branch is `claude/hopeful-sagan-267tw5`. A fast-forward to `it-math` would have published its 435 history commits here, so it was not done.
+- B37 was not fixed in this cycle. The Settings fix changes a shared dialog's layout, which needs a design choice (see the next step).
 
 ### Next step (exact)
 
-- Row 1: `pnpm test` (full suite, about four minutes). Record the failing test names and their timings in row 1's evidence.
+1. [Decision needed] B48: whether material failure reasons (`record.extraction.error`) should be hidden from visitors on the operator's key. Today short vendor status messages pass through (`lib/pdf/alidocmind-client.ts`, the `throw new Error` lines near 154, 166 and 209). Existing tests in `tests/agent-runtime/material-extraction.test.ts` pin the pass-through.
+2. B54: a narrow-width layout for `components/settings/index.tsx`. The `DialogContent` is at about line 736, and the sidebar uses an inline `sidebarWidth`. Choose between a collapsed or stacked sidebar below 400 px. Then re-run the 360 px check described under "How to verify".
 
 ### Open questions and blockers
 
-- None.
+- B48 decision above: needs the repository owner.
+- B54 layout choice: stacked or collapsed sidebar. Repository owner or the design team.
 
 ### How to verify
 
-- `pnpm test`: baseline from cycle 6 is 702 test files passed, 9 skipped (see `scrum/BACKLOG.md`). Record this run's figures.
-- `npx tsc --noEmit`: expected 0 errors.
+- `npx tsc --noEmit`: exit 0 (this cycle).
+- `pnpm test`: 745 files passed, 9 skipped; 8230 tests passed, 79 skipped; exit 0 (this cycle).
+- `pnpm check`, `pnpm check:i18n-keys`: exit 0 (this cycle).
+- 360 px check for B54 (scratch, not in the repo): run the app with `NEXT_PUBLIC_PERSISTENCE=1` and a `DATABASE_URL`. Create an administrator with `POST /api/auth/register` (set `ADMIN_USERNAMES`). Playwright at a 360 × 740 viewport: click the header button named `Sign in`, submit the form inside the dialog, click the icon-only button containing `svg.lucide-settings`, click the `System` tab, then measure the dialog's `scrollWidth - clientWidth` and whether the `Disable` buttons are inside the viewport.
 
 ### Environment notes
 
 - Node `>=22.19.0`, pnpm `10.28.0` (see `package.json`). Required environment variables by name only.
 - Chromium: `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`. Use `executablePath: '/opt/pw-browsers/chromium'`. Do not run `playwright install`.
+- PostgreSQL 16 is installed but not running. Start it with `pg_ctlcluster 16 main start` (needs root). The throwaway database and role from this cycle are not kept. Create new ones, and give the password through an environment variable, never in a file.
+- Dev server for account checks: set `DATABASE_URL`, `NEXT_PUBLIC_PERSISTENCE=1`, `ACCOUNT_REGISTRATION=open` and `ADMIN_USERNAMES`. Stop it by PID from `ps`, not with `pkill -f`.
+- Dev log from this cycle shows "Ecmascript file had an error" (B55). It was not investigated.
 
 ## Closed assignments
 
