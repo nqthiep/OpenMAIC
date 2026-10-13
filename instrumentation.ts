@@ -108,6 +108,6 @@ export async function register(): Promise<void> {
     return shutdownPromise;
   };
 
-  process.once('SIGTERM', () => void shutdown());
-  process.once('SIGINT', () => void shutdown());
+  const { onShutdownSignal } = await import('@/lib/server/process-signals');
+  onShutdownSignal(() => void shutdown());
 }

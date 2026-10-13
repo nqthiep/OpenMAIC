@@ -79,10 +79,10 @@ describe('middleware access gate', () => {
   });
 
   async function runMiddleware(cookieValue?: string) {
-    const { middleware } = await import('@/middleware');
+    const { proxy } = await import('@/proxy');
     const headers: Record<string, string> = {};
     if (cookieValue !== undefined) headers.cookie = `openmaic_access=${cookieValue}`;
-    return middleware(new NextRequest('http://localhost/api/stages', { headers }));
+    return proxy(new NextRequest('http://localhost/api/stages', { headers }));
   }
 
   it('lets a request through with a fresh signed cookie and refuses an expired one', async () => {

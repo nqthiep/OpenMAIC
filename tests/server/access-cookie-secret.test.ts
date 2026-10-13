@@ -50,8 +50,8 @@ describe('access cookie with ACCESS_COOKIE_SECRET', () => {
   });
 
   async function gate(cookieValue: string) {
-    const { middleware } = await import('@/middleware');
-    return middleware(
+    const { proxy } = await import('@/proxy');
+    return proxy(
       new NextRequest('http://localhost/api/stages', {
         headers: { cookie: `openmaic_access=${cookieValue}` },
       }),
