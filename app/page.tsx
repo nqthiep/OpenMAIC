@@ -68,6 +68,7 @@ import {
   deleteFolder,
   setStageFolder,
   FolderNameError,
+  stageListFailureMessage,
   type DeleteFolderMode,
 } from '@/lib/utils/stage-storage';
 import type { FolderRecord } from '@/lib/utils/database';
@@ -289,7 +290,7 @@ function HomePage() {
       }
     } catch (err) {
       log.error('Failed to load classrooms:', err);
-      toast.error('Persistence is unavailable. Saved classrooms could not be loaded.');
+      toast.error(stageListFailureMessage(err));
     }
   };
 
@@ -882,7 +883,7 @@ function HomePage() {
             {/* ── Greeting + Profile + Agents ── */}
             <div className="relative z-20 flex items-start justify-between">
               <GreetingBar />
-              <div className="pr-3 pt-3.5 shrink-0">
+              <div className="min-w-0 overflow-x-auto pr-3 pt-3.5">
                 <AgentBar />
               </div>
             </div>
@@ -900,7 +901,8 @@ function HomePage() {
 
             {/* Toolbar row */}
             <div className="px-3 pb-3 flex items-end gap-2">
-              <div className="flex-1 min-w-0">
+              {/* The toolbar scrolls sideways when the width is short, so the controls after it keep their place. */}
+              <div className="flex-1 min-w-0 overflow-x-auto">
                 <GenerationToolbar
                   webSearch={form.webSearch}
                   onWebSearchChange={(v) => updateForm('webSearch', v)}

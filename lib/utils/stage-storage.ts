@@ -753,6 +753,22 @@ async function performStageDeletion(stageId: string): Promise<void> {
   clearStoreForDeletedStage(stageId);
 }
 
+/** The owner listing answered a non-OK status. A 404 means the server's agent runtime is off (B55). */
+export class StageListError extends Error {
+  override readonly name = 'StageListError';
+
+  constructor(readonly status: number) {
+    super(`Failed to list owner stages: HTTP ${status}`);
+  }
+}
+
+/** The message a visitor sees when the home listing fails. A 404 is a server setting, not storage. */
+export function stageListFailureMessage(error: unknown): string {
+  return error instanceof StageListError && error.status === 404
+    ? 'Saved classrooms are unavailable: the agent runtime is not enabled on this server.'
+    : 'Persistence is unavailable. Saved classrooms could not be loaded.';
+}
+
 /**
  * PG mode: the owner-scoped course listing.
  *
@@ -769,7 +785,7 @@ async function performStageDeletion(stageId: string): Promise<void> {
 async function listOwnerStagesFromServer(): Promise<StageListItem[]> {
   const res = await fetch('/api/stages', { credentials: 'include' });
   if (!res.ok) {
-    throw new Error(`Failed to list owner stages: HTTP ${res.status}`);
+    throw new StageListError(res.status);
   }
   const body = (await res.json().catch(() => null)) as { stages?: unknown } | null;
   if (!body || !Array.isArray(body.stages)) {

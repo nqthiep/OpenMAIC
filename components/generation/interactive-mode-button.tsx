@@ -52,7 +52,8 @@ export const InteractiveModeButton = forwardRef<HTMLButtonElement, InteractiveMo
         ) : (
           <Atom aria-hidden="true" className="relative z-10 size-3.5" />
         )}
-        <span className="relative z-10">{label}</span>
+        {/* Below sm only the icon shows; the label stays the button's accessible name. */}
+        <span className="relative z-10 sr-only sm:not-sr-only">{label}</span>
       </button>
     );
   },

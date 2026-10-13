@@ -35,6 +35,7 @@ import {
   listFolders,
   createFolder,
   setStageFolder,
+  stageListFailureMessage,
   type StageListItem,
 } from '@/lib/utils/stage-storage';
 import type { FolderRecord } from '@/lib/utils/database';
@@ -136,7 +137,7 @@ export function useHomeDiscovery({
           if (stateRef.current === 'ready') return;
           stateRef.current = 'error';
           setState('error');
-          toast.error('Persistence is unavailable. Saved classrooms could not be loaded.');
+          toast.error(stageListFailureMessage(err));
         },
       });
     }
