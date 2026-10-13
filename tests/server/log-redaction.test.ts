@@ -53,6 +53,25 @@ describe('log redaction', () => {
     expect(lines[0]).toContain('[redacted]');
   });
 
+  it('redacts an environment secret whose keyword is not last in the name (D-33)', () => {
+    vi.stubEnv('AWS_BEARER_TOKEN_BEDROCK', 'bearer-0123456789abcdef');
+    vi.stubEnv('ALIDOCMIND_ACCESS_KEY_ID', 'LTAI-0123456789abcdef');
+
+    createLogger('Test').info('bearer bearer-0123456789abcdef key LTAI-0123456789abcdef');
+
+    expect(lines[0]).not.toContain('bearer-0123456789abcdef');
+    expect(lines[0]).not.toContain('LTAI-0123456789abcdef');
+  });
+
+  it('keeps a numeric setting whose name contains a keyword, and a count named *_TOKENS (D-33)', () => {
+    vi.stubEnv('PDF_TOKEN_LIMIT', '10000000');
+    vi.stubEnv('OPENMAIC_AGENT_COMPACTION_RESERVE_TOKENS', '20000000');
+
+    createLogger('Test').info('limits 10000000 and 20000000');
+
+    expect(lines[0]).toContain('limits 10000000 and 20000000');
+  });
+
   it('ignores values shorter than the minimum length, so ordinary words are not hidden', () => {
     registerLogSecret('short', 'operator');
 

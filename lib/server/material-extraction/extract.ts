@@ -125,23 +125,29 @@ export async function extractClaimedSessionMaterial(
       mimeType: raw.mime,
       config: resolveServerMediaExtractorConfig(),
     };
-    let selected: MediaExtractorProvider;
+    // Selection messages are built from our own availability strings, so they are stored as they are.
+    const selected = await selectMediaExtractorProvider({
+      mimeType: raw.mime,
+      input: mediaInput,
+      providers: mediaProviders,
+    });
     let artifact: MediaArtifact;
     try {
-      selected = await selectMediaExtractorProvider({
-        mimeType: raw.mime,
-        input: mediaInput,
-        providers: mediaProviders,
-      });
       artifact = await selected.extract({
         ...mediaInput,
         config: { ...mediaInput.config, providerId: selected.id },
       });
     } catch (error) {
+      // D-32: only our own extraction messages are stored. A plain adapter error can carry
+      // vendor response text, so it is logged and the stored reason is the fixed text.
+      if (error instanceof MaterialExtractionError) throw error;
+      log.warn(`Media extraction by ${selected.id} failed:`, error);
       throw new MaterialExtractionError(
-        error instanceof Error ? error.message : String(error),
+        EXTRACTION_FAILURE_TEXT,
         isTransientExtractionError(error),
-        { cause: error },
+        {
+          cause: error,
+        },
       );
     }
     const text = mediaArtifactText(artifact);

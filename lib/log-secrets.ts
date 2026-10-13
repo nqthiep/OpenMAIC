@@ -9,8 +9,14 @@ const REDACTED = '[redacted]';
 const MIN_SECRET_LENGTH = 8;
 /** Recent visitor keys kept for redaction. The operator's keys are never evicted. */
 const VISITOR_SECRET_LIMIT = 256;
-/** Environment variables whose values are treated as secrets and redacted from every line. */
-const SECRET_ENV_NAME = /(API_KEY|ACCESS_KEY|SECRET|TOKEN|PASSWORD|ACCESS_CODE)$/i;
+/**
+ * Environment variables whose values are treated as secrets and redacted from every line.
+ * The keyword may sit anywhere in the name, as a whole segment: `AWS_BEARER_TOKEN_BEDROCK` and
+ * `ALIDOCMIND_ACCESS_KEY_ID` match, while `*_TOKENS` (a count) does not (D-33).
+ */
+const SECRET_ENV_NAME = /(^|_)(API_KEY|ACCESS_KEY|SECRET|TOKEN|PASSWORD|ACCESS_CODE)(_|$)/i;
+/** An environment value made only of digits is a setting, not a credential (D-33). */
+const NUMERIC_VALUE = /^[0-9]+$/;
 
 const operatorSecrets = new Set<string>();
 const visitorSecrets = new Set<string>();
@@ -43,7 +49,9 @@ function scanEnvironmentSecrets(): void {
   const env = typeof process === 'undefined' ? undefined : process.env;
   if (!env) return;
   for (const [name, value] of Object.entries(env)) {
-    if (SECRET_ENV_NAME.test(name)) registerLogSecret(value, 'operator');
+    if (SECRET_ENV_NAME.test(name) && !NUMERIC_VALUE.test(value ?? '')) {
+      registerLogSecret(value, 'operator');
+    }
   }
 }
 

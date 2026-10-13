@@ -12,7 +12,10 @@ import {
 } from '@openmaic/storage/material/pg';
 
 import { buildMaterialTools } from '@/lib/server/agent-runtime/material-tools';
-import { extractClaimedSessionMaterial } from '@/lib/server/material-extraction/extract';
+import {
+  EXTRACTION_FAILURE_TEXT,
+  extractClaimedSessionMaterial,
+} from '@/lib/server/material-extraction/extract';
 import { runNextMaterialExtraction } from '@/lib/server/material-extraction/runner';
 import { LocalMediaExtractionError } from '@/lib/document/extractors/local-media';
 import type { MediaExtractorProvider } from '@/lib/document';
@@ -271,6 +274,39 @@ describe('uploaded material extraction lifecycle', () => {
       attempts: 0,
       error: 'ASR HTTP status 400',
     });
+  });
+
+  it('stores the fixed reason when an adapter throws a plain error with vendor text', async () => {
+    // D-32: a plain adapter error may echo a vendor response body. Only the fixed text is stored.
+    db = new PGlite();
+    await db.waitReady;
+    await ensureAgentSessionSchema(db);
+    await ensureAgentSessionMaterialSchema(db);
+    const sessions = new PgAgentSessionStore(db, {
+      withTransaction: (body) => db!.transaction((tx: Queryable) => body(tx)),
+    });
+    const materials = new PgAgentSessionMaterialStore(db);
+    await sessions.createSession({ id: 'session-1', ownerId: 'owner-1', prompt: 'p' });
+    await materials.createMaterial('session-1', {
+      id: 'mat_vendor',
+      kind: 'source',
+      rawAssetId: 'ast_vendor',
+    });
+    await materials.enqueueExtraction('session-1', 'mat_vendor');
+    await runNextMaterialExtraction(materials, 'worker-1', (claim) =>
+      extractClaimedSessionMaterial(claim, {
+        resolveSource: async () => ({ bytes: Buffer.from('video'), mime: 'video/mp4' }),
+        mediaProviders: () => [
+          mediaProvider(async () => {
+            throw new Error('upstream body {"message":"vendor-echo-4b1e"}');
+          }),
+        ],
+      }),
+    );
+
+    const stored = (await materials.getMaterial('session-1', 'mat_vendor'))?.extraction;
+    expect(stored?.error).toBe(EXTRACTION_FAILURE_TEXT);
+    expect(stored?.error).not.toContain('vendor-echo-4b1e');
   });
 
   it('fails cleanly with both media enablement paths when no provider is available', async () => {
