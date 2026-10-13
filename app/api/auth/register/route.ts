@@ -9,6 +9,7 @@ import {
 import { withClientBudget, trustedClientKey } from '@/lib/server/accounts/client-budget';
 import { accountServiceDeps, accountsEnabled } from '@/lib/server/accounts/runtime';
 import { registerAccount } from '@/lib/server/accounts/service';
+import { claimAnonymousDataAfterSignIn } from '@/lib/server/accounts/claim';
 import { sessionCookieHeader } from '@/lib/server/accounts/session';
 
 export const runtime = 'nodejs';
@@ -32,6 +33,7 @@ export async function POST(request: Request): Promise<Response> {
     );
     const response = apiSuccess({ account: { username: session.username } }, 201);
     response.headers.append('Set-Cookie', sessionCookieHeader(session.token));
+    await claimAnonymousDataAfterSignIn(request, session.accountId, response);
     return response;
   });
 }
