@@ -19,7 +19,11 @@ import {
 import type { MediaArtifact } from '@/lib/document';
 import { normalizeDocumentMimeType, SUPPORTED_MEDIA_MIME_TYPES } from '@/lib/document/mime';
 import { createLogger } from '@/lib/logger';
-import { MODEL_FAILURE_TEXT, visitorErrorText } from '@/lib/server/error-summary';
+import {
+  MODEL_FAILURE_TEXT,
+  describeUnexpectedError,
+  visitorErrorText,
+} from '@/lib/server/error-summary';
 import {
   resolveServerAsset,
   type ServerAssetResolution,
@@ -646,8 +650,7 @@ export async function POST(req: NextRequest) {
     log.error(
       `Document extraction failed [provider=${logState.resolvedProviderId ?? 'unknown'}, file="${sanitizeLogValue(
         logState.fileName ?? 'unknown',
-      )}"]:`,
-      error,
+      )}", error=${describeUnexpectedError(error)}]:`,
     );
     if (isAssetIdForm) {
       // The asset-id form must not leak raw extractor internals to the caller

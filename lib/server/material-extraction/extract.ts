@@ -126,23 +126,29 @@ export async function extractClaimedSessionMaterial(
       mimeType: raw.mime,
       config: resolveServerMediaExtractorConfig(),
     };
-    let selected: MediaExtractorProvider;
+    // Selection failures are our own messages (no vendor text); they propagate
+    // unchanged so the persisted reason stays helpful.
+    const selected: MediaExtractorProvider = await selectMediaExtractorProvider({
+      mimeType: raw.mime,
+      input: mediaInput,
+      providers: mediaProviders,
+    });
     let artifact: MediaArtifact;
     try {
-      selected = await selectMediaExtractorProvider({
-        mimeType: raw.mime,
-        input: mediaInput,
-        providers: mediaProviders,
-      });
       artifact = await selected.extract({
         ...mediaInput,
         config: { ...mediaInput.config, providerId: selected.id },
       });
     } catch (error) {
+      // B48 (D-31 precedent): the adapter's message can carry vendor response
+      // text, so the wrapped error keeps only our own fixed message. The
+      // original error stays as `cause` for server-side diagnosis.
       throw new MaterialExtractionError(
-        error instanceof Error ? error.message : String(error),
+        EXTRACTION_FAILURE_TEXT,
         isTransientExtractionError(error),
-        { cause: error },
+        {
+          cause: error,
+        },
       );
     }
     const text = mediaArtifactText(artifact);

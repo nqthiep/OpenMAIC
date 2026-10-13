@@ -238,7 +238,8 @@ describe('uploaded material extraction lifecycle', () => {
     expect((await materials.getMaterial('session-1', 'mat_transient'))?.extraction).toEqual({
       status: 'pending',
       attempts: 1,
-      error: 'ASR HTTP status 503',
+      // B48: the persisted reason keeps only our own message, never the adapter's text.
+      error: 'The extraction provider could not process this material.',
     });
     const retryClaim = await materials.claimNextExtraction('cleanup-worker', {
       leaseTtlMs: 10_000,
@@ -269,7 +270,8 @@ describe('uploaded material extraction lifecycle', () => {
     expect((await materials.getMaterial('session-1', 'mat_permanent'))?.extraction).toEqual({
       status: 'failed',
       attempts: 0,
-      error: 'ASR HTTP status 400',
+      // B48: the persisted reason keeps only our own message, never the adapter's text.
+      error: 'The extraction provider could not process this material.',
     });
   });
 
