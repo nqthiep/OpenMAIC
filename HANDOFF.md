@@ -20,8 +20,8 @@ Sprint goal: đóng mọi mục backlog còn làm được bằng code, hoàn th
 | 3 | B48 — verify adapter-level `MaterialExtractionError` vendor text; keep only our message | Done | `b271f650`: yes it could (extract.ts wrapped `error.message` verbatim); now fixed text + original as cause; selection errors keep own message; new test 2 pass; tsc 0 |
 | 4 | B49 — fix non-Error throw wording under visitor's key on non-model routes | Done | `d751973b`: transcription/parse-pdf/extract-document get own fixed text; new test 3 pass; tsc 0 |
 | 5 | B51 — evaluate suffix redaction; register aliases for real misses | Done | `2fba2657`: found 4 real misses (YAML `accessKeySecret`; env `AWS_BEARER_TOKEN_BEDROCK`, `S3_CONTRACT_SECRET_KEY`, `ALIDOCMIND_ACCESS_KEY_ID`; `DATABASE_URL` password parsed); 5 new tests pass; tsc 0 |
-| 6 | B53 — agent entry tree raw frames: check for readers; drop or document retention | In progress | Searching for readers of the stored raw frames |
-| 7 | B50 — timing-sensitive tests: explicit budgets/retry like B27 | Todo | `tests/server/classroom-generation-retry.test.ts`, local media real pipeline |
+| 6 | B53 — agent entry tree raw frames: check for readers; drop or document retention | Done | `df438574`: confirmed no route reads entries (only runner + agent's own history tools); storage kept, retention policy documented in entry-tree-storage.ts |
+| 7 | B50 — timing-sensitive tests: explicit budgets/retry like B27 | In progress | Reading the two flaky tests |
 | 8 | P4.4 — claim anonymous data on sign-in/register (small scope); decision in `scrum/DECISIONS-04.md` | Todo | Read `scrum/specs/claim-anonymous-data.md`; conflict rule: account data wins on id collision |
 | 9 | i18n server error messages: all server error responses must be error codes; UI maps codes → 12 locales | Todo | `pnpm check:i18n-keys` must pass |
 | 10 | B26 — watch: if full run reproduces the intermittent failure, capture stack, no blind fix | Todo | |

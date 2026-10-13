@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   resolveModel: vi.fn(),
@@ -79,10 +79,15 @@ const slideContent = {
   remark: 'Retry transient failures',
 };
 
+type ClassroomGenerationModule = typeof import('@/lib/server/classroom-generation');
+let classroomGeneration: ClassroomGenerationModule | undefined;
+
 async function generateWithProgress() {
   const progress: Array<{ message: string }> = [];
-  const { generateClassroom } = await import('@/lib/server/classroom-generation');
-  const result = await generateClassroom(
+  const generationModule =
+    classroomGeneration ?? (await import('@/lib/server/classroom-generation'));
+  classroomGeneration = generationModule;
+  const result = await generationModule.generateClassroom(
     { requirement: 'Teach retry basics' },
     {
       baseUrl: 'http://localhost',
@@ -95,6 +100,13 @@ async function generateWithProgress() {
 }
 
 describe('classroom scene generation retries', () => {
+  beforeAll(async () => {
+    // B50 (B27 pattern): the classroom-generation module graph is heavy — its
+    // cold import took ~4.9s alone, which the full suite's load pushes past
+    // the five-second test budget. Load it here under the hook's own timeout.
+    classroomGeneration = await import('@/lib/server/classroom-generation');
+  }, 60_000);
+
   beforeEach(() => {
     for (const mock of Object.values(mocks)) {
       mock.mockReset();
@@ -153,7 +165,9 @@ describe('classroom scene generation retries', () => {
     expect(progress.some((event) => event.message.includes('Retrying scene 1/1 content'))).toBe(
       true,
     );
-  });
+    // B50: this test waits on real retry backoff (~1s); the explicit budget
+    // keeps full-suite load from pushing it past the default five seconds.
+  }, 30_000);
 
   it('forwards classroom thinking config to scene retry LLM calls', async () => {
     const thinkingConfig = { enabled: true, effort: 'high' };
@@ -193,7 +207,9 @@ describe('classroom scene generation retries', () => {
     expect(progress.some((event) => event.message.includes('Retrying scene 1/1 actions'))).toBe(
       true,
     );
-  });
+    // B50: this test waits on real retry backoff (~1s); the explicit budget
+    // keeps full-suite load from pushing it past the default five seconds.
+  }, 30_000);
 
   it('does not retry non-retryable action generation errors', async () => {
     const unauthorized = Object.assign(new Error('Unauthorized'), { statusCode: 401 });
@@ -206,7 +222,8 @@ describe('classroom scene generation retries', () => {
   });
 
   it('converts only PBLGenerationError to a null scene result', async () => {
-    const { containPBLGenerationError } = await import('@/lib/server/classroom-generation');
+    const { containPBLGenerationError } =
+      classroomGeneration ?? (await import('@/lib/server/classroom-generation'));
 
     expect(
       containPBLGenerationError(
