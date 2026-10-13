@@ -6,8 +6,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 
 - Requested by: repository owner. Request (verbatim): "Hãy giải quyết tiếp các phần mà bạn chưa làm đi"
 - Interpretation: finish the items listed as not done at the end of cycle 7 (B48 residual, B54, B55, B47, B51, B52, B53, B26), and record a decision or a precise blocker for each of the rest. The owner asked for decisions to be made with the expert team, not asked back. Where a decision needs a person (for example native translators or content reviewers), the blocker is recorded. [Inference]
-- Assignment status: In progress
-- Branch and commit: `claude/hopeful-sagan-267tw5` @ `404a31a` (last pushed commit before this assignment), pushed: yes
+- Assignment status: In progress (all tasks done except the push, row 11)
+- Branch and commit: `claude/hopeful-sagan-267tw5` @ `9b57516` (this assignment's commits `dd47ae5`, `b3457ac`, `ac79f5b`, `514dc0c`, `9b57516`, on top of `404a31a`), pushed: no, pending
 - Note on branches: `it-math` is at `f760943`. It is not updated by this assignment.
 - Last updated: 2026-10-13 (UTC)
 
@@ -24,24 +24,37 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 7 | B47: measure request sizes from repo fixtures and tests. Set caps on the stage, chat, generate, classroom and pbl routes with the bounded reader. Add tests | Blocked | Stage routes capped (1 MiB create and rename, 10 MiB save, by precedent; test added; 137 stage route tests pass). Classroom was already capped. Chat, generate and pbl routes not capped: no precedent and no measured sizes in this environment. Reopen condition and reasons in D-37 (`scrum/DECISIONS-03.md`). Needs production request-size data |
 | 8 | B26: reproduce the intermittent `tests/accounts/routes.test.ts` failure by repeated runs. Record the result or the root cause | Done | Not reproduced: 6 isolated runs passed (`b26-1..6.log`); full runs passed in cycle 7 (run 2) and this cycle (run 3, `test-run-3.log`). Root cause not found. Recorded as "not reproduced" in `scrum/BACKLOG.md`, cycle 8. Watch item |
 | 9 | Open product and content items (B1, B2, B3, B8, B13, B17, B29, B30, B35, B36): record for each a decision or a blocker with its owner in `scrum/BACKLOG.md` | Done | "Open items: decision or blocker recorded" table in the cycle 8 section of `scrum/BACKLOG.md`. B1, B2, B3, B30: owner decision needed (recommendation for B1 recorded). B8: deferred with reasons. B13, B17, B35: human reviewers needed. B29, B36: verification needs a two-reader browser check or a provider for sample generation |
-| 10 | Verification: `npx tsc --noEmit`, `pnpm test`, `pnpm check`, `pnpm check:i18n-keys`, ESLint on changed files | Todo | `tsc` exit 0; `pnpm test`: 747 files passed, 9 skipped; 8239 tests passed, 79 skipped; ESLint 0 errors (one pre-existing warning). `pnpm check` and `pnpm check:i18n-keys` still to run after the last edits |
-| 11 | Commit, push to `claude/hopeful-sagan-267tw5`, update the backlog and this file | Todo | |
+| 10 | Verification: `npx tsc --noEmit`, `pnpm test`, `pnpm check`, `pnpm check:i18n-keys`, ESLint on changed files | Done | `tsc` exit 0; `pnpm test`: 747 files passed, 9 skipped; 8239 tests passed, 79 skipped; `pnpm check` exit 0; `pnpm check:i18n-keys` passed (12 locales); ESLint 0 errors (one pre-existing warning at `app/page.tsx`, present at HEAD). Logs: scratchpad `test-run-3.log`, `check-all-2.log` |
+| 11 | Commit, push to `claude/hopeful-sagan-267tw5`, update the backlog and this file | In progress | Five commits on top of `404a31a`: `dd47ae5` (logs), `b3457ac` (UI at 360 px and toast), `ac79f5b` (dev tooling and proxy rename), `514dc0c` (stage body caps), `9b57516` (docs). Push pending |
 
 ### Done so far
 
-- Nothing yet in this assignment. Previous assignment (cycle 7) is closed below.
+- B48 residual: media path stores only our own messages (D-32). Test: `tests/agent-runtime/material-extraction.test.ts`.
+- B51: secret env names match a keyword segment; digit-only values are not secrets (D-33). Test: `tests/server/log-redaction.test.ts`.
+- B53: no `app/` file imports the entry tree or its readers (D-34). Guard: `tests/server/entry-tree-route-guard.test.ts`.
+- B52: decision to keep raw error objects in operator logs (D-35). No code change.
+- B54: Settings stacks below `sm`; composer scrolls sideways; Interactive Mode label is `sr-only` below `sm`. Checked at 360 px and 1280 px in a browser.
+- B55: Edge warning removed (`lib/server/process-signals.ts`); toast names the runtime on a 404 (`stageListFailureMessage`); `middleware.ts` renamed to `proxy.ts` (D-36). Test: `tests/utils/stage-list-failure.test.ts`.
+- B47 (partly): stage routes capped, 1 MiB create and rename, 10 MiB save (D-37). Test: `tests/agent-runtime/stages-route.test.ts`.
+- B26: not reproduced in six isolated runs or two full runs. Root cause not found.
+- Open items 9: decision or blocker recorded for B1, B2, B3, B8, B13, B17, B29, B30, B35, B36 in the cycle 8 section of `scrum/BACKLOG.md`.
+- Previous assignment (cycle 7) is closed below.
 
 ### Decisions and reasons
 
-- None yet.
+- D-32 to D-37 in `scrum/DECISIONS-03.md`. Each has a reason and, where a decision was taken without the owner, a note on what would change it.
+- B1 recommendation (owner decision): limit unpublished course reads to the owner; keep shared links for published courses.
 
 ### Next step (exact)
 
-- Row 1: open `lib/server/material-extraction/extract.ts` around lines 136–148 and wrap the adapter error. Then update the pinned reasons in `tests/agent-runtime/material-extraction.test.ts` (lines near 123, 152, 241, 272, 303).
+- Push `claude/hopeful-sagan-267tw5` (commits `dd47ae5`..`9b57516`), then mark row 11 Done.
+- Chat, generate and pbl body caps (B47): first log request sizes for one release (no content), then set caps from the data. Named routes: `app/api/chat/route.ts`, `app/api/chat/pi/route.ts`, `app/api/generate/*`, `app/api/pbl/v2/*`.
+- B52 follow-up: when the owner sets the log retention policy, decide whether provider messages leave operator logs.
 
 ### Open questions and blockers
 
-- None for the agent. Items 9 needs native reviewers (B13) and subject-matter reviewers (B17, B35, B36) who are not in this environment. The blocker is recorded, not worked around.
+- Owner decisions: B1, B2, B3, B30 (see the cycle 8 table in `scrum/BACKLOG.md`), and the log retention policy for B52.
+- Human reviewers: native translators (B13), subject-matter reviewers (B17, B35). B29 needs a browser check with two readers. B36 needs sample generation with a provider.
 
 ### How to verify
 
