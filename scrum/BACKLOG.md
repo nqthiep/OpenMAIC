@@ -130,6 +130,7 @@ The reviewer found no Critical issues. Dispositions:
 | 5 | 2026-10-11 | Presence lease for B40; administrator panel (B37); metadata body caps (B33 part 2); log hygiene and operator-key text (B43) | B40, B41, B42 done; B37 built; B33 part 2 (six handlers) done; B43 partly done (six routes and nine log sites fixed; B45, B46 open). Two independent reviews (`scrum/reviews/cycle5-review.md`). Full suite on the final tree: exit 0; 739 files passed, 9 skipped; 8,188 tests passed, 79 skipped; type check, ESLint and Prettier clean on changed files |
 | 6 | 2026-10-12 | Visitor-facing upstream text (B18); log hygiene (B45, B46); unflushed-edit lease (B44); procedural-skill scope (B34); render-job decision (B8) | B18 fixed for the audit's 11 routes and persisted text (228d146); B44 dirty window (76ccf4e, 2828f55); B45 central redaction (2c138b8, 2791ba1); B46 lengths in logs (3e7788c); B34 skill (26c271d); B8 deferred (D-29). Full suite on the final tree: exit 0; 744 files passed, 9 skipped; 8,227 tests passed, 79 skipped; type check, ESLint, Prettier and i18n check pass |
 | 7 | 2026-10-13 | Continue the backlog: test stability (B50), provider wording (B49), AliDocMind body echo (B48), 360 px check (B37) | B50 explicit limits on two failing cases; B49 `PROVIDER_FAILURE_TEXT` on three routes; B48 upstream body kept out of the stored reason; B37 measured at 360 px, Settings clips the Accounts list (B54). Full suite: 745 files passed, 9 skipped; 8,230 tests passed, 79 skipped; type check, ESLint on changed files, Prettier and i18n check pass. Uncommitted when this section was written |
+| 8 | 2026-10-13 | Resolve the open items from cycle 7: B48 residual, B51, B52, B53, B54, B55, B47 (stage routes), B26 | D-32 to D-37. B54 fixed at 360 px (Settings stacks; composer scrolls; label hidden). B55 fixed (Edge warning, toast cause, `middleware.ts` renamed to `proxy.ts`). B51 gap fixed (`AWS_BEARER_TOKEN_BEDROCK`). B47 stage routes capped; chat, generate and pbl wait for data. B26 not reproduced. Ten open product, content and verification items have a recorded decision or blocker. Full suite: 747 files passed, 9 skipped; 8,239 tests passed, 79 skipped; type check and ESLint pass |
 
 ## Process notes (retrospective, cycle 1)
 
@@ -421,3 +422,48 @@ Still open: B47 (needs measured request sizes; not started), B51, B52, B53, B8 (
 - **What helped:** running each failing file alone separated load failures from logic failures in one command. Reading the code path for B48 showed the leak was real before any change.
 - **What hindered:** `pkill -f "next dev"` matched the shell running it, and the command exited with 144. The account control did not render until the dev server had `NEXT_PUBLIC_PERSISTENCE=1`.
 - **Change for the next cycle:** stop processes by PID taken from `ps`, not by `pkill -f` with a name that appears in the command line. Make no further 360 px claim until B54 is settled.
+
+## Cycle 8: the open items from cycle 7, decided or blocked
+
+Assignment: "Hãy giải quyết tiếp các phần mà bạn chưa làm đi". The task table and handoff are in `HANDOFF.md`. Decisions D-32 to D-37 are in `scrum/DECISIONS-03.md`.
+
+### Items completed this cycle
+
+| Item | Status | Change | Evidence |
+|---|---|---|---|
+| B48 (residual) | Done | D-32: on the media path, only our own `MaterialExtractionError` messages are stored. Other adapter errors store the fixed text | `tests/agent-runtime/material-extraction.test.ts` (new case fails on the old module) |
+| B51 | Done | D-33: env secret names match a keyword segment (`AWS_BEARER_TOKEN_BEDROCK`, `ALIDOCMIND_ACCESS_KEY_ID` were not redacted); digit-only values are not registered | `tests/server/log-redaction.test.ts` (new case fails on the old rule) |
+| B53 | Done | D-34: no `app/` file imports the entry tree or its readers | `tests/server/entry-tree-route-guard.test.ts` (a forbidden import was caught, then removed) |
+| B52 | Done (decision) | D-35: raw error objects stay in operator logs. Visitor text is not logged. Residual: a provider's own message can echo request text (`[Unverified]`) | Decision only. Follow-up depends on the owner's log policy |
+| B54 | Done | Settings stacks below `sm`; the composer's toolbar and agent row scroll sideways; the Interactive Mode label is `sr-only` below `sm` | Scratch Playwright checks at 360 px and 1280 px (not committed). At 360 px, "Disable alice" is inside the viewport and clickable; the send button right edge is 316 |
+| B55 | Done | D-36: `process.once` moved out of `instrumentation.ts`; the toast names the runtime when `/api/stages` answers 404; `middleware.ts` renamed to `proxy.ts` | Edge warning count 0 after restart; toast text checked in a browser; `tests/utils/stage-list-failure.test.ts` (4 cases); access tests 18 passed |
+| B47 (partly) | Partly done | D-37: stage routes capped (1 MiB create and rename; 10 MiB save, by precedent) | `tests/agent-runtime/stages-route.test.ts` (new 413 case); 137 stage route tests passed |
+| B26 | Not reproduced | Six isolated runs of `tests/accounts/routes.test.ts` passed; two full runs passed (cycle 7 run 2, this cycle's run 3). Root cause not found | Logs: scratchpad `b26-*.log`, `test-run-3.log` |
+
+### Open items: decision or blocker recorded
+
+| Item | Status | Decision or blocker | Owner |
+|---|---|---|---|
+| B1 | Decision needed | Shared links read unpublished courses. Keep, or limit unpublished reads to the owner. This conflicts with the isolation goal, so it needs the owner's product call. Recommendation: limit unpublished reads to the owner, keep shared links for published courses | Repository owner |
+| B2 | Blocked on decision | Claim of anonymous data on sign-in. Spec: `scrum/specs/claim-anonymous-data.md`. Open: consent on a shared browser | Repository owner |
+| B3 | Blocked on decision | The public development bearer still serves signed-out runtime requests in development. Retire it only after the owner confirms no signed-out runtime use | Repository owner |
+| B8 | Deferred (D-29) | Render-job ownership needs a shared store, the external job-id scheme (`[Unverified]`), and a decision on signed-out submits | Repository owner, then engineering |
+| B13 | Blocked (human) | Native review of the eleven machine-drafted `account` translations | Native-speaking reviewers |
+| B17 | Blocked (human) | Educational content review (accuracy, objectives, examples, feedback) | Subject-matter reviewers |
+| B29 | Blocked (verification) | The relative-URL specification recommends NO-GO until a browser check of a classroom loaded from a relative reference passes. Two readers cannot be checked from this environment | QA with two readers |
+| B30 | Blocked (owner) | A required `ACCESS_COOKIE_SECRET` needs a release date | Repository owner |
+| B35 | Blocked (human) | Factual claims (23) and open defects (15) in `scrum/reviews/content-phase1.md` | Subject-matter reviewers |
+| B36 | Blocked (verification) | The five defects in `scrum/reviews/templates-phase1.md` change generated lesson text. Verifying them needs sample generation with a provider, which this environment does not have | Engineering with a provider key |
+
+### Verification
+
+- `npx tsc --noEmit`: exit 0.
+- `pnpm test`: 747 files passed, 9 skipped; 8239 tests passed, 79 skipped; exit 0.
+- ESLint on the changed TypeScript files: 0 errors. One warning, `react-hooks/exhaustive-deps` at `app/page.tsx`, already present at HEAD.
+- Prettier on the changed files: passed.
+
+### Process notes (retrospective, cycle 8)
+
+- **What helped:** each red check was reduced to a test that fails on the old code and passes on the fix, as with D-32, D-33 and the 360 px fixes. Measuring the toast in a browser exposed a wrong cause, which the code reading had not shown.
+- **What hindered:** the 360 px work needed a browser, PostgreSQL and a dev server, and each restart cost time. Several "open" items need people or data this environment does not have.
+- **Change for the next cycle:** log request sizes on the chat, generate and pbl routes for one release (no content), so B47 can be decided from data. Ask for the log policy (B52) and the product calls (B1, B2, B3) before changing those areas.

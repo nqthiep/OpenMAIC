@@ -2,69 +2,84 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
-## Assignment: Continue the Scrum backlog (cycle 7)
+## Assignment: Resolve the open items left by cycle 7
 
-- Requested by: repository owner. Request (verbatim): "Tiếp tục đi"
-- Interpretation: the last open assignment was the Scrum mission (accounts, UX, security, reliability, content). Cycle 6 closed with a report. "Continue" means the next cycle from `scrum/BACKLOG.md`. [Inference]
-- Assignment status: Done for cycle 7 (B50, B49, B48 partly, B37 checked). Open items are listed in "Next step" and in `scrum/BACKLOG.md`
-- Branch and commit: `claude/hopeful-sagan-267tw5` @ `6cc3d46` (cycle commits `c735894`, `6cc3d46`), pushed: yes
-- Note on branches: `it-math` is at `f760943` and has the same tree as the code on this branch before cycle 7. It is not updated by cycle 7, and pushing to it needs a new instruction.
-- Last updated: 2026-10-13 (UTC, time after the final push not recorded)
+- Requested by: repository owner. Request (verbatim): "Hãy giải quyết tiếp các phần mà bạn chưa làm đi"
+- Interpretation: finish the items listed as not done at the end of cycle 7 (B48 residual, B54, B55, B47, B51, B52, B53, B26), and record a decision or a precise blocker for each of the rest. The owner asked for decisions to be made with the expert team, not asked back. Where a decision needs a person (for example native translators or content reviewers), the blocker is recorded. [Inference]
+- Assignment status: In progress
+- Branch and commit: `claude/hopeful-sagan-267tw5` @ `404a31a` (last pushed commit before this assignment), pushed: yes
+- Note on branches: `it-math` is at `f760943`. It is not updated by this assignment.
+- Last updated: 2026-10-13 (UTC)
 
 ### Task table
 
 | # | Task | Status | Evidence / notes |
 |---|------|--------|------------------|
-| 1 | Reproduce B50: run the full suite once and record which timing-sensitive tests fail under load | Done | `pnpm test`: 2 failed, 742 files passed (753 total), 8225 tests passed, 2 failed. The 2 failures: `tests/lint-llm-entry-guard.test.ts` (one case, 12341 ms, timeout 5000 ms) and `tests/runtime/database-chat-cutover.test.ts` (one case, timeout 5000 ms). The two B50 files passed in this run. Log: scratchpad `test-run-1.log` |
-| 2 | B50: make the timing-sensitive tests stable under load without skipping them: `tests/lint-llm-entry-guard.test.ts`, `tests/runtime/database-chat-cutover.test.ts`, and the two B50 files `tests/server/classroom-generation-retry.test.ts`, `tests/document/local-media-extractor.test.ts` | Done | All four pass alone. Explicit 30 s limits added to the failing cases (the matrix `it` in `lint-llm-entry-guard`, and the clear-migration case in `database-chat-cutover`), following precedent `ccaeb6c` (`c735894`). The two B50 files were not changed. Full run 2 (row 6) passed. [Inference] One green full run does not prove stability under load; no repeated runs were done |
-| 3 | B49: a non-Error throw under a visitor's key on non-model routes gets "model provider" wording. Fix the wording and add a test | Done | Added `PROVIDER_FAILURE_TEXT` in `lib/server/error-summary.ts`, used by `web-search`, `parse-pdf`, `verify-pdf-provider` (not by tts, voice, transcription or extract-document, which use speech or model services). `tests/api/managed-key-upstream-text-routes.test.ts` updated, plus one new non-Error case. `vitest run` on the four affected test files: 32 passed; route tests for the three routes: 51 passed |
-| 4 | B48: check whether adapter errors reach `MaterialExtractionError` with vendor text. Fix if reproduced; otherwise record it as not reproduced | Done | Reproduced by reading code: `lib/pdf/alidocmind-client.ts` put `JSON.stringify(body)` of the upstream response into a thrown message. That message is stored as the material's failure reason (`runner.ts`) and returned to the agent (`material-tools.ts`). Fixed: body goes to the log, message is fixed. New test `tests/document/alidocmind-submit-error.test.ts` (2 cases): fails on the original client, passes on the fix. Residual, not changed: short upstream status messages (`lines 154, 166, 209`) still reach the stored reason, and existing tests pin that pass-through. [Decision needed]: whether material reasons should be hidden from visitors on the operator's key |
-| 5 | B37: 360 px layout check of the sign-in and account UI in Chromium (`/opt/pw-browsers/chromium`). Record measured overflow | Done | Setup: PostgreSQL 16 on localhost, a throwaway database, `NEXT_PUBLIC_PERSISTENCE=1`, `ACCOUNT_REGISTRATION=open`, `ADMIN_USERNAMES=admin`. Results at 360 px (scratch script, not in the repo): sign-in dialog 306 px wide, no internal overflow; page has no horizontal scroll (`scrollWidth - clientWidth` = −15). Settings → System → Accounts: the two-column Settings dialog clips the System pane, so the Accounts list actions are not reachable at this width (screenshot checked). Not fixed this cycle; recorded as B54 |
-| 6 | Verification: `npx tsc --noEmit`, `pnpm test`, `pnpm check`, `pnpm check:i18n-keys`, ESLint on changed files | Done | `tsc --noEmit`: exit 0. `pnpm check:i18n-keys`: passed (12 locales). `pnpm test`: 745 files passed, 9 skipped; 8230 tests passed, 79 skipped; exit 0 (log: scratchpad `test-run-2.log`). `pnpm check`: exit 0. ESLint on the 9 changed `.ts` files: exit 0. Prettier fixed one new test file, then passed. Note: one green full run after the earlier red run; not repeated [Inference] |
-| 7 | Record cycle 7 in `scrum/BACKLOG.md` and update this file | Done | New "Cycle 7" section at the end of `scrum/BACKLOG.md`, a row in the cycle log, B54 and B55 added. `prettier --check scrum/BACKLOG.md HANDOFF.md` passed |
-| 8 | Commit and push to `claude/hopeful-sagan-267tw5` | Done | Commits `c735894` (code and tests) and `6cc3d46` (backlog and handoff). `git ls-remote origin refs/heads/claude/hopeful-sagan-267tw5` shows `6cc3d46`. Fast-forward, no force |
+| 1 | B48 residual: apply decision D-31 to the media path. Adapter errors reach the stored reason only as a fixed message. Our own `MaterialExtractionError` messages keep their text. Record D-32. Update the tests that pin the pass-through | Done | `lib/server/material-extraction/extract.ts` (plain adapter errors → `EXTRACTION_FAILURE_TEXT`; selection kept outside the try). New test "stores the fixed reason when an adapter throws a plain error with vendor text": fails on the previous module, passes on the fix. `vitest run tests/agent-runtime/material-extraction.test.ts tests/document/local-media-extractor.test.ts`: 11 passed. D-32 in `scrum/DECISIONS-03.md`. The ASR tests pin our own messages (`LocalMediaExtractionError` is an alias), so they were not changed |
+| 2 | B51: check every secret-bearing environment name in `.env.example` and in code against the suffix rule. Decide and record: accept, or widen the rule | Done | Gap found: `AWS_BEARER_TOKEN_BEDROCK` (a bearer token) and `ALIDOCMIND_ACCESS_KEY_ID` were not redacted. Fixed in `lib/log-secrets.ts`: keyword matches as a segment; digit-only values are not registered. Tests in `tests/server/log-redaction.test.ts` (new case fails on the old rule; numeric guard passes on both). `vitest run tests/server/log-redaction.test.ts tests/server/error-summary.test.ts`: 18 passed. D-33 in `scrum/DECISIONS-03.md` |
+| 3 | B53: find every reader of the agent entry tree. Decide and record | Done | Readers: `runner.ts` and `personal-history-tools.ts` only (model context). No `app/` file imports them. Clients read `agent_session_events`. D-34 in `scrum/DECISIONS-03.md`. Guard test `tests/server/entry-tree-route-guard.test.ts` passes; a temporary forbidden route import was caught and removed. Unchecked: whether tool results are shown verbatim in the UI `[Unverified]` |
+| 4 | B52: classify the raw error-object log sites in provider-touching files. Decide per class. Change the sites where the message can carry upstream text | Done | About 142 single-line sites (a floor). Decision D-35: keep the error object in operator logs, since the registry redacts secrets (D-26, D-33) and our own messages are the diagnostic. No visitor text is logged (D-27). Residual, `[Unverified]`: a provider's own message can echo request text. The owner's log retention and privacy policy decides any change (follow-up recorded in D-35) |
+| 5 | B54: narrow-width layout for the Settings dialog (`components/settings/index.tsx`), and the home composer row at 360 px. Verify with the 360 px script | Done | Settings: columns stack below `sm` (nav row scrolls sideways, list max height 44 units, panel fills the rest; resize handles hidden below `sm`). At 360 px: no offender, "Disable alice" at left 138 to right 210 of a 360 px viewport, and clickable. Composer (`app/page.tsx`): toolbar and agent row scroll sideways; the Interactive Mode label is `sr-only` below `sm` (`components/generation/interactive-mode-button.tsx`). At 360 px the send button right edge is 316 and clickable. At 1280 px the sidebar is 191 px (was 192), the handles show, and the composer does not scroll. Scratch scripts `check-360-v4.js`, `check-360-home.js`, `check-desktop.js` (not in the repo). Screenshots reviewed |
+| 6 | B55: find the cause of the dev-log "Ecmascript file had an error" (`instrumentation.ts`, `packages/@openmaic/storage/src/server/reference.ts`) and of the "Persistence is unavailable" toast. Fix or record the cause | Done | (a) Edge warning: `process.once` in `instrumentation.ts` moved to `lib/server/process-signals.ts`; count 0 after restart. (b) Toast: the runtime was off, so `/api/stages` answered 404. Message now names the runtime (`stageListFailureMessage`); browser check shows the new text. (c) Next 16 deprecation: `middleware.ts` renamed to `proxy.ts`; access tests 18 passed; no deprecation line in the log. Decision D-36 in `scrum/DECISIONS-03.md`. Tests: `tests/utils/stage-list-failure.test.ts` (4 cases) |
+| 7 | B47: measure request sizes from repo fixtures and tests. Set caps on the stage, chat, generate, classroom and pbl routes with the bounded reader. Add tests | Blocked | Stage routes capped (1 MiB create and rename, 10 MiB save, by precedent; test added; 137 stage route tests pass). Classroom was already capped. Chat, generate and pbl routes not capped: no precedent and no measured sizes in this environment. Reopen condition and reasons in D-37 (`scrum/DECISIONS-03.md`). Needs production request-size data |
+| 8 | B26: reproduce the intermittent `tests/accounts/routes.test.ts` failure by repeated runs. Record the result or the root cause | Done | Not reproduced: 6 isolated runs passed (`b26-1..6.log`); full runs passed in cycle 7 (run 2) and this cycle (run 3, `test-run-3.log`). Root cause not found. Recorded as "not reproduced" in `scrum/BACKLOG.md`, cycle 8. Watch item |
+| 9 | Open product and content items (B1, B2, B3, B8, B13, B17, B29, B30, B35, B36): record for each a decision or a blocker with its owner in `scrum/BACKLOG.md` | Done | "Open items: decision or blocker recorded" table in the cycle 8 section of `scrum/BACKLOG.md`. B1, B2, B3, B30: owner decision needed (recommendation for B1 recorded). B8: deferred with reasons. B13, B17, B35: human reviewers needed. B29, B36: verification needs a two-reader browser check or a provider for sample generation |
+| 10 | Verification: `npx tsc --noEmit`, `pnpm test`, `pnpm check`, `pnpm check:i18n-keys`, ESLint on changed files | Todo | `tsc` exit 0; `pnpm test`: 747 files passed, 9 skipped; 8239 tests passed, 79 skipped; ESLint 0 errors (one pre-existing warning). `pnpm check` and `pnpm check:i18n-keys` still to run after the last edits |
+| 11 | Commit, push to `claude/hopeful-sagan-267tw5`, update the backlog and this file | Todo | |
 
 ### Done so far
 
-- Branch reset: `claude/hopeful-sagan-267tw5` starts at `origin/claude/hopeful-sagan-267tw5` (`4bbcaaf`). The two rule commits were cherry-picked on top (`f598bb5`, `c07b6a1`). The `it-math` history was not added to this branch.
-- B50 (`c735894`): explicit 30 s limits on `tests/lint-llm-entry-guard.test.ts` (matrix) and `tests/runtime/database-chat-cutover.test.ts` (clear-migration case).
-- B49 (`c735894`): `PROVIDER_FAILURE_TEXT` in `lib/server/error-summary.ts`, used by `app/api/web-search/route.ts`, `app/api/parse-pdf/route.ts`, `app/api/verify-pdf-provider/route.ts`.
-- B48 (`c735894`): `lib/pdf/alidocmind-client.ts` logs the upstream body instead of putting it in the thrown message. New test `tests/document/alidocmind-submit-error.test.ts`.
-- B37 (checked, not fixed): 360 px. The sign-in dialog fits. The Settings dialog clips the System pane, so the Accounts actions cannot be reached. Opened B54.
-- Backlog recorded (`6cc3d46`): new "Cycle 7" section in `scrum/BACKLOG.md`, B54 and B55 added.
+- Nothing yet in this assignment. Previous assignment (cycle 7) is closed below.
 
 ### Decisions and reasons
 
-- Scope of cycle 7: B50, B49, B48 and B37. Reason: each is small and checkable. B47 is not started, because it needs measured request sizes that this environment cannot produce. B51, B52 and B53 are not started. Each stays open in the backlog.
-- Branch: the designated branch is `claude/hopeful-sagan-267tw5`. A fast-forward to `it-math` would have published its 435 history commits here, so it was not done.
-- B37 was not fixed in this cycle. The Settings fix changes a shared dialog's layout, which needs a design choice (see the next step).
+- None yet.
 
 ### Next step (exact)
 
-1. [Decision needed] B48: whether material failure reasons (`record.extraction.error`) should be hidden from visitors on the operator's key. Today short vendor status messages pass through (`lib/pdf/alidocmind-client.ts`, the `throw new Error` lines near 154, 166 and 209). Existing tests in `tests/agent-runtime/material-extraction.test.ts` pin the pass-through.
-2. B54: a narrow-width layout for `components/settings/index.tsx`. The `DialogContent` is at about line 736, and the sidebar uses an inline `sidebarWidth`. Choose between a collapsed or stacked sidebar below 400 px. Then re-run the 360 px check described under "How to verify".
+- Row 1: open `lib/server/material-extraction/extract.ts` around lines 136–148 and wrap the adapter error. Then update the pinned reasons in `tests/agent-runtime/material-extraction.test.ts` (lines near 123, 152, 241, 272, 303).
 
 ### Open questions and blockers
 
-- B48 decision above: needs the repository owner.
-- B54 layout choice: stacked or collapsed sidebar. Repository owner or the design team.
+- None for the agent. Items 9 needs native reviewers (B13) and subject-matter reviewers (B17, B35, B36) who are not in this environment. The blocker is recorded, not worked around.
 
 ### How to verify
 
-- `npx tsc --noEmit`: exit 0 (this cycle).
-- `pnpm test`: 745 files passed, 9 skipped; 8230 tests passed, 79 skipped; exit 0 (this cycle).
-- `pnpm check`, `pnpm check:i18n-keys`: exit 0 (this cycle).
-- 360 px check for B54 (scratch, not in the repo): run the app with `NEXT_PUBLIC_PERSISTENCE=1` and a `DATABASE_URL`. Create an administrator with `POST /api/auth/register` (set `ADMIN_USERNAMES`). Playwright at a 360 × 740 viewport: click the header button named `Sign in`, submit the form inside the dialog, click the icon-only button containing `svg.lucide-settings`, click the `System` tab, then measure the dialog's `scrollWidth - clientWidth` and whether the `Disable` buttons are inside the viewport.
+- `npx tsc --noEmit`: expected exit 0.
+- `pnpm test`: expected 0 failed files. Last full run: 745 files passed, 9 skipped; 8230 tests passed, 79 skipped.
+- `pnpm check`, `pnpm check:i18n-keys`: expected exit 0.
+- B54 check (scratch, not in the repo): see the "How to verify" section of the closed cycle 7 assignment below.
 
 ### Environment notes
 
 - Node `>=22.19.0`, pnpm `10.28.0` (see `package.json`). Required environment variables by name only.
 - Chromium: `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`. Use `executablePath: '/opt/pw-browsers/chromium'`. Do not run `playwright install`.
-- PostgreSQL 16 is installed but not running. Start it with `pg_ctlcluster 16 main start` (needs root). The throwaway database and role from this cycle are not kept. Create new ones, and give the password through an environment variable, never in a file.
+- PostgreSQL 16 is installed but not running. Start it with `pg_ctlcluster 16 main start` (needs root). Create a throwaway database and role for each browser check, and give the password through an environment variable, never in a file.
 - Dev server for account checks: set `DATABASE_URL`, `NEXT_PUBLIC_PERSISTENCE=1`, `ACCOUNT_REGISTRATION=open` and `ADMIN_USERNAMES`. Stop it by PID from `ps`, not with `pkill -f`.
-- Dev log from this cycle shows "Ecmascript file had an error" (B55). It was not investigated.
+- Scratch browser scripts from cycle 7 are in the session scratchpad, not in the repository: `check-360-v3.js` (Settings Accounts panel) and `check-360-v2.js` (sign-in dialog and home).
 
 ## Closed assignments
+
+### Assignment: Continue the Scrum backlog (cycle 7) (closed 2026-10-13)
+
+- Requested by: repository owner. Request (verbatim): "Tiếp tục đi"
+- Interpretation: the next cycle from `scrum/BACKLOG.md`. [Inference]
+- Assignment status: Done for cycle 7
+- Branch and commit: `claude/hopeful-sagan-267tw5`, commits `c735894` (code and tests), `6cc3d46` (backlog and handoff), `fe9f5be` and `404a31a` (handoff). Pushed: yes
+
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Reproduce B50: run the full suite once and record which timing-sensitive tests fail under load | Done | Run 1: 2 failed. `tests/lint-llm-entry-guard.test.ts` (one case, 12341 ms, limit 5000 ms) and `tests/runtime/database-chat-cutover.test.ts` (one case, limit 5000 ms). Log: scratchpad `test-run-1.log` |
+| 2 | B50: make the timing-sensitive tests stable under load without skipping them | Done | Explicit 30 s limits on the two failing cases (`c735894`). All four named files pass alone. Full run 2 passed. [Inference] One green full run does not prove stability under load |
+| 3 | B49: non-Error throw on non-model routes gets "model provider" wording | Done | `PROVIDER_FAILURE_TEXT` in `lib/server/error-summary.ts`, used by `web-search`, `parse-pdf`, `verify-pdf-provider` (`c735894`). Tests: 32 passed (four files), 51 passed (route tests) |
+| 4 | B48: check whether adapter errors reach `MaterialExtractionError` with vendor text | Done (partly) | `lib/pdf/alidocmind-client.ts` put the upstream body in a thrown message. Fixed: body goes to the log (`c735894`). New test `tests/document/alidocmind-submit-error.test.ts` fails on the old client and passes on the fix. Residual: the media path still passes adapter messages (addressed in the current assignment, row 1) |
+| 5 | B37: 360 px check of the sign-in and account UI | Done | Sign-in dialog 306 px, no internal overflow. Page: no horizontal scroll. Settings → System → Accounts: the two-column dialog clips the System pane; the Disable and Enable buttons are not reachable at 360 px. Opened B54 |
+| 6 | Verification | Done | `tsc` exit 0; `pnpm test` 745 files passed, 9 skipped, 8230 tests passed, 79 skipped; `pnpm check` and `pnpm check:i18n-keys` exit 0; ESLint on changed `.ts` files exit 0 |
+| 7 | Record cycle 7 in `scrum/BACKLOG.md` and this file | Done | Cycle 7 section and cycle-log row in `scrum/BACKLOG.md`; B54 and B55 added |
+| 8 | Commit and push | Done | `c735894`, `6cc3d46`, `fe9f5be`, `404a31a`; `git ls-remote` shows `404a31a` |
+
+- The `it-math` history was not added to this branch. A fast-forward to `it-math` would have published its 435 history commits here.
+- Open at the end of cycle 7: B54, B55, B48 residual, B47, B51, B52, B53, B26, and the older product and content items listed in `scrum/BACKLOG.md`.
 
 ### Assignment: Write task-tracking and handoff rules into AGENTS.md and CLAUDE.md (closed 2026-10-12)
 
