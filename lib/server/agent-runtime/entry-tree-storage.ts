@@ -16,6 +16,23 @@ import {
 
 import { getAgentSessionStore } from './store';
 
+/**
+ * Retention policy for agent session entries (B53).
+ *
+ * Message entries keep the raw provider frame (`message: unknown`), because
+ * resume and replay need the exact frames the run produced. The raw frames
+ * are read only by the agent runtime itself (`runner.ts` resume/replay and
+ * the agent's own history tools in `personal-history-tools.ts`); no API route
+ * reads entries, so raw frames never leave the server toward the client.
+ *
+ * Entries are append-only. A `compaction` entry marks everything before
+ * `firstKeptEntryId` as superseded for replay, but the raw rows stay until
+ * the session itself goes away. A session's entries disappear only when the
+ * owner soft-deletes the session (DELETE /api/agent/sessions or the
+ * workbench action); there is no automatic time-based purge. Do not add a
+ * route that returns raw entries without also scrubbing provider frames.
+ */
+
 export class SessionEntryHistoryError extends Error {
   override readonly name = 'SessionEntryHistoryError';
 
