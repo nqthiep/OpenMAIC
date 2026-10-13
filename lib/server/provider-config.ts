@@ -21,7 +21,8 @@ import {
 const log = createLogger('ServerProviderConfig');
 
 /** Field names in the server's provider file whose values are secrets. */
-const SECRET_YAML_FIELD = /^(apiKey|accessKeyId|secretAccessKey|secret|token|password)$/i;
+const SECRET_YAML_FIELD =
+  /^(apiKey|accessKeyId|accessKeySecret|secretAccessKey|secretKey|secret|token|password)$/i;
 
 /** Registers the secret-valued fields of the provider file, so no log line carries them. */
 function registerYamlSecrets(node: unknown): void {

@@ -82,4 +82,34 @@ describe('log redaction', () => {
 
     expect(lines[0]).toContain('visitor-oldest-xxxxxxxx');
   });
+
+  // B51: secret-bearing names the suffix list cannot see.
+  it.each([
+    ['AWS_BEARER_TOKEN_BEDROCK', 'bedrock-bearer-9d2bxxxxxxxx'],
+    ['S3_CONTRACT_SECRET_KEY', 's3-contract-secret-9d2bxxxx'],
+    ['ALIDOCMIND_ACCESS_KEY_ID', 'AKIA9d2bxxxxxxxxxxxx'],
+  ])('redacts %s from the environment without registration', (name, value) => {
+    vi.stubEnv(name, value);
+
+    createLogger('Test').info(`saw ${value} in a line`);
+
+    expect(lines.join('\n')).not.toContain(value);
+    expect(lines.join('\n')).toContain('[redacted]');
+  });
+
+  it('redacts the password embedded in DATABASE_URL', () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://appuser:dbpass-9d2bxxxxxxxx@db.internal:5432/openmaic');
+
+    createLogger('Test').error('connect failed', new Error('password authentication failed'));
+
+    expect(lines.join('\n')).not.toContain('dbpass-9d2bxxxxxxxx');
+  });
+
+  it('does not redact a DATABASE_URL without a password', () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://db.internal:5432/openmaic');
+
+    createLogger('Test').info('using postgres://db.internal:5432/openmaic');
+
+    expect(lines.join('\n')).toContain('postgres://db.internal:5432/openmaic');
+  });
 });

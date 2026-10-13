@@ -11,6 +11,16 @@ const MIN_SECRET_LENGTH = 8;
 const VISITOR_SECRET_LIMIT = 256;
 /** Environment variables whose values are treated as secrets and redacted from every line. */
 const SECRET_ENV_NAME = /(API_KEY|ACCESS_KEY|SECRET|TOKEN|PASSWORD|ACCESS_CODE)$/i;
+/**
+ * B51: secret-bearing environment names the suffix list cannot see. A bearer
+ * token and an S3 secret key do not end with a known suffix; the AliDocMind
+ * access key id is registered for parity with the YAML field of the same name.
+ */
+const SECRET_ENV_EXACT = new Set([
+  'AWS_BEARER_TOKEN_BEDROCK',
+  'S3_CONTRACT_SECRET_KEY',
+  'ALIDOCMIND_ACCESS_KEY_ID',
+]);
 
 const operatorSecrets = new Set<string>();
 const visitorSecrets = new Set<string>();
@@ -43,7 +53,22 @@ function scanEnvironmentSecrets(): void {
   const env = typeof process === 'undefined' ? undefined : process.env;
   if (!env) return;
   for (const [name, value] of Object.entries(env)) {
-    if (SECRET_ENV_NAME.test(name)) registerLogSecret(value, 'operator');
+    if (SECRET_ENV_NAME.test(name) || SECRET_ENV_EXACT.has(name)) {
+      registerLogSecret(value, 'operator');
+    }
+    // B51: DATABASE_URL usually embeds `user:password@host`; the name matches
+    // no suffix, so register the password part explicitly.
+    if (name === 'DATABASE_URL') registerDatabasePassword(value);
+  }
+}
+
+/** Registers the password embedded in a database URL, when it parses as one. */
+function registerDatabasePassword(value: string | undefined): void {
+  if (!value) return;
+  try {
+    registerLogSecret(new URL(value).password, 'operator');
+  } catch {
+    // Not a parseable URL; nothing to extract.
   }
 }
 
