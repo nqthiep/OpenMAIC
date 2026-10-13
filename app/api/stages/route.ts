@@ -23,8 +23,12 @@ import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-sc
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 export const runtime = 'nodejs';
+
+/** Largest stage create body, refused before it is buffered. The app sends a name and description. */
+const STAGE_CREATE_MAX_BYTES = 1024 * 1024;
 
 /** Mint a fresh, collision-free course id in the same `stage-` family as the agent tools. */
 function createStageId(): string {
@@ -50,12 +54,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  const read = await readBoundedJson(req, STAGE_CREATE_MAX_BYTES);
+  if (!read.ok) {
+    return read.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${STAGE_CREATE_MAX_BYTES} bytes`)
+      : apiError('INVALID_REQUEST', 400, 'invalid JSON body');
   }
+  const body: unknown = read.value;
   if (typeof body !== 'object' || body === null) {
     return apiError('INVALID_REQUEST', 400, 'request body must be a JSON object');
   }

@@ -96,15 +96,17 @@ describe('scene-content vocational gate', () => {
 });
 
 function mockRequest(outline: SceneOutline, requirements?: { taskEngineMode?: boolean }) {
-  return {
-    json: async () => ({
+  return new Request('http://localhost/api/generate/scene-content', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
       outline,
       allOutlines: [outline],
       stageId: 'stage-1',
       stageInfo: { name: 'Test Stage' },
       requirements,
     }),
-  } as unknown as Parameters<typeof import('@/app/api/generate/scene-content/route').POST>[0];
+  }) as unknown as Parameters<typeof import('@/app/api/generate/scene-content/route').POST>[0];
 }
 
 function createProceduralSkillOutline(): SceneOutline {

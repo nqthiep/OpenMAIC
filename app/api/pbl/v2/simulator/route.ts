@@ -28,6 +28,10 @@ import type { PBLProjectV2 } from '@/lib/pbl/v2/types';
 export const maxDuration = 300;
 
 const log = createLogger('PBL v2 Simulator API');
+import { readBoundedJson } from '@/lib/server/bounded-json';
+
+/** Largest simulator request body, refused before it is buffered. Project plus learner message. */
+const PBL_SIMULATOR_MAX_BYTES = 1024 * 1024;
 
 interface SimulatorRequest {
   project: PBLProjectV2;
@@ -41,12 +45,13 @@ export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
 
-  let body: SimulatorRequest;
-  try {
-    body = (await req.json()) as SimulatorRequest;
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'Request body must be valid JSON.');
+  const simulatorRead = await readBoundedJson(req, PBL_SIMULATOR_MAX_BYTES);
+  if (!simulatorRead.ok) {
+    return simulatorRead.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${PBL_SIMULATOR_MAX_BYTES} bytes`)
+      : apiError('INVALID_REQUEST', 400, 'Request body must be valid JSON.');
   }
+  const body: SimulatorRequest = simulatorRead.value as SimulatorRequest;
 
   if (!body?.project) {
     return apiError('MISSING_REQUIRED_FIELD', 400, '`project` is required.');

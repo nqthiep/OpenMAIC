@@ -7,10 +7,17 @@ import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { createLogger } from '@/lib/logger';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('GenerateClassroom API');
 
 export const maxDuration = 30;
+
+/**
+ * Largest classroom-generation input, refused before it is buffered. The
+ * input carries a requirement plus optional PDF text.
+ */
+const GENERATE_CLASSROOM_MAX_BYTES = 10 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
@@ -18,7 +25,17 @@ export async function POST(req: NextRequest) {
 
   let requirementLength: number | undefined;
   try {
-    const rawBody = (await req.json()) as Partial<GenerateClassroomInput>;
+    const read = await readBoundedJson(req, GENERATE_CLASSROOM_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${GENERATE_CLASSROOM_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const rawBody = read.value as Partial<GenerateClassroomInput>;
     requirementLength = rawBody.requirement?.length;
     const body: GenerateClassroomInput = {
       requirement: rawBody.requirement || '',

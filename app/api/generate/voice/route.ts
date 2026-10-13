@@ -39,10 +39,17 @@ import {
 } from '@/lib/audio/voice-registration';
 import { QwenVoiceCloneError, qwenVoiceCloneErrorMessage } from '@/lib/audio/qwen-voice-clone';
 import { InvalidReferenceAudioError } from '@/lib/audio/wav-validate';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Voice Registration API');
 
 export const maxDuration = 30;
+
+/**
+ * Largest voice-registration request body, refused before it is buffered. The
+ * body may carry a reference audio clip as base64.
+ */
+const VOICE_REQUEST_MAX_BYTES = 10 * 1024 * 1024;
 const ROUTE_DEADLINE_MS = 29_000;
 const EXISTS_LOOKUP_SLICE_MS = 5_000;
 
@@ -83,7 +90,17 @@ export async function POST(req: NextRequest) {
     ROUTE_DEADLINE_MS,
   );
   try {
-    const body = (await req.json()) as {
+    const read = await readBoundedJson(req, VOICE_REQUEST_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${VOICE_REQUEST_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value as {
       providerId?: string;
       voiceId?: string;
       descriptor?: unknown;

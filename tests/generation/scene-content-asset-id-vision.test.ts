@@ -514,8 +514,10 @@ function mockRequest(body: {
   }>;
   imageMapping?: Record<string, string>;
 }) {
-  return {
-    json: async () => ({
+  return new Request('http://localhost/api/generate/scene-content', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
       outline: body.outline,
       allOutlines: [body.outline],
       stageId: 'stage-1',
@@ -523,10 +525,7 @@ function mockRequest(body: {
       pdfImages: body.pdfImages ?? [],
       imageMapping: body.imageMapping ?? {},
     }),
-    headers: {
-      get: () => null,
-    },
-  } as unknown as Parameters<typeof import('@/app/api/generate/scene-content/route').POST>[0];
+  }) as unknown as Parameters<typeof import('@/app/api/generate/scene-content/route').POST>[0];
 }
 
 function slideOutline(suggestedImageIds: string[] = ['img_1']): SceneOutline {

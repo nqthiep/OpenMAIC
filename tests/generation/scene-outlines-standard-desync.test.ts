@@ -122,18 +122,17 @@ function mockRequest(body: {
   pdfImages: Array<Pick<PdfImage, 'id' | 'src' | 'pageNumber' | 'width' | 'height'>>;
   imageMapping: ImageMapping;
 }) {
-  return {
-    json: async () => ({
+  return new Request('http://localhost/api/generate/scene-outlines-stream', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
       requirements: { requirement: 'Teach a safety checklist course.' },
       pdfText: 'Inspect the device before calibration.',
       pdfImages: body.pdfImages,
       imageMapping: body.imageMapping,
       researchContext: '',
     }),
-    headers: {
-      get: () => null,
-    },
-  } as unknown as Parameters<
+  }) as unknown as Parameters<
     typeof import('@/app/api/generate/scene-outlines-stream/route').POST
   >[0];
 }

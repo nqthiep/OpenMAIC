@@ -14,8 +14,8 @@ Sprint goal: đóng mọi mục backlog còn làm được bằng code, hoàn th
 ### Task table
 | # | Task | Status | Evidence / notes |
 |---|------|--------|------------------|
-| 0 | Setup: clone, read AGENTS.md/HANDOFF.md, pnpm install, verify push | In progress | `git clone -b it-math`; pnpm 10.28.0 installed globally via npm; `git ls-remote origin refs/heads/it-math` matches HEAD |
-| 1 | B47 — body caps for remaining routes (stage, chat, generate, generate-classroom, pbl) | Todo | Measure real request sizes first; use `lib/server/bounded-json.ts`; oversize → 413/400 |
+| 0 | Setup: clone, read AGENTS.md/HANDOFF.md, pnpm install, verify push | Done | Commits local (20168bd4); push blocked on GitHub auth (see blockers) |
+| 1 | B47 — body caps for remaining routes (stage, chat, generate, generate-classroom, pbl) | In progress | Reading `lib/server/bounded-json.ts`; listing uncapped routes |
 | 2 | B52 — audit ~50 raw error log sites in provider-touching files | Todo | Per site: log summary only or register secret in `lib/log-secrets.ts` |
 | 3 | B48 — verify adapter-level `MaterialExtractionError` vendor text; keep only our message | Todo | Precedent D-31 |
 | 4 | B49 — fix non-Error throw wording under visitor's key on non-model routes | Todo | Route-specific fixed text |

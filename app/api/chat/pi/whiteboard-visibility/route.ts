@@ -3,8 +3,12 @@ import { NextRequest } from 'next/server';
 import { settleWhiteboardVisibility } from '@/lib/chat/pi/whiteboard-visibility';
 import { resolveLearnerKeyForRequest } from '@/lib/persistence/server-auth';
 import { apiError } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 export const runtime = 'nodejs';
+
+/** Largest visibility response body, refused before it is buffered. Three small fields. */
+const VISIBILITY_REQUEST_MAX_BYTES = 1024 * 1024;
 
 const BODY_KEYS = new Set(['queryId', 'stageId', 'visibility']);
 
@@ -37,12 +41,17 @@ export async function POST(req: NextRequest): Promise<Response> {
     return apiError('INVALID_CREDENTIALS', 401, 'Invalid persistence development binding');
   }
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'Invalid whiteboard visibility response');
+  const read = await readBoundedJson(req, VISIBILITY_REQUEST_MAX_BYTES);
+  if (!read.ok) {
+    return read.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError(
+          'PAYLOAD_TOO_LARGE',
+          413,
+          `request body exceeds ${VISIBILITY_REQUEST_MAX_BYTES} bytes`,
+        )
+      : apiError('INVALID_REQUEST', 400, 'Invalid whiteboard visibility response');
   }
+  const body: unknown = read.value;
   if (!validBody(body)) {
     return apiError('INVALID_REQUEST', 400, 'Invalid whiteboard visibility response');
   }

@@ -41,10 +41,17 @@ import {
   ElementReferenceValidationError,
   resolveElementReference,
 } from '@/lib/chat/pi/element-reference';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Pi Chat API');
 
 export const maxDuration = 300;
+
+/**
+ * Largest chat request body, refused before it is buffered. The client sends
+ * the message history, which may carry attached images as data URLs.
+ */
+const PI_CHAT_REQUEST_MAX_BYTES = 10 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
@@ -60,7 +67,17 @@ export async function POST(req: NextRequest) {
   let managedKey = false;
 
   try {
-    const body: StatelessChatRequest = await req.json();
+    const read = await readBoundedJson(req, PI_CHAT_REQUEST_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${PI_CHAT_REQUEST_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body: StatelessChatRequest = read.value as StatelessChatRequest;
     chatModel = body.model;
     chatMessageCount = body.messages?.length;
 

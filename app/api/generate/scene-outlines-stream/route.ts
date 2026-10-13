@@ -48,9 +48,16 @@ import {
 import { sortDocumentImagesForVision } from '@/lib/document/bundle';
 import { resolveVisionImagesForPrompt } from '@/lib/persistence/resolve-vision-images';
 import { resolveVocationalActive } from '@/lib/config/feature-flags';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 const log = createLogger('Outlines Stream');
 
 export const maxDuration = 300;
+
+/**
+ * Largest outlines-stream request body, refused before it is buffered. The
+ * body may carry PDF page images as base64 data URLs.
+ */
+const OUTLINES_STREAM_MAX_BYTES = 10 * 1024 * 1024;
 
 /**
  * Extract the languageDirective from the streamed wrapper JSON.
@@ -301,7 +308,17 @@ export async function POST(req: NextRequest) {
   // True once the operator's key is chosen. Upstream error text then stays on the server.
   let managedKey = false;
   try {
-    const body = await req.json();
+    const read = await readBoundedJson(req, OUTLINES_STREAM_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${OUTLINES_STREAM_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body: Record<string, unknown> = read.value as Record<string, unknown>;
 
     // Get API configuration from request headers/body
     const {

@@ -36,18 +36,17 @@ function parseSseEvents(text: string) {
 }
 
 function mockRequest(requirements: Record<string, unknown>) {
-  return {
-    json: async () => ({
+  return new Request('http://localhost/api/generate/scene-outlines-stream', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
       requirements,
       pdfText: '',
       pdfImages: [],
       imageMapping: {},
       researchContext: '',
     }),
-    headers: {
-      get: () => null,
-    },
-  };
+  });
 }
 
 describe('task-engine outline route', () => {

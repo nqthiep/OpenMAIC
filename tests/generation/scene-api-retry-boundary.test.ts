@@ -354,13 +354,15 @@ describe('scene API retry boundary', () => {
 });
 
 function mockRequest(extraBody: Record<string, unknown> = {}) {
-  return {
-    json: async () => ({
+  return new Request('http://localhost/api/generate/scene-content', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
       outline,
       allOutlines: [outline],
       stageId: 'stage-1',
       stageInfo: { name: 'Retry Course' },
       ...extraBody,
     }),
-  } as unknown as Parameters<typeof import('@/app/api/generate/scene-content/route').POST>[0];
+  }) as unknown as Parameters<typeof import('@/app/api/generate/scene-content/route').POST>[0];
 }

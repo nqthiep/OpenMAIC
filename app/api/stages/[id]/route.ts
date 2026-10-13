@@ -27,8 +27,14 @@ import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-sc
 import { ownerApiError, ownerJson, ownerNotFound } from '@/lib/server/agent-runtime/route-response';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 export const runtime = 'nodejs';
+
+/** Largest rename body, refused before it is buffered. The app sends one name. */
+const STAGE_RENAME_MAX_BYTES = 1024 * 1024;
+/** Largest document save body, refused before it is buffered. A whole course document. */
+const STAGE_SAVE_MAX_BYTES = 10 * 1024 * 1024;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -78,13 +84,14 @@ export async function GET(req: NextRequest, { params }: Params) {
 export async function PATCH(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  const renameRead = await readBoundedJson(req, STAGE_RENAME_MAX_BYTES);
+  if (!renameRead.ok) {
+    return renameRead.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${STAGE_RENAME_MAX_BYTES} bytes`)
+      : apiError('INVALID_REQUEST', 400, 'invalid JSON body');
   }
-  const rawName = (body as { name?: unknown })?.name;
+  const renameBody: unknown = renameRead.value;
+  const rawName = (renameBody as { name?: unknown })?.name;
   if (typeof rawName !== 'string' || rawName.trim().length === 0) {
     return apiError('INVALID_REQUEST', 400, 'name must be a non-empty string');
   }
@@ -118,13 +125,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 export async function PUT(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return new Response('Not found', { status: 404 });
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'invalid JSON body');
+  const saveRead = await readBoundedJson(req, STAGE_SAVE_MAX_BYTES);
+  if (!saveRead.ok) {
+    return saveRead.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${STAGE_SAVE_MAX_BYTES} bytes`)
+      : apiError('INVALID_REQUEST', 400, 'invalid JSON body');
   }
-  const candidate = body as {
+  const saveBody: unknown = saveRead.value;
+  const candidate = saveBody as {
     stage?: { id?: unknown; updatedAt?: unknown };
     scenes?: unknown;
   };
@@ -166,8 +174,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
       // The full payload is validated inside the store before anything is
       // persisted (invalid stage/scene shapes throw and map to 400 below).
       await store.saveDocument({
-        ...(body as MaicDocument),
-        stage: { ...(body as MaicDocument).stage, updatedAt: Date.now() },
+        ...(saveBody as MaicDocument),
+        stage: { ...(saveBody as MaicDocument).stage, updatedAt: Date.now() },
       });
     } catch (error) {
       return mapSaveError(error, responseHeaders);

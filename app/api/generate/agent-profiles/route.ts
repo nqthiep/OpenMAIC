@@ -20,10 +20,14 @@ import {
 import { AGENT_COLOR_PALETTE } from '@/lib/constants/agent-defaults';
 import { normalizeVoiceDesign } from '@/lib/audio/voice-design';
 import { isQwenCloneVoice, resolveTTSModelForVoice } from '@/lib/audio/constants';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Agent Profiles API');
 
 export const maxDuration = 120;
+
+/** Largest agent-profile request body, refused before it is buffered. Stage info, outlines and voices. */
+const AGENT_PROFILES_MAX_BYTES = 1024 * 1024;
 
 interface RequestBody {
   stageInfo: { name: string; description?: string };
@@ -142,7 +146,17 @@ export async function POST(req: NextRequest) {
   // True once the operator's key is chosen. Upstream error text then stays on the server.
   let managedKey = false;
   try {
-    const body = (await req.json()) as RequestBody;
+    const read = await readBoundedJson(req, AGENT_PROFILES_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${AGENT_PROFILES_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value as RequestBody;
     const {
       stageInfo,
       sceneOutlines,

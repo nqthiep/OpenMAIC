@@ -22,6 +22,10 @@ export const maxDuration = 60;
 import type { NextRequest } from 'next/server';
 
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { readBoundedJson } from '@/lib/server/bounded-json';
+
+/** Largest task-update request body, refused before it is buffered. The project plus the action. */
+const PBL_TASK_UPDATE_MAX_BYTES = 1024 * 1024;
 
 import {
   startMicrotask,
@@ -46,12 +50,17 @@ interface UpdateRequest {
 }
 
 export async function POST(req: NextRequest) {
-  let body: UpdateRequest;
-  try {
-    body = (await req.json()) as UpdateRequest;
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'Request body must be valid JSON.');
+  const taskUpdateRead = await readBoundedJson(req, PBL_TASK_UPDATE_MAX_BYTES);
+  if (!taskUpdateRead.ok) {
+    return taskUpdateRead.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError(
+          'PAYLOAD_TOO_LARGE',
+          413,
+          `request body exceeds ${PBL_TASK_UPDATE_MAX_BYTES} bytes`,
+        )
+      : apiError('INVALID_REQUEST', 400, 'Request body must be valid JSON.');
   }
+  const body: UpdateRequest = taskUpdateRead.value as UpdateRequest;
   if (!body?.project) {
     return apiError('MISSING_REQUIRED_FIELD', 400, '`project` is required.');
   }

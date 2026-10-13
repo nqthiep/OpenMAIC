@@ -37,10 +37,14 @@ import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { VOXCPM_AUTO_VOICE_ID, VOXCPM_TTS_PROVIDER_ID } from '@/lib/audio/voxcpm';
 import { QwenVoiceCloneError, qwenVoiceCloneErrorMessage } from '@/lib/audio/qwen-voice-clone';
 import { isQwenCloneVoice } from '@/lib/audio/constants';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('TTS API');
 
 export const maxDuration = 30;
+
+/** Largest TTS request body, refused before it is buffered. Narration text plus options. */
+const TTS_REQUEST_MAX_BYTES = 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
@@ -51,8 +55,13 @@ export async function POST(req: NextRequest) {
   let audioId: string | undefined;
   let managed = false;
   try {
-    const body = await req.json();
-    const { text, ttsModelId, ttsSpeed, ttsApiKey, ttsBaseUrl, ttsProviderOptions } = body as {
+    const read = await readBoundedJson(req, TTS_REQUEST_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${TTS_REQUEST_MAX_BYTES} bytes`)
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value as {
       text: string;
       audioId: string;
       ttsProviderId: TTSProviderId;
@@ -63,6 +72,7 @@ export async function POST(req: NextRequest) {
       ttsBaseUrl?: string;
       ttsProviderOptions?: Record<string, unknown>;
     };
+    const { text, ttsModelId, ttsSpeed, ttsApiKey, ttsBaseUrl, ttsProviderOptions } = body;
     ttsProviderId = body.ttsProviderId;
     ttsVoice = typeof body.ttsVoice === 'string' ? body.ttsVoice.trim() : undefined;
     audioId = body.audioId;

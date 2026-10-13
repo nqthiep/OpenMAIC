@@ -27,10 +27,17 @@ import {
   visitorStreamEvent,
 } from '@/lib/server/error-summary';
 import type { ThinkingConfig } from '@/lib/types/provider';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 const log = createLogger('Chat API');
 
 // Allow streaming responses up to 60 seconds
 export const maxDuration = 60;
+
+/**
+ * Largest chat request body, refused before it is buffered. The client sends
+ * the message history, which may carry attached images as data URLs.
+ */
+const CHAT_REQUEST_MAX_BYTES = 10 * 1024 * 1024;
 
 /**
  * POST /api/chat
@@ -59,7 +66,13 @@ export async function POST(req: NextRequest) {
   let managedKey = false;
 
   try {
-    const body: StatelessChatRequest = await req.json();
+    const read = await readBoundedJson(req, CHAT_REQUEST_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${CHAT_REQUEST_MAX_BYTES} bytes`)
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body: StatelessChatRequest = read.value as StatelessChatRequest;
     chatModel = body.model;
     chatMessageCount = body.messages?.length;
 

@@ -30,10 +30,14 @@ import { normalizeLegacyPBLContent } from '@/lib/pbl/legacy/read';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { llmApiError } from '@/lib/server/llm-error-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Scene Actions API');
 
 export const maxDuration = 60;
+
+/** Largest scene-actions request body, refused before it is buffered. One outline plus its generated content. */
+const SCENE_ACTIONS_MAX_BYTES = 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
@@ -42,7 +46,17 @@ export async function POST(req: NextRequest) {
   let outlineTitle: string | undefined;
   let resolvedModelString: string | undefined;
   try {
-    const body = await req.json();
+    const read = await readBoundedJson(req, SCENE_ACTIONS_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${SCENE_ACTIONS_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value;
     const {
       outline,
       allOutlines,

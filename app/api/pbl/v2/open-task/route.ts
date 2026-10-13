@@ -28,6 +28,10 @@ import type { PBLProjectV2, PriorQuizResult } from '@/lib/pbl/v2/types';
 export const maxDuration = 300;
 
 const log = createLogger('PBL v2 OpenTask API');
+import { readBoundedJson } from '@/lib/server/bounded-json';
+
+/** Largest open-task request body, refused before it is buffered. Project plus task selection. */
+const PBL_OPEN_TASK_MAX_BYTES = 1024 * 1024;
 
 interface OpenTaskRequest {
   project: PBLProjectV2;
@@ -42,12 +46,13 @@ export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
 
-  let body: OpenTaskRequest;
-  try {
-    body = (await req.json()) as OpenTaskRequest;
-  } catch {
-    return apiError('INVALID_REQUEST', 400, 'Request body must be valid JSON.');
+  const openTaskRead = await readBoundedJson(req, PBL_OPEN_TASK_MAX_BYTES);
+  if (!openTaskRead.ok) {
+    return openTaskRead.code === 'PAYLOAD_TOO_LARGE'
+      ? apiError('PAYLOAD_TOO_LARGE', 413, `request body exceeds ${PBL_OPEN_TASK_MAX_BYTES} bytes`)
+      : apiError('INVALID_REQUEST', 400, 'Request body must be valid JSON.');
   }
+  const body: OpenTaskRequest = openTaskRead.value as OpenTaskRequest;
 
   if (!body?.project) {
     return apiError('MISSING_REQUIRED_FIELD', 400, '`project` is required.');

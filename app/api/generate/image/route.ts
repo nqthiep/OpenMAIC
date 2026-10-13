@@ -33,8 +33,12 @@ import { CONTENT_BLOCKED_TEXT, MODEL_FAILURE_TEXT } from '@/lib/server/error-sum
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { resolveImageSize } from '@/lib/server/image-sizing';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('ImageGeneration API');
+
+/** Largest image-generation request body, refused before it is buffered. Prompt plus options. */
+const IMAGE_REQUEST_MAX_BYTES = 1024 * 1024;
 
 // The ComfyUI adapter polls up to GENERATION_TIMEOUT_MS (5 min) and real
 // workflows can take 3–5 min. 60s would let platforms that enforce maxDuration
@@ -49,7 +53,17 @@ export async function POST(request: NextRequest) {
 
   let managed = false;
   try {
-    const body = (await request.json()) as ImageGenerationOptions;
+    const read = await readBoundedJson(request, IMAGE_REQUEST_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${IMAGE_REQUEST_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value as ImageGenerationOptions;
 
     if (!body.prompt) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing prompt');

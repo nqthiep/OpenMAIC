@@ -34,10 +34,17 @@ import {
   type VisionPromptImage,
 } from '@/lib/persistence/resolve-vision-images';
 import { generatePBLV2Project } from '@/lib/pbl/v2/agents/planner';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Scene Content API');
 
 export const maxDuration = 300;
+
+/**
+ * Largest scene-content request body, refused before it is buffered. The body
+ * may carry PDF page images as base64 data URLs.
+ */
+const SCENE_CONTENT_MAX_BYTES = 10 * 1024 * 1024;
 
 /**
  * Aggregate budget for the WHOLE resolve-with-refill phase, reused from the
@@ -64,7 +71,17 @@ export async function POST(req: NextRequest) {
   let outlineTitle: string | undefined;
   let resolvedModelString: string | undefined;
   try {
-    const body = await req.json();
+    const read = await readBoundedJson(req, SCENE_CONTENT_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${SCENE_CONTENT_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value;
     const {
       outline: rawOutline,
       allOutlines,

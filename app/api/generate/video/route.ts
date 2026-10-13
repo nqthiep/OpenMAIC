@@ -33,8 +33,12 @@ import { createLogger } from '@/lib/logger';
 import { CONTENT_BLOCKED_TEXT, MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('VideoGeneration API');
+
+/** Largest video-generation request body, refused before it is buffered. Prompt plus options. */
+const VIDEO_REQUEST_MAX_BYTES = 1024 * 1024;
 
 export const maxDuration = 300;
 
@@ -44,7 +48,17 @@ export async function POST(request: NextRequest) {
 
   let managed = false;
   try {
-    const body = (await request.json()) as VideoGenerationOptions;
+    const read = await readBoundedJson(request, VIDEO_REQUEST_MAX_BYTES);
+    if (!read.ok) {
+      return read.code === 'PAYLOAD_TOO_LARGE'
+        ? apiError(
+            'PAYLOAD_TOO_LARGE',
+            413,
+            `request body exceeds ${VIDEO_REQUEST_MAX_BYTES} bytes`,
+          )
+        : apiError('INVALID_REQUEST', 400, 'request body must be valid JSON');
+    }
+    const body = read.value as VideoGenerationOptions;
 
     if (!body.prompt) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing prompt');
