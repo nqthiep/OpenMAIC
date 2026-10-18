@@ -2,6 +2,31 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Catalog page that scales to many courses (phase 2)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "Làm giai đoạn 2 của trang danh mục: lọc có bài kiểm tra/tương tác, lọc độ dài, kiểu danh sách gọn, thêm updatedAt và sắp xếp Mới cập nhật. Ghi bảng task vào HANDOFF.md trước khi làm."
+- Owner's push instruction (verbatim): "Please resume, khi nào hoàn thành thì push lên branch it-math trên remote repo của tôi."
+- Assignment status: In progress
+- Branch and commit: `it-math` @ `632144f1` plus uncommitted changes, pushed: no. Push to `origin` (`https://github.com/nqthiep/OpenMAIC.git`) branch `it-math` is allowed once this phase is done. The working tree also holds other sessions' uncommitted work (community, TTS, subject grouping), so only the files of the catalog work (phases 1 and 2) are committed, selected by path or by hunk.
+- Last updated: 2026-10-19 (UTC time not recorded)
+
+### Design
+- Server: `listCatalog` adds to each entry `updatedAt` (ISO string), `hasQuiz`, `hasInteractive`. Content flags come from `document_scenes.data->>'type'` (`quiz`; `interactive` or `pbl`) in the same query that counts scenes. `updatedAt` is the approval time (`course_shares.decided_at`) for a shared course, because readers see the approved copy, and `document_stages.updated_at` (milliseconds) for the others. All three are absent when the course documents are not stored here. Additive fields, old clients ignore them.
+- Client: new filters `has=quiz,interactive` (a course must have every chosen one) and `len=short,medium,long` (at most 5 scenes, 6 to 15, more than 15; a course of unknown length matches none), sort `updated`, layout `layout=list` (compact rows). The default sort stays A to Z so the order of an existing catalog does not change.
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, `git status`, branch `it-math`, remote | Done | Branch `it-math`; `origin` = `https://github.com/nqthiep/OpenMAIC.git`; 47 changed paths in the tree, most from other sessions |
+| 2 | Server: `updatedAt`, `hasQuiz`, `hasInteractive` in `listCatalog` + type + test | In progress | |
+| 3 | Pure logic: length and content filters, sort `updated`, `layout`, URL params + tests | Todo | |
+| 4 | UI: content and length chips, grid or compact list toggle, updated date in the list | Todo | |
+| 5 | i18n keys in 12 locales | Todo | |
+| 6 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Todo | |
+| 7 | Browser check at 768 px and wider | Todo | |
+| 8 | Commit the catalog files (phases 1 and 2) and push `it-math` to `origin` | Todo | |
+| 9 | Update this section and report | Todo | |
+
 ## Assignment: Community discussion list that scales (phase 1)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "ở trên trang thảo luận, khi số lượng thành viên tăng, số bài học tăng, số thảo luận tăng thì sẽ rất khó tìm kiếm, thiết kế hiện tại khá đơn giản. Hãy brainstorming để nghĩ ra một ý tưởng thiết kế để đáp ứng các yêu cầu đó, tuy nhiên vẫn phải easy to use."
@@ -33,41 +58,149 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Offset paging with `limit + 1` instead of a keyset cursor: one mechanism for all four sorts, and the client drops duplicate ids when a question is bumped between pages. Ceiling: a question bumped between two pages can be skipped. Upgrade to a keyset cursor if feeds grow past a few thousand questions.
 - Phase 2 (accent-insensitive search, follow and unread) and phase 3 ("for me" by class, similar questions) are NOT in this assignment.
 
-## Assignment: Fall back to browser speech when lesson audio fails
+## Assignment: Catalog page that scales to many courses (phase 1)
 - Requested by: repository owner (nqthiep)
-- Original request (verbatim): "Có lỗi khi chạy bài giảng do AI sinh ra thì không nghe thấy âm thanh. Nếu đúng thì dù cho setting hệ thống sử dụng mô hình sinh âm thanh nào, hoặc các provide cloud hết credit thì cũng phải fallback sang sử dụng local của browser để sinh âm thanh."
-- Assignment status: In progress
-- Branch and commit: `it-math` @ `7a6be525` plus uncommitted changes, pushed: no. No git writes requested, so nothing is committed.
-- Last updated: 2026-10-18 13:18 UTC
+- Original request (verbatim): "ở trên trang danh mục, khi só lượng bài học trở lên nhiều, hãy brainstorming để thiết kế cách hiển thị và filter sao cho learner dễ tìm thấy bài học mà họ cần." Then, after the design proposal: "Làm giai đoạn 1: sửa lỗi tiến độ khi >100 khoá, tìm kiếm không dấu, lọc trạng thái và loại, sắp xếp, hàng Tiếp tục học, Hiện thêm, URL giữ bộ lọc. Ghi bảng task vào HANDOFF.md trước khi làm."
+- Assignment status: Done for phase 1 (code, tests and a browser check on mock data). Phases 2 and 3 are not started.
+- Branch and commit: `it-math` @ `632144f1` plus uncommitted changes, pushed: no. Git writes were not requested, and `HANDOFF.md` also holds other sessions' uncommitted text, so nothing is committed. The sections below this one belong to other sessions and stay open.
+- Last updated: 2026-10-18 (UTC time not recorded)
+
+### Design (from the proposal in this session)
+- Facts read from code: `/catalog` is one flat 3-column grid sorted A to Z (`listCatalog`, `lib/server/learning/store.ts`); `CatalogEntry` has only id, title, kind, `sceneCount`; `GET /api/progress` rejects more than 100 course ids (`MAX_COURSE_IDS`), and the catalog sends all grid ids and swallows the 400, so every progress line vanishes from the 101st course on. The back arrow from a course returns to a bare `/catalog`.
+- Phase 1 has no schema or API change. Filter bar appears above 12 courses in the grid; below that the page stays as it is. Search is client-side, accent-insensitive, on the title only (no `description` field in `CatalogEntry`). Filters: status (not started / in progress / done) and kind (free preview / shared). Sort: A to Z (default, as now), last studied, shortest first. "Mới cập nhật" is NOT in phase 1: it needs `updatedAt` from the server (phase 2).
+- State lives in the URL: `?q=&status=&kind=&sort=`, other params (for example `join`) are kept. The classroom back arrow carries it as `cq` and returns to the same filtered view.
 
 ### Task table
 | # | Task | Status | Evidence / notes |
 |---|------|--------|------------------|
-| 1 | Read HANDOFF.md, run git status, confirm branch `it-math` | Done | `git branch --show-current` printed `it-math`; HANDOFF.md is 258 KB, so the top sections were read by line range |
-| 2 | Find why a lesson audio failure is silent | Done | `lib/playback/engine.ts:627-654`: browser TTS only when `ttsProviderId === 'browser-native-tts'` and that provider is enabled, otherwise `scheduleReadingTimer` (silent). `lib/store/settings.ts:528`: browser-native defaults to `enabled: false`. `lib/utils/audio-player.ts:135-138` returns false when no audio exists; `:168` throws when play fails |
-| 3 | In `lib/playback/engine.ts`, use one shared fallback for the no-audio branch and the play-error branch. Drop the provider and enabled checks. Keep the `ttsEnabled`, text and `speechSynthesis` checks | In progress | |
-| 4 | Add a test for: cloud provider with no audio, play rejects, ttsEnabled off (silence) | Todo | |
-| 5 | Run `pnpm vitest run tests/playback`, `npx tsc --noEmit`, `pnpm lint` | Todo | |
-| 6 | Update this section and report | Todo | |
+| 1 | Read HANDOFF.md, `git status`, branch `it-math` | Done | Branch `it-math`; the 3 open sections above (subject grouping, TTS fallback, "Lớp của tôi") belong to other sessions; files they touch (`app/page.tsx`, `lib/playback/*`, `lib/hooks/*`) are not mine |
+| 2 | Fix: `fetchProgress` sends more than 100 ids | Done | `components/learning/learning-api.ts` `fetchProgress` asks in batches of 50 ids (`PROGRESS_BATCH`; the route allows 100 and ids can be 128 characters, in a URL). `tests/learning/fetch-progress.test.ts` (3): 250 ids go in 5 requests; with `PROGRESS_BATCH = 5000` the 250-id test fails with `LearningRequestError: INVALID` (the old behaviour), restored to 50 and it passes |
+| 3 | Pure module `lib/home/catalog-filter.ts` (fold, status, filter, sort, URL parse and build) + test | Done | `tests/home/catalog-filter.test.ts` (14): accent-insensitive search incl. `đ`, any word order, status and kind filters, three sorts, unfinished list, URL round trip, unknown values ignored, other params kept |
+| 4 | UI `components/home/catalog-browser.tsx`: search, chips, sort, "Tiếp tục học" row, "Hiện thêm", empty result; used by `app/catalog/page.tsx` | Done | Browser check in row 8. At 12 courses or fewer the page is the plain grid as before (`FILTER_THRESHOLD`). Kind chips show only when both kinds exist. "Tiếp tục học" shows up to 4 unfinished courses, only while the search box and filters are empty. 24 per page (`PAGE_SIZE`). The invite flow in `app/catalog/page.tsx` now removes only `join` from the address instead of everything |
+| 5 | Back arrow keeps the filters (`cq`) in `lib/workbench/classroom-exit.ts` + test | Done | `catalogClassroomHref(courseId, viewQuery)` adds `cq`; `resolveClassroomExit` returns `/catalog?<clean view>`, and `cleanViewSearch` keeps only `q,status,kind,sort`. `tests/workbench/classroom-exit.test.ts` has a new case. Browser: `/classroom/qa-community-course?returnTo=catalog&cq=q%3Ddao%26sort%3Dshort%26evil%3D1` then the back button went to `/catalog?q=dao&sort=short` (`evil` dropped) |
+| 6 | i18n keys in 12 locales | Done | New under `catalog`: `search.*`, `filter.*`, `status.*`, `sort.*`, `continue`, `results`, `noMatch`, `clearFilters`, `showMore`. `pnpm check:i18n-keys`: passed (12 files). The 11 non-Vietnamese texts are mine, not reviewed by a native speaker [Unverified] |
+| 7 | Checks: vitest, `npx tsc --noEmit`, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/learning tests/workbench tests/i18n tests/components`: 128 files, 1479 passed. `npx tsc --noEmit`: no error outside `.next/` and `tests/security/`. `pnpm exec eslint` on the 8 changed code files: 0 problems. `prettier --write` on them and on the 12 locales: only 3 files needed changes, now clean |
+| 8 | Browser check at 768 px and wider with more than 12 courses | Done (mock data) | `cat.localhost:3002` (another session's `next dev`, HMR), guest cookie jar. The real catalog has 1 course, so the page was given 40 mock courses by replacing `window.fetch` for `/api/catalog`, `/api/progress` and `/api/auth/session` in the page (nothing written to the database). Seen at 1280 px dark, 768 px dark (no horizontal overflow), 1280 px light: search "dao ham" gives "Đạo hàm cơ bản" and "Đạo hàm cơ bản – nâng cao" (2) and the address becomes `?q=dao+ham`; "Đang học" with it gives 0 and the empty state with "Xoá bộ lọc"; clearing returns 40 and the "Tiếp tục học" row (4 cards); kind "Đã chia sẻ" 30, plus "Đã xong" 5; `?status=done&kind=shared&sort=short` opens with those chips pressed and the sort "Ngắn trước"; "Hiện thêm 16 khoá học" took the grid from 24 to 40 and the button went away; card links carry `cq`. Not seen: a real database with more than 12 courses; keyboard-only use; a screen reader. Mock progress request sizes: 40 ids (one batch) |
+| 9 | Update this section and report | Done | this section |
 
 ### Done so far
-- Nothing changed in code yet.
+- `components/learning/learning-api.ts`: `fetchProgress` in batches of 50 (fixes progress vanishing from the 101st course).
+- `lib/home/catalog-filter.ts` (new): pure search, filter, sort, address helpers. `components/home/catalog-browser.tsx` (new): the list with toolbar. `app/catalog/page.tsx`: uses it, keeps the view params when a join removes `join`.
+- `lib/workbench/classroom-exit.ts`: back arrow returns to the same search and filters (`cq`).
+- `catalog.*` keys in 12 locales. Tests: `tests/home/catalog-filter.test.ts`, `tests/learning/fetch-progress.test.ts`, a case in `tests/workbench/classroom-exit.test.ts`.
 
 ### Decisions and reasons
-- Keep the `ttsEnabled` gate. If the user turned TTS off, silence is intended.
-- The fallback ignores the browser-native `enabled` toggle. Its default is `false` (`lib/store/settings.ts:528`), so the current gate never fires for a default user, which is the reported symptom. The owner asked for the fallback regardless of settings. This overrides the #665 opt-in for the fallback path only. Choosing browser-native directly still works as before.
-- Scope is lecture playback (`lib/playback/engine.ts`) only.
+- The toolbar shows above 12 courses only: a search box over a dozen cards is noise, and the page stays as it was for the small catalog.
+- Title-only search and A to Z default: `CatalogEntry` has no description or update time. "Mới cập nhật" and description search need `updatedAt` and `description` from `listCatalog` (phase 2).
+- Filtering and paging are on the client: the list is ids, titles, kinds and counts, so thousands of courses still fit one response. Move them to the server only when measured slow. [Inference]
+- The address uses `history.replaceState` (no new history entry per keystroke), reading it once on mount.
 
 ### Next step (exact)
-- Edit `lib/playback/engine.ts` around line 627 (the `.then` and `.catch` on `this.audioPlayer.play`) so both call one `speakFallback` helper.
+- Owner: decide whether to start phase 2 (derived filters "có bài kiểm tra / tương tác", length, compact list view, `updatedAt`) and phase 3 (topic and grade tags). Phase 3 needs the decisions in the proposal: who tags a course and the fixed tag list.
 
 ### Open questions and blockers
-- Discussion (roundtable) TTS does not fall back to browser speech (`lib/hooks/use-discussion-tts.ts:416` skips it on purpose). Not changed. Owner decides whether it should change.
+- Not verified: a real database with more than 12 courses (the check used mock responses in the page). Keyboard-only and screen-reader use were not tried. The 11 translated locales are not reviewed by native speakers.
+- The "Xoá bộ lọc" button shows twice when a filter gives no result (toolbar and empty state). Kept on purpose; say if one should go.
+
+### How to verify
+- `pnpm vitest run tests/home/catalog-filter.test.ts tests/learning/fetch-progress.test.ts tests/workbench/classroom-exit.test.ts`: expected all pass. [Run: 23 passed with the filter and exit files; fetch-progress 3 passed]
+- Browser: with more than 12 courses visible in `/catalog` the search box, chips and sort appear; `/catalog?q=dao` filters on load.
+
+## Assignment: Group the learner home library by subject
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "ở trên trang chủ của leaner thì các bài học được sắp xếp nhóm theo môn học."
+- Owner's answer (verbatim) to "group by what, since a course has no subject field?": "Tôi nghiêng về lựa chọn Thư mục = môn học (Recommended), nhưng lựa chọn này có đáp ứng trong trường hợp learner học nhiều môn trên hệ thống này không?"
+- Assignment status: Done and pushed (2026-10-19). One step not seen end to end: a finished generation landing in the chosen folder (row 14)
+- Branch and commit: `it-math` @ `2d8cc491` (feature) plus a docs commit holding this file, pushed: yes (the owner asked on 2026-10-19). The commit holds only this assignment's files; other sessions' uncommitted files (TTS, catalog, community, security tests, `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`) stay in the working tree.
+- Last updated: 2026-10-19 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, `git status`, branch `it-math` | Done | Branch `it-math`; HANDOFF top sections read |
+| 2 | Find what "subject" is in the data | Done | No course field: `Stage` in `packages/@openmaic/dsl/src/stage.ts:141` and `StageListItem` in `lib/utils/stage-storage.ts:104` have none. `learningSubject` in `lib/store/user-profile.ts:38` is one free-text string for the learner, not per course. Folders exist (`folders` + `stageFolders`, limit 50, name width 40: `lib/utils/folder-name-validation.ts`). Owner chose folder = subject |
+| 3 | Multi-subject check (owner's question) | Done | Folder view serves many subjects. Auto-filing a new course from `learningSubject` does not: one string cannot name two subjects. So it is NOT built; a new course stays unfiled and is moved with the existing folder menu |
+| 4 | Pure grouping function `lib/home/subject-groups.ts` + test | Done | `groupBySubject`: folders by `order`, empty folders left out, unfiled or deleted-folder courses last. `pnpm vitest run tests/home/subject-groups.test.ts`: 3 passed |
+| 5 | Home library: grouped view (default) and a toggle back to folder tiles in `app/page.tsx` | Done | `showSubjects` (grouped on, not searching, root view, at least one filed course) replaces the folder tiles with one heading row per folder (`h3`, `col-span-full`) and its course tiles in the same grid; toggle button (`LayoutList`, `aria-pressed`, localStorage `recentClassroomsBySubject`, default on) shown only when a folder exists. Search and the folder drill-down are unchanged. Folder rename/delete/drop stay on the tile view (toggle off) |
+| 6 | i18n keys in 12 locales | Done | `classroom.groupBySubject`, `classroom.unsorted` in all 12; `pnpm check:i18n-keys` passes. Translations for the 11 non-en/vi locales were written by the agent, not reviewed by a native speaker [Unverified] |
+| 7 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/i18n tests/learning`: 37 files, 276 passed. `npx tsc --noEmit`: nothing outside `.next/` and `tests/security/`. eslint on the 3 files: 0 errors, 1 old warning at `app/page.tsx:390` (`loadClassrooms` dependency, not mine). `prettier --check`: passes |
+| 8 | Browser check as a learner with two folders | Done | `next dev` :3002, 1024x768, test learner `rv_subject` (created for this check, password not recorded; it stays in the dev DB). Seeded 2 folders and 4 courses through `/api/folders`, `/api/stages`, `/api/folders/members`, then deleted them (stages 0, folders 0 after). Grouped view: headings `Toán 2`, `Vật lý 1`, `Chưa phân môn 1` with their tiles. Toggle off: folder tiles `Toán`, `Vật lý` and the unfiled tile; `aria-pressed=false`, stored `false`, still off after reload; toggled on again. Console: no errors. Not checked: light theme, widths under 768 px (owner decision: wide screens only), drag-drop of a course in grouped view (not supported there; use the folder menu on the tile) |
+| 9 | Update this section and report | Done | this section |
+| 10 | Follow-up (owner, verbatim): "Thêm ô chọn môn ở khung tạo khoá: danh sách thư mục của learner cộng Chưa phân môn, rồi tự xếp bài vào thư mục đó sau khi tạo xong." Plan: `folderId` in the generation session; picker in the composer; file the course after it is saved | Done | Reverses the "no auto-filing" decision under Decisions: the owner chose a picker, which names the subject per course, so a learner of several subjects is served. Code and browser check below; the final filing step is not seen end to end (row 14) |
+| 11 | Subject picker in the composer (`app/page.tsx`), remembered per device, only shown when a folder exists | Done | Native `<select>` (aria-label `home.composer.subject`, options `classroom.unsorted` + the learner's folders), localStorage `composerFolderId`, `knownFolderId` in `lib/home/subject-groups.ts` ignores a folder that was deleted. Key `home.composer.subject` in 12 locales; `pnpm check:i18n-keys` passes |
+| 12 | Carry the choice through `GenerationSessionState` and file the course in `app/generation-preview/page.tsx` after `saveToStorage()` | Done | `folderId?` in `app/generation-preview/types.ts`; `setStageFolder(stage.id, folderId)` right after `saveToStorage()`, a failure is logged and the course stays unfiled (the learner can move it) |
+| 13 | Tests, tsc, eslint, prettier, i18n key check | Done | `pnpm vitest run tests/home tests/i18n tests/generation tests/learning`: 389 passed, 2 failed in the first run. The failure was `tests/learning/store.test.ts` (catalog scene count), which passes alone (36 passed), and `lib/server/learning/store.ts` is being changed by another session, so [Inference] it is load or that session's work. `tests/home/subject-groups.test.ts`: 4 tests. `npx tsc --noEmit`: nothing outside `.next/` and `tests/security/`. eslint: 0 errors, the old `app/page.tsx` warning. `prettier --check` passes |
+| 14 | Browser check: pick a folder, generate (or stop before the model call if it costs quota), see the course in the folder | Done (filing not seen) | `next dev` :3002 (started by this session, then stopped), test learner `rv_subject`, made a member with one SQL insert into `memberships` in the dev DB container `openmaic-dev-db-postgres-1` (`granted_by` `qa-subject-check`; row and account stay). No folder: no picker. With folders `Toán` and `Vật lý`: picker options `Chưa phân môn`, `Toán`, `Vật lý`; choosing Toán stored `composerFolderId`; the click on "Tạo khoá học" put `folderId` of Toán into `sessionStorage.generationSession` and opened `/generation-preview`. A request to `/api/generate/scene-outlines-stream` was sent by mistake (my block on `/api/generate` was lost to a full page load): model `deepseek:deepseek-flash`, 9.3 s, 0 outlines, retry started; I left the page right away, no course was created. Not seen: the course appearing in the folder after a finished generation (the provider returned no outlines here). Folders were deleted again (folders 0, stages 0). Console: no app errors. Picker works in a 1024 px pane only |
+| 15 | Owner asked (2026-10-19): when done, push to `it-math` on the owner's remote. Commit only this assignment's files, then push | Done | Commit `2d8cc491` holds the 3 app files, `lib/home/subject-groups.ts`, its test and only this assignment's hunks of the 12 locale files (the other hunks are another session's catalog keys); `git apply --cached` per hunk. Push result: see "Push" below | Other sessions' uncommitted files in the tree (TTS, catalog, community, security tests) must stay out of the commit |
+
+### Done so far
+- `lib/home/subject-groups.ts` (new), `tests/home/subject-groups.test.ts` (new), `app/page.tsx` (grouped view and toggle), `lib/i18n/locales/*.json` (2 keys each).
+
+### Decisions and reasons
+- Subject = folder. A course has no subject field, and adding one means changing `Stage` in the `@openmaic/dsl` contract and the storage schema, which also makes upstream merges harder. Owner leaned to this option.
+- No auto-filing from `learningSubject`. It is one free-text string, so a learner of Toán and Lý would get one folder with a wrong name. Replaced on 2026-10-19 by a per-course picker in the composer (rows 10 to 14), chosen by the owner.
+- Grouped view is the default and a toggle returns to the tiles, because rename, delete and drag-drop of folders live only on the tile.
+- Only the learner's own library on `/` is grouped. "Lớp của tôi" (teacher-ordered) and `/catalog` (server courses have no subject) are not.
+
+### Next step (exact)
+- Owner: generate one real course with a folder picked in the composer and check it lands in that folder (needs a working model provider; here the outline call returned nothing).
+
+### Push
+- `git push origin it-math`: result is recorded in the final reply; check with `git ls-remote origin refs/heads/it-math` against `git rev-parse HEAD`.
+
+## Assignment: Fall back to browser speech when lesson audio fails
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "Có lỗi khi chạy bài giảng do AI sinh ra thì không nghe thấy âm thanh. Nếu đúng thì dù cho setting hệ thống sử dụng mô hình sinh âm thanh nào, hoặc các provide cloud hết credit thì cũng phải fallback sang sử dụng local của browser để sinh âm thanh."
+- Owner's follow-up (verbatim): "Yes, also make discussion TTS fall back to browser speech." (answer to: "Also make roundtable discussion TTS fall back to browser speech?")
+- Assignment status: In progress. Follow-up "wrong language in browser speech" (rows 11 to 14) is done in code and tests. Audible check in Safari is not done.
+- Branch and commit: `it-math` @ `7a6be525` plus uncommitted changes, pushed: no. No git writes requested, so nothing is committed.
+- Last updated: 2026-10-18 15:36 UTC
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, run git status, confirm branch `it-math` | Done | `git branch --show-current` printed `it-math`. HANDOFF.md is 258 KB, so the top sections were read by line range |
+| 2 | Find why a lesson audio failure is silent | Done | Before the fix, `lib/playback/engine.ts` fell back to browser speech only when `ttsProviderId === 'browser-native-tts'` and that provider was enabled. Otherwise it used the silent reading timer. `lib/store/settings.ts:528` defaults browser-native to `enabled: false`. `lib/utils/audio-player.ts:135-138` returns false when no audio exists, and `:168` throws when playback fails |
+| 3 | Lecture: one shared `fallback` in `lib/playback/engine.ts` for the no-audio and play-error branches. Drop the provider and enabled checks. Keep the `ttsEnabled`, text and `speechSynthesis` checks | Done | `fallback` at `lib/playback/engine.ts:627`. The `isTTSProviderEnabled` import was removed. `pnpm exec eslint` exit 0; `prettier --check` passes |
+| 4 | Lecture test: cloud with no audio, cloud play throws (both speak), cloud audio plays (no speech), TTS off (silent reading timer) | Done | `pnpm vitest run tests/playback/speech-browser-fallback.test.ts`: 4 passed. With HEAD `lib/playback/engine.ts`, the 2 bug cases fail and the 2 negative cases pass |
+| 5 | Lecture checks: playback tests, tsc, lint | Done | `pnpm vitest run tests/playback`: 36 passed in 5 files. `npx tsc --noEmit`: 4 errors, none in changed files |
+| 6 | Lecture report in this section | Done | Superseded by row 10 for the final state |
+| 7 | Discussion: fall back to browser speech when cloud TTS fails, plays no audio, or no provider is enabled. Browser speech errors advance the queue. A retry is not counted as a finished segment | Done | `lib/hooks/use-discussion-tts.ts`: `requeueAsBrowserSpeech` (module level); `finishBrowserSegment` also wired to `onError`; `retriedAsBrowser` guards `segmentDoneCounterRef` in `finish`; the `error` listener and the play-reject path requeue; the generation-failure path requeues; `handleSegmentSealed` uses browser when `resolveVoiceForAgent` returns null |
+| 8 | Discussion tests | Done | `tests/hooks/use-discussion-tts.test.ts`: 4 new tests in `discussion TTS browser fallback`. The 2 existing tests that assert silence on failure (`handles a prefetched generation failure...` and `advances once if playback errors...`) were not edited: they still pass because jsdom has no `speechSynthesis`, so the new path is not taken there |
+| 9 | Run `tests/hooks`, `tests/playback`, `tests/audio`, tsc, eslint, prettier | Done | `pnpm vitest run tests/hooks tests/playback tests/audio`: 48 files, 374 tests passed. Against HEAD `use-discussion-tts.ts`: the 4 new tests fail, the 17 existing pass. `npx tsc --noEmit`: the same 4 errors as before, none in changed files. `pnpm exec eslint` (4 changed files): exit 0. `prettier --check`: passes |
+| 10 | Update this section and report | Done | this section, checked with `grep -n '^## Assignment: Fall back' HANDOFF.md` |
+| 11 | Follow-up: browser speech read Vietnamese lessons with an English voice. The lecture fell back to `en-US` for Latin text, and discussion used the hook default `zh-CN`. Choose the language from the text and a voice for that language | Done | New `lib/audio/browser-speech-language.ts` (`detectSpeechLanguage`, `pickBrowserVoice`). Used in `lib/playback/engine.ts` (`playBrowserTTSChunk`), `lib/hooks/use-browser-tts.ts` (`speak`, no `zh-CN` default), `lib/audio/browser-tts-preview.ts` (`resolveBrowserVoice`, settings preview). The old CJK-only checks were removed |
+| 12 | Tests for detection, voice choice, preview, and the lecture Vietnamese case | Done | `pnpm vitest run tests/audio/browser-speech-language.test.ts`: 13 passed. `tests/playback/speech-browser-fallback.test.ts` gained a Vietnamese case (`vi-VN` and the `linh` voice). With `tests/hooks tests/playback tests/audio` it is 71 passed across the 3 related suites |
+| 13 | Checks: tsc, eslint, prettier on the 6 changed files | Done | `npx tsc --noEmit`: 4 errors, the same unrelated ones. `pnpm exec eslint` on the 6 files: exit 0. `prettier --check`: passes after formatting `lib/hooks/use-browser-tts.ts` |
+| 14 | Update this section and report | Done | this section |
+
+### Done so far
+- Lecture: `lib/playback/engine.ts`. When pre-generated audio is missing or fails to play, the speech line is spoken with browser speech whenever `ttsEnabled` is on and the line has text, whatever provider the lesson uses.
+- Discussion: `lib/hooks/use-discussion-tts.ts`. A failed cloud segment (generation error, play rejected, audio `error` event) goes to the browser instead of being skipped. A segment with no enabled provider goes to the browser. A browser utterance that errors advances the queue. Before, it stalled.
+- Tests: `tests/playback/speech-browser-fallback.test.ts` (new, 4 tests); `tests/hooks/use-discussion-tts.test.ts` (4 new tests appended).
+
+### Decisions and reasons
+- Keep the `ttsEnabled` gate in both paths. If the user turned TTS off, silence is intended.
+- Lecture and discussion both ignore the browser-native `enabled` toggle on the fallback path. Its default is `false` (`lib/store/settings.ts:528`), so the old gate never fired for a default user, which is the reported symptom. The owner asked for the fallback regardless of settings. This overrides the #665 opt-in for the fallback path only. Choosing browser-native directly works as before.
+- Discussion with no enabled provider now speaks with the browser when `ttsEnabled` is on. The old rule "no silent browser-native" (`use-discussion-tts.ts:416`) was removed. Without speech synthesis the segment is skipped, and the queue still advances.
+- A retried segment (browser fallback or clone fallback) is not counted in `segmentDoneCounterRef`. The stream buffer holds for TTS on that counter, so counting early would release the hold while the browser is still speaking.
+- Browser speech for the fallback uses the cloud voice id as `voiceURI`. It does not match a browser voice, so the browser's default voice is used. Matching the lecture fallback.
+
+### Next step (exact)
+- Owner: in the browser, run a lesson and a roundtable discussion while the cloud TTS has no credit (or while the provider is unreachable). Check that browser speech is audible in both.
+
+### Open questions and blockers
+- Not verified: audible output in a real browser. Both fallbacks are covered by unit tests on the `speechSynthesis.speak` calls. [Unverified in browser]
+- Not caused by this change: `pnpm test` reports 68 failing tests in 6 files this run (72 in 8 files in the first run). The failing names change between runs, in `tests/runtime/*`, `tests/security/*`, `tests/quiz/runtime.test.ts`, `tests/media/*`, `tests/accounts/routes.test.ts`. None of these files references `use-discussion-tts`, `playback/engine` or `use-browser-tts`. This suggests timing flakiness. [Inference] Who: owners of those uncommitted changes.
+- `npx tsc --noEmit` reports 4 errors, all outside this change: `tests/security/log-redaction.test.ts`, `tests/security/provider-log-redaction.test.ts`, `.next/types/validator.ts`.
 - The previous assignment, "Review of all learner user journeys (UI and UX)", was moved under `## Closed assignments` when this one started, as CLAUDE.md requires. Its rows 12, 15 and 16 are still Blocked. See that section.
 
 ### How to verify
-- `pnpm vitest run tests/playback`: expected all tests pass, including the new file. [Not run yet]
-- `npx tsc --noEmit`: expected no errors. [Not run yet]
+- `pnpm vitest run tests/playback/speech-browser-fallback.test.ts`: expected 4 passed. [Run: 4 passed]
+- `pnpm vitest run tests/hooks/use-discussion-tts.test.ts`: expected 21 passed. [Run: 21 passed]
+- `pnpm vitest run tests/hooks tests/playback tests/audio`: expected all passed. [Run: 48 files, 374 tests passed]
+- `npx tsc --noEmit`: expected no errors in changed files. [Run: 4 errors, all elsewhere]
+- `pnpm exec eslint lib/hooks/use-discussion-tts.ts tests/hooks/use-discussion-tts.test.ts lib/playback/engine.ts tests/playback/speech-browser-fallback.test.ts`: expected exit 0. [Run: exit 0]
 
 ### Environment notes
 - Node `>=22.19.0`, pnpm `10.28.0` (see `package.json`). No environment variables needed.
