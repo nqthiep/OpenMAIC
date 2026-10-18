@@ -2,9 +2,31 @@ import { PGlite } from '@electric-sql/pglite';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
+import { singleUserCapabilities } from '@/lib/server/authz/capabilities';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 type RouteHandler = (request: Request) => Promise<Response>;
+
+// A visitor with no signed-in account can do nothing that the capability list gates.
+const GUEST_CAPABILITIES = {
+  generate: false,
+  proMode: false,
+  joinClass: false,
+  exportCourse: false,
+  shareCourse: false,
+  requestAccess: false,
+  personalProviderKey: false,
+  viewProviders: false,
+  dashboard: false,
+  viewUsage: false,
+  manageMembers: false,
+  decideShares: false,
+  markPreviews: false,
+  manageClasses: false,
+  viewAudit: false,
+  changeRoles: false,
+  disableLearners: false,
+};
 
 interface AccountRoutes {
   register: RouteHandler;
@@ -196,6 +218,7 @@ describe('account routes', () => {
         enabled: false,
         registrationOpen: false,
         authenticated: false,
+        capabilities: singleUserCapabilities(),
       });
     },
     ROUTE_TIMEOUT_MS,
@@ -524,6 +547,7 @@ describe('account routes', () => {
         enabled: true,
         registrationOpen: true,
         authenticated: false,
+        capabilities: GUEST_CAPABILITIES,
       });
 
       const cookie = sessionCookieFrom(await register(jsonRequest('/api/auth/register', ALICE)));
@@ -546,6 +570,7 @@ describe('account routes', () => {
         enabled: true,
         registrationOpen: true,
         authenticated: false,
+        capabilities: GUEST_CAPABILITIES,
       });
     },
     ROUTE_TIMEOUT_MS,

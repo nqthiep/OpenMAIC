@@ -43,6 +43,8 @@ const KNOWN_SPENDERS = [
   'app/api/verify-video-provider/route.ts',
   'app/api/verify-pdf-provider/route.ts',
   'app/api/generate-classroom/route.ts',
+  'app/api/community/questions/[id]/ai/route.ts',
+  'app/api/community/challenges/[id]/route.ts',
 ];
 
 async function routeFiles(dir: string): Promise<string[]> {

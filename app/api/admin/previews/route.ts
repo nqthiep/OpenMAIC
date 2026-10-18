@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
-import { apiSuccess } from '@/lib/server/api-response';
+import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { isValidClassroomId } from '@/lib/server/classroom-storage';
+import { courseExists } from '@/lib/server/learning/course-exists';
 import { authorize, bodyOf, invalid, learningRoute } from '@/lib/server/learning/http';
 import { listCoursePreviews, setCoursePreview } from '@/lib/server/learning/store';
 
@@ -29,6 +30,10 @@ export async function POST(request: Request): Promise<Response> {
         return invalid('Invalid course id');
       }
       if (typeof on !== 'boolean') return invalid('on must be true or false');
+      // Removing stays possible for a course that is gone; adding needs one that opens.
+      if (on && !(await courseExists(courseId))) {
+        return apiError('COURSE_NOT_FOUND', 404, 'Course not found');
+      }
       await setCoursePreview(ctx.db, {
         actorId: ctx.viewer.accountId!,
         courseId,

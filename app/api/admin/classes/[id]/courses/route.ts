@@ -1,7 +1,9 @@
-import { apiSuccess } from '@/lib/server/api-response';
+import type { NextRequest } from 'next/server';
+import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { isValidClassroomId } from '@/lib/server/classroom-storage';
+import { courseExists } from '@/lib/server/learning/course-exists';
 import { authorize, bodyOf, invalid, learningRoute } from '@/lib/server/learning/http';
-import { attachCourseToClass } from '@/lib/server/learning/store';
+import { attachCourseToClass, detachCourseFromClass } from '@/lib/server/learning/store';
 
 export const runtime = 'nodejs';
 
@@ -21,6 +23,8 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
       if (typeof courseId !== 'string' || !isValidClassroomId(courseId)) {
         return invalid('Invalid course id');
       }
+      if (!(await courseExists(courseId)))
+        return apiError('COURSE_NOT_FOUND', 404, 'Course not found');
       const attached = await attachCourseToClass(ctx.db, {
         classId: id,
         courseId,
@@ -28,6 +32,29 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
         now: ctx.now,
       });
       if (!attached) return invalid('Class not found, or the course is already attached');
+      return apiSuccess({ classId: id, courseId });
+    },
+    { mutating: true },
+  );
+}
+
+/** Detaches a course from a class. Query: ?courseId=. Logged as `class:detach:<classId>`. */
+export async function DELETE(request: NextRequest, { params }: Params): Promise<Response> {
+  const { id } = await params;
+  return learningRoute(
+    request,
+    async (ctx) => {
+      const refusal = authorize(ctx, 'class.manage');
+      if (refusal) return refusal;
+      const courseId = request.nextUrl.searchParams.get('courseId');
+      if (courseId === null || !isValidClassroomId(courseId)) return invalid('Invalid course id');
+      const detached = await detachCourseFromClass(ctx.db, {
+        classId: id,
+        courseId,
+        actorId: ctx.viewer.accountId!,
+        now: ctx.now,
+      });
+      if (!detached) return apiError('NOT_FOUND', 404, 'The course is not attached to this class');
       return apiSuccess({ classId: id, courseId });
     },
     { mutating: true },
