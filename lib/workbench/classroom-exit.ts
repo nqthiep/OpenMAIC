@@ -1,4 +1,7 @@
-export type ClassroomExitDecision = { readonly kind: 'push'; readonly href: '/workspace' | '/' };
+export type ClassroomExitDecision = {
+  readonly kind: 'push';
+  readonly href: '/workspace' | '/catalog' | '/';
+};
 
 interface ClassroomExitContext {
   readonly searchParams: Pick<URLSearchParams, 'get'>;
@@ -35,6 +38,10 @@ export function resolveClassroomExit({
   if (searchParams.get('returnTo') === 'home') {
     return { kind: 'push', href: '/' };
   }
+  // A course opened from the catalog goes back to the catalog.
+  if (searchParams.get('returnTo') === 'catalog') {
+    return { kind: 'push', href: '/catalog' };
+  }
   return { kind: 'push', href: '/' };
 }
 
@@ -48,10 +55,15 @@ export function exitClassroom(
 
 export function classroomExitLabelKey(
   searchParams: Pick<URLSearchParams, 'get'>,
-): 'workbench.common.backToWorkspace' | 'generation.backToHome' {
-  return searchParams.get('from') === 'workspace'
-    ? 'workbench.common.backToWorkspace'
-    : 'generation.backToHome';
+): 'workbench.common.backToWorkspace' | 'catalog.back' | 'generation.backToHome' {
+  if (searchParams.get('from') === 'workspace') return 'workbench.common.backToWorkspace';
+  if (searchParams.get('returnTo') === 'catalog') return 'catalog.back';
+  return 'generation.backToHome';
+}
+
+/** The classroom URL for a course opened from the catalog, so its back arrow returns there. */
+export function catalogClassroomHref(courseId: string): string {
+  return `/classroom/${encodeURIComponent(courseId)}?returnTo=catalog`;
 }
 
 export function classroomEntryHref(stageId: string, discoverOnly: boolean): string {

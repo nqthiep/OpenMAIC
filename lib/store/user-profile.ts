@@ -1,7 +1,7 @@
 /**
  * User Profile Store
  *
- * Persists avatar, nickname & bio through the `@openmaic/storage` KVStore in
+ * Persists avatar, nickname, bio and what the learner studies through the `@openmaic/storage` KVStore in
  * the `account` scope: this is the learner's own identity, exactly the data a
  * server-backed deployment is expected to carry across their devices.
  */
@@ -34,9 +34,13 @@ export interface UserProfileState {
   avatar: string;
   nickname: string;
   bio: string;
+  /** What the learner studies, in their own words. Sent to the course generator with the bio. */
+  learningSubject: string;
+  learningLevel: string;
   setAvatar: (avatar: string) => void;
   setNickname: (nickname: string) => void;
   setBio: (bio: string) => void;
+  setLearningFocus: (subject: string, level: string) => void;
 }
 
 export const useUserProfileStore = create<UserProfileState>()(
@@ -45,9 +49,12 @@ export const useUserProfileStore = create<UserProfileState>()(
       avatar: AVATAR_OPTIONS[0],
       nickname: '',
       bio: '',
+      learningSubject: '',
+      learningLevel: '',
       setAvatar: (avatar) => set({ avatar }),
       setNickname: (nickname) => set({ nickname }),
       setBio: (bio) => set({ bio }),
+      setLearningFocus: (learningSubject, learningLevel) => set({ learningSubject, learningLevel }),
     }),
     {
       name: 'user-profile-storage',

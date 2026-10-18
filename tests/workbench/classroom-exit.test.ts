@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  catalogClassroomHref,
   classroomEntryHref,
   classroomExitLabelKey,
   exitClassroom,
@@ -31,6 +32,15 @@ describe('resolveClassroomExit', () => {
       kind: 'push',
       href: '/workspace',
     });
+  });
+
+  it('returns to the catalog for a course opened from it, with a matching label', () => {
+    expect(resolveClassroomExit({ searchParams: params('returnTo=catalog') })).toEqual({
+      kind: 'push',
+      href: '/catalog',
+    });
+    expect(classroomExitLabelKey(params('returnTo=catalog'))).toBe('catalog.back');
+    expect(catalogClassroomHref('a b')).toBe('/classroom/a%20b?returnTo=catalog');
   });
 
   it('returns to home explicitly instead of reopening Pro through browser history', () => {

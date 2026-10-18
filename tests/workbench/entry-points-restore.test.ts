@@ -178,7 +178,7 @@ describe('entry point 2 — the composer attach control', () => {
   it('carries the reference’s own copy in every locale', () => {
     const expected: Record<string, string> = {
       'ar-SA': 'إرفاق مواد',
-      'de-DE': 'Attach material',
+      'de-DE': 'Material anhängen',
       'en-US': 'Attach material',
       'es-MX': 'Adjuntar material',
       'fr-FR': 'Joindre un support',
