@@ -197,7 +197,8 @@
       "save": "Lưu"
     },
     "composer": {
-      "title": "Hôm nay bạn muốn học gì?"
+      "title": "Hôm nay bạn muốn học gì?",
+      "subject": "Môn học của khoá này"
     },
     "renew": {
       "pending": "Đã gửi yêu cầu gia hạn ngày {{date}}.",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "Gần đây",
+    "groupBySubject": "Nhóm theo môn học",
+    "unsorted": "Chưa phân môn",
     "today": "Hôm nay",
     "yesterday": "Hôm qua",
     "daysAgo": "ngày trước",

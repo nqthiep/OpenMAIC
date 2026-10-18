@@ -197,7 +197,8 @@
       "save": "Speichern"
     },
     "composer": {
-      "title": "Was möchtest du heute lernen?"
+      "title": "Was möchtest du heute lernen?",
+      "subject": "Fach dieses Kurses"
     },
     "renew": {
       "pending": "Verlängerung am {{date}} angefragt.",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "Zuletzt verwendet",
+    "groupBySubject": "Nach Fach gruppieren",
+    "unsorted": "Ohne Fach",
     "today": "Heute",
     "yesterday": "Gestern",
     "daysAgo": "Tage her",

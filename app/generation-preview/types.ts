@@ -40,6 +40,8 @@ export interface GenerationSessionState {
   courseTitle?: string;
   // Server-effective vocational mode from the outline generation done event.
   taskEngineMode?: boolean;
+  // Folder (the learner's subject) the finished course is filed into; absent = unfiled
+  folderId?: string;
 }
 
 export type GenerationStep = {

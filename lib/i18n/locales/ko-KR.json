@@ -197,7 +197,8 @@
       "save": "저장"
     },
     "composer": {
-      "title": "오늘은 무엇을 배우고 싶나요?"
+      "title": "오늘은 무엇을 배우고 싶나요?",
+      "subject": "이 강좌의 과목"
     },
     "renew": {
       "pending": "{{date}}에 연장을 요청했습니다.",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "최근",
+    "groupBySubject": "과목별로 묶기",
+    "unsorted": "과목 미지정",
     "today": "오늘",
     "yesterday": "어제",
     "daysAgo": "일 전",

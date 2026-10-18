@@ -197,7 +197,8 @@
       "save": "儲存"
     },
     "composer": {
-      "title": "今天你想學什麼？"
+      "title": "今天你想學什麼？",
+      "subject": "本課程的科目"
     },
     "renew": {
       "pending": "已於 {{date}} 申請續期。",
@@ -1178,6 +1179,8 @@
   },
   "classroom": {
     "recentClassrooms": "近期教室",
+    "groupBySubject": "依科目分組",
+    "unsorted": "未分科目",
     "today": "今天",
     "yesterday": "昨天",
     "daysAgo": "天前",

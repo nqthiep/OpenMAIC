@@ -55,6 +55,7 @@ import {
 } from '@/lib/document/bundle';
 import { buildVideoManifestFromOutlines } from '@/lib/media/video-manifest';
 import { nanoid } from 'nanoid';
+import { setStageFolder } from '@/lib/utils/stage-storage';
 import type { GeneratedAgentConfig, Stage } from '@/lib/types/stage';
 import type {
   SceneOutline,
@@ -1061,6 +1062,12 @@ function GenerationPreviewContent() {
 
       sessionStorage.removeItem('generationSession');
       await store.saveToStorage();
+      // A failed filing must not lose the course: it stays unfiled and the learner can move it.
+      if (currentSession.folderId) {
+        await setStageFolder(stage.id, currentSession.folderId).catch((err) =>
+          log.error('Failed to file the new course into its folder', err),
+        );
+      }
       router.push(`/classroom/${stage.id}`);
     } catch (err) {
       setIsOutlineStreaming(false);

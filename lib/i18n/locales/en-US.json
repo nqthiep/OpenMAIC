@@ -197,7 +197,8 @@
       "save": "Save"
     },
     "composer": {
-      "title": "What do you want to learn today?"
+      "title": "What do you want to learn today?",
+      "subject": "Subject of this course"
     },
     "renew": {
       "pending": "Renewal requested on {{date}}.",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "Recent",
+    "groupBySubject": "Group by subject",
+    "unsorted": "No subject yet",
     "today": "Today",
     "yesterday": "Yesterday",
     "daysAgo": "days ago",

@@ -197,7 +197,8 @@
       "save": "حفظ"
     },
     "composer": {
-      "title": "ماذا تريد أن تتعلم اليوم؟"
+      "title": "ماذا تريد أن تتعلم اليوم؟",
+      "subject": "مادة هذه الدورة"
     },
     "renew": {
       "pending": "تم طلب التجديد في {{date}}.",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "الأخيرة",
+    "groupBySubject": "تجميع حسب المادة",
+    "unsorted": "بدون مادة",
     "today": "اليوم",
     "yesterday": "أمس",
     "daysAgo": "أيام مضت",

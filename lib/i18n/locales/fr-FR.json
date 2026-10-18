@@ -197,7 +197,8 @@
       "save": "Enregistrer"
     },
     "composer": {
-      "title": "Que voulez-vous apprendre aujourd’hui ?"
+      "title": "Que voulez-vous apprendre aujourd’hui ?",
+      "subject": "Matière de ce cours"
     },
     "renew": {
       "pending": "Renouvellement demandé le {{date}}.",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "Récents",
+    "groupBySubject": "Grouper par matière",
+    "unsorted": "Sans matière",
     "today": "Aujourd’hui",
     "yesterday": "Hier",
     "daysAgo": "jours",

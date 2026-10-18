@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useDeferredValue, Suspense } from 'react';
+import { Fragment, useState, useEffect, useMemo, useRef, useDeferredValue, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -14,6 +14,7 @@ import {
   Folder,
   FolderPlus,
   ImagePlus,
+  LayoutList,
   Pencil,
   Trash2,
   Search,
@@ -41,6 +42,7 @@ import { MyClasses } from '@/components/home/my-classes';
 import { StarterPrompts } from '@/components/home/starter-prompts';
 import { StatusStrip } from '@/components/home/status-strip';
 import { composeUserBio } from '@/lib/home/learning-focus';
+import { groupBySubject, knownFolderId, type SubjectGroup } from '@/lib/home/subject-groups';
 import { useMembershipStatus } from '@/lib/home/use-membership-status';
 import { rememberStaffLearning, staffChoseLearning } from '@/lib/home/staff-learning';
 import { useAccountSession, useCapabilities } from '@/lib/capabilities/use-capabilities';
@@ -122,6 +124,8 @@ const log = createLogger('Home');
 
 const WEB_SEARCH_STORAGE_KEY = 'webSearchEnabled';
 const RECENT_OPEN_STORAGE_KEY = 'recentClassroomsOpen';
+const BY_SUBJECT_STORAGE_KEY = 'recentClassroomsBySubject';
+const COMPOSER_FOLDER_STORAGE_KEY = 'composerFolderId';
 const INTERACTIVE_MODE_STORAGE_KEY = 'interactiveModeEnabled';
 const ADVANCED_COMPOSER_STORAGE_KEY = 'composerAdvanced';
 
@@ -217,6 +221,26 @@ function HomePage() {
       /* ignore */
     }
   };
+  // The subject (folder) the next course is filed under; remembered so a run of Toán courses is one pick.
+  const [composerFolderId, setComposerFolderId] = useState<string | undefined>(undefined);
+  const persistComposerFolder = (next: string | undefined) => {
+    setComposerFolderId(next);
+    try {
+      localStorage.setItem(COMPOSER_FOLDER_STORAGE_KEY, next ?? '');
+    } catch {
+      /* ignore */
+    }
+  };
+  // The library groups courses by subject (their folder) unless the learner switched it off.
+  const [bySubject, setBySubject] = useState(true);
+  const persistBySubject = (next: boolean) => {
+    setBySubject(next);
+    try {
+      localStorage.setItem(BY_SUBJECT_STORAGE_KEY, String(next));
+    } catch {
+      /* ignore */
+    }
+  };
 
   // On a wide screen the cursor starts in the composer, the one thing to do here.
   useEffect(() => {
@@ -230,6 +254,8 @@ function HomePage() {
     try {
       const saved = localStorage.getItem(RECENT_OPEN_STORAGE_KEY);
       if (saved !== null) setRecentOpen(saved !== 'false');
+      setBySubject(localStorage.getItem(BY_SUBJECT_STORAGE_KEY) !== 'false');
+      setComposerFolderId(localStorage.getItem(COMPOSER_FOLDER_STORAGE_KEY) || undefined);
       setAdvanced(localStorage.getItem(ADVANCED_COMPOSER_STORAGE_KEY) === 'true');
     } catch {
       /* localStorage unavailable */
@@ -529,6 +555,18 @@ function HomePage() {
     return byFolder;
   }, [classrooms, thumbnails]);
   const currentFolder = folders.find((f) => f.id === currentFolderId);
+  // The remembered subject counts only while its folder exists.
+  const subjectFolderId = knownFolderId(folders, composerFolderId);
+  // Subject sections replace the folder tiles on the root view when any course is filed.
+  const subjectGroups = useMemo(() => groupBySubject(classrooms, folders), [classrooms, folders]);
+  const showSubjects =
+    bySubject &&
+    !isSearching &&
+    currentFolderId === undefined &&
+    subjectGroups.some((g) => g.folder);
+  const tileGroups: SubjectGroup<StageListItem>[] = showSubjects
+    ? subjectGroups
+    : [{ courses: visibleClassrooms }];
 
   const updateForm = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -724,6 +762,7 @@ function HomePage() {
         pdfProviderConfig,
         sceneOutlines: null,
         currentStep: 'generating' as const,
+        ...(subjectFolderId ? { folderId: subjectFolderId } : {}),
       };
       sessionStorage.setItem('generationSession', JSON.stringify(sessionState));
 
@@ -908,6 +947,28 @@ function HomePage() {
                         {t('toolbar.interactiveModeHint')}
                       </TooltipContent>
                     </Tooltip>
+                  )}
+
+                  {/* Subject of the new course: one of the learner's folders, or none. */}
+                  {folders.length > 0 && (
+                    <label className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-border/60 px-3 text-xs font-medium text-muted-foreground focus-within:ring-2 focus-within:ring-ring">
+                      <Folder className="size-3.5" aria-hidden="true" />
+                      <select
+                        aria-label={t('home.composer.subject')}
+                        title={t('home.composer.subject')}
+                        value={subjectFolderId ?? ''}
+                        disabled={preparingGenerate}
+                        onChange={(e) => persistComposerFolder(e.target.value || undefined)}
+                        className="max-w-[9rem] cursor-pointer truncate bg-transparent text-foreground focus:outline-none"
+                      >
+                        <option value="">{t('classroom.unsorted')}</option>
+                        {folders.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   )}
 
                   {/* Plain / advanced switch */}
@@ -1226,6 +1287,24 @@ function HomePage() {
                   {t('catalog.join.title')}
                 </Link>
               </Gate>
+              {/* Group by subject — only worth offering once there is a folder to group by. */}
+              {!currentFolderId && !isSearching && folders.length > 0 && (
+                <button
+                  type="button"
+                  aria-pressed={bySubject}
+                  onClick={() => persistBySubject(!bySubject)}
+                  aria-label={t('classroom.groupBySubject')}
+                  title={t('classroom.groupBySubject')}
+                  className={cn(
+                    'inline-flex items-center justify-center size-7 rounded-full ring-1 transition-[background-color,color,box-shadow] cursor-pointer',
+                    bySubject
+                      ? 'bg-brand-100 text-brand-800 ring-brand-300 dark:bg-white/10 dark:text-brand-100 dark:ring-white/20'
+                      : 'bg-muted/40 text-muted-foreground ring-border/50 hover:bg-muted hover:text-foreground hover:ring-border',
+                  )}
+                >
+                  <LayoutList className="size-3.5" />
+                </button>
+              )}
               {/* New folder — round icon button, matches the import/upload affordances. */}
               {!currentFolderId && !isSearching && (
                 <button
@@ -1331,6 +1410,7 @@ function HomePage() {
                         {/* Root + non-search: render folder tiles first. */}
                         {!isSearching &&
                           currentFolderId === undefined &&
+                          !showSubjects &&
                           folders.map((folder, i) => (
                             <motion.div
                               key={folder.id}
@@ -1350,43 +1430,60 @@ function HomePage() {
                             </motion.div>
                           ))}
 
-                        {/* Course tiles for the active view. */}
-                        {visibleClassrooms.map((classroom, i) => (
-                          <motion.div
-                            key={classroom.id}
-                            initial={{ opacity: 0, y: 16 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.04, duration: 0.35, ease: 'easeOut' }}
-                          >
-                            <ClassroomCard
-                              classroom={classroom}
-                              slide={thumbnails[classroom.id]}
-                              formatDate={formatDate}
-                              onDelete={handleDelete}
-                              onRename={handleRename}
-                              confirmingDelete={pendingDeleteId === classroom.id}
-                              onConfirmDelete={() => confirmDelete(classroom.id)}
-                              onCancelDelete={() => setPendingDeleteId(null)}
-                              onClick={() => router.push(`/classroom/${classroom.id}`)}
-                              overlay={
-                                <>
-                                  <MoveToFolderMenu
-                                    folders={folders}
-                                    currentFolderId={classroom.folderId}
-                                    onMove={(folderId) => handleMoveCourse(classroom.id, folderId)}
-                                    onCreateAndMove={handleCreateAndMove(classroom.id)}
-                                  />
-                                  {/* Search view: show the owning folder as a badge. */}
-                                  {isSearching && classroom.folderId && (
-                                    <span className="absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 rounded-md bg-violet-500/80 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm pointer-events-none">
-                                      <Folder className="size-2.5" />
-                                      {folderNameById.get(classroom.folderId) ?? ''}
-                                    </span>
-                                  )}
-                                </>
-                              }
-                            />
-                          </motion.div>
+                        {/* Course tiles for the active view; by subject, each folder gets a heading row. */}
+                        {tileGroups.map((group) => (
+                          <Fragment key={group.folder?.id ?? 'unfiled'}>
+                            {showSubjects && (
+                              <h3 className="col-span-full -mb-4 mt-4 flex items-center gap-2 border-b first:mt-0 border-border/40 pb-2 text-sm font-medium text-brand-800/80 dark:text-brand-100/80">
+                                <Folder className="size-3.5" />
+                                <span className="truncate">
+                                  {group.folder?.name ?? t('classroom.unsorted')}
+                                </span>
+                                <span className="text-[11px] font-normal tabular-nums opacity-60">
+                                  {group.courses.length}
+                                </span>
+                              </h3>
+                            )}
+                            {group.courses.map((classroom, i) => (
+                              <motion.div
+                                key={classroom.id}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.04, duration: 0.35, ease: 'easeOut' }}
+                              >
+                                <ClassroomCard
+                                  classroom={classroom}
+                                  slide={thumbnails[classroom.id]}
+                                  formatDate={formatDate}
+                                  onDelete={handleDelete}
+                                  onRename={handleRename}
+                                  confirmingDelete={pendingDeleteId === classroom.id}
+                                  onConfirmDelete={() => confirmDelete(classroom.id)}
+                                  onCancelDelete={() => setPendingDeleteId(null)}
+                                  onClick={() => router.push(`/classroom/${classroom.id}`)}
+                                  overlay={
+                                    <>
+                                      <MoveToFolderMenu
+                                        folders={folders}
+                                        currentFolderId={classroom.folderId}
+                                        onMove={(folderId) =>
+                                          handleMoveCourse(classroom.id, folderId)
+                                        }
+                                        onCreateAndMove={handleCreateAndMove(classroom.id)}
+                                      />
+                                      {/* Search view: show the owning folder as a badge. */}
+                                      {isSearching && classroom.folderId && (
+                                        <span className="absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 rounded-md bg-violet-500/80 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm pointer-events-none">
+                                          <Folder className="size-2.5" />
+                                          {folderNameById.get(classroom.folderId) ?? ''}
+                                        </span>
+                                      )}
+                                    </>
+                                  }
+                                />
+                              </motion.div>
+                            ))}
+                          </Fragment>
                         ))}
                       </motion.div>
                     </AnimatePresence>

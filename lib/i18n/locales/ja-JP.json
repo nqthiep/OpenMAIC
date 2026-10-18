@@ -197,7 +197,8 @@
       "save": "保存"
     },
     "composer": {
-      "title": "今日は何を学びたいですか？"
+      "title": "今日は何を学びたいですか？",
+      "subject": "このコースの科目"
     },
     "renew": {
       "pending": "{{date}} に更新を申請しました。",
@@ -1193,6 +1194,8 @@
   },
   "classroom": {
     "recentClassrooms": "最近の教室",
+    "groupBySubject": "科目ごとにまとめる",
+    "unsorted": "科目なし",
     "today": "今日",
     "yesterday": "昨日",
     "daysAgo": "日前",
