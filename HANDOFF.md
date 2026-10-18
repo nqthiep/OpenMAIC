@@ -7,8 +7,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Original request (verbatim): "ở trên trang thảo luận, khi số lượng thành viên tăng, số bài học tăng, số thảo luận tăng thì sẽ rất khó tìm kiếm, thiết kế hiện tại khá đơn giản. Hãy brainstorming để nghĩ ra một ý tưởng thiết kế để đáp ứng các yêu cầu đó, tuy nhiên vẫn phải easy to use."
 - Owner's go-ahead (verbatim): "Làm Pha 1 theo đề xuất: chọn phạm vi khoá/bài, sắp xếp, chip lọc + URL state, dòng câu hỏi mới, nhóm theo ngày, tải thêm, tìm khi gõ."
 - Owner's push instruction (verbatim): "Please resume, khi nào hoàn thành thì push lên branch it-math trên remote repo của tôi."
-- Assignment status: In progress (code and checks done; commit and push pending)
-- Branch and commit: `it-math` @ `632144f1` plus uncommitted changes, pushed: no. Push to `origin` branch `it-math` is allowed. Only this assignment's files are committed, through a private index (`GIT_INDEX_FILE`) so another session's staged files are not swept in. Other sessions' sections below stay open; their files (`app/page.tsx`, `app/catalog`, TTS files) are not touched by this one.
+- Assignment status: Done (phase 1). Phases 2 and 3 are not started.
+- Branch and commit: `it-math` @ `fdc16942` (feature) plus a docs commit for this file, pushed: yes, to `origin` (`https://github.com/nqthiep/OpenMAIC.git`). Only this assignment's files were committed, through a private index (`GIT_INDEX_FILE`) so another session's staged files were not swept in; `components/learning/learning-api.ts`, the 12 locale files and this file were committed as HEAD plus this assignment's hunks only. Other sessions' sections below stay open; their files (`app/page.tsx`, `app/catalog`, TTS files) are not touched by this one.
 - Last updated: 2026-10-19 (UTC time not recorded)
 
 ### Task table
@@ -23,8 +23,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 7 | i18n keys in 12 locales | Done | `pnpm check:i18n-keys`: passed (12 locale files) |
 | 8 | Checks | Done | `pnpm vitest run tests/learning tests/community tests/authz tests/i18n`: 34 files, 278 passed. `npx tsc --noEmit`: only the 4 older errors in `tests/security/*` and `.next/types`. `eslint` on the changed files: exit 0. `prettier --check`: passes |
 | 9 | Browser check | Done | Dev server `:3002`, 800 px and 1280 px. With a patched `fetch` (64 fake questions, 3 courses): 25 rows, then "Load more" gave offsets 25 and 50 (64 rows, no repeat); one request after typing 5 letters (debounce); `sort=waiting` gave a flat list; picking a scene wrote `course=&scene=` into the URL and showed two chips; `/` focused the search box. Reload from `?view=unsolved&sort=new&q=giới` restored view, sort, search and chips. Real data: row opens its thread, `question=` in the URL, no console errors. Not checked: light theme; phone widths (not supported by decision) |
-| 10 | Commit these files and push `it-math` to `origin` | In progress | |
-| 11 | Update this section and report | Todo | |
+| 10 | Commit these files and push `it-math` to `origin` | Done | `git push origin it-math`: `632144f1..fdc16942`. After `git fetch origin it-math`, `git rev-parse HEAD origin/it-math` printed the same sha `fdc16942` twice |
+| 11 | Update this section and report | Done | this section; docs commit pushed after `fdc16942` |
 
 ### Not done (phase 2 and 3, by the owner's plan)
 - Accent-insensitive search on the server (`ILIKE` still needs the same marks; only the course picker folds accents), follow and unread, "for me" by class, similar questions when asking.
@@ -32,7 +32,6 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 ### Decisions and reasons
 - Offset paging with `limit + 1` instead of a keyset cursor: one mechanism for all four sorts, and the client drops duplicate ids when a question is bumped between pages. Ceiling: a question bumped between two pages can be skipped. Upgrade to a keyset cursor if feeds grow past a few thousand questions.
 - Phase 2 (accent-insensitive search, follow and unread) and phase 3 ("for me" by class, similar questions) are NOT in this assignment.
-
 
 ## Assignment: Fall back to browser speech when lesson audio fails
 - Requested by: repository owner (nqthiep)
