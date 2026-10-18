@@ -6,8 +6,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Làm giai đoạn 2 của trang danh mục: lọc có bài kiểm tra/tương tác, lọc độ dài, kiểu danh sách gọn, thêm updatedAt và sắp xếp Mới cập nhật. Ghi bảng task vào HANDOFF.md trước khi làm."
 - Owner's push instruction (verbatim): "Please resume, khi nào hoàn thành thì push lên branch it-math trên remote repo của tôi."
-- Assignment status: In progress
-- Branch and commit: `it-math` @ `632144f1` plus uncommitted changes, pushed: no. Push to `origin` (`https://github.com/nqthiep/OpenMAIC.git`) branch `it-math` is allowed once this phase is done. The working tree also holds other sessions' uncommitted work (community, TTS, subject grouping), so only the files of the catalog work (phases 1 and 2) are committed, selected by path or by hunk.
+- Assignment status: Done for phase 2 (code, tests, browser check on mock data, pushed). Phase 3 (topic and grade tags) is not started.
+- Branch and commit: `it-math` @ `87bdb82d` (the catalog feature, phases 1 and 2) plus a docs commit for this file, pushed: yes, to `origin` (`https://github.com/nqthiep/OpenMAIC.git`; `git ls-remote origin refs/heads/it-math` printed `87bdb82d` after the push). Only the catalog files were staged, by path. The TTS session's uncommitted files, `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` and `tests/security/*` stay in the working tree.
 - Last updated: 2026-10-19 (UTC time not recorded)
 
 ### Design
@@ -18,14 +18,36 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | # | Task | Status | Evidence / notes |
 |---|------|--------|------------------|
 | 1 | Read HANDOFF.md, `git status`, branch `it-math`, remote | Done | Branch `it-math`; `origin` = `https://github.com/nqthiep/OpenMAIC.git`; 47 changed paths in the tree, most from other sessions |
-| 2 | Server: `updatedAt`, `hasQuiz`, `hasInteractive` in `listCatalog` + type + test | In progress | |
-| 3 | Pure logic: length and content filters, sort `updated`, `layout`, URL params + tests | Todo | |
-| 4 | UI: content and length chips, grid or compact list toggle, updated date in the list | Todo | |
-| 5 | i18n keys in 12 locales | Todo | |
-| 6 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Todo | |
-| 7 | Browser check at 768 px and wider | Todo | |
-| 8 | Commit the catalog files (phases 1 and 2) and push `it-math` to `origin` | Todo | |
-| 9 | Update this section and report | Todo | |
+| 2 | Server: `updatedAt`, `hasQuiz`, `hasInteractive` in `listCatalog` + type + test | Done | `lib/server/learning/store.ts` (`addDocumentFacts` replaces `addSceneCounts`: one query, `COUNT(*) FILTER` on `data->>'type'`, `MAX(updated_at)` from a left join on `document_stages`; shared courses get `course_shares.decided_at` through a new `approved_at` column of the union). `components/learning/learning-api.ts` type. `tests/learning/store.test.ts`: new case (quiz, project counted as interactive, the shared course keeps its approval time instead of the later edit, nothing claimed without scenes); the old scene-count case needed `data` and `updated_at` columns in its stub tables. `pnpm vitest run tests/learning`: 18 files, 121 passed |
+| 3 | Pure logic: length and content filters, sort `updated`, `layout`, URL params + tests | Done | `lib/home/catalog-filter.ts` (`lengthOf`, `has`, `len`, `updated`, `layout`, `withoutFilters`, `LIST_PAGE_SIZE` = 60). `tests/home/catalog-filter.test.ts`: 17 passed (length edges 5/6/15/16, unknown length matches no class, content filters need every chosen kind, sort by update with unknown last, URL round trip of the new params, unknown values dropped) |
+| 4 | UI: content and length chips, grid or compact list toggle, updated date in the list | Done | `components/home/catalog-browser.tsx` (chip groups "Nội dung" and "Độ dài", hidden when the server sent no flags or counts; layout toggle with `aria-pressed`), `components/home/course-row.tsx` (new: title, then kind, scene count, quiz and interactive marks, "Cập nhật <date>", progress, "Mở"). The compact list shows 60 rows per page, the grid 24 |
+| 5 | i18n keys in 12 locales | Done | New under `catalog`: `filter.content`, `filter.length`, `sort.updated`, `content.*`, `length.*` (with `{{short}}`, `{{from}}`, `{{to}}`), `layout.*`, `updatedOn`. `pnpm check:i18n-keys` passed; prettier clean. The 11 non-Vietnamese texts are mine, not reviewed by a native speaker [Unverified] |
+| 6 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/learning tests/workbench tests/i18n tests/components`: 128 files, 1486 passed. `npx tsc --noEmit`: no error outside `.next/` and `tests/security/`. `pnpm exec eslint` on the 12 changed code files: 0 problems. `prettier --check` on them and the 12 locales: clean |
+| 7 | Browser check at 768 px and wider | Done (mock data) | `p2.localhost:3002`, this session's own `next dev` (the other session's server had stopped), 40 mock courses given to the page by replacing `window.fetch` for `/api/catalog`, `/api/progress`, `/api/auth/session` (nothing written to the database). Seen: the five chip groups; "Có bài kiểm tra" 14 of 40, plus "Có tương tác" 3, "Có tương tác" with "Dài" 3 (each matches a count computed from the mock); address `?has=quiz%2Cinteractive`, `?has=interactive&len=long`, `?layout=list`, `?sort=updated&layout=list`; "Xoá bộ lọc" keeps the layout; sort "Mới cập nhật" chosen with the mouse puts the newest first and the courses with no date last; the compact list shows 40 rows with kind, scenes, quiz and interactive marks, date, progress; at 768 px no horizontal overflow and no row overflows; 800 px dark and 1280 px light checked. Not seen: a real database with these fields; keyboard-only use; the grid card does not show the update date |
+| 8 | Commit the catalog files (phases 1 and 2) and push `it-math` to `origin` | Done | `87bdb82d` ("feat(catalog): find courses in a long catalog ..."), 23 files, staged by path. `git push origin it-math`: `4b94b335..87bdb82d`, a fast-forward (the fetched remote head was `4b94b335`, the commit's parent), no force. `git ls-remote origin refs/heads/it-math`: `87bdb82db65b7a7fecbcb154762706835b4ea9a7` |
+| 9 | Update this section and report | Done | this section, committed and pushed in a docs commit after `87bdb82d` |
+
+### Done so far
+- Server: `lib/server/learning/store.ts` `listCatalog` returns `updatedAt`, `hasQuiz`, `hasInteractive` (additive; the client type is in `components/learning/learning-api.ts`).
+- Client: `lib/home/catalog-filter.ts` (logic and address), `components/home/catalog-browser.tsx` (toolbar, chips, layout toggle, list or grid), `components/home/course-row.tsx` (compact row).
+- 12 locales, tests in `tests/home/catalog-filter.test.ts`, `tests/learning/store.test.ts`, `tests/learning/fetch-progress.test.ts`, `tests/workbench/classroom-exit.test.ts`.
+
+### Decisions and reasons
+- A pending update is not an update: a shared course shows the approval time, not the author's later edits, because readers see the approved copy.
+- The default sort stays A to Z. Making "Mới cập nhật" the default is a change of default in `DEFAULT_VIEW.sort` (`lib/home/catalog-filter.ts`) and a changed order for every catalog, small ones included, so it was left for the owner.
+- "Has an interactive part" covers `interactive` and `pbl` scenes. Several content chips mean the course must have all of them; chips of one group otherwise mean any of them.
+- The layout choice lives in the address only. It is not remembered between visits.
+
+### Next step (exact)
+- Owner: decide on phase 3 (topic and grade tags): who tags a course (author, operator at approval, or AI suggestion) and the fixed tag list. Also say whether "Mới cập nhật" should become the default sort.
+
+### Open questions and blockers
+- Not verified: a real database with these fields (the browser check used mock responses); keyboard-only use; screen reader. The 11 non-Vietnamese texts are not reviewed by native speakers.
+- The grid card does not show the update date; only the compact list does.
+
+### How to verify
+- `pnpm vitest run tests/home/catalog-filter.test.ts tests/learning/store.test.ts tests/learning/fetch-progress.test.ts tests/workbench/classroom-exit.test.ts`: expected all pass.
+- `/catalog` with more than 12 courses: the toolbar shows five groups; `/catalog?has=quiz&len=long&sort=updated&layout=list` opens filtered, sorted and as a list.
 
 ## Assignment: Community discussion list that scales (phase 1)
 - Requested by: repository owner (nqthiep)
@@ -61,8 +83,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 ## Assignment: Catalog page that scales to many courses (phase 1)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "ở trên trang danh mục, khi só lượng bài học trở lên nhiều, hãy brainstorming để thiết kế cách hiển thị và filter sao cho learner dễ tìm thấy bài học mà họ cần." Then, after the design proposal: "Làm giai đoạn 1: sửa lỗi tiến độ khi >100 khoá, tìm kiếm không dấu, lọc trạng thái và loại, sắp xếp, hàng Tiếp tục học, Hiện thêm, URL giữ bộ lọc. Ghi bảng task vào HANDOFF.md trước khi làm."
-- Assignment status: Done for phase 1 (code, tests and a browser check on mock data). Phases 2 and 3 are not started.
-- Branch and commit: `it-math` @ `632144f1` plus uncommitted changes, pushed: no. Git writes were not requested, and `HANDOFF.md` also holds other sessions' uncommitted text, so nothing is committed. The sections below this one belong to other sessions and stay open.
+- Assignment status: Done for phase 1 (code, tests and a browser check on mock data). Phase 2 is done in the section above; phase 3 is not started.
+- Branch and commit: `it-math` @ `87bdb82d`, committed and pushed together with phase 2 (see the section above).
 - Last updated: 2026-10-18 (UTC time not recorded)
 
 ### Design (from the proposal in this session)
