@@ -2979,7 +2979,35 @@
       "filter": "篩選問題",
       "search": "搜尋問題",
       "pick": "選擇一個問題查看回答。",
-      "howToAsk": "想提問？開啟課程，進入卡住的投影片，點擊工具列中的討論按鈕。"
+      "howToAsk": "想提問？開啟課程，進入卡住的投影片，點擊工具列中的討論按鈕。",
+      "clearSearch": "清除搜尋",
+      "removeFilter": "移除篩選 {{name}}",
+      "clear": "清除篩選",
+      "count": "{{count}} 個問題",
+      "countMore": "{{count}}+ 個問題",
+      "noMatch": "沒有符合篩選條件的問題。",
+      "loadMore": "載入更多",
+      "aiOnly": "僅 AI 已回答",
+      "scope": {
+        "label": "課程",
+        "all": "全部課程",
+        "search": "搜尋課程或課時…",
+        "empty": "找不到課程或課時。",
+        "courses": "課程",
+        "unsolved": "{{count}} 個未解決"
+      },
+      "sort": {
+        "label": "排序",
+        "active": "最近活躍",
+        "new": "最新",
+        "top": "最有幫助",
+        "waiting": "未回答優先"
+      },
+      "group": {
+        "today": "今天",
+        "week": "本週",
+        "older": "更早"
+      }
     },
     "reports": {
       "title": "社群檢舉",

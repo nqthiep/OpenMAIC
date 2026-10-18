@@ -535,6 +535,8 @@ export interface QuestionRow {
   body: string;
   bestAnswerId: number | null;
   answerCount: number;
+  /** Answers by members, without the AI answer. */
+  humanAnswers: number;
   hidden: boolean;
   locked: boolean;
   createdAt: string;
@@ -573,16 +575,45 @@ export interface ReportRow {
   firstReportedAt: string;
 }
 
+export type QuestionSort = 'active' | 'new' | 'top' | 'waiting';
+
+export interface CommunityScope {
+  courseId: string;
+  title: string;
+  total: number;
+  unsolved: number;
+  lastActivityAt: string;
+  scenes: { sceneId: string; title: string; total: number; unsolved: number }[];
+}
+
 export function fetchQuestions(
-  filter: { courseId?: string; mine?: boolean; unsolved?: boolean; q?: string } = {},
-): Promise<{ questions: QuestionRow[]; canPost: boolean; open?: boolean }> {
+  filter: {
+    courseId?: string;
+    sceneId?: string;
+    mine?: boolean;
+    unsolved?: boolean;
+    q?: string;
+    sort?: QuestionSort;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<{ questions: QuestionRow[]; hasMore: boolean; canPost: boolean; open?: boolean }> {
   const query = new URLSearchParams();
   if (filter.courseId) query.set('courseId', filter.courseId);
+  if (filter.sceneId) query.set('sceneId', filter.sceneId);
   if (filter.mine) query.set('mine', '1');
   if (filter.unsolved) query.set('unsolved', '1');
   if (filter.q) query.set('q', filter.q);
+  if (filter.sort) query.set('sort', filter.sort);
+  if (filter.limit) query.set('limit', String(filter.limit));
+  if (filter.offset) query.set('offset', String(filter.offset));
   const suffix = query.size > 0 ? `?${query}` : '';
   return call('GET', `/api/community/questions${suffix}`);
+}
+
+/** The courses and scenes that have questions, for the feed's scope picker. */
+export function fetchCommunityScopes(): Promise<{ courses: CommunityScope[] }> {
+  return call('GET', '/api/community/courses');
 }
 
 export function askQuestion(input: {

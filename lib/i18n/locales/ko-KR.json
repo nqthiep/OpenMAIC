@@ -2979,7 +2979,35 @@
       "filter": "질문 필터",
       "search": "질문 검색",
       "pick": "질문을 선택하면 답변이 보입니다.",
-      "howToAsk": "질문하려면 강의를 열고, 막힌 슬라이드에서 도구 모음의 토론 버튼을 누르세요."
+      "howToAsk": "질문하려면 강의를 열고, 막힌 슬라이드에서 도구 모음의 토론 버튼을 누르세요.",
+      "clearSearch": "검색어 지우기",
+      "removeFilter": "필터 {{name}} 해제",
+      "clear": "필터 초기화",
+      "count": "질문 {{count}}개",
+      "countMore": "질문 {{count}}개 이상",
+      "noMatch": "필터에 맞는 질문이 없습니다.",
+      "loadMore": "더 보기",
+      "aiOnly": "AI만 답변함",
+      "scope": {
+        "label": "강좌",
+        "all": "모든 강좌",
+        "search": "강좌나 수업 검색…",
+        "empty": "강좌나 수업을 찾을 수 없습니다.",
+        "courses": "강좌",
+        "unsolved": "미해결 {{count}}개"
+      },
+      "sort": {
+        "label": "정렬",
+        "active": "최근 활동",
+        "new": "최신순",
+        "top": "도움이 된 순",
+        "waiting": "답변 없는 질문 먼저"
+      },
+      "group": {
+        "today": "오늘",
+        "week": "이번 주",
+        "older": "이전"
+      }
     },
     "reports": {
       "title": "커뮤니티 신고",

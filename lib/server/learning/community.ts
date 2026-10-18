@@ -27,6 +27,8 @@ export interface QuestionView {
   body: string;
   bestAnswerId: number | null;
   answerCount: number;
+  /** Visible answers by members: `answerCount` without the AI answer and hidden ones. */
+  humanAnswers: number;
   hidden: boolean;
   locked: boolean;
   createdAt: string;
@@ -59,15 +61,19 @@ interface QuestionRow {
   body: string;
   best_answer_id: number | string | null;
   answer_count: number;
+  human_answers: number;
   hidden: boolean;
   locked: boolean;
   created_at: Date | string;
   last_activity_at: Date | string;
 }
 
+const HUMAN_ANSWERS = `(SELECT count(*) FROM course_answers h
+  WHERE h.question_id = q.id AND NOT h.from_ai AND NOT h.hidden)`;
+
 const QUESTION_COLUMNS = `q.id, q.course_id, q.course_title, q.scene_id, q.scene_title, q.author_id,
-  a.username AS author_name, q.title, q.body, q.best_answer_id, q.answer_count, q.hidden, q.locked,
-  q.created_at, q.last_activity_at`;
+  a.username AS author_name, q.title, q.body, q.best_answer_id, q.answer_count,
+  ${HUMAN_ANSWERS}::int AS human_answers, q.hidden, q.locked, q.created_at, q.last_activity_at`;
 
 function toIso(value: Date | string): string {
   return new Date(value).toISOString();
@@ -86,6 +92,7 @@ function toQuestion(row: QuestionRow): QuestionView {
     body: row.body,
     bestAnswerId: row.best_answer_id === null ? null : Number(row.best_answer_id),
     answerCount: Number(row.answer_count),
+    humanAnswers: Number(row.human_answers),
     hidden: row.hidden,
     locked: row.locked,
     createdAt: toIso(row.created_at),
@@ -125,8 +132,22 @@ export async function createQuestion(
   );
 }
 
+export const QUESTION_SORTS = ['active', 'new', 'top', 'waiting'] as const;
+export type QuestionSort = (typeof QUESTION_SORTS)[number];
+
+// A fixed list: the value is never taken from the request, only looked up by name.
+const SORT_SQL: Record<QuestionSort, string> = {
+  active: 'q.last_activity_at DESC, q.id',
+  new: 'q.created_at DESC, q.id',
+  top: `(SELECT COALESCE(sum(v.votes), 0) FROM course_answers v
+          WHERE v.question_id = q.id AND NOT v.hidden) DESC, q.last_activity_at DESC, q.id`,
+  waiting: `${HUMAN_ANSWERS} ASC, q.last_activity_at DESC, q.id`,
+};
+
 export interface QuestionFilter {
   courseId?: string;
+  /** Only questions pinned to this scene. */
+  sceneId?: string;
   authorId?: string;
   /** Only questions without a best answer. */
   unsolved?: boolean;
@@ -134,15 +155,23 @@ export interface QuestionFilter {
   search?: string;
   /** Staff see hidden questions too. */
   includeHidden?: boolean;
+  /** Default `active`: newest activity first. */
+  sort?: QuestionSort;
   limit?: number;
+  offset?: number;
 }
 
-/** Questions, newest activity first. */
+/**
+ * One page of questions in `filter.sort` order. Paging is by offset, so a question bumped between
+ * two pages can be skipped or repeated: the client drops repeats by id.
+ */
+// ponytail: offset paging, move to a keyset cursor if a feed grows past a few thousand questions.
 export async function listQuestions(
   db: AccountQueryable,
   filter: QuestionFilter,
-): Promise<QuestionView[]> {
+): Promise<{ questions: QuestionView[]; hasMore: boolean }> {
   const search = filter.search?.trim();
+  const limit = filter.limit ?? 100;
   const result = await db.query(
     `SELECT ${QUESTION_COLUMNS}
        FROM course_questions q JOIN accounts a ON a.id = q.author_id
@@ -151,18 +180,98 @@ export async function listQuestions(
         AND (NOT $3::boolean OR q.best_answer_id IS NULL)
         AND ($4::text IS NULL OR q.title ILIKE $4::text OR q.body ILIKE $4::text)
         AND ($5::boolean OR NOT q.hidden)
-      ORDER BY q.last_activity_at DESC, q.id
-      LIMIT $6::int`,
+        AND ($7::text IS NULL OR q.scene_id = $7::text)
+      ORDER BY ${SORT_SQL[filter.sort ?? 'active']}
+      LIMIT $6::int OFFSET $8::int`,
     [
       filter.courseId ?? null,
       filter.authorId ?? null,
       filter.unsolved === true,
       search ? `%${search.replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null,
       filter.includeHidden === true,
-      filter.limit ?? 100,
+      limit + 1,
+      filter.sceneId ?? null,
+      filter.offset ?? 0,
     ],
   );
-  return (result.rows as QuestionRow[]).map(toQuestion);
+  const rows = result.rows as QuestionRow[];
+  return { questions: rows.slice(0, limit).map(toQuestion), hasMore: rows.length > limit };
+}
+
+export interface CommunityScene {
+  sceneId: string;
+  title: string;
+  total: number;
+  unsolved: number;
+}
+
+export interface CommunityScope {
+  courseId: string;
+  title: string;
+  total: number;
+  unsolved: number;
+  lastActivityAt: string;
+  scenes: CommunityScene[];
+}
+
+/**
+ * The courses and scenes that have questions, with how many are open, newest activity first. It
+ * feeds the scope picker of the feed, so a course with no question does not appear.
+ */
+// ponytail: one query capped at 2000 course/scene groups, no paging; add a search param if more.
+export async function listCommunityScopes(
+  db: AccountQueryable,
+  options: { includeHidden: boolean },
+): Promise<CommunityScope[]> {
+  const result = await db.query(
+    `SELECT q.course_id, q.scene_id,
+            (array_agg(q.course_title ORDER BY q.last_activity_at DESC))[1] AS course_title,
+            (array_agg(q.scene_title ORDER BY q.last_activity_at DESC))[1] AS scene_title,
+            count(*)::int AS total,
+            (count(*) FILTER (WHERE q.best_answer_id IS NULL))::int AS unsolved,
+            max(q.last_activity_at) AS last_activity_at
+       FROM course_questions q
+      WHERE ($1::boolean OR NOT q.hidden)
+      GROUP BY q.course_id, q.scene_id
+      ORDER BY max(q.last_activity_at) DESC, q.course_id, q.scene_id
+      LIMIT 2000`,
+    [options.includeHidden],
+  );
+  const courses = new Map<string, CommunityScope>();
+  for (const row of result.rows as Array<{
+    course_id: string;
+    scene_id: string | null;
+    course_title: string;
+    scene_title: string | null;
+    total: number;
+    unsolved: number;
+    last_activity_at: Date | string;
+  }>) {
+    // Rows come newest first, so the first row of a course holds its latest title and activity.
+    let course = courses.get(row.course_id);
+    if (!course) {
+      course = {
+        courseId: row.course_id,
+        title: row.course_title,
+        total: 0,
+        unsolved: 0,
+        lastActivityAt: toIso(row.last_activity_at),
+        scenes: [],
+      };
+      courses.set(row.course_id, course);
+    }
+    course.total += Number(row.total);
+    course.unsolved += Number(row.unsolved);
+    if (row.scene_id !== null) {
+      course.scenes.push({
+        sceneId: row.scene_id,
+        title: row.scene_title ?? row.scene_id,
+        total: Number(row.total),
+        unsolved: Number(row.unsolved),
+      });
+    }
+  }
+  return [...courses.values()];
 }
 
 export async function readQuestion(

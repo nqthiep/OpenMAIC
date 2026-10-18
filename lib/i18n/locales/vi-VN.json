@@ -2979,7 +2979,35 @@
       "filter": "Lọc câu hỏi",
       "search": "Tìm câu hỏi",
       "pick": "Chọn một câu hỏi để xem lời giải.",
-      "howToAsk": "Muốn hỏi? Mở một khoá học, đến slide bạn vướng và bấm nút Thảo luận trên thanh công cụ."
+      "howToAsk": "Muốn hỏi? Mở một khoá học, đến slide bạn vướng và bấm nút Thảo luận trên thanh công cụ.",
+      "clearSearch": "Xoá tìm kiếm",
+      "removeFilter": "Bỏ lọc {{name}}",
+      "clear": "Xoá bộ lọc",
+      "count": "{{count}} câu hỏi",
+      "countMore": "{{count}}+ câu hỏi",
+      "noMatch": "Không có câu hỏi nào khớp bộ lọc.",
+      "loadMore": "Tải thêm",
+      "aiOnly": "Mới có AI trả lời",
+      "scope": {
+        "label": "Khoá học",
+        "all": "Tất cả khoá học",
+        "search": "Tìm khoá học hoặc bài…",
+        "empty": "Không tìm thấy khoá học hay bài nào.",
+        "courses": "Khoá học",
+        "unsolved": "{{count}} chưa giải"
+      },
+      "sort": {
+        "label": "Sắp xếp",
+        "active": "Hoạt động gần đây",
+        "new": "Mới nhất",
+        "top": "Hữu ích nhất",
+        "waiting": "Chưa ai trả lời trước"
+      },
+      "group": {
+        "today": "Hôm nay",
+        "week": "Tuần này",
+        "older": "Cũ hơn"
+      }
     },
     "reports": {
       "title": "Báo cáo cộng đồng",

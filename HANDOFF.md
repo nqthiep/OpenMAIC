@@ -2,6 +2,38 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Community discussion list that scales (phase 1)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "ở trên trang thảo luận, khi số lượng thành viên tăng, số bài học tăng, số thảo luận tăng thì sẽ rất khó tìm kiếm, thiết kế hiện tại khá đơn giản. Hãy brainstorming để nghĩ ra một ý tưởng thiết kế để đáp ứng các yêu cầu đó, tuy nhiên vẫn phải easy to use."
+- Owner's go-ahead (verbatim): "Làm Pha 1 theo đề xuất: chọn phạm vi khoá/bài, sắp xếp, chip lọc + URL state, dòng câu hỏi mới, nhóm theo ngày, tải thêm, tìm khi gõ."
+- Owner's push instruction (verbatim): "Please resume, khi nào hoàn thành thì push lên branch it-math trên remote repo của tôi."
+- Assignment status: In progress (code and checks done; commit and push pending)
+- Branch and commit: `it-math` @ `632144f1` plus uncommitted changes, pushed: no. Push to `origin` branch `it-math` is allowed. Only this assignment's files are committed, through a private index (`GIT_INDEX_FILE`) so another session's staged files are not swept in. Other sessions' sections below stay open; their files (`app/page.tsx`, `app/catalog`, TTS files) are not touched by this one.
+- Last updated: 2026-10-19 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, `git status`, branch `it-math`; read the current feed | Done | Branch `it-math`. Feed was `CommunityFeed` in `components/community/community.tsx`; query `listQuestions` in `lib/server/learning/community.ts` (`LIMIT 100`, no paging) |
+| 2 | Backend: sort (`active`, `new`, `top`, `waiting`), offset paging with `hasMore`, `humanAnswers`, `sceneId` filter in `listQuestions` | Done | `lib/server/learning/community.ts`; route params `sceneId`, `sort`, `limit` (1 to 100, 100 when absent so the in-classroom list is unchanged), `offset` in `app/api/community/questions/route.ts` |
+| 3 | Backend: `listCommunityScopes` + `GET /api/community/courses` | Done | `app/api/community/courses/route.ts`; real server answered 200 with the one seeded course and its scene |
+| 4 | Route test: paging, four sorts, scene filter, hidden for staff only, scopes counts | Done | `pnpm vitest run tests/learning/community-routes.test.ts`: 3 passed. Mutation check: with `waiting` sort and the scene filter broken the new test fails (`expected [Beta, Alpha, Gamma] to deeply equal [Beta, Gamma, Alpha]`); restored, 3 passed |
+| 5 | Client API types and calls (`QuestionSort`, `CommunityScope`, `fetchCommunityScopes`, `hasMore`, `humanAnswers`) | Done | `components/learning/learning-api.ts` |
+| 6 | UI: scope picker (accent-insensitive, scenes under the chosen course), views, sort menu, filter chips, new rows, day groups, load more, live search with 250 ms pause, `/` shortcut, URL state | Done | New `components/community/feed.tsx` and `lib/community/feed-state.ts`; old `CommunityFeed` removed from `community.tsx`. `pnpm vitest run tests/community/feed-state.test.ts`: 9 passed |
+| 7 | i18n keys in 12 locales | Done | `pnpm check:i18n-keys`: passed (12 locale files) |
+| 8 | Checks | Done | `pnpm vitest run tests/learning tests/community tests/authz tests/i18n`: 34 files, 278 passed. `npx tsc --noEmit`: only the 4 older errors in `tests/security/*` and `.next/types`. `eslint` on the changed files: exit 0. `prettier --check`: passes |
+| 9 | Browser check | Done | Dev server `:3002`, 800 px and 1280 px. With a patched `fetch` (64 fake questions, 3 courses): 25 rows, then "Load more" gave offsets 25 and 50 (64 rows, no repeat); one request after typing 5 letters (debounce); `sort=waiting` gave a flat list; picking a scene wrote `course=&scene=` into the URL and showed two chips; `/` focused the search box. Reload from `?view=unsolved&sort=new&q=giới` restored view, sort, search and chips. Real data: row opens its thread, `question=` in the URL, no console errors. Not checked: light theme; phone widths (not supported by decision) |
+| 10 | Commit these files and push `it-math` to `origin` | In progress | |
+| 11 | Update this section and report | Todo | |
+
+### Not done (phase 2 and 3, by the owner's plan)
+- Accent-insensitive search on the server (`ILIKE` still needs the same marks; only the course picker folds accents), follow and unread, "for me" by class, similar questions when asking.
+
+### Decisions and reasons
+- Offset paging with `limit + 1` instead of a keyset cursor: one mechanism for all four sorts, and the client drops duplicate ids when a question is bumped between pages. Ceiling: a question bumped between two pages can be skipped. Upgrade to a keyset cursor if feeds grow past a few thousand questions.
+- Phase 2 (accent-insensitive search, follow and unread) and phase 3 ("for me" by class, similar questions) are NOT in this assignment.
+
+
 ## Assignment: Fall back to browser speech when lesson audio fails
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Có lỗi khi chạy bài giảng do AI sinh ra thì không nghe thấy âm thanh. Nếu đúng thì dù cho setting hệ thống sử dụng mô hình sinh âm thanh nào, hoặc các provide cloud hết credit thì cũng phải fallback sang sử dụng local của browser để sinh âm thanh."

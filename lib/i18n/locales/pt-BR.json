@@ -2979,7 +2979,35 @@
       "filter": "Filtrar perguntas",
       "search": "Buscar perguntas",
       "pick": "Escolha uma pergunta para ver as respostas.",
-      "howToAsk": "Quer perguntar? Abra uma aula, vá ao slide em que travou e toque no botão Discussão na barra de ferramentas."
+      "howToAsk": "Quer perguntar? Abra uma aula, vá ao slide em que travou e toque no botão Discussão na barra de ferramentas.",
+      "clearSearch": "Limpar busca",
+      "removeFilter": "Remover filtro {{name}}",
+      "clear": "Limpar filtros",
+      "count": "{{count}} perguntas",
+      "countMore": "{{count}}+ perguntas",
+      "noMatch": "Nenhuma pergunta corresponde a esses filtros.",
+      "loadMore": "Carregar mais",
+      "aiOnly": "Só a IA respondeu",
+      "scope": {
+        "label": "Curso",
+        "all": "Todos os cursos",
+        "search": "Buscar cursos ou aulas…",
+        "empty": "Nenhum curso ou aula encontrado.",
+        "courses": "Cursos",
+        "unsolved": "{{count}} sem solução"
+      },
+      "sort": {
+        "label": "Ordenar",
+        "active": "Atividade recente",
+        "new": "Mais recentes",
+        "top": "Mais úteis",
+        "waiting": "Sem resposta primeiro"
+      },
+      "group": {
+        "today": "Hoje",
+        "week": "Esta semana",
+        "older": "Mais antigas"
+      }
     },
     "reports": {
       "title": "Denúncias da comunidade",

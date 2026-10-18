@@ -11,7 +11,6 @@ import {
   LockOpen,
   MessageCircleQuestion,
   Plus,
-  Search,
   Sparkles,
   ThumbsUp,
 } from 'lucide-react';
@@ -807,119 +806,6 @@ export function SceneDiscussionButton() {
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-type FeedFilter = 'all' | 'unsolved' | 'mine';
-
-/** The community page: every question, filtered and searched, with the chosen one on the right. */
-export function CommunityFeed() {
-  const { t } = useI18n();
-  const failure = useFailureToast();
-  const [filter, setFilter] = useState<FeedFilter>('all');
-  const [search, setSearch] = useState('');
-  const [query, setQuery] = useState('');
-  const [data, setData] = useState<{ questions: QuestionRow[]; canPost: boolean } | null>(null);
-  const [selected, setSelected] = useState<string | null>(() =>
-    typeof window === 'undefined'
-      ? null
-      : new URLSearchParams(window.location.search).get('question'),
-  );
-
-  const load = useCallback(
-    () =>
-      fetchQuestions({
-        unsolved: filter === 'unsolved',
-        mine: filter === 'mine',
-        q: query || undefined,
-      }),
-    [filter, query],
-  );
-
-  const reload = useCallback(async () => {
-    try {
-      setData(await load());
-    } catch (error) {
-      failure(error);
-    }
-  }, [load, failure]);
-
-  useEffect(() => {
-    let active = true;
-    load()
-      .then((next) => {
-        if (active) setData(next);
-      })
-      .catch((error: unknown) => {
-        if (active) failure(error);
-      });
-    return () => {
-      active = false;
-    };
-  }, [load, failure]);
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className={cn('grid min-h-[32rem] grid-cols-[22rem_1fr] gap-6 rounded-2xl p-6', GLASS)}>
-        <div className="flex min-h-0 flex-col gap-3 border-r pr-6">
-          <form
-            role="search"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setQuery(search.trim());
-            }}
-            className="flex gap-2"
-          >
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('community.feed.search')}
-              aria-label={t('community.feed.search')}
-            />
-            <Button
-              type="submit"
-              size="icon"
-              variant="outline"
-              aria-label={t('community.feed.search')}
-            >
-              <Search className="size-4" />
-            </Button>
-          </form>
-          <div className="flex gap-1" role="group" aria-label={t('community.feed.filter')}>
-            {(['all', 'unsolved', 'mine'] as const).map((value) => (
-              <Button
-                key={value}
-                type="button"
-                size="sm"
-                variant={filter === value ? 'secondary' : 'ghost'}
-                aria-pressed={filter === value}
-                onClick={() => setFilter(value)}
-              >
-                {t(`community.feed.${value}`)}
-              </Button>
-            ))}
-          </div>
-          <div className="min-h-0 overflow-y-auto">
-            <QuestionList
-              questions={data?.questions ?? null}
-              selected={selected}
-              showCourse
-              onSelect={setSelected}
-            />
-          </div>
-        </div>
-        <div className="flex min-w-0 flex-col">
-          {selected ? (
-            <QuestionThread key={selected} questionId={selected} onChanged={reload} showLink />
-          ) : (
-            <EmptyPane
-              icon={MessageCircleQuestion}
-              lines={[t('community.feed.pick'), t('community.feed.howToAsk')]}
-            />
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
 

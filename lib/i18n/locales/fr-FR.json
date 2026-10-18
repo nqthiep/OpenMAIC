@@ -2979,7 +2979,35 @@
       "filter": "Filtrer les questions",
       "search": "Rechercher des questions",
       "pick": "Choisissez une question pour voir ses réponses.",
-      "howToAsk": "Vous voulez poser une question ? Ouvrez une leçon, allez à la diapositive qui vous bloque et appuyez sur le bouton Discussion de la barre d'outils."
+      "howToAsk": "Vous voulez poser une question ? Ouvrez une leçon, allez à la diapositive qui vous bloque et appuyez sur le bouton Discussion de la barre d'outils.",
+      "clearSearch": "Effacer la recherche",
+      "removeFilter": "Retirer le filtre {{name}}",
+      "clear": "Réinitialiser les filtres",
+      "count": "{{count}} questions",
+      "countMore": "{{count}}+ questions",
+      "noMatch": "Aucune question ne correspond à ces filtres.",
+      "loadMore": "Afficher plus",
+      "aiOnly": "Seule l’IA a répondu",
+      "scope": {
+        "label": "Cours",
+        "all": "Tous les cours",
+        "search": "Rechercher un cours ou une leçon…",
+        "empty": "Aucun cours ni leçon trouvé.",
+        "courses": "Cours",
+        "unsolved": "{{count}} sans solution"
+      },
+      "sort": {
+        "label": "Trier",
+        "active": "Activité récente",
+        "new": "Plus récentes",
+        "top": "Plus utiles",
+        "waiting": "Sans réponse d’abord"
+      },
+      "group": {
+        "today": "Aujourd’hui",
+        "week": "Cette semaine",
+        "older": "Plus ancien"
+      }
     },
     "reports": {
       "title": "Signalements de la communauté",

@@ -2979,7 +2979,35 @@
       "filter": "Fragen filtern",
       "search": "Fragen suchen",
       "pick": "Wählen Sie eine Frage, um die Antworten zu sehen.",
-      "howToAsk": "Sie möchten fragen? Öffnen Sie eine Lektion, gehen Sie zur Folie, an der Sie feststecken, und drücken Sie in der Werkzeugleiste auf Diskussion."
+      "howToAsk": "Sie möchten fragen? Öffnen Sie eine Lektion, gehen Sie zur Folie, an der Sie feststecken, und drücken Sie in der Werkzeugleiste auf Diskussion.",
+      "clearSearch": "Suche löschen",
+      "removeFilter": "Filter {{name}} entfernen",
+      "clear": "Filter zurücksetzen",
+      "count": "{{count}} Fragen",
+      "countMore": "{{count}}+ Fragen",
+      "noMatch": "Keine Frage passt zu diesen Filtern.",
+      "loadMore": "Mehr laden",
+      "aiOnly": "Nur die KI hat geantwortet",
+      "scope": {
+        "label": "Kurs",
+        "all": "Alle Kurse",
+        "search": "Kurse oder Lektionen suchen…",
+        "empty": "Kein Kurs und keine Lektion gefunden.",
+        "courses": "Kurse",
+        "unsolved": "{{count}} ungelöst"
+      },
+      "sort": {
+        "label": "Sortieren",
+        "active": "Letzte Aktivität",
+        "new": "Neueste",
+        "top": "Hilfreichste",
+        "waiting": "Unbeantwortete zuerst"
+      },
+      "group": {
+        "today": "Heute",
+        "week": "Diese Woche",
+        "older": "Älter"
+      }
     },
     "reports": {
       "title": "Community-Meldungen",

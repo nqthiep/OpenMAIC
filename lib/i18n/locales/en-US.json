@@ -2979,7 +2979,35 @@
       "filter": "Filter questions",
       "search": "Search questions",
       "pick": "Pick a question to see its answers.",
-      "howToAsk": "Want to ask? Open a lesson, go to the slide you are stuck on and press the Discussion button in the toolbar."
+      "howToAsk": "Want to ask? Open a lesson, go to the slide you are stuck on and press the Discussion button in the toolbar.",
+      "clearSearch": "Clear search",
+      "removeFilter": "Remove filter {{name}}",
+      "clear": "Clear filters",
+      "count": "{{count}} questions",
+      "countMore": "{{count}}+ questions",
+      "noMatch": "No question matches these filters.",
+      "loadMore": "Load more",
+      "aiOnly": "Only the AI has answered",
+      "scope": {
+        "label": "Course",
+        "all": "All courses",
+        "search": "Search courses or lessons…",
+        "empty": "No course or lesson found.",
+        "courses": "Courses",
+        "unsolved": "{{count}} unsolved"
+      },
+      "sort": {
+        "label": "Sort",
+        "active": "Recent activity",
+        "new": "Newest",
+        "top": "Most helpful",
+        "waiting": "Unanswered first"
+      },
+      "group": {
+        "today": "Today",
+        "week": "This week",
+        "older": "Older"
+      }
     },
     "reports": {
       "title": "Community reports",

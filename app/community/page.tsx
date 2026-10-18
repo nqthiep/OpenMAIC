@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { ArrowRight, Lock, MessagesSquare, Trophy } from 'lucide-react';
 import { AccountDialog } from '@/components/account/account-dialog';
 import { ChallengeBoard } from '@/components/community/challenge';
-import { CommunityFeed } from '@/components/community/community';
+import { CommunityFeed } from '@/components/community/feed';
 import { AccessRequest } from '@/components/home/access-request';
 import { GLASS, Reveal, SiteShell } from '@/components/home/site-shell';
 import { Button } from '@/components/ui/button';

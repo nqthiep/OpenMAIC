@@ -96,7 +96,7 @@ async function loadRoutes() {
   vi.doMock('@/lib/persistence/server-provider', () => ({
     getServerPersistenceProvider: async () => ({ pool }),
   }));
-  const [register, questions, question, ai, answer, reports, bans] = await Promise.all([
+  const [register, questions, question, ai, answer, reports, bans, courses] = await Promise.all([
     import('@/app/api/auth/register/route'),
     import('@/app/api/community/questions/route'),
     import('@/app/api/community/questions/[id]/route'),
@@ -104,6 +104,7 @@ async function loadRoutes() {
     import('@/app/api/community/answers/[id]/route'),
     import('@/app/api/community/reports/route'),
     import('@/app/api/community/bans/route'),
+    import('@/app/api/community/courses/route'),
   ]);
   return {
     register: register.POST,
@@ -119,6 +120,7 @@ async function loadRoutes() {
     report: reports.POST,
     resolve: reports.PATCH,
     ban: bans.POST,
+    scopes: courses.GET,
   };
 }
 
@@ -153,6 +155,8 @@ interface Body {
   id: string;
   errorCode: string;
   questions: Array<Record<string, unknown>>;
+  hasMore: boolean;
+  courses: Array<Record<string, unknown>>;
   answers: Array<Record<string, unknown>>;
   reports: Array<Record<string, unknown>>;
   canPost: boolean;
@@ -347,6 +351,134 @@ describe('community routes', () => {
       expect(
         (await routes.ask(jsonRequest('POST', { courseId: COURSE, title: 'Again' }, bob))).status,
       ).toBe(201);
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it(
+    'the feed pages, sorts and narrows by scene, and the scopes count open questions per course',
+    async () => {
+      const routes = await loadRoutes();
+      const root = await signUp(routes, 'root');
+      await signUp(routes, 'alice', true);
+      const carol = await signUp(routes, 'carol');
+      const alice = (
+        await db!.query<{ id: string }>(`SELECT id FROM accounts WHERE username = 'alice'`)
+      ).rows[0]!.id;
+
+      const seed = async (
+        id: string,
+        course: string,
+        scene: string | null,
+        title: string,
+        created: string,
+        activity: string,
+        extra: { hidden?: boolean; best?: number } = {},
+      ) => {
+        await db!.query(
+          `INSERT INTO course_questions
+             (id, course_id, course_title, scene_id, scene_title, author_id, title, body,
+              best_answer_id, hidden, created_at, last_activity_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, '', $8, $9, $10::timestamptz, $11::timestamptz)`,
+          [
+            id,
+            course,
+            course === COURSE ? 'Derivatives' : 'Integrals',
+            scene,
+            scene === null ? null : `Scene ${scene}`,
+            alice,
+            title,
+            extra.best ?? null,
+            extra.hidden === true,
+            created,
+            activity,
+          ],
+        );
+      };
+      const answer = (question: string, fromAi: boolean, votes: number) =>
+        db!.query(
+          `INSERT INTO course_answers (question_id, author_id, from_ai, body, votes)
+           VALUES ($1, $2, $3, 'x', $4)`,
+          [question, fromAi ? null : alice, fromAi, votes],
+        );
+      await seed('q1', COURSE, 'scene-1', 'Alpha', '2026-01-01T10:00:00Z', '2026-01-01T10:05:00Z');
+      await seed('q2', COURSE, null, 'Beta', '2026-01-01T11:00:00Z', '2026-01-01T11:00:00Z');
+      await seed(
+        'q3',
+        'course-integrals',
+        'scene-x',
+        'Gamma',
+        '2026-01-01T12:00:00Z',
+        '2026-01-01T09:00:00Z',
+        { best: 999 },
+      );
+      await seed('q4', COURSE, null, 'Hidden', '2026-01-01T13:00:00Z', '2026-01-01T13:00:00Z', {
+        hidden: true,
+      });
+      await answer('q1', true, 0);
+      await answer('q1', false, 3);
+      await answer('q2', true, 0);
+
+      const titles = async (query: string, cookie = carol) => {
+        const { body } = await json(
+          await routes.list(getRequest(`/api/community/questions${query}`, cookie)),
+        );
+        return { titles: body.questions.map((q) => q.title), hasMore: body.hasMore, body };
+      };
+
+      // Newest activity first by default; a hidden question is for staff only.
+      expect((await titles('')).titles).toEqual(['Beta', 'Alpha', 'Gamma']);
+      expect((await titles('', root)).titles).toEqual(['Hidden', 'Beta', 'Alpha', 'Gamma']);
+      expect((await titles('?sort=new')).titles).toEqual(['Gamma', 'Beta', 'Alpha']);
+      expect((await titles('?sort=top')).titles).toEqual(['Alpha', 'Beta', 'Gamma']);
+      // Without a member answer first: Beta (AI only) and Gamma (none) before Alpha.
+      expect((await titles('?sort=waiting')).titles).toEqual(['Beta', 'Gamma', 'Alpha']);
+      // An unknown sort or a bad number falls back to the defaults.
+      expect((await titles('?sort=nope&limit=abc&offset=-1')).titles).toEqual([
+        'Beta',
+        'Alpha',
+        'Gamma',
+      ]);
+
+      const counts = (await titles('')).body.questions.map((q) => [q.title, q.humanAnswers]);
+      expect(counts).toEqual([
+        ['Beta', 0],
+        ['Alpha', 1],
+        ['Gamma', 0],
+      ]);
+
+      // Pages of two: the first says more follows, the second is the rest.
+      const first = await titles('?limit=2');
+      expect(first).toMatchObject({ titles: ['Beta', 'Alpha'], hasMore: true });
+      const second = await titles('?limit=2&offset=2');
+      expect(second).toMatchObject({ titles: ['Gamma'], hasMore: false });
+
+      expect((await titles(`?courseId=${COURSE}&sceneId=scene-1`)).titles).toEqual(['Alpha']);
+      expect((await titles('?unsolved=1')).titles).toEqual(['Beta', 'Alpha']);
+
+      // The picker: courses with open counts and their scenes, newest activity first.
+      expect((await routes.scopes(getRequest('/api/community/courses'))).status).toBe(401);
+      const scopes = await json(await routes.scopes(getRequest('/api/community/courses', carol)));
+      expect(scopes.body.courses).toMatchObject([
+        {
+          courseId: COURSE,
+          title: 'Derivatives',
+          total: 2,
+          unsolved: 2,
+          scenes: [{ sceneId: 'scene-1', title: 'Scene scene-1', total: 1, unsolved: 1 }],
+        },
+        {
+          courseId: 'course-integrals',
+          title: 'Integrals',
+          total: 1,
+          unsolved: 0,
+          scenes: [{ sceneId: 'scene-x', total: 1, unsolved: 0 }],
+        },
+      ]);
+      const staffScopes = await json(
+        await routes.scopes(getRequest('/api/community/courses', root)),
+      );
+      expect(staffScopes.body.courses[0]).toMatchObject({ courseId: COURSE, total: 3 });
     },
     ROUTE_TIMEOUT_MS,
   );
