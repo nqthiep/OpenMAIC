@@ -7,7 +7,7 @@ import '@/lib/i18n/config';
 
 const LOCALE_STORAGE_KEY = 'locale';
 
-/** Match a browser language code (e.g. 'en', 'zh-TW') to a supported locale */
+/** Match a stored language code (e.g. 'en', 'zh-TW') to a supported locale */
 function resolveLocale(lang: string): Locale {
   // Exact match
   const exact = supportedLocales.find((l) => l.code === lang);
@@ -31,14 +31,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const locale = (i18n.language || defaultLocale) as Locale;
 
-  // Detect language after hydration to avoid SSR mismatch.
-  // i18next handles fallback automatically: if the detected language
+  // Apply the visitor's saved choice after hydration to avoid SSR mismatch. Without one the
+  // interface is in the default locale (Vietnamese), whatever the browser's own language is.
+  // i18next handles fallback automatically: if the chosen language
   // has no matching JSON file, it falls back to fallbackLng.
   useEffect(() => {
     try {
       const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-      const raw = stored || navigator.language || defaultLocale;
-      const target = resolveLocale(raw);
+      const target = resolveLocale(stored || defaultLocale);
       if (target !== i18n.language) i18n.changeLanguage(target);
     } catch {
       // localStorage unavailable, keep default

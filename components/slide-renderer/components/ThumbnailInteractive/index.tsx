@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
 import type { InteractiveContent } from '@/lib/types/stage';
 import { patchHtmlForIframe } from '@/lib/utils/iframe';
+import { useI18n } from '@/lib/hooks/use-i18n';
 
 interface ThumbnailInteractiveProps {
   /** Interactive content to render */
@@ -23,6 +24,7 @@ export function ThumbnailInteractive({
   size,
   viewportSize = 1000,
 }: ThumbnailInteractiveProps) {
+  const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -67,7 +69,7 @@ export function ThumbnailInteractive({
       {!isVisible ? (
         // Placeholder when not visible
         <div className="w-full h-full flex justify-center items-center bg-gray-100 dark:bg-gray-800 text-gray-400 text-xs">
-          Interactive
+          {t('edit.sceneType.interactive')}
         </div>
       ) : (
         <div

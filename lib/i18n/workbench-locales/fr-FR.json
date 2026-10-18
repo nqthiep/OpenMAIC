@@ -90,8 +90,15 @@
       "style-clone": "Clonage de style",
       "teacher-style-clone": "Style de l'enseignant",
       "vocational": "Formation professionnelle",
-      "workshop-style": "Atelier interactif"
-    }
+      "workshop-style": "Atelier interactif",
+      "fact-check": "Vérification des faits",
+      "feynman-learning": "Méthode Feynman",
+      "learning-to-learn": "Apprendre à apprendre",
+      "social-emotional-learning": "Apprentissage socio-émotionnel (SEL)",
+      "spiral-curriculum": "Curriculum en spirale",
+      "understanding-by-design": "Planification à rebours (UbD)"
+    },
+    "contentLoadFailed": "Impossible de charger tout le contenu de la Skill"
   },
   "thinking": {
     "active": "Réflexion…",

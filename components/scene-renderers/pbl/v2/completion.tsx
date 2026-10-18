@@ -164,7 +164,7 @@ export function PBLV2Completion({ project, onBack }: Props) {
             {typeof report.stars === 'number' && (
               <div className="shrink-0 rounded-2xl border border-amber-200/15 bg-amber-300/[0.08] px-4 py-3 text-right">
                 <div className="mb-1 text-[10px] uppercase tracking-wider text-amber-200/90">
-                  Stars
+                  {t('pbl.v2.completion.stars')}
                 </div>
                 <div className="flex items-center gap-1 text-amber-300">
                   <Star className="h-4 w-4 fill-current" />
@@ -417,18 +417,18 @@ const CONFETTI: ReadonlyArray<{
   drift: number;
   rotate: number;
 }> = [
-  { left: 6, color: '#a78bfa', size: 6, delay: 0.0, duration: 3.0, drift: 14, rotate: 320 },
+  { left: 6, color: '#93c5fd', size: 6, delay: 0.0, duration: 3.0, drift: 14, rotate: 320 },
   { left: 14, color: '#67e8f9', size: 7, delay: 0.7, duration: 3.4, drift: -10, rotate: -260 },
   { left: 22, color: '#fcd34d', size: 5, delay: 1.3, duration: 2.8, drift: 8, rotate: 400 },
   { left: 30, color: '#6ee7b7', size: 6, delay: 0.4, duration: 3.2, drift: -16, rotate: -340 },
   { left: 38, color: '#f9a8d4', size: 7, delay: 1.0, duration: 3.6, drift: 12, rotate: 300 },
   { left: 46, color: '#7dd3fc', size: 5, delay: 0.2, duration: 2.9, drift: -8, rotate: -380 },
-  { left: 54, color: '#a78bfa', size: 6, delay: 1.5, duration: 3.3, drift: 16, rotate: 360 },
+  { left: 54, color: '#93c5fd', size: 6, delay: 1.5, duration: 3.3, drift: 16, rotate: 360 },
   { left: 62, color: '#fcd34d', size: 7, delay: 0.6, duration: 3.0, drift: -12, rotate: -300 },
   { left: 70, color: '#6ee7b7', size: 5, delay: 1.1, duration: 3.5, drift: 10, rotate: 420 },
   { left: 78, color: '#67e8f9', size: 6, delay: 0.3, duration: 2.7, drift: -14, rotate: -340 },
   { left: 86, color: '#f9a8d4', size: 7, delay: 0.9, duration: 3.4, drift: 8, rotate: 320 },
-  { left: 94, color: '#a78bfa', size: 5, delay: 1.4, duration: 3.1, drift: -10, rotate: -360 },
+  { left: 94, color: '#93c5fd', size: 5, delay: 1.4, duration: 3.1, drift: -10, rotate: -360 },
   { left: 18, color: '#fcd34d', size: 6, delay: 1.8, duration: 3.2, drift: 12, rotate: 380 },
   { left: 82, color: '#7dd3fc', size: 6, delay: 2.0, duration: 3.3, drift: -8, rotate: -320 },
 ];

@@ -10,8 +10,190 @@
     "close": "Close"
   },
   "home": {
-    "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
-    "greetingWithName": "Hi, {{name}}"
+    "slogan": "Know it well · Step into the exam with confidence",
+    "greetingWithName": "Hi, {{name}}",
+    "guest": {
+      "kicker": "AI as your study partner",
+      "title": "Learn at your own pace, with AI to help",
+      "description": "Lessons, slides and discussions are prepared with the help of AI, and checked by people before they are shared. Look around the free previews first. No account needed.",
+      "signIn": "Sign in",
+      "browseCatalog": "Browse courses",
+      "stepsTitle": "How it works",
+      "step1": {
+        "title": "Free preview",
+        "body": "Open the courses the administrator picks. No account needed."
+      },
+      "step2": {
+        "title": "Sign in",
+        "body": "Sign in with the account you were given. Guests can look around, but cannot create courses.",
+        "titleOpen": "Sign in or create an account",
+        "bodyOpen": "Create a free account or sign in. Until you become a member you can look around, but not create lessons yet."
+      },
+      "step3": {
+        "title": "Become a member",
+        "body": "Members can create courses with AI, join classes and share what they make."
+      },
+      "previewsTitle": "Free previews",
+      "previewsEmpty": "No previews yet. Come back soon.",
+      "membershipTitle": "Become a member",
+      "membershipBody": "Members get a monthly allowance for creating courses with AI, can join classes with a code, and can share courses with other members.",
+      "nav": {
+        "features": "Features",
+        "how": "How it works",
+        "previews": "Previews",
+        "membership": "Membership"
+      },
+      "chip1": "Explained from several angles",
+      "chip2": "Slides & whiteboard",
+      "chip3": "Quizzes & projects",
+      "mock": {
+        "title": "Fractions in daily life",
+        "live": "Live",
+        "teacher": "Let's cut one pizza into four equal slices.",
+        "student": "What if the slices are not equal?"
+      },
+      "features": {
+        "title": "Made to help you understand",
+        "subtitle": "AI explains, discusses and checks your understanding, like studying with a patient group, and you decide what to learn.",
+        "f1": {
+          "title": "A study group in every lesson",
+          "body": "A teacher, classmates and an assistant, all played by AI, take part so each idea is explained from several sides."
+        },
+        "f2": {
+          "title": "Slides and whiteboard",
+          "body": "Every lesson comes with slides, a live whiteboard and visual explanations."
+        },
+        "f3": {
+          "title": "Quizzes and projects",
+          "body": "Check what you learned with quizzes, then practise in project-based tasks."
+        },
+        "f4": {
+          "title": "Voice narration",
+          "body": "Scenes can be read aloud, and you can answer by voice."
+        },
+        "f5": {
+          "title": "Classes and sharing",
+          "body": "Join a class with a code, and share your courses with other members once an administrator has approved them."
+        },
+        "f6": {
+          "title": "Take it with you",
+          "body": "Export a course as a web page, a PowerPoint file or a video."
+        }
+      },
+      "previewsSubtitle": "Open these courses right now. No account needed.",
+      "perks": {
+        "p1": "A monthly AI allowance to create your own courses",
+        "p2": "Join classes with an invitation code",
+        "p3": "Share your courses with other members",
+        "p4": "Export courses to a web page, PowerPoint or video"
+      },
+      "cta": {
+        "title": "Want to see for yourself?",
+        "body": "Open a free preview first, or sign in whenever you are ready."
+      },
+      "footerTagline": "ÔN THI · built on the open-source project OpenMAIC",
+      "trust": {
+        "title": "Using AI with care",
+        "subtitle": "We know not everyone trusts AI yet. Here is how we try to earn yours.",
+        "t1": {
+          "title": "You stay in charge",
+          "body": "AI only helps explain and practise. You choose what to learn, and you can stop at any time."
+        },
+        "t2": {
+          "title": "Checked before it is shared",
+          "body": "An administrator reviews a course before other members can see it."
+        },
+        "t3": {
+          "title": "Honest about limits",
+          "body": "AI can make mistakes. For anything important, check with your teacher or a trusted source."
+        },
+        "t4": {
+          "title": "Look before you commit",
+          "body": "Free previews are open to everyone, with no account and no obligation."
+        }
+      }
+    },
+    "locked": {
+      "membership": "Creating courses with AI is for members.",
+      "classes": "Joining classes is for members.",
+      "contactAdmin": "Ask an administrator to add you as a member.",
+      "quota": "This month's AI allowance is used up.",
+      "quotaReset": "Creating courses opens again on {{date}}."
+    },
+    "quota": {
+      "label": "AI allowance this month",
+      "used": "{{used}} of {{quota}} tokens used"
+    },
+    "classes": {
+      "mine": "My classes"
+    },
+    "status": {
+      "ok": "Membership until {{date}} · days left: {{days}}",
+      "expiring": "Your membership ends on {{date}} (days left: {{days}}). Ask an administrator to renew it.",
+      "quotaNear": "You have used {{percent}}% of this month's AI allowance.",
+      "quotaOut": "This month's AI allowance is used up. Your courses stay open to study.",
+      "expired": "Your membership ended on {{date}}. Your courses stay open to read. Ask an administrator to renew it to create new ones.",
+      "suspended": "Your membership is paused. Your courses stay open to read. Ask an administrator to resume it."
+    },
+    "continue": {
+      "title": "Continue learning",
+      "progress": "Scene {{current}} of {{total}}",
+      "button": "Continue"
+    },
+    "myClasses": {
+      "members": "Members: {{count}}",
+      "noCourses": "No courses are attached to this class yet.",
+      "untitled": "Course {{number}}"
+    },
+    "starter": {
+      "title": "Not sure where to start? Try one of these:",
+      "one": "Explain [topic] to a beginner, step by step",
+      "two": "Make a one-week revision plan for [topic]",
+      "three": "Write practice questions on [topic] with worked solutions"
+    },
+    "access": {
+      "prompt": "Ask the administrators to add you as a member.",
+      "promptRenew": "Ask the administrators to renew your membership.",
+      "notePlaceholder": "A short note (optional): who you are and why you need access",
+      "button": "Ask for access",
+      "renewButton": "Ask for renewal",
+      "pending": "Your request was sent on {{date}}. An administrator will look at it.",
+      "rejected": "Your last request was not accepted. You can ask again from {{date}}.",
+      "suspended": "An administrator paused your membership. Ask them to resume it.",
+      "refusalReason": "Reason: {{reason}}"
+    },
+    "contribution": {
+      "title": "My contribution",
+      "shared": "Shared courses",
+      "pending": "Waiting for review",
+      "readers": "Readers",
+      "bonus": "Reward this month",
+      "bonusValue": "+{{tokens}} of {{cap}} tokens",
+      "badges": "Badges",
+      "badge": {
+        "readers-10": "10 readers",
+        "readers-100": "100 readers",
+        "challenge-top3": "Weekly Champion"
+      },
+      "next": "{{count}} more readers for the “{{badge}}” badge.",
+      "readersOf": "{{count}} readers",
+      "rejected": "Refused",
+      "rejectedWithReason": "Refused: {{reason}}"
+    },
+    "focus": {
+      "add": "Add what you study",
+      "summary": "Studying: {{focus}}",
+      "subjectPlaceholder": "Subject, for example Maths",
+      "levelPlaceholder": "Level, for example Grade 10",
+      "save": "Save"
+    },
+    "composer": {
+      "title": "What do you want to learn today?"
+    },
+    "renew": {
+      "pending": "Renewal requested on {{date}}.",
+      "rejected": "Your renewal request was not accepted. You can ask again from {{date}}."
+    }
   },
   "toolbar": {
     "pdfParser": "Parser",
@@ -44,7 +226,9 @@
     "ttsPreview": "Preview",
     "ttsPreviewing": "Playing...",
     "interactiveModeHint": "Enable interactive-first mode for more hands-on content",
-    "interactiveModeLabel": "Interactive Mode"
+    "interactiveModeLabel": "Interactive Mode",
+    "advanced": "Advanced",
+    "advancedHint": "Advanced options: model, web search, images/video, interactive mode, agents. By default ÔN THI picks a model that fits your request and adds illustrations and interactive activities."
   },
   "export": {
     "pptx": "Export PPTX",
@@ -170,6 +354,24 @@
       "qa": "Q&A",
       "discussion": "DISC",
       "lecture": "LEC"
+    },
+    "actionTag": {
+      "spotlight": "Spotlight",
+      "laser": "Laser",
+      "play": "Play",
+      "open": "Open",
+      "close": "Close",
+      "clear": "Clear",
+      "delete": "Delete",
+      "text": "Text",
+      "shape": "Shape",
+      "chart": "Chart",
+      "formula": "Formula",
+      "table": "Table",
+      "line": "Line",
+      "code": "Code",
+      "editCode": "Edit Code",
+      "discuss": "Discuss"
     }
   },
   "actions": {
@@ -406,7 +608,16 @@
       "sendBackward": "Send backward",
       "alignTop": "Align top",
       "alignMiddle": "Align middle",
-      "alignBottom": "Align bottom"
+      "alignBottom": "Align bottom",
+      "centerBoth": "Center on slide",
+      "setLink": "Set link",
+      "ruler": "Ruler",
+      "gridLines": "Gridlines",
+      "gridNone": "None",
+      "gridSmall": "Small",
+      "gridMedium": "Medium",
+      "gridLarge": "Large",
+      "resetPage": "Clear this page"
     },
     "background": {
       "label": "Background",
@@ -733,7 +944,13 @@
     "voiceInputDisabled": "Voice input disabled",
     "textInput": "Text input",
     "stopRecording": "Stop recording",
-    "startRecording": "Start recording"
+    "startRecording": "Start recording",
+    "toggleSidebar": "Show or hide the scene list",
+    "toggleChat": "Show or hide the chat",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "play": "Play",
+    "pause": "Pause"
   },
   "pbl": {
     "emptyProject": "PBL project has not been generated yet. Please create via course generation.",
@@ -951,7 +1168,8 @@
         },
         "durationMinutes": "{{m}} min",
         "durationHours": "{{h}} hr",
-        "durationHoursMinutes": "{{h}} hr {{m}} min"
+        "durationHoursMinutes": "{{h}} hr {{m}} min",
+        "stars": "Stars"
       },
       "completionCard": {
         "title": "Project Complete · Completion",
@@ -1010,8 +1228,10 @@
     "deleteFolderAndCourses_other": "Delete folder and {{count}} courses",
     "deleteFolderConfirmRemove": "This removes the folder and its courses, including chat history.",
     "notFound": "Course not found",
-    "notFoundDesc": "This course does not exist, or it has been deleted.",
-    "backToHome": "Back to home"
+    "notFoundDesc": "This course does not exist, has been deleted, or you do not have access to it.",
+    "backToHome": "Back to home",
+    "loadFailed": "Persistence is unavailable. Saved classrooms could not be loaded.",
+    "deleteFailed": "Failed to delete classroom"
   },
   "upload": {
     "pdfSizeLimit": "Supports PDF files up to 50MB",
@@ -1866,7 +2086,7 @@
       "download": "Download",
       "detailFailed": "Could not load the skill details",
       "contentLabel": "Content",
-      "builtinDetailNote": "This skill ships with OpenMAIC. Download it to import into another agent workspace.",
+      "builtinDetailNote": "This skill ships with ÔN THI. Download it to import into another agent workspace.",
       "upload": "Upload",
       "uploading": "Uploading…",
       "uploadFailed": "Could not upload the skill. Check the file and try again.",
@@ -2104,7 +2324,22 @@
         "roleFailed": "The role could not be changed. Try again."
       },
       "roleChanged": "Role updated.",
-      "changeRoleLabel": "Change role of {{username}}"
+      "changeRoleLabel": "Change role of {{username}}",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "Reset password",
+      "resetPasswordLabel": "Reset the password of {{username}}",
+      "resetTitle": "Reset the password of {{username}}?",
+      "resetDescription": "The account gets a temporary password and is signed out everywhere. The password is shown once: give it to the person and ask them to change it after signing in. The reset is written to the audit log.",
+      "resetDone": "Temporary password for {{username}}. Copy it now; it will not be shown again.",
+      "resetCopy": "Copy",
+      "resetCopied": "Temporary password copied.",
+      "resetClose": "Done"
     },
     "roles": {
       "learner": "Learner",
@@ -2113,9 +2348,37 @@
     },
     "administration": "Administration",
     "adminPage": {
-      "title": "Administration",
+      "title": "Operations",
       "description": "Accounts, usage and roles for this deployment.",
-      "denied": "This page is for operators and administrators."
+      "denied": "This page is for operators and administrators.",
+      "learn": "Go to learning",
+      "summary": {
+        "activeMembers": "Active memberships",
+        "pendingShares": "Share requests waiting",
+        "classes": "Classes",
+        "pendingAccessRequests": "Access requests waiting"
+      },
+      "providers": {
+        "title": "Server providers",
+        "description": "Read-only. Providers are set in the server configuration, not here.",
+        "empty": "No provider is configured on the server."
+      },
+      "deniedSignIn": "Sign in with an operator or administrator account."
+    },
+    "membership": {
+      "active": "Membership until {{date}} · {{quota}} tokens a month",
+      "none": "No active membership"
+    },
+    "password": {
+      "title": "Change password",
+      "description": "Other devices are signed out; this one stays signed in.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Repeat the new password",
+      "submit": "Change password",
+      "changed": "Password changed. Other devices were signed out.",
+      "wrongCurrent": "The current password is wrong.",
+      "mismatch": "The two new passwords do not match."
     }
   },
   "workbench": {
@@ -2149,17 +2412,52 @@
       "quotaValue": "{{tokens}} tokens a month",
       "grant": "Grant or extend",
       "resume": "Resume",
-      "suspend": "Suspend"
+      "suspend": "Suspend",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "Share requests",
-      "description": "Approve a request to open a course to all members.",
-      "empty": "No pending requests.",
+      "description": "Decide share requests, or take back courses already shared.",
+      "empty": "No course has been put forward for sharing yet.",
       "approve": "Approve",
       "reject": "Reject",
       "approved": "Course shared with members.",
       "rejected": "Request rejected.",
-      "requested": "Requested {{date}}"
+      "requested": "Requested {{date}}",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "Update"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "Refuse sharing “{{title}}”?",
+      "rejectDescription": "The owner sees that the request was refused, with your reason if you give one, and can ask again.",
+      "rejectReason": "Reason (optional)",
+      "snapshot": "Package: “{{name}}”, {{count}} scenes, {{media}} media files, {{size}}",
+      "remixOf": "Remix of “{{title}}”"
     },
     "previews": {
       "title": "Free previews",
@@ -2167,7 +2465,10 @@
       "courseId": "Course id",
       "add": "Mark as preview",
       "remove": "Remove",
-      "empty": "No previews yet."
+      "empty": "No previews yet.",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "Classes",
@@ -2178,12 +2479,247 @@
       "empty": "No classes yet.",
       "members": "{{count}} members",
       "courses": "{{count}} courses",
-      "attach": "Attach course"
+      "attach": "Attach course",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "New join code",
+      "newCodeTitle": "Give “{{name}}” a new join code?",
+      "newCodeDescription": "The current code stops working at once; members already in the class stay. The new code is shown once, so copy it.",
+      "membersOf": "Members of {{name}}",
+      "membersDescription": "A removed member can join again with the class code; give the class a new code to keep them out.",
+      "noMembers": "No members yet.",
+      "joined": "Joined {{date}}",
+      "removeMember": "Remove",
+      "removeMemberTitle": "Remove {{username}} from {{name}}?",
+      "removeMemberDescription": "They lose the courses of this class. The change is written to the audit log.",
+      "memberRemoved": "{{username}} removed from the class."
     },
     "audit": {
       "title": "Audit log",
-      "description": "Recent changes to accounts, memberships, sharing and classes.",
-      "empty": "Nothing recorded yet."
+      "description": "The newest {{max}} entries. Every create, edit and delete of accounts, memberships, shares, previews and classes is recorded here.",
+      "empty": "Nothing recorded yet.",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "Password resets"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "Join code replaced",
+        "password_reset": "Password reset",
+        "community_ban": "Block community posting",
+        "community_unban": "Unblock community posting",
+        "class_remove": "Member removed",
+        "challenge_create": "Create challenge",
+        "challenge_update": "Edit challenge",
+        "settings_update": "Change setting",
+        "share_update-approve": "Shared update approved",
+        "share_update-reject": "Shared update rejected"
+      }
+    },
+    "accessRequests": {
+      "title": "Access requests",
+      "description": "People asking for a membership. Approving gives 30 days and the default monthly allowance; change it in the members list afterwards.",
+      "empty": "No requests waiting.",
+      "requested": "Asked {{date}}",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "{{name}} is now a member.",
+      "rejected": "Request from {{name}} rejected.",
+      "reasonPlaceholder": "Reason (optional; the learner sees it, and it is kept in the audit log)",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "{{count}} support requests are waiting for a reply.",
+        "reportsOpen": "{{count}} reported community items are waiting."
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "Courses",
+      "description": "Every course on this system. Open one to review it, or copy its ID to mark it as a preview or attach it to a class.",
+      "open": "Open the course in a new tab",
+      "copy": "Copy ID {{id}}",
+      "copied": "Copied {{id}}",
+      "owner": "Owner",
+      "anonymous": "Not signed in",
+      "updated": "Updated",
+      "empty": "No courses yet."
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "Not found.",
       "MEMBERSHIP_REQUIRED": "An active membership is needed for this.",
       "QUOTA_EXCEEDED": "This month's AI allowance is used up.",
-      "ACCOUNTS_NOT_CONFIGURED": "Accounts are not set up on this deployment."
+      "ACCOUNTS_NOT_CONFIGURED": "Accounts are not set up on this deployment.",
+      "ALREADY_MEMBER": "You already have an active membership.",
+      "MEMBERSHIP_SUSPENDED": "Your membership is paused by an administrator.",
+      "REQUEST_PENDING": "A request is already waiting for an administrator.",
+      "REQUEST_TOO_SOON": "A rejected request can be sent again later.",
+      "COURSE_NOT_FOUND": "There is no course with this ID. Check the ID in the course address (/classroom/<ID>).",
+      "RATE_LIMITED": "You have too many unanswered requests. Wait for a reply first.",
+      "COMMUNITY_BLOCKED": "Your account is blocked from posting in the community."
     }
   },
   "catalog": {
     "title": "Catalog",
     "description": {
       "member": "Free previews, shared courses, and the courses of your classes.",
-      "guest": "Free previews. Sign in to see more."
+      "guest": "Free previews. Sign in to see more.",
+      "signedIn": "Free previews. Members also see shared courses and their classes."
     },
     "signInToSee": "Sign in to see shared courses and join a class.",
     "join": {
       "title": "Join a class",
       "code": "Join code",
       "submit": "Join",
-      "done": "You joined {{name}}."
+      "done": "You joined {{name}}.",
+      "description": "Enter the code you were given to join a class."
     },
     "empty": "Nothing to browse yet.",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "Your class"
     },
     "open": "Open",
-    "unavailable": "The catalog is not available on this deployment."
+    "unavailable": "The catalog is not available on this deployment.",
+    "back": "Back to the catalog",
+    "membersOnly": "Shared courses and classes are for members."
   },
   "courseShare": {
     "request": "Share with members",
-    "pending": "Waiting for approval",
     "stop": "Stop sharing",
     "requested": "Request sent. An operator will review it.",
     "withdrawn": "Sharing stopped. Learners who already have it keep their copy.",
-    "failed": "The course could not be shared. Try again."
+    "failed": "The course could not be shared. Try again.",
+    "rejected": "Your share request was refused.",
+    "rejectedWithReason": "Your share request was refused: {{reason}}",
+    "requestWithdrawn": "Share request withdrawn.",
+    "menu": "Share with members",
+    "packing": "Packing the course…",
+    "updateSent": "Update sent. Readers keep the current version until it is approved.",
+    "updatePending": "An update is waiting for review. Readers still get the approved version.",
+    "updateRejected": "The update was rejected: {{reason}}",
+    "sharedStatus": "Shared with members.",
+    "pendingStatus": "Waiting for an operator's review.",
+    "privateStatus": "Not shared yet.",
+    "update": "Update the shared version",
+    "resend": "Send the latest version again",
+    "withdraw": "Withdraw the request",
+    "reviewNote": "The course is sent exactly as you see it now (edits and media included). Every version needs an operator's approval."
+  },
+  "support": {
+    "title": "Contact the admin",
+    "description": "Send a question or request to the operations team. Replies appear here.",
+    "contact": "Contact the admin",
+    "panelTitle": "Support inbox",
+    "panelDescription": "Questions and requests from learners. Threads waiting for a reply come first.",
+    "new": "New request",
+    "subject": "Subject",
+    "body": "Message",
+    "username": "Send to (username)",
+    "send": "Send",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply…",
+    "close": "Mark as resolved",
+    "reopen": "Reopen",
+    "empty": "No requests yet.",
+    "pick": "Pick a request to read it.",
+    "staff": "Operations team",
+    "waiting": "Waiting",
+    "unread": "New",
+    "unreadCount": "{{count}} new replies",
+    "sent": "Sent.",
+    "state": {
+      "open": "Open",
+      "closed": "Resolved"
+    },
+    "filter": {
+      "label": "Filter by state"
+    },
+    "subjects": {
+      "renew": "Renew my membership",
+      "resume": "Resume my membership",
+      "quota": "Raise my AI allowance"
+    }
+  },
+  "community": {
+    "title": "Community",
+    "description": "Questions learners ask right on a slide, answered by the AI teaching assistant and by other members.",
+    "signIn": "Sign in to see the community.",
+    "empty": "No questions yet.",
+    "answer": "Answer",
+    "answerPlaceholder": "Write your answer… (Markdown and formulas like $x^2$ work)",
+    "answers": "{{count}} answers",
+    "answerCount": "{{count}} answers",
+    "vote": "Helpful ({{count}})",
+    "best": "Best",
+    "bestMarked": "Best answer chosen.",
+    "bestRewarded": "Chosen. {{name}} earned {{tokens}} reward tokens.",
+    "solved": "Solved",
+    "locked": "Locked",
+    "lockedHint": "This question is locked and takes no more answers.",
+    "hidden": "Hidden",
+    "markBest": "Mark as best",
+    "openSlide": "Open the slide",
+    "ai": {
+      "name": "AI teaching assistant",
+      "writing": "The AI teaching assistant is writing an answer…",
+      "retry": "Ask the AI again"
+    },
+    "ask": {
+      "button": "Ask a question",
+      "title": "Question",
+      "titlePlaceholder": "What is unclear?",
+      "body": "Details (optional)",
+      "bodyPlaceholder": "What you tried, where you got stuck…",
+      "submit": "Post question",
+      "onScene": "The question will be pinned to the slide “{{scene}}”.",
+      "onCourse": "The question will be pinned to the whole course.",
+      "aiNote": "The AI teaching assistant answers right away; other members can add to it."
+    },
+    "join": {
+      "title": "Join the discussion",
+      "body": "Members ask questions, get an instant answer from the AI teaching assistant, help others, and earn reward tokens when their answer is chosen as the best.",
+      "cta": "Become a member"
+    },
+    "report": {
+      "action": "Report",
+      "title": "Report content",
+      "description": "Tell the operations team why this does not belong here.",
+      "reason": "Reason",
+      "send": "Send report",
+      "done": "Report sent. Thank you."
+    },
+    "mod": {
+      "hide": "Hide",
+      "show": "Show",
+      "hidden": "Content hidden.",
+      "shown": "Content shown again.",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "ban": "Block posting",
+      "banned": "{{name}} can no longer post.",
+      "unban": "Unblock",
+      "unbanned": "{{name}} can post again."
+    },
+    "scene": {
+      "button": "Discussion on this slide",
+      "title": "Discussion",
+      "thisSlide": "This slide",
+      "wholeCourse": "Whole course",
+      "scope": "Scope",
+      "pick": "Pick a question to read, or ask a new one."
+    },
+    "feed": {
+      "all": "All",
+      "unsolved": "Unsolved",
+      "mine": "Mine",
+      "filter": "Filter questions",
+      "search": "Search questions",
+      "pick": "Pick a question to see its answers.",
+      "howToAsk": "Want to ask? Open a lesson, go to the slide you are stuck on and press the Discussion button in the toolbar."
+    },
+    "reports": {
+      "title": "Community reports",
+      "description": "Reported questions and answers. Hide what breaks the rules, dismiss wrong reports, or block the author from posting.",
+      "empty": "No reports waiting.",
+      "count": "{{count}} reports",
+      "reasons": "Reasons",
+      "open": "Open",
+      "dismiss": "Dismiss",
+      "dismissed": "Report dismissed.",
+      "banned": "Accounts blocked from posting",
+      "kind": {
+        "question": "Question",
+        "answer": "Answer"
+      }
+    },
+    "tabs": {
+      "questions": "Q&A",
+      "challenges": "Weekly challenges"
+    }
+  },
+  "challenge": {
+    "none": "No challenges yet.",
+    "pick": "Pick a challenge to see it.",
+    "entries": "{{count}} entries",
+    "phase": {
+      "upcoming": "Coming up",
+      "open": "Open for entries",
+      "voting": "Voting",
+      "finished": "Finished"
+    },
+    "when": {
+      "upcoming": "Opens {{date}}",
+      "open": "Entries close {{date}}",
+      "voting": "Voting ends {{date}}",
+      "finished": "Ended {{date}}"
+    },
+    "prize": "Place {{rank}}: {{tokens}} tokens",
+    "prizeBadge": "+ the Weekly Champion badge",
+    "rank": "Place {{rank}}",
+    "yours": "Yours",
+    "aiScore": "AI score {{score}}/10",
+    "aiFeedback": "AI feedback (only you see this)",
+    "reward": "+{{tokens}} tokens",
+    "vote": "Vote ({{count}})",
+    "voteHint": "Vote for the solutions you find best. You cannot vote for your own.",
+    "yourEntry": "Your solution",
+    "editEntry": "Edit your solution",
+    "entryPlaceholder": "Write your solution… (Markdown and formulas like $x^2$ work)",
+    "gradeNote": "The AI teaching assistant grades it as soon as you submit. You can edit and resubmit until the deadline; other members see entries only after it.",
+    "grading": "Submitting and grading…",
+    "submit": "Submit solution",
+    "resubmit": "Resubmit",
+    "submitted": "Submitted. Your AI score and feedback are below.",
+    "notGraded": {
+      "quota": "Submitted, but not graded: this month's AI allowance is used up.",
+      "failed": "Submitted, but the AI could not grade it. Resubmit to try again."
+    },
+    "showReference": "Show the reference solution",
+    "hideReference": "Hide the reference solution",
+    "results": "Results",
+    "allEntries": "Solutions",
+    "noEntries": "No entries.",
+    "leaderboard": {
+      "title": "Leaderboard this month",
+      "empty": "Nobody has points this month yet.",
+      "points": "{{count}} points",
+      "rule": "1 point per entry, plus 3 / 2 / 1 for places 1 / 2 / 3."
+    },
+    "admin": {
+      "panelTitle": "Weekly challenges",
+      "panelDescription": "Post the problem, the entry and voting windows, and the rewards for each challenge. Results are computed when voting ends.",
+      "create": "New challenge",
+      "edit": "Edit challenge",
+      "saved": "Challenge saved.",
+      "title": "Title",
+      "statement": "Problem",
+      "markdownHint": "Markdown and $...$ formulas",
+      "reference": "Reference solution (hidden until voting)",
+      "referenceHint": "Used for the AI grade; learners see it once voting starts.",
+      "opensAt": "Opens at",
+      "submissionDays": "Days for entries",
+      "votingDays": "Days for voting",
+      "rewards": "Token rewards for the top 3",
+      "rewardsHint": "Keep them small. Rewards still count toward each person's monthly reward cap.",
+      "hidden": "Hide this challenge"
+    },
+    "settings": {
+      "title": "Weekly challenges: AI grading",
+      "description": "Each submission gets one AI grade. Choose who pays the tokens for it.",
+      "paidBy": "Who pays for AI grading",
+      "submitter": "The submitter's allowance",
+      "submitterHint": "Learners without allowance left still submit, only without an AI score.",
+      "system": "The system",
+      "systemHint": "Does not use the learner's allowance; counts toward the operating budget.",
+      "adminOnly": "Only an administrator can change this setting.",
+      "saved": "Setting saved."
+    }
+  },
+  "remix": {
+    "menu": "Remix",
+    "action": "Remix this course",
+    "creating": "Creating your remix…",
+    "created": "Your remix is ready.",
+    "note": "Makes a copy you own to edit and share again. The original author is credited and gets a share of the reward when your remix is read.",
+    "of": "Remix of “{{title}}” by {{author}}",
+    "list": "{{count}} remixes",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "A membership is needed to remix.",
+      "FORBIDDEN": "This course cannot be remixed.",
+      "OWN_COURSE": "This is your own course.",
+      "RATE_LIMITED": "You reached today's remix limit."
+    },
+    "settings": {
+      "title": "Course remixes",
+      "description": "The original author's share of reader rewards, and how many remixes one member may make per day.",
+      "royaltyPercent": "Original author's share (%)",
+      "dailyLimit": "Remixes per day"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "main": "Main navigation"
   }
 }

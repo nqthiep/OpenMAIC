@@ -10,8 +10,190 @@
     "close": "Schließen"
   },
   "home": {
-    "slogan": "Generatives Lernen im interaktiven Lernraum mit mehreren KI-Agenten",
-    "greetingWithName": "Hallo, {{name}}"
+    "slogan": "Wissen sicher verstehen · Selbstbewusst in die Prüfung",
+    "greetingWithName": "Hallo, {{name}}",
+    "guest": {
+      "kicker": "KI als Lernpartner",
+      "title": "In Ihrem Tempo lernen, mit KI als Unterstützung",
+      "description": "Lektionen, Folien und Diskussionen entstehen mit Hilfe von KI und werden von Menschen geprüft, bevor sie geteilt werden. Sehen Sie sich zuerst die kostenlosen Vorschauen an. Kein Konto nötig.",
+      "signIn": "Anmelden",
+      "browseCatalog": "Kurse durchsuchen",
+      "stepsTitle": "So funktioniert es",
+      "step1": {
+        "title": "Kostenlose Vorschau",
+        "body": "Öffnen Sie die vom Administrator ausgewählten Kurse, ohne Konto."
+      },
+      "step2": {
+        "title": "Anmelden",
+        "body": "Melden Sie sich mit dem Ihnen zugeteilten Konto an. Gäste können sich umsehen, aber keine Kurse erstellen.",
+        "titleOpen": "Anmelden oder Konto erstellen",
+        "bodyOpen": "Erstellen Sie kostenlos ein Konto oder melden Sie sich an. Bis Sie Mitglied sind, können Sie sich umsehen, aber noch keine Kurse erstellen."
+      },
+      "step3": {
+        "title": "Mitglied werden",
+        "body": "Mitglieder können Kurse mit KI erstellen, Klassen beitreten und Eigenes teilen."
+      },
+      "previewsTitle": "Kostenlose Vorschauen",
+      "previewsEmpty": "Noch keine Vorschauen. Schauen Sie bald wieder vorbei.",
+      "membershipTitle": "Mitglied werden",
+      "membershipBody": "Mitglieder erhalten ein monatliches Kontingent, um Kurse mit KI zu erstellen, per Code Klassen beizutreten und Kurse mit anderen Mitgliedern zu teilen.",
+      "nav": {
+        "features": "Funktionen",
+        "how": "So funktioniert es",
+        "previews": "Vorschauen",
+        "membership": "Mitgliedschaft"
+      },
+      "chip1": "Aus mehreren Blickwinkeln erklärt",
+      "chip2": "Folien & Whiteboard",
+      "chip3": "Quiz & Projekte",
+      "mock": {
+        "title": "Brüche im Alltag",
+        "live": "Live",
+        "teacher": "Schneiden wir eine Pizza in vier gleiche Stücke.",
+        "student": "Und wenn die Stücke nicht gleich groß sind?"
+      },
+      "features": {
+        "title": "Gemacht, damit Sie verstehen",
+        "subtitle": "Die KI erklärt, diskutiert und prüft Ihr Verständnis, wie in einer geduldigen Lerngruppe. Was Sie lernen, entscheiden Sie.",
+        "f1": {
+          "title": "Eine Lerngruppe in jeder Lektion",
+          "body": "Lehrkraft, Mitschüler und Assistent, alle von der KI gespielt, machen mit, sodass jede Idee aus mehreren Blickwinkeln erklärt wird."
+        },
+        "f2": {
+          "title": "Folien und Whiteboard",
+          "body": "Jede Lektion kommt mit Folien, einem Live-Whiteboard und anschaulichen Erklärungen."
+        },
+        "f3": {
+          "title": "Quiz und Projekte",
+          "body": "Prüfen Sie Ihr Wissen mit Quizfragen und üben Sie in projektbasierten Aufgaben."
+        },
+        "f4": {
+          "title": "Sprachausgabe",
+          "body": "Szenen lassen sich vorlesen, und Sie können per Sprache antworten."
+        },
+        "f5": {
+          "title": "Klassen und Teilen",
+          "body": "Treten Sie mit einem Code einer Klasse bei und teilen Sie Ihre Kurse mit anderen Mitgliedern, sobald ein Administrator sie freigegeben hat."
+        },
+        "f6": {
+          "title": "Zum Mitnehmen",
+          "body": "Exportieren Sie einen Kurs als Webseite, PowerPoint-Datei oder Video."
+        }
+      },
+      "previewsSubtitle": "Öffnen Sie diese Kurse sofort. Kein Konto nötig.",
+      "perks": {
+        "p1": "Ein monatliches KI-Kontingent für eigene Kurse",
+        "p2": "Klassen per Einladungscode beitreten",
+        "p3": "Eigene Kurse mit anderen Mitgliedern teilen",
+        "p4": "Kurse als Webseite, PowerPoint oder Video exportieren"
+      },
+      "cta": {
+        "title": "Möchten Sie es selbst sehen?",
+        "body": "Öffnen Sie zuerst eine kostenlose Vorschau oder melden Sie sich an, wenn Sie bereit sind."
+      },
+      "footerTagline": "ÔN THI · basiert auf dem Open-Source-Projekt OpenMAIC",
+      "trust": {
+        "title": "KI mit Sorgfalt einsetzen",
+        "subtitle": "Wir wissen, dass nicht jeder der KI schon vertraut. So versuchen wir, Ihr Vertrauen zu verdienen.",
+        "t1": {
+          "title": "Sie behalten die Führung",
+          "body": "Die KI hilft nur beim Erklären und Üben. Sie wählen, was Sie lernen, und können jederzeit aufhören."
+        },
+        "t2": {
+          "title": "Geprüft, bevor es geteilt wird",
+          "body": "Ein Administrator prüft einen Kurs, bevor andere Mitglieder ihn sehen."
+        },
+        "t3": {
+          "title": "Ehrlich über Grenzen",
+          "body": "KI kann Fehler machen. Prüfen Sie Wichtiges bei Ihrer Lehrkraft oder einer vertrauenswürdigen Quelle."
+        },
+        "t4": {
+          "title": "Erst ansehen, dann entscheiden",
+          "body": "Kostenlose Vorschauen stehen allen offen, ohne Konto und ohne Verpflichtung."
+        }
+      }
+    },
+    "locked": {
+      "membership": "Kurse mit KI zu erstellen ist Mitgliedern vorbehalten.",
+      "classes": "Klassen beizutreten ist Mitgliedern vorbehalten.",
+      "contactAdmin": "Bitten Sie einen Administrator, Sie als Mitglied hinzuzufügen.",
+      "quota": "Das KI-Kontingent dieses Monats ist aufgebraucht.",
+      "quotaReset": "Neue Kurse können ab {{date}} wieder erstellt werden."
+    },
+    "quota": {
+      "label": "KI-Kontingent in diesem Monat",
+      "used": "{{used}} von {{quota}} Token verbraucht"
+    },
+    "classes": {
+      "mine": "Meine Klassen"
+    },
+    "status": {
+      "ok": "Mitgliedschaft bis {{date}} · verbleibende Tage: {{days}}",
+      "expiring": "Ihre Mitgliedschaft endet am {{date}} (verbleibende Tage: {{days}}). Bitten Sie einen Administrator um die Verlängerung.",
+      "quotaNear": "Sie haben {{percent}} % des KI-Kontingents dieses Monats verbraucht.",
+      "quotaOut": "Das KI-Kontingent dieses Monats ist aufgebraucht. Ihre Kurse bleiben zum Lernen offen.",
+      "expired": "Ihre Mitgliedschaft ist am {{date}} abgelaufen. Ihre Kurse bleiben lesbar. Bitten Sie einen Administrator um die Verlängerung, um neue Kurse zu erstellen.",
+      "suspended": "Ihre Mitgliedschaft ist pausiert. Ihre Kurse bleiben lesbar. Bitten Sie einen Administrator, sie wieder zu aktivieren."
+    },
+    "continue": {
+      "title": "Weiterlernen",
+      "progress": "Szene {{current}} von {{total}}",
+      "button": "Weiter"
+    },
+    "myClasses": {
+      "members": "Mitglieder: {{count}}",
+      "noCourses": "Dieser Klasse sind noch keine Kurse zugeordnet.",
+      "untitled": "Kurs {{number}}"
+    },
+    "starter": {
+      "title": "Sie wissen nicht, wo Sie anfangen sollen? Probieren Sie eines davon:",
+      "one": "Erkläre [Thema] für Anfänger Schritt für Schritt",
+      "two": "Erstelle einen Wiederholungsplan für [Thema] für eine Woche",
+      "three": "Schreibe Übungsaufgaben zu [Thema] mit ausführlichen Lösungen"
+    },
+    "access": {
+      "prompt": "Bitten Sie einen Administrator, Sie als Mitglied aufzunehmen.",
+      "promptRenew": "Bitten Sie einen Administrator, Ihre Mitgliedschaft zu verlängern.",
+      "notePlaceholder": "Kurze Nachricht (optional): wer Sie sind und warum Sie Zugang brauchen",
+      "button": "Zugang anfragen",
+      "renewButton": "Verlängerung anfragen",
+      "pending": "Ihre Anfrage wurde am {{date}} gesendet. Ein Administrator sieht sie sich an.",
+      "rejected": "Ihre letzte Anfrage wurde nicht angenommen. Ab {{date}} können Sie erneut anfragen.",
+      "suspended": "Ein Administrator hat Ihre Mitgliedschaft pausiert. Bitten Sie ihn, sie wieder zu aktivieren.",
+      "refusalReason": "Grund: {{reason}}"
+    },
+    "contribution": {
+      "title": "Mein Beitrag",
+      "shared": "Geteilte Kurse",
+      "pending": "Wartet auf Prüfung",
+      "readers": "Leser",
+      "bonus": "Belohnung in diesem Monat",
+      "bonusValue": "+{{tokens}} von {{cap}} Token",
+      "badges": "Abzeichen",
+      "badge": {
+        "readers-10": "10 Leser",
+        "readers-100": "100 Leser",
+        "challenge-top3": "Wochenchampion"
+      },
+      "next": "Noch {{count}} Leser bis zum Abzeichen „{{badge}}“.",
+      "readersOf": "{{count}} Leser",
+      "rejected": "Abgelehnt",
+      "rejectedWithReason": "Abgelehnt: {{reason}}"
+    },
+    "focus": {
+      "add": "Hinzufügen, was Sie lernen",
+      "summary": "Sie lernen: {{focus}}",
+      "subjectPlaceholder": "Fach, zum Beispiel Mathematik",
+      "levelPlaceholder": "Niveau, zum Beispiel Klasse 10",
+      "save": "Speichern"
+    },
+    "composer": {
+      "title": "Was möchtest du heute lernen?"
+    },
+    "renew": {
+      "pending": "Verlängerung am {{date}} angefragt.",
+      "rejected": "Die Verlängerung wurde nicht angenommen. Du kannst ab {{date}} erneut anfragen."
+    }
   },
   "toolbar": {
     "pdfParser": "Parser",
@@ -44,7 +226,9 @@
     "ttsPreview": "Vorschau",
     "ttsPreviewing": "Wird abgespielt...",
     "interactiveModeHint": "Aktiviere den interaktiven Modus, damit bevorzugt interaktive Inhalte erzeugt werden",
-    "interactiveModeLabel": "Interaktiver Modus"
+    "interactiveModeLabel": "Interaktiver Modus",
+    "advanced": "Erweitert",
+    "advancedHint": "Erweiterte Optionen: Modell, Websuche, Bilder/Video, interaktiver Modus, Agenten. Standardmäßig wählt ÔN THI ein zur Anfrage passendes Modell und ergänzt Illustrationen und interaktive Aktivitäten."
   },
   "export": {
     "pptx": "PPTX exportieren",
@@ -170,6 +354,24 @@
       "qa": "Q&A",
       "discussion": "Disk.",
       "lecture": "Vortrag"
+    },
+    "actionTag": {
+      "spotlight": "Spotlight",
+      "laser": "Laser",
+      "play": "Abspielen",
+      "open": "Öffnen",
+      "close": "Schließen",
+      "clear": "Leeren",
+      "delete": "Löschen",
+      "text": "Text",
+      "shape": "Form",
+      "chart": "Diagramm",
+      "formula": "Formel",
+      "table": "Tabelle",
+      "line": "Linie",
+      "code": "Code",
+      "editCode": "Code bearbeiten",
+      "discuss": "Diskutieren"
     }
   },
   "actions": {
@@ -377,8 +579,8 @@
       "rename": "Umbenennen",
       "sceneIncomplete": "Diese Seite enthält unvollständige Inhalte",
       "addPage": "Seite hinzufügen",
-      "nextPage": "Next page",
-      "prevPage": "Previous page"
+      "nextPage": "Nächste Seite",
+      "prevPage": "Vorherige Seite"
     },
     "zorder": {
       "toFront": "In den Vordergrund",
@@ -406,7 +608,16 @@
       "sendBackward": "Eine Ebene nach hinten",
       "alignTop": "Oben ausrichten",
       "alignMiddle": "Mittig ausrichten",
-      "alignBottom": "Unten ausrichten"
+      "alignBottom": "Unten ausrichten",
+      "centerBoth": "Auf Folie zentrieren",
+      "setLink": "Link festlegen",
+      "ruler": "Lineal",
+      "gridLines": "Gitternetz",
+      "gridNone": "Keins",
+      "gridSmall": "Klein",
+      "gridMedium": "Mittel",
+      "gridLarge": "Groß",
+      "resetPage": "Diese Seite leeren"
     },
     "background": {
       "label": "Hintergrund",
@@ -636,10 +847,10 @@
       "removeFromClass": "Aus dem Kurs entfernen",
       "aiClassmates": "KI-Mitlernende · {{count}}",
       "addRole": "Rolle hinzufügen",
-      "shortTitle": "Roster"
+      "shortTitle": "Besetzung"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "Verweis {{label}} entfernen",
       "counts": "{{count}}/{{max}} referenziert",
       "exitPicking": "Auswahl beenden",
       "startPicking": "Elemente referenzieren"
@@ -733,7 +944,13 @@
     "voiceInputDisabled": "Spracheingabe deaktiviert",
     "textInput": "Texteingabe",
     "stopRecording": "Aufnahme beenden",
-    "startRecording": "Aufnahme starten"
+    "startRecording": "Aufnahme starten",
+    "toggleSidebar": "Szenenliste ein- oder ausblenden",
+    "toggleChat": "Chat ein- oder ausblenden",
+    "mute": "Stummschalten",
+    "unmute": "Ton einschalten",
+    "play": "Abspielen",
+    "pause": "Pausieren"
   },
   "pbl": {
     "emptyProject": "Das PBL-Projekt wurde noch nicht generiert. Erstelle es über die Kursgenerierung.",
@@ -951,7 +1168,8 @@
         },
         "durationMinutes": "{{m}} Min.",
         "durationHours": "{{h}} Std.",
-        "durationHoursMinutes": "{{h}} Std. {{m}} Min."
+        "durationHoursMinutes": "{{h}} Std. {{m}} Min.",
+        "stars": "Sterne"
       },
       "completionCard": {
         "title": "Projekt abgeschlossen · Auswertung",
@@ -1010,8 +1228,10 @@
     "deleteFolderAndCourses_other": "Ordner und {{count}} Kurse löschen",
     "deleteFolderConfirmRemove": "Dadurch werden der Ordner und seine Kurse einschließlich des Chatverlaufs gelöscht.",
     "notFound": "Kurs nicht gefunden",
-    "notFoundDesc": "Dieser Kurs existiert nicht oder wurde gelöscht.",
-    "backToHome": "Zurück zur Startseite"
+    "notFoundDesc": "Dieser Kurs existiert nicht, wurde gelöscht oder du hast keine Berechtigung, ihn anzusehen.",
+    "backToHome": "Zurück zur Startseite",
+    "loadFailed": "Speicher nicht verfügbar. Gespeicherte Klassenräume konnten nicht geladen werden.",
+    "deleteFailed": "Klassenraum konnte nicht gelöscht werden"
   },
   "upload": {
     "pdfSizeLimit": "Unterstützt PDF-Dateien bis zu 50 MB",
@@ -1287,7 +1507,7 @@
     "connectionFailed": "Verbindung fehlgeschlagen",
     "capabilities": {
       "vision": "Bildverarbeitung",
-      "tools": "Tools",
+      "tools": "Werkzeuge",
       "streaming": "Streaming"
     },
     "contextWindow": "Kontext",
@@ -1362,10 +1582,10 @@
     "noConfiguredProviders": "Keine konfigurierten Anbieter",
     "configureProvidersFirst": "Konfiguriere bitte links unter \"Modellanbieter\" die Verbindungseinstellungen des Anbieters",
     "currentlyUsing": "Derzeit verwendet",
-    "ttsSettings": "Text-to-Speech",
+    "ttsSettings": "Sprachausgabe",
     "asrSettings": "Spracherkennung",
     "audioSettings": "Audioeinstellungen",
-    "ttsSection": "Text-to-Speech (TTS)",
+    "ttsSection": "Sprachausgabe (TTS)",
     "asrSection": "Automatische Spracherkennung (ASR)",
     "ttsDescription": "TTS (Text-to-Speech) – Text in Sprache umwandeln",
     "asrDescription": "ASR (automatische Spracherkennung) – Sprache in Text umwandeln",
@@ -1442,16 +1662,16 @@
     "voxcpmStopPreview": "Vorschau stoppen",
     "voxcpmPreviewVoice": "Stimme vorhören",
     "voxcpmDeleteVoice": "Stimme löschen",
-    "qwenCloneVoicesTitle": "Qwen TTS Cloned Voices",
-    "qwenCloneRefText": "Enter the verbatim transcript of the reference audio",
-    "qwenCloneRefAudioHint": "Use a clean 1–60 second voice sample. A 10–20 second sample is recommended; audio is converted to 24 kHz mono PCM WAV.",
-    "qwenCloneSaved": "Qwen cloned voice registered and saved",
-    "qwenCloneSaveFailed": "Failed to register the Qwen cloned voice",
-    "qwenCloneUnsupported": "Recording is not supported in this browser; upload an audio file instead.",
-    "qwenCloneSpeedHint": "Cloned voices always synthesize at 1× speed.",
-    "qwenCloneDeleteWarning": "The voice was removed locally, but provider deletion failed.",
-    "qwenCloneNarrationUnavailable": "The assigned voice is unavailable. Narration will use another enabled voice instead.",
-    "qwenCloneDiscussionUnavailable": "The assigned voice is unavailable. Discussion will use another enabled voice instead.",
+    "qwenCloneVoicesTitle": "Geklonte Stimmen (Qwen TTS)",
+    "qwenCloneRefText": "Wortgetreues Transkript des Referenz-Audios eingeben",
+    "qwenCloneRefAudioHint": "Verwende eine saubere Sprachprobe von 1–60 Sekunden. Empfohlen sind 10–20 Sekunden; das Audio wird in 24-kHz-Mono-PCM-WAV umgewandelt.",
+    "qwenCloneSaved": "Geklonte Qwen-Stimme registriert und gespeichert",
+    "qwenCloneSaveFailed": "Registrierung der geklonten Qwen-Stimme fehlgeschlagen",
+    "qwenCloneUnsupported": "Aufnahme wird in diesem Browser nicht unterstützt; lade stattdessen eine Audiodatei hoch.",
+    "qwenCloneSpeedHint": "Geklonte Stimmen werden immer mit 1×-Geschwindigkeit synthetisiert.",
+    "qwenCloneDeleteWarning": "Die Stimme wurde lokal entfernt, das Löschen beim Anbieter ist jedoch fehlgeschlagen.",
+    "qwenCloneNarrationUnavailable": "Die zugewiesene Stimme ist nicht verfügbar. Für die Erzählung wird stattdessen eine andere aktivierte Stimme verwendet.",
+    "qwenCloneDiscussionUnavailable": "Die zugewiesene Stimme ist nicht verfügbar. Für die Diskussion wird stattdessen eine andere aktivierte Stimme verwendet.",
     "providerOpenAIWhisper": "OpenAI ASR (gpt-4o-mini-transcribe)",
     "providerBrowserNative": "Browserintegrierte ASR",
     "providerQwenASR": "Qwen ASR (Alibaba Cloud Bailian)",
@@ -1866,7 +2086,7 @@
       "download": "Herunterladen",
       "detailFailed": "Die Skill-Details konnten nicht geladen werden",
       "contentLabel": "Inhalt",
-      "builtinDetailNote": "Dieser Skill ist in OpenMAIC enthalten. Lade ihn herunter, um ihn in einen anderen Agenten-Arbeitsbereich zu importieren.",
+      "builtinDetailNote": "Dieser Skill ist in ÔN THI enthalten. Lade ihn herunter, um ihn in einen anderen Agenten-Arbeitsbereich zu importieren.",
       "upload": "Hochladen",
       "uploading": "Wird hochgeladen…",
       "uploadFailed": "Der Skill konnte nicht hochgeladen werden. Prüfe die Datei und versuche es erneut.",
@@ -1881,83 +2101,83 @@
     "alidocmindAccessKeySecret": "AccessKey Secret"
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "Unbenannter Kurs",
+    "sceneCount": "{{count}} Seiten",
+    "sceneCount_one": "{{count}} Seite",
+    "sceneCount_other": "{{count}} Seiten",
+    "courseLinkHint": "{{name}} im rechten Bereich öffnen",
+    "courseLinkMore": "{{count}} weitere Klassenräume",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "Klassenraum für diese Nachricht referenzieren",
+      "empty": "Kein passender Klassenraum",
+      "alreadyNamed": "Bereits referenziert",
+      "remove": "{{name}} entfernen",
+      "pillHint": "Diese Nachricht referenziert {{name}}",
       "notAccepted": "Der Server ist vorübergehend nicht verfügbar. Bitte versuche es gleich noch einmal.",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "{{name}} referenzieren",
+      "capped": "Die ersten {{count}} werden angezeigt – tippe weiter, um einzugrenzen"
     },
-    "heroTitle": "What will you create today?",
-    "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "heroTitle": "Was erstellst du heute?",
+    "heroSubtitle": "Teile eine Idee und mach daraus eine Lernreise, auf die sich andere einlassen können",
+    "newSession": "Neuer Chat",
     "sections": {
-      "courses": "Courses",
+      "courses": "Kurse",
       "sessions": "Chats"
     },
-    "coursesEmpty": "No courses yet",
-    "sessionsEmpty": "No chats yet",
-    "loading": "Loading",
-    "loadFailed": "Couldn't load",
-    "retry": "Retry",
-    "untitledSession": "Untitled chat",
-    "pagePosition": "Page {{index}} of {{total}}",
-    "exitPro": "Exit Pro",
-    "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
-    "currentSession": "Current chat",
-    "startLearning": "Start learning",
+    "coursesEmpty": "Noch keine Kurse",
+    "sessionsEmpty": "Noch keine Chats",
+    "loading": "Wird geladen",
+    "loadFailed": "Laden fehlgeschlagen",
+    "retry": "Erneut versuchen",
+    "untitledSession": "Unbenannter Chat",
+    "pagePosition": "Seite {{index}} von {{total}}",
+    "exitPro": "Pro beenden",
+    "navAria": "Arbeitsbereich-Navigation",
+    "homeAria": "Zurück zur Startseite",
+    "currentSession": "Aktueller Chat",
+    "startLearning": "Lernen starten",
     "time": {
-      "justNow": "Just now",
-      "minutesAgo": "{{count}}m ago",
-      "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "justNow": "Gerade eben",
+      "minutesAgo": "vor {{count}} Min.",
+      "hoursAgo": "vor {{count}} Std.",
+      "daysAgo": "vor {{count}} T."
     },
     "sessionStatus": {
-      "connecting": "Connecting",
-      "queued": "Queued",
-      "running": "Running",
-      "succeeded": "Ready",
-      "failed": "Needs attention",
-      "cancelled": "Stopped"
+      "connecting": "Verbindung wird hergestellt",
+      "queued": "In Warteschlange",
+      "running": "Läuft",
+      "succeeded": "Fertig",
+      "failed": "Benötigt Aufmerksamkeit",
+      "cancelled": "Gestoppt"
     },
-    "backToWorkspace": "Back to workspace",
-    "searchPlaceholder": "Filter by name",
-    "searchAria": "Search {{section}}",
-    "searchEmpty": "No matches",
-    "showMore": "Show {{count}} more",
-    "showLess": "Show less",
-    "utilitiesAria": "Preferences and account",
-    "resizeAria": "Drag to resize the sidebar",
-    "chatPaneAria": "Chat panel",
-    "classroomPaneAria": "Classroom",
-    "collapseNav": "Collapse navigation",
-    "expandNav": "Expand navigation",
-    "expandNavInto": "Expand navigation · {{section}}",
-    "collapseChat": "Collapse conversation",
-    "expandChat": "Conversation",
-    "collapseClassroom": "Collapse classroom",
-    "expandClassroom": "Classroom",
-    "readOnlyBadge": "Read-only",
-    "noCourseTitle": "No course open",
-    "noCourseHint": "Open one from a course link in the conversation, or pick one from the list on the left — the conversation stays put",
-    "resizeChatAria": "Drag to resize the conversation pane",
-    "firstPageLanding": "The first page is landing…",
+    "backToWorkspace": "Zurück zum Arbeitsbereich",
+    "searchPlaceholder": "Nach Name filtern",
+    "searchAria": "{{section}} durchsuchen",
+    "searchEmpty": "Keine Treffer",
+    "showMore": "{{count}} weitere anzeigen",
+    "showLess": "Weniger anzeigen",
+    "utilitiesAria": "Einstellungen und Konto",
+    "resizeAria": "Ziehen, um die Seitenleiste anzupassen",
+    "chatPaneAria": "Chat-Bereich",
+    "classroomPaneAria": "Klassenzimmer",
+    "collapseNav": "Navigation einklappen",
+    "expandNav": "Navigation ausklappen",
+    "expandNavInto": "Navigation ausklappen · {{section}}",
+    "collapseChat": "Unterhaltung einklappen",
+    "expandChat": "Unterhaltung",
+    "collapseClassroom": "Klassenzimmer einklappen",
+    "expandClassroom": "Klassenzimmer",
+    "readOnlyBadge": "Schreibgeschützt",
+    "noCourseTitle": "Kein Kurs geöffnet",
+    "noCourseHint": "Öffne einen Kurs über einen Kurslink in der Unterhaltung oder wähle einen aus der Liste links – die Unterhaltung bleibt erhalten",
+    "resizeChatAria": "Ziehen, um den Unterhaltungsbereich anzupassen",
+    "firstPageLanding": "Die erste Seite kommt gleich…",
     "autoSaving": "Wird automatisch gespeichert…",
     "autoSaved": "Gespeichert",
-    "collapsedTitle": "Both panes are collapsed",
-    "collapsedHint": "Use the tabs on the left to bring the conversation or the classroom back",
-    "moreUtilities": "More",
-    "rowMore": "More actions for {{name}}",
+    "collapsedTitle": "Beide Bereiche sind eingeklappt",
+    "collapsedHint": "Über die Tabs links holst du die Unterhaltung oder das Klassenzimmer zurück",
+    "moreUtilities": "Mehr",
+    "rowMore": "Weitere Aktionen für {{name}}",
     "folderDeleteHint": "Die Kurse darin wandern zurück auf die oberste Ebene. Nichts wird gelöscht.",
     "dropToUnfile": "Hier ablegen, um aus dem Ordner zu nehmen",
     "renameInvalid": "Der Name muss 1–120 Zeichen lang sein",
@@ -1966,14 +2186,14 @@
     "renameSession": "Chat umbenennen",
     "renameSessionAria": "Chat „{{name}}“ umbenennen",
     "renameSessionFailed": "Umbenennen fehlgeschlagen, bitte erneut versuchen",
-    "delete": "Delete",
-    "confirmDelete": "Confirm delete",
-    "deleting": "Deleting…",
-    "deleteFailed": "Couldn't delete. Please try again.",
-    "tabsAria": "Chats and courses",
-    "courseTabsAria": "Open courses",
-    "courseTabClose": "Close tab: {{name}}",
-    "courseTabRunning": "Generating",
+    "delete": "Löschen",
+    "confirmDelete": "Löschen bestätigen",
+    "deleting": "Wird gelöscht…",
+    "deleteFailed": "Löschen fehlgeschlagen. Bitte versuche es erneut.",
+    "tabsAria": "Chats und Kurse",
+    "courseTabsAria": "Geöffnete Kurse",
+    "courseTabClose": "Tab schließen: {{name}}",
+    "courseTabRunning": "Wird generiert",
     "foldersUnavailable": "Ordner sind in dieser Version nicht verfügbar"
   },
   "profile": {
@@ -1992,7 +2212,7 @@
     "imageHint": "Bilder für Folien generieren",
     "videoCapability": "Videogenerierung",
     "videoHint": "Videos für Folien generieren",
-    "ttsCapability": "Text-to-Speech",
+    "ttsCapability": "Sprachausgabe",
     "ttsHint": "KI-Lehrkraft liest Inhalte vor",
     "asrCapability": "Spracherkennung",
     "asrHint": "Spracheingabe für Diskussionsrunden",
@@ -2086,7 +2306,22 @@
         "roleFailed": "Die Rolle konnte nicht geändert werden. Bitte versuchen Sie es erneut."
       },
       "roleChanged": "Rolle aktualisiert.",
-      "changeRoleLabel": "Rolle von {{username}} ändern"
+      "changeRoleLabel": "Rolle von {{username}} ändern",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "Passwort zurücksetzen",
+      "resetPasswordLabel": "Passwort von {{username}} zurücksetzen",
+      "resetTitle": "Passwort von {{username}} zurücksetzen?",
+      "resetDescription": "Das Konto erhält ein temporäres Passwort und wird überall abgemeldet. Das Passwort wird nur einmal angezeigt: Gib es der Person und bitte sie, es nach der Anmeldung zu ändern. Die Aktion wird protokolliert.",
+      "resetDone": "Temporäres Passwort für {{username}}. Kopiere es jetzt; es wird nicht erneut angezeigt.",
+      "resetCopy": "Kopieren",
+      "resetCopied": "Temporäres Passwort kopiert.",
+      "resetClose": "Fertig"
     },
     "roles": {
       "learner": "Lernende",
@@ -2095,28 +2330,56 @@
     },
     "administration": "Verwaltung",
     "adminPage": {
-      "title": "Verwaltung",
+      "title": "Betrieb",
       "description": "Konten, Nutzung und Rollen dieser Instanz.",
-      "denied": "Diese Seite ist nur für Betreiber und Administratoren."
+      "denied": "Diese Seite ist nur für Betreiber und Administratoren.",
+      "learn": "Zum Lernbereich",
+      "summary": {
+        "activeMembers": "Aktive Mitgliedschaften",
+        "pendingShares": "Wartende Freigabeanfragen",
+        "classes": "Klassen",
+        "pendingAccessRequests": "Wartende Zugangsanfragen"
+      },
+      "providers": {
+        "title": "Server-Anbieter",
+        "description": "Nur Ansicht. Anbieter werden in der Serverkonfiguration festgelegt, nicht hier.",
+        "empty": "Auf dem Server ist kein Anbieter konfiguriert."
+      },
+      "deniedSignIn": "Melde dich mit einem Operator- oder Administratorkonto an."
+    },
+    "membership": {
+      "active": "Mitgliedschaft bis {{date}} · {{quota}} Token pro Monat",
+      "none": "Keine aktive Mitgliedschaft"
+    },
+    "password": {
+      "title": "Passwort ändern",
+      "description": "Andere Geräte werden abgemeldet; dieses bleibt angemeldet.",
+      "current": "Aktuelles Passwort",
+      "new": "Neues Passwort",
+      "confirm": "Neues Passwort wiederholen",
+      "submit": "Ändern",
+      "changed": "Passwort geändert. Andere Geräte wurden abgemeldet.",
+      "wrongCurrent": "Das aktuelle Passwort ist falsch.",
+      "mismatch": "Die beiden neuen Passwörter stimmen nicht überein."
     }
   },
   "proMode": {
-    "attach": "Attach material",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
-    "badgeAria": "Pro mode",
-    "badgeEnter": "Pro mode",
-    "badgeExit": "Back to classic",
-    "launchPlaceholder": "Describe the learning experience you want to create",
-    "launchSend": "Start build"
+    "attach": "Material anhängen",
+    "mentionCourse": "Klassenraum referenzieren",
+    "loadSkill": "Skill laden",
+    "skillMenuTitle": "Skill für das Kursdesign wählen",
+    "skillsLoading": "Skills werden geladen…",
+    "noSkillsAvailable": "Keine Skills verfügbar",
+    "userSkillsGroup": "Meine Skills",
+    "builtinSkillsGroup": "Integrierte Skills",
+    "skillsLoadFailed": "Skills konnten nicht geladen werden. Klicken, um es erneut zu versuchen",
+    "retrySkills": "Erneut versuchen",
+    "noSkillMatch": "Keine Skills passen zu „{{query}}“",
+    "badgeAria": "Pro-Modus",
+    "badgeEnter": "Pro-Modus",
+    "badgeExit": "Zurück zur klassischen Ansicht",
+    "launchPlaceholder": "Beschreibe das Lernerlebnis, das du erstellen möchtest",
+    "launchSend": "Erstellung starten"
   },
   "workbench": {
     "tool": {
@@ -2149,7 +2412,25 @@
       "quotaValue": "{{tokens}} Token pro Monat",
       "grant": "Erteilen oder verlängern",
       "resume": "Wieder aktivieren",
-      "suspend": "Sperren"
+      "suspend": "Sperren",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "Freigabeanfragen",
@@ -2159,7 +2440,24 @@
       "reject": "Ablehnen",
       "approved": "Kurs für Mitglieder freigegeben.",
       "rejected": "Anfrage abgelehnt.",
-      "requested": "Angefragt am {{date}}"
+      "requested": "Angefragt am {{date}}",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "Aktualisierung"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "Freigabe von „{{title}}“ ablehnen?",
+      "rejectDescription": "Der Eigentümer sieht die Ablehnung und, falls angegeben, deinen Grund und kann erneut anfragen.",
+      "rejectReason": "Grund (optional)",
+      "snapshot": "Paket: „{{name}}“, {{count}} Szenen, {{media}} Mediendateien, {{size}}",
+      "remixOf": "Remix von „{{title}}“"
     },
     "previews": {
       "title": "Kostenlose Vorschauen",
@@ -2167,7 +2465,10 @@
       "courseId": "Kurs-ID",
       "add": "Als Vorschau markieren",
       "remove": "Entfernen",
-      "empty": "Noch keine Vorschauen."
+      "empty": "Noch keine Vorschauen.",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "Klassen",
@@ -2178,12 +2479,247 @@
       "empty": "Noch keine Klassen.",
       "members": "{{count}} Mitglieder",
       "courses": "{{count}} Kurse",
-      "attach": "Kurs zuordnen"
+      "attach": "Kurs zuordnen",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "Neuer Code",
+      "newCodeTitle": "Der Klasse „{{name}}“ einen neuen Beitrittscode geben?",
+      "newCodeDescription": "Der aktuelle Code gilt sofort nicht mehr; Mitglieder, die schon in der Klasse sind, bleiben. Der neue Code wird nur einmal angezeigt, kopiere ihn also gleich.",
+      "membersOf": "Mitglieder von {{name}}",
+      "membersDescription": "Entfernte Mitglieder können mit dem Klassencode wieder beitreten; erstelle einen neuen Code, um das zu verhindern.",
+      "noMembers": "Noch keine Mitglieder.",
+      "joined": "Beigetreten am {{date}}",
+      "removeMember": "Entfernen",
+      "removeMemberTitle": "{{username}} aus {{name}} entfernen?",
+      "removeMemberDescription": "Die Person verliert die Kurse dieser Klasse. Die Aktion wird protokolliert.",
+      "memberRemoved": "{{username}} aus der Klasse entfernt."
     },
     "audit": {
       "title": "Audit-Protokoll",
       "description": "Letzte Änderungen an Konten, Mitgliedschaften, Freigaben und Klassen.",
-      "empty": "Noch nichts aufgezeichnet."
+      "empty": "Noch nichts aufgezeichnet.",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "Passwort-Zurücksetzungen"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "Beitrittscode ersetzt",
+        "password_reset": "Passwort zurückgesetzt",
+        "community_ban": "Community-Beiträge sperren",
+        "community_unban": "Community-Beiträge freigeben",
+        "class_remove": "Mitglied entfernt",
+        "challenge_create": "Challenge erstellt",
+        "challenge_update": "Challenge bearbeitet",
+        "settings_update": "Einstellung geändert",
+        "share_update-approve": "Geteilte Aktualisierung freigegeben",
+        "share_update-reject": "Geteilte Aktualisierung abgelehnt"
+      }
+    },
+    "accessRequests": {
+      "title": "Zugangsanfragen",
+      "description": "Personen, die Mitglied werden möchten. Eine Genehmigung gewährt 30 Tage und das Standard-Monatskontingent; später in der Mitgliederliste änderbar.",
+      "empty": "Keine offenen Anfragen.",
+      "requested": "Angefragt am {{date}}",
+      "approve": "Genehmigen",
+      "reject": "Ablehnen",
+      "approved": "{{name}} ist jetzt Mitglied.",
+      "rejected": "Anfrage von {{name}} abgelehnt.",
+      "reasonPlaceholder": "Grund (optional; Lernende sehen ihn, er wird protokolliert)",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "{{count}} Support-Anfragen warten auf eine Antwort.",
+        "reportsOpen": "{{count}} gemeldete Community-Inhalte warten auf Bearbeitung."
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "Kurse",
+      "description": "Alle Kurse im System. Öffne einen Kurs zur Prüfung oder kopiere seine ID, um ihn als Vorschau zu markieren oder einer Klasse zuzuordnen.",
+      "open": "Kurs in neuem Tab öffnen",
+      "copy": "ID {{id}} kopieren",
+      "copied": "{{id}} kopiert",
+      "owner": "Eigentümer",
+      "anonymous": "Nicht angemeldet",
+      "updated": "Aktualisiert",
+      "empty": "Noch keine Kurse."
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "Nicht gefunden.",
       "MEMBERSHIP_REQUIRED": "Dafür ist eine aktive Mitgliedschaft erforderlich.",
       "QUOTA_EXCEEDED": "Das KI-Kontingent für diesen Monat ist aufgebraucht.",
-      "ACCOUNTS_NOT_CONFIGURED": "Konten sind auf dieser Installation nicht eingerichtet."
+      "ACCOUNTS_NOT_CONFIGURED": "Konten sind auf dieser Installation nicht eingerichtet.",
+      "ALREADY_MEMBER": "Sie haben bereits eine aktive Mitgliedschaft.",
+      "MEMBERSHIP_SUSPENDED": "Ihre Mitgliedschaft wurde von einem Administrator pausiert.",
+      "REQUEST_PENDING": "Eine Anfrage wartet bereits auf einen Administrator.",
+      "REQUEST_TOO_SOON": "Eine abgelehnte Anfrage kann später erneut gesendet werden.",
+      "COURSE_NOT_FOUND": "Es gibt keinen Kurs mit dieser ID. Prüfe die ID in der Kursadresse (/classroom/<ID>).",
+      "RATE_LIMITED": "Sie haben zu viele unbeantwortete Anfragen. Warten Sie zuerst auf eine Antwort.",
+      "COMMUNITY_BLOCKED": "Ihr Konto darf in der Community nichts veröffentlichen."
     }
   },
   "catalog": {
     "title": "Katalog",
     "description": {
       "member": "Kostenlose Vorschauen, geteilte Kurse und die Kurse Ihrer Klassen.",
-      "guest": "Kostenlose Vorschauen. Melden Sie sich an, um mehr zu sehen."
+      "guest": "Kostenlose Vorschauen. Melden Sie sich an, um mehr zu sehen.",
+      "signedIn": "Kostenlose Vorschauen. Mitglieder sehen auch geteilte Kurse und ihre Klassen."
     },
     "signInToSee": "Melden Sie sich an, um geteilte Kurse zu sehen und einer Klasse beizutreten.",
     "join": {
       "title": "Einer Klasse beitreten",
       "code": "Beitrittscode",
       "submit": "Beitreten",
-      "done": "Sie sind {{name}} beigetreten."
+      "done": "Sie sind {{name}} beigetreten.",
+      "description": "Geben Sie den Code ein, den Sie erhalten haben, um einer Klasse beizutreten."
     },
     "empty": "Noch nichts zum Durchstöbern.",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "Ihre Klasse"
     },
     "open": "Öffnen",
-    "unavailable": "Der Katalog ist auf dieser Installation nicht verfügbar."
+    "unavailable": "Der Katalog ist auf dieser Installation nicht verfügbar.",
+    "back": "Zurück zum Katalog",
+    "membersOnly": "Geteilte Kurse und Klassen sind für Mitglieder."
   },
   "courseShare": {
     "request": "Mit Mitgliedern teilen",
-    "pending": "Warten auf Genehmigung",
     "stop": "Teilen beenden",
     "requested": "Anfrage gesendet. Ein Betreiber prüft sie.",
     "withdrawn": "Freigabe beendet. Lernende, die den Kurs bereits haben, behalten ihre Kopie.",
-    "failed": "Der Kurs konnte nicht geteilt werden. Bitte versuchen Sie es erneut."
+    "failed": "Der Kurs konnte nicht geteilt werden. Bitte versuchen Sie es erneut.",
+    "rejected": "Deine Freigabeanfrage wurde abgelehnt.",
+    "rejectedWithReason": "Deine Freigabeanfrage wurde abgelehnt: {{reason}}",
+    "requestWithdrawn": "Freigabeanfrage zurückgezogen.",
+    "menu": "Mit Mitgliedern teilen",
+    "packing": "Kurs wird verpackt…",
+    "updateSent": "Aktualisierung gesendet. Bis zur Freigabe sehen Lesende die bisherige Version.",
+    "updatePending": "Eine Aktualisierung wartet auf Prüfung. Lesende sehen die freigegebene Version.",
+    "updateRejected": "Die Aktualisierung wurde abgelehnt: {{reason}}",
+    "sharedStatus": "Mit Mitgliedern geteilt.",
+    "pendingStatus": "Wartet auf die Prüfung durch das Betriebsteam.",
+    "privateStatus": "Noch nicht geteilt.",
+    "update": "Geteilte Version aktualisieren",
+    "resend": "Neueste Version erneut senden",
+    "withdraw": "Anfrage zurückziehen",
+    "reviewNote": "Der Kurs wird so gesendet, wie Sie ihn jetzt sehen (mit Änderungen und Medien). Jede Version braucht eine Freigabe durch das Betriebsteam."
+  },
+  "support": {
+    "title": "Admin kontaktieren",
+    "description": "Senden Sie eine Frage oder Anfrage an das Betriebsteam. Antworten erscheinen hier.",
+    "contact": "Admin kontaktieren",
+    "panelTitle": "Support-Postfach",
+    "panelDescription": "Fragen und Anfragen von Lernenden. Unbeantwortete stehen oben.",
+    "new": "Neue Anfrage",
+    "subject": "Betreff",
+    "body": "Nachricht",
+    "username": "Senden an (Benutzername)",
+    "send": "Senden",
+    "reply": "Antworten",
+    "replyPlaceholder": "Antwort schreiben…",
+    "close": "Als erledigt markieren",
+    "reopen": "Wieder öffnen",
+    "empty": "Noch keine Anfragen.",
+    "pick": "Wählen Sie eine Anfrage zum Lesen.",
+    "staff": "Betriebsteam",
+    "waiting": "Wartet",
+    "unread": "Neu",
+    "unreadCount": "{{count}} neue Antworten",
+    "sent": "Gesendet.",
+    "state": {
+      "open": "Offen",
+      "closed": "Erledigt"
+    },
+    "filter": {
+      "label": "Nach Status filtern"
+    },
+    "subjects": {
+      "renew": "Mitgliedschaft verlängern",
+      "resume": "Mitgliedschaft fortsetzen",
+      "quota": "KI-Kontingent erhöhen"
+    }
+  },
+  "community": {
+    "title": "Community",
+    "description": "Fragen, die Lernende direkt auf einer Folie stellen, beantwortet vom KI-Assistenten und von anderen Mitgliedern.",
+    "signIn": "Melden Sie sich an, um die Community zu sehen.",
+    "empty": "Noch keine Fragen.",
+    "answer": "Antworten",
+    "answerPlaceholder": "Antwort schreiben… (Markdown und Formeln wie $x^2$ funktionieren)",
+    "answers": "{{count}} Antworten",
+    "answerCount": "{{count}} Antworten",
+    "vote": "Hilfreich ({{count}})",
+    "best": "Beste",
+    "bestMarked": "Beste Antwort gewählt.",
+    "bestRewarded": "Gewählt. {{name}} erhält {{tokens}} Bonus-Tokens.",
+    "solved": "Gelöst",
+    "locked": "Gesperrt",
+    "lockedHint": "Diese Frage ist gesperrt und nimmt keine Antworten mehr an.",
+    "hidden": "Ausgeblendet",
+    "markBest": "Als beste markieren",
+    "openSlide": "Folie öffnen",
+    "ai": {
+      "name": "KI-Assistent",
+      "writing": "Der KI-Assistent schreibt eine Antwort…",
+      "retry": "KI erneut fragen"
+    },
+    "ask": {
+      "button": "Frage stellen",
+      "title": "Frage",
+      "titlePlaceholder": "Was ist unklar?",
+      "body": "Details (optional)",
+      "bodyPlaceholder": "Was Sie versucht haben, wo Sie feststecken…",
+      "submit": "Frage veröffentlichen",
+      "onScene": "Die Frage wird an die Folie „{{scene}}“ geheftet.",
+      "onCourse": "Die Frage wird an den ganzen Kurs geheftet.",
+      "aiNote": "Der KI-Assistent antwortet sofort; andere Mitglieder können ergänzen."
+    },
+    "join": {
+      "title": "Diskutieren Sie mit",
+      "body": "Mitglieder stellen Fragen, bekommen sofort eine Antwort vom KI-Assistenten, helfen anderen und erhalten Bonus-Tokens, wenn ihre Antwort als beste gewählt wird.",
+      "cta": "Mitglied werden"
+    },
+    "report": {
+      "action": "Melden",
+      "title": "Inhalt melden",
+      "description": "Sagen Sie dem Betriebsteam, warum dieser Inhalt nicht hierher gehört.",
+      "reason": "Grund",
+      "send": "Meldung senden",
+      "done": "Meldung gesendet. Danke."
+    },
+    "mod": {
+      "hide": "Ausblenden",
+      "show": "Einblenden",
+      "hidden": "Inhalt ausgeblendet.",
+      "shown": "Inhalt wieder eingeblendet.",
+      "lock": "Sperren",
+      "unlock": "Entsperren",
+      "ban": "Beiträge sperren",
+      "banned": "{{name}} kann nicht mehr posten.",
+      "unban": "Freigeben",
+      "unbanned": "{{name}} kann wieder posten."
+    },
+    "scene": {
+      "button": "Diskussion zu dieser Folie",
+      "title": "Diskussion",
+      "thisSlide": "Diese Folie",
+      "wholeCourse": "Ganzer Kurs",
+      "scope": "Bereich",
+      "pick": "Wählen Sie eine Frage oder stellen Sie eine neue."
+    },
+    "feed": {
+      "all": "Alle",
+      "unsolved": "Ungelöst",
+      "mine": "Meine",
+      "filter": "Fragen filtern",
+      "search": "Fragen suchen",
+      "pick": "Wählen Sie eine Frage, um die Antworten zu sehen.",
+      "howToAsk": "Sie möchten fragen? Öffnen Sie eine Lektion, gehen Sie zur Folie, an der Sie feststecken, und drücken Sie in der Werkzeugleiste auf Diskussion."
+    },
+    "reports": {
+      "title": "Community-Meldungen",
+      "description": "Gemeldete Fragen und Antworten. Blenden Sie Verstöße aus, verwerfen Sie falsche Meldungen oder sperren Sie die Beiträge des Autors.",
+      "empty": "Keine offenen Meldungen.",
+      "count": "{{count}} Meldungen",
+      "reasons": "Gründe",
+      "open": "Öffnen",
+      "dismiss": "Verwerfen",
+      "dismissed": "Meldung verworfen.",
+      "banned": "Für Beiträge gesperrte Konten",
+      "kind": {
+        "question": "Frage",
+        "answer": "Antwort"
+      }
+    },
+    "tabs": {
+      "questions": "Fragen",
+      "challenges": "Wöchentliche Challenges"
+    }
+  },
+  "challenge": {
+    "none": "Noch keine Challenges.",
+    "pick": "Wählen Sie eine Challenge aus.",
+    "entries": "{{count}} Einreichungen",
+    "phase": {
+      "upcoming": "Demnächst",
+      "open": "Einreichung offen",
+      "voting": "Abstimmung läuft",
+      "finished": "Beendet"
+    },
+    "when": {
+      "upcoming": "Startet am {{date}}",
+      "open": "Einreichung bis {{date}}",
+      "voting": "Abstimmung bis {{date}}",
+      "finished": "Beendet am {{date}}"
+    },
+    "prize": "Platz {{rank}}: {{tokens}} Tokens",
+    "prizeBadge": "+ das Abzeichen Wochenchampion",
+    "rank": "Platz {{rank}}",
+    "yours": "Ihre",
+    "aiScore": "KI-Bewertung {{score}}/10",
+    "aiFeedback": "KI-Feedback (nur für Sie sichtbar)",
+    "reward": "+{{tokens}} Tokens",
+    "vote": "Abstimmen ({{count}})",
+    "voteHint": "Stimmen Sie für die besten Lösungen. Für die eigene können Sie nicht stimmen.",
+    "yourEntry": "Ihre Lösung",
+    "editEntry": "Lösung bearbeiten",
+    "entryPlaceholder": "Schreiben Sie Ihre Lösung… (Markdown und Formeln wie $x^2$ funktionieren)",
+    "gradeNote": "Der KI-Assistent bewertet sofort nach dem Einreichen. Bis zur Frist können Sie ändern und erneut einreichen; andere Mitglieder sehen Lösungen erst danach.",
+    "grading": "Wird eingereicht und bewertet…",
+    "submit": "Lösung einreichen",
+    "resubmit": "Erneut einreichen",
+    "submitted": "Eingereicht. Ihre KI-Bewertung und das Feedback stehen unten.",
+    "notGraded": {
+      "quota": "Eingereicht, aber nicht bewertet: Das KI-Kontingent dieses Monats ist aufgebraucht.",
+      "failed": "Eingereicht, aber die KI konnte nicht bewerten. Reichen Sie erneut ein, um es noch einmal zu versuchen."
+    },
+    "showReference": "Musterlösung zeigen",
+    "hideReference": "Musterlösung ausblenden",
+    "results": "Ergebnisse",
+    "allEntries": "Lösungen",
+    "noEntries": "Keine Einreichungen.",
+    "leaderboard": {
+      "title": "Rangliste des Monats",
+      "empty": "In diesem Monat hat noch niemand Punkte.",
+      "points": "{{count}} Punkte",
+      "rule": "1 Punkt pro Einreichung, dazu 3 / 2 / 1 für Platz 1 / 2 / 3."
+    },
+    "admin": {
+      "panelTitle": "Wöchentliche Challenges",
+      "panelDescription": "Legen Sie für jede Challenge Aufgabe, Einreichungs- und Abstimmungszeit sowie Belohnungen fest. Die Ergebnisse stehen automatisch nach der Abstimmung fest.",
+      "create": "Neue Challenge",
+      "edit": "Challenge bearbeiten",
+      "saved": "Challenge gespeichert.",
+      "title": "Titel",
+      "statement": "Aufgabe",
+      "markdownHint": "Markdown und $...$-Formeln",
+      "reference": "Musterlösung (bis zur Abstimmung verborgen)",
+      "referenceHint": "Für die KI-Bewertung; Lernende sehen sie ab Beginn der Abstimmung.",
+      "opensAt": "Start",
+      "submissionDays": "Tage für Einreichungen",
+      "votingDays": "Tage für die Abstimmung",
+      "rewards": "Token-Belohnungen für die Top 3",
+      "rewardsHint": "Halten Sie sie klein. Belohnungen zählen zur monatlichen Obergrenze jeder Person.",
+      "hidden": "Diese Challenge ausblenden"
+    },
+    "settings": {
+      "title": "Wöchentliche Challenges: KI-Bewertung",
+      "description": "Jede Einreichung erhält eine KI-Bewertung. Wählen Sie, wer die Tokens dafür zahlt.",
+      "paidBy": "Wer zahlt die KI-Bewertung",
+      "submitter": "Das Kontingent der einreichenden Person",
+      "submitterHint": "Lernende ohne Restkontingent können trotzdem einreichen, nur ohne KI-Bewertung.",
+      "system": "Das System",
+      "systemHint": "Nutzt nicht das Kontingent der Lernenden; zählt zum Betriebsbudget.",
+      "adminOnly": "Nur Administratoren können diese Einstellung ändern.",
+      "saved": "Einstellung gespeichert."
+    }
+  },
+  "remix": {
+    "menu": "Remix",
+    "action": "Diesen Kurs remixen",
+    "creating": "Ihr Remix wird erstellt…",
+    "created": "Ihr Remix ist fertig.",
+    "note": "Erstellt eine eigene Kopie zum Bearbeiten und erneuten Teilen. Die ursprüngliche Autorin bzw. der Autor wird genannt und erhält einen Teil der Belohnung, wenn Ihr Remix gelesen wird.",
+    "of": "Remix von „{{title}}“ von {{author}}",
+    "list": "{{count}} Remixe",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "Für einen Remix ist eine Mitgliedschaft nötig.",
+      "FORBIDDEN": "Dieser Kurs kann nicht geremixt werden.",
+      "OWN_COURSE": "Das ist Ihr eigener Kurs.",
+      "RATE_LIMITED": "Sie haben das heutige Remix-Limit erreicht."
+    },
+    "settings": {
+      "title": "Kurs-Remixe",
+      "description": "Anteil der ursprünglichen Autorin bzw. des Autors an Lesebelohnungen und wie viele Remixe ein Mitglied pro Tag erstellen darf.",
+      "royaltyPercent": "Anteil der Originalautorschaft (%)",
+      "dailyLimit": "Remixe pro Tag"
+    }
+  },
+  "nav": {
+    "home": "Startseite",
+    "main": "Hauptnavigation"
   }
 }

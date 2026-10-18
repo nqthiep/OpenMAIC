@@ -90,8 +90,15 @@
       "style-clone": "استنساخ نمط العرض",
       "teacher-style-clone": "أسلوب المعلّم",
       "vocational": "تدريب مهني",
-      "workshop-style": "ورشة تفاعلية"
-    }
+      "workshop-style": "ورشة تفاعلية",
+      "fact-check": "التحقق من الحقائق",
+      "feynman-learning": "التعلّم بطريقة فاينمان",
+      "learning-to-learn": "تعلّم كيف تتعلّم",
+      "social-emotional-learning": "التعلّم الاجتماعي العاطفي (SEL)",
+      "spiral-curriculum": "تصميم المنهج الحلزوني",
+      "understanding-by-design": "التصميم العكسي (UbD)"
+    },
+    "contentLoadFailed": "تعذّر تحميل محتوى Skill بالكامل"
   },
   "thinking": {
     "active": "يفكّر…",

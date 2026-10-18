@@ -90,8 +90,15 @@
       "style-clone": "Deck-Stil klonen",
       "teacher-style-clone": "Lehrstil",
       "vocational": "Berufliche Ausbildung",
-      "workshop-style": "Interaktiver Workshop"
-    }
+      "workshop-style": "Interaktiver Workshop",
+      "fact-check": "Faktencheck",
+      "feynman-learning": "Feynman-Methode",
+      "learning-to-learn": "Lernen lernen",
+      "social-emotional-learning": "Sozial-emotionales Lernen (SEL)",
+      "spiral-curriculum": "Spiralcurriculum",
+      "understanding-by-design": "Rückwärtsplanung (UbD)"
+    },
+    "contentLoadFailed": "Der vollständige Skill-Inhalt konnte nicht geladen werden"
   },
   "thinking": {
     "active": "Denkt nach …",

@@ -90,8 +90,15 @@
       "style-clone": "Клонирование стиля",
       "teacher-style-clone": "Стиль преподавателя",
       "vocational": "Профессиональная подготовка",
-      "workshop-style": "Интерактивный воркшоп"
-    }
+      "workshop-style": "Интерактивный воркшоп",
+      "fact-check": "Проверка фактов",
+      "feynman-learning": "Метод Фейнмана",
+      "learning-to-learn": "Учиться учиться",
+      "social-emotional-learning": "Социально-эмоциональное обучение (SEL)",
+      "spiral-curriculum": "Спиральная учебная программа",
+      "understanding-by-design": "Обратное проектирование (UbD)"
+    },
+    "contentLoadFailed": "Не удалось загрузить полное содержимое Skill"
   },
   "thinking": {
     "active": "Думает…",

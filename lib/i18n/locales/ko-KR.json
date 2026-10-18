@@ -10,8 +10,190 @@
     "close": "닫기"
   },
   "home": {
-    "slogan": "멀티 에이전트 인터랙티브 교실에서 펼치는 생성형 학습",
-    "greetingWithName": "안녕하세요, {{name}}!"
+    "slogan": "확실히 이해하고 · 자신 있게 시험으로",
+    "greetingWithName": "안녕하세요, {{name}}!",
+    "guest": {
+      "kicker": "AI는 당신의 학습 파트너",
+      "title": "내 속도대로 배우고, AI가 곁에서 돕습니다",
+      "description": "강의, 슬라이드, 토론은 AI의 도움으로 준비하고, 공유하기 전에 사람이 확인합니다. 먼저 무료로 둘러보세요. 계정이 필요 없습니다.",
+      "signIn": "로그인",
+      "browseCatalog": "강좌 둘러보기",
+      "stepsTitle": "이용 방법",
+      "step1": {
+        "title": "무료 미리보기",
+        "body": "관리자가 고른 강좌를 계정 없이 열 수 있습니다."
+      },
+      "step2": {
+        "title": "로그인",
+        "body": "발급받은 계정으로 로그인하세요. 손님은 둘러볼 수 있지만 강좌를 만들 수는 없습니다.",
+        "titleOpen": "로그인 또는 계정 만들기",
+        "bodyOpen": "무료로 계정을 만들거나 로그인하세요. 회원이 되기 전에는 둘러볼 수 있지만 아직 강의를 만들 수는 없습니다."
+      },
+      "step3": {
+        "title": "회원 되기",
+        "body": "회원은 AI로 강좌를 만들고, 수업에 참여하고, 만든 것을 공유할 수 있습니다."
+      },
+      "previewsTitle": "무료 미리보기",
+      "previewsEmpty": "아직 미리보기 강좌가 없습니다. 나중에 다시 확인해 주세요.",
+      "membershipTitle": "회원 되기",
+      "membershipBody": "회원에게는 매달 사용 한도가 주어져 AI로 강좌를 만들고, 초대 코드로 수업에 참여하고, 다른 회원과 강좌를 공유할 수 있습니다.",
+      "nav": {
+        "features": "기능",
+        "how": "이용 방법",
+        "previews": "미리보기",
+        "membership": "회원"
+      },
+      "chip1": "여러 관점에서 설명",
+      "chip2": "슬라이드와 화이트보드",
+      "chip3": "퀴즈와 프로젝트",
+      "mock": {
+        "title": "일상 속 분수",
+        "live": "라이브",
+        "teacher": "피자 한 판을 똑같이 네 조각으로 나눠 볼까요?",
+        "student": "조각이 똑같지 않으면 어떻게 되나요?"
+      },
+      "features": {
+        "title": "이해를 돕기 위해 만들었습니다",
+        "subtitle": "AI가 설명하고, 토론하고, 이해도를 확인합니다. 인내심 있는 스터디 그룹처럼, 무엇을 배울지는 언제나 내가 정합니다.",
+        "f1": {
+          "title": "모든 수업에 스터디 그룹",
+          "body": "선생님, 반 친구, 조교는 모두 AI가 맡아 함께 참여하며, 하나의 개념을 여러 관점에서 설명합니다."
+        },
+        "f2": {
+          "title": "슬라이드와 화이트보드",
+          "body": "모든 수업에 슬라이드, 실시간 화이트보드, 시각적 설명이 함께합니다."
+        },
+        "f3": {
+          "title": "퀴즈와 프로젝트",
+          "body": "퀴즈로 이해도를 확인하고 프로젝트형 과제로 직접 연습하세요."
+        },
+        "f4": {
+          "title": "음성 낭독",
+          "body": "장면을 소리 내어 읽어 주고, 음성으로 답할 수도 있습니다."
+        },
+        "f5": {
+          "title": "수업과 공유",
+          "body": "초대 코드로 수업에 참여하고, 관리자가 승인한 뒤에는 내 강좌를 다른 회원과 공유할 수 있습니다."
+        },
+        "f6": {
+          "title": "어디든 가져가기",
+          "body": "강좌를 웹페이지, PowerPoint 파일, 동영상으로 내보낼 수 있습니다."
+        }
+      },
+      "previewsSubtitle": "지금 바로 열어 보세요. 계정이 필요 없습니다.",
+      "perks": {
+        "p1": "직접 강좌를 만드는 월간 AI 한도",
+        "p2": "초대 코드로 수업 참여",
+        "p3": "내 강좌를 다른 회원과 공유",
+        "p4": "강좌를 웹페이지, PowerPoint, 동영상으로 내보내기"
+      },
+      "cta": {
+        "title": "직접 확인해 보시겠어요?",
+        "body": "무료 미리보기를 먼저 열어 보거나, 준비되면 로그인하세요."
+      },
+      "footerTagline": "ÔN THI · 오픈소스 프로젝트 OpenMAIC 기반",
+      "trust": {
+        "title": "AI를 신중하게 사용합니다",
+        "subtitle": "아직 AI를 믿기 어렵다는 분이 많다는 것을 알고 있습니다. 신뢰를 얻기 위해 이렇게 노력합니다.",
+        "t1": {
+          "title": "주도권은 당신에게",
+          "body": "AI는 설명과 연습을 도울 뿐입니다. 무엇을 배울지는 직접 고르고, 언제든 멈출 수 있습니다."
+        },
+        "t2": {
+          "title": "공유 전에 확인",
+          "body": "관리자가 검토한 뒤에야 다른 회원이 강좌를 볼 수 있습니다."
+        },
+        "t3": {
+          "title": "한계도 솔직하게",
+          "body": "AI는 틀릴 수 있습니다. 중요한 내용은 선생님이나 믿을 수 있는 자료로 확인하세요."
+        },
+        "t4": {
+          "title": "보고 나서 결정",
+          "body": "무료 미리보기는 누구에게나 열려 있으며, 계정도 약정도 필요 없습니다."
+        }
+      }
+    },
+    "locked": {
+      "membership": "AI로 강좌를 만드는 기능은 회원 전용입니다.",
+      "classes": "수업 참여는 회원 전용입니다.",
+      "contactAdmin": "관리자에게 회원 등록을 요청해 주세요.",
+      "quota": "이번 달 AI 사용량을 모두 사용했습니다.",
+      "quotaReset": "{{date}}부터 강좌를 다시 만들 수 있습니다."
+    },
+    "quota": {
+      "label": "이번 달 AI 한도",
+      "used": "{{used}} / {{quota}} 토큰 사용"
+    },
+    "classes": {
+      "mine": "내 수업"
+    },
+    "status": {
+      "ok": "회원권 {{date}}까지 · 남은 일수: {{days}}",
+      "expiring": "회원권이 {{date}}에 종료됩니다(남은 일수: {{days}}). 관리자에게 연장을 요청해 주세요.",
+      "quotaNear": "이번 달 AI 사용량의 {{percent}}%를 사용했습니다.",
+      "quotaOut": "이번 달 AI 사용량을 모두 사용했습니다. 만든 강좌는 계속 학습할 수 있습니다.",
+      "expired": "회원권이 {{date}}에 종료되었습니다. 만든 강좌는 계속 볼 수 있습니다. 새 강좌를 만들려면 관리자에게 연장을 요청해 주세요.",
+      "suspended": "회원권이 일시 중지되었습니다. 만든 강좌는 계속 볼 수 있습니다. 관리자에게 재개를 요청해 주세요."
+    },
+    "continue": {
+      "title": "이어서 학습하기",
+      "progress": "장면 {{current}} / {{total}}",
+      "button": "이어서"
+    },
+    "myClasses": {
+      "members": "멤버: {{count}}",
+      "noCourses": "이 클래스에는 아직 강좌가 없습니다.",
+      "untitled": "강좌 {{number}}"
+    },
+    "starter": {
+      "title": "어디서 시작할지 모르겠나요? 이런 것을 해 보세요:",
+      "one": "[주제]를 초보자에게 단계별로 설명해 줘",
+      "two": "[주제]의 1주 복습 계획을 만들어 줘",
+      "three": "[주제]의 연습 문제를 풀이와 함께 만들어 줘"
+    },
+    "access": {
+      "prompt": "관리자에게 회원 등록을 요청해 주세요.",
+      "promptRenew": "관리자에게 회원권 연장을 요청해 주세요.",
+      "notePlaceholder": "간단한 메모(선택): 누구인지, 왜 필요한지",
+      "button": "이용 신청",
+      "renewButton": "연장 신청",
+      "pending": "{{date}}에 신청을 보냈습니다. 관리자가 확인할 예정입니다.",
+      "rejected": "지난 신청은 승인되지 않았습니다. {{date}}부터 다시 신청할 수 있습니다.",
+      "suspended": "관리자가 회원권을 일시 중지했습니다. 재개는 관리자에게 요청해 주세요.",
+      "refusalReason": "사유: {{reason}}"
+    },
+    "contribution": {
+      "title": "내 기여",
+      "shared": "공유한 강좌",
+      "pending": "검토 대기",
+      "readers": "독자",
+      "bonus": "이번 달 보상",
+      "bonusValue": "+{{tokens}} / {{cap}} 토큰",
+      "badges": "배지",
+      "badge": {
+        "readers-10": "독자 10명",
+        "readers-100": "독자 100명",
+        "challenge-top3": "주간 챔피언"
+      },
+      "next": "“{{badge}}” 배지까지 독자 {{count}}명 남았습니다.",
+      "readersOf": "독자 {{count}}명",
+      "rejected": "거절됨",
+      "rejectedWithReason": "거절됨: {{reason}}"
+    },
+    "focus": {
+      "add": "공부하는 과목 추가",
+      "summary": "공부 중: {{focus}}",
+      "subjectPlaceholder": "과목 (예: 수학)",
+      "levelPlaceholder": "수준 (예: 고등학교 1학년)",
+      "save": "저장"
+    },
+    "composer": {
+      "title": "오늘은 무엇을 배우고 싶나요?"
+    },
+    "renew": {
+      "pending": "{{date}}에 연장을 요청했습니다.",
+      "rejected": "연장 요청이 승인되지 않았습니다. {{date}}부터 다시 요청할 수 있습니다."
+    }
   },
   "toolbar": {
     "pdfParser": "파서",
@@ -44,7 +226,9 @@
     "ttsPreview": "미리 듣기",
     "ttsPreviewing": "재생 중...",
     "interactiveModeHint": "체험 중심 콘텐츠를 위해 인터랙티브 우선 모드를 사용하세요",
-    "interactiveModeLabel": "인터랙티브 모드"
+    "interactiveModeLabel": "인터랙티브 모드",
+    "advanced": "고급",
+    "advancedHint": "고급 옵션: 모델, 웹 검색, 이미지/동영상, 인터랙티브 모드, 에이전트. 기본값에서는 ÔN THI가 요청에 맞는 모델을 고르고 삽화와 인터랙티브 활동을 더합니다."
   },
   "export": {
     "pptx": "PPTX 내보내기",
@@ -170,6 +354,24 @@
       "qa": "Q&A",
       "discussion": "토론",
       "lecture": "강의"
+    },
+    "actionTag": {
+      "spotlight": "스포트라이트",
+      "laser": "레이저",
+      "play": "재생",
+      "open": "열기",
+      "close": "닫기",
+      "clear": "지우기",
+      "delete": "삭제",
+      "text": "텍스트",
+      "shape": "도형",
+      "chart": "차트",
+      "formula": "수식",
+      "table": "표",
+      "line": "선",
+      "code": "코드",
+      "editCode": "코드 편집",
+      "discuss": "토론"
     }
   },
   "actions": {
@@ -543,7 +745,16 @@
       "sendBackward": "뒤로 보내기",
       "alignTop": "위쪽 정렬",
       "alignMiddle": "세로 가운데 정렬",
-      "alignBottom": "아래쪽 정렬"
+      "alignBottom": "아래쪽 정렬",
+      "centerBoth": "슬라이드 가운데 정렬",
+      "setLink": "링크 설정",
+      "ruler": "눈금자",
+      "gridLines": "격자선",
+      "gridNone": "없음",
+      "gridSmall": "작게",
+      "gridMedium": "보통",
+      "gridLarge": "크게",
+      "resetPage": "이 페이지 비우기"
     },
     "background": {
       "image": "이미지",
@@ -639,7 +850,7 @@
       "shortTitle": "구성원"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "참조 {{label}} 제거",
       "counts": "참조 {{count}}/{{max}}",
       "exitPicking": "선택 완료",
       "startPicking": "요소 참조"
@@ -733,230 +944,237 @@
     "voiceInputDisabled": "음성 입력 비활성화됨",
     "textInput": "텍스트 입력",
     "stopRecording": "녹음 중지",
-    "startRecording": "녹음 시작"
+    "startRecording": "녹음 시작",
+    "toggleSidebar": "장면 목록 표시/숨기기",
+    "toggleChat": "채팅 표시/숨기기",
+    "mute": "음소거",
+    "unmute": "음소거 해제",
+    "play": "재생",
+    "pause": "일시정지"
   },
   "pbl": {
     "emptyProject": "PBL 프로젝트가 아직 생성되지 않았습니다. 강좌 생성을 통해 만들어주세요.",
     "v2": {
       "hero": {
-        "title": "Project-Based Learning",
-        "stage": "Stages",
-        "task": "Tasks",
-        "tutor": "Tutor",
-        "greetingBanner": "Your tutor is saying hello…",
-        "startProject": "Start Project",
-        "continueProject": "Continue Project",
-        "resetProgress": "Reset learning progress",
-        "resetConfirmTitle": "Reset learning progress?",
-        "resetConfirmDescription": "This clears all progress for this project — chat history, submissions, and stage status — and you'll start over from the beginning. This can't be undone.",
-        "resetConfirmConfirm": "Reset",
-        "resetConfirmCancel": "Cancel",
-        "startHint": "Click to enter the workspace. {{name}} will guide you through each stage.",
-        "startError": "Unable to start: {{error}}",
-        "youWillLearn": "What you'll gain",
-        "instructorTagline": "Guides you through the whole project",
-        "scenarioCharacter": "Role-play character",
-        "scenarioCharacterTagline": "The character you'll interact with in the scenario",
-        "scenarioFlow": "Flow",
-        "close": "Close"
+        "title": "프로젝트 기반 학습",
+        "stage": "단계",
+        "task": "과제",
+        "tutor": "튜터",
+        "greetingBanner": "튜터가 인사하고 있어요…",
+        "startProject": "프로젝트 시작",
+        "continueProject": "프로젝트 계속하기",
+        "resetProgress": "학습 진행 초기화",
+        "resetConfirmTitle": "학습 진행을 초기화할까요?",
+        "resetConfirmDescription": "이 프로젝트의 모든 진행 상황(채팅 기록, 제출물, 단계 상태)이 지워지고 처음부터 다시 시작합니다. 되돌릴 수 없습니다.",
+        "resetConfirmConfirm": "초기화",
+        "resetConfirmCancel": "취소",
+        "startHint": "클릭하면 작업 공간으로 들어갑니다. {{name}}이(가) 각 단계를 안내합니다.",
+        "startError": "시작할 수 없습니다: {{error}}",
+        "youWillLearn": "얻게 될 것",
+        "instructorTagline": "프로젝트 전체를 안내합니다",
+        "scenarioCharacter": "역할극 캐릭터",
+        "scenarioCharacterTagline": "시나리오에서 함께 대화할 캐릭터",
+        "scenarioFlow": "흐름",
+        "close": "닫기"
       },
       "sidebar": {
-        "title": "Project Roadmap",
-        "summary": "{{completed}} / {{total}} tasks · {{stages}} stages",
-        "enterScenario": "Enter the scene",
-        "advanceScene": "Advance the scene",
-        "continueScene": "Next stage",
-        "stagePrep": "Prep",
-        "stageRoleplay": "Simulation",
-        "stageWrapup": "Debrief",
-        "completeAct": "Finish this act",
-        "completeTask": "Done"
+        "title": "프로젝트 로드맵",
+        "summary": "과제 {{completed}} / {{total}} · {{stages}}단계",
+        "enterScenario": "장면으로 들어가기",
+        "advanceScene": "장면 진행",
+        "continueScene": "다음 단계",
+        "stagePrep": "준비",
+        "stageRoleplay": "시뮬레이션",
+        "stageWrapup": "돌아보기",
+        "completeAct": "이 막 마치기",
+        "completeTask": "완료"
       },
       "workspace": {
-        "progressLabel": "Progress",
-        "resizeSidebar": "Resize sidebar and chat",
-        "resizeSubmission": "Resize chat and submission panel",
-        "enterFullscreen": "Expand to fullscreen workspace",
-        "exitFullscreen": "Exit fullscreen workspace",
-        "exitNativeFullscreen": "Exit fullscreen",
-        "returnToHero": "Back to project overview",
-        "breadcrumbOverview": "Overview",
-        "breadcrumbCurrent": "Workspace"
+        "progressLabel": "진행률",
+        "resizeSidebar": "사이드바와 채팅 크기 조절",
+        "resizeSubmission": "채팅과 제출 패널 크기 조절",
+        "enterFullscreen": "작업 공간 전체 화면으로 확장",
+        "exitFullscreen": "작업 공간 전체 화면 종료",
+        "exitNativeFullscreen": "전체 화면 종료",
+        "returnToHero": "프로젝트 개요로 돌아가기",
+        "breadcrumbOverview": "개요",
+        "breadcrumbCurrent": "작업 공간"
       },
       "chat": {
-        "placeholder": "Chat with {{name}} about your progress...",
-        "placeholderCompleted": "Project complete. Check out your report.",
-        "send": "Send",
-        "voiceInput": "Voice input",
-        "keyboardHint": "Enter to send · Shift+Enter for newline",
-        "readingSubmission": "Reading submission…",
-        "generatingMilestoneFeedback": "Generating milestone feedback…",
-        "generatingFinalEval": "Generating final evaluation…",
-        "readingSubmissionWithTitle": "Reading latest submission for \"{{title}}\"…",
-        "evaluatingTask": "{{name}} · Reviewing task",
-        "evaluatingFinal": "{{name}} · Final evaluation",
-        "narrating": "Setting the scene…",
-        "choosePrompt": "Pick an option",
-        "choiceOrType": "Pick one, or type your own…",
-        "suggestionsToggle": "Need ideas? See some ways to respond",
-        "guidancePointer": "Stuck? Check this act's goal and tips in the panel on the right.",
-        "roleplayHistoryTitle": "Role-play history",
-        "coachHint": "Coach tip",
-        "thinking": "{{name}} · Thinking",
-        "typing": "{{name}} · Typing…",
-        "submitted": "Work submitted",
-        "evaluatingSubmission": "Evaluating your submission…",
-        "evaluatingSubmissionDetail": "Task: \"{{title}}\". Feedback on this submission will appear here once evaluation is complete.",
-        "milestoneFeedbackPending": "The milestone feedback will appear once ready.",
-        "emptyChat": "No messages yet.",
-        "emptyChatHint": "Your project walkthrough with {{name}} will start here.",
-        "continueError": "Unable to continue: {{error}}",
-        "stillTyping": "Still typing",
-        "handoverHint": "Click \"Continue to Next Stage\" to keep going."
+        "placeholder": "진행 상황에 대해 {{name}}와(과) 대화하세요...",
+        "placeholderCompleted": "프로젝트가 완료되었습니다. 보고서를 확인하세요.",
+        "send": "보내기",
+        "voiceInput": "음성 입력",
+        "keyboardHint": "Enter로 보내기 · Shift+Enter로 줄바꿈",
+        "readingSubmission": "제출물을 읽는 중…",
+        "generatingMilestoneFeedback": "마일스톤 피드백 생성 중…",
+        "generatingFinalEval": "최종 평가 생성 중…",
+        "readingSubmissionWithTitle": "\"{{title}}\"의 최신 제출물을 읽는 중…",
+        "evaluatingTask": "{{name}} · 과제 검토 중",
+        "evaluatingFinal": "{{name}} · 최종 평가",
+        "narrating": "장면을 준비하는 중…",
+        "choosePrompt": "선택지를 고르세요",
+        "choiceOrType": "하나를 고르거나 직접 입력하세요…",
+        "suggestionsToggle": "아이디어가 필요하세요? 응답 예시 보기",
+        "guidancePointer": "막혔나요? 오른쪽 패널에서 이번 막의 목표와 팁을 확인하세요.",
+        "roleplayHistoryTitle": "역할극 기록",
+        "coachHint": "코치 팁",
+        "thinking": "{{name}} · 생각 중",
+        "typing": "{{name}} · 입력 중…",
+        "submitted": "과제 제출됨",
+        "evaluatingSubmission": "제출물을 평가하는 중…",
+        "evaluatingSubmissionDetail": "과제: \"{{title}}\". 평가가 끝나면 이 제출물에 대한 피드백이 여기에 표시됩니다.",
+        "milestoneFeedbackPending": "마일스톤 피드백이 준비되면 표시됩니다.",
+        "emptyChat": "아직 메시지가 없습니다.",
+        "emptyChatHint": "{{name}}와(과) 함께하는 프로젝트 안내가 여기서 시작됩니다.",
+        "continueError": "계속할 수 없습니다: {{error}}",
+        "stillTyping": "아직 입력 중",
+        "handoverHint": "\"다음 단계로 계속\"을 클릭해 이어가세요."
       },
       "scene": {
-        "expand": "Expand",
-        "collapse": "Collapse",
-        "greetHint": "Tap to say hi",
-        "label": "The scene"
+        "expand": "펼치기",
+        "collapse": "접기",
+        "greetHint": "탭해서 인사하기",
+        "label": "장면"
       },
       "milestoneCard": {
-        "title": "Milestone Review",
-        "youLearned": "What you learned",
-        "nextStage": "Next stage:",
-        "continueHint": "Click Continue to enter the next stage.",
-        "alreadyEntered": "Next stage entered",
-        "continueToNext": "Continue to Next Stage",
-        "projectAlmostDone": "🎉 Project almost done — awaiting completion report"
+        "title": "마일스톤 리뷰",
+        "youLearned": "배운 내용",
+        "nextStage": "다음 단계:",
+        "continueHint": "계속을 클릭해 다음 단계로 들어가세요.",
+        "alreadyEntered": "다음 단계에 들어갔습니다",
+        "continueToNext": "다음 단계로 계속",
+        "projectAlmostDone": "🎉 프로젝트가 거의 끝났습니다 — 완료 보고서를 기다리는 중"
       },
       "taskEvalCard": {
-        "title": "Submission Feedback",
-        "strengths": "What went well",
-        "improvements": "Next steps"
+        "title": "제출 피드백",
+        "strengths": "잘한 점",
+        "improvements": "다음 단계"
       },
       "briefing": {
-        "intro": "The premise introduced during prep — kept here so you can revisit it anytime in the scene.",
-        "tablistLabel": "Right panel tabs",
-        "submissionTab": "Submit",
-        "briefingTab": "Briefing",
-        "setting": "Setting",
-        "learnerRole": "Your role",
-        "goal": "Goal",
-        "rules": "Rules",
-        "cast": "Cast",
-        "identity": "Identity",
-        "situation": "Situation"
+        "intro": "준비 단계에서 소개된 설정입니다. 장면 중 언제든 다시 볼 수 있도록 여기에 보관됩니다.",
+        "tablistLabel": "오른쪽 패널 탭",
+        "submissionTab": "제출",
+        "briefingTab": "브리핑",
+        "setting": "배경",
+        "learnerRole": "나의 역할",
+        "goal": "목표",
+        "rules": "규칙",
+        "cast": "등장인물",
+        "identity": "신분",
+        "situation": "상황"
       },
       "submission": {
-        "textSubmission": "Text submission",
-        "fileTooLarge": "File exceeds 5 MB limit. Try splitting or compressing.",
-        "contentRequired": "Content cannot be empty",
-        "readFileFailed": "Failed to read file: {{error}}",
-        "parsingPdf": "Parsing PDF…",
-        "parsePdfFailed": "Failed to parse PDF: {{error}}",
-        "pdfNoText": "No extractable text found in this PDF.",
-        "imageUploadFailed": "Failed to upload image: {{error}}",
-        "imageTooLargeNoStorage": "Image too large to attach without storage configured (max 2 MB locally).",
-        "imageNeedsCaptionNoVision": "The current model can't read images. Add a text description of the image before submitting, or switch to a vision-capable model in Settings.",
-        "unsupportedFileType": "Unsupported file type. Only text files (.txt, .md, .csv, .json, .py, …) and PDF are accepted.",
-        "pasteTab": "Paste text / image",
-        "uploadTab": "Upload file",
-        "pastePlaceholder": "Paste your code, document, answer — or an image / screenshot — here…",
-        "uploadPlaceholder": "Uploaded content will appear here. Edit before submitting…",
-        "imageCaptionPlaceholder": "Add an optional caption for this image…",
-        "imageSelectedReplace": "Image selected · click to replace",
-        "removeImage": "Remove image",
-        "processing": "Processing…",
-        "cancelProcessingConfirm": "A file is still being processed. Cancel and discard this upload?",
-        "currentTask": "Current Task",
-        "hints": "Hints",
-        "submitOutput": "Submit",
-        "evaluating": "Evaluating submission…",
-        "lockedWhileStreaming": "The instructor is replying — please wait before submitting.",
-        "evalFailed": "Evaluation failed: {{error}}",
-        "submittedCount": "{{count}} submitted",
-        "submissionHistory": "Submission History",
-        "fromTask": "Task: {{title}}",
-        "download": "Download",
-        "viewSubmission": "View submission",
-        "noActiveTask": "No active task.",
-        "canceling": "Cancel",
-        "submitting": "Submitting…",
-        "selectFileHint": "Choose a file · Max 5 MB · Text, PDF or image",
-        "modalTitle": "Submit your work",
-        "modalTaskLabel": "Task: {{title}}",
-        "fileRead": "Read: {{filename}} · {{size}} KB",
-        "submittedBadge": "Submitted ({{count}})",
-        "receiptFile": "File: {{filename}}",
-        "receiptTemplate": "Submitted work for this task ({{label}})."
+        "textSubmission": "텍스트 제출",
+        "fileTooLarge": "파일이 5 MB 제한을 초과합니다. 나누거나 압축해 보세요.",
+        "contentRequired": "내용을 비워 둘 수 없습니다",
+        "readFileFailed": "파일을 읽지 못했습니다: {{error}}",
+        "parsingPdf": "PDF 분석 중…",
+        "parsePdfFailed": "PDF를 분석하지 못했습니다: {{error}}",
+        "pdfNoText": "이 PDF에서 추출할 수 있는 텍스트가 없습니다.",
+        "imageUploadFailed": "이미지를 업로드하지 못했습니다: {{error}}",
+        "imageTooLargeNoStorage": "저장소가 설정되지 않아 이미지가 너무 커서 첨부할 수 없습니다(로컬 최대 2 MB).",
+        "imageNeedsCaptionNoVision": "현재 모델은 이미지를 읽을 수 없습니다. 제출하기 전에 이미지에 대한 텍스트 설명을 추가하거나, 설정에서 비전 지원 모델로 전환하세요.",
+        "unsupportedFileType": "지원하지 않는 파일 형식입니다. 텍스트 파일(.txt, .md, .csv, .json, .py, …)과 PDF만 허용됩니다.",
+        "pasteTab": "텍스트 / 이미지 붙여넣기",
+        "uploadTab": "파일 업로드",
+        "pastePlaceholder": "코드, 문서, 답변 — 또는 이미지 / 스크린샷 — 을 여기에 붙여넣으세요…",
+        "uploadPlaceholder": "업로드한 내용이 여기에 표시됩니다. 제출 전에 편집하세요…",
+        "imageCaptionPlaceholder": "이 이미지에 대한 설명을 추가하세요(선택)…",
+        "imageSelectedReplace": "이미지 선택됨 · 클릭해 교체",
+        "removeImage": "이미지 제거",
+        "processing": "처리 중…",
+        "cancelProcessingConfirm": "파일을 아직 처리하는 중입니다. 취소하고 이 업로드를 버릴까요?",
+        "currentTask": "현재 과제",
+        "hints": "힌트",
+        "submitOutput": "제출",
+        "evaluating": "제출물 평가 중…",
+        "lockedWhileStreaming": "강사가 답변 중입니다 — 잠시 후 제출하세요.",
+        "evalFailed": "평가 실패: {{error}}",
+        "submittedCount": "{{count}}개 제출됨",
+        "submissionHistory": "제출 기록",
+        "fromTask": "과제: {{title}}",
+        "download": "다운로드",
+        "viewSubmission": "제출물 보기",
+        "noActiveTask": "진행 중인 과제가 없습니다.",
+        "canceling": "취소",
+        "submitting": "제출 중…",
+        "selectFileHint": "파일 선택 · 최대 5 MB · 텍스트, PDF 또는 이미지",
+        "modalTitle": "과제 제출",
+        "modalTaskLabel": "과제: {{title}}",
+        "fileRead": "읽음: {{filename}} · {{size}} KB",
+        "submittedBadge": "제출됨 ({{count}})",
+        "receiptFile": "파일: {{filename}}",
+        "receiptTemplate": "이 과제의 결과물을 제출했습니다({{label}})."
       },
       "agentTabs": {
-        "noAgent": "No AI agent configured for this project."
+        "noAgent": "이 프로젝트에 설정된 AI 에이전트가 없습니다."
       },
       "completion": {
-        "noWhatsNext": "The final evaluation hasn't been written yet.",
-        "backToWorkspace": "Back to Workspace",
-        "completionCta": "View Report",
-        "title": "Completion Report",
-        "whatYouBuilt": "What you built",
-        "whatYouLearned": "What you learned",
-        "whatsNext": "What's next",
-        "noDataFallback": "Not yet written",
-        "stageReview": "Stage Reviews",
-        "summary": "You completed {{completed}} of {{total}} tasks across {{stages}} stages.",
-        "statConcepts": "Concepts mastered",
-        "statTurns": "Messages exchanged",
-        "statScope": "Stages · Tasks",
-        "statDuration": "Time spent",
-        "statSubmissions": "Work submitted",
-        "coreStageBadge": "Core",
-        "conceptsInStageLabel": "Concepts:",
-        "submissionsInStage": "Submitted {{count}} piece(s) of work",
-        "coreConceptGrasp": "Core concept \"{{concept}}\" — {{quality}}",
-        "stageNoData": "No recorded output in this stage.",
+        "noWhatsNext": "최종 평가가 아직 작성되지 않았습니다.",
+        "backToWorkspace": "작업 공간으로 돌아가기",
+        "completionCta": "보고서 보기",
+        "title": "완료 보고서",
+        "whatYouBuilt": "만든 결과물",
+        "whatYouLearned": "배운 내용",
+        "whatsNext": "다음 단계",
+        "noDataFallback": "아직 작성되지 않음",
+        "stageReview": "단계별 리뷰",
+        "summary": "{{stages}}개 단계에서 과제 {{total}}개 중 {{completed}}개를 완료했습니다.",
+        "statConcepts": "익힌 개념",
+        "statTurns": "주고받은 메시지",
+        "statScope": "단계 · 과제",
+        "statDuration": "소요 시간",
+        "statSubmissions": "제출한 결과물",
+        "coreStageBadge": "핵심",
+        "conceptsInStageLabel": "개념:",
+        "submissionsInStage": "결과물 {{count}}개 제출",
+        "coreConceptGrasp": "핵심 개념 \"{{concept}}\" — {{quality}}",
+        "stageNoData": "이 단계에는 기록된 결과물이 없습니다.",
         "scenario": {
-          "summary": "You completed all {{acts}} acts of this scenario. Here's how the role-play went.",
-          "whatYouDidWell": "What you did well",
-          "skillsPracticed": "Skills you practised",
-          "statGoals": "Goals met",
-          "statActs": "Acts completed",
-          "goalReviewTitle": "Act-by-act review",
-          "goalReviewHint": "This scenario set a few key goals for each act. Here's a look back at how your conversation actually went — you met {{achieved}} of {{total}} this time.",
-          "goalListTitle": "What each act asked of you",
-          "goalListHint": "This scenario set a few key goals for each act. Here's a look back at what each act asked you to do.",
-          "goalAchieved": "achieved",
-          "goalPartial": "partly done",
-          "goalMissed": "not done",
-          "statGoodDecisions": "Strong choices",
-          "statScore": "Decision score",
-          "statBeats": "Acts completed",
-          "decisionReviewTitle": "Decision review",
-          "good": "strong",
-          "ok": "okay",
-          "poor": "to improve",
-          "decisionScore": "Decision score {{score}}",
-          "castLabel": "You interacted with: {{names}}"
+          "summary": "이 시나리오의 {{acts}}개 막을 모두 마쳤습니다. 역할극이 어떻게 진행됐는지 살펴보세요.",
+          "whatYouDidWell": "잘한 점",
+          "skillsPracticed": "연습한 기술",
+          "statGoals": "달성한 목표",
+          "statActs": "완료한 막",
+          "goalReviewTitle": "막별 리뷰",
+          "goalReviewHint": "이 시나리오는 막마다 몇 가지 핵심 목표를 정해 두었습니다. 실제 대화가 어떻게 흘러갔는지 돌아보면, 이번에는 {{total}}개 중 {{achieved}}개를 달성했습니다.",
+          "goalListTitle": "각 막에서 요구한 것",
+          "goalListHint": "이 시나리오는 막마다 몇 가지 핵심 목표를 정해 두었습니다. 각 막에서 무엇을 요구했는지 돌아봅니다.",
+          "goalAchieved": "달성",
+          "goalPartial": "일부 달성",
+          "goalMissed": "미달성",
+          "statGoodDecisions": "좋은 선택",
+          "statScore": "결정 점수",
+          "statBeats": "완료한 막",
+          "decisionReviewTitle": "결정 리뷰",
+          "good": "우수",
+          "ok": "보통",
+          "poor": "개선 필요",
+          "decisionScore": "결정 점수 {{score}}",
+          "castLabel": "대화한 인물: {{names}}"
         },
-        "highlightsTitle": "Highlights",
+        "highlightsTitle": "하이라이트",
         "highlight": {
-          "independence": "You demonstrated {{unlocks}}/{{total}} concepts on your own — no prompting needed. Solid understanding.",
-          "resilience": "In \"{{title}}\" you overcame {{errors}} errors, tackling each one — real grit.",
-          "resilienceGeneral": "You overcame {{errors}} errors, tackling each one — real grit.",
-          "completion": "You completed every task. Steady progress all the way through."
+          "independence": "개념 {{total}}개 중 {{unlocks}}개를 도움 없이 스스로 보여 주었습니다. 탄탄한 이해력입니다.",
+          "resilience": "\"{{title}}\"에서 오류 {{errors}}개를 하나씩 해결하며 극복했습니다 — 진정한 끈기입니다.",
+          "resilienceGeneral": "오류 {{errors}}개를 하나씩 해결하며 극복했습니다 — 진정한 끈기입니다.",
+          "completion": "모든 과제를 완료했습니다. 처음부터 끝까지 꾸준히 나아갔습니다."
         },
         "synthesisQuality": {
-          "strong": "Strong understanding ✅",
-          "ok": "Good grasp 👍",
-          "weak": "Room to grow 💪"
+          "strong": "탄탄한 이해 ✅",
+          "ok": "잘 이해함 👍",
+          "weak": "성장할 여지 💪"
         },
-        "durationMinutes": "{{m}} min",
+        "durationMinutes": "{{m}}분",
         "durationHours": "{{h}} hr",
-        "durationHoursMinutes": "{{h}} hr {{m}} min"
+        "durationHoursMinutes": "{{h}}시간 {{m}}분",
+        "stars": "별점"
       },
       "completionCard": {
-        "title": "Project Complete · Completion",
-        "subtitle": "Congratulations! You finished the entire project.",
-        "description": "Based on your performance data (time spent, conversations, error recovery, concepts unlocked…), we have generated a completion report showing what you built, what you learned, and where to go next."
+        "title": "프로젝트 완료 · 수료",
+        "subtitle": "축하합니다! 프로젝트 전체를 마쳤습니다.",
+        "description": "수행 데이터(소요 시간, 대화, 오류 해결, 습득한 개념…)를 바탕으로 무엇을 만들었고, 무엇을 배웠고, 다음에 무엇을 하면 좋을지 보여 주는 완료 보고서를 만들었습니다."
       }
     }
   },
@@ -1010,8 +1228,10 @@
     "deleteFolderConfirmRemove": "폴더와 강의(채팅 기록 포함)가 삭제됩니다.",
     "deleteFolderAndCourses_other": "폴더와 강의 {{count}}개 삭제",
     "notFound": "강의를 찾을 수 없습니다",
-    "notFoundDesc": "해당 강의가 존재하지 않거나 이미 삭제되었습니다.",
-    "backToHome": "홈으로 돌아가기"
+    "notFoundDesc": "해당 강의가 존재하지 않거나, 삭제되었거나, 볼 수 있는 권한이 없습니다.",
+    "backToHome": "홈으로 돌아가기",
+    "loadFailed": "저장소를 사용할 수 없어 저장된 강의실을 불러오지 못했습니다.",
+    "deleteFailed": "강의실을 삭제하지 못했습니다"
   },
   "upload": {
     "pdfSizeLimit": "최대 50MB PDF 파일을 지원합니다",
@@ -1442,16 +1662,16 @@
     "voxcpmStopPreview": "미리 듣기 중지",
     "voxcpmPreviewVoice": "음성 미리 듣기",
     "voxcpmDeleteVoice": "음성 삭제",
-    "qwenCloneVoicesTitle": "Qwen TTS Cloned Voices",
-    "qwenCloneRefText": "Enter the verbatim transcript of the reference audio",
-    "qwenCloneRefAudioHint": "Use a clean 1–60 second voice sample. A 10–20 second sample is recommended; audio is converted to 24 kHz mono PCM WAV.",
-    "qwenCloneSaved": "Qwen cloned voice registered and saved",
-    "qwenCloneSaveFailed": "Failed to register the Qwen cloned voice",
-    "qwenCloneUnsupported": "Recording is not supported in this browser; upload an audio file instead.",
-    "qwenCloneSpeedHint": "Cloned voices always synthesize at 1× speed.",
-    "qwenCloneDeleteWarning": "The voice was removed locally, but provider deletion failed.",
-    "qwenCloneNarrationUnavailable": "The assigned voice is unavailable. Narration will use another enabled voice instead.",
-    "qwenCloneDiscussionUnavailable": "The assigned voice is unavailable. Discussion will use another enabled voice instead.",
+    "qwenCloneVoicesTitle": "Qwen TTS 복제 음성",
+    "qwenCloneRefText": "참조 오디오의 원문 그대로의 대본을 입력하세요",
+    "qwenCloneRefAudioHint": "1–60초 길이의 깨끗한 음성 샘플을 사용하세요. 10–20초를 권장하며, 오디오는 24 kHz 모노 PCM WAV로 변환됩니다.",
+    "qwenCloneSaved": "Qwen 복제 음성을 등록하고 저장했습니다",
+    "qwenCloneSaveFailed": "Qwen 복제 음성을 등록하지 못했습니다",
+    "qwenCloneUnsupported": "이 브라우저는 녹음을 지원하지 않습니다. 대신 오디오 파일을 업로드하세요.",
+    "qwenCloneSpeedHint": "복제 음성은 항상 1× 속도로 합성됩니다.",
+    "qwenCloneDeleteWarning": "음성은 로컬에서 삭제되었지만 제공자 측 삭제에 실패했습니다.",
+    "qwenCloneNarrationUnavailable": "지정된 음성을 사용할 수 없습니다. 내레이션에는 활성화된 다른 음성이 사용됩니다.",
+    "qwenCloneDiscussionUnavailable": "지정된 음성을 사용할 수 없습니다. 토론에는 활성화된 다른 음성이 사용됩니다.",
     "providerOpenAIWhisper": "OpenAI ASR (gpt-4o-mini-transcribe)",
     "providerBrowserNative": "브라우저 기본 ASR",
     "providerQwenASR": "Qwen ASR (Alibaba Cloud Bailian)",
@@ -1799,55 +2019,55 @@
     "webSearchBaseUrl": "기본 URL",
     "webSearchServerConfigured": "서버 측 검색 API 키가 설정되어 있습니다",
     "optional": "선택 사항",
-    "selectProvider": "Select Provider",
-    "customProvider": "Custom",
-    "presetPickHint": "Picking a provider auto-fills its base URL and protocol; enter your key then click \"Fetch Models\". Not listed? Use \"Custom\".",
+    "selectProvider": "제공자 선택",
+    "customProvider": "사용자 지정",
+    "presetPickHint": "제공자를 선택하면 Base URL과 프로토콜이 자동으로 채워집니다. 키를 입력한 뒤 \"모델 가져오기\"를 클릭하세요. 목록에 없나요? \"사용자 지정\"을 사용하세요.",
     "presetCategory": {
-      "tokenPlan": "Token Plans",
-      "aggregator": "Aggregators",
-      "thirdParty": "Vendors",
-      "official": "Official"
+      "tokenPlan": "토큰 플랜",
+      "aggregator": "애그리게이터",
+      "thirdParty": "공급업체",
+      "official": "공식"
     },
-    "fetchModels": "Fetch Models",
-    "fetchModelsResult": "Fetched {total} models, added {added}",
-    "fetchModelsNoEndpoint": "This provider has no model list endpoint — add models manually",
-    "fetchModelsAuthError": "API key is invalid or expired",
-    "fetchModelsFailed": "Failed to fetch models",
+    "fetchModels": "모델 가져오기",
+    "fetchModelsResult": "모델 {total}개를 가져와 {added}개를 추가했습니다",
+    "fetchModelsNoEndpoint": "이 제공자는 모델 목록 엔드포인트가 없습니다. 모델을 직접 추가하세요",
+    "fetchModelsAuthError": "API 키가 유효하지 않거나 만료되었습니다",
+    "fetchModelsFailed": "모델을 가져오지 못했습니다",
     "usage": {
-      "title": "Usage",
-      "refresh": "Refresh",
-      "disclaimer": "Usage is system-tracked; only server-side calls are counted.",
-      "totalRequests": "Requests",
-      "totalTokens": "LLM Tokens",
-      "dailyTrend": "Daily Token Trend",
-      "tokens": "Tokens",
-      "byModel": "By Model",
-      "model": "Model",
-      "type": "Type",
-      "reqs": "Reqs",
-      "usage": "Usage",
-      "empty": "No usage data yet",
+      "title": "사용량",
+      "refresh": "새로고침",
+      "disclaimer": "사용량은 시스템이 기록하며 서버 측 호출만 집계됩니다.",
+      "totalRequests": "요청",
+      "totalTokens": "LLM 토큰",
+      "dailyTrend": "일별 토큰 추이",
+      "tokens": "토큰",
+      "byModel": "모델별",
+      "model": "모델",
+      "type": "유형",
+      "reqs": "요청",
+      "usage": "사용량",
+      "empty": "아직 사용 데이터가 없습니다",
       "kindLlm": "LLM",
-      "kindImage": "Image",
+      "kindImage": "이미지",
       "kindVideo": "Video",
-      "kindTts": "Speech",
+      "kindTts": "음성",
       "kindAsr": "ASR",
-      "unitToken": "tokens",
-      "unitImage": "images",
-      "unitSecond": "sec",
-      "unitCharacter": "chars"
+      "unitToken": "토큰",
+      "unitImage": "장",
+      "unitSecond": "초",
+      "unitCharacter": "자"
     },
     "tokenPlan": {
       "nav": "Token Plan",
-      "title": "Token Plan Setup",
-      "desc": "Pick your token plan provider and enter the key — it auto-configures every adapted modality (LLM/image/video/speech/web search).",
-      "selectPlan": "Select Provider",
-      "apiKey": "API Key",
-      "enable": "Enable",
-      "updateKey": "Update key",
-      "modelsCount": "{{n}} models",
-      "capabilities": "Capabilities offered",
-      "offeredNote": "Models offered by this plan. Pick the ones you want on the generation bar — availability depends on your plan tier, and unsupported models will error at generation time."
+      "title": "토큰 플랜 설정",
+      "desc": "토큰 플랜 제공자를 선택하고 키를 입력하면 지원되는 모든 모달리티(LLM/이미지/동영상/음성/웹 검색)가 자동으로 설정됩니다.",
+      "selectPlan": "제공자 선택",
+      "apiKey": "API 키",
+      "enable": "사용",
+      "updateKey": "키 업데이트",
+      "modelsCount": "모델 {{n}}개",
+      "capabilities": "제공 기능",
+      "offeredNote": "이 플랜에서 제공하는 모델입니다. 생성 바에 표시할 모델을 선택하세요. 사용 가능 여부는 플랜 등급에 따라 다르며, 지원되지 않는 모델은 생성 시 오류가 발생합니다."
     },
     "skills": {
       "nav": "스킬",
@@ -1866,7 +2086,7 @@
       "download": "다운로드",
       "detailFailed": "스킬 상세를 불러오지 못했습니다",
       "contentLabel": "내용",
-      "builtinDetailNote": "이 스킬은 OpenMAIC에 포함되어 있습니다. 다른 에이전트 작업공간으로 가져오려면 다운로드하세요.",
+      "builtinDetailNote": "이 스킬은 ÔN THI에 포함되어 있습니다. 다른 에이전트 작업공간으로 가져오려면 다운로드하세요.",
       "upload": "업로드",
       "uploading": "업로드 중…",
       "uploadFailed": "스킬을 업로드하지 못했습니다. 파일을 확인하고 다시 시도하세요.",
@@ -1881,82 +2101,82 @@
     "alidocmindAccessKeySecret": "AccessKey Secret"
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "제목 없는 코스",
+    "sceneCount": "{{count}}페이지",
+    "sceneCount_one": "{{count}}페이지",
+    "sceneCount_other": "{{count}}페이지",
+    "courseLinkHint": "오른쪽 창에서 {{name}} 열기",
+    "courseLinkMore": "강의실 {{count}}개 더",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "이 메시지에서 강의실 참조",
+      "empty": "일치하는 강의실이 없습니다",
+      "alreadyNamed": "이미 참조됨",
+      "remove": "{{name}} 제거",
+      "pillHint": "이 메시지는 {{name}}을(를) 참조합니다",
       "notAccepted": "서버를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "{{name}} 참조",
+      "capped": "처음 {{count}}개만 표시 — 계속 입력해 범위를 좁히세요"
     },
-    "heroTitle": "What will you create today?",
-    "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "heroTitle": "오늘은 무엇을 만들어 볼까요?",
+    "heroSubtitle": "아이디어를 공유하고 누구나 참여할 수 있는 학습 여정으로 만들어 보세요",
+    "newSession": "새 채팅",
     "sections": {
-      "courses": "Courses",
-      "sessions": "Chats"
+      "courses": "코스",
+      "sessions": "채팅"
     },
-    "coursesEmpty": "No courses yet",
-    "sessionsEmpty": "No chats yet",
-    "loading": "Loading",
-    "loadFailed": "Couldn't load",
-    "retry": "Retry",
-    "untitledSession": "Untitled chat",
-    "pagePosition": "Page {{index}} of {{total}}",
-    "exitPro": "Exit Pro",
-    "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
-    "currentSession": "Current chat",
+    "coursesEmpty": "아직 코스가 없습니다",
+    "sessionsEmpty": "아직 채팅이 없습니다",
+    "loading": "불러오는 중",
+    "loadFailed": "불러오지 못했습니다",
+    "retry": "다시 시도",
+    "untitledSession": "제목 없는 채팅",
+    "pagePosition": "{{index}} / {{total}} 페이지",
+    "exitPro": "Pro 종료",
+    "navAria": "작업 공간 탐색",
+    "homeAria": "홈으로 돌아가기",
+    "currentSession": "현재 채팅",
     "startLearning": "학습 시작",
     "time": {
-      "justNow": "Just now",
-      "minutesAgo": "{{count}}m ago",
-      "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "justNow": "방금",
+      "minutesAgo": "{{count}}분 전",
+      "hoursAgo": "{{count}}시간 전",
+      "daysAgo": "{{count}}일 전"
     },
     "sessionStatus": {
-      "connecting": "Connecting",
-      "queued": "Queued",
-      "running": "Running",
-      "succeeded": "Ready",
-      "failed": "Needs attention",
-      "cancelled": "Stopped"
+      "connecting": "연결 중",
+      "queued": "대기 중",
+      "running": "실행 중",
+      "succeeded": "완료",
+      "failed": "확인 필요",
+      "cancelled": "중지됨"
     },
-    "backToWorkspace": "Back to workspace",
-    "searchPlaceholder": "Filter by name",
-    "searchAria": "Search {{section}}",
-    "searchEmpty": "No matches",
-    "showMore": "Show {{count}} more",
-    "showLess": "Show less",
-    "utilitiesAria": "Preferences and account",
-    "resizeAria": "Drag to resize the sidebar",
-    "chatPaneAria": "Chat panel",
-    "classroomPaneAria": "Classroom",
-    "collapseNav": "Collapse navigation",
-    "expandNav": "Expand navigation",
-    "expandNavInto": "Expand navigation · {{section}}",
-    "collapseChat": "Collapse conversation",
-    "expandChat": "Conversation",
-    "collapseClassroom": "Collapse classroom",
-    "expandClassroom": "Classroom",
-    "readOnlyBadge": "Read-only",
-    "noCourseTitle": "No course open",
+    "backToWorkspace": "작업 공간으로 돌아가기",
+    "searchPlaceholder": "이름으로 필터",
+    "searchAria": "{{section}} 검색",
+    "searchEmpty": "일치하는 항목 없음",
+    "showMore": "{{count}}개 더 보기",
+    "showLess": "간단히 보기",
+    "utilitiesAria": "환경설정 및 계정",
+    "resizeAria": "드래그하여 사이드바 크기 조절",
+    "chatPaneAria": "채팅 패널",
+    "classroomPaneAria": "강의실",
+    "collapseNav": "탐색 접기",
+    "expandNav": "탐색 펼치기",
+    "expandNavInto": "탐색 펼치기 · {{section}}",
+    "collapseChat": "대화 접기",
+    "expandChat": "대화",
+    "collapseClassroom": "강의실 접기",
+    "expandClassroom": "강의실",
+    "readOnlyBadge": "읽기 전용",
+    "noCourseTitle": "열린 코스가 없습니다",
     "noCourseHint": "대화의 코스 링크로 열거나 왼쪽 목록에서 선택하세요. 대화는 그대로 남습니다",
-    "resizeChatAria": "Drag to resize the conversation pane",
-    "firstPageLanding": "The first page is landing…",
+    "resizeChatAria": "드래그하여 대화 창 크기 조절",
+    "firstPageLanding": "첫 페이지가 곧 도착합니다…",
     "autoSaving": "자동 저장 중…",
     "autoSaved": "저장됨",
-    "collapsedTitle": "Both panes are collapsed",
-    "collapsedHint": "Use the tabs on the left to bring the conversation or the classroom back",
-    "moreUtilities": "More",
+    "collapsedTitle": "두 창이 모두 접혀 있습니다",
+    "collapsedHint": "왼쪽 탭을 사용해 대화나 강의실을 다시 열 수 있습니다",
+    "moreUtilities": "더보기",
     "rowMore": "{{name}} 추가 작업",
     "folderDeleteHint": "폴더 안의 강의는 최상위 목록으로 돌아갑니다. 삭제되지 않습니다.",
     "dropToUnfile": "여기에 놓으면 폴더에서 빼냅니다",
@@ -1970,7 +2190,7 @@
     "confirmDelete": "삭제 확인",
     "deleting": "삭제 중…",
     "deleteFailed": "삭제하지 못했습니다. 다시 시도해 주세요.",
-    "tabsAria": "Chats and courses",
+    "tabsAria": "채팅 및 코스",
     "courseTabsAria": "열린 코스",
     "courseTabClose": "탭 닫기: {{name}}",
     "courseTabRunning": "생성 중",
@@ -2086,7 +2306,22 @@
         "roleFailed": "역할을 변경할 수 없습니다. 다시 시도하세요."
       },
       "roleChanged": "역할을 변경했습니다.",
-      "changeRoleLabel": "{{username}}의 역할 변경"
+      "changeRoleLabel": "{{username}}의 역할 변경",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "비밀번호 재설정",
+      "resetPasswordLabel": "{{username}} 비밀번호 재설정",
+      "resetTitle": "{{username}}의 비밀번호를 재설정할까요?",
+      "resetDescription": "계정에 임시 비밀번호가 설정되고 모든 기기에서 로그아웃됩니다. 임시 비밀번호는 한 번만 표시되니 사용자에게 전달하고 로그인 후 변경하도록 안내하세요. 작업은 감사 로그에 기록됩니다.",
+      "resetDone": "{{username}}의 임시 비밀번호입니다. 지금 복사하세요. 다시 표시되지 않습니다.",
+      "resetCopy": "복사",
+      "resetCopied": "임시 비밀번호를 복사했습니다.",
+      "resetClose": "완료"
     },
     "roles": {
       "learner": "학습자",
@@ -2095,23 +2330,51 @@
     },
     "administration": "관리",
     "adminPage": {
-      "title": "관리",
+      "title": "운영",
       "description": "이 배포의 계정, 사용량, 역할을 관리합니다.",
-      "denied": "이 페이지는 운영자와 관리자만 볼 수 있습니다."
+      "denied": "이 페이지는 운영자와 관리자만 볼 수 있습니다.",
+      "learn": "학습 화면으로",
+      "summary": {
+        "activeMembers": "활성 회원",
+        "pendingShares": "승인 대기 중인 공유 요청",
+        "classes": "수업",
+        "pendingAccessRequests": "대기 중인 이용 신청"
+      },
+      "providers": {
+        "title": "서버 제공자",
+        "description": "읽기 전용입니다. 제공자는 서버 설정에서 지정합니다.",
+        "empty": "서버에 설정된 제공자가 없습니다."
+      },
+      "deniedSignIn": "운영자 또는 관리자 계정으로 로그인하세요."
+    },
+    "membership": {
+      "active": "회원권 {{date}}까지 · 월 {{quota}} 토큰",
+      "none": "활성 회원권이 없습니다"
+    },
+    "password": {
+      "title": "비밀번호 변경",
+      "description": "다른 기기는 로그아웃되고 이 기기는 로그인 상태로 유지됩니다.",
+      "current": "현재 비밀번호",
+      "new": "새 비밀번호",
+      "confirm": "새 비밀번호 다시 입력",
+      "submit": "변경",
+      "changed": "비밀번호를 변경했습니다. 다른 기기는 로그아웃되었습니다.",
+      "wrongCurrent": "현재 비밀번호가 올바르지 않습니다.",
+      "mismatch": "새 비밀번호가 일치하지 않습니다."
     }
   },
   "proMode": {
     "attach": "자료 첨부",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
+    "mentionCourse": "강의실 참조",
+    "loadSkill": "스킬 불러오기",
+    "skillMenuTitle": "코스 설계 스킬 선택",
+    "skillsLoading": "스킬 불러오는 중…",
+    "noSkillsAvailable": "사용 가능한 스킬이 없습니다",
+    "userSkillsGroup": "내 스킬",
+    "builtinSkillsGroup": "기본 제공 스킬",
+    "skillsLoadFailed": "스킬을 불러오지 못했습니다. 클릭해 다시 시도",
+    "retrySkills": "다시 시도",
+    "noSkillMatch": "“{{query}}”와(과) 일치하는 스킬이 없습니다",
     "badgeAria": "Pro 모드",
     "badgeEnter": "Pro 모드",
     "badgeExit": "일반 모드로 돌아가기",
@@ -2149,7 +2412,25 @@
       "quotaValue": "월 {{tokens}} 토큰",
       "grant": "부여 또는 연장",
       "resume": "재개",
-      "suspend": "일시 중지"
+      "suspend": "일시 중지",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "공유 요청",
@@ -2159,7 +2440,24 @@
       "reject": "거부",
       "approved": "강좌를 회원에게 공개했습니다.",
       "rejected": "요청을 거부했습니다.",
-      "requested": "{{date}} 요청"
+      "requested": "{{date}} 요청",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "업데이트"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "“{{title}}” 공유를 거절할까요?",
+      "rejectDescription": "소유자는 요청이 거절된 사실과(입력한 경우) 사유를 보게 되며 다시 요청할 수 있습니다.",
+      "rejectReason": "사유(선택)",
+      "snapshot": "패키지: “{{name}}”, 장면 {{count}}개, 미디어 {{media}}개, {{size}}",
+      "remixOf": "“{{title}}”의 리믹스"
     },
     "previews": {
       "title": "무료 미리보기",
@@ -2167,7 +2465,10 @@
       "courseId": "강좌 ID",
       "add": "미리보기로 표시",
       "remove": "제거",
-      "empty": "아직 미리보기가 없습니다."
+      "empty": "아직 미리보기가 없습니다.",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "클래스",
@@ -2178,12 +2479,247 @@
       "empty": "아직 클래스가 없습니다.",
       "members": "회원 {{count}}명",
       "courses": "강좌 {{count}}개",
-      "attach": "강좌 연결"
+      "attach": "강좌 연결",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "새 참여 코드",
+      "newCodeTitle": "“{{name}}”에 새 참여 코드를 만들까요?",
+      "newCodeDescription": "현재 코드는 즉시 사용할 수 없게 됩니다. 이미 반에 있는 구성원은 그대로 남습니다. 새 코드는 한 번만 표시되니 바로 복사하세요.",
+      "membersOf": "{{name}} 구성원",
+      "membersDescription": "제외된 구성원은 반 코드로 다시 참여할 수 있습니다. 막으려면 새 코드를 만드세요.",
+      "noMembers": "아직 구성원이 없습니다.",
+      "joined": "{{date}} 참여",
+      "removeMember": "제외",
+      "removeMemberTitle": "{{username}}을(를) {{name}}에서 제외할까요?",
+      "removeMemberDescription": "이 반의 강의를 더 이상 열 수 없습니다. 작업은 감사 로그에 기록됩니다.",
+      "memberRemoved": "{{username}}을(를) 반에서 제외했습니다."
     },
     "audit": {
       "title": "감사 로그",
       "description": "계정, 회원권, 공유, 클래스의 최근 변경 사항.",
-      "empty": "아직 기록이 없습니다."
+      "empty": "아직 기록이 없습니다.",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "비밀번호 재설정"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "참여 코드 변경",
+        "password_reset": "비밀번호 재설정",
+        "community_ban": "커뮤니티 게시 차단",
+        "community_unban": "커뮤니티 게시 차단 해제",
+        "class_remove": "구성원 제외",
+        "challenge_create": "챌린지 생성",
+        "challenge_update": "챌린지 수정",
+        "settings_update": "설정 변경",
+        "share_update-approve": "공유 업데이트 승인",
+        "share_update-reject": "공유 업데이트 거절"
+      }
+    },
+    "accessRequests": {
+      "title": "이용 신청 목록",
+      "description": "회원 가입을 신청한 사람들입니다. 승인하면 30일과 기본 월 사용량이 부여되며, 이후 회원 목록에서 바꿀 수 있습니다.",
+      "empty": "대기 중인 신청이 없습니다.",
+      "requested": "{{date}} 신청",
+      "approve": "승인",
+      "reject": "거절",
+      "approved": "{{name}} 님이 회원이 되었습니다.",
+      "rejected": "{{name}} 님의 신청을 거절했습니다.",
+      "reasonPlaceholder": "사유(선택, 학습자에게 표시되며 감사 로그에 기록됨)",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "지원 요청 {{count}}건이 답변을 기다리고 있습니다.",
+        "reportsOpen": "처리 대기 중인 커뮤니티 신고 {{count}}건이 있습니다."
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "강의",
+      "description": "이 시스템의 모든 강의입니다. 열어서 검토하거나 ID를 복사해 미리보기로 지정하거나 반에 연결하세요.",
+      "open": "새 탭에서 강의 열기",
+      "copy": "ID {{id}} 복사",
+      "copied": "{{id}} 복사됨",
+      "owner": "소유자",
+      "anonymous": "로그인 안 함",
+      "updated": "업데이트",
+      "empty": "아직 강의가 없습니다."
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "찾을 수 없습니다.",
       "MEMBERSHIP_REQUIRED": "이 작업에는 활성 회원권이 필요합니다.",
       "QUOTA_EXCEEDED": "이번 달 AI 사용량을 모두 사용했습니다.",
-      "ACCOUNTS_NOT_CONFIGURED": "이 배포에서는 계정 기능이 설정되어 있지 않습니다."
+      "ACCOUNTS_NOT_CONFIGURED": "이 배포에서는 계정 기능이 설정되어 있지 않습니다.",
+      "ALREADY_MEMBER": "이미 유효한 회원권이 있습니다.",
+      "MEMBERSHIP_SUSPENDED": "관리자가 회원권을 일시 중지했습니다.",
+      "REQUEST_PENDING": "관리자의 확인을 기다리는 신청이 이미 있습니다.",
+      "REQUEST_TOO_SOON": "거절된 신청은 나중에 다시 보낼 수 있습니다.",
+      "COURSE_NOT_FOUND": "이 ID의 강의가 없습니다. 강의 주소(/classroom/<ID>)의 ID를 확인하세요.",
+      "RATE_LIMITED": "답변받지 못한 문의가 너무 많습니다. 먼저 답변을 기다려 주세요.",
+      "COMMUNITY_BLOCKED": "계정이 커뮤니티 게시에서 차단되었습니다."
     }
   },
   "catalog": {
     "title": "카탈로그",
     "description": {
       "member": "무료 미리보기, 공유 강좌, 내 클래스의 강좌.",
-      "guest": "무료 미리보기입니다. 로그인하면 더 볼 수 있습니다."
+      "guest": "무료 미리보기입니다. 로그인하면 더 볼 수 있습니다.",
+      "signedIn": "무료 미리보기입니다. 회원은 공유 강의와 소속 반도 볼 수 있습니다."
     },
     "signInToSee": "로그인하면 공유 강좌를 보고 클래스에 참여할 수 있습니다.",
     "join": {
       "title": "클래스 참여",
       "code": "참여 코드",
       "submit": "참여",
-      "done": "{{name}}에 참여했습니다."
+      "done": "{{name}}에 참여했습니다.",
+      "description": "받은 코드를 입력하면 수업에 참여할 수 있습니다."
     },
     "empty": "아직 둘러볼 항목이 없습니다.",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "내 클래스"
     },
     "open": "열기",
-    "unavailable": "이 배포에서는 카탈로그를 사용할 수 없습니다."
+    "unavailable": "이 배포에서는 카탈로그를 사용할 수 없습니다.",
+    "back": "카탈로그로 돌아가기",
+    "membersOnly": "공유 강의와 반은 회원 전용입니다."
   },
   "courseShare": {
     "request": "회원과 공유",
-    "pending": "승인 대기 중",
     "stop": "공유 중지",
     "requested": "요청을 보냈습니다. 운영자가 검토합니다.",
     "withdrawn": "공유를 중지했습니다. 이미 가진 학습자는 사본을 계속 사용합니다.",
-    "failed": "강좌를 공유할 수 없습니다. 다시 시도하세요."
+    "failed": "강좌를 공유할 수 없습니다. 다시 시도하세요.",
+    "rejected": "공유 요청이 거절되었습니다.",
+    "rejectedWithReason": "공유 요청이 거절되었습니다: {{reason}}",
+    "requestWithdrawn": "공유 요청을 철회했습니다.",
+    "menu": "멤버와 공유",
+    "packing": "강좌를 패키징하는 중…",
+    "updateSent": "업데이트를 보냈습니다. 승인 전까지 독자는 이전 버전을 봅니다.",
+    "updatePending": "업데이트가 검토를 기다리고 있습니다. 독자는 승인된 버전을 봅니다.",
+    "updateRejected": "업데이트가 거절되었습니다: {{reason}}",
+    "sharedStatus": "멤버와 공유 중입니다.",
+    "pendingStatus": "운영자의 검토를 기다리는 중입니다.",
+    "privateStatus": "아직 공유되지 않았습니다.",
+    "update": "공유 버전 업데이트",
+    "resend": "최신 버전 다시 보내기",
+    "withdraw": "요청 철회",
+    "reviewNote": "강좌는 지금 보이는 그대로(수정 내용과 미디어 포함) 전송됩니다. 모든 버전은 운영자 승인이 필요합니다."
+  },
+  "support": {
+    "title": "관리자에게 문의",
+    "description": "운영팀에 질문이나 요청을 보내세요. 답변은 여기에 표시됩니다.",
+    "contact": "관리자에게 문의",
+    "panelTitle": "지원 받은편지함",
+    "panelDescription": "학습자의 질문과 요청입니다. 답변을 기다리는 항목이 먼저 표시됩니다.",
+    "new": "새 문의",
+    "subject": "제목",
+    "body": "내용",
+    "username": "받는 사람(사용자 이름)",
+    "send": "보내기",
+    "reply": "답장",
+    "replyPlaceholder": "답장 작성…",
+    "close": "해결됨으로 표시",
+    "reopen": "다시 열기",
+    "empty": "아직 문의가 없습니다.",
+    "pick": "문의를 선택해 확인하세요.",
+    "staff": "운영팀",
+    "waiting": "답변 대기",
+    "unread": "새 답장",
+    "unreadCount": "새 답장 {{count}}개",
+    "sent": "보냈습니다.",
+    "state": {
+      "open": "진행 중",
+      "closed": "해결됨"
+    },
+    "filter": {
+      "label": "상태별 필터"
+    },
+    "subjects": {
+      "renew": "멤버십 연장",
+      "resume": "멤버십 재개",
+      "quota": "AI 한도 늘리기"
+    }
+  },
+  "community": {
+    "title": "커뮤니티",
+    "description": "학습자가 슬라이드에서 바로 한 질문에 AI 조교와 다른 멤버가 답합니다.",
+    "signIn": "커뮤니티를 보려면 로그인하세요.",
+    "empty": "아직 질문이 없습니다.",
+    "answer": "답변하기",
+    "answerPlaceholder": "답변을 작성하세요… (Markdown과 $x^2$ 같은 수식 사용 가능)",
+    "answers": "답변 {{count}}개",
+    "answerCount": "답변 {{count}}개",
+    "vote": "도움됨 ({{count}})",
+    "best": "베스트",
+    "bestMarked": "베스트 답변을 선택했습니다.",
+    "bestRewarded": "선택했습니다. {{name}} 님이 보상 토큰 {{tokens}}개를 받았습니다.",
+    "solved": "해결됨",
+    "locked": "잠김",
+    "lockedHint": "이 질문은 잠겨 더 이상 답변을 받지 않습니다.",
+    "hidden": "숨김",
+    "markBest": "베스트로 선택",
+    "openSlide": "슬라이드 열기",
+    "ai": {
+      "name": "AI 조교",
+      "writing": "AI 조교가 답변을 작성 중입니다…",
+      "retry": "AI에게 다시 묻기"
+    },
+    "ask": {
+      "button": "질문하기",
+      "title": "질문",
+      "titlePlaceholder": "무엇이 이해되지 않나요?",
+      "body": "자세한 내용 (선택)",
+      "bodyPlaceholder": "시도한 것, 막힌 단계…",
+      "submit": "질문 올리기",
+      "onScene": "질문이 슬라이드 “{{scene}}”에 고정됩니다.",
+      "onCourse": "질문이 강좌 전체에 고정됩니다.",
+      "aiNote": "AI 조교가 바로 답하고, 다른 멤버가 보충할 수 있습니다."
+    },
+    "join": {
+      "title": "토론에 참여하세요",
+      "body": "멤버는 질문하고 AI 조교의 답을 바로 받으며, 다른 사람을 돕고, 답변이 베스트로 선택되면 보상 토큰을 받습니다.",
+      "cta": "멤버 되기"
+    },
+    "report": {
+      "action": "신고",
+      "title": "내용 신고",
+      "description": "이 내용이 부적절한 이유를 운영팀에 알려 주세요.",
+      "reason": "사유",
+      "send": "신고 보내기",
+      "done": "신고했습니다. 감사합니다."
+    },
+    "mod": {
+      "hide": "숨기기",
+      "show": "다시 보이기",
+      "hidden": "내용을 숨겼습니다.",
+      "shown": "내용을 다시 표시했습니다.",
+      "lock": "잠그기",
+      "unlock": "잠금 해제",
+      "ban": "게시 차단",
+      "banned": "{{name}} 님의 게시를 차단했습니다.",
+      "unban": "차단 해제",
+      "unbanned": "{{name}} 님이 다시 게시할 수 있습니다."
+    },
+    "scene": {
+      "button": "이 슬라이드의 토론",
+      "title": "토론",
+      "thisSlide": "이 슬라이드",
+      "wholeCourse": "강좌 전체",
+      "scope": "범위",
+      "pick": "질문을 선택해 읽거나 새 질문을 하세요."
+    },
+    "feed": {
+      "all": "전체",
+      "unsolved": "미해결",
+      "mine": "내 질문",
+      "filter": "질문 필터",
+      "search": "질문 검색",
+      "pick": "질문을 선택하면 답변이 보입니다.",
+      "howToAsk": "질문하려면 강의를 열고, 막힌 슬라이드에서 도구 모음의 토론 버튼을 누르세요."
+    },
+    "reports": {
+      "title": "커뮤니티 신고",
+      "description": "신고된 질문과 답변입니다. 규칙 위반은 숨기고, 잘못된 신고는 무시하거나, 작성자의 게시를 차단하세요.",
+      "empty": "대기 중인 신고가 없습니다.",
+      "count": "신고 {{count}}건",
+      "reasons": "사유",
+      "open": "열기",
+      "dismiss": "무시",
+      "dismissed": "신고를 무시했습니다.",
+      "banned": "게시가 차단된 계정",
+      "kind": {
+        "question": "질문",
+        "answer": "답변"
+      }
+    },
+    "tabs": {
+      "questions": "Q&A",
+      "challenges": "주간 챌린지"
+    }
+  },
+  "challenge": {
+    "none": "아직 챌린지가 없습니다.",
+    "pick": "챌린지를 선택해 확인하세요.",
+    "entries": "제출 {{count}}건",
+    "phase": {
+      "upcoming": "곧 시작",
+      "open": "제출 받는 중",
+      "voting": "투표 중",
+      "finished": "종료"
+    },
+    "when": {
+      "upcoming": "{{date}}에 시작",
+      "open": "제출 마감: {{date}}",
+      "voting": "투표 마감: {{date}}",
+      "finished": "{{date}}에 종료"
+    },
+    "prize": "{{rank}}위: 토큰 {{tokens}}개",
+    "prizeBadge": "+ 주간 챔피언 배지",
+    "rank": "{{rank}}위",
+    "yours": "내 제출",
+    "aiScore": "AI 점수 {{score}}/10",
+    "aiFeedback": "AI 피드백 (나만 보임)",
+    "reward": "+토큰 {{tokens}}개",
+    "vote": "투표 ({{count}})",
+    "voteHint": "가장 좋은 풀이에 투표하세요. 내 풀이에는 투표할 수 없습니다.",
+    "yourEntry": "내 풀이",
+    "editEntry": "풀이 수정",
+    "entryPlaceholder": "풀이를 작성하세요… (Markdown과 $x^2$ 같은 수식 사용 가능)",
+    "gradeNote": "제출하면 AI 조교가 바로 예비 채점합니다. 마감 전까지 수정해 다시 제출할 수 있고, 다른 멤버는 마감 후에 볼 수 있습니다.",
+    "grading": "제출하고 채점 중…",
+    "submit": "풀이 제출",
+    "resubmit": "다시 제출",
+    "submitted": "제출했습니다. AI 점수와 피드백은 아래에 있습니다.",
+    "notGraded": {
+      "quota": "제출했지만 이번 달 AI 한도를 모두 써서 채점되지 않았습니다.",
+      "failed": "제출했지만 AI가 채점하지 못했습니다. 다시 제출해 보세요."
+    },
+    "showReference": "모범 풀이 보기",
+    "hideReference": "모범 풀이 숨기기",
+    "results": "결과",
+    "allEntries": "모든 풀이",
+    "noEntries": "제출이 없습니다.",
+    "leaderboard": {
+      "title": "이번 달 순위",
+      "empty": "이번 달에는 아직 점수가 없습니다.",
+      "points": "{{count}}점",
+      "rule": "제출마다 1점, 1 / 2 / 3위에 3 / 2 / 1점 추가."
+    },
+    "admin": {
+      "panelTitle": "주간 챌린지",
+      "panelDescription": "챌린지마다 문제, 제출·투표 기간, 보상을 정합니다. 투표가 끝나면 결과가 자동으로 정해집니다.",
+      "create": "새 챌린지",
+      "edit": "챌린지 수정",
+      "saved": "챌린지를 저장했습니다.",
+      "title": "제목",
+      "statement": "문제",
+      "markdownHint": "Markdown과 $...$ 수식",
+      "reference": "모범 풀이 (투표 전까지 비공개)",
+      "referenceHint": "AI 예비 채점에 쓰이며, 학습자는 투표가 시작되면 볼 수 있습니다.",
+      "opensAt": "시작 시각",
+      "submissionDays": "제출 기간(일)",
+      "votingDays": "투표 기간(일)",
+      "rewards": "상위 3명 토큰 보상",
+      "rewardsHint": "적은 양으로 정하세요. 보상은 각자의 월간 보상 한도에 포함됩니다.",
+      "hidden": "이 챌린지 숨기기"
+    },
+    "settings": {
+      "title": "주간 챌린지: AI 채점",
+      "description": "제출마다 AI가 한 번 채점합니다. 그 토큰을 누가 낼지 선택하세요.",
+      "paidBy": "AI 채점 비용 부담",
+      "submitter": "제출자 한도에서 차감",
+      "submitterHint": "한도를 다 쓴 학습자도 제출할 수 있지만 AI 점수는 없습니다.",
+      "system": "시스템 부담",
+      "systemHint": "학습자 한도를 쓰지 않고 운영 예산으로 처리합니다.",
+      "adminOnly": "이 설정은 관리자만 바꿀 수 있습니다.",
+      "saved": "설정을 저장했습니다."
+    }
+  },
+  "remix": {
+    "menu": "리믹스",
+    "action": "이 강좌 리믹스",
+    "creating": "리믹스를 만드는 중…",
+    "created": "리믹스가 만들어졌습니다.",
+    "note": "내 소유의 사본을 만들어 수정하고 다시 공유할 수 있습니다. 원작자의 이름이 표시되고, 리믹스가 읽히면 원작자도 보상의 일부를 받습니다.",
+    "of": "{{author}} 님의 “{{title}}” 리믹스",
+    "list": "리믹스 {{count}}개",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "리믹스하려면 멤버십이 필요합니다.",
+      "FORBIDDEN": "이 강좌는 리믹스할 수 없습니다.",
+      "OWN_COURSE": "내 강좌입니다.",
+      "RATE_LIMITED": "오늘의 리믹스 한도에 도달했습니다."
+    },
+    "settings": {
+      "title": "강좌 리믹스",
+      "description": "독자 보상 중 원작자 몫과 멤버 1명이 하루에 만들 수 있는 리믹스 수.",
+      "royaltyPercent": "원작자 몫(%)",
+      "dailyLimit": "하루 리믹스 한도"
+    }
+  },
+  "nav": {
+    "home": "홈",
+    "main": "주 메뉴"
   }
 }

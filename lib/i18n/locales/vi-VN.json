@@ -10,8 +10,190 @@
     "close": "Đóng"
   },
   "home": {
-    "slogan": "Học tập sinh tạo trong lớp học tương tác đa tác nhân",
-    "greetingWithName": "Chào {{name}}"
+    "slogan": "Hiểu chắc kiến thức · Vững bước vào kỳ thi",
+    "greetingWithName": "Chào {{name}}",
+    "guest": {
+      "kicker": "AI đồng hành cùng việc học của bạn",
+      "title": "Học theo nhịp của bạn, có AI hỗ trợ bên cạnh",
+      "description": "Bài giảng, trình chiếu và thảo luận được soạn với sự hỗ trợ của AI, và được người thật xem lại trước khi chia sẻ. Bạn có thể xem thử miễn phí trước, không cần tài khoản.",
+      "signIn": "Đăng nhập",
+      "browseCatalog": "Xem danh mục bài học",
+      "stepsTitle": "Cách hoạt động",
+      "step1": {
+        "title": "Xem thử miễn phí",
+        "body": "Mở các bài do quản trị viên chọn, không cần tài khoản."
+      },
+      "step2": {
+        "title": "Đăng nhập",
+        "body": "Đăng nhập bằng tài khoản được cấp. Khách có thể xem thử nhưng chưa tạo được bài học.",
+        "titleOpen": "Đăng nhập hoặc tạo tài khoản",
+        "bodyOpen": "Tạo tài khoản miễn phí hoặc đăng nhập. Trước khi trở thành thành viên, bạn có thể xem thử nhưng chưa tạo được bài học."
+      },
+      "step3": {
+        "title": "Trở thành thành viên",
+        "body": "Thành viên có thể tạo bài học bằng AI, tham gia lớp và chia sẻ những gì mình làm."
+      },
+      "previewsTitle": "Bài xem thử",
+      "previewsEmpty": "Chưa có bài xem thử. Quay lại sau nhé.",
+      "membershipTitle": "Trở thành thành viên",
+      "membershipBody": "Thành viên có hạn mức hằng tháng để tạo bài học bằng AI, tham gia lớp bằng mã mời và chia sẻ bài với các thành viên khác.",
+      "nav": {
+        "features": "Tính năng",
+        "how": "Cách hoạt động",
+        "previews": "Bài xem thử",
+        "membership": "Thành viên"
+      },
+      "chip1": "Giải thích từ nhiều góc nhìn",
+      "chip2": "Trình chiếu & bảng trắng",
+      "chip3": "Bài kiểm tra & dự án",
+      "mock": {
+        "title": "Phân số trong đời sống",
+        "live": "Trực tiếp",
+        "teacher": "Mình cắt một chiếc bánh thành bốn phần bằng nhau nhé.",
+        "student": "Nếu các phần không bằng nhau thì sao ạ?"
+      },
+      "features": {
+        "title": "Thiết kế để bạn hiểu bài",
+        "subtitle": "AI giải thích, thảo luận và kiểm tra mức hiểu của bạn như một nhóm học kiên nhẫn, còn bạn luôn chủ động trong việc học.",
+        "f1": {
+          "title": "Một nhóm học trong mỗi bài",
+          "body": "Giảng viên, bạn học và trợ giảng, tất cả do AI đảm nhận, cùng tham gia để mỗi ý được giải thích từ nhiều phía."
+        },
+        "f2": {
+          "title": "Trình chiếu và bảng trắng",
+          "body": "Mỗi bài học có slide, bảng trắng trực tiếp và minh họa trực quan."
+        },
+        "f3": {
+          "title": "Bài kiểm tra và dự án",
+          "body": "Kiểm tra mức hiểu bằng câu hỏi trắc nghiệm, rồi thực hành qua các dự án."
+        },
+        "f4": {
+          "title": "Giọng đọc",
+          "body": "Mỗi cảnh có thể được đọc to, và bạn có thể trả lời bằng giọng nói."
+        },
+        "f5": {
+          "title": "Lớp học và chia sẻ",
+          "body": "Tham gia lớp bằng mã mời, và chia sẻ bài của bạn với các thành viên khác sau khi quản trị viên duyệt."
+        },
+        "f6": {
+          "title": "Mang bài đi bất cứ đâu",
+          "body": "Xuất bài học thành trang web, tệp PowerPoint hoặc video."
+        }
+      },
+      "previewsSubtitle": "Mở ngay các bài này, không cần tài khoản.",
+      "perks": {
+        "p1": "Hạn mức AI hằng tháng để tự tạo bài học",
+        "p2": "Tham gia lớp bằng mã mời",
+        "p3": "Chia sẻ bài học với các thành viên khác",
+        "p4": "Xuất bài học thành trang web, PowerPoint hoặc video"
+      },
+      "cta": {
+        "title": "Muốn tự mình trải nghiệm?",
+        "body": "Cứ xem thử một bài miễn phí trước, hoặc đăng nhập khi bạn sẵn sàng."
+      },
+      "footerTagline": "ÔN THI · xây dựng trên dự án mã nguồn mở OpenMAIC",
+      "trust": {
+        "title": "Dùng AI một cách cẩn trọng",
+        "subtitle": "Chúng tôi hiểu không phải ai cũng yên tâm về AI. Đây là cách chúng tôi cố gắng xứng đáng với sự tin tưởng của bạn.",
+        "t1": {
+          "title": "Bạn luôn chủ động",
+          "body": "AI chỉ hỗ trợ giải thích và luyện tập. Bạn chọn học gì và có thể dừng bất cứ lúc nào."
+        },
+        "t2": {
+          "title": "Được xem lại trước khi chia sẻ",
+          "body": "Quản trị viên xem lại bài học trước khi các thành viên khác nhìn thấy."
+        },
+        "t3": {
+          "title": "Nói thật về giới hạn",
+          "body": "AI có thể nhầm. Với điều quan trọng, hãy đối chiếu với thầy cô hoặc nguồn đáng tin cậy."
+        },
+        "t4": {
+          "title": "Xem trước rồi hãy quyết định",
+          "body": "Bài xem thử mở cho mọi người, không cần tài khoản và không ràng buộc."
+        }
+      }
+    },
+    "locked": {
+      "membership": "Tạo bài học bằng AI dành cho thành viên.",
+      "classes": "Tham gia lớp dành cho thành viên.",
+      "contactAdmin": "Hãy nhờ quản trị viên thêm bạn vào danh sách thành viên.",
+      "quota": "Hạn mức AI tháng này đã dùng hết.",
+      "quotaReset": "Tạo bài mới sẽ mở lại từ {{date}}."
+    },
+    "quota": {
+      "label": "Hạn mức AI tháng này",
+      "used": "Đã dùng {{used}} / {{quota}} token"
+    },
+    "classes": {
+      "mine": "Lớp của tôi"
+    },
+    "status": {
+      "ok": "Gói thành viên đến {{date}} · còn {{days}} ngày",
+      "expiring": "Gói thành viên của bạn hết hạn ngày {{date}} (còn {{days}} ngày). Hãy nhờ quản trị viên gia hạn.",
+      "quotaNear": "Bạn đã dùng {{percent}}% hạn mức AI của tháng này.",
+      "quotaOut": "Hạn mức AI tháng này đã dùng hết. Các bài học của bạn vẫn mở để học.",
+      "expired": "Gói thành viên của bạn đã hết hạn từ {{date}}. Các bài học của bạn vẫn đọc được. Hãy nhờ quản trị viên gia hạn để tạo bài mới.",
+      "suspended": "Gói thành viên của bạn đang tạm dừng. Các bài học của bạn vẫn đọc được. Hãy nhờ quản trị viên mở lại."
+    },
+    "continue": {
+      "title": "Tiếp tục học",
+      "progress": "Cảnh {{current}} / {{total}}",
+      "button": "Tiếp tục"
+    },
+    "myClasses": {
+      "members": "Thành viên: {{count}}",
+      "noCourses": "Lớp này chưa có bài học nào.",
+      "untitled": "Bài học {{number}}"
+    },
+    "starter": {
+      "title": "Chưa biết bắt đầu từ đâu? Thử một gợi ý:",
+      "one": "Giải thích [chủ đề] cho người mới bắt đầu, từng bước một",
+      "two": "Lập kế hoạch ôn [chủ đề] trong một tuần",
+      "three": "Soạn câu hỏi luyện tập về [chủ đề] kèm lời giải chi tiết"
+    },
+    "access": {
+      "prompt": "Gửi yêu cầu để quản trị viên thêm bạn làm thành viên.",
+      "promptRenew": "Gửi yêu cầu để quản trị viên gia hạn gói thành viên của bạn.",
+      "notePlaceholder": "Ghi chú ngắn (không bắt buộc): bạn là ai, vì sao cần quyền này",
+      "button": "Xin quyền",
+      "renewButton": "Xin gia hạn",
+      "pending": "Yêu cầu của bạn đã gửi ngày {{date}}. Quản trị viên sẽ xem xét.",
+      "rejected": "Yêu cầu gần nhất chưa được chấp nhận. Bạn có thể gửi lại từ {{date}}.",
+      "suspended": "Quản trị viên đang tạm dừng gói thành viên của bạn. Hãy nhờ họ mở lại.",
+      "refusalReason": "Lý do: {{reason}}"
+    },
+    "contribution": {
+      "title": "Đóng góp của tôi",
+      "shared": "Khoá học đã chia sẻ",
+      "pending": "Đang chờ duyệt",
+      "readers": "Độc giả",
+      "bonus": "Thưởng tháng này",
+      "bonusValue": "+{{tokens}} / {{cap}} token",
+      "badges": "Huy hiệu",
+      "badge": {
+        "readers-10": "10 độc giả",
+        "readers-100": "100 độc giả",
+        "challenge-top3": "Cao thủ tuần"
+      },
+      "next": "Còn {{count}} độc giả nữa để đạt huy hiệu “{{badge}}”.",
+      "readersOf": "{{count}} độc giả",
+      "rejected": "Bị từ chối",
+      "rejectedWithReason": "Bị từ chối: {{reason}}"
+    },
+    "focus": {
+      "add": "Thêm môn bạn đang học",
+      "summary": "Đang học: {{focus}}",
+      "subjectPlaceholder": "Môn học, ví dụ Toán",
+      "levelPlaceholder": "Mức, ví dụ Lớp 10",
+      "save": "Lưu"
+    },
+    "composer": {
+      "title": "Hôm nay bạn muốn học gì?"
+    },
+    "renew": {
+      "pending": "Đã gửi yêu cầu gia hạn ngày {{date}}.",
+      "rejected": "Yêu cầu gia hạn chưa được chấp nhận. Có thể gửi lại từ {{date}}."
+    }
   },
   "toolbar": {
     "pdfParser": "Bộ đọc PDF",
@@ -44,7 +226,9 @@
     "ttsPreview": "Nghe thử",
     "ttsPreviewing": "Đang phát…",
     "interactiveModeHint": "Bật chế độ ưu tiên tương tác để có nhiều nội dung thực hành hơn",
-    "interactiveModeLabel": "Chế độ tương tác"
+    "interactiveModeLabel": "Chế độ tương tác",
+    "advanced": "Nâng cao",
+    "advancedHint": "Tuỳ chọn nâng cao: chọn model, tìm web, ảnh/video, chế độ tương tác, tác nhân. Mặc định, ÔN THI tự chọn model phù hợp với câu hỏi, kèm ảnh minh hoạ và hoạt động tương tác."
   },
   "export": {
     "pptx": "Xuất PPTX",
@@ -170,6 +354,24 @@
       "qa": "HỎI ĐÁP",
       "discussion": "THẢO LUẬN",
       "lecture": "GIẢNG"
+    },
+    "actionTag": {
+      "spotlight": "Làm nổi bật",
+      "laser": "Bút laser",
+      "play": "Phát",
+      "open": "Mở",
+      "close": "Đóng",
+      "clear": "Xóa hết",
+      "delete": "Xóa",
+      "text": "Chữ",
+      "shape": "Hình",
+      "chart": "Biểu đồ",
+      "formula": "Công thức",
+      "table": "Bảng",
+      "line": "Đường",
+      "code": "Mã",
+      "editCode": "Sửa mã",
+      "discuss": "Thảo luận"
     }
   },
   "actions": {
@@ -406,7 +608,16 @@
       "sendBackward": "Đưa xuống dưới",
       "alignTop": "Căn trên",
       "alignMiddle": "Căn giữa",
-      "alignBottom": "Căn dưới"
+      "alignBottom": "Căn dưới",
+      "centerBoth": "Căn giữa trang",
+      "setLink": "Đặt liên kết",
+      "ruler": "Thước kẻ",
+      "gridLines": "Đường lưới",
+      "gridNone": "Không",
+      "gridSmall": "Nhỏ",
+      "gridMedium": "Vừa",
+      "gridLarge": "Lớn",
+      "resetPage": "Xóa trắng trang này"
     },
     "background": {
       "label": "Nền",
@@ -639,7 +850,7 @@
       "shortTitle": "Danh sách nhân vật"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "Bỏ tham chiếu {{label}}",
       "counts": "Đã tham chiếu {{count}}/{{max}}",
       "exitPicking": "Xong",
       "startPicking": "Tham chiếu phần tử"
@@ -733,7 +944,13 @@
     "voiceInputDisabled": "Đã tắt nhập bằng giọng nói",
     "textInput": "Nhập bằng chữ",
     "stopRecording": "Dừng ghi âm",
-    "startRecording": "Bắt đầu ghi âm"
+    "startRecording": "Bắt đầu ghi âm",
+    "toggleSidebar": "Ẩn/hiện danh sách trang",
+    "toggleChat": "Ẩn/hiện khung trò chuyện",
+    "mute": "Tắt tiếng",
+    "unmute": "Bật tiếng",
+    "play": "Phát",
+    "pause": "Tạm dừng"
   },
   "pbl": {
     "emptyProject": "Chưa tạo dự án nào. Hãy tạo trong lúc soạn bài học.",
@@ -951,7 +1168,8 @@
         },
         "durationMinutes": "{{m}} phút",
         "durationHours": "{{h}} giờ",
-        "durationHoursMinutes": "{{h}} giờ {{m}} phút"
+        "durationHoursMinutes": "{{h}} giờ {{m}} phút",
+        "stars": "Số sao"
       },
       "completionCard": {
         "title": "Hoàn thành dự án · Kết thúc",
@@ -1010,8 +1228,10 @@
     "deleteFolderAndCourses_other": "Xóa thư mục và {{count}} bài học",
     "deleteFolderConfirmRemove": "Thao tác này xóa thư mục cùng các bài học bên trong, gồm cả lịch sử trò chuyện.",
     "notFound": "Không tìm thấy khóa học",
-    "notFoundDesc": "Khóa học này không tồn tại hoặc đã bị xóa.",
-    "backToHome": "Về trang chủ"
+    "notFoundDesc": "Khóa học này không tồn tại, đã bị xóa, hoặc bạn chưa có quyền xem.",
+    "backToHome": "Về trang chủ",
+    "loadFailed": "Không truy cập được bộ lưu trữ. Không tải được các lớp học đã lưu.",
+    "deleteFailed": "Không xóa được lớp học"
   },
   "upload": {
     "pdfSizeLimit": "Nhận tệp PDF tối đa 50MB",
@@ -1198,7 +1418,7 @@
     "agentRoles": {
       "teacher": "Giảng viên",
       "assistant": "Trợ giảng",
-      "student": "Sinh viên"
+      "student": "Bạn học"
     },
     "agentDescriptions": {
       "default-1": "Giảng viên chính, giảng rõ ràng và có hệ thống",
@@ -1442,16 +1662,16 @@
     "voxcpmStopPreview": "Dừng nghe thử",
     "voxcpmPreviewVoice": "Nghe thử giọng",
     "voxcpmDeleteVoice": "Xóa giọng",
-    "qwenCloneVoicesTitle": "Qwen TTS Cloned Voices",
-    "qwenCloneRefText": "Enter the verbatim transcript of the reference audio",
-    "qwenCloneRefAudioHint": "Use a clean 1–60 second voice sample. A 10–20 second sample is recommended; audio is converted to 24 kHz mono PCM WAV.",
-    "qwenCloneSaved": "Qwen cloned voice registered and saved",
-    "qwenCloneSaveFailed": "Failed to register the Qwen cloned voice",
-    "qwenCloneUnsupported": "Recording is not supported in this browser; upload an audio file instead.",
-    "qwenCloneSpeedHint": "Cloned voices always synthesize at 1× speed.",
-    "qwenCloneDeleteWarning": "The voice was removed locally, but provider deletion failed.",
-    "qwenCloneNarrationUnavailable": "The assigned voice is unavailable. Narration will use another enabled voice instead.",
-    "qwenCloneDiscussionUnavailable": "The assigned voice is unavailable. Discussion will use another enabled voice instead.",
+    "qwenCloneVoicesTitle": "Giọng nhân bản Qwen TTS",
+    "qwenCloneRefText": "Nhập đúng nguyên văn lời thoại trong âm thanh mẫu",
+    "qwenCloneRefAudioHint": "Dùng mẫu giọng sạch dài 1–60 giây, nên chọn 10–20 giây. Âm thanh sẽ được chuyển sang WAV PCM 24 kHz đơn kênh.",
+    "qwenCloneSaved": "Đã đăng ký và lưu giọng nhân bản Qwen",
+    "qwenCloneSaveFailed": "Không đăng ký được giọng nhân bản Qwen",
+    "qwenCloneUnsupported": "Trình duyệt này chưa hỗ trợ ghi âm. Bạn hãy tải lên một tệp âm thanh thay thế.",
+    "qwenCloneSpeedHint": "Giọng nhân bản luôn được tổng hợp ở tốc độ 1×.",
+    "qwenCloneDeleteWarning": "Giọng đã được xoá trên máy này, nhưng nhà cung cấp chưa xoá được.",
+    "qwenCloneNarrationUnavailable": "Giọng đã chọn hiện không dùng được. Phần thuyết minh sẽ dùng một giọng khác đang bật.",
+    "qwenCloneDiscussionUnavailable": "Giọng đã chọn hiện không dùng được. Phần thảo luận sẽ dùng một giọng khác đang bật.",
     "providerOpenAIWhisper": "OpenAI ASR (gpt-4o-mini-transcribe)",
     "providerBrowserNative": "Nhận dạng giọng nói sẵn có của trình duyệt",
     "providerQwenASR": "Qwen ASR (Alibaba Cloud Bailian)",
@@ -1866,7 +2086,7 @@
       "download": "Tải xuống",
       "detailFailed": "Không thể tải chi tiết skill",
       "contentLabel": "Nội dung",
-      "builtinDetailNote": "Skill này đi kèm với OpenMAIC. Tải xuống để nhập vào không gian làm việc của agent khác.",
+      "builtinDetailNote": "Skill này đi kèm với ÔN THI. Tải xuống để nhập vào không gian làm việc của agent khác.",
       "upload": "Tải lên",
       "uploading": "Đang tải lên…",
       "uploadFailed": "Không thể tải skill lên. Hãy kiểm tra tệp và thử lại.",
@@ -1881,82 +2101,82 @@
     "alidocmindAccessKeySecret": "AccessKey Secret"
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "Khoá học chưa đặt tên",
+    "sceneCount": "{{count}} trang",
+    "sceneCount_one": "{{count}} trang",
+    "sceneCount_other": "{{count}} trang",
+    "courseLinkHint": "Mở {{name}} ở khung bên phải",
+    "courseLinkMore": "Còn {{count}} lớp học nữa",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "Nhắc đến một lớp học trong tin nhắn này",
+      "empty": "Không có lớp học nào khớp",
+      "alreadyNamed": "Đã được nhắc đến",
+      "remove": "Bỏ {{name}}",
+      "pillHint": "Tin nhắn này nhắc đến {{name}}",
       "notAccepted": "Máy chủ tạm thời không khả dụng. Vui lòng thử lại sau giây lát.",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "Nhắc đến {{name}}",
+      "capped": "Chỉ hiện {{count}} kết quả đầu, hãy gõ thêm để thu hẹp"
     },
-    "heroTitle": "What will you create today?",
-    "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "heroTitle": "Hôm nay bạn muốn tạo gì?",
+    "heroSubtitle": "Chia sẻ một ý tưởng và biến nó thành hành trình học mà mọi người có thể bước vào",
+    "newSession": "Cuộc trò chuyện mới",
     "sections": {
-      "courses": "Courses",
-      "sessions": "Chats"
+      "courses": "Khoá học",
+      "sessions": "Trò chuyện"
     },
-    "coursesEmpty": "No courses yet",
-    "sessionsEmpty": "No chats yet",
-    "loading": "Loading",
-    "loadFailed": "Couldn't load",
-    "retry": "Retry",
-    "untitledSession": "Untitled chat",
-    "pagePosition": "Page {{index}} of {{total}}",
-    "exitPro": "Exit Pro",
-    "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
-    "currentSession": "Current chat",
+    "coursesEmpty": "Chưa có khoá học nào",
+    "sessionsEmpty": "Chưa có cuộc trò chuyện nào",
+    "loading": "Đang tải",
+    "loadFailed": "Chưa tải được",
+    "retry": "Thử lại",
+    "untitledSession": "Cuộc trò chuyện chưa đặt tên",
+    "pagePosition": "Trang {{index}} / {{total}}",
+    "exitPro": "Thoát chế độ Pro",
+    "navAria": "Điều hướng không gian làm việc",
+    "homeAria": "Về trang chủ",
+    "currentSession": "Cuộc trò chuyện hiện tại",
     "startLearning": "Bắt đầu học",
     "time": {
-      "justNow": "Just now",
-      "minutesAgo": "{{count}}m ago",
-      "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "justNow": "Vừa xong",
+      "minutesAgo": "{{count}} phút trước",
+      "hoursAgo": "{{count}} giờ trước",
+      "daysAgo": "{{count}} ngày trước"
     },
     "sessionStatus": {
-      "connecting": "Connecting",
-      "queued": "Queued",
-      "running": "Running",
-      "succeeded": "Ready",
-      "failed": "Needs attention",
-      "cancelled": "Stopped"
+      "connecting": "Đang kết nối",
+      "queued": "Đang chờ",
+      "running": "Đang chạy",
+      "succeeded": "Sẵn sàng",
+      "failed": "Cần xem lại",
+      "cancelled": "Đã dừng"
     },
-    "backToWorkspace": "Back to workspace",
-    "searchPlaceholder": "Filter by name",
-    "searchAria": "Search {{section}}",
-    "searchEmpty": "No matches",
-    "showMore": "Show {{count}} more",
-    "showLess": "Show less",
-    "utilitiesAria": "Preferences and account",
-    "resizeAria": "Drag to resize the sidebar",
-    "chatPaneAria": "Chat panel",
-    "classroomPaneAria": "Classroom",
-    "collapseNav": "Collapse navigation",
-    "expandNav": "Expand navigation",
-    "expandNavInto": "Expand navigation · {{section}}",
-    "collapseChat": "Collapse conversation",
-    "expandChat": "Conversation",
-    "collapseClassroom": "Collapse classroom",
-    "expandClassroom": "Classroom",
-    "readOnlyBadge": "Read-only",
-    "noCourseTitle": "No course open",
-    "noCourseHint": "Open one from a course link in the conversation, or pick one from the list on the left — the conversation stays put",
-    "resizeChatAria": "Drag to resize the conversation pane",
-    "firstPageLanding": "The first page is landing…",
+    "backToWorkspace": "Quay lại không gian làm việc",
+    "searchPlaceholder": "Lọc theo tên",
+    "searchAria": "Tìm trong {{section}}",
+    "searchEmpty": "Không có kết quả",
+    "showMore": "Xem thêm {{count}}",
+    "showLess": "Thu gọn",
+    "utilitiesAria": "Tuỳ chọn và tài khoản",
+    "resizeAria": "Kéo để đổi kích thước thanh bên",
+    "chatPaneAria": "Khung trò chuyện",
+    "classroomPaneAria": "Lớp học",
+    "collapseNav": "Thu gọn thanh điều hướng",
+    "expandNav": "Mở rộng thanh điều hướng",
+    "expandNavInto": "Mở rộng thanh điều hướng · {{section}}",
+    "collapseChat": "Thu gọn cuộc trò chuyện",
+    "expandChat": "Cuộc trò chuyện",
+    "collapseClassroom": "Thu gọn lớp học",
+    "expandClassroom": "Lớp học",
+    "readOnlyBadge": "Chỉ xem",
+    "noCourseTitle": "Chưa mở khoá học nào",
+    "noCourseHint": "Mở một khoá học từ liên kết trong cuộc trò chuyện, hoặc chọn từ danh sách bên trái. Cuộc trò chuyện vẫn được giữ nguyên",
+    "resizeChatAria": "Kéo để đổi kích thước khung trò chuyện",
+    "firstPageLanding": "Trang đầu tiên đang được chuẩn bị…",
     "autoSaving": "Đang tự động lưu…",
     "autoSaved": "Đã lưu",
-    "collapsedTitle": "Both panes are collapsed",
-    "collapsedHint": "Use the tabs on the left to bring the conversation or the classroom back",
-    "moreUtilities": "More",
+    "collapsedTitle": "Cả hai khung đang được thu gọn",
+    "collapsedHint": "Dùng các thẻ bên trái để mở lại cuộc trò chuyện hoặc lớp học",
+    "moreUtilities": "Thêm",
     "rowMore": "Thao tác khác cho {{name}}",
     "folderDeleteHint": "Các khoá học bên trong sẽ trở về cấp trên cùng, không bị xoá.",
     "dropToUnfile": "Thả vào đây để đưa ra khỏi thư mục",
@@ -1970,10 +2190,10 @@
     "confirmDelete": "Xác nhận xóa",
     "deleting": "Đang xóa…",
     "deleteFailed": "Không thể xóa. Vui lòng thử lại.",
-    "tabsAria": "Chats and courses",
-    "courseTabsAria": "Open courses",
-    "courseTabClose": "Close tab: {{name}}",
-    "courseTabRunning": "Generating",
+    "tabsAria": "Cuộc trò chuyện và khoá học",
+    "courseTabsAria": "Các khoá học đang mở",
+    "courseTabClose": "Đóng thẻ: {{name}}",
+    "courseTabRunning": "Đang tạo",
     "foldersUnavailable": "Thư mục không khả dụng trong bản này"
   },
   "profile": {
@@ -2057,36 +2277,51 @@
       "sessionEnded": "Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại để tiếp tục."
     },
     "admin": {
-      "title": "Accounts",
-      "description": "Disabling an account signs it out everywhere and blocks sign-in until it is enabled again.",
-      "refresh": "Refresh",
-      "empty": "No accounts yet.",
-      "loadMore": "Load more",
-      "created": "Created {{date}}",
-      "you": "You",
+      "title": "Tài khoản",
+      "description": "Khi vô hiệu hoá một tài khoản, người đó bị đăng xuất khỏi mọi thiết bị và không đăng nhập được cho đến khi bạn bật lại.",
+      "refresh": "Làm mới",
+      "empty": "Chưa có tài khoản nào.",
+      "loadMore": "Tải thêm",
+      "created": "Tạo ngày {{date}}",
+      "you": "Bạn",
       "status": {
-        "active": "Active",
-        "disabled": "Disabled"
+        "active": "Đang hoạt động",
+        "disabled": "Đã vô hiệu hoá"
       },
-      "disable": "Disable",
-      "enable": "Enable",
-      "disableLabel": "Disable {{username}}",
-      "enableLabel": "Enable {{username}}",
+      "disable": "Vô hiệu hoá",
+      "enable": "Bật lại",
+      "disableLabel": "Vô hiệu hoá {{username}}",
+      "enableLabel": "Bật lại {{username}}",
       "confirm": {
-        "disableTitle": "Disable {{username}}?",
-        "disableDescription": "They are signed out everywhere and cannot sign in until the account is enabled again.",
-        "disableAction": "Disable account",
-        "enableTitle": "Enable {{username}}?",
-        "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "disableTitle": "Vô hiệu hoá {{username}}?",
+        "disableDescription": "Họ sẽ bị đăng xuất khỏi mọi thiết bị và không đăng nhập được cho đến khi tài khoản được bật lại.",
+        "disableAction": "Vô hiệu hoá tài khoản",
+        "enableTitle": "Bật lại {{username}}?",
+        "enableDescription": "Họ có thể đăng nhập lại. Các phiên đã kết thúc khi tài khoản bị vô hiệu hoá sẽ không tự khôi phục.",
+        "enableAction": "Bật lại tài khoản"
       },
       "errors": {
-        "loadFailed": "Accounts could not be loaded. Try again.",
-        "changeFailed": "The account could not be updated. Try again.",
+        "loadFailed": "Chưa tải được danh sách tài khoản. Bạn hãy thử lại.",
+        "changeFailed": "Chưa cập nhật được tài khoản. Bạn hãy thử lại.",
         "roleFailed": "Không đổi được vai trò. Thử lại."
       },
       "roleChanged": "Đã cập nhật vai trò.",
-      "changeRoleLabel": "Đổi vai trò của {{username}}"
+      "changeRoleLabel": "Đổi vai trò của {{username}}",
+      "columns": {
+        "username": "Tài khoản",
+        "role": "Vai trò",
+        "created": "Ngày tạo",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "resetPassword": "Đặt lại mật khẩu",
+      "resetPasswordLabel": "Đặt lại mật khẩu cho {{username}}",
+      "resetTitle": "Đặt lại mật khẩu cho {{username}}?",
+      "resetDescription": "Tài khoản nhận một mật khẩu tạm và bị đăng xuất trên mọi thiết bị. Mật khẩu tạm chỉ hiện một lần: hãy gửi cho người dùng và nhắc họ đổi mật khẩu sau khi đăng nhập. Thao tác được ghi vào nhật ký.",
+      "resetDone": "Mật khẩu tạm của {{username}}. Hãy sao chép ngay, mật khẩu này sẽ không hiện lại.",
+      "resetCopy": "Sao chép",
+      "resetCopied": "Đã sao chép mật khẩu tạm.",
+      "resetClose": "Xong"
     },
     "roles": {
       "learner": "Học viên",
@@ -2095,23 +2330,51 @@
     },
     "administration": "Quản trị",
     "adminPage": {
-      "title": "Quản trị",
+      "title": "Vận hành",
       "description": "Tài khoản, mức sử dụng và vai trò của hệ thống này.",
-      "denied": "Trang này dành cho người vận hành và quản trị viên."
+      "denied": "Trang này dành cho người vận hành và quản trị viên.",
+      "learn": "Vào học",
+      "summary": {
+        "activeMembers": "Thành viên đang hoạt động",
+        "pendingShares": "Yêu cầu chia sẻ chờ duyệt",
+        "classes": "Lớp học",
+        "pendingAccessRequests": "Yêu cầu xin quyền đang chờ"
+      },
+      "providers": {
+        "title": "Nhà cung cấp trên máy chủ",
+        "description": "Chỉ xem. Nhà cung cấp được cấu hình trên máy chủ, không chỉnh ở đây.",
+        "empty": "Chưa có nhà cung cấp nào được cấu hình trên máy chủ."
+      },
+      "deniedSignIn": "Hãy đăng nhập bằng tài khoản người vận hành hoặc quản trị viên."
+    },
+    "membership": {
+      "active": "Gói thành viên đến {{date}} · {{quota}} token mỗi tháng",
+      "none": "Chưa có gói thành viên"
+    },
+    "password": {
+      "title": "Đổi mật khẩu",
+      "description": "Các thiết bị khác sẽ bị đăng xuất; thiết bị này vẫn giữ đăng nhập.",
+      "current": "Mật khẩu hiện tại",
+      "new": "Mật khẩu mới",
+      "confirm": "Nhập lại mật khẩu mới",
+      "submit": "Đổi mật khẩu",
+      "changed": "Đã đổi mật khẩu. Các thiết bị khác đã bị đăng xuất.",
+      "wrongCurrent": "Mật khẩu hiện tại không đúng.",
+      "mismatch": "Hai mật khẩu mới không khớp."
     }
   },
   "proMode": {
     "attach": "Đính kèm tài liệu",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
+    "mentionCourse": "Nhắc đến một lớp học",
+    "loadSkill": "Nạp skill",
+    "skillMenuTitle": "Chọn skill thiết kế khoá học",
+    "skillsLoading": "Đang tải skill…",
+    "noSkillsAvailable": "Chưa có skill nào",
+    "userSkillsGroup": "Skill của tôi",
+    "builtinSkillsGroup": "Skill có sẵn",
+    "skillsLoadFailed": "Không tải được skill. Bấm để thử lại",
+    "retrySkills": "Thử lại",
+    "noSkillMatch": "Không có skill nào khớp với “{{query}}”",
     "badgeAria": "Chế độ Pro",
     "badgeEnter": "Chế độ Pro",
     "badgeExit": "Quay lại chế độ cổ điển",
@@ -2149,17 +2412,52 @@
       "quotaValue": "{{tokens}} token mỗi tháng",
       "grant": "Cấp hoặc gia hạn",
       "resume": "Mở lại",
-      "suspend": "Tạm khoá"
+      "suspend": "Tạm khoá",
+      "columns": {
+        "username": "Tài khoản",
+        "status": "Trạng thái",
+        "expires": "Hết hạn"
+      },
+      "empty": "Chưa có tài khoản nào.",
+      "revoke": "Thu hồi",
+      "revokeTitle": "Thu hồi gói thành viên của {{name}}?",
+      "revokeDescription": "Người này mất quyền tạo bài ngay. Thao tác được ghi vào nhật ký.",
+      "revoked": "Đã thu hồi gói thành viên của {{name}}.",
+      "grantTitle": "Cấp hoặc gia hạn cho {{name}}",
+      "grantDescription": "Cộng số ngày vào hạn hiện tại (hoặc tính từ hôm nay nếu đã hết hạn) và đặt hạn mức token mỗi tháng.",
+      "editTitle": "Sửa gói thành viên của {{name}}",
+      "editDescription": "Đặt chính xác ngày hết hạn và hạn mức token mỗi tháng. Thay đổi được ghi vào nhật ký.",
+      "updated": "Đã cập nhật gói thành viên.",
+      "invalidQuota": "Hạn mức phải là số nguyên từ 0 trở lên.",
+      "invalidDays": "Số ngày phải là số nguyên từ 1 trở lên.",
+      "invalidDate": "Hãy chọn ngày hết hạn."
     },
     "shares": {
       "title": "Yêu cầu chia sẻ",
-      "description": "Duyệt yêu cầu để mở khoá học cho mọi thành viên.",
-      "empty": "Không có yêu cầu nào đang chờ.",
+      "description": "Duyệt yêu cầu chia sẻ khoá học, hoặc gỡ những khoá học đã chia sẻ.",
+      "empty": "Chưa có khoá học nào được xin chia sẻ.",
       "approve": "Duyệt",
       "reject": "Từ chối",
       "approved": "Đã chia sẻ khoá học cho thành viên.",
       "rejected": "Đã từ chối yêu cầu.",
-      "requested": "Yêu cầu ngày {{date}}"
+      "requested": "Yêu cầu ngày {{date}}",
+      "columns": {
+        "title": "Khoá học"
+      },
+      "state": {
+        "pending": "Chờ duyệt",
+        "shared": "Đã chia sẻ",
+        "update": "Bản cập nhật"
+      },
+      "revoke": "Gỡ chia sẻ",
+      "revokeTitle": "Gỡ chia sẻ “{{title}}”?",
+      "revokeDescription": "Thành viên sẽ không mở được khoá học này qua danh mục chia sẻ nữa. Thao tác được ghi vào nhật ký.",
+      "revoked": "Đã gỡ chia sẻ khoá học.",
+      "rejectTitle": "Từ chối chia sẻ “{{title}}”?",
+      "rejectDescription": "Chủ khoá học sẽ thấy yêu cầu bị từ chối cùng lý do bạn ghi (nếu có), và có thể gửi lại.",
+      "rejectReason": "Lý do (không bắt buộc)",
+      "snapshot": "Gói gửi kèm: «{{name}}», {{count}} cảnh, {{media}} tệp media, {{size}}",
+      "remixOf": "Remix của «{{title}}»"
     },
     "previews": {
       "title": "Bài xem thử miễn phí",
@@ -2167,7 +2465,10 @@
       "courseId": "Mã khoá học",
       "add": "Đánh dấu xem thử",
       "remove": "Gỡ",
-      "empty": "Chưa có bài xem thử nào."
+      "empty": "Chưa có bài xem thử nào.",
+      "marked": "Ngày đánh dấu",
+      "removeTitle": "Gỡ bài xem thử {{id}}?",
+      "removeDescription": "Khách chưa đăng nhập sẽ không mở được khoá học này nữa. Thao tác được ghi vào nhật ký."
     },
     "classes": {
       "title": "Lớp học",
@@ -2178,12 +2479,247 @@
       "empty": "Chưa có lớp nào.",
       "members": "{{count}} thành viên",
       "courses": "{{count}} khoá học",
-      "attach": "Gắn khoá học"
+      "attach": "Gắn khoá học",
+      "columns": {
+        "members": "Thành viên",
+        "courses": "Khoá học đã gắn"
+      },
+      "detach": "Gỡ khoá học {{id}} khỏi lớp",
+      "deleteTitle": "Xoá lớp “{{name}}”?",
+      "deleteDescription": "{{count}} thành viên sẽ rời lớp và các khoá học gắn với lớp sẽ được gỡ (bản thân khoá học vẫn còn). Thao tác được ghi vào nhật ký.",
+      "deleted": "Đã xoá lớp {{name}}.",
+      "renameTitle": "Đổi tên lớp",
+      "renamed": "Đã đổi tên lớp.",
+      "newCode": "Mã mới",
+      "newCodeTitle": "Tạo mã tham gia mới cho “{{name}}”?",
+      "newCodeDescription": "Mã hiện tại hết hiệu lực ngay; thành viên đã trong lớp vẫn ở lại. Mã mới chỉ hiện một lần, hãy sao chép ngay.",
+      "membersOf": "Thành viên lớp {{name}}",
+      "membersDescription": "Người bị gỡ vẫn có thể vào lại bằng mã lớp; hãy tạo mã mới nếu muốn chặn hẳn.",
+      "noMembers": "Chưa có thành viên nào.",
+      "joined": "Tham gia {{date}}",
+      "removeMember": "Gỡ khỏi lớp",
+      "removeMemberTitle": "Gỡ {{username}} khỏi lớp {{name}}?",
+      "removeMemberDescription": "Người này sẽ không còn mở được khoá học của lớp. Thao tác được ghi vào nhật ký.",
+      "memberRemoved": "Đã gỡ {{username}} khỏi lớp."
     },
     "audit": {
       "title": "Nhật ký kiểm tra",
-      "description": "Các thay đổi gần đây về tài khoản, gói thành viên, chia sẻ và lớp học.",
-      "empty": "Chưa có bản ghi nào."
+      "description": "{{max}} bản ghi gần nhất. Mọi thao tác tạo, sửa, xoá về tài khoản, thành viên, chia sẻ, bài xem thử và lớp học đều được ghi ở đây.",
+      "empty": "Chưa có bản ghi nào.",
+      "columns": {
+        "time": "Thời gian",
+        "actor": "Người thực hiện",
+        "action": "Thao tác",
+        "target": "Đối tượng",
+        "details": "Chi tiết"
+      },
+      "categories": {
+        "changes": "Mọi thay đổi",
+        "membership": "Gói thành viên",
+        "access": "Yêu cầu xin quyền",
+        "share": "Chia sẻ khoá học",
+        "preview": "Bài xem thử",
+        "class": "Lớp học",
+        "set_role": "Đổi vai trò",
+        "disable": "Khoá tài khoản",
+        "enable": "Mở khoá tài khoản",
+        "list": "Xem danh sách tài khoản",
+        "password_reset": "Đặt lại mật khẩu"
+      },
+      "actions": {
+        "membership_grant": "Cấp/gia hạn thành viên",
+        "membership_update": "Sửa gói thành viên",
+        "membership_revoke": "Thu hồi thành viên",
+        "membership_suspended": "Tạm khoá thành viên",
+        "membership_active": "Mở lại thành viên",
+        "access_approve": "Duyệt xin quyền",
+        "access_reject": "Từ chối xin quyền",
+        "share_approve": "Duyệt chia sẻ",
+        "share_reject": "Từ chối chia sẻ",
+        "share_revoke": "Gỡ chia sẻ",
+        "preview_on": "Thêm bài xem thử",
+        "preview_off": "Gỡ bài xem thử",
+        "class_create": "Tạo lớp",
+        "class_rename": "Đổi tên lớp",
+        "class_delete": "Xoá lớp",
+        "class_attach": "Gắn khoá học vào lớp",
+        "class_detach": "Gỡ khoá học khỏi lớp",
+        "set_role_learner": "Đổi vai trò: học viên",
+        "set_role_operator": "Đổi vai trò: vận hành",
+        "set_role_admin": "Đổi vai trò: quản trị",
+        "disable": "Khoá tài khoản",
+        "enable": "Mở khoá tài khoản",
+        "list": "Xem danh sách tài khoản",
+        "class_code": "Đổi mã tham gia",
+        "password_reset": "Đặt lại mật khẩu",
+        "community_ban": "Chặn đăng trong cộng đồng",
+        "community_unban": "Bỏ chặn đăng trong cộng đồng",
+        "class_remove": "Gỡ thành viên khỏi lớp",
+        "challenge_create": "Tạo thử thách",
+        "challenge_update": "Sửa thử thách",
+        "settings_update": "Đổi cài đặt",
+        "share_update-approve": "Duyệt bản cập nhật chia sẻ",
+        "share_update-reject": "Từ chối bản cập nhật chia sẻ"
+      }
+    },
+    "accessRequests": {
+      "title": "Yêu cầu xin quyền",
+      "description": "Những người xin làm thành viên. Duyệt sẽ cấp 30 ngày và hạn mức tháng mặc định; có thể chỉnh sau ở danh sách thành viên.",
+      "empty": "Không có yêu cầu nào đang chờ.",
+      "requested": "Gửi ngày {{date}}",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "approved": "{{name}} đã trở thành thành viên.",
+      "rejected": "Đã từ chối yêu cầu của {{name}}.",
+      "reasonPlaceholder": "Lý do (không bắt buộc; học viên sẽ thấy, và được ghi vào nhật ký)",
+      "note": "Lời nhắn",
+      "reason": "Lý do"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Tổng quan",
+        "support": "Hỗ trợ người dùng",
+        "content": "Nội dung & lớp",
+        "system": "Sử dụng & hệ thống",
+        "audit": "Nhật ký",
+        "badge": "{{count}} mục cần xử lý"
+      },
+      "refresh": "Làm mới",
+      "loading": "Đang tải tình trạng hệ thống…",
+      "attention": {
+        "title": "Cần xử lý",
+        "description": "Những việc cần người vận hành, nghiêm trọng nhất ở trên. Bấm nút để tới đúng chỗ xử lý.",
+        "empty": "Mọi thứ ổn: không có việc gì đang chờ.",
+        "open": {
+          "overview": "Xem",
+          "support": "Tới hỗ trợ",
+          "content": "Tới nội dung",
+          "system": "Xem hệ thống",
+          "audit": "Xem nhật ký"
+        }
+      },
+      "severity": {
+        "critical": "Nghiêm trọng",
+        "warning": "Cảnh báo",
+        "info": "Lưu ý"
+      },
+      "alerts": {
+        "noProviders": "Máy chủ chưa có nhà cung cấp AI (LLM) nào: không ai tạo được bài học.",
+        "quotaOver": "{{count}} học viên đã dùng hết hạn mức AI tháng này và đang bị chặn tạo bài.",
+        "accessRequestsOverdue": "{{count}} yêu cầu xin quyền đang chờ; yêu cầu cũ nhất đã chờ {{hours}} giờ.",
+        "accessRequestsPending": "{{count}} yêu cầu xin quyền đang chờ duyệt.",
+        "quotaNear": "{{count}} học viên đã dùng trên 80% hạn mức AI tháng này.",
+        "expiringSoon": "{{count}} thành viên sẽ hết hạn trong 7 ngày tới.",
+        "sharesOverdue": "{{count}} yêu cầu chia sẻ khoá học đang chờ; yêu cầu cũ nhất đã chờ {{hours}} giờ.",
+        "sharesPending": "{{count}} yêu cầu chia sẻ khoá học đang chờ duyệt.",
+        "expired": "{{count}} thành viên đã hết hạn và không còn tạo bài được.",
+        "quiet": "Không có yêu cầu AI nào trong {{count}} ngày qua dù vẫn có thành viên đang hoạt động. Hãy kiểm tra nhà cung cấp.",
+        "supportWaiting": "{{count}} yêu cầu hỗ trợ đang chờ trả lời.",
+        "reportsOpen": "{{count}} nội dung cộng đồng bị báo cáo đang chờ xử lý."
+      },
+      "charts": {
+        "membership": {
+          "title": "Tình trạng thành viên",
+          "description": "Học viên chia theo trạng thái thành viên.",
+          "active": "Đang hoạt động",
+          "expiringSoon": "Sắp hết hạn (7 ngày)",
+          "expired": "Đã hết hạn",
+          "suspended": "Bị tạm dừng",
+          "none": "Chưa là thành viên",
+          "empty": "Chưa có học viên nào."
+        },
+        "quota": {
+          "title": "Hạn mức AI tháng này",
+          "description": "Học viên đã dùng từ 50% hạn mức trở lên, tính cả thưởng từ người đọc. Đỏ: hết hạn mức; vàng: trên 80%.",
+          "empty": "Chưa ai dùng quá nửa hạn mức tháng này."
+        },
+        "activity": {
+          "title": "Yêu cầu AI theo ngày",
+          "description": "{{count}} ngày gần nhất, tổng {{total}} yêu cầu (theo giờ UTC). Rơi về 0 đột ngột thường là dấu hiệu sự cố.",
+          "empty": "Chưa có yêu cầu AI nào trong khoảng này."
+        },
+        "accounts": {
+          "title": "Tài khoản theo vai trò",
+          "description": "Tài khoản đang mở theo vai trò; tài khoản bị khoá tính riêng.",
+          "disabled": "Bị khoá"
+        },
+        "accessFlow": {
+          "title": "Luồng xin quyền thành viên",
+          "description": "Học viên gửi yêu cầu, người vận hành duyệt hoặc từ chối.",
+          "pending": "Đang chờ duyệt",
+          "approved": "Đã duyệt",
+          "rejected": "Đã từ chối"
+        },
+        "shareFlow": {
+          "title": "Luồng chia sẻ khoá học",
+          "description": "Học viên xin chia sẻ khoá học; khi được duyệt, mọi thành viên đều mở được.",
+          "pending": "Đang chờ duyệt",
+          "shared": "Đã chia sẻ"
+        },
+        "usageKinds": {
+          "title": "Yêu cầu AI theo loại",
+          "description": "Số yêu cầu trong {{count}} ngày gần nhất, theo loại dịch vụ."
+        },
+        "content": {
+          "title": "Lớp học & nội dung mở",
+          "description": "Nội dung đang mở cho học viên, và các lớp đông thành viên nhất.",
+          "shared": "Khoá học đã chia sẻ",
+          "previews": "Bài xem thử miễn phí",
+          "classes": "Lớp học",
+          "courses": "· {{count}} khoá",
+          "empty": "Chưa có lớp nào."
+        },
+        "providers": {
+          "title": "Nhà cung cấp AI",
+          "description": "Loại dịch vụ AI nào đã được cấu hình trên máy chủ.",
+          "missing": "Chưa cấu hình",
+          "unknown": "Chưa tải được danh sách nhà cung cấp.",
+          "kinds": {
+            "providers": "Mô hình ngôn ngữ (LLM)",
+            "tts": "Giọng đọc (TTS)",
+            "asr": "Nhận dạng giọng nói",
+            "pdf": "Đọc tài liệu PDF",
+            "image": "Tạo ảnh",
+            "video": "Tạo video",
+            "webSearch": "Tìm kiếm web"
+          }
+        }
+      },
+      "details": "Xem chi tiết",
+      "groups": {
+        "people": "Người dùng & hỗ trợ",
+        "queues": "Hàng đợi duyệt",
+        "usage": "Sử dụng AI",
+        "system": "Nội dung & hệ thống"
+      }
+    },
+    "table": {
+      "search": "Tìm kiếm…",
+      "all": "Tất cả",
+      "loading": "Đang tải…",
+      "noMatch": "Không có dòng nào khớp bộ lọc.",
+      "range": "{{from}}–{{to}} / {{total}}",
+      "perPage": "Số dòng mỗi trang",
+      "rows": "{{count}} dòng/trang",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "page": "Trang {{page}}/{{pages}}",
+      "actions": "Thao tác",
+      "requested": "Ngày gửi",
+      "edit": "Sửa",
+      "delete": "Xoá",
+      "save": "Lưu"
+    },
+    "courses": {
+      "title": "Khoá học",
+      "description": "Mọi khoá học trên hệ thống. Mở để xem lại, hoặc sao chép ID để đánh dấu xem thử hay gắn vào lớp.",
+      "open": "Mở khoá học trong tab mới",
+      "copy": "Sao chép ID {{id}}",
+      "copied": "Đã sao chép {{id}}",
+      "owner": "Chủ sở hữu",
+      "anonymous": "Chưa đăng nhập",
+      "updated": "Cập nhật",
+      "empty": "Chưa có khoá học nào."
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "Không tìm thấy.",
       "MEMBERSHIP_REQUIRED": "Cần gói thành viên đang hoạt động để thực hiện việc này.",
       "QUOTA_EXCEEDED": "Đã hết hạn mức AI trong tháng này.",
-      "ACCOUNTS_NOT_CONFIGURED": "Hệ thống này chưa bật tài khoản."
+      "ACCOUNTS_NOT_CONFIGURED": "Hệ thống này chưa bật tài khoản.",
+      "ALREADY_MEMBER": "Bạn đã có gói thành viên đang hoạt động.",
+      "MEMBERSHIP_SUSPENDED": "Quản trị viên đang tạm dừng gói thành viên của bạn.",
+      "REQUEST_PENDING": "Đã có một yêu cầu đang chờ quản trị viên.",
+      "REQUEST_TOO_SOON": "Yêu cầu bị từ chối chưa thể gửi lại ngay.",
+      "COURSE_NOT_FOUND": "Không có khoá học nào với ID này. Hãy kiểm tra ID trong địa chỉ khoá học (/classroom/<ID>).",
+      "RATE_LIMITED": "Bạn đang có quá nhiều yêu cầu chưa được trả lời. Hãy chờ trả lời trước.",
+      "COMMUNITY_BLOCKED": "Tài khoản của bạn đang bị chặn đăng trong cộng đồng."
     }
   },
   "catalog": {
     "title": "Danh mục",
     "description": {
       "member": "Bài xem thử miễn phí, khoá học được chia sẻ và khoá học của lớp bạn.",
-      "guest": "Bài xem thử miễn phí. Đăng nhập để xem thêm."
+      "guest": "Bài xem thử miễn phí. Đăng nhập để xem thêm.",
+      "signedIn": "Bài xem thử miễn phí. Thành viên xem thêm khoá học được chia sẻ và lớp học của mình."
     },
     "signInToSee": "Đăng nhập để xem khoá học được chia sẻ và tham gia lớp.",
     "join": {
       "title": "Tham gia lớp",
       "code": "Mã tham gia",
       "submit": "Tham gia",
-      "done": "Bạn đã tham gia {{name}}."
+      "done": "Bạn đã tham gia {{name}}.",
+      "description": "Nhập mã bạn được cấp để tham gia lớp."
     },
     "empty": "Chưa có nội dung để xem.",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "Lớp của bạn"
     },
     "open": "Mở",
-    "unavailable": "Danh mục không khả dụng trên hệ thống này."
+    "unavailable": "Danh mục không khả dụng trên hệ thống này.",
+    "back": "Quay lại danh mục",
+    "membersOnly": "Khoá học được chia sẻ và lớp học dành cho thành viên."
   },
   "courseShare": {
     "request": "Chia sẻ cho thành viên",
-    "pending": "Đang chờ duyệt",
     "stop": "Ngừng chia sẻ",
     "requested": "Đã gửi yêu cầu. Người vận hành sẽ xem xét.",
     "withdrawn": "Đã ngừng chia sẻ. Học viên đã có khoá học vẫn giữ bản sao.",
-    "failed": "Không thể chia sẻ khoá học. Hãy thử lại."
+    "failed": "Không thể chia sẻ khoá học. Hãy thử lại.",
+    "rejected": "Yêu cầu chia sẻ đã bị từ chối.",
+    "rejectedWithReason": "Yêu cầu chia sẻ đã bị từ chối: {{reason}}",
+    "requestWithdrawn": "Đã rút yêu cầu chia sẻ.",
+    "menu": "Chia sẻ với thành viên",
+    "packing": "Đang đóng gói khoá học…",
+    "updateSent": "Đã gửi bản cập nhật. Người đọc vẫn thấy bản cũ cho đến khi được duyệt.",
+    "updatePending": "Bản cập nhật đang chờ duyệt. Người đọc vẫn thấy bản đã duyệt trước.",
+    "updateRejected": "Bản cập nhật bị từ chối: {{reason}}",
+    "sharedStatus": "Đang chia sẻ với thành viên.",
+    "pendingStatus": "Đang chờ người vận hành duyệt.",
+    "privateStatus": "Khoá học chưa được chia sẻ.",
+    "update": "Cập nhật bản chia sẻ",
+    "resend": "Gửi lại bản mới nhất",
+    "withdraw": "Rút yêu cầu",
+    "reviewNote": "Khoá học được gửi đúng như bạn đang thấy (kể cả bản sửa và media). Mỗi lần gửi đều cần người vận hành duyệt."
+  },
+  "support": {
+    "title": "Liên hệ quản trị",
+    "description": "Gửi câu hỏi hoặc yêu cầu cho đội vận hành. Câu trả lời sẽ hiện ở đây.",
+    "contact": "Liên hệ quản trị",
+    "panelTitle": "Hộp thư hỗ trợ",
+    "panelDescription": "Câu hỏi và yêu cầu của học viên. Yêu cầu chờ trả lời xếp lên đầu.",
+    "new": "Yêu cầu mới",
+    "subject": "Chủ đề",
+    "body": "Nội dung",
+    "username": "Gửi cho (tên đăng nhập)",
+    "send": "Gửi",
+    "reply": "Trả lời",
+    "replyPlaceholder": "Viết trả lời…",
+    "close": "Đánh dấu đã xử lý",
+    "reopen": "Mở lại",
+    "empty": "Chưa có yêu cầu nào.",
+    "pick": "Chọn một yêu cầu để xem.",
+    "staff": "Đội vận hành",
+    "waiting": "Chờ trả lời",
+    "unread": "Mới",
+    "unreadCount": "{{count}} trả lời mới",
+    "sent": "Đã gửi.",
+    "state": {
+      "open": "Đang mở",
+      "closed": "Đã xử lý"
+    },
+    "filter": {
+      "label": "Lọc theo trạng thái"
+    },
+    "subjects": {
+      "renew": "Gia hạn gói thành viên",
+      "resume": "Mở lại gói thành viên",
+      "quota": "Tăng hạn mức AI"
+    }
+  },
+  "community": {
+    "title": "Cộng đồng",
+    "description": "Câu hỏi học viên đặt ngay trên từng slide, với lời giải của trợ giảng AI và của các thành viên.",
+    "signIn": "Đăng nhập để xem cộng đồng.",
+    "empty": "Chưa có câu hỏi nào.",
+    "answer": "Trả lời",
+    "answerPlaceholder": "Viết câu trả lời của bạn… (hỗ trợ Markdown và công thức $x^2$)",
+    "answers": "{{count}} câu trả lời",
+    "answerCount": "{{count}} trả lời",
+    "vote": "Hữu ích ({{count}})",
+    "best": "Hay nhất",
+    "bestMarked": "Đã chọn câu trả lời hay nhất.",
+    "bestRewarded": "Đã chọn. {{name}} được thưởng {{tokens}} token.",
+    "solved": "Đã giải",
+    "locked": "Đã khoá",
+    "lockedHint": "Câu hỏi này đã khoá, không nhận thêm trả lời.",
+    "hidden": "Đã ẩn",
+    "markBest": "Chọn là hay nhất",
+    "openSlide": "Mở slide",
+    "ai": {
+      "name": "Trợ giảng AI",
+      "writing": "Trợ giảng AI đang soạn câu trả lời…",
+      "retry": "Nhờ AI trả lời lại"
+    },
+    "ask": {
+      "button": "Đặt câu hỏi",
+      "title": "Câu hỏi",
+      "titlePlaceholder": "Bạn chưa hiểu điều gì?",
+      "body": "Chi tiết (không bắt buộc)",
+      "bodyPlaceholder": "Bạn đã thử gì, vướng ở bước nào…",
+      "submit": "Gửi câu hỏi",
+      "onScene": "Câu hỏi sẽ gắn vào slide «{{scene}}».",
+      "onCourse": "Câu hỏi sẽ gắn vào cả khoá học.",
+      "aiNote": "Trợ giảng AI sẽ trả lời ngay; các thành viên khác có thể bổ sung."
+    },
+    "join": {
+      "title": "Tham gia thảo luận cùng cộng đồng",
+      "body": "Thành viên được đặt câu hỏi, nhận lời giải ngay từ trợ giảng AI, trả lời giúp người khác và nhận token thưởng khi câu trả lời được chọn là hay nhất.",
+      "cta": "Đăng ký thành viên"
+    },
+    "report": {
+      "action": "Báo cáo",
+      "title": "Báo cáo nội dung",
+      "description": "Cho đội vận hành biết vì sao nội dung này không phù hợp.",
+      "reason": "Lý do",
+      "send": "Gửi báo cáo",
+      "done": "Đã gửi báo cáo. Cảm ơn bạn."
+    },
+    "mod": {
+      "hide": "Ẩn",
+      "show": "Hiện lại",
+      "hidden": "Đã ẩn nội dung.",
+      "shown": "Đã hiện lại nội dung.",
+      "lock": "Khoá",
+      "unlock": "Mở khoá",
+      "ban": "Chặn đăng",
+      "banned": "Đã chặn {{name}} đăng bài.",
+      "unban": "Bỏ chặn",
+      "unbanned": "Đã bỏ chặn {{name}}."
+    },
+    "scene": {
+      "button": "Thảo luận ở slide này",
+      "title": "Thảo luận",
+      "thisSlide": "Slide này",
+      "wholeCourse": "Cả khoá",
+      "scope": "Phạm vi",
+      "pick": "Chọn một câu hỏi để xem, hoặc đặt câu hỏi mới."
+    },
+    "feed": {
+      "all": "Tất cả",
+      "unsolved": "Chưa giải",
+      "mine": "Của tôi",
+      "filter": "Lọc câu hỏi",
+      "search": "Tìm câu hỏi",
+      "pick": "Chọn một câu hỏi để xem lời giải.",
+      "howToAsk": "Muốn hỏi? Mở một bài học, đến slide bạn vướng và bấm nút Thảo luận trên thanh công cụ."
+    },
+    "reports": {
+      "title": "Báo cáo cộng đồng",
+      "description": "Câu hỏi và câu trả lời bị báo cáo. Ẩn nội dung vi phạm, bỏ qua báo cáo sai, hoặc chặn tác giả đăng bài.",
+      "empty": "Không có báo cáo nào đang chờ.",
+      "count": "{{count}} báo cáo",
+      "reasons": "Lý do",
+      "open": "Mở",
+      "dismiss": "Bỏ qua",
+      "dismissed": "Đã bỏ qua báo cáo.",
+      "banned": "Tài khoản bị chặn đăng",
+      "kind": {
+        "question": "Câu hỏi",
+        "answer": "Câu trả lời"
+      }
+    },
+    "tabs": {
+      "questions": "Hỏi đáp",
+      "challenges": "Thử thách tuần"
+    }
+  },
+  "challenge": {
+    "none": "Chưa có thử thách nào.",
+    "pick": "Chọn một thử thách để xem.",
+    "entries": "{{count}} bài nộp",
+    "phase": {
+      "upcoming": "Sắp mở",
+      "open": "Đang nhận bài",
+      "voting": "Đang bình chọn",
+      "finished": "Đã kết thúc"
+    },
+    "when": {
+      "upcoming": "Mở nhận bài lúc {{date}}",
+      "open": "Hạn nộp bài: {{date}}",
+      "voting": "Bình chọn đến {{date}}",
+      "finished": "Đã kết thúc lúc {{date}}"
+    },
+    "prize": "Hạng {{rank}}: {{tokens}} token",
+    "prizeBadge": "+ huy hiệu Cao thủ tuần",
+    "rank": "Hạng {{rank}}",
+    "yours": "Của bạn",
+    "aiScore": "AI chấm {{score}}/10",
+    "aiFeedback": "Nhận xét của AI (chỉ bạn thấy)",
+    "reward": "+{{tokens}} token",
+    "vote": "Bình chọn ({{count}})",
+    "voteHint": "Bình chọn cho lời giải bạn thấy hay nhất. Bạn không thể bình chọn cho bài của mình.",
+    "yourEntry": "Lời giải của bạn",
+    "editEntry": "Sửa lời giải",
+    "entryPlaceholder": "Trình bày lời giải… (hỗ trợ Markdown và công thức $x^2$)",
+    "gradeNote": "Trợ giảng AI chấm sơ bộ ngay khi nộp. Bạn sửa và nộp lại được cho đến hạn; các thành viên khác chỉ thấy bài sau khi hết hạn nộp.",
+    "grading": "Đang nộp và chấm…",
+    "submit": "Nộp lời giải",
+    "resubmit": "Nộp lại",
+    "submitted": "Đã nộp. Xem điểm và nhận xét của AI bên dưới.",
+    "notGraded": {
+      "quota": "Đã nộp, nhưng chưa chấm được vì hạn mức AI tháng này đã hết.",
+      "failed": "Đã nộp, nhưng AI chưa chấm được. Bạn có thể nộp lại để chấm."
+    },
+    "showReference": "Xem lời giải mẫu",
+    "hideReference": "Ẩn lời giải mẫu",
+    "results": "Kết quả",
+    "allEntries": "Các lời giải",
+    "noEntries": "Không có bài nộp nào.",
+    "leaderboard": {
+      "title": "Bảng xếp hạng tháng",
+      "empty": "Chưa có ai ghi điểm tháng này.",
+      "points": "{{count}} điểm",
+      "rule": "1 điểm cho mỗi bài nộp, thêm 3 / 2 / 1 điểm cho hạng 1 / 2 / 3."
+    },
+    "admin": {
+      "panelTitle": "Thử thách tuần",
+      "panelDescription": "Ra đề, đặt thời gian nộp và bình chọn, và mức thưởng cho từng thử thách. Kết quả được tính tự động khi hết thời gian bình chọn.",
+      "create": "Tạo thử thách",
+      "edit": "Sửa thử thách",
+      "saved": "Đã lưu thử thách.",
+      "title": "Tiêu đề",
+      "statement": "Đề bài",
+      "markdownHint": "Markdown và công thức $...$",
+      "reference": "Lời giải mẫu (ẩn đến khi bình chọn)",
+      "referenceHint": "Dùng để AI chấm sơ bộ; học viên chỉ thấy khi bắt đầu bình chọn.",
+      "opensAt": "Mở nhận bài",
+      "submissionDays": "Số ngày nhận bài",
+      "votingDays": "Số ngày bình chọn",
+      "rewards": "Thưởng token cho top 3",
+      "rewardsHint": "Nên để mức nhỏ. Thưởng vẫn tính chung trần thưởng tháng của mỗi người.",
+      "hidden": "Ẩn thử thách này"
+    },
+    "settings": {
+      "title": "Thử thách tuần: chấm AI",
+      "description": "Mỗi lần học viên nộp bài, AI chấm sơ bộ một lần. Chọn ai trả token cho lượt chấm đó.",
+      "paidBy": "Ai trả chi phí chấm AI",
+      "submitter": "Tính vào hạn mức người nộp",
+      "submitterHint": "Người đã hết hạn mức vẫn nộp được, chỉ không có điểm AI.",
+      "system": "Hệ thống trả",
+      "systemHint": "Không trừ hạn mức học viên; tính vào ngân sách vận hành.",
+      "adminOnly": "Chỉ quản trị viên được đổi cài đặt này.",
+      "saved": "Đã lưu cài đặt."
+    }
+  },
+  "remix": {
+    "menu": "Remix",
+    "action": "Remix khoá học này",
+    "creating": "Đang tạo bản remix…",
+    "created": "Đã tạo bản remix của bạn.",
+    "note": "Tạo một bản sao thuộc về bạn để chỉnh sửa và chia sẻ lại. Tác giả gốc được ghi công và nhận một phần thưởng khi bản remix có người đọc.",
+    "of": "Remix từ «{{title}}» của {{author}}",
+    "list": "{{count}} bản remix",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "Cần gói thành viên để remix.",
+      "FORBIDDEN": "Khoá học này không remix được.",
+      "OWN_COURSE": "Đây là khoá học của bạn.",
+      "RATE_LIMITED": "Bạn đã đạt giới hạn remix hôm nay."
+    },
+    "settings": {
+      "title": "Remix khoá học",
+      "description": "Tỉ lệ thưởng cho tác giả gốc và giới hạn số remix mỗi ngày của một thành viên.",
+      "royaltyPercent": "Phần thưởng cho tác giả gốc (%)",
+      "dailyLimit": "Số remix tối đa mỗi ngày"
+    }
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "main": "Điều hướng chính"
   }
 }

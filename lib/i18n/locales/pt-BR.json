@@ -10,8 +10,190 @@
     "close": "Fechar"
   },
   "home": {
-    "slogan": "Aprendizagem Generativa em Sala de Aula Interativa Multi-Agente",
-    "greetingWithName": "Olá, {{name}}"
+    "slogan": "Entenda bem · Chegue à prova com segurança",
+    "greetingWithName": "Olá, {{name}}",
+    "guest": {
+      "kicker": "A IA como parceira de estudo",
+      "title": "Aprenda no seu ritmo, com a IA para ajudar",
+      "description": "As lições, os slides e as discussões são preparados com a ajuda da IA e revisados por pessoas antes de serem compartilhados. Veja primeiro as prévias gratuitas. Não precisa de conta.",
+      "signIn": "Entrar",
+      "browseCatalog": "Ver cursos",
+      "stepsTitle": "Como funciona",
+      "step1": {
+        "title": "Prévia gratuita",
+        "body": "Abra os cursos escolhidos pelo administrador, sem conta."
+      },
+      "step2": {
+        "title": "Entrar",
+        "body": "Entre com a conta que foi fornecida a você. Visitantes podem olhar, mas não podem criar cursos.",
+        "titleOpen": "Entre ou crie uma conta",
+        "bodyOpen": "Crie uma conta grátis ou entre. Até virar membro, você pode explorar, mas ainda não pode criar cursos."
+      },
+      "step3": {
+        "title": "Torne-se membro",
+        "body": "Membros podem criar cursos com IA, entrar em turmas e compartilhar o que fazem."
+      },
+      "previewsTitle": "Prévias gratuitas",
+      "previewsEmpty": "Ainda não há prévias. Volte em breve.",
+      "membershipTitle": "Torne-se membro",
+      "membershipBody": "Os membros têm um limite mensal para criar cursos com IA, entrar em turmas com um código e compartilhar cursos com outros membros.",
+      "nav": {
+        "features": "Recursos",
+        "how": "Como funciona",
+        "previews": "Prévias",
+        "membership": "Assinatura"
+      },
+      "chip1": "Explicado de vários ângulos",
+      "chip2": "Slides e lousa",
+      "chip3": "Quizzes e projetos",
+      "mock": {
+        "title": "Frações no dia a dia",
+        "live": "Ao vivo",
+        "teacher": "Vamos cortar uma pizza em quatro fatias iguais.",
+        "student": "E se as fatias não forem iguais?"
+      },
+      "features": {
+        "title": "Feito para ajudar você a entender",
+        "subtitle": "A IA explica, conversa e confere o que você entendeu, como um grupo de estudo paciente, e é você quem decide o que aprender.",
+        "f1": {
+          "title": "Um grupo de estudo em cada lição",
+          "body": "Um professor, colegas e um assistente, todos interpretados pela IA, participam para que cada ideia seja explicada por vários ângulos."
+        },
+        "f2": {
+          "title": "Slides e lousa",
+          "body": "Cada lição vem com slides, uma lousa ao vivo e explicações visuais."
+        },
+        "f3": {
+          "title": "Quizzes e projetos",
+          "body": "Confira o que aprendeu com quizzes e pratique em tarefas baseadas em projetos."
+        },
+        "f4": {
+          "title": "Narração por voz",
+          "body": "As cenas podem ser lidas em voz alta, e você pode responder falando."
+        },
+        "f5": {
+          "title": "Turmas e compartilhamento",
+          "body": "Entre em uma turma com um código e compartilhe seus cursos com outros membros depois que um administrador aprová-los."
+        },
+        "f6": {
+          "title": "Leve com você",
+          "body": "Exporte um curso como página da web, arquivo do PowerPoint ou vídeo."
+        }
+      },
+      "previewsSubtitle": "Abra estes cursos agora mesmo. Não precisa de conta.",
+      "perks": {
+        "p1": "Um limite mensal de IA para criar seus próprios cursos",
+        "p2": "Entrar em turmas com um código de convite",
+        "p3": "Compartilhar seus cursos com outros membros",
+        "p4": "Exportar cursos como página da web, PowerPoint ou vídeo"
+      },
+      "cta": {
+        "title": "Quer ver por conta própria?",
+        "body": "Abra primeiro uma prévia gratuita ou entre quando estiver pronto."
+      },
+      "footerTagline": "ÔN THI · criado a partir do projeto de código aberto OpenMAIC",
+      "trust": {
+        "title": "Usando a IA com cuidado",
+        "subtitle": "Sabemos que nem todo mundo confia na IA ainda. É assim que tentamos merecer a sua confiança.",
+        "t1": {
+          "title": "Você no comando",
+          "body": "A IA só ajuda a explicar e a praticar. Você escolhe o que aprender e pode parar quando quiser."
+        },
+        "t2": {
+          "title": "Revisado antes de ser compartilhado",
+          "body": "Um administrador revisa um curso antes de outros membros poderem vê-lo."
+        },
+        "t3": {
+          "title": "Sinceros sobre os limites",
+          "body": "A IA pode errar. Para o que for importante, confirme com seu professor ou uma fonte confiável."
+        },
+        "t4": {
+          "title": "Veja antes de se comprometer",
+          "body": "As prévias gratuitas são abertas a todos, sem conta e sem compromisso."
+        }
+      }
+    },
+    "locked": {
+      "membership": "Criar cursos com IA é para membros.",
+      "classes": "Entrar em turmas é para membros.",
+      "contactAdmin": "Peça a um administrador que adicione você como membro.",
+      "quota": "A cota de IA deste mês acabou.",
+      "quotaReset": "A criação de cursos será liberada novamente em {{date}}."
+    },
+    "quota": {
+      "label": "Limite de IA deste mês",
+      "used": "{{used}} de {{quota}} tokens usados"
+    },
+    "classes": {
+      "mine": "Minhas turmas"
+    },
+    "status": {
+      "ok": "Assinatura até {{date}} · dias restantes: {{days}}",
+      "expiring": "Sua assinatura termina em {{date}} (dias restantes: {{days}}). Peça a um administrador que a renove.",
+      "quotaNear": "Você usou {{percent}}% da cota de IA deste mês.",
+      "quotaOut": "A cota de IA deste mês acabou. Seus cursos continuam abertos para estudo.",
+      "expired": "Sua assinatura terminou em {{date}}. Seus cursos continuam disponíveis para leitura. Peça a um administrador que a renove para criar novos cursos.",
+      "suspended": "Sua assinatura está pausada. Seus cursos continuam disponíveis para leitura. Peça a um administrador que a reative."
+    },
+    "continue": {
+      "title": "Continuar aprendendo",
+      "progress": "Cena {{current}} de {{total}}",
+      "button": "Continuar"
+    },
+    "myClasses": {
+      "members": "Membros: {{count}}",
+      "noCourses": "Esta turma ainda não tem cursos.",
+      "untitled": "Curso {{number}}"
+    },
+    "starter": {
+      "title": "Não sabe por onde começar? Experimente uma destas ideias:",
+      "one": "Explique [tema] para um iniciante, passo a passo",
+      "two": "Monte um plano de revisão de uma semana sobre [tema]",
+      "three": "Escreva exercícios de prática sobre [tema] com soluções detalhadas"
+    },
+    "access": {
+      "prompt": "Peça a um administrador que adicione você como membro.",
+      "promptRenew": "Peça a um administrador que renove sua assinatura.",
+      "notePlaceholder": "Uma nota curta (opcional): quem você é e por que precisa de acesso",
+      "button": "Pedir acesso",
+      "renewButton": "Pedir renovação",
+      "pending": "Seu pedido foi enviado em {{date}}. Um administrador vai analisá-lo.",
+      "rejected": "Seu último pedido não foi aceito. Você pode pedir de novo a partir de {{date}}.",
+      "suspended": "Um administrador pausou sua assinatura. Peça a ele que a reative.",
+      "refusalReason": "Motivo: {{reason}}"
+    },
+    "contribution": {
+      "title": "Minha contribuição",
+      "shared": "Cursos compartilhados",
+      "pending": "Aguardando revisão",
+      "readers": "Leitores",
+      "bonus": "Recompensa deste mês",
+      "bonusValue": "+{{tokens}} de {{cap}} tokens",
+      "badges": "Medalhas",
+      "badge": {
+        "readers-10": "10 leitores",
+        "readers-100": "100 leitores",
+        "challenge-top3": "Campeão da Semana"
+      },
+      "next": "Faltam {{count}} leitores para a medalha “{{badge}}”.",
+      "readersOf": "{{count}} leitores",
+      "rejected": "Recusado",
+      "rejectedWithReason": "Recusado: {{reason}}"
+    },
+    "focus": {
+      "add": "Adicionar o que você estuda",
+      "summary": "Você estuda: {{focus}}",
+      "subjectPlaceholder": "Disciplina, por exemplo Matemática",
+      "levelPlaceholder": "Nível, por exemplo 1º ano do ensino médio",
+      "save": "Salvar"
+    },
+    "composer": {
+      "title": "O que você quer aprender hoje?"
+    },
+    "renew": {
+      "pending": "Renovação pedida em {{date}}.",
+      "rejected": "O pedido de renovação não foi aceito. Você pode pedir de novo a partir de {{date}}."
+    }
   },
   "toolbar": {
     "pdfParser": "Analisador",
@@ -44,7 +226,9 @@
     "ttsPreview": "Pré-visualizar",
     "ttsPreviewing": "Reproduzindo...",
     "interactiveModeHint": "Ative o modo interativo para conteúdos mais práticos",
-    "interactiveModeLabel": "Modo Interativo"
+    "interactiveModeLabel": "Modo Interativo",
+    "advanced": "Avançado",
+    "advancedHint": "Opções avançadas: modelo, busca na web, imagens/vídeo, modo interativo, agentes. Por padrão, o ÔN THI escolhe um modelo adequado ao seu pedido e acrescenta ilustrações e atividades interativas."
   },
   "export": {
     "pptx": "Exportar PPTX",
@@ -170,6 +354,24 @@
       "qa": "P&R",
       "discussion": "DEB",
       "lecture": "AULA"
+    },
+    "actionTag": {
+      "spotlight": "Destaque",
+      "laser": "Laser",
+      "play": "Reproduzir",
+      "open": "Abrir",
+      "close": "Fechar",
+      "clear": "Limpar",
+      "delete": "Excluir",
+      "text": "Texto",
+      "shape": "Forma",
+      "chart": "Gráfico",
+      "formula": "Fórmula",
+      "table": "Tabela",
+      "line": "Linha",
+      "code": "Código",
+      "editCode": "Editar código",
+      "discuss": "Discutir"
     }
   },
   "actions": {
@@ -391,7 +593,16 @@
       "sendBackward": "Enviar para trás",
       "alignTop": "Alinhar acima",
       "alignMiddle": "Alinhar ao meio",
-      "alignBottom": "Alinhar abaixo"
+      "alignBottom": "Alinhar abaixo",
+      "centerBoth": "Centralizar no slide",
+      "setLink": "Definir link",
+      "ruler": "Régua",
+      "gridLines": "Linhas de grade",
+      "gridNone": "Nenhuma",
+      "gridSmall": "Pequena",
+      "gridMedium": "Média",
+      "gridLarge": "Grande",
+      "resetPage": "Limpar esta página"
     },
     "background": {
       "label": "Fundo",
@@ -472,18 +683,18 @@
       "placeholder": "Descreva suas alterações neste slide…",
       "stop": "Parar geração",
       "empty": {
-        "lead": "Tell me how to change this slide — I'll redo the content and re-align the narration.",
-        "boundary": "For fine-grained edits use the editor; add / delete / reorder slides from the left nav.",
-        "comingSoon": "More capabilities coming soon."
+        "lead": "Diga como mudar este slide — eu refaço o conteúdo e realinho a narração.",
+        "boundary": "Para ajustes finos, use o editor; adicione, exclua ou reordene slides pela navegação à esquerda.",
+        "comingSoon": "Mais recursos em breve."
       },
       "cap": {
         "content": {
-          "label": "Regenerate the slide",
-          "examples": "“Condense to 3 points”, “Add a real-world example”"
+          "label": "Regerar o slide",
+          "examples": "“Resuma em 3 pontos”, “Adicione um exemplo real”"
         },
         "narration": {
-          "label": "Regenerate the narration script",
-          "examples": "“Make it more conversational”, “Align with my canvas edits”"
+          "label": "Regerar o roteiro de narração",
+          "examples": "“Deixe mais conversacional”, “Alinhe com minhas edições no canvas”"
         },
         "fixHtml": {
           "examples": "\"O botão de iniciar não faz nada\", \"Os painéis se sobrepõem no celular\"",
@@ -494,7 +705,7 @@
           "examples": "“Deixe o título azul e suba”, “Diminua esta figura”"
         }
       },
-      "newConversation": "New conversation",
+      "newConversation": "Nova conversa",
       "sessionHistory": "Histórico",
       "sessionUntitled": "Conversa sem título",
       "sessionDelete": "Excluir",
@@ -587,10 +798,10 @@
       "resume": "Refazer"
     },
     "readCard": {
-      "title": "Read slide content",
-      "reading": "Reading",
-      "done": "Read",
-      "failed": "Not read"
+      "title": "Ler conteúdo do slide",
+      "reading": "Lendo",
+      "done": "Lido",
+      "failed": "Não lido"
     },
     "fixHtml": {
       "editsCount": "{{count}} edição(ões)",
@@ -624,7 +835,7 @@
       "shortTitle": "Elenco"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "Remover referência {{label}}",
       "counts": "{{count}}/{{max}} referenciados",
       "exitPicking": "Concluir seleção",
       "startPicking": "Referenciar elementos"
@@ -733,36 +944,42 @@
     "voiceInputDisabled": "Entrada por voz desativada",
     "textInput": "Entrada por texto",
     "stopRecording": "Parar gravação",
-    "startRecording": "Iniciar gravação"
+    "startRecording": "Iniciar gravação",
+    "toggleSidebar": "Mostrar ou ocultar a lista de cenas",
+    "toggleChat": "Mostrar ou ocultar o chat",
+    "mute": "Silenciar",
+    "unmute": "Ativar som",
+    "play": "Reproduzir",
+    "pause": "Pausar"
   },
   "pbl": {
     "emptyProject": "O projeto PBL ainda não foi gerado. Crie via geração de curso.",
     "v2": {
       "hero": {
-        "title": "Project-Based Learning",
-        "stage": "Stages",
-        "task": "Tasks",
+        "title": "Aprendizagem Baseada em Projetos",
+        "stage": "Etapas",
+        "task": "Tarefas",
         "tutor": "Tutor",
-        "greetingBanner": "Your tutor is saying hello…",
-        "startProject": "Start Project",
+        "greetingBanner": "Seu tutor está dizendo olá…",
+        "startProject": "Iniciar projeto",
         "continueProject": "Continuar projeto",
         "resetProgress": "Redefinir progresso de aprendizagem",
         "resetConfirmTitle": "Redefinir o progresso de aprendizagem?",
         "resetConfirmDescription": "Isso apaga todo o progresso deste projeto — histórico de conversa, envios e status das etapas — e você começará do zero. Esta ação não pode ser desfeita.",
         "resetConfirmConfirm": "Redefinir",
         "resetConfirmCancel": "Cancelar",
-        "startHint": "Click to enter the workspace. {{name}} will guide you through each stage.",
-        "startError": "Unable to start: {{error}}",
+        "startHint": "Clique para entrar no espaço de trabalho. {{name}} vai guiar você em cada etapa.",
+        "startError": "Não foi possível iniciar: {{error}}",
         "youWillLearn": "O que você vai ganhar",
         "instructorTagline": "Acompanha você durante todo o projeto",
         "scenarioCharacter": "Personagem do cenário",
         "scenarioCharacterTagline": "O personagem com quem você interage no cenário",
         "scenarioFlow": "Etapas",
-        "close": "Close"
+        "close": "Fechar"
       },
       "sidebar": {
-        "title": "Project Roadmap",
-        "summary": "{{completed}} / {{total}} tasks · {{stages}} stages",
+        "title": "Roteiro do projeto",
+        "summary": "{{completed}} / {{total}} tarefas · {{stages}} etapas",
         "enterScenario": "Entrar na cena",
         "advanceScene": "Avançar a cena",
         "continueScene": "Próxima etapa",
@@ -773,28 +990,28 @@
         "completeTask": "Concluir"
       },
       "workspace": {
-        "progressLabel": "Progress",
-        "resizeSidebar": "Resize sidebar and chat",
-        "resizeSubmission": "Resize chat and submission panel",
-        "enterFullscreen": "Expand to fullscreen workspace",
-        "exitFullscreen": "Exit fullscreen workspace",
+        "progressLabel": "Progresso",
+        "resizeSidebar": "Redimensionar barra lateral e chat",
+        "resizeSubmission": "Redimensionar chat e painel de envio",
+        "enterFullscreen": "Expandir o espaço de trabalho para tela cheia",
+        "exitFullscreen": "Sair da tela cheia do espaço de trabalho",
         "exitNativeFullscreen": "Sair da tela cheia",
         "returnToHero": "Voltar à visão geral do projeto",
         "breadcrumbOverview": "Visão geral",
         "breadcrumbCurrent": "Espaço de trabalho"
       },
       "chat": {
-        "placeholder": "Chat with {{name}} about your progress...",
-        "placeholderCompleted": "Project complete. Check out your report.",
-        "send": "Send",
+        "placeholder": "Converse com {{name}} sobre seu progresso...",
+        "placeholderCompleted": "Projeto concluído. Confira seu relatório.",
+        "send": "Enviar",
         "voiceInput": "Entrada de voz",
-        "keyboardHint": "Enter to send · Shift+Enter for newline",
-        "readingSubmission": "Reading submission…",
-        "generatingMilestoneFeedback": "Generating milestone feedback…",
-        "generatingFinalEval": "Generating final evaluation…",
-        "readingSubmissionWithTitle": "Reading latest submission for \"{{title}}\"…",
-        "evaluatingTask": "{{name}} · Reviewing task",
-        "evaluatingFinal": "{{name}} · Final evaluation",
+        "keyboardHint": "Enter para enviar · Shift+Enter para nova linha",
+        "readingSubmission": "Lendo o envio…",
+        "generatingMilestoneFeedback": "Gerando feedback do marco…",
+        "generatingFinalEval": "Gerando avaliação final…",
+        "readingSubmissionWithTitle": "Lendo o envio mais recente de \"{{title}}\"…",
+        "evaluatingTask": "{{name}} · Revisando a tarefa",
+        "evaluatingFinal": "{{name}} · Avaliação final",
         "narrating": "Definindo a cena…",
         "choosePrompt": "Escolha uma opção",
         "choiceOrType": "Escolha ou escreva o seu…",
@@ -802,17 +1019,17 @@
         "guidancePointer": "Sem ideias? Veja o objetivo e as dicas deste ato no painel à direita.",
         "roleplayHistoryTitle": "Histórico da simulação",
         "coachHint": "Dica do coach",
-        "thinking": "{{name}} · Thinking",
-        "typing": "{{name}} · Typing…",
-        "submitted": "Work submitted",
-        "evaluatingSubmission": "Evaluating your submission…",
-        "evaluatingSubmissionDetail": "Task: \"{{title}}\". Feedback on this submission will appear here once evaluation is complete.",
-        "milestoneFeedbackPending": "The milestone feedback will appear once ready.",
-        "emptyChat": "No messages yet.",
-        "emptyChatHint": "Your project walkthrough with {{name}} will start here.",
-        "continueError": "Unable to continue: {{error}}",
-        "stillTyping": "Still typing",
-        "handoverHint": "Click \"Continue to Next Stage\" to keep going."
+        "thinking": "{{name}} · Pensando",
+        "typing": "{{name}} · Digitando…",
+        "submitted": "Trabalho enviado",
+        "evaluatingSubmission": "Avaliando seu envio…",
+        "evaluatingSubmissionDetail": "Tarefa: \"{{title}}\". O feedback sobre este envio aparecerá aqui quando a avaliação terminar.",
+        "milestoneFeedbackPending": "O feedback do marco aparecerá quando estiver pronto.",
+        "emptyChat": "Nenhuma mensagem ainda.",
+        "emptyChatHint": "Seu percurso pelo projeto com {{name}} começará aqui.",
+        "continueError": "Não foi possível continuar: {{error}}",
+        "stillTyping": "Ainda digitando",
+        "handoverHint": "Clique em \"Continuar para a próxima etapa\" para seguir."
       },
       "scene": {
         "expand": "Expandir",
@@ -821,18 +1038,18 @@
         "label": "A cena"
       },
       "milestoneCard": {
-        "title": "Milestone Review",
-        "youLearned": "What you learned",
-        "nextStage": "Next stage:",
-        "continueHint": "Click Continue to enter the next stage.",
-        "alreadyEntered": "Next stage entered",
-        "continueToNext": "Continue to Next Stage",
-        "projectAlmostDone": "🎉 Project almost done — awaiting completion report"
+        "title": "Revisão do marco",
+        "youLearned": "O que você aprendeu",
+        "nextStage": "Próxima etapa:",
+        "continueHint": "Clique em Continuar para entrar na próxima etapa.",
+        "alreadyEntered": "Próxima etapa iniciada",
+        "continueToNext": "Continuar para a próxima etapa",
+        "projectAlmostDone": "🎉 Projeto quase concluído — aguardando o relatório de conclusão"
       },
       "taskEvalCard": {
-        "title": "Submission Feedback",
-        "strengths": "What went well",
-        "improvements": "Next steps"
+        "title": "Feedback do envio",
+        "strengths": "O que deu certo",
+        "improvements": "Próximos passos"
       },
       "briefing": {
         "intro": "A premissa apresentada na preparação fica aqui para você revisitar a qualquer momento na cena.",
@@ -848,73 +1065,73 @@
         "situation": "Situação"
       },
       "submission": {
-        "textSubmission": "Text submission",
-        "fileTooLarge": "File exceeds 5 MB limit. Try splitting or compressing.",
-        "contentRequired": "Content cannot be empty",
-        "readFileFailed": "Failed to read file: {{error}}",
-        "parsingPdf": "Parsing PDF…",
-        "parsePdfFailed": "Failed to parse PDF: {{error}}",
-        "pdfNoText": "No extractable text found in this PDF.",
-        "imageUploadFailed": "Failed to upload image: {{error}}",
-        "imageTooLargeNoStorage": "Image too large to attach without storage configured (max 2 MB locally).",
-        "imageNeedsCaptionNoVision": "The current model can't read images. Add a text description of the image before submitting, or switch to a vision-capable model in Settings.",
-        "unsupportedFileType": "Unsupported file type. Only text files (.txt, .md, .csv, .json, .py, …) and PDF are accepted.",
-        "pasteTab": "Paste text / image",
-        "uploadTab": "Upload file",
-        "pastePlaceholder": "Paste your code, document, answer — or an image / screenshot — here…",
-        "uploadPlaceholder": "Uploaded content will appear here. Edit before submitting…",
-        "imageCaptionPlaceholder": "Add an optional caption for this image…",
-        "imageSelectedReplace": "Image selected · click to replace",
-        "removeImage": "Remove image",
-        "processing": "Processing…",
-        "cancelProcessingConfirm": "A file is still being processed. Cancel and discard this upload?",
-        "currentTask": "Current Task",
-        "hints": "Hints",
-        "submitOutput": "Submit",
-        "evaluating": "Evaluating submission…",
-        "lockedWhileStreaming": "The instructor is replying — please wait before submitting.",
+        "textSubmission": "Envio de texto",
+        "fileTooLarge": "O arquivo excede o limite de 5 MB. Tente dividir ou compactar.",
+        "contentRequired": "O conteúdo não pode ficar vazio",
+        "readFileFailed": "Falha ao ler o arquivo: {{error}}",
+        "parsingPdf": "Analisando PDF…",
+        "parsePdfFailed": "Falha ao analisar o PDF: {{error}}",
+        "pdfNoText": "Nenhum texto extraível encontrado neste PDF.",
+        "imageUploadFailed": "Falha ao enviar a imagem: {{error}}",
+        "imageTooLargeNoStorage": "Imagem grande demais para anexar sem armazenamento configurado (máx. 2 MB localmente).",
+        "imageNeedsCaptionNoVision": "O modelo atual não consegue ler imagens. Adicione uma descrição em texto da imagem antes de enviar, ou mude para um modelo com visão nas Configurações.",
+        "unsupportedFileType": "Tipo de arquivo não suportado. Apenas arquivos de texto (.txt, .md, .csv, .json, .py, …) e PDF são aceitos.",
+        "pasteTab": "Colar texto / imagem",
+        "uploadTab": "Enviar arquivo",
+        "pastePlaceholder": "Cole aqui seu código, documento, resposta — ou uma imagem / captura de tela…",
+        "uploadPlaceholder": "O conteúdo enviado aparecerá aqui. Edite antes de enviar…",
+        "imageCaptionPlaceholder": "Adicione uma legenda opcional para esta imagem…",
+        "imageSelectedReplace": "Imagem selecionada · clique para substituir",
+        "removeImage": "Remover imagem",
+        "processing": "Processando…",
+        "cancelProcessingConfirm": "Um arquivo ainda está sendo processado. Cancelar e descartar este envio?",
+        "currentTask": "Tarefa atual",
+        "hints": "Dicas",
+        "submitOutput": "Enviar",
+        "evaluating": "Avaliando envio…",
+        "lockedWhileStreaming": "O instrutor está respondendo — aguarde antes de enviar.",
         "evalFailed": "Falha na avaliação: {{error}}",
-        "submittedCount": "{{count}} submitted",
-        "submissionHistory": "Submission History",
-        "fromTask": "Task: {{title}}",
-        "download": "Download",
-        "viewSubmission": "View submission",
-        "noActiveTask": "No active task.",
-        "canceling": "Cancel",
-        "submitting": "Submitting…",
-        "selectFileHint": "Choose a file · Max 5 MB · Text, PDF or image",
-        "modalTitle": "Submit your work",
-        "modalTaskLabel": "Task: {{title}}",
-        "fileRead": "Read: {{filename}} · {{size}} KB",
-        "submittedBadge": "Submitted ({{count}})",
-        "receiptFile": "File: {{filename}}",
-        "receiptTemplate": "Submitted work for this task ({{label}})."
+        "submittedCount": "{{count}} enviado(s)",
+        "submissionHistory": "Histórico de envios",
+        "fromTask": "Tarefa: {{title}}",
+        "download": "Baixar",
+        "viewSubmission": "Ver envio",
+        "noActiveTask": "Nenhuma tarefa ativa.",
+        "canceling": "Cancelar",
+        "submitting": "Enviando…",
+        "selectFileHint": "Escolha um arquivo · Máx. 5 MB · Texto, PDF ou imagem",
+        "modalTitle": "Envie seu trabalho",
+        "modalTaskLabel": "Tarefa: {{title}}",
+        "fileRead": "Lido: {{filename}} · {{size}} KB",
+        "submittedBadge": "Enviado ({{count}})",
+        "receiptFile": "Arquivo: {{filename}}",
+        "receiptTemplate": "Trabalho enviado para esta tarefa ({{label}})."
       },
       "agentTabs": {
-        "noAgent": "No AI agent configured for this project."
+        "noAgent": "Nenhum agente de IA configurado para este projeto."
       },
       "completion": {
-        "noWhatsNext": "The final evaluation hasn't been written yet.",
-        "backToWorkspace": "Back to Workspace",
-        "completionCta": "View Report",
-        "title": "Completion Report",
-        "whatYouBuilt": "What you built",
-        "whatYouLearned": "What you learned",
-        "whatsNext": "What's next",
-        "noDataFallback": "Not yet written",
-        "stageReview": "Stage Reviews",
-        "summary": "You completed {{completed}} of {{total}} tasks across {{stages}} stages.",
-        "statConcepts": "Concepts mastered",
-        "statTurns": "Messages exchanged",
-        "statScope": "Stages · Tasks",
-        "statDuration": "Time spent",
-        "statSubmissions": "Work submitted",
-        "coreStageBadge": "Core",
-        "conceptsInStageLabel": "Concepts:",
-        "submissionsInStage": "Submitted {{count}} piece(s) of work",
-        "coreConceptGrasp": "Core concept \"{{concept}}\" — {{quality}}",
-        "stageNoData": "No recorded output in this stage.",
-        "highlightsTitle": "Highlights",
+        "noWhatsNext": "A avaliação final ainda não foi escrita.",
+        "backToWorkspace": "Voltar ao espaço de trabalho",
+        "completionCta": "Ver relatório",
+        "title": "Relatório de conclusão",
+        "whatYouBuilt": "O que você construiu",
+        "whatYouLearned": "O que você aprendeu",
+        "whatsNext": "Próximos passos",
+        "noDataFallback": "Ainda não escrito",
+        "stageReview": "Revisão das etapas",
+        "summary": "Você concluiu {{completed}} de {{total}} tarefas em {{stages}} etapas.",
+        "statConcepts": "Conceitos dominados",
+        "statTurns": "Mensagens trocadas",
+        "statScope": "Etapas · Tarefas",
+        "statDuration": "Tempo dedicado",
+        "statSubmissions": "Trabalhos enviados",
+        "coreStageBadge": "Essencial",
+        "conceptsInStageLabel": "Conceitos:",
+        "submissionsInStage": "{{count}} trabalho(s) enviado(s)",
+        "coreConceptGrasp": "Conceito central \"{{concept}}\" — {{quality}}",
+        "stageNoData": "Nenhum resultado registrado nesta etapa.",
+        "highlightsTitle": "Destaques",
         "scenario": {
           "summary": "Você concluiu todos os {{acts}} atos deste cenário. Veja como foi o role-play.",
           "whatYouDidWell": "O que você fez bem",
@@ -939,24 +1156,25 @@
           "castLabel": "Você interagiu com: {{names}}"
         },
         "highlight": {
-          "independence": "You demonstrated {{unlocks}}/{{total}} concepts on your own — no prompting needed. Solid understanding.",
-          "resilience": "In \"{{title}}\" you overcame {{errors}} errors, tackling each one — real grit.",
-          "resilienceGeneral": "You overcame {{errors}} errors, tackling each one — real grit.",
-          "completion": "You completed every task. Steady progress all the way through."
+          "independence": "Você demonstrou {{unlocks}}/{{total}} conceitos por conta própria — sem precisar de dicas. Compreensão sólida.",
+          "resilience": "Em \"{{title}}\" você superou {{errors}} erros, enfrentando cada um — muita garra.",
+          "resilienceGeneral": "Você superou {{errors}} erros, enfrentando cada um — muita garra.",
+          "completion": "Você concluiu todas as tarefas. Progresso constante do início ao fim."
         },
         "synthesisQuality": {
-          "strong": "Strong understanding ✅",
-          "ok": "Good grasp 👍",
-          "weak": "Room to grow 💪"
+          "strong": "Compreensão sólida ✅",
+          "ok": "Bom domínio 👍",
+          "weak": "Espaço para crescer 💪"
         },
         "durationMinutes": "{{m}} min",
         "durationHours": "{{h}} hr",
-        "durationHoursMinutes": "{{h}} hr {{m}} min"
+        "durationHoursMinutes": "{{h}} h {{m}} min",
+        "stars": "Estrelas"
       },
       "completionCard": {
-        "title": "Project Complete · Completion",
-        "subtitle": "Congratulations! You finished the entire project.",
-        "description": "Based on your performance data (time spent, conversations, error recovery, concepts unlocked…), we have generated a completion report showing what you built, what you learned, and where to go next."
+        "title": "Projeto concluído · Conclusão",
+        "subtitle": "Parabéns! Você concluiu o projeto inteiro.",
+        "description": "Com base nos seus dados de desempenho (tempo dedicado, conversas, recuperação de erros, conceitos desbloqueados…), geramos um relatório de conclusão que mostra o que você construiu, o que aprendeu e para onde seguir."
       }
     }
   },
@@ -1010,8 +1228,10 @@
     "deleteFolderAndCourses_other": "Excluir pasta e {{count}} cursos",
     "deleteFolderConfirmRemove": "Isto remove a pasta e seus cursos, incluindo o histórico de chat.",
     "notFound": "Curso não encontrado",
-    "notFoundDesc": "Este curso não existe ou foi excluído.",
-    "backToHome": "Voltar ao início"
+    "notFoundDesc": "Este curso não existe, foi excluído ou você não tem permissão para vê-lo.",
+    "backToHome": "Voltar ao início",
+    "loadFailed": "O armazenamento está indisponível. Não foi possível carregar as salas salvas.",
+    "deleteFailed": "Falha ao excluir a sala de aula"
   },
   "upload": {
     "pdfSizeLimit": "Suporta arquivos PDF de até 50 MB",
@@ -1442,16 +1662,16 @@
     "voxcpmStopPreview": "Parar pré-visualização",
     "voxcpmPreviewVoice": "Pré-visualizar voz",
     "voxcpmDeleteVoice": "Excluir voz",
-    "qwenCloneVoicesTitle": "Qwen TTS Cloned Voices",
-    "qwenCloneRefText": "Enter the verbatim transcript of the reference audio",
-    "qwenCloneRefAudioHint": "Use a clean 1–60 second voice sample. A 10–20 second sample is recommended; audio is converted to 24 kHz mono PCM WAV.",
-    "qwenCloneSaved": "Qwen cloned voice registered and saved",
-    "qwenCloneSaveFailed": "Failed to register the Qwen cloned voice",
-    "qwenCloneUnsupported": "Recording is not supported in this browser; upload an audio file instead.",
-    "qwenCloneSpeedHint": "Cloned voices always synthesize at 1× speed.",
-    "qwenCloneDeleteWarning": "The voice was removed locally, but provider deletion failed.",
-    "qwenCloneNarrationUnavailable": "The assigned voice is unavailable. Narration will use another enabled voice instead.",
-    "qwenCloneDiscussionUnavailable": "The assigned voice is unavailable. Discussion will use another enabled voice instead.",
+    "qwenCloneVoicesTitle": "Vozes clonadas do Qwen TTS",
+    "qwenCloneRefText": "Digite a transcrição literal do áudio de referência",
+    "qwenCloneRefAudioHint": "Use uma amostra de voz limpa de 1–60 segundos. Recomenda-se 10–20 segundos; o áudio é convertido para PCM WAV mono de 24 kHz.",
+    "qwenCloneSaved": "Voz clonada do Qwen registrada e salva",
+    "qwenCloneSaveFailed": "Falha ao registrar a voz clonada do Qwen",
+    "qwenCloneUnsupported": "Este navegador não permite gravação; envie um arquivo de áudio.",
+    "qwenCloneSpeedHint": "Vozes clonadas são sempre sintetizadas na velocidade 1×.",
+    "qwenCloneDeleteWarning": "A voz foi removida localmente, mas a exclusão no provedor falhou.",
+    "qwenCloneNarrationUnavailable": "A voz atribuída não está disponível. A narração usará outra voz ativada.",
+    "qwenCloneDiscussionUnavailable": "A voz atribuída não está disponível. A discussão usará outra voz ativada.",
     "providerOpenAIWhisper": "OpenAI ASR (gpt-4o-mini-transcribe)",
     "providerBrowserNative": "ASR Nativo do Navegador",
     "providerQwenASR": "Qwen ASR (Alibaba Cloud Bailian)",
@@ -1799,55 +2019,55 @@
     "webSearchBaseUrl": "URL Base",
     "webSearchServerConfigured": "Chave de API de busca configurada no servidor",
     "optional": "Opcional",
-    "selectProvider": "Select Provider",
-    "customProvider": "Custom",
-    "presetPickHint": "Picking a provider auto-fills its base URL and protocol; enter your key then click \"Fetch Models\". Not listed? Use \"Custom\".",
+    "selectProvider": "Selecionar provedor",
+    "customProvider": "Personalizado",
+    "presetPickHint": "Escolher um provedor preenche automaticamente a URL base e o protocolo; insira sua chave e clique em \"Buscar modelos\". Não está na lista? Use \"Personalizado\".",
     "presetCategory": {
-      "tokenPlan": "Token Plans",
-      "aggregator": "Aggregators",
-      "thirdParty": "Vendors",
-      "official": "Official"
+      "tokenPlan": "Planos de tokens",
+      "aggregator": "Agregadores",
+      "thirdParty": "Fornecedores",
+      "official": "Oficiais"
     },
-    "fetchModels": "Fetch Models",
-    "fetchModelsResult": "Fetched {total} models, added {added}",
-    "fetchModelsNoEndpoint": "This provider has no model list endpoint — add models manually",
-    "fetchModelsAuthError": "API key is invalid or expired",
-    "fetchModelsFailed": "Failed to fetch models",
+    "fetchModels": "Buscar modelos",
+    "fetchModelsResult": "{total} modelos encontrados, {added} adicionados",
+    "fetchModelsNoEndpoint": "Este provedor não tem endpoint de lista de modelos — adicione os modelos manualmente",
+    "fetchModelsAuthError": "A chave de API é inválida ou expirou",
+    "fetchModelsFailed": "Falha ao buscar modelos",
     "usage": {
-      "title": "Usage",
-      "refresh": "Refresh",
-      "disclaimer": "Usage is system-tracked; only server-side calls are counted.",
-      "totalRequests": "Requests",
-      "totalTokens": "LLM Tokens",
-      "dailyTrend": "Daily Token Trend",
+      "title": "Uso",
+      "refresh": "Atualizar",
+      "disclaimer": "O uso é registrado pelo sistema; apenas chamadas do lado do servidor são contadas.",
+      "totalRequests": "Requisições",
+      "totalTokens": "Tokens de LLM",
+      "dailyTrend": "Tendência diária de tokens",
       "tokens": "Tokens",
-      "byModel": "By Model",
-      "model": "Model",
-      "type": "Type",
-      "reqs": "Reqs",
-      "usage": "Usage",
-      "empty": "No usage data yet",
+      "byModel": "Por modelo",
+      "model": "Modelo",
+      "type": "Tipo",
+      "reqs": "Req.",
+      "usage": "Uso",
+      "empty": "Ainda não há dados de uso",
       "kindLlm": "LLM",
-      "kindImage": "Image",
+      "kindImage": "Imagem",
       "kindVideo": "Video",
-      "kindTts": "Speech",
+      "kindTts": "Fala",
       "kindAsr": "ASR",
       "unitToken": "tokens",
-      "unitImage": "images",
-      "unitSecond": "sec",
-      "unitCharacter": "chars"
+      "unitImage": "imagens",
+      "unitSecond": "s",
+      "unitCharacter": "caract."
     },
     "tokenPlan": {
       "nav": "Token Plan",
-      "title": "Token Plan Setup",
-      "desc": "Pick your token plan provider and enter the key — it auto-configures every adapted modality (LLM/image/video/speech/web search).",
-      "selectPlan": "Select Provider",
-      "apiKey": "API Key",
-      "enable": "Enable",
-      "updateKey": "Update key",
-      "modelsCount": "{{n}} models",
-      "capabilities": "Capabilities offered",
-      "offeredNote": "Models offered by this plan. Pick the ones you want on the generation bar — availability depends on your plan tier, and unsupported models will error at generation time."
+      "title": "Configuração do plano de tokens",
+      "desc": "Escolha o provedor do plano de tokens e insira a chave — todas as modalidades compatíveis (LLM/imagem/vídeo/fala/pesquisa na web) são configuradas automaticamente.",
+      "selectPlan": "Selecionar provedor",
+      "apiKey": "Chave de API",
+      "enable": "Ativar",
+      "updateKey": "Atualizar chave",
+      "modelsCount": "{{n}} modelos",
+      "capabilities": "Recursos oferecidos",
+      "offeredNote": "Modelos oferecidos por este plano. Escolha os que deseja na barra de geração — a disponibilidade depende do nível do seu plano, e modelos não compatíveis darão erro na geração."
     },
     "skills": {
       "nav": "Skills",
@@ -1866,7 +2086,7 @@
       "download": "Baixar",
       "detailFailed": "Não foi possível carregar os detalhes do skill",
       "contentLabel": "Conteúdo",
-      "builtinDetailNote": "Este skill acompanha o OpenMAIC. Baixe-o para importar em outro espaço de trabalho de agente.",
+      "builtinDetailNote": "Este skill acompanha o ÔN THI. Baixe-o para importar em outro espaço de trabalho de agente.",
       "upload": "Enviar",
       "uploading": "Enviando…",
       "uploadFailed": "Não foi possível enviar o skill. Verifique o arquivo e tente novamente.",
@@ -1881,82 +2101,82 @@
     "alidocmindAccessKeySecret": "AccessKey Secret"
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "Curso sem título",
+    "sceneCount": "{{count}} páginas",
+    "sceneCount_one": "{{count}} página",
+    "sceneCount_other": "{{count}} páginas",
+    "courseLinkHint": "Abrir {{name}} no painel direito",
+    "courseLinkMore": "Mais {{count}} sala(s)",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "Referenciar uma sala nesta mensagem",
+      "empty": "Nenhuma sala corresponde",
+      "alreadyNamed": "Já referenciada",
+      "remove": "Remover {{name}}",
+      "pillHint": "Esta mensagem referencia {{name}}",
       "notAccepted": "O servidor está temporariamente indisponível. Tente novamente em instantes.",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "Referenciar {{name}}",
+      "capped": "Mostrando os primeiros {{count}} — continue digitando para filtrar"
     },
-    "heroTitle": "What will you create today?",
-    "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "heroTitle": "O que você vai criar hoje?",
+    "heroSubtitle": "Compartilhe uma ideia e transforme-a em uma jornada de aprendizagem para outras pessoas",
+    "newSession": "Novo chat",
     "sections": {
-      "courses": "Courses",
+      "courses": "Cursos",
       "sessions": "Chats"
     },
-    "coursesEmpty": "No courses yet",
-    "sessionsEmpty": "No chats yet",
-    "loading": "Loading",
-    "loadFailed": "Couldn't load",
-    "retry": "Retry",
-    "untitledSession": "Untitled chat",
-    "pagePosition": "Page {{index}} of {{total}}",
-    "exitPro": "Exit Pro",
-    "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
-    "currentSession": "Current chat",
+    "coursesEmpty": "Nenhum curso ainda",
+    "sessionsEmpty": "Nenhum chat ainda",
+    "loading": "Carregando",
+    "loadFailed": "Não foi possível carregar",
+    "retry": "Tentar novamente",
+    "untitledSession": "Chat sem título",
+    "pagePosition": "Página {{index}} de {{total}}",
+    "exitPro": "Sair do Pro",
+    "navAria": "Navegação do espaço de trabalho",
+    "homeAria": "Voltar ao início",
+    "currentSession": "Chat atual",
     "startLearning": "Começar a aprender",
     "time": {
-      "justNow": "Just now",
-      "minutesAgo": "{{count}}m ago",
-      "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "justNow": "Agora mesmo",
+      "minutesAgo": "há {{count}} min",
+      "hoursAgo": "há {{count}} h",
+      "daysAgo": "há {{count}} d"
     },
     "sessionStatus": {
-      "connecting": "Connecting",
-      "queued": "Queued",
-      "running": "Running",
-      "succeeded": "Ready",
-      "failed": "Needs attention",
-      "cancelled": "Stopped"
+      "connecting": "Conectando",
+      "queued": "Na fila",
+      "running": "Em execução",
+      "succeeded": "Pronto",
+      "failed": "Requer atenção",
+      "cancelled": "Interrompido"
     },
-    "backToWorkspace": "Back to workspace",
-    "searchPlaceholder": "Filter by name",
-    "searchAria": "Search {{section}}",
-    "searchEmpty": "No matches",
-    "showMore": "Show {{count}} more",
-    "showLess": "Show less",
-    "utilitiesAria": "Preferences and account",
-    "resizeAria": "Drag to resize the sidebar",
-    "chatPaneAria": "Chat panel",
-    "classroomPaneAria": "Classroom",
-    "collapseNav": "Collapse navigation",
-    "expandNav": "Expand navigation",
-    "expandNavInto": "Expand navigation · {{section}}",
-    "collapseChat": "Collapse conversation",
-    "expandChat": "Conversation",
-    "collapseClassroom": "Collapse classroom",
-    "expandClassroom": "Classroom",
-    "readOnlyBadge": "Read-only",
-    "noCourseTitle": "No course open",
+    "backToWorkspace": "Voltar ao espaço de trabalho",
+    "searchPlaceholder": "Filtrar por nome",
+    "searchAria": "Pesquisar em {{section}}",
+    "searchEmpty": "Nenhum resultado",
+    "showMore": "Mostrar mais {{count}}",
+    "showLess": "Mostrar menos",
+    "utilitiesAria": "Preferências e conta",
+    "resizeAria": "Arraste para redimensionar a barra lateral",
+    "chatPaneAria": "Painel de chat",
+    "classroomPaneAria": "Sala de aula",
+    "collapseNav": "Recolher navegação",
+    "expandNav": "Expandir navegação",
+    "expandNavInto": "Expandir navegação · {{section}}",
+    "collapseChat": "Recolher conversa",
+    "expandChat": "Conversa",
+    "collapseClassroom": "Recolher sala de aula",
+    "expandClassroom": "Sala de aula",
+    "readOnlyBadge": "Somente leitura",
+    "noCourseTitle": "Nenhum curso aberto",
     "noCourseHint": "Abra por um link de curso na conversa, ou escolha um na lista à esquerda — a conversa fica onde está",
-    "resizeChatAria": "Drag to resize the conversation pane",
-    "firstPageLanding": "The first page is landing…",
+    "resizeChatAria": "Arraste para redimensionar o painel da conversa",
+    "firstPageLanding": "A primeira página está chegando…",
     "autoSaving": "Salvando automaticamente…",
     "autoSaved": "Salvo",
-    "collapsedTitle": "Both panes are collapsed",
-    "collapsedHint": "Use the tabs on the left to bring the conversation or the classroom back",
-    "moreUtilities": "More",
+    "collapsedTitle": "Os dois painéis estão recolhidos",
+    "collapsedHint": "Use as abas à esquerda para trazer de volta a conversa ou a sala de aula",
+    "moreUtilities": "Mais",
     "rowMore": "Mais ações para {{name}}",
     "folderDeleteHint": "Os cursos dentro dela voltam para o nível principal. Nada é excluído.",
     "dropToUnfile": "Solte aqui para tirar da pasta",
@@ -1970,7 +2190,7 @@
     "confirmDelete": "Confirmar exclusão",
     "deleting": "Excluindo…",
     "deleteFailed": "Não foi possível excluir. Tente novamente.",
-    "tabsAria": "Chats and courses",
+    "tabsAria": "Chats e cursos",
     "courseTabsAria": "Cursos abertos",
     "courseTabClose": "Fechar aba: {{name}}",
     "courseTabRunning": "Gerando",
@@ -2086,7 +2306,22 @@
         "roleFailed": "Não foi possível alterar a função. Tente novamente."
       },
       "roleChanged": "Função atualizada.",
-      "changeRoleLabel": "Alterar a função de {{username}}"
+      "changeRoleLabel": "Alterar a função de {{username}}",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "Redefinir senha",
+      "resetPasswordLabel": "Redefinir a senha de {{username}}",
+      "resetTitle": "Redefinir a senha de {{username}}?",
+      "resetDescription": "A conta recebe uma senha temporária e é desconectada em todos os dispositivos. A senha aparece uma só vez: entregue-a à pessoa e peça que a altere após entrar. A ação fica no registro de auditoria.",
+      "resetDone": "Senha temporária de {{username}}. Copie agora; ela não será mostrada de novo.",
+      "resetCopy": "Copiar",
+      "resetCopied": "Senha temporária copiada.",
+      "resetClose": "Concluir"
     },
     "roles": {
       "learner": "Aluno",
@@ -2095,23 +2330,51 @@
     },
     "administration": "Administração",
     "adminPage": {
-      "title": "Administração",
+      "title": "Operações",
       "description": "Contas, uso e funções desta instalação.",
-      "denied": "Esta página é para operadores e administradores."
+      "denied": "Esta página é para operadores e administradores.",
+      "learn": "Ir para o aprendizado",
+      "summary": {
+        "activeMembers": "Assinaturas ativas",
+        "pendingShares": "Pedidos de compartilhamento pendentes",
+        "classes": "Turmas",
+        "pendingAccessRequests": "Pedidos de acesso pendentes"
+      },
+      "providers": {
+        "title": "Provedores do servidor",
+        "description": "Somente leitura. Os provedores são configurados no servidor, não aqui.",
+        "empty": "Nenhum provedor está configurado no servidor."
+      },
+      "deniedSignIn": "Entre com uma conta de operador ou administrador."
+    },
+    "membership": {
+      "active": "Assinatura até {{date}} · {{quota}} tokens por mês",
+      "none": "Sem assinatura ativa"
+    },
+    "password": {
+      "title": "Alterar senha",
+      "description": "Os outros dispositivos serão desconectados; este continua conectado.",
+      "current": "Senha atual",
+      "new": "Nova senha",
+      "confirm": "Repita a nova senha",
+      "submit": "Alterar senha",
+      "changed": "Senha alterada. Os outros dispositivos foram desconectados.",
+      "wrongCurrent": "A senha atual está errada.",
+      "mismatch": "As duas novas senhas não coincidem."
     }
   },
   "proMode": {
     "attach": "Anexar material",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
+    "mentionCourse": "Referenciar uma sala",
+    "loadSkill": "Carregar uma Skill",
+    "skillMenuTitle": "Escolha uma Skill de design de curso",
+    "skillsLoading": "Carregando Skills…",
+    "noSkillsAvailable": "Nenhuma Skill disponível",
+    "userSkillsGroup": "Minhas Skills",
+    "builtinSkillsGroup": "Skills integradas",
+    "skillsLoadFailed": "Falha ao carregar as Skills. Clique para tentar novamente",
+    "retrySkills": "Tentar novamente",
+    "noSkillMatch": "Nenhuma Skill corresponde a “{{query}}”",
     "badgeAria": "Modo Pro",
     "badgeEnter": "Modo Pro",
     "badgeExit": "Voltar ao modo clássico",
@@ -2149,7 +2412,25 @@
       "quotaValue": "{{tokens}} tokens por mês",
       "grant": "Conceder ou prorrogar",
       "resume": "Retomar",
-      "suspend": "Suspender"
+      "suspend": "Suspender",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "Pedidos de compartilhamento",
@@ -2159,7 +2440,24 @@
       "reject": "Recusar",
       "approved": "Curso compartilhado com os membros.",
       "rejected": "Pedido recusado.",
-      "requested": "Solicitado em {{date}}"
+      "requested": "Solicitado em {{date}}",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "Atualização"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "Recusar o compartilhamento de “{{title}}”?",
+      "rejectDescription": "O dono verá que o pedido foi recusado, com o motivo se você informar, e poderá pedir de novo.",
+      "rejectReason": "Motivo (opcional)",
+      "snapshot": "Pacote: “{{name}}”, {{count}} cenas, {{media}} arquivos de mídia, {{size}}",
+      "remixOf": "Remix de “{{title}}”"
     },
     "previews": {
       "title": "Prévias gratuitas",
@@ -2167,7 +2465,10 @@
       "courseId": "ID do curso",
       "add": "Marcar como prévia",
       "remove": "Remover",
-      "empty": "Ainda não há prévias."
+      "empty": "Ainda não há prévias.",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "Turmas",
@@ -2178,12 +2479,247 @@
       "empty": "Ainda não há turmas.",
       "members": "{{count}} membros",
       "courses": "{{count}} cursos",
-      "attach": "Anexar curso"
+      "attach": "Anexar curso",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "Novo código",
+      "newCodeTitle": "Gerar um novo código de entrada para “{{name}}”?",
+      "newCodeDescription": "O código atual deixa de funcionar na hora; quem já está na turma continua nela. O novo código aparece uma só vez, então copie-o.",
+      "membersOf": "Membros de {{name}}",
+      "membersDescription": "Quem for removido pode voltar com o código da turma; gere um novo código para impedir.",
+      "noMembers": "Ainda não há membros.",
+      "joined": "Entrou em {{date}}",
+      "removeMember": "Remover",
+      "removeMemberTitle": "Remover {{username}} de {{name}}?",
+      "removeMemberDescription": "A pessoa perde os cursos desta turma. A ação fica no registro de auditoria.",
+      "memberRemoved": "{{username}} removido da turma."
     },
     "audit": {
       "title": "Log de auditoria",
       "description": "Alterações recentes em contas, assinaturas, compartilhamentos e turmas.",
-      "empty": "Nada registrado ainda."
+      "empty": "Nada registrado ainda.",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "Redefinições de senha"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "Código de entrada trocado",
+        "password_reset": "Senha redefinida",
+        "community_ban": "Impedir publicações na comunidade",
+        "community_unban": "Liberar publicações na comunidade",
+        "class_remove": "Membro removido",
+        "challenge_create": "Criar desafio",
+        "challenge_update": "Editar desafio",
+        "settings_update": "Alterar configuração",
+        "share_update-approve": "Atualização compartilhada aprovada",
+        "share_update-reject": "Atualização compartilhada recusada"
+      }
+    },
+    "accessRequests": {
+      "title": "Pedidos de acesso",
+      "description": "Pessoas que pedem para ser membros. Aprovar concede 30 dias e a cota mensal padrão; depois dá para mudar na lista de membros.",
+      "empty": "Nenhum pedido pendente.",
+      "requested": "Pedido em {{date}}",
+      "approve": "Aprovar",
+      "reject": "Recusar",
+      "approved": "{{name}} agora é membro.",
+      "rejected": "Pedido de {{name}} recusado.",
+      "reasonPlaceholder": "Motivo (opcional; o aluno verá, e fica no registro de auditoria)",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "{{count}} pedidos de suporte aguardam resposta.",
+        "reportsOpen": "{{count}} itens denunciados na comunidade aguardam análise."
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "Cursos",
+      "description": "Todos os cursos do sistema. Abra um para revisar ou copie o ID para marcá-lo como prévia ou vinculá-lo a uma turma.",
+      "open": "Abrir o curso em uma nova aba",
+      "copy": "Copiar ID {{id}}",
+      "copied": "{{id}} copiado",
+      "owner": "Dono",
+      "anonymous": "Sem login",
+      "updated": "Atualizado",
+      "empty": "Ainda não há cursos."
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "Não encontrado.",
       "MEMBERSHIP_REQUIRED": "É preciso ter uma assinatura ativa.",
       "QUOTA_EXCEEDED": "A cota de IA deste mês foi usada.",
-      "ACCOUNTS_NOT_CONFIGURED": "As contas não estão configuradas nesta instalação."
+      "ACCOUNTS_NOT_CONFIGURED": "As contas não estão configuradas nesta instalação.",
+      "ALREADY_MEMBER": "Você já tem uma assinatura ativa.",
+      "MEMBERSHIP_SUSPENDED": "Sua assinatura foi pausada por um administrador.",
+      "REQUEST_PENDING": "Já há um pedido aguardando um administrador.",
+      "REQUEST_TOO_SOON": "Um pedido recusado pode ser enviado de novo mais tarde.",
+      "COURSE_NOT_FOUND": "Não há curso com este ID. Confira o ID no endereço do curso (/classroom/<ID>).",
+      "RATE_LIMITED": "Você tem muitos pedidos sem resposta. Aguarde uma resposta primeiro.",
+      "COMMUNITY_BLOCKED": "Sua conta está impedida de publicar na comunidade."
     }
   },
   "catalog": {
     "title": "Catálogo",
     "description": {
       "member": "Prévias gratuitas, cursos compartilhados e os cursos das suas turmas.",
-      "guest": "Prévias gratuitas. Entre para ver mais."
+      "guest": "Prévias gratuitas. Entre para ver mais.",
+      "signedIn": "Prévias grátis. Membros também veem cursos compartilhados e suas turmas."
     },
     "signInToSee": "Entre para ver os cursos compartilhados e entrar em uma turma.",
     "join": {
       "title": "Entrar em uma turma",
       "code": "Código de entrada",
       "submit": "Entrar",
-      "done": "Você entrou em {{name}}."
+      "done": "Você entrou em {{name}}.",
+      "description": "Digite o código que você recebeu para entrar em uma turma."
     },
     "empty": "Nada para explorar ainda.",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "Sua turma"
     },
     "open": "Abrir",
-    "unavailable": "O catálogo não está disponível nesta instalação."
+    "unavailable": "O catálogo não está disponível nesta instalação.",
+    "back": "Voltar ao catálogo",
+    "membersOnly": "Cursos compartilhados e turmas são para membros."
   },
   "courseShare": {
     "request": "Compartilhar com os membros",
-    "pending": "Aguardando aprovação",
     "stop": "Parar de compartilhar",
     "requested": "Pedido enviado. Um operador vai analisá-lo.",
     "withdrawn": "Compartilhamento interrompido. Quem já tem o curso mantém a cópia.",
-    "failed": "Não foi possível compartilhar o curso. Tente novamente."
+    "failed": "Não foi possível compartilhar o curso. Tente novamente.",
+    "rejected": "Seu pedido de compartilhamento foi recusado.",
+    "rejectedWithReason": "Seu pedido de compartilhamento foi recusado: {{reason}}",
+    "requestWithdrawn": "Pedido de compartilhamento retirado.",
+    "menu": "Compartilhar com membros",
+    "packing": "Empacotando o curso…",
+    "updateSent": "Atualização enviada. Os leitores veem a versão atual até a aprovação.",
+    "updatePending": "Uma atualização aguarda revisão. Os leitores veem a versão aprovada.",
+    "updateRejected": "A atualização foi recusada: {{reason}}",
+    "sharedStatus": "Compartilhado com membros.",
+    "pendingStatus": "Aguardando revisão de um operador.",
+    "privateStatus": "Ainda não compartilhado.",
+    "update": "Atualizar a versão compartilhada",
+    "resend": "Enviar a versão mais recente de novo",
+    "withdraw": "Retirar o pedido",
+    "reviewNote": "O curso é enviado exatamente como você o vê agora (com edições e mídia). Cada versão precisa da aprovação de um operador."
+  },
+  "support": {
+    "title": "Falar com o administrador",
+    "description": "Envie uma pergunta ou pedido à equipe de operação. As respostas aparecem aqui.",
+    "contact": "Falar com o administrador",
+    "panelTitle": "Caixa de suporte",
+    "panelDescription": "Perguntas e pedidos dos alunos. Os que aguardam resposta aparecem primeiro.",
+    "new": "Novo pedido",
+    "subject": "Assunto",
+    "body": "Mensagem",
+    "username": "Enviar para (usuário)",
+    "send": "Enviar",
+    "reply": "Responder",
+    "replyPlaceholder": "Escreva uma resposta…",
+    "close": "Marcar como resolvido",
+    "reopen": "Reabrir",
+    "empty": "Nenhum pedido ainda.",
+    "pick": "Escolha um pedido para ler.",
+    "staff": "Equipe de operação",
+    "waiting": "Aguardando",
+    "unread": "Novo",
+    "unreadCount": "{{count}} novas respostas",
+    "sent": "Enviado.",
+    "state": {
+      "open": "Aberto",
+      "closed": "Resolvido"
+    },
+    "filter": {
+      "label": "Filtrar por estado"
+    },
+    "subjects": {
+      "renew": "Renovar minha assinatura",
+      "resume": "Retomar minha assinatura",
+      "quota": "Aumentar meu limite de IA"
+    }
+  },
+  "community": {
+    "title": "Comunidade",
+    "description": "Perguntas que os alunos fazem direto no slide, respondidas pelo assistente de IA e por outros membros.",
+    "signIn": "Entre para ver a comunidade.",
+    "empty": "Nenhuma pergunta ainda.",
+    "answer": "Responder",
+    "answerPlaceholder": "Escreva sua resposta… (Markdown e fórmulas como $x^2$ funcionam)",
+    "answers": "{{count}} respostas",
+    "answerCount": "{{count}} respostas",
+    "vote": "Útil ({{count}})",
+    "best": "Melhor",
+    "bestMarked": "Melhor resposta escolhida.",
+    "bestRewarded": "Escolhida. {{name}} ganhou {{tokens}} tokens de recompensa.",
+    "solved": "Resolvida",
+    "locked": "Bloqueada",
+    "lockedHint": "Esta pergunta está bloqueada e não aceita novas respostas.",
+    "hidden": "Oculto",
+    "markBest": "Marcar como melhor",
+    "openSlide": "Abrir o slide",
+    "ai": {
+      "name": "Assistente de IA",
+      "writing": "O assistente de IA está escrevendo uma resposta…",
+      "retry": "Pedir à IA de novo"
+    },
+    "ask": {
+      "button": "Fazer uma pergunta",
+      "title": "Pergunta",
+      "titlePlaceholder": "O que não ficou claro?",
+      "body": "Detalhes (opcional)",
+      "bodyPlaceholder": "O que você tentou, onde travou…",
+      "submit": "Publicar pergunta",
+      "onScene": "A pergunta ficará presa ao slide “{{scene}}”.",
+      "onCourse": "A pergunta ficará presa ao curso inteiro.",
+      "aiNote": "O assistente de IA responde na hora; outros membros podem complementar."
+    },
+    "join": {
+      "title": "Participe da discussão",
+      "body": "Membros fazem perguntas, recebem resposta imediata do assistente de IA, ajudam os outros e ganham tokens de recompensa quando sua resposta é escolhida como a melhor.",
+      "cta": "Tornar-se membro"
+    },
+    "report": {
+      "action": "Denunciar",
+      "title": "Denunciar conteúdo",
+      "description": "Diga à equipe de operação por que isto não deveria estar aqui.",
+      "reason": "Motivo",
+      "send": "Enviar denúncia",
+      "done": "Denúncia enviada. Obrigado."
+    },
+    "mod": {
+      "hide": "Ocultar",
+      "show": "Mostrar",
+      "hidden": "Conteúdo ocultado.",
+      "shown": "Conteúdo exibido de novo.",
+      "lock": "Bloquear",
+      "unlock": "Desbloquear",
+      "ban": "Impedir publicações",
+      "banned": "{{name}} não pode mais publicar.",
+      "unban": "Liberar",
+      "unbanned": "{{name}} pode publicar de novo."
+    },
+    "scene": {
+      "button": "Discussão neste slide",
+      "title": "Discussão",
+      "thisSlide": "Este slide",
+      "wholeCourse": "Curso inteiro",
+      "scope": "Escopo",
+      "pick": "Escolha uma pergunta para ler ou faça uma nova."
+    },
+    "feed": {
+      "all": "Todas",
+      "unsolved": "Sem solução",
+      "mine": "Minhas",
+      "filter": "Filtrar perguntas",
+      "search": "Buscar perguntas",
+      "pick": "Escolha uma pergunta para ver as respostas.",
+      "howToAsk": "Quer perguntar? Abra uma aula, vá ao slide em que travou e toque no botão Discussão na barra de ferramentas."
+    },
+    "reports": {
+      "title": "Denúncias da comunidade",
+      "description": "Perguntas e respostas denunciadas. Oculte o que viola as regras, descarte denúncias erradas ou impeça o autor de publicar.",
+      "empty": "Nenhuma denúncia pendente.",
+      "count": "{{count}} denúncias",
+      "reasons": "Motivos",
+      "open": "Abrir",
+      "dismiss": "Descartar",
+      "dismissed": "Denúncia descartada.",
+      "banned": "Contas impedidas de publicar",
+      "kind": {
+        "question": "Pergunta",
+        "answer": "Resposta"
+      }
+    },
+    "tabs": {
+      "questions": "Perguntas",
+      "challenges": "Desafios da semana"
+    }
+  },
+  "challenge": {
+    "none": "Nenhum desafio ainda.",
+    "pick": "Escolha um desafio para ver.",
+    "entries": "{{count}} envios",
+    "phase": {
+      "upcoming": "Em breve",
+      "open": "Recebendo soluções",
+      "voting": "Em votação",
+      "finished": "Encerrado"
+    },
+    "when": {
+      "upcoming": "Abre em {{date}}",
+      "open": "Envios até {{date}}",
+      "voting": "Votação até {{date}}",
+      "finished": "Encerrado em {{date}}"
+    },
+    "prize": "{{rank}}º lugar: {{tokens}} tokens",
+    "prizeBadge": "+ o selo Campeão da Semana",
+    "rank": "{{rank}}º lugar",
+    "yours": "Sua",
+    "aiScore": "Nota da IA {{score}}/10",
+    "aiFeedback": "Comentário da IA (só você vê)",
+    "reward": "+{{tokens}} tokens",
+    "vote": "Votar ({{count}})",
+    "voteHint": "Vote nas soluções que achar melhores. Você não pode votar na sua.",
+    "yourEntry": "Sua solução",
+    "editEntry": "Editar sua solução",
+    "entryPlaceholder": "Escreva sua solução… (Markdown e fórmulas como $x^2$ funcionam)",
+    "gradeNote": "O assistente de IA avalia assim que você envia. Você pode editar e reenviar até o prazo; os outros membros só veem depois dele.",
+    "grading": "Enviando e avaliando…",
+    "submit": "Enviar solução",
+    "resubmit": "Reenviar",
+    "submitted": "Enviada. Sua nota e o comentário da IA estão abaixo.",
+    "notGraded": {
+      "quota": "Enviada, mas sem nota: o limite de IA deste mês acabou.",
+      "failed": "Enviada, mas a IA não conseguiu avaliar. Reenvie para tentar de novo."
+    },
+    "showReference": "Ver a solução de referência",
+    "hideReference": "Ocultar a solução de referência",
+    "results": "Resultados",
+    "allEntries": "Soluções",
+    "noEntries": "Nenhum envio.",
+    "leaderboard": {
+      "title": "Ranking do mês",
+      "empty": "Ninguém pontuou neste mês ainda.",
+      "points": "{{count}} pontos",
+      "rule": "1 ponto por envio, mais 3 / 2 / 1 para 1º / 2º / 3º lugar."
+    },
+    "admin": {
+      "panelTitle": "Desafios da semana",
+      "panelDescription": "Defina o problema, os prazos de envio e votação e as recompensas de cada desafio. Os resultados saem automaticamente ao fim da votação.",
+      "create": "Novo desafio",
+      "edit": "Editar desafio",
+      "saved": "Desafio salvo.",
+      "title": "Título",
+      "statement": "Problema",
+      "markdownHint": "Markdown e fórmulas $...$",
+      "reference": "Solução de referência (oculta até a votação)",
+      "referenceHint": "Usada na avaliação da IA; os alunos veem quando a votação começa.",
+      "opensAt": "Abre em",
+      "submissionDays": "Dias para envios",
+      "votingDays": "Dias para votação",
+      "rewards": "Tokens de recompensa para o top 3",
+      "rewardsHint": "Mantenha valores pequenos. As recompensas contam no limite mensal de cada pessoa.",
+      "hidden": "Ocultar este desafio"
+    },
+    "settings": {
+      "title": "Desafios da semana: avaliação por IA",
+      "description": "Cada envio recebe uma avaliação da IA. Escolha quem paga os tokens dela.",
+      "paidBy": "Quem paga a avaliação por IA",
+      "submitter": "O limite de quem envia",
+      "submitterHint": "Alunos sem limite restante ainda enviam, só que sem nota da IA.",
+      "system": "O sistema",
+      "systemHint": "Não usa o limite do aluno; entra no orçamento de operação.",
+      "adminOnly": "Só um administrador pode mudar esta configuração.",
+      "saved": "Configuração salva."
+    }
+  },
+  "remix": {
+    "menu": "Remix",
+    "action": "Fazer remix deste curso",
+    "creating": "Criando seu remix…",
+    "created": "Seu remix está pronto.",
+    "note": "Cria uma cópia sua para editar e compartilhar de novo. O autor original recebe crédito e parte da recompensa quando seu remix é lido.",
+    "of": "Remix de “{{title}}” por {{author}}",
+    "list": "{{count}} remixes",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "É preciso ser membro para fazer remix.",
+      "FORBIDDEN": "Este curso não pode receber remix.",
+      "OWN_COURSE": "Este curso é seu.",
+      "RATE_LIMITED": "Você atingiu o limite de remixes de hoje."
+    },
+    "settings": {
+      "title": "Remixes de cursos",
+      "description": "A parte do autor original nas recompensas de leitura e quantos remixes cada membro pode fazer por dia.",
+      "royaltyPercent": "Parte do autor original (%)",
+      "dailyLimit": "Remixes por dia"
+    }
+  },
+  "nav": {
+    "home": "Início",
+    "main": "Navegação principal"
   }
 }

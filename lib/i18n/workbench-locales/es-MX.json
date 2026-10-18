@@ -90,8 +90,15 @@
       "style-clone": "Clonar estilo del deck",
       "teacher-style-clone": "Estilo del docente",
       "vocational": "Formación profesional",
-      "workshop-style": "Taller interactivo"
-    }
+      "workshop-style": "Taller interactivo",
+      "fact-check": "Verificación de datos",
+      "feynman-learning": "Aprendizaje Feynman",
+      "learning-to-learn": "Aprender a aprender",
+      "social-emotional-learning": "Aprendizaje socioemocional (SEL)",
+      "spiral-curriculum": "Currículo en espiral",
+      "understanding-by-design": "Diseño inverso (UbD)"
+    },
+    "contentLoadFailed": "No se pudo cargar todo el contenido de la Skill"
   },
   "thinking": {
     "active": "Pensando…",

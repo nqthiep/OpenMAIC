@@ -90,8 +90,15 @@
       "style-clone": "デッキ模写",
       "teacher-style-clone": "講師スタイル",
       "vocational": "職業訓練",
-      "workshop-style": "ワークショップ"
-    }
+      "workshop-style": "ワークショップ",
+      "fact-check": "ファクトチェック",
+      "feynman-learning": "ファインマン学習法",
+      "learning-to-learn": "学び方を学ぶ",
+      "social-emotional-learning": "社会性と情動の学習（SEL）",
+      "spiral-curriculum": "スパイラル・カリキュラム設計",
+      "understanding-by-design": "逆向き設計（UbD）"
+    },
+    "contentLoadFailed": "Skill の全内容を読み込めませんでした"
   },
   "thinking": {
     "active": "思考中…",

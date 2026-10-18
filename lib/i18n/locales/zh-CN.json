@@ -10,8 +10,190 @@
     "close": "关闭"
   },
   "home": {
-    "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
-    "greetingWithName": "嗨，{{name}}"
+    "slogan": "把知识学扎实 · 稳步迈向考试",
+    "greetingWithName": "嗨，{{name}}",
+    "guest": {
+      "kicker": "AI 是你的学习伙伴",
+      "title": "按自己的节奏学习，有 AI 在一旁协助",
+      "description": "课程、课件和讨论在 AI 的协助下准备，并在分享前由人工审核。你可以先免费试看，无需账号。",
+      "signIn": "登录",
+      "browseCatalog": "浏览课程",
+      "stepsTitle": "使用方法",
+      "step1": {
+        "title": "免费试看",
+        "body": "打开管理员选定的课程，无需账号。"
+      },
+      "step2": {
+        "title": "登录",
+        "body": "使用分配给你的账号登录。访客可以试看，但不能创建课程。",
+        "titleOpen": "登录或注册账号",
+        "bodyOpen": "免费注册账号或直接登录。成为会员之前，你可以试看，但还不能创建课程。"
+      },
+      "step3": {
+        "title": "成为会员",
+        "body": "会员可以用 AI 创建课程、加入班级，并分享自己的作品。"
+      },
+      "previewsTitle": "免费试看",
+      "previewsEmpty": "暂无试看课程，请稍后再来。",
+      "membershipTitle": "成为会员",
+      "membershipBody": "会员每月有一份额度，可用 AI 创建课程，凭邀请码加入班级，并与其他会员分享课程。",
+      "nav": {
+        "features": "功能",
+        "how": "使用方法",
+        "previews": "试看课程",
+        "membership": "会员"
+      },
+      "chip1": "从多个角度讲解",
+      "chip2": "课件与白板",
+      "chip3": "测验与项目",
+      "mock": {
+        "title": "生活中的分数",
+        "live": "直播中",
+        "teacher": "我们把一个披萨平均切成四块吧。",
+        "student": "如果切得不一样大呢？"
+      },
+      "features": {
+        "title": "为帮助你理解而设计",
+        "subtitle": "AI 负责讲解、讨论并检查你的理解，就像和一群有耐心的同学一起学习，而学什么由你决定。",
+        "f1": {
+          "title": "每节课都有学习小组",
+          "body": "老师、同学和助教都由 AI 扮演，一起参与，让每个知识点从多个角度讲清楚。"
+        },
+        "f2": {
+          "title": "课件与白板",
+          "body": "每节课都配有课件、实时白板和直观讲解。"
+        },
+        "f3": {
+          "title": "测验与项目",
+          "body": "用测验检查学习效果，再通过项目式任务动手练习。"
+        },
+        "f4": {
+          "title": "语音讲解",
+          "body": "场景可以朗读出来，你也可以用语音回答。"
+        },
+        "f5": {
+          "title": "班级与分享",
+          "body": "凭邀请码加入班级；你的课程经管理员审核后，可以分享给其他会员。"
+        },
+        "f6": {
+          "title": "随身带走",
+          "body": "把课程导出为网页、PowerPoint 文件或视频。"
+        }
+      },
+      "previewsSubtitle": "现在就能打开这些课程，无需账号。",
+      "perks": {
+        "p1": "每月 AI 额度，可自行创建课程",
+        "p2": "凭邀请码加入班级",
+        "p3": "与其他会员分享你的课程",
+        "p4": "将课程导出为网页、PowerPoint 或视频"
+      },
+      "cta": {
+        "title": "想亲自看看吗？",
+        "body": "可以先试看一节免费课程，准备好了再登录。"
+      },
+      "footerTagline": "ÔN THI · 基于开源项目 OpenMAIC 构建",
+      "trust": {
+        "title": "谨慎地使用 AI",
+        "subtitle": "我们知道并非每个人都对 AI 放心。下面是我们努力赢得你信任的方式。",
+        "t1": {
+          "title": "学什么由你决定",
+          "body": "AI 只负责协助讲解和练习。学什么由你选择，也可以随时停下。"
+        },
+        "t2": {
+          "title": "分享前先审核",
+          "body": "课程经管理员审核后，其他会员才能看到。"
+        },
+        "t3": {
+          "title": "坦诚说明局限",
+          "body": "AI 可能出错。重要内容请向老师或可靠来源核实。"
+        },
+        "t4": {
+          "title": "先看再决定",
+          "body": "免费试看对所有人开放，无需账号，也没有任何义务。"
+        }
+      }
+    },
+    "locked": {
+      "membership": "用 AI 创建课程仅限会员。",
+      "classes": "加入班级仅限会员。",
+      "contactAdmin": "请让管理员把你加为会员。",
+      "quota": "本月 AI 额度已用完。",
+      "quotaReset": "{{date}} 起可再次创建课程。"
+    },
+    "quota": {
+      "label": "本月 AI 额度",
+      "used": "已使用 {{used}} / {{quota}} 个 token"
+    },
+    "classes": {
+      "mine": "我的班级"
+    },
+    "status": {
+      "ok": "会员有效期至 {{date}} · 剩余 {{days}} 天",
+      "expiring": "你的会员将于 {{date}} 到期（剩余 {{days}} 天）。请让管理员为你续期。",
+      "quotaNear": "本月 AI 额度已使用 {{percent}}%。",
+      "quotaOut": "本月 AI 额度已用完。你的课程仍可继续学习。",
+      "expired": "你的会员已于 {{date}} 到期。你的课程仍可阅读。请让管理员续期后再创建新课程。",
+      "suspended": "你的会员已暂停。你的课程仍可阅读。请让管理员恢复。"
+    },
+    "continue": {
+      "title": "继续学习",
+      "progress": "场景 {{current}} / {{total}}",
+      "button": "继续"
+    },
+    "myClasses": {
+      "members": "成员：{{count}}",
+      "noCourses": "这个班级还没有课程。",
+      "untitled": "课程 {{number}}"
+    },
+    "starter": {
+      "title": "不知道从哪里开始？试试这些：",
+      "one": "用通俗的方式一步步讲解[主题]",
+      "two": "为[主题]制定一周复习计划",
+      "three": "出几道[主题]的练习题并附详细解答"
+    },
+    "access": {
+      "prompt": "请向管理员申请成为会员。",
+      "promptRenew": "请向管理员申请续期。",
+      "notePlaceholder": "简短留言（可选）：你是谁，为什么需要权限",
+      "button": "申请权限",
+      "renewButton": "申请续期",
+      "pending": "你的申请已于 {{date}} 发送，管理员会查看。",
+      "rejected": "你上一次的申请未被通过。{{date}} 起可以再次申请。",
+      "suspended": "管理员已暂停你的会员。请让他们恢复。",
+      "refusalReason": "理由：{{reason}}"
+    },
+    "contribution": {
+      "title": "我的贡献",
+      "shared": "已分享的课程",
+      "pending": "等待审核",
+      "readers": "读者",
+      "bonus": "本月奖励",
+      "bonusValue": "+{{tokens}} / {{cap}} 个 token",
+      "badges": "徽章",
+      "badge": {
+        "readers-10": "10 位读者",
+        "readers-100": "100 位读者",
+        "challenge-top3": "每周冠军"
+      },
+      "next": "再有 {{count}} 位读者即可获得“{{badge}}”徽章。",
+      "readersOf": "{{count}} 位读者",
+      "rejected": "已拒绝",
+      "rejectedWithReason": "已拒绝：{{reason}}"
+    },
+    "focus": {
+      "add": "添加你在学的科目",
+      "summary": "在学：{{focus}}",
+      "subjectPlaceholder": "科目，例如数学",
+      "levelPlaceholder": "年级或水平，例如高一",
+      "save": "保存"
+    },
+    "composer": {
+      "title": "今天你想学什么？"
+    },
+    "renew": {
+      "pending": "已于 {{date}} 申请续期。",
+      "rejected": "续期申请未通过，可从 {{date}} 起再次申请。"
+    }
   },
   "toolbar": {
     "pdfParser": "解析器",
@@ -44,7 +226,9 @@
     "ttsPreview": "试听",
     "ttsPreviewing": "播放中...",
     "interactiveModeHint": "开启深度交互模式，生成更多互动内容",
-    "interactiveModeLabel": "深度交互"
+    "interactiveModeLabel": "深度交互",
+    "advanced": "高级",
+    "advancedHint": "高级选项：模型、联网搜索、图片/视频、互动模式、智能体。默认情况下，ÔN THI 会按问题自动选择合适的模型，并配上插图和互动活动。"
   },
   "export": {
     "pptx": "导出 PPTX",
@@ -170,6 +354,24 @@
       "qa": "Q&A",
       "discussion": "讨论",
       "lecture": "授课"
+    },
+    "actionTag": {
+      "spotlight": "聚光灯",
+      "laser": "激光笔",
+      "play": "播放",
+      "open": "打开",
+      "close": "关闭",
+      "clear": "清空",
+      "delete": "删除",
+      "text": "文字",
+      "shape": "形状",
+      "chart": "图表",
+      "formula": "公式",
+      "table": "表格",
+      "line": "线条",
+      "code": "代码",
+      "editCode": "编辑代码",
+      "discuss": "讨论"
     }
   },
   "actions": {
@@ -406,7 +608,16 @@
       "sendBackward": "下移一层",
       "alignTop": "顶部对齐",
       "alignMiddle": "垂直居中",
-      "alignBottom": "底部对齐"
+      "alignBottom": "底部对齐",
+      "centerBoth": "水平垂直居中",
+      "setLink": "设置链接",
+      "ruler": "标尺",
+      "gridLines": "网格线",
+      "gridNone": "无",
+      "gridSmall": "小",
+      "gridMedium": "中",
+      "gridLarge": "大",
+      "resetPage": "重置当前页"
     },
     "background": {
       "label": "背景",
@@ -733,7 +944,13 @@
     "voiceInputDisabled": "语音输入已禁用",
     "textInput": "文字输入",
     "stopRecording": "停止录音",
-    "startRecording": "开始录音"
+    "startRecording": "开始录音",
+    "toggleSidebar": "显示或隐藏场景列表",
+    "toggleChat": "显示或隐藏对话",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "play": "播放",
+    "pause": "暂停"
   },
   "pbl": {
     "emptyProject": "PBL项目尚未生成，请通过课程生成创建",
@@ -951,7 +1168,8 @@
         },
         "durationMinutes": "{{m}} 分钟",
         "durationHours": "{{h}} 小时",
-        "durationHoursMinutes": "{{h}} 小时 {{m}} 分钟"
+        "durationHoursMinutes": "{{h}} 小时 {{m}} 分钟",
+        "stars": "星级"
       },
       "completionCard": {
         "title": "项目完成 · Completion",
@@ -1010,8 +1228,10 @@
     "deleteFolderConfirmRemove": "将删除文件夹及其课程（含聊天记录），不可恢复。",
     "deleteFolderAndCourses_other": "删除文件夹和 {{count}} 门课程",
     "notFound": "找不到这门课程",
-    "notFoundDesc": "课程不存在，或已被删除。",
-    "backToHome": "返回首页"
+    "notFoundDesc": "课程不存在、已被删除，或你没有查看权限。",
+    "backToHome": "返回首页",
+    "loadFailed": "存储不可用，无法加载已保存的课堂。",
+    "deleteFailed": "删除课堂失败"
   },
   "upload": {
     "pdfSizeLimit": "支持最大50MB的PDF文件",
@@ -1866,7 +2086,7 @@
       "download": "下载",
       "detailFailed": "技能详情加载失败",
       "contentLabel": "正文",
-      "builtinDetailNote": "该技能随 OpenMAIC 提供。下载后可导入其他智能体工作台。",
+      "builtinDetailNote": "该技能随 ÔN THI 提供。下载后可导入其他智能体工作台。",
       "upload": "上传",
       "uploading": "正在上传…",
       "uploadFailed": "技能上传失败。请检查文件后重试。",
@@ -2086,7 +2306,22 @@
         "roleFailed": "无法更改角色，请重试。"
       },
       "roleChanged": "角色已更新。",
-      "changeRoleLabel": "更改 {{username}} 的角色"
+      "changeRoleLabel": "更改 {{username}} 的角色",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "重置密码",
+      "resetPasswordLabel": "重置 {{username}} 的密码",
+      "resetTitle": "重置 {{username}} 的密码？",
+      "resetDescription": "该账户将获得一个临时密码，并在所有设备上登出。临时密码只显示一次：请交给用户并提醒其登录后修改。此操作会记入日志。",
+      "resetDone": "{{username}} 的临时密码。请立即复制，之后不会再显示。",
+      "resetCopy": "复制",
+      "resetCopied": "已复制临时密码。",
+      "resetClose": "完成"
     },
     "roles": {
       "learner": "学员",
@@ -2095,9 +2330,37 @@
     },
     "administration": "管理",
     "adminPage": {
-      "title": "管理",
+      "title": "运营",
       "description": "本部署的账户、用量与角色管理。",
-      "denied": "此页面仅供运营人员和管理员访问。"
+      "denied": "此页面仅供运营人员和管理员访问。",
+      "learn": "进入学习",
+      "summary": {
+        "activeMembers": "有效会员",
+        "pendingShares": "待审核的分享申请",
+        "classes": "班级",
+        "pendingAccessRequests": "待处理的权限申请"
+      },
+      "providers": {
+        "title": "服务器提供商",
+        "description": "只读。提供商在服务器配置中设置，不能在此修改。",
+        "empty": "服务器尚未配置任何提供商。"
+      },
+      "deniedSignIn": "请使用运营人员或管理员账户登录。"
+    },
+    "membership": {
+      "active": "会员有效期至 {{date}} · 每月 {{quota}} 个 token",
+      "none": "暂无有效会员资格"
+    },
+    "password": {
+      "title": "修改密码",
+      "description": "其他设备将被登出；本设备保持登录。",
+      "current": "当前密码",
+      "new": "新密码",
+      "confirm": "再次输入新密码",
+      "submit": "修改密码",
+      "changed": "密码已修改，其他设备已登出。",
+      "wrongCurrent": "当前密码不正确。",
+      "mismatch": "两次输入的新密码不一致。"
     }
   },
   "proMode": {
@@ -2149,7 +2412,25 @@
       "quotaValue": "每月 {{tokens}} 个 token",
       "grant": "授予或延长",
       "resume": "恢复",
-      "suspend": "暂停"
+      "suspend": "暂停",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "分享申请",
@@ -2159,7 +2440,24 @@
       "reject": "拒绝",
       "approved": "课程已分享给会员。",
       "rejected": "申请已拒绝。",
-      "requested": "申请于 {{date}}"
+      "requested": "申请于 {{date}}",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "更新"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "拒绝分享“{{title}}”？",
+      "rejectDescription": "课程所有者会看到申请被拒绝以及你填写的理由（如有），并可再次申请。",
+      "rejectReason": "理由（可选）",
+      "snapshot": "附带包：“{{name}}”，{{count}} 个场景，{{media}} 个媒体文件，{{size}}",
+      "remixOf": "改编自《{{title}}》"
     },
     "previews": {
       "title": "免费预览",
@@ -2167,7 +2465,10 @@
       "courseId": "课程 ID",
       "add": "标记为预览",
       "remove": "移除",
-      "empty": "还没有预览。"
+      "empty": "还没有预览。",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "班级",
@@ -2178,12 +2479,247 @@
       "empty": "还没有班级。",
       "members": "{{count}} 名会员",
       "courses": "{{count}} 门课程",
-      "attach": "添加课程"
+      "attach": "添加课程",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "新加入码",
+      "newCodeTitle": "为“{{name}}”生成新的加入码？",
+      "newCodeDescription": "当前加入码立即失效；已在班级中的成员不受影响。新加入码只显示一次，请立即复制。",
+      "membersOf": "{{name}} 的成员",
+      "membersDescription": "被移出的成员仍可用班级代码重新加入；如需阻止，请更换新代码。",
+      "noMembers": "还没有成员。",
+      "joined": "{{date}} 加入",
+      "removeMember": "移出",
+      "removeMemberTitle": "将 {{username}} 移出 {{name}}？",
+      "removeMemberDescription": "该成员将无法再打开本班级的课程。此操作会记入日志。",
+      "memberRemoved": "已将 {{username}} 移出班级。"
     },
     "audit": {
       "title": "审计日志",
       "description": "账号、会员、分享和班级的最近更改。",
-      "empty": "还没有记录。"
+      "empty": "还没有记录。",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "密码重置"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "加入码已更换",
+        "password_reset": "重置密码",
+        "community_ban": "禁止社区发帖",
+        "community_unban": "解除社区发帖禁止",
+        "class_remove": "移出成员",
+        "challenge_create": "创建挑战",
+        "challenge_update": "编辑挑战",
+        "settings_update": "修改设置",
+        "share_update-approve": "已批准分享更新",
+        "share_update-reject": "已拒绝分享更新"
+      }
+    },
+    "accessRequests": {
+      "title": "权限申请",
+      "description": "申请成为会员的人。通过后将授予 30 天和默认的每月额度，之后可在会员列表中调整。",
+      "empty": "没有待处理的申请。",
+      "requested": "申请于 {{date}}",
+      "approve": "通过",
+      "reject": "拒绝",
+      "approved": "{{name}} 已成为会员。",
+      "rejected": "已拒绝 {{name}} 的申请。",
+      "reasonPlaceholder": "理由（可选；学员可见，并记入日志）",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "{{count}} 个支持请求等待回复。",
+        "reportsOpen": "{{count}} 条社区举报待处理。"
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "课程",
+      "description": "系统中的所有课程。打开即可审阅，或复制 ID 用于设为试看或加入班级。",
+      "open": "在新标签页中打开课程",
+      "copy": "复制 ID {{id}}",
+      "copied": "已复制 {{id}}",
+      "owner": "所有者",
+      "anonymous": "未登录",
+      "updated": "更新时间",
+      "empty": "还没有课程。"
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "未找到。",
       "MEMBERSHIP_REQUIRED": "此操作需要有效的会员资格。",
       "QUOTA_EXCEEDED": "本月的 AI 额度已用完。",
-      "ACCOUNTS_NOT_CONFIGURED": "此部署未启用账号功能。"
+      "ACCOUNTS_NOT_CONFIGURED": "此部署未启用账号功能。",
+      "ALREADY_MEMBER": "你已经有有效的会员。",
+      "MEMBERSHIP_SUSPENDED": "你的会员已被管理员暂停。",
+      "REQUEST_PENDING": "已有一份申请在等待管理员处理。",
+      "REQUEST_TOO_SOON": "被拒绝的申请需要稍后才能再次提交。",
+      "COURSE_NOT_FOUND": "没有此 ID 的课程。请核对课程地址中的 ID（/classroom/<ID>）。",
+      "RATE_LIMITED": "你有太多未回复的请求。请先等待回复。",
+      "COMMUNITY_BLOCKED": "你的账号已被禁止在社区发帖。"
     }
   },
   "catalog": {
     "title": "课程目录",
     "description": {
       "member": "免费预览、分享课程，以及你所在班级的课程。",
-      "guest": "免费预览。登录后可查看更多。"
+      "guest": "免费预览。登录后可查看更多。",
+      "signedIn": "免费试看课程。会员还可查看共享课程和所在班级。"
     },
     "signInToSee": "登录后可查看分享课程并加入班级。",
     "join": {
       "title": "加入班级",
       "code": "加入代码",
       "submit": "加入",
-      "done": "你已加入 {{name}}。"
+      "done": "你已加入 {{name}}。",
+      "description": "输入你收到的邀请码即可加入班级。"
     },
     "empty": "暂时没有可浏览的内容。",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "你的班级"
     },
     "open": "打开",
-    "unavailable": "此部署不提供课程目录。"
+    "unavailable": "此部署不提供课程目录。",
+    "back": "返回课程目录",
+    "membersOnly": "共享课程和班级仅对会员开放。"
   },
   "courseShare": {
     "request": "与会员分享",
-    "pending": "等待批准",
     "stop": "停止分享",
     "requested": "申请已发送，运营人员将审核。",
     "withdrawn": "已停止分享。已经拥有此课程的学员仍保留其副本。",
-    "failed": "无法分享此课程，请重试。"
+    "failed": "无法分享此课程，请重试。",
+    "rejected": "分享申请被拒绝。",
+    "rejectedWithReason": "分享申请被拒绝：{{reason}}",
+    "requestWithdrawn": "已撤回分享申请。",
+    "menu": "与会员分享",
+    "packing": "正在打包课程…",
+    "updateSent": "已提交更新。批准前读者仍看到旧版本。",
+    "updatePending": "有一个更新等待审核。读者仍看到已批准的版本。",
+    "updateRejected": "更新被拒绝：{{reason}}",
+    "sharedStatus": "已与会员分享。",
+    "pendingStatus": "等待运营人员审核。",
+    "privateStatus": "尚未分享。",
+    "update": "更新分享版本",
+    "resend": "重新发送最新版本",
+    "withdraw": "撤回请求",
+    "reviewNote": "课程将按你现在看到的样子发送（包括修改和媒体）。每个版本都需要运营人员批准。"
+  },
+  "support": {
+    "title": "联系管理员",
+    "description": "向运营团队发送问题或请求。回复会显示在这里。",
+    "contact": "联系管理员",
+    "panelTitle": "支持收件箱",
+    "panelDescription": "学员的问题和请求。等待回复的排在最前。",
+    "new": "新请求",
+    "subject": "主题",
+    "body": "内容",
+    "username": "发送给（用户名）",
+    "send": "发送",
+    "reply": "回复",
+    "replyPlaceholder": "写回复…",
+    "close": "标记为已解决",
+    "reopen": "重新打开",
+    "empty": "还没有请求。",
+    "pick": "选择一个请求查看。",
+    "staff": "运营团队",
+    "waiting": "待回复",
+    "unread": "新",
+    "unreadCount": "{{count}} 条新回复",
+    "sent": "已发送。",
+    "state": {
+      "open": "进行中",
+      "closed": "已解决"
+    },
+    "filter": {
+      "label": "按状态筛选"
+    },
+    "subjects": {
+      "renew": "续订会员",
+      "resume": "恢复会员",
+      "quota": "提高 AI 额度"
+    }
+  },
+  "community": {
+    "title": "社区",
+    "description": "学员直接在幻灯片上提出的问题，由 AI 助教和其他会员解答。",
+    "signIn": "登录后查看社区。",
+    "empty": "还没有问题。",
+    "answer": "回答",
+    "answerPlaceholder": "写下你的回答…（支持 Markdown 和公式，如 $x^2$）",
+    "answers": "{{count}} 个回答",
+    "answerCount": "{{count}} 个回答",
+    "vote": "有用（{{count}}）",
+    "best": "最佳",
+    "bestMarked": "已选出最佳回答。",
+    "bestRewarded": "已选出。{{name}} 获得 {{tokens}} 奖励 token。",
+    "solved": "已解决",
+    "locked": "已锁定",
+    "lockedHint": "此问题已锁定，不再接受回答。",
+    "hidden": "已隐藏",
+    "markBest": "设为最佳",
+    "openSlide": "打开幻灯片",
+    "ai": {
+      "name": "AI 助教",
+      "writing": "AI 助教正在撰写回答…",
+      "retry": "再请 AI 回答"
+    },
+    "ask": {
+      "button": "提问",
+      "title": "问题",
+      "titlePlaceholder": "哪里不明白？",
+      "body": "详细说明（可选）",
+      "bodyPlaceholder": "你尝试过什么，卡在哪一步…",
+      "submit": "发布问题",
+      "onScene": "问题将固定在幻灯片“{{scene}}”。",
+      "onCourse": "问题将固定在整个课程。",
+      "aiNote": "AI 助教会立即回答，其他会员可以补充。"
+    },
+    "join": {
+      "title": "加入讨论",
+      "body": "会员可以提问、立即获得 AI 助教的解答、帮助他人，回答被选为最佳时还能获得奖励 token。",
+      "cta": "成为会员"
+    },
+    "report": {
+      "action": "举报",
+      "title": "举报内容",
+      "description": "告诉运营团队此内容为何不合适。",
+      "reason": "原因",
+      "send": "发送举报",
+      "done": "已发送举报，谢谢。"
+    },
+    "mod": {
+      "hide": "隐藏",
+      "show": "显示",
+      "hidden": "内容已隐藏。",
+      "shown": "内容已恢复显示。",
+      "lock": "锁定",
+      "unlock": "解锁",
+      "ban": "禁止发帖",
+      "banned": "{{name}} 已被禁止发帖。",
+      "unban": "解除禁止",
+      "unbanned": "{{name}} 可以再次发帖。"
+    },
+    "scene": {
+      "button": "本页讨论",
+      "title": "讨论",
+      "thisSlide": "本页",
+      "wholeCourse": "整个课程",
+      "scope": "范围",
+      "pick": "选择一个问题查看，或提出新问题。"
+    },
+    "feed": {
+      "all": "全部",
+      "unsolved": "未解决",
+      "mine": "我的",
+      "filter": "筛选问题",
+      "search": "搜索问题",
+      "pick": "选择一个问题查看回答。",
+      "howToAsk": "想提问？打开课程，进入卡住的幻灯片，点击工具栏中的讨论按钮。"
+    },
+    "reports": {
+      "title": "社区举报",
+      "description": "被举报的问题和回答。隐藏违规内容、忽略错误举报，或禁止作者发帖。",
+      "empty": "没有待处理的举报。",
+      "count": "{{count}} 次举报",
+      "reasons": "原因",
+      "open": "打开",
+      "dismiss": "忽略",
+      "dismissed": "已忽略举报。",
+      "banned": "被禁止发帖的账号",
+      "kind": {
+        "question": "问题",
+        "answer": "回答"
+      }
+    },
+    "tabs": {
+      "questions": "问答",
+      "challenges": "每周挑战"
+    }
+  },
+  "challenge": {
+    "none": "还没有挑战。",
+    "pick": "选择一个挑战查看。",
+    "entries": "{{count}} 份提交",
+    "phase": {
+      "upcoming": "即将开始",
+      "open": "接受提交中",
+      "voting": "投票中",
+      "finished": "已结束"
+    },
+    "when": {
+      "upcoming": "{{date}} 开始",
+      "open": "提交截止：{{date}}",
+      "voting": "投票截止：{{date}}",
+      "finished": "已于 {{date}} 结束"
+    },
+    "prize": "第 {{rank}} 名：{{tokens}} token",
+    "prizeBadge": "+ 每周冠军徽章",
+    "rank": "第 {{rank}} 名",
+    "yours": "你的",
+    "aiScore": "AI 评分 {{score}}/10",
+    "aiFeedback": "AI 评语（仅你可见）",
+    "reward": "+{{tokens}} token",
+    "vote": "投票（{{count}}）",
+    "voteHint": "为你认为最好的解答投票。不能给自己的解答投票。",
+    "yourEntry": "你的解答",
+    "editEntry": "修改解答",
+    "entryPlaceholder": "写下你的解答…（支持 Markdown 和公式，如 $x^2$）",
+    "gradeNote": "提交后 AI 助教立即初评。截止前可修改并重新提交；截止后其他会员才能看到。",
+    "grading": "正在提交并评分…",
+    "submit": "提交解答",
+    "resubmit": "重新提交",
+    "submitted": "已提交。AI 评分和评语见下方。",
+    "notGraded": {
+      "quota": "已提交，但本月 AI 额度已用完，未评分。",
+      "failed": "已提交，但 AI 暂时无法评分。可重新提交再试。"
+    },
+    "showReference": "查看参考答案",
+    "hideReference": "隐藏参考答案",
+    "results": "结果",
+    "allEntries": "所有解答",
+    "noEntries": "没有提交。",
+    "leaderboard": {
+      "title": "本月排行榜",
+      "empty": "本月还没有人得分。",
+      "points": "{{count}} 分",
+      "rule": "每次提交得 1 分，第 1 / 2 / 3 名另加 3 / 2 / 1 分。"
+    },
+    "admin": {
+      "panelTitle": "每周挑战",
+      "panelDescription": "为每个挑战设置题目、提交和投票时间以及奖励。投票结束后自动计算结果。",
+      "create": "新建挑战",
+      "edit": "编辑挑战",
+      "saved": "挑战已保存。",
+      "title": "标题",
+      "statement": "题目",
+      "markdownHint": "支持 Markdown 和 $...$ 公式",
+      "reference": "参考答案（投票前隐藏）",
+      "referenceHint": "用于 AI 初评；投票开始后学员才能看到。",
+      "opensAt": "开始时间",
+      "submissionDays": "提交天数",
+      "votingDays": "投票天数",
+      "rewards": "前三名 token 奖励",
+      "rewardsHint": "建议设小额。奖励仍计入每人每月的奖励上限。",
+      "hidden": "隐藏此挑战"
+    },
+    "settings": {
+      "title": "每周挑战：AI 评分",
+      "description": "每次提交都会有一次 AI 评分。选择由谁支付评分的 token。",
+      "paidBy": "AI 评分由谁付费",
+      "submitter": "计入提交者额度",
+      "submitterHint": "额度用完的学员仍可提交，只是没有 AI 评分。",
+      "system": "由系统支付",
+      "systemHint": "不占用学员额度，计入运营预算。",
+      "adminOnly": "只有管理员可以修改此设置。",
+      "saved": "设置已保存。"
+    }
+  },
+  "remix": {
+    "menu": "改编",
+    "action": "改编这门课程",
+    "creating": "正在创建你的改编版…",
+    "created": "你的改编版已创建。",
+    "note": "创建一份归你所有的副本，可编辑并再次分享。原作者会被署名，并在你的改编版被阅读时获得一部分奖励。",
+    "of": "改编自 {{author}} 的《{{title}}》",
+    "list": "{{count}} 个改编版",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "需要会员才能改编。",
+      "FORBIDDEN": "这门课程无法改编。",
+      "OWN_COURSE": "这是你自己的课程。",
+      "RATE_LIMITED": "你已达到今天的改编上限。"
+    },
+    "settings": {
+      "title": "课程改编",
+      "description": "原作者在阅读奖励中的分成，以及每位会员每天可改编的次数。",
+      "royaltyPercent": "原作者分成（%）",
+      "dailyLimit": "每天改编次数上限"
+    }
+  },
+  "nav": {
+    "home": "首页",
+    "main": "主导航"
   }
 }

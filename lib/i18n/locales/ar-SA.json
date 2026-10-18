@@ -10,8 +10,190 @@
     "close": "إغلاق"
   },
   "home": {
-    "slogan": "التعلّم التوليدي في فصل تفاعلي متعدد الوكلاء",
-    "greetingWithName": "مرحبًا، {{name}}"
+    "slogan": "افهم جيدًا · وادخل الاختبار بثقة",
+    "greetingWithName": "مرحبًا، {{name}}",
+    "guest": {
+      "kicker": "الذكاء الاصطناعي رفيقك في التعلم",
+      "title": "تعلّم بإيقاعك، ومعك الذكاء الاصطناعي للمساعدة",
+      "description": "تُعدّ الدروس والشرائح والنقاشات بمساعدة الذكاء الاصطناعي، ويراجعها أشخاص قبل مشاركتها. تصفّح المعاينات المجانية أولًا دون الحاجة إلى حساب.",
+      "signIn": "تسجيل الدخول",
+      "browseCatalog": "تصفح الدورات",
+      "stepsTitle": "كيف يعمل",
+      "step1": {
+        "title": "معاينة مجانية",
+        "body": "افتح الدورات التي يختارها المسؤول دون حساب."
+      },
+      "step2": {
+        "title": "تسجيل الدخول",
+        "body": "سجّل الدخول بالحساب المخصص لك. يستطيع الزوار التصفح لكن لا يمكنهم إنشاء الدورات.",
+        "titleOpen": "سجّل الدخول أو أنشئ حسابًا",
+        "bodyOpen": "أنشئ حسابًا مجانيًا أو سجّل الدخول. إلى أن تصبح عضوًا يمكنك التصفح، لكن لا يمكنك إنشاء دورات بعد."
+      },
+      "step3": {
+        "title": "كن عضوًا",
+        "body": "يستطيع الأعضاء إنشاء الدورات بالذكاء الاصطناعي، والانضمام إلى الصفوف، ومشاركة ما صنعوه."
+      },
+      "previewsTitle": "المعاينات المجانية",
+      "previewsEmpty": "لا توجد معاينات بعد. عُد لاحقًا.",
+      "membershipTitle": "كن عضوًا",
+      "membershipBody": "يحصل الأعضاء على حصة شهرية لإنشاء الدورات بالذكاء الاصطناعي، ويمكنهم الانضمام إلى الصفوف برمز دعوة ومشاركة الدورات مع الأعضاء الآخرين.",
+      "nav": {
+        "features": "الميزات",
+        "how": "كيف يعمل",
+        "previews": "المعاينات",
+        "membership": "العضوية"
+      },
+      "chip1": "شرح من زوايا متعددة",
+      "chip2": "شرائح وسبورة",
+      "chip3": "اختبارات ومشاريع",
+      "mock": {
+        "title": "الكسور في الحياة اليومية",
+        "live": "مباشر",
+        "teacher": "لنقسّم البيتزا إلى أربع شرائح متساوية.",
+        "student": "ماذا لو لم تكن الشرائح متساوية؟"
+      },
+      "features": {
+        "title": "صُمّم ليساعدك على الفهم",
+        "subtitle": "يشرح الذكاء الاصطناعي ويناقش ويتحقق من فهمك، كأنك تدرس مع مجموعة صبورة، وأنت من يقرر ما تتعلمه.",
+        "f1": {
+          "title": "مجموعة دراسة في كل درس",
+          "body": "المعلم والزملاء والمساعد، وجميعهم من أداء الذكاء الاصطناعي، يشاركون لتُشرح كل فكرة من أكثر من زاوية."
+        },
+        "f2": {
+          "title": "شرائح وسبورة",
+          "body": "يأتي كل درس مع شرائح وسبورة مباشرة وشروحات مرئية."
+        },
+        "f3": {
+          "title": "اختبارات ومشاريع",
+          "body": "اختبر ما تعلمته بالاختبارات ثم تدرّب في مهام قائمة على المشاريع."
+        },
+        "f4": {
+          "title": "قراءة صوتية",
+          "body": "يمكن قراءة المشاهد بصوت عالٍ، ويمكنك الإجابة بصوتك."
+        },
+        "f5": {
+          "title": "الصفوف والمشاركة",
+          "body": "انضم إلى صف برمز دعوة، وشارك دوراتك مع الأعضاء الآخرين بعد موافقة المسؤول عليها."
+        },
+        "f6": {
+          "title": "خذها معك",
+          "body": "صدّر الدورة كصفحة ويب أو ملف PowerPoint أو فيديو."
+        }
+      },
+      "previewsSubtitle": "افتح هذه الدورات الآن دون الحاجة إلى حساب.",
+      "perks": {
+        "p1": "حصة شهرية من الذكاء الاصطناعي لإنشاء دوراتك",
+        "p2": "الانضمام إلى الصفوف برمز دعوة",
+        "p3": "مشاركة دوراتك مع الأعضاء الآخرين",
+        "p4": "تصدير الدورات كصفحة ويب أو PowerPoint أو فيديو"
+      },
+      "cta": {
+        "title": "هل تريد أن ترى بنفسك؟",
+        "body": "افتح معاينة مجانية أولًا، أو سجّل الدخول متى كنت جاهزًا."
+      },
+      "footerTagline": "ÔN THI · مبني على مشروع OpenMAIC مفتوح المصدر",
+      "trust": {
+        "title": "استخدام الذكاء الاصطناعي بحرص",
+        "subtitle": "ندرك أن كثيرين لا يثقون بالذكاء الاصطناعي بعد. هكذا نحاول أن نكسب ثقتك.",
+        "t1": {
+          "title": "القرار لك",
+          "body": "يساعد الذكاء الاصطناعي في الشرح والتدرّب فقط. أنت تختار ما تتعلمه، ويمكنك التوقف في أي وقت."
+        },
+        "t2": {
+          "title": "مراجعة قبل المشاركة",
+          "body": "يراجع المسؤول الدورة قبل أن يراها الأعضاء الآخرون."
+        },
+        "t3": {
+          "title": "صراحة بشأن الحدود",
+          "body": "قد يخطئ الذكاء الاصطناعي. للأمور المهمة، تحقق من معلمك أو من مصدر موثوق."
+        },
+        "t4": {
+          "title": "انظر قبل أن تلتزم",
+          "body": "المعاينات المجانية متاحة للجميع، دون حساب ودون أي التزام."
+        }
+      }
+    },
+    "locked": {
+      "membership": "إنشاء الدورات بالذكاء الاصطناعي متاح للأعضاء.",
+      "classes": "الانضمام إلى الصفوف متاح للأعضاء.",
+      "contactAdmin": "اطلب من المسؤول إضافتك كعضو.",
+      "quota": "انتهت حصة الذكاء الاصطناعي لهذا الشهر.",
+      "quotaReset": "يمكنك إنشاء الدورات مرة أخرى بدءًا من {{date}}."
+    },
+    "quota": {
+      "label": "حصة الذكاء الاصطناعي لهذا الشهر",
+      "used": "تم استخدام {{used}} من {{quota}} رمزًا"
+    },
+    "classes": {
+      "mine": "صفوفي"
+    },
+    "status": {
+      "ok": "العضوية حتى {{date}} · الأيام المتبقية: {{days}}",
+      "expiring": "تنتهي عضويتك في {{date}} (الأيام المتبقية: {{days}}). اطلب من المسؤول تجديدها.",
+      "quotaNear": "استخدمت {{percent}}٪ من حصة الذكاء الاصطناعي لهذا الشهر.",
+      "quotaOut": "انتهت حصة الذكاء الاصطناعي لهذا الشهر. تبقى دوراتك متاحة للدراسة.",
+      "expired": "انتهت عضويتك في {{date}}. تبقى دوراتك متاحة للقراءة. اطلب من المسؤول تجديدها لإنشاء دورات جديدة.",
+      "suspended": "عضويتك متوقفة مؤقتًا. تبقى دوراتك متاحة للقراءة. اطلب من المسؤول إعادة تفعيلها."
+    },
+    "continue": {
+      "title": "متابعة التعلّم",
+      "progress": "المشهد {{current}} من {{total}}",
+      "button": "متابعة"
+    },
+    "myClasses": {
+      "members": "الأعضاء: {{count}}",
+      "noCourses": "لا توجد دورات مرتبطة بهذا الصف بعد.",
+      "untitled": "الدورة {{number}}"
+    },
+    "starter": {
+      "title": "لا تعرف من أين تبدأ؟ جرّب إحدى هذه الأفكار:",
+      "one": "اشرح [الموضوع] لمبتدئ خطوة بخطوة",
+      "two": "ضع خطة مراجعة لمدة أسبوع في [الموضوع]",
+      "three": "اكتب أسئلة تدريبية عن [الموضوع] مع حلول مفصلة"
+    },
+    "access": {
+      "prompt": "اطلب من المسؤول إضافتك كعضو.",
+      "promptRenew": "اطلب من المسؤول تجديد عضويتك.",
+      "notePlaceholder": "ملاحظة قصيرة (اختياري): من أنت ولماذا تحتاج إلى الوصول",
+      "button": "طلب الوصول",
+      "renewButton": "طلب التجديد",
+      "pending": "أُرسل طلبك في {{date}}. سيراجعه أحد المسؤولين.",
+      "rejected": "لم يُقبل طلبك الأخير. يمكنك الطلب مجددًا ابتداءً من {{date}}.",
+      "suspended": "أوقف أحد المسؤولين عضويتك مؤقتًا. اطلب منه إعادة تفعيلها.",
+      "refusalReason": "السبب: {{reason}}"
+    },
+    "contribution": {
+      "title": "مساهمتي",
+      "shared": "الدورات المشتركة",
+      "pending": "بانتظار المراجعة",
+      "readers": "القرّاء",
+      "bonus": "مكافأة هذا الشهر",
+      "bonusValue": "+{{tokens}} من {{cap}} رمز",
+      "badges": "الأوسمة",
+      "badge": {
+        "readers-10": "10 قرّاء",
+        "readers-100": "100 قارئ",
+        "challenge-top3": "بطل الأسبوع"
+      },
+      "next": "بقي {{count}} من القرّاء للحصول على وسام «{{badge}}».",
+      "readersOf": "{{count}} من القرّاء",
+      "rejected": "مرفوض",
+      "rejectedWithReason": "مرفوض: {{reason}}"
+    },
+    "focus": {
+      "add": "أضف ما تدرسه",
+      "summary": "تدرس: {{focus}}",
+      "subjectPlaceholder": "المادة، مثل الرياضيات",
+      "levelPlaceholder": "المستوى، مثل الصف العاشر",
+      "save": "حفظ"
+    },
+    "composer": {
+      "title": "ماذا تريد أن تتعلم اليوم؟"
+    },
+    "renew": {
+      "pending": "تم طلب التجديد في {{date}}.",
+      "rejected": "لم يُقبل طلب التجديد. يمكنك الطلب مجددًا من {{date}}."
+    }
   },
   "toolbar": {
     "pdfParser": "محلل PDF",
@@ -44,7 +226,9 @@
     "ttsTitle": "تحويل النص إلى كلام",
     "ttsHint": "اختر صوتًا للمعلم الذكي",
     "ttsPreview": "معاينة",
-    "ttsPreviewing": "جارٍ التشغيل..."
+    "ttsPreviewing": "جارٍ التشغيل...",
+    "advanced": "خيارات متقدمة",
+    "advancedHint": "خيارات متقدمة: النموذج، البحث على الويب، الصور/الفيديو، الوضع التفاعلي، الوكلاء. افتراضيًا يختار ÔN THI النموذج المناسب لطلبك ويضيف رسومًا توضيحية وأنشطة تفاعلية."
   },
   "export": {
     "pptx": "تصدير PPTX",
@@ -170,6 +354,24 @@
       "qa": "أسئلة",
       "discussion": "نقاش",
       "lecture": "محاضرة"
+    },
+    "actionTag": {
+      "spotlight": "تسليط الضوء",
+      "laser": "الليزر",
+      "play": "تشغيل",
+      "open": "فتح",
+      "close": "إغلاق",
+      "clear": "مسح",
+      "delete": "حذف",
+      "text": "نص",
+      "shape": "شكل",
+      "chart": "مخطط",
+      "formula": "صيغة",
+      "table": "جدول",
+      "line": "خط",
+      "code": "شيفرة",
+      "editCode": "تعديل الشيفرة",
+      "discuss": "نقاش"
     }
   },
   "actions": {
@@ -406,7 +608,16 @@
       "sendBackward": "إرسال إلى الخلف",
       "alignTop": "محاذاة للأعلى",
       "alignMiddle": "محاذاة للوسط",
-      "alignBottom": "محاذاة للأسفل"
+      "alignBottom": "محاذاة للأسفل",
+      "centerBoth": "توسيط في الشريحة",
+      "setLink": "تعيين رابط",
+      "ruler": "المسطرة",
+      "gridLines": "خطوط الشبكة",
+      "gridNone": "بلا",
+      "gridSmall": "صغيرة",
+      "gridMedium": "متوسطة",
+      "gridLarge": "كبيرة",
+      "resetPage": "مسح هذه الصفحة"
     },
     "background": {
       "label": "الخلفية",
@@ -487,18 +698,18 @@
       "placeholder": "صف تغييراتك على هذه الشريحة…",
       "stop": "إيقاف التوليد",
       "empty": {
-        "lead": "Tell me how to change this slide — I'll redo the content and re-align the narration.",
-        "boundary": "For fine-grained edits use the editor; add / delete / reorder slides from the left nav.",
-        "comingSoon": "More capabilities coming soon."
+        "lead": "أخبرني كيف أغيّر هذه الشريحة — سأعيد كتابة المحتوى وأعيد مواءمة السرد.",
+        "boundary": "للتعديلات الدقيقة استخدم المحرّر؛ أضف الشرائح أو احذفها أو أعد ترتيبها من التنقل الأيسر.",
+        "comingSoon": "المزيد من القدرات قريبًا."
       },
       "cap": {
         "content": {
-          "label": "Regenerate the slide",
-          "examples": "“Condense to 3 points”, “Add a real-world example”"
+          "label": "إعادة توليد الشريحة",
+          "examples": "“اختصرها إلى 3 نقاط”، “أضف مثالًا من الواقع”"
         },
         "narration": {
-          "label": "Regenerate the narration script",
-          "examples": "“Make it more conversational”, “Align with my canvas edits”"
+          "label": "إعادة توليد نص السرد",
+          "examples": "“اجعله أكثر حوارية”، “وائمه مع تعديلاتي على اللوحة”"
         },
         "fixHtml": {
           "examples": "«زر البدء لا يفعل شيئًا»، «تتداخل اللوحات على الجوال»",
@@ -509,7 +720,7 @@
           "examples": "«اجعل العنوان أزرق وحرّكه للأعلى»، «صغّر هذا الشكل»"
         }
       },
-      "newConversation": "New conversation",
+      "newConversation": "محادثة جديدة",
       "sessionHistory": "السجل",
       "sessionUntitled": "محادثة بلا عنوان",
       "sessionDelete": "حذف",
@@ -602,10 +813,10 @@
       "resume": "إعادة"
     },
     "readCard": {
-      "title": "Read slide content",
-      "reading": "Reading",
-      "done": "Read",
-      "failed": "Not read"
+      "title": "قراءة محتوى الشريحة",
+      "reading": "جارٍ القراءة",
+      "done": "تمت القراءة",
+      "failed": "لم تتم القراءة"
     },
     "fixHtml": {
       "editsCount": "{{count}} تعديل",
@@ -639,7 +850,7 @@
       "shortTitle": "التشكيلة"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "إزالة المرجع {{label}}",
       "counts": "تمت الإشارة إلى {{count}}/{{max}}",
       "exitPicking": "إنهاء التحديد",
       "startPicking": "الإشارة إلى العناصر"
@@ -733,7 +944,13 @@
     "voiceInputDisabled": "الإدخال الصوتي معطّل",
     "textInput": "إدخال نصي",
     "stopRecording": "إيقاف التسجيل",
-    "startRecording": "بدء التسجيل"
+    "startRecording": "بدء التسجيل",
+    "toggleSidebar": "إظهار قائمة المشاهد أو إخفاؤها",
+    "toggleChat": "إظهار المحادثة أو إخفاؤها",
+    "mute": "كتم الصوت",
+    "unmute": "إلغاء كتم الصوت",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت"
   },
   "pbl": {
     "emptyProject": "لم يتم توليد مشروع التعلم القائم على المشاريع بعد. يرجى إنشاؤه عبر توليد المقرر.",
@@ -951,7 +1168,8 @@
         },
         "durationMinutes": "{{m}} دقيقة",
         "durationHours": "{{h}} ساعة",
-        "durationHoursMinutes": "{{h}} ساعة {{m}} دقيقة"
+        "durationHoursMinutes": "{{h}} ساعة {{m}} دقيقة",
+        "stars": "النجوم"
       },
       "completionCard": {
         "title": "اكتمل المشروع · Completion",
@@ -1010,8 +1228,10 @@
     "deleteFolderConfirmRemove": "سيؤدي هذا إلى حذف المجلد ودوراته، بما في ذلك سجل الدردشة.",
     "deleteFolderAndCourses_other": "حذف المجلد و {{count}} دورة",
     "notFound": "لم يتم العثور على الدورة",
-    "notFoundDesc": "هذه الدورة غير موجودة أو تم حذفها.",
-    "backToHome": "العودة إلى الصفحة الرئيسية"
+    "notFoundDesc": "هذه الدورة غير موجودة، أو تم حذفها، أو ليست لديك صلاحية لعرضها.",
+    "backToHome": "العودة إلى الصفحة الرئيسية",
+    "loadFailed": "التخزين غير متاح. تعذّر تحميل الفصول المحفوظة.",
+    "deleteFailed": "فشل حذف الفصل"
   },
   "upload": {
     "pdfSizeLimit": "يدعم ملفات PDF حتى 50 ميغابايت",
@@ -1442,16 +1662,16 @@
     "voxcpmStopPreview": "إيقاف المعاينة",
     "voxcpmPreviewVoice": "معاينة الصوت",
     "voxcpmDeleteVoice": "حذف الصوت",
-    "qwenCloneVoicesTitle": "Qwen TTS Cloned Voices",
-    "qwenCloneRefText": "Enter the verbatim transcript of the reference audio",
-    "qwenCloneRefAudioHint": "Use a clean 1–60 second voice sample. A 10–20 second sample is recommended; audio is converted to 24 kHz mono PCM WAV.",
-    "qwenCloneSaved": "Qwen cloned voice registered and saved",
-    "qwenCloneSaveFailed": "Failed to register the Qwen cloned voice",
-    "qwenCloneUnsupported": "Recording is not supported in this browser; upload an audio file instead.",
-    "qwenCloneSpeedHint": "Cloned voices always synthesize at 1× speed.",
-    "qwenCloneDeleteWarning": "The voice was removed locally, but provider deletion failed.",
-    "qwenCloneNarrationUnavailable": "The assigned voice is unavailable. Narration will use another enabled voice instead.",
-    "qwenCloneDiscussionUnavailable": "The assigned voice is unavailable. Discussion will use another enabled voice instead.",
+    "qwenCloneVoicesTitle": "أصوات Qwen TTS المستنسخة",
+    "qwenCloneRefText": "أدخل النص الحرفي للمقطع الصوتي المرجعي",
+    "qwenCloneRefAudioHint": "استخدم عيّنة صوتية نظيفة مدتها 1–60 ثانية. يُوصى بعيّنة من 10–20 ثانية؛ يُحوَّل الصوت إلى PCM WAV أحادي 24 كيلوهرتز.",
+    "qwenCloneSaved": "تم تسجيل صوت Qwen المستنسخ وحفظه",
+    "qwenCloneSaveFailed": "فشل تسجيل صوت Qwen المستنسخ",
+    "qwenCloneUnsupported": "التسجيل غير مدعوم في هذا المتصفح؛ ارفع ملفًا صوتيًا بدلًا من ذلك.",
+    "qwenCloneSpeedHint": "تُركَّب الأصوات المستنسخة دائمًا بسرعة 1×.",
+    "qwenCloneDeleteWarning": "أُزيل الصوت محليًا، لكن فشل حذفه لدى المزوّد.",
+    "qwenCloneNarrationUnavailable": "الصوت المعيَّن غير متاح. سيستخدم السرد صوتًا آخر مفعّلًا بدلًا منه.",
+    "qwenCloneDiscussionUnavailable": "الصوت المعيَّن غير متاح. ستستخدم المناقشة صوتًا آخر مفعّلًا بدلًا منه.",
     "providerOpenAIWhisper": "OpenAI ASR (gpt-4o-mini-transcribe)",
     "providerBrowserNative": "التعرّف على الكلام المدمج في المتصفح",
     "providerQwenASR": "Qwen ASR (سحابة علي بابا بايليان)",
@@ -1799,55 +2019,55 @@
     "webSearchBaseUrl": "العنوان الأساسي",
     "webSearchServerConfigured": "تم تكوين مفتاح API للبحث على الخادم",
     "optional": "اختياري",
-    "selectProvider": "Select Provider",
-    "customProvider": "Custom",
-    "presetPickHint": "Picking a provider auto-fills its base URL and protocol; enter your key then click \"Fetch Models\". Not listed? Use \"Custom\".",
+    "selectProvider": "اختر المزوّد",
+    "customProvider": "مخصص",
+    "presetPickHint": "اختيار مزوّد يملأ تلقائيًا عنوان URL الأساسي والبروتوكول؛ أدخل مفتاحك ثم انقر \"جلب النماذج\". غير مدرج؟ استخدم \"مخصص\".",
     "presetCategory": {
-      "tokenPlan": "Token Plans",
-      "aggregator": "Aggregators",
-      "thirdParty": "Vendors",
-      "official": "Official"
+      "tokenPlan": "خطط الرموز",
+      "aggregator": "المجمِّعات",
+      "thirdParty": "المورّدون",
+      "official": "رسمي"
     },
-    "fetchModels": "Fetch Models",
-    "fetchModelsResult": "Fetched {total} models, added {added}",
-    "fetchModelsNoEndpoint": "This provider has no model list endpoint — add models manually",
-    "fetchModelsAuthError": "API key is invalid or expired",
-    "fetchModelsFailed": "Failed to fetch models",
+    "fetchModels": "جلب النماذج",
+    "fetchModelsResult": "تم جلب {total} نموذجًا، وأُضيف {added}",
+    "fetchModelsNoEndpoint": "لا يوفّر هذا المزوّد نقطة نهاية لقائمة النماذج — أضف النماذج يدويًا",
+    "fetchModelsAuthError": "مفتاح API غير صالح أو منتهي الصلاحية",
+    "fetchModelsFailed": "فشل جلب النماذج",
     "usage": {
-      "title": "Usage",
-      "refresh": "Refresh",
-      "disclaimer": "Usage is system-tracked; only server-side calls are counted.",
-      "totalRequests": "Requests",
-      "totalTokens": "LLM Tokens",
-      "dailyTrend": "Daily Token Trend",
-      "tokens": "Tokens",
-      "byModel": "By Model",
-      "model": "Model",
-      "type": "Type",
-      "reqs": "Reqs",
-      "usage": "Usage",
-      "empty": "No usage data yet",
+      "title": "الاستخدام",
+      "refresh": "تحديث",
+      "disclaimer": "يتتبّع النظام الاستخدام؛ تُحتسب الاستدعاءات من جهة الخادم فقط.",
+      "totalRequests": "الطلبات",
+      "totalTokens": "رموز LLM",
+      "dailyTrend": "اتجاه الرموز اليومي",
+      "tokens": "الرموز",
+      "byModel": "حسب النموذج",
+      "model": "النموذج",
+      "type": "النوع",
+      "reqs": "طلبات",
+      "usage": "الاستخدام",
+      "empty": "لا توجد بيانات استخدام بعد",
       "kindLlm": "LLM",
-      "kindImage": "Image",
+      "kindImage": "صورة",
       "kindVideo": "Video",
-      "kindTts": "Speech",
+      "kindTts": "الكلام",
       "kindAsr": "ASR",
-      "unitToken": "tokens",
-      "unitImage": "images",
-      "unitSecond": "sec",
-      "unitCharacter": "chars"
+      "unitToken": "رمز",
+      "unitImage": "صورة",
+      "unitSecond": "ث",
+      "unitCharacter": "حرف"
     },
     "tokenPlan": {
       "nav": "Token Plan",
-      "title": "Token Plan Setup",
-      "desc": "Pick your token plan provider and enter the key — it auto-configures every adapted modality (LLM/image/video/speech/web search).",
-      "selectPlan": "Select Provider",
-      "apiKey": "API Key",
-      "enable": "Enable",
-      "updateKey": "Update key",
-      "modelsCount": "{{n}} models",
-      "capabilities": "Capabilities offered",
-      "offeredNote": "Models offered by this plan. Pick the ones you want on the generation bar — availability depends on your plan tier, and unsupported models will error at generation time."
+      "title": "إعداد خطة الرموز",
+      "desc": "اختر مزوّد خطة الرموز وأدخل المفتاح — يُهيّئ تلقائيًا كل الوسائط المدعومة (LLM/الصور/الفيديو/الكلام/البحث على الويب).",
+      "selectPlan": "اختر المزوّد",
+      "apiKey": "مفتاح API",
+      "enable": "تفعيل",
+      "updateKey": "تحديث المفتاح",
+      "modelsCount": "{{n}} نموذج",
+      "capabilities": "القدرات المتاحة",
+      "offeredNote": "النماذج التي تقدّمها هذه الخطة. اختر ما تريده في شريط التوليد — يعتمد التوفّر على مستوى خطتك، وستُظهر النماذج غير المدعومة خطأً عند التوليد."
     },
     "skills": {
       "nav": "المهارات",
@@ -1866,7 +2086,7 @@
       "download": "تنزيل",
       "detailFailed": "تعذّر تحميل تفاصيل المهارة",
       "contentLabel": "المحتوى",
-      "builtinDetailNote": "هذه المهارة مرفقة مع OpenMAIC. نزّلها لاستيرادها إلى مساحة عمل وكيل أخرى.",
+      "builtinDetailNote": "هذه المهارة مرفقة مع ÔN THI. نزّلها لاستيرادها إلى مساحة عمل وكيل أخرى.",
       "upload": "رفع",
       "uploading": "جارٍ الرفع…",
       "uploadFailed": "تعذّر رفع المهارة. تحقّق من الملف وحاول مرة أخرى.",
@@ -1881,82 +2101,82 @@
     "alidocmindAccessKeySecret": "AccessKey Secret"
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "دورة بلا عنوان",
+    "sceneCount": "{{count}} صفحة",
+    "sceneCount_one": "{{count}} صفحة",
+    "sceneCount_other": "{{count}} صفحة",
+    "courseLinkHint": "افتح {{name}} في اللوحة اليمنى",
+    "courseLinkMore": "{{count}} فصل إضافي",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "أشِر إلى فصل في هذه الرسالة",
+      "empty": "لا يوجد فصل مطابق",
+      "alreadyNamed": "تمت الإشارة إليه",
+      "remove": "إزالة {{name}}",
+      "pillHint": "تشير هذه الرسالة إلى {{name}}",
       "notAccepted": "الخادم غير متاح مؤقتًا. يُرجى إعادة المحاولة بعد قليل.",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "الإشارة إلى {{name}}",
+      "capped": "يُعرض أول {{count}} — تابع الكتابة لتضييق النتائج"
     },
-    "heroTitle": "What will you create today?",
-    "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "heroTitle": "ماذا ستصنع اليوم؟",
+    "heroSubtitle": "شارك فكرة وحوّلها إلى رحلة تعلّم يمكن للآخرين خوضها",
+    "newSession": "محادثة جديدة",
     "sections": {
-      "courses": "Courses",
-      "sessions": "Chats"
+      "courses": "الدورات",
+      "sessions": "المحادثات"
     },
-    "coursesEmpty": "No courses yet",
-    "sessionsEmpty": "No chats yet",
-    "loading": "Loading",
-    "loadFailed": "Couldn't load",
-    "retry": "Retry",
-    "untitledSession": "Untitled chat",
-    "pagePosition": "Page {{index}} of {{total}}",
-    "exitPro": "Exit Pro",
-    "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
-    "currentSession": "Current chat",
+    "coursesEmpty": "لا توجد دورات بعد",
+    "sessionsEmpty": "لا توجد محادثات بعد",
+    "loading": "جارٍ التحميل",
+    "loadFailed": "تعذّر التحميل",
+    "retry": "إعادة المحاولة",
+    "untitledSession": "محادثة بلا عنوان",
+    "pagePosition": "الصفحة {{index}} من {{total}}",
+    "exitPro": "الخروج من Pro",
+    "navAria": "التنقل في مساحة العمل",
+    "homeAria": "العودة إلى الصفحة الرئيسية",
+    "currentSession": "المحادثة الحالية",
     "startLearning": "ابدأ التعلم",
     "time": {
-      "justNow": "Just now",
-      "minutesAgo": "{{count}}m ago",
-      "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "justNow": "الآن",
+      "minutesAgo": "قبل {{count}} د",
+      "hoursAgo": "قبل {{count}} س",
+      "daysAgo": "قبل {{count}} ي"
     },
     "sessionStatus": {
-      "connecting": "Connecting",
-      "queued": "Queued",
-      "running": "Running",
-      "succeeded": "Ready",
-      "failed": "Needs attention",
-      "cancelled": "Stopped"
+      "connecting": "جارٍ الاتصال",
+      "queued": "في قائمة الانتظار",
+      "running": "قيد التشغيل",
+      "succeeded": "جاهز",
+      "failed": "يحتاج إلى انتباه",
+      "cancelled": "متوقف"
     },
-    "backToWorkspace": "Back to workspace",
-    "searchPlaceholder": "Filter by name",
-    "searchAria": "Search {{section}}",
-    "searchEmpty": "No matches",
-    "showMore": "Show {{count}} more",
-    "showLess": "Show less",
-    "utilitiesAria": "Preferences and account",
-    "resizeAria": "Drag to resize the sidebar",
-    "chatPaneAria": "Chat panel",
-    "classroomPaneAria": "Classroom",
-    "collapseNav": "Collapse navigation",
-    "expandNav": "Expand navigation",
-    "expandNavInto": "Expand navigation · {{section}}",
-    "collapseChat": "Collapse conversation",
-    "expandChat": "Conversation",
-    "collapseClassroom": "Collapse classroom",
-    "expandClassroom": "Classroom",
-    "readOnlyBadge": "Read-only",
-    "noCourseTitle": "No course open",
+    "backToWorkspace": "العودة إلى مساحة العمل",
+    "searchPlaceholder": "تصفية حسب الاسم",
+    "searchAria": "البحث في {{section}}",
+    "searchEmpty": "لا توجد نتائج",
+    "showMore": "عرض {{count}} أخرى",
+    "showLess": "عرض أقل",
+    "utilitiesAria": "التفضيلات والحساب",
+    "resizeAria": "اسحب لتغيير حجم الشريط الجانبي",
+    "chatPaneAria": "لوحة المحادثة",
+    "classroomPaneAria": "الفصل الدراسي",
+    "collapseNav": "طي التنقل",
+    "expandNav": "توسيع التنقل",
+    "expandNavInto": "توسيع التنقل · {{section}}",
+    "collapseChat": "طي المحادثة",
+    "expandChat": "المحادثة",
+    "collapseClassroom": "طي الفصل الدراسي",
+    "expandClassroom": "الفصل الدراسي",
+    "readOnlyBadge": "للقراءة فقط",
+    "noCourseTitle": "لا توجد دورة مفتوحة",
     "noCourseHint": "افتحها من رابط دورة في المحادثة، أو اختر واحدة من القائمة على اليسار — تبقى المحادثة كما هي",
-    "resizeChatAria": "Drag to resize the conversation pane",
-    "firstPageLanding": "The first page is landing…",
+    "resizeChatAria": "اسحب لتغيير حجم لوحة المحادثة",
+    "firstPageLanding": "الصفحة الأولى في الطريق…",
     "autoSaving": "جارٍ الحفظ التلقائي…",
     "autoSaved": "تم الحفظ",
-    "collapsedTitle": "Both panes are collapsed",
-    "collapsedHint": "Use the tabs on the left to bring the conversation or the classroom back",
-    "moreUtilities": "More",
+    "collapsedTitle": "اللوحتان مطويتان",
+    "collapsedHint": "استخدم الألسنة على اليسار لإظهار المحادثة أو الفصل الدراسي",
+    "moreUtilities": "المزيد",
     "rowMore": "إجراءات أخرى لـ {{name}}",
     "folderDeleteHint": "ستعود الدورات داخله إلى المستوى الأعلى، ولن يُحذف شيء.",
     "dropToUnfile": "أفلِت هنا لإخراجه من المجلد",
@@ -1970,7 +2190,7 @@
     "confirmDelete": "تأكيد الحذف",
     "deleting": "جارٍ الحذف…",
     "deleteFailed": "تعذر الحذف. حاول مرة أخرى.",
-    "tabsAria": "Chats and courses",
+    "tabsAria": "المحادثات والدورات",
     "courseTabsAria": "الدورات المفتوحة",
     "courseTabClose": "إغلاق التبويب: {{name}}",
     "courseTabRunning": "قيد التوليد",
@@ -2086,7 +2306,22 @@
         "roleFailed": "تعذّر تغيير الدور. حاول مرة أخرى."
       },
       "roleChanged": "تم تحديث الدور.",
-      "changeRoleLabel": "تغيير دور {{username}}"
+      "changeRoleLabel": "تغيير دور {{username}}",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "إعادة تعيين كلمة المرور",
+      "resetPasswordLabel": "إعادة تعيين كلمة مرور {{username}}",
+      "resetTitle": "إعادة تعيين كلمة مرور {{username}}؟",
+      "resetDescription": "يحصل الحساب على كلمة مرور مؤقتة ويُسجَّل خروجه من كل الأجهزة. تظهر كلمة المرور مرة واحدة فقط: أعطها للمستخدم واطلب منه تغييرها بعد تسجيل الدخول. يُسجَّل الإجراء في سجل التدقيق.",
+      "resetDone": "كلمة المرور المؤقتة لـ {{username}}. انسخها الآن، فلن تظهر مرة أخرى.",
+      "resetCopy": "نسخ",
+      "resetCopied": "تم نسخ كلمة المرور المؤقتة.",
+      "resetClose": "تم"
     },
     "roles": {
       "learner": "متعلم",
@@ -2095,23 +2330,51 @@
     },
     "administration": "الإدارة",
     "adminPage": {
-      "title": "الإدارة",
+      "title": "العمليات",
       "description": "الحسابات والاستخدام والأدوار لهذه النسخة.",
-      "denied": "هذه الصفحة للمشغّلين والمسؤولين فقط."
+      "denied": "هذه الصفحة للمشغّلين والمسؤولين فقط.",
+      "learn": "الذهاب إلى التعلم",
+      "summary": {
+        "activeMembers": "العضويات الفعّالة",
+        "pendingShares": "طلبات مشاركة بانتظار القرار",
+        "classes": "الصفوف",
+        "pendingAccessRequests": "طلبات الوصول المعلّقة"
+      },
+      "providers": {
+        "title": "مزوّدو الخادم",
+        "description": "للعرض فقط. يُضبط المزوّدون في إعدادات الخادم، لا هنا.",
+        "empty": "لم يُضبط أي مزوّد على الخادم."
+      },
+      "deniedSignIn": "سجّل الدخول بحساب مشغّل أو مسؤول."
+    },
+    "membership": {
+      "active": "العضوية حتى {{date}} · {{quota}} رمز شهريًا",
+      "none": "لا توجد عضوية فعّالة"
+    },
+    "password": {
+      "title": "تغيير كلمة المرور",
+      "description": "سيتم تسجيل الخروج من الأجهزة الأخرى، ويبقى هذا الجهاز مسجّل الدخول.",
+      "current": "كلمة المرور الحالية",
+      "new": "كلمة المرور الجديدة",
+      "confirm": "أعد إدخال كلمة المرور الجديدة",
+      "submit": "تغيير",
+      "changed": "تم تغيير كلمة المرور وتسجيل الخروج من الأجهزة الأخرى.",
+      "wrongCurrent": "كلمة المرور الحالية غير صحيحة.",
+      "mismatch": "كلمتا المرور الجديدتان غير متطابقتين."
     }
   },
   "proMode": {
     "attach": "إرفاق مواد",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
+    "mentionCourse": "الإشارة إلى فصل",
+    "loadSkill": "تحميل Skill",
+    "skillMenuTitle": "اختر Skill لتصميم الدورة",
+    "skillsLoading": "جارٍ تحميل الـSkills…",
+    "noSkillsAvailable": "لا توجد Skills متاحة",
+    "userSkillsGroup": "الـSkills الخاصة بي",
+    "builtinSkillsGroup": "Skills مدمجة",
+    "skillsLoadFailed": "تعذّر تحميل الـSkills. انقر لإعادة المحاولة",
+    "retrySkills": "إعادة المحاولة",
+    "noSkillMatch": "لا توجد Skills تطابق “{{query}}”",
     "badgeAria": "وضع Pro",
     "badgeEnter": "وضع Pro",
     "badgeExit": "العودة إلى الوضع العادي",
@@ -2149,7 +2412,25 @@
       "quotaValue": "{{tokens}} رمز شهرياً",
       "grant": "منح أو تمديد",
       "resume": "استئناف",
-      "suspend": "إيقاف"
+      "suspend": "إيقاف",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "طلبات المشاركة",
@@ -2159,7 +2440,24 @@
       "reject": "رفض",
       "approved": "تمت مشاركة الدورة مع الأعضاء.",
       "rejected": "تم رفض الطلب.",
-      "requested": "طُلب في {{date}}"
+      "requested": "طُلب في {{date}}",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "تحديث"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "رفض مشاركة «{{title}}»؟",
+      "rejectDescription": "سيرى المالك أن الطلب رُفض مع السبب إن ذكرته، ويمكنه الطلب مجددًا.",
+      "rejectReason": "السبب (اختياري)",
+      "snapshot": "الحزمة: «{{name}}»، {{count}} مشاهد، {{media}} ملفات وسائط، {{size}}",
+      "remixOf": "إعادة مزج «{{title}}»"
     },
     "previews": {
       "title": "معاينات مجانية",
@@ -2167,7 +2465,10 @@
       "courseId": "معرّف الدورة",
       "add": "وسم كمعاينة",
       "remove": "إزالة",
-      "empty": "لا توجد معاينات بعد."
+      "empty": "لا توجد معاينات بعد.",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "الفصول",
@@ -2178,12 +2479,247 @@
       "empty": "لا توجد فصول بعد.",
       "members": "{{count}} عضواً",
       "courses": "{{count}} دورة",
-      "attach": "إرفاق دورة"
+      "attach": "إرفاق دورة",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "رمز جديد",
+      "newCodeTitle": "إنشاء رمز انضمام جديد للفصل «{{name}}»؟",
+      "newCodeDescription": "يتوقف الرمز الحالي عن العمل فورًا، ويبقى الأعضاء الموجودون في الفصل. يظهر الرمز الجديد مرة واحدة فقط، فانسخه الآن.",
+      "membersOf": "أعضاء {{name}}",
+      "membersDescription": "يمكن للعضو المُزال الانضمام مجددًا برمز الفصل؛ أنشئ رمزًا جديدًا لمنعه.",
+      "noMembers": "لا يوجد أعضاء بعد.",
+      "joined": "انضم في {{date}}",
+      "removeMember": "إزالة",
+      "removeMemberTitle": "إزالة {{username}} من {{name}}؟",
+      "removeMemberDescription": "سيفقد الوصول إلى دورات هذا الفصل. يُسجَّل الإجراء في سجل التدقيق.",
+      "memberRemoved": "تمت إزالة {{username}} من الفصل."
     },
     "audit": {
       "title": "سجل التدقيق",
       "description": "التغييرات الأخيرة في الحسابات والعضويات والمشاركة والفصول.",
-      "empty": "لم يُسجَّل شيء بعد."
+      "empty": "لم يُسجَّل شيء بعد.",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "إعادات تعيين كلمة المرور"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "تم تغيير رمز الانضمام",
+        "password_reset": "إعادة تعيين كلمة المرور",
+        "community_ban": "منع النشر في المجتمع",
+        "community_unban": "رفع منع النشر في المجتمع",
+        "class_remove": "إزالة عضو",
+        "challenge_create": "إنشاء تحدٍّ",
+        "challenge_update": "تعديل تحدٍّ",
+        "settings_update": "تغيير إعداد",
+        "share_update-approve": "تمت الموافقة على تحديث المشاركة",
+        "share_update-reject": "تم رفض تحديث المشاركة"
+      }
+    },
+    "accessRequests": {
+      "title": "طلبات الوصول",
+      "description": "أشخاص يطلبون أن يصبحوا أعضاء. تمنح الموافقة 30 يومًا والحصة الشهرية الافتراضية، ويمكن تغييرها لاحقًا في قائمة الأعضاء.",
+      "empty": "لا توجد طلبات معلّقة.",
+      "requested": "طُلب في {{date}}",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "approved": "أصبح {{name}} عضوًا.",
+      "rejected": "تم رفض طلب {{name}}.",
+      "reasonPlaceholder": "السبب (اختياري؛ يراه المتعلم ويُحفظ في سجل التدقيق)",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "{{count}} طلبات دعم تنتظر الرد.",
+        "reportsOpen": "{{count}} عناصر مُبلّغ عنها في المجتمع بانتظار المراجعة."
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "الدورات",
+      "description": "كل الدورات في هذا النظام. افتح دورة لمراجعتها، أو انسخ معرّفها لجعلها معاينة مجانية أو لإضافتها إلى فصل.",
+      "open": "فتح الدورة في علامة تبويب جديدة",
+      "copy": "نسخ المعرّف {{id}}",
+      "copied": "تم نسخ {{id}}",
+      "owner": "المالك",
+      "anonymous": "غير مسجّل الدخول",
+      "updated": "آخر تحديث",
+      "empty": "لا توجد دورات بعد."
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "غير موجود.",
       "MEMBERSHIP_REQUIRED": "تحتاج إلى عضوية نشطة لذلك.",
       "QUOTA_EXCEEDED": "استُنفدت حصة الذكاء الاصطناعي لهذا الشهر.",
-      "ACCOUNTS_NOT_CONFIGURED": "الحسابات غير مُعدّة على هذه النسخة."
+      "ACCOUNTS_NOT_CONFIGURED": "الحسابات غير مُعدّة على هذه النسخة.",
+      "ALREADY_MEMBER": "لديك عضوية فعّالة بالفعل.",
+      "MEMBERSHIP_SUSPENDED": "أوقف أحد المسؤولين عضويتك مؤقتًا.",
+      "REQUEST_PENDING": "هناك طلب بانتظار أحد المسؤولين بالفعل.",
+      "REQUEST_TOO_SOON": "يمكن إرسال الطلب المرفوض مرة أخرى لاحقًا.",
+      "COURSE_NOT_FOUND": "لا توجد دورة بهذا المعرّف. تحقق من المعرّف في عنوان الدورة (/classroom/<ID>).",
+      "RATE_LIMITED": "لديك طلبات كثيرة دون رد. انتظر الرد أولًا.",
+      "COMMUNITY_BLOCKED": "حسابك ممنوع من النشر في المجتمع."
     }
   },
   "catalog": {
     "title": "الكتالوج",
     "description": {
       "member": "معاينات مجانية، ودورات مشتركة، ودورات فصولك.",
-      "guest": "معاينات مجانية. سجّل الدخول لرؤية المزيد."
+      "guest": "معاينات مجانية. سجّل الدخول لرؤية المزيد.",
+      "signedIn": "معاينات مجانية. يرى الأعضاء أيضًا الدورات المشتركة وفصولهم."
     },
     "signInToSee": "سجّل الدخول لرؤية الدورات المشتركة والانضمام إلى فصل.",
     "join": {
       "title": "الانضمام إلى فصل",
       "code": "رمز الانضمام",
       "submit": "انضم",
-      "done": "انضممت إلى {{name}}."
+      "done": "انضممت إلى {{name}}.",
+      "description": "أدخل الرمز الذي حصلت عليه للانضمام إلى صف."
     },
     "empty": "لا يوجد ما يُتصفَّح بعد.",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "فصلك"
     },
     "open": "فتح",
-    "unavailable": "الكتالوج غير متاح على هذه النسخة."
+    "unavailable": "الكتالوج غير متاح على هذه النسخة.",
+    "back": "العودة إلى الكتالوج",
+    "membersOnly": "الدورات المشتركة والفصول متاحة للأعضاء."
   },
   "courseShare": {
     "request": "مشاركة مع الأعضاء",
-    "pending": "بانتظار الموافقة",
     "stop": "إيقاف المشاركة",
     "requested": "تم إرسال الطلب. سيراجعه المشغّل.",
     "withdrawn": "توقفت المشاركة. يحتفظ المتعلمون الذين لديهم الدورة بنسختهم.",
-    "failed": "تعذّرت مشاركة الدورة. حاول مرة أخرى."
+    "failed": "تعذّرت مشاركة الدورة. حاول مرة أخرى.",
+    "rejected": "تم رفض طلب المشاركة.",
+    "rejectedWithReason": "تم رفض طلب المشاركة: {{reason}}",
+    "requestWithdrawn": "تم سحب طلب المشاركة.",
+    "menu": "مشاركة مع الأعضاء",
+    "packing": "جارٍ تجهيز الدورة…",
+    "updateSent": "أُرسل التحديث. يبقى القرّاء على النسخة الحالية حتى تتم الموافقة.",
+    "updatePending": "تحديث بانتظار المراجعة. يرى القرّاء النسخة المعتمدة.",
+    "updateRejected": "رُفض التحديث: {{reason}}",
+    "sharedStatus": "مشاركة مع الأعضاء.",
+    "pendingStatus": "بانتظار مراجعة المشغّل.",
+    "privateStatus": "لم تتم المشاركة بعد.",
+    "update": "تحديث النسخة المشاركة",
+    "resend": "إرسال أحدث نسخة مجددًا",
+    "withdraw": "سحب الطلب",
+    "reviewNote": "تُرسل الدورة كما تراها الآن (مع التعديلات والوسائط). كل نسخة تحتاج إلى موافقة المشغّل."
+  },
+  "support": {
+    "title": "تواصل مع المسؤول",
+    "description": "أرسل سؤالًا أو طلبًا إلى فريق التشغيل. تظهر الردود هنا.",
+    "contact": "تواصل مع المسؤول",
+    "panelTitle": "صندوق الدعم",
+    "panelDescription": "أسئلة المتعلمين وطلباتهم. تظهر الطلبات التي تنتظر ردًا أولًا.",
+    "new": "طلب جديد",
+    "subject": "الموضوع",
+    "body": "الرسالة",
+    "username": "إرسال إلى (اسم المستخدم)",
+    "send": "إرسال",
+    "reply": "رد",
+    "replyPlaceholder": "اكتب ردًا…",
+    "close": "وضع علامة تم الحل",
+    "reopen": "إعادة الفتح",
+    "empty": "لا توجد طلبات بعد.",
+    "pick": "اختر طلبًا لقراءته.",
+    "staff": "فريق التشغيل",
+    "waiting": "بانتظار الرد",
+    "unread": "جديد",
+    "unreadCount": "{{count}} ردود جديدة",
+    "sent": "تم الإرسال.",
+    "state": {
+      "open": "مفتوح",
+      "closed": "تم الحل"
+    },
+    "filter": {
+      "label": "التصفية حسب الحالة"
+    },
+    "subjects": {
+      "renew": "تجديد عضويتي",
+      "resume": "استئناف عضويتي",
+      "quota": "زيادة حد الذكاء الاصطناعي"
+    }
+  },
+  "community": {
+    "title": "المجتمع",
+    "description": "أسئلة يطرحها المتعلمون مباشرة على الشريحة، يجيب عنها المساعد الذكي وأعضاء آخرون.",
+    "signIn": "سجّل الدخول لرؤية المجتمع.",
+    "empty": "لا توجد أسئلة بعد.",
+    "answer": "أجب",
+    "answerPlaceholder": "اكتب إجابتك… (يدعم Markdown والصيغ مثل $x^2$)",
+    "answers": "{{count}} إجابات",
+    "answerCount": "{{count}} إجابات",
+    "vote": "مفيد ({{count}})",
+    "best": "الأفضل",
+    "bestMarked": "تم اختيار أفضل إجابة.",
+    "bestRewarded": "تم الاختيار. حصل {{name}} على {{tokens}} رمز مكافأة.",
+    "solved": "محلول",
+    "locked": "مغلق",
+    "lockedHint": "هذا السؤال مغلق ولا يقبل إجابات جديدة.",
+    "hidden": "مخفي",
+    "markBest": "اختيار كأفضل إجابة",
+    "openSlide": "فتح الشريحة",
+    "ai": {
+      "name": "المساعد الذكي",
+      "writing": "المساعد الذكي يكتب إجابة…",
+      "retry": "اسأل الذكاء الاصطناعي مرة أخرى"
+    },
+    "ask": {
+      "button": "اطرح سؤالًا",
+      "title": "السؤال",
+      "titlePlaceholder": "ما الذي لم يتضح لك؟",
+      "body": "التفاصيل (اختياري)",
+      "bodyPlaceholder": "ما الذي جربته، وأين توقفت…",
+      "submit": "نشر السؤال",
+      "onScene": "سيُثبّت السؤال على الشريحة «{{scene}}».",
+      "onCourse": "سيُثبّت السؤال على الدورة كاملة.",
+      "aiNote": "يجيب المساعد الذكي فورًا، ويمكن للأعضاء الآخرين الإضافة."
+    },
+    "join": {
+      "title": "انضم إلى النقاش",
+      "body": "يطرح الأعضاء الأسئلة ويحصلون على إجابة فورية من المساعد الذكي، ويساعدون غيرهم، ويكسبون رموز مكافأة عند اختيار إجابتهم كأفضل إجابة.",
+      "cta": "كن عضوًا"
+    },
+    "report": {
+      "action": "إبلاغ",
+      "title": "الإبلاغ عن محتوى",
+      "description": "أخبر فريق التشغيل لماذا لا يناسب هذا المحتوى المكان.",
+      "reason": "السبب",
+      "send": "إرسال البلاغ",
+      "done": "تم إرسال البلاغ. شكرًا لك."
+    },
+    "mod": {
+      "hide": "إخفاء",
+      "show": "إظهار",
+      "hidden": "تم إخفاء المحتوى.",
+      "shown": "تمت إعادة إظهار المحتوى.",
+      "lock": "إغلاق",
+      "unlock": "فتح",
+      "ban": "منع النشر",
+      "banned": "لم يعد بإمكان {{name}} النشر.",
+      "unban": "رفع المنع",
+      "unbanned": "يمكن لـ {{name}} النشر مجددًا."
+    },
+    "scene": {
+      "button": "النقاش حول هذه الشريحة",
+      "title": "النقاش",
+      "thisSlide": "هذه الشريحة",
+      "wholeCourse": "الدورة كاملة",
+      "scope": "النطاق",
+      "pick": "اختر سؤالًا لقراءته، أو اطرح سؤالًا جديدًا."
+    },
+    "feed": {
+      "all": "الكل",
+      "unsolved": "غير محلولة",
+      "mine": "أسئلتي",
+      "filter": "تصفية الأسئلة",
+      "search": "البحث في الأسئلة",
+      "pick": "اختر سؤالًا لرؤية إجاباته.",
+      "howToAsk": "تريد أن تسأل؟ افتح درسًا، وانتقل إلى الشريحة التي توقفت عندها، واضغط زر النقاش في شريط الأدوات."
+    },
+    "reports": {
+      "title": "بلاغات المجتمع",
+      "description": "أسئلة وإجابات تم الإبلاغ عنها. أخفِ المخالف، وتجاهل البلاغات الخاطئة، أو امنع الكاتب من النشر.",
+      "empty": "لا توجد بلاغات بانتظار المراجعة.",
+      "count": "{{count}} بلاغات",
+      "reasons": "الأسباب",
+      "open": "فتح",
+      "dismiss": "تجاهل",
+      "dismissed": "تم تجاهل البلاغ.",
+      "banned": "حسابات ممنوعة من النشر",
+      "kind": {
+        "question": "سؤال",
+        "answer": "إجابة"
+      }
+    },
+    "tabs": {
+      "questions": "أسئلة وأجوبة",
+      "challenges": "تحديات الأسبوع"
+    }
+  },
+  "challenge": {
+    "none": "لا توجد تحديات بعد.",
+    "pick": "اختر تحديًا لعرضه.",
+    "entries": "{{count}} حلول",
+    "phase": {
+      "upcoming": "قريبًا",
+      "open": "يستقبل الحلول",
+      "voting": "التصويت جارٍ",
+      "finished": "انتهى"
+    },
+    "when": {
+      "upcoming": "يبدأ {{date}}",
+      "open": "آخر موعد للحلول: {{date}}",
+      "voting": "التصويت حتى {{date}}",
+      "finished": "انتهى في {{date}}"
+    },
+    "prize": "المركز {{rank}}: {{tokens}} رمز",
+    "prizeBadge": "+ شارة بطل الأسبوع",
+    "rank": "المركز {{rank}}",
+    "yours": "حلك",
+    "aiScore": "تقييم الذكاء الاصطناعي {{score}}/10",
+    "aiFeedback": "ملاحظات الذكاء الاصطناعي (تظهر لك فقط)",
+    "reward": "+{{tokens}} رمز",
+    "vote": "تصويت ({{count}})",
+    "voteHint": "صوّت للحلول التي تراها الأفضل. لا يمكنك التصويت لحلك.",
+    "yourEntry": "حلك",
+    "editEntry": "تعديل حلك",
+    "entryPlaceholder": "اكتب حلك… (يدعم Markdown والصيغ مثل $x^2$)",
+    "gradeNote": "يقيّم المساعد الذكي الحل مبدئيًا فور إرساله. يمكنك التعديل وإعادة الإرسال حتى الموعد النهائي، ولا يرى الأعضاء الآخرون الحلول إلا بعده.",
+    "grading": "جارٍ الإرسال والتقييم…",
+    "submit": "إرسال الحل",
+    "resubmit": "إعادة الإرسال",
+    "submitted": "تم الإرسال. تجد تقييم الذكاء الاصطناعي وملاحظاته أدناه.",
+    "notGraded": {
+      "quota": "تم الإرسال دون تقييم: نفد رصيد الذكاء الاصطناعي لهذا الشهر.",
+      "failed": "تم الإرسال، لكن تعذّر على الذكاء الاصطناعي التقييم. أعد الإرسال للمحاولة مجددًا."
+    },
+    "showReference": "عرض الحل النموذجي",
+    "hideReference": "إخفاء الحل النموذجي",
+    "results": "النتائج",
+    "allEntries": "الحلول",
+    "noEntries": "لا توجد حلول.",
+    "leaderboard": {
+      "title": "ترتيب هذا الشهر",
+      "empty": "لم يحصل أحد على نقاط هذا الشهر بعد.",
+      "points": "{{count}} نقاط",
+      "rule": "نقطة لكل حل، و3 / 2 / 1 إضافية للمراكز 1 / 2 / 3."
+    },
+    "admin": {
+      "panelTitle": "تحديات الأسبوع",
+      "panelDescription": "حدّد المسألة ومدة الإرسال والتصويت والمكافآت لكل تحدٍّ. تُحسب النتائج تلقائيًا عند انتهاء التصويت.",
+      "create": "تحدٍّ جديد",
+      "edit": "تعديل التحدي",
+      "saved": "تم حفظ التحدي.",
+      "title": "العنوان",
+      "statement": "المسألة",
+      "markdownHint": "Markdown وصيغ $...$",
+      "reference": "الحل النموذجي (مخفي حتى التصويت)",
+      "referenceHint": "يُستخدم للتقييم المبدئي، ويظهر للمتعلمين عند بدء التصويت.",
+      "opensAt": "وقت البدء",
+      "submissionDays": "أيام الإرسال",
+      "votingDays": "أيام التصويت",
+      "rewards": "مكافآت الرموز للثلاثة الأوائل",
+      "rewardsHint": "اجعلها صغيرة. تُحتسب المكافآت ضمن الحد الشهري لكل شخص.",
+      "hidden": "إخفاء هذا التحدي"
+    },
+    "settings": {
+      "title": "تحديات الأسبوع: تقييم الذكاء الاصطناعي",
+      "description": "يحصل كل حل على تقييم واحد من الذكاء الاصطناعي. اختر من يدفع رموزه.",
+      "paidBy": "من يدفع تكلفة التقييم",
+      "submitter": "رصيد صاحب الحل",
+      "submitterHint": "يمكن للمتعلم الذي نفد رصيده الإرسال، لكن دون تقييم.",
+      "system": "النظام",
+      "systemHint": "لا يُخصم من رصيد المتعلم، ويُحتسب على ميزانية التشغيل.",
+      "adminOnly": "يغيّر هذا الإعداد المسؤول فقط.",
+      "saved": "تم حفظ الإعداد."
+    }
+  },
+  "remix": {
+    "menu": "إعادة مزج",
+    "action": "إعادة مزج هذه الدورة",
+    "creating": "جارٍ إنشاء نسختك…",
+    "created": "نسختك المعاد مزجها جاهزة.",
+    "note": "تنشئ نسخة تملكها لتعديلها ومشاركتها من جديد. يُذكر المؤلف الأصلي ويحصل على جزء من المكافأة عند قراءة نسختك.",
+    "of": "إعادة مزج «{{title}}» لـ {{author}}",
+    "list": "{{count}} نسخ معاد مزجها",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "تحتاج إلى عضوية لإعادة المزج.",
+      "FORBIDDEN": "لا يمكن إعادة مزج هذه الدورة.",
+      "OWN_COURSE": "هذه دورتك.",
+      "RATE_LIMITED": "بلغت حد إعادة المزج لليوم."
+    },
+    "settings": {
+      "title": "إعادة مزج الدورات",
+      "description": "حصة المؤلف الأصلي من مكافآت القراءة، وعدد مرات إعادة المزج المسموح بها لكل عضو يوميًا.",
+      "royaltyPercent": "حصة المؤلف الأصلي (%)",
+      "dailyLimit": "عدد مرات إعادة المزج يوميًا"
+    }
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "main": "التنقل الرئيسي"
   }
 }

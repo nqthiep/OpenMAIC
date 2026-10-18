@@ -90,8 +90,15 @@
       "style-clone": "덱 스타일 복제",
       "teacher-style-clone": "강사 스타일",
       "vocational": "직업 실습",
-      "workshop-style": "인터랙티브 워크숍"
-    }
+      "workshop-style": "인터랙티브 워크숍",
+      "fact-check": "팩트 체크",
+      "feynman-learning": "파인만 학습법",
+      "learning-to-learn": "학습하는 법 배우기",
+      "social-emotional-learning": "사회정서학습(SEL)",
+      "spiral-curriculum": "나선형 교육과정 설계",
+      "understanding-by-design": "이해중심 교육과정(UbD)"
+    },
+    "contentLoadFailed": "Skill 전체 내용을 불러오지 못했습니다"
   },
   "thinking": {
     "active": "생각 중…",

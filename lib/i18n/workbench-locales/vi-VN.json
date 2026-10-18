@@ -90,8 +90,15 @@
       "style-clone": "Nhân bản phong cách bộ slide",
       "teacher-style-clone": "Phong cách giảng viên",
       "vocational": "Đào tạo nghề",
-      "workshop-style": "Workshop tương tác"
-    }
+      "workshop-style": "Workshop tương tác",
+      "fact-check": "Kiểm chứng thông tin",
+      "feynman-learning": "Học theo phương pháp Feynman",
+      "learning-to-learn": "Học cách học",
+      "social-emotional-learning": "Học tập cảm xúc – xã hội (SEL)",
+      "spiral-curriculum": "Thiết kế chương trình xoắn ốc",
+      "understanding-by-design": "Thiết kế ngược (UbD)"
+    },
+    "contentLoadFailed": "Không tải được toàn bộ nội dung Skill"
   },
   "thinking": {
     "active": "Đang suy nghĩ…",

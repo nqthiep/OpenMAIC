@@ -10,8 +10,190 @@
     "close": "閉じる"
   },
   "home": {
-    "slogan": "マルチエージェント対話型教室で生成的に学ぶ",
-    "greetingWithName": "こんにちは、{{name}}さん"
+    "slogan": "しっかり理解して・自信を持って試験へ",
+    "greetingWithName": "こんにちは、{{name}}さん",
+    "guest": {
+      "kicker": "AI は、あなたの学びのパートナー",
+      "title": "自分のペースで学べる、AI のサポート付き",
+      "description": "講義、スライド、議論は AI の助けを借りて用意し、共有する前に人が確認します。まずは無料でお試しください。アカウントは不要です。",
+      "signIn": "ログイン",
+      "browseCatalog": "講座を探す",
+      "stepsTitle": "利用の流れ",
+      "step1": {
+        "title": "無料試聴",
+        "body": "管理者が選んだ講座を、アカウントなしで開けます。"
+      },
+      "step2": {
+        "title": "ログイン",
+        "body": "割り当てられたアカウントでログインします。ゲストは見て回れますが、講座は作成できません。",
+        "titleOpen": "ログインまたはアカウント作成",
+        "bodyOpen": "無料でアカウントを作成するか、ログインします。メンバーになるまでは見て回れますが、講座はまだ作成できません。"
+      },
+      "step3": {
+        "title": "会員になる",
+        "body": "会員は AI で講座を作成し、クラスに参加して、作ったものを共有できます。"
+      },
+      "previewsTitle": "無料試聴",
+      "previewsEmpty": "試聴できる講座はまだありません。また後でご覧ください。",
+      "membershipTitle": "会員になる",
+      "membershipBody": "会員には毎月の利用枠があり、AI で講座を作成し、招待コードでクラスに参加し、他の会員と講座を共有できます。",
+      "nav": {
+        "features": "機能",
+        "how": "使い方",
+        "previews": "試聴講座",
+        "membership": "会員"
+      },
+      "chip1": "いろいろな角度から説明",
+      "chip2": "スライドとホワイトボード",
+      "chip3": "クイズとプロジェクト",
+      "mock": {
+        "title": "暮らしの中の分数",
+        "live": "ライブ",
+        "teacher": "ピザを同じ大きさの4つに切り分けてみましょう。",
+        "student": "大きさがそろっていなかったらどうなりますか？"
+      },
+      "features": {
+        "title": "理解を助けるために",
+        "subtitle": "AI が説明し、話し合い、理解度を確かめます。根気のある仲間と学ぶような感覚で、何を学ぶかは自分で決められます。",
+        "f1": {
+          "title": "どの授業にも学習グループ",
+          "body": "先生、クラスメート、アシスタントはすべて AI が務め、ひとつの考えをいろいろな角度から説明します。"
+        },
+        "f2": {
+          "title": "スライドとホワイトボード",
+          "body": "どの授業にも、スライド、ライブのホワイトボード、視覚的な解説が付きます。"
+        },
+        "f3": {
+          "title": "クイズとプロジェクト",
+          "body": "クイズで理解を確かめ、プロジェクト型の課題で実践できます。"
+        },
+        "f4": {
+          "title": "音声ナレーション",
+          "body": "各シーンを読み上げでき、音声で答えることもできます。"
+        },
+        "f5": {
+          "title": "クラスと共有",
+          "body": "招待コードでクラスに参加できます。講座は管理者の承認後に、他の会員と共有できます。"
+        },
+        "f6": {
+          "title": "持ち出しも自由",
+          "body": "講座を Web ページ、PowerPoint ファイル、動画として書き出せます。"
+        }
+      },
+      "previewsSubtitle": "これらの講座は、アカウントなしですぐに開けます。",
+      "perks": {
+        "p1": "AI で講座を作れる月間利用枠",
+        "p2": "招待コードでクラスに参加",
+        "p3": "講座を他の会員と共有",
+        "p4": "講座を Web ページ、PowerPoint、動画で書き出し"
+      },
+      "cta": {
+        "title": "まずは自分の目で確かめませんか？",
+        "body": "無料の試聴講座を先にご覧いただくか、準備ができたらログインしてください。"
+      },
+      "footerTagline": "ÔN THI · オープンソースプロジェクト OpenMAIC をベースに構築",
+      "trust": {
+        "title": "AI を、慎重に使う",
+        "subtitle": "AI をまだ信頼できないという方も多いと理解しています。信頼していただくために、次のことを大切にしています。",
+        "t1": {
+          "title": "主導権はあなたに",
+          "body": "AI は説明と練習をお手伝いするだけです。何を学ぶかは自分で選べ、いつでもやめられます。"
+        },
+        "t2": {
+          "title": "共有の前に確認",
+          "body": "講座は、管理者が確認してから他の会員に表示されます。"
+        },
+        "t3": {
+          "title": "限界も正直に",
+          "body": "AI は間違えることがあります。大切なことは、先生や信頼できる情報源で確かめてください。"
+        },
+        "t4": {
+          "title": "見てから決める",
+          "body": "無料の試聴は誰でも利用でき、アカウントも義務も必要ありません。"
+        }
+      }
+    },
+    "locked": {
+      "membership": "AI での講座作成は会員向けの機能です。",
+      "classes": "クラスへの参加は会員向けの機能です。",
+      "contactAdmin": "会員への追加は管理者にご依頼ください。",
+      "quota": "今月の AI 利用枠を使い切りました。",
+      "quotaReset": "講座の作成は {{date}} から再開できます。"
+    },
+    "quota": {
+      "label": "今月の AI 利用枠",
+      "used": "{{used}} / {{quota}} トークン使用済み"
+    },
+    "classes": {
+      "mine": "マイクラス"
+    },
+    "status": {
+      "ok": "会員期限 {{date}} · 残り {{days}} 日",
+      "expiring": "会員資格は {{date}} に終了します（残り {{days}} 日）。更新は管理者にご依頼ください。",
+      "quotaNear": "今月の AI 利用枠の {{percent}}% を使用しました。",
+      "quotaOut": "今月の AI 利用枠を使い切りました。作成済みの講座は引き続き学習できます。",
+      "expired": "会員資格は {{date}} に終了しました。作成済みの講座は引き続き閲覧できます。新しい講座を作るには、管理者に更新をご依頼ください。",
+      "suspended": "会員資格は一時停止中です。作成済みの講座は引き続き閲覧できます。再開は管理者にご依頼ください。"
+    },
+    "continue": {
+      "title": "学習を続ける",
+      "progress": "シーン {{current}} / {{total}}",
+      "button": "続ける"
+    },
+    "myClasses": {
+      "members": "メンバー：{{count}}",
+      "noCourses": "このクラスにはまだ講座がありません。",
+      "untitled": "講座 {{number}}"
+    },
+    "starter": {
+      "title": "どこから始めるか迷ったら、こちらをどうぞ：",
+      "one": "[トピック]を初心者向けに順を追って説明して",
+      "two": "[トピック]の 1 週間の復習計画を作って",
+      "three": "[トピック]の練習問題を解答付きで作って"
+    },
+    "access": {
+      "prompt": "管理者に会員への追加を依頼してください。",
+      "promptRenew": "管理者に会員資格の更新を依頼してください。",
+      "notePlaceholder": "ひとこと（任意）：あなたが誰か、なぜ必要か",
+      "button": "利用を申請する",
+      "renewButton": "更新を申請する",
+      "pending": "{{date}} に申請を送信しました。管理者が確認します。",
+      "rejected": "前回の申請は承認されませんでした。{{date}} 以降に再度申請できます。",
+      "suspended": "管理者が会員資格を一時停止しています。再開は管理者に依頼してください。",
+      "refusalReason": "理由：{{reason}}"
+    },
+    "contribution": {
+      "title": "私の貢献",
+      "shared": "共有した講座",
+      "pending": "審査待ち",
+      "readers": "読者",
+      "bonus": "今月の報酬",
+      "bonusValue": "+{{tokens}} / {{cap}} トークン",
+      "badges": "バッジ",
+      "badge": {
+        "readers-10": "読者 10 人",
+        "readers-100": "読者 100 人",
+        "challenge-top3": "週間チャンピオン"
+      },
+      "next": "「{{badge}}」バッジまであと読者 {{count}} 人です。",
+      "readersOf": "読者 {{count}} 人",
+      "rejected": "却下",
+      "rejectedWithReason": "却下：{{reason}}"
+    },
+    "focus": {
+      "add": "学んでいる科目を追加",
+      "summary": "学習中：{{focus}}",
+      "subjectPlaceholder": "科目（例：数学）",
+      "levelPlaceholder": "レベル（例：高校 1 年）",
+      "save": "保存"
+    },
+    "composer": {
+      "title": "今日は何を学びたいですか？"
+    },
+    "renew": {
+      "pending": "{{date}} に更新を申請しました。",
+      "rejected": "更新の申請は承認されませんでした。{{date}} から再申請できます。"
+    }
   },
   "toolbar": {
     "pdfParser": "パーサー",
@@ -44,7 +226,9 @@
     "ttsPreview": "プレビュー",
     "ttsPreviewing": "再生中...",
     "interactiveModeHint": "インタラクティブ優先モードを有効にして、より実践的なコンテンツを生成",
-    "interactiveModeLabel": "インタラクティブモード"
+    "interactiveModeLabel": "インタラクティブモード",
+    "advanced": "詳細設定",
+    "advancedHint": "詳細設定：モデル、ウェブ検索、画像・動画、インタラクティブモード、エージェント。標準では ÔN THI が内容に合ったモデルを選び、図解とインタラクティブな活動を加えます。"
   },
   "export": {
     "pptx": "PPTXエクスポート",
@@ -170,6 +354,24 @@
       "qa": "Q&A",
       "discussion": "議論",
       "lecture": "講義"
+    },
+    "actionTag": {
+      "spotlight": "スポットライト",
+      "laser": "レーザー",
+      "play": "再生",
+      "open": "開く",
+      "close": "閉じる",
+      "clear": "クリア",
+      "delete": "削除",
+      "text": "テキスト",
+      "shape": "図形",
+      "chart": "グラフ",
+      "formula": "数式",
+      "table": "表",
+      "line": "線",
+      "code": "コード",
+      "editCode": "コード編集",
+      "discuss": "ディスカッション"
     }
   },
   "actions": {
@@ -406,7 +608,16 @@
       "sendBackward": "背面へ移動",
       "alignTop": "上揃え",
       "alignMiddle": "垂直中央揃え",
-      "alignBottom": "下揃え"
+      "alignBottom": "下揃え",
+      "centerBoth": "スライドの中央に配置",
+      "setLink": "リンクを設定",
+      "ruler": "ルーラー",
+      "gridLines": "グリッド線",
+      "gridNone": "なし",
+      "gridSmall": "小",
+      "gridMedium": "中",
+      "gridLarge": "大",
+      "resetPage": "このページをクリア"
     },
     "background": {
       "label": "背景",
@@ -639,7 +850,7 @@
       "shortTitle": "編成"
     },
     "elementRef": {
-      "remove": "移除引用 {{label}}",
+      "remove": "参照 {{label}} を削除",
       "counts": "参照 {{count}}/{{max}}",
       "exitPicking": "選択を終了",
       "startPicking": "要素を参照"
@@ -733,7 +944,13 @@
     "voiceInputDisabled": "音声入力無効",
     "textInput": "テキスト入力",
     "stopRecording": "録音を停止",
-    "startRecording": "録音を開始"
+    "startRecording": "録音を開始",
+    "toggleSidebar": "シーン一覧の表示・非表示",
+    "toggleChat": "チャットの表示・非表示",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "play": "再生",
+    "pause": "一時停止"
   },
   "pbl": {
     "emptyProject": "PBLプロジェクトがまだ生成されていません。コース生成から作成してください。",
@@ -951,7 +1168,8 @@
         },
         "durationMinutes": "{{m}} 分",
         "durationHours": "{{h}} 時間",
-        "durationHoursMinutes": "{{h}} 時間 {{m}} 分"
+        "durationHoursMinutes": "{{h}} 時間 {{m}} 分",
+        "stars": "スター"
       },
       "completionCard": {
         "title": "プロジェクト完了 · Completion",
@@ -1010,8 +1228,10 @@
     "deleteFolderConfirmRemove": "フォルダとコース（チャット履歴を含む）が削除されます。",
     "deleteFolderAndCourses_other": "フォルダと {{count}} 件のコースを削除",
     "notFound": "コースが見つかりません",
-    "notFoundDesc": "このコースは存在しないか、すでに削除されています。",
-    "backToHome": "ホームに戻る"
+    "notFoundDesc": "このコースは存在しないか、削除されたか、閲覧する権限がありません。",
+    "backToHome": "ホームに戻る",
+    "loadFailed": "ストレージを利用できません。保存済みの教室を読み込めませんでした。",
+    "deleteFailed": "教室を削除できませんでした"
   },
   "upload": {
     "pdfSizeLimit": "50MBまでのPDFファイルに対応しています",
@@ -1442,16 +1662,16 @@
     "voxcpmStopPreview": "試聴を停止",
     "voxcpmPreviewVoice": "音色を試聴",
     "voxcpmDeleteVoice": "音色を削除",
-    "qwenCloneVoicesTitle": "Qwen TTS Cloned Voices",
-    "qwenCloneRefText": "Enter the verbatim transcript of the reference audio",
-    "qwenCloneRefAudioHint": "Use a clean 1–60 second voice sample. A 10–20 second sample is recommended; audio is converted to 24 kHz mono PCM WAV.",
-    "qwenCloneSaved": "Qwen cloned voice registered and saved",
-    "qwenCloneSaveFailed": "Failed to register the Qwen cloned voice",
-    "qwenCloneUnsupported": "Recording is not supported in this browser; upload an audio file instead.",
-    "qwenCloneSpeedHint": "Cloned voices always synthesize at 1× speed.",
-    "qwenCloneDeleteWarning": "The voice was removed locally, but provider deletion failed.",
-    "qwenCloneNarrationUnavailable": "The assigned voice is unavailable. Narration will use another enabled voice instead.",
-    "qwenCloneDiscussionUnavailable": "The assigned voice is unavailable. Discussion will use another enabled voice instead.",
+    "qwenCloneVoicesTitle": "Qwen TTS のクローン音声",
+    "qwenCloneRefText": "参照音声の文字起こしをそのまま入力してください",
+    "qwenCloneRefAudioHint": "1〜60 秒のクリアな音声サンプルを使用してください。10〜20 秒を推奨します。音声は 24 kHz モノラル PCM WAV に変換されます。",
+    "qwenCloneSaved": "Qwen のクローン音声を登録して保存しました",
+    "qwenCloneSaveFailed": "Qwen のクローン音声を登録できませんでした",
+    "qwenCloneUnsupported": "このブラウザは録音に対応していません。代わりに音声ファイルをアップロードしてください。",
+    "qwenCloneSpeedHint": "クローン音声は常に 1× の速度で合成されます。",
+    "qwenCloneDeleteWarning": "音声はローカルから削除されましたが、プロバイダー側での削除に失敗しました。",
+    "qwenCloneNarrationUnavailable": "割り当てられた音声は利用できません。ナレーションには別の有効な音声が使われます。",
+    "qwenCloneDiscussionUnavailable": "割り当てられた音声は利用できません。ディスカッションには別の有効な音声が使われます。",
     "providerOpenAIWhisper": "OpenAI ASR (gpt-4o-mini-transcribe)",
     "providerBrowserNative": "ブラウザネイティブASR",
     "providerQwenASR": "Qwen ASR（Alibaba Cloud百錬）",
@@ -1799,55 +2019,55 @@
     "webSearchBaseUrl": "ベースURL",
     "webSearchServerConfigured": "サーバー側で検索APIキーが設定済みです",
     "optional": "任意",
-    "selectProvider": "Select Provider",
-    "customProvider": "Custom",
-    "presetPickHint": "Picking a provider auto-fills its base URL and protocol; enter your key then click \"Fetch Models\". Not listed? Use \"Custom\".",
+    "selectProvider": "プロバイダーを選択",
+    "customProvider": "カスタム",
+    "presetPickHint": "プロバイダーを選ぶと Base URL とプロトコルが自動入力されます。キーを入力して「モデルを取得」をクリックしてください。一覧にない場合は「カスタム」を使用してください。",
     "presetCategory": {
-      "tokenPlan": "Token Plans",
-      "aggregator": "Aggregators",
-      "thirdParty": "Vendors",
-      "official": "Official"
+      "tokenPlan": "トークンプラン",
+      "aggregator": "アグリゲーター",
+      "thirdParty": "ベンダー",
+      "official": "公式"
     },
-    "fetchModels": "Fetch Models",
-    "fetchModelsResult": "Fetched {total} models, added {added}",
-    "fetchModelsNoEndpoint": "This provider has no model list endpoint — add models manually",
-    "fetchModelsAuthError": "API key is invalid or expired",
-    "fetchModelsFailed": "Failed to fetch models",
+    "fetchModels": "モデルを取得",
+    "fetchModelsResult": "{total} 件のモデルを取得し、{added} 件を追加しました",
+    "fetchModelsNoEndpoint": "このプロバイダーにはモデル一覧のエンドポイントがありません。モデルを手動で追加してください",
+    "fetchModelsAuthError": "API キーが無効か期限切れです",
+    "fetchModelsFailed": "モデルを取得できませんでした",
     "usage": {
-      "title": "Usage",
-      "refresh": "Refresh",
-      "disclaimer": "Usage is system-tracked; only server-side calls are counted.",
-      "totalRequests": "Requests",
-      "totalTokens": "LLM Tokens",
-      "dailyTrend": "Daily Token Trend",
-      "tokens": "Tokens",
-      "byModel": "By Model",
-      "model": "Model",
-      "type": "Type",
-      "reqs": "Reqs",
-      "usage": "Usage",
-      "empty": "No usage data yet",
+      "title": "使用状況",
+      "refresh": "更新",
+      "disclaimer": "使用状況はシステムで記録され、サーバー側の呼び出しのみが集計されます。",
+      "totalRequests": "リクエスト",
+      "totalTokens": "LLM トークン",
+      "dailyTrend": "日別トークン推移",
+      "tokens": "トークン",
+      "byModel": "モデル別",
+      "model": "モデル",
+      "type": "種類",
+      "reqs": "回数",
+      "usage": "使用量",
+      "empty": "使用データはまだありません",
       "kindLlm": "LLM",
-      "kindImage": "Image",
+      "kindImage": "画像",
       "kindVideo": "Video",
-      "kindTts": "Speech",
+      "kindTts": "音声",
       "kindAsr": "ASR",
-      "unitToken": "tokens",
-      "unitImage": "images",
-      "unitSecond": "sec",
-      "unitCharacter": "chars"
+      "unitToken": "トークン",
+      "unitImage": "枚",
+      "unitSecond": "秒",
+      "unitCharacter": "文字"
     },
     "tokenPlan": {
       "nav": "Token Plan",
-      "title": "Token Plan Setup",
-      "desc": "Pick your token plan provider and enter the key — it auto-configures every adapted modality (LLM/image/video/speech/web search).",
-      "selectPlan": "Select Provider",
-      "apiKey": "API Key",
-      "enable": "Enable",
-      "updateKey": "Update key",
-      "modelsCount": "{{n}} models",
-      "capabilities": "Capabilities offered",
-      "offeredNote": "Models offered by this plan. Pick the ones you want on the generation bar — availability depends on your plan tier, and unsupported models will error at generation time."
+      "title": "トークンプランの設定",
+      "desc": "トークンプランのプロバイダーを選んでキーを入力すると、対応するすべてのモダリティ（LLM/画像/動画/音声/ウェブ検索）が自動設定されます。",
+      "selectPlan": "プロバイダーを選択",
+      "apiKey": "API キー",
+      "enable": "有効にする",
+      "updateKey": "キーを更新",
+      "modelsCount": "{{n}} 個のモデル",
+      "capabilities": "利用できる機能",
+      "offeredNote": "このプランで提供されるモデルです。生成バーに表示したいものを選んでください。利用可否はプランのランクによって異なり、非対応のモデルは生成時にエラーになります。"
     },
     "skills": {
       "nav": "スキル",
@@ -1866,7 +2086,7 @@
       "download": "ダウンロード",
       "detailFailed": "スキル詳細を読み込めませんでした",
       "contentLabel": "内容",
-      "builtinDetailNote": "このスキルは OpenMAIC に同梱されています。他のエージェントワークスペースにインポートするにはダウンロードしてください。",
+      "builtinDetailNote": "このスキルは ÔN THI に同梱されています。他のエージェントワークスペースにインポートするにはダウンロードしてください。",
       "upload": "アップロード",
       "uploading": "アップロード中…",
       "uploadFailed": "スキルをアップロードできませんでした。ファイルを確認して再試行してください。",
@@ -1881,82 +2101,82 @@
     "alidocmindAccessKeySecret": "AccessKey Secret"
   },
   "workspace": {
-    "untitledCourse": "未命名课堂",
-    "sceneCount": "{{count}} 页",
-    "sceneCount_one": "{{count}} 页",
-    "sceneCount_other": "{{count}} 页",
-    "courseLinkHint": "在右侧打开《{{name}}》",
-    "courseLinkMore": "还有 {{count}} 节课堂",
+    "untitledCourse": "無題のコース",
+    "sceneCount": "{{count}} ページ",
+    "sceneCount_one": "{{count}} ページ",
+    "sceneCount_other": "{{count}} ページ",
+    "courseLinkHint": "右側のパネルで {{name}} を開く",
+    "courseLinkMore": "ほかに {{count}} 件の教室",
     "courseMention": {
-      "title": "为这条消息引用课堂",
-      "empty": "没有匹配的课堂",
-      "alreadyNamed": "已引用",
-      "remove": "移除{{name}}",
-      "pillHint": "这条消息引用了「{{name}}」",
+      "title": "このメッセージで教室を参照",
+      "empty": "一致する教室はありません",
+      "alreadyNamed": "参照済み",
+      "remove": "{{name}} を削除",
+      "pillHint": "このメッセージは {{name}} を参照しています",
       "notAccepted": "サーバーは一時的に利用できません。しばらくしてからもう一度お試しください。",
-      "reference": "引用「{{name}}」",
-      "capped": "仅显示前 {{count}} 个，继续输入以缩小范围"
+      "reference": "{{name}} を参照",
+      "capped": "最初の {{count}} 件を表示中 — 入力を続けて絞り込めます"
     },
-    "heroTitle": "What will you create today?",
-    "heroSubtitle": "Share an idea and turn it into a learning journey people can step into",
-    "newSession": "New chat",
+    "heroTitle": "今日は何を作りますか？",
+    "heroSubtitle": "アイデアを共有して、誰もが参加できる学びの旅に変えましょう",
+    "newSession": "新しいチャット",
     "sections": {
-      "courses": "Courses",
-      "sessions": "Chats"
+      "courses": "コース",
+      "sessions": "チャット"
     },
-    "coursesEmpty": "No courses yet",
-    "sessionsEmpty": "No chats yet",
-    "loading": "Loading",
-    "loadFailed": "Couldn't load",
-    "retry": "Retry",
-    "untitledSession": "Untitled chat",
-    "pagePosition": "Page {{index}} of {{total}}",
-    "exitPro": "Exit Pro",
-    "navAria": "Workspace navigation",
-    "homeAria": "Back to home",
-    "currentSession": "Current chat",
+    "coursesEmpty": "まだコースがありません",
+    "sessionsEmpty": "まだチャットがありません",
+    "loading": "読み込み中",
+    "loadFailed": "読み込めませんでした",
+    "retry": "再試行",
+    "untitledSession": "無題のチャット",
+    "pagePosition": "{{total}} ページ中 {{index}} ページ",
+    "exitPro": "Pro を終了",
+    "navAria": "ワークスペースのナビゲーション",
+    "homeAria": "ホームに戻る",
+    "currentSession": "現在のチャット",
     "startLearning": "学習を開始",
     "time": {
-      "justNow": "Just now",
-      "minutesAgo": "{{count}}m ago",
-      "hoursAgo": "{{count}}h ago",
-      "daysAgo": "{{count}}d ago"
+      "justNow": "たった今",
+      "minutesAgo": "{{count}} 分前",
+      "hoursAgo": "{{count}} 時間前",
+      "daysAgo": "{{count}} 日前"
     },
     "sessionStatus": {
-      "connecting": "Connecting",
-      "queued": "Queued",
-      "running": "Running",
-      "succeeded": "Ready",
-      "failed": "Needs attention",
-      "cancelled": "Stopped"
+      "connecting": "接続中",
+      "queued": "待機中",
+      "running": "実行中",
+      "succeeded": "完了",
+      "failed": "要確認",
+      "cancelled": "停止済み"
     },
-    "backToWorkspace": "Back to workspace",
-    "searchPlaceholder": "Filter by name",
-    "searchAria": "Search {{section}}",
-    "searchEmpty": "No matches",
-    "showMore": "Show {{count}} more",
-    "showLess": "Show less",
-    "utilitiesAria": "Preferences and account",
-    "resizeAria": "Drag to resize the sidebar",
-    "chatPaneAria": "Chat panel",
-    "classroomPaneAria": "Classroom",
-    "collapseNav": "Collapse navigation",
-    "expandNav": "Expand navigation",
-    "expandNavInto": "Expand navigation · {{section}}",
-    "collapseChat": "Collapse conversation",
-    "expandChat": "Conversation",
-    "collapseClassroom": "Collapse classroom",
-    "expandClassroom": "Classroom",
-    "readOnlyBadge": "Read-only",
-    "noCourseTitle": "No course open",
+    "backToWorkspace": "ワークスペースに戻る",
+    "searchPlaceholder": "名前で絞り込む",
+    "searchAria": "{{section}} を検索",
+    "searchEmpty": "一致する項目はありません",
+    "showMore": "さらに {{count}} 件表示",
+    "showLess": "表示を減らす",
+    "utilitiesAria": "設定とアカウント",
+    "resizeAria": "ドラッグしてサイドバーのサイズを変更",
+    "chatPaneAria": "チャットパネル",
+    "classroomPaneAria": "教室",
+    "collapseNav": "ナビゲーションを折りたたむ",
+    "expandNav": "ナビゲーションを展開",
+    "expandNavInto": "ナビゲーションを展開 · {{section}}",
+    "collapseChat": "会話を折りたたむ",
+    "expandChat": "会話",
+    "collapseClassroom": "教室を折りたたむ",
+    "expandClassroom": "教室",
+    "readOnlyBadge": "閲覧のみ",
+    "noCourseTitle": "開いているコースはありません",
     "noCourseHint": "会話内のコースリンクから開くか、左のリストから選んでください。会話はそのまま残ります",
-    "resizeChatAria": "Drag to resize the conversation pane",
-    "firstPageLanding": "The first page is landing…",
+    "resizeChatAria": "ドラッグして会話パネルのサイズを変更",
+    "firstPageLanding": "最初のページを準備中…",
     "autoSaving": "自動保存中…",
     "autoSaved": "保存済み",
-    "collapsedTitle": "Both panes are collapsed",
-    "collapsedHint": "Use the tabs on the left to bring the conversation or the classroom back",
-    "moreUtilities": "More",
+    "collapsedTitle": "両方のパネルが折りたたまれています",
+    "collapsedHint": "左側のタブで会話または教室を再表示できます",
+    "moreUtilities": "その他",
     "rowMore": "{{name}}のその他の操作",
     "folderDeleteHint": "フォルダー内のコースはトップレベルに戻ります。削除はされません。",
     "dropToUnfile": "ここにドロップするとフォルダーから外れます",
@@ -1970,7 +2190,7 @@
     "confirmDelete": "削除を確認",
     "deleting": "削除中…",
     "deleteFailed": "削除できませんでした。もう一度お試しください。",
-    "tabsAria": "Chats and courses",
+    "tabsAria": "チャットとコース",
     "courseTabsAria": "開いているコース",
     "courseTabClose": "タブを閉じる：{{name}}",
     "courseTabRunning": "生成中",
@@ -2086,7 +2306,22 @@
         "roleFailed": "権限を変更できませんでした。もう一度お試しください。"
       },
       "roleChanged": "権限を更新しました。",
-      "changeRoleLabel": "{{username}} の権限を変更"
+      "changeRoleLabel": "{{username}} の権限を変更",
+      "columns": {
+        "username": "Account",
+        "role": "Role",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "resetPassword": "パスワードをリセット",
+      "resetPasswordLabel": "{{username}} のパスワードをリセット",
+      "resetTitle": "{{username}} のパスワードをリセットしますか？",
+      "resetDescription": "アカウントに一時パスワードが設定され、すべての端末でサインアウトされます。一時パスワードは一度だけ表示されます。本人に渡し、サインイン後に変更するよう伝えてください。操作は監査ログに記録されます。",
+      "resetDone": "{{username}} の一時パスワードです。今すぐコピーしてください。再表示されません。",
+      "resetCopy": "コピー",
+      "resetCopied": "一時パスワードをコピーしました。",
+      "resetClose": "完了"
     },
     "roles": {
       "learner": "学習者",
@@ -2095,23 +2330,51 @@
     },
     "administration": "管理",
     "adminPage": {
-      "title": "管理",
+      "title": "運用",
       "description": "このデプロイのアカウント、利用状況、権限を管理します。",
-      "denied": "このページは運用担当者と管理者のみ利用できます。"
+      "denied": "このページは運用担当者と管理者のみ利用できます。",
+      "learn": "学習画面へ",
+      "summary": {
+        "activeMembers": "有効な会員",
+        "pendingShares": "承認待ちの共有申請",
+        "classes": "クラス",
+        "pendingAccessRequests": "待機中の利用申請"
+      },
+      "providers": {
+        "title": "サーバーのプロバイダー",
+        "description": "読み取り専用です。プロバイダーはサーバーの設定で指定します。",
+        "empty": "サーバーにプロバイダーが設定されていません。"
+      },
+      "deniedSignIn": "オペレーターまたは管理者のアカウントでサインインしてください。"
+    },
+    "membership": {
+      "active": "会員期限 {{date}} · 月 {{quota}} トークン",
+      "none": "有効な会員資格はありません"
+    },
+    "password": {
+      "title": "パスワードを変更",
+      "description": "他の端末はサインアウトされ、この端末はサインインしたままです。",
+      "current": "現在のパスワード",
+      "new": "新しいパスワード",
+      "confirm": "新しいパスワード（確認）",
+      "submit": "変更する",
+      "changed": "パスワードを変更しました。他の端末はサインアウトされました。",
+      "wrongCurrent": "現在のパスワードが正しくありません。",
+      "mismatch": "新しいパスワードが一致しません。"
     }
   },
   "proMode": {
     "attach": "教材を添付",
-    "mentionCourse": "引用课堂",
-    "loadSkill": "加载 skill",
-    "skillMenuTitle": "选择课程设计技能",
-    "skillsLoading": "正在加载 skill…",
-    "noSkillsAvailable": "暂无可用 skill",
-    "userSkillsGroup": "我的 Skill",
-    "builtinSkillsGroup": "内置 Skill",
-    "skillsLoadFailed": "Skill 加载失败，点击重试",
-    "retrySkills": "重试",
-    "noSkillMatch": "没有匹配“{{query}}”的 Skill",
+    "mentionCourse": "教室を参照",
+    "loadSkill": "Skill を読み込む",
+    "skillMenuTitle": "コース設計の Skill を選択",
+    "skillsLoading": "Skill を読み込み中…",
+    "noSkillsAvailable": "利用できる Skill はありません",
+    "userSkillsGroup": "マイ Skill",
+    "builtinSkillsGroup": "組み込み Skill",
+    "skillsLoadFailed": "Skill を読み込めませんでした。クリックして再試行",
+    "retrySkills": "再試行",
+    "noSkillMatch": "“{{query}}” に一致する Skill はありません",
     "badgeAria": "Pro モード",
     "badgeEnter": "Pro モード",
     "badgeExit": "通常モードに戻る",
@@ -2149,7 +2412,25 @@
       "quotaValue": "月 {{tokens}} トークン",
       "grant": "付与・延長",
       "resume": "再開",
-      "suspend": "停止"
+      "suspend": "停止",
+      "columns": {
+        "username": "Account",
+        "status": "Status",
+        "expires": "Expires"
+      },
+      "empty": "No accounts yet.",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}'s membership?",
+      "revokeDescription": "They lose the right to generate at once. The change is written to the audit log.",
+      "revoked": "Revoked {{name}}'s membership.",
+      "grantTitle": "Grant or extend for {{name}}",
+      "grantDescription": "Adds the days to the current expiry (or from today if it has expired) and sets the monthly token allowance.",
+      "editTitle": "Edit {{name}}'s membership",
+      "editDescription": "Sets the exact expiry date and monthly token allowance. The change is written to the audit log.",
+      "updated": "Membership updated.",
+      "invalidQuota": "The allowance must be a whole number, 0 or more.",
+      "invalidDays": "Days must be a whole number, 1 or more.",
+      "invalidDate": "Choose an expiry date."
     },
     "shares": {
       "title": "共有リクエスト",
@@ -2159,7 +2440,24 @@
       "reject": "却下",
       "approved": "コースを会員に公開しました。",
       "rejected": "リクエストを却下しました。",
-      "requested": "{{date}} にリクエスト"
+      "requested": "{{date}} にリクエスト",
+      "columns": {
+        "title": "Course"
+      },
+      "state": {
+        "pending": "Waiting",
+        "shared": "Shared",
+        "update": "更新"
+      },
+      "revoke": "Unshare",
+      "revokeTitle": "Unshare “{{title}}”?",
+      "revokeDescription": "Members can no longer open this course from the shared catalog. The change is written to the audit log.",
+      "revoked": "Course unshared.",
+      "rejectTitle": "「{{title}}」の共有を却下しますか？",
+      "rejectDescription": "所有者には却下されたことと（記入した場合は）理由が表示され、再申請できます。",
+      "rejectReason": "理由（任意）",
+      "snapshot": "パッケージ：「{{name}}」、{{count}} シーン、メディア {{media}} 件、{{size}}",
+      "remixOf": "「{{title}}」のリミックス"
     },
     "previews": {
       "title": "無料プレビュー",
@@ -2167,7 +2465,10 @@
       "courseId": "コース ID",
       "add": "プレビューに設定",
       "remove": "削除",
-      "empty": "まだプレビューはありません。"
+      "empty": "まだプレビューはありません。",
+      "marked": "Marked on",
+      "removeTitle": "Remove the preview {{id}}?",
+      "removeDescription": "Visitors without an account can no longer open this course. The change is written to the audit log."
     },
     "classes": {
       "title": "クラス",
@@ -2178,12 +2479,247 @@
       "empty": "まだクラスはありません。",
       "members": "{{count}} 人",
       "courses": "{{count}} コース",
-      "attach": "コースを追加"
+      "attach": "コースを追加",
+      "columns": {
+        "members": "Members",
+        "courses": "Attached courses"
+      },
+      "detach": "Detach course {{id}} from the class",
+      "deleteTitle": "Delete the class “{{name}}”?",
+      "deleteDescription": "{{count}} member(s) leave the class and its courses are detached (the courses themselves stay). The change is written to the audit log.",
+      "deleted": "Class {{name}} deleted.",
+      "renameTitle": "Rename class",
+      "renamed": "Class renamed.",
+      "newCode": "新しい参加コード",
+      "newCodeTitle": "「{{name}}」の参加コードを新しくしますか？",
+      "newCodeDescription": "現在のコードはすぐに使えなくなります。すでにクラスにいるメンバーはそのままです。新しいコードは一度だけ表示されるので、すぐにコピーしてください。",
+      "membersOf": "{{name}} のメンバー",
+      "membersDescription": "外されたメンバーはクラスコードで再参加できます。防ぐには新しいコードを発行してください。",
+      "noMembers": "メンバーはまだいません。",
+      "joined": "{{date}} に参加",
+      "removeMember": "外す",
+      "removeMemberTitle": "{{username}} を {{name}} から外しますか？",
+      "removeMemberDescription": "このクラスのコースは開けなくなります。操作は監査ログに記録されます。",
+      "memberRemoved": "{{username}} をクラスから外しました。"
     },
     "audit": {
       "title": "監査ログ",
       "description": "アカウント、会員、共有、クラスの最近の変更。",
-      "empty": "まだ記録はありません。"
+      "empty": "まだ記録はありません。",
+      "columns": {
+        "time": "Time",
+        "actor": "By",
+        "action": "Action",
+        "target": "Target",
+        "details": "Details"
+      },
+      "categories": {
+        "changes": "All changes",
+        "membership": "Memberships",
+        "access": "Access requests",
+        "share": "Course shares",
+        "preview": "Previews",
+        "class": "Classes",
+        "set_role": "Role changes",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "password_reset": "パスワードのリセット"
+      },
+      "actions": {
+        "membership_grant": "Membership granted",
+        "membership_update": "Membership edited",
+        "membership_revoke": "Membership revoked",
+        "membership_suspended": "Membership suspended",
+        "membership_active": "Membership resumed",
+        "access_approve": "Access approved",
+        "access_reject": "Access rejected",
+        "share_approve": "Share approved",
+        "share_reject": "Share rejected",
+        "share_revoke": "Share revoked",
+        "preview_on": "Preview added",
+        "preview_off": "Preview removed",
+        "class_create": "Class created",
+        "class_rename": "Class renamed",
+        "class_delete": "Class deleted",
+        "class_attach": "Course attached",
+        "class_detach": "Course detached",
+        "set_role_learner": "Role: learner",
+        "set_role_operator": "Role: operator",
+        "set_role_admin": "Role: admin",
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "list": "Account list viewed",
+        "class_code": "参加コードを変更",
+        "password_reset": "パスワードのリセット",
+        "community_ban": "コミュニティ投稿を禁止",
+        "community_unban": "コミュニティ投稿の禁止を解除",
+        "class_remove": "メンバーを外した",
+        "challenge_create": "チャレンジ作成",
+        "challenge_update": "チャレンジ編集",
+        "settings_update": "設定変更",
+        "share_update-approve": "共有更新を承認",
+        "share_update-reject": "共有更新を却下"
+      }
+    },
+    "accessRequests": {
+      "title": "利用申請",
+      "description": "会員になりたい人の申請です。承認すると 30 日間と標準の月間利用枠が付与されます。あとで会員一覧で変更できます。",
+      "empty": "待機中の申請はありません。",
+      "requested": "{{date}} に申請",
+      "approve": "承認",
+      "reject": "却下",
+      "approved": "{{name}} が会員になりました。",
+      "rejected": "{{name}} の申請を却下しました。",
+      "reasonPlaceholder": "理由（任意。学習者に表示され、監査ログに記録されます）",
+      "note": "Note",
+      "reason": "Reason"
+    },
+    "ops": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "User support",
+        "content": "Content & classes",
+        "system": "Usage & system",
+        "audit": "Audit log",
+        "badge": "{{count}} need attention"
+      },
+      "refresh": "Refresh",
+      "loading": "Loading system health…",
+      "attention": {
+        "title": "Needs attention",
+        "description": "What needs an operator, worst first. Each button takes you to where it is handled.",
+        "empty": "All clear: nothing is waiting.",
+        "open": {
+          "overview": "View",
+          "support": "Go to support",
+          "content": "Go to content",
+          "system": "View system",
+          "audit": "View log"
+        }
+      },
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "alerts": {
+        "noProviders": "The server has no AI (LLM) provider: nobody can generate a course.",
+        "quotaOver": "{{count}} learner(s) used up this month's AI allowance and cannot generate.",
+        "accessRequestsOverdue": "{{count}} access request(s) waiting; the oldest has waited {{hours}} hours.",
+        "accessRequestsPending": "{{count}} access request(s) waiting for a decision.",
+        "quotaNear": "{{count}} learner(s) used more than 80% of this month's AI allowance.",
+        "expiringSoon": "{{count}} membership(s) expire within 7 days.",
+        "sharesOverdue": "{{count}} course share request(s) waiting; the oldest has waited {{hours}} hours.",
+        "sharesPending": "{{count}} course share request(s) waiting for a decision.",
+        "expired": "{{count}} membership(s) have expired; those learners cannot generate.",
+        "quiet": "No AI requests in the last {{count}} days although members are active. Check the providers.",
+        "supportWaiting": "{{count}} 件のサポート依頼が返信を待っています。",
+        "reportsOpen": "対応待ちのコミュニティ報告が {{count}} 件あります。"
+      },
+      "charts": {
+        "membership": {
+          "title": "Membership status",
+          "description": "Learners by membership state.",
+          "active": "Active",
+          "expiringSoon": "Expiring (7 days)",
+          "expired": "Expired",
+          "suspended": "Suspended",
+          "none": "No membership",
+          "empty": "No learners yet."
+        },
+        "quota": {
+          "title": "AI allowance this month",
+          "description": "Learners at 50% or more of their allowance, reader bonus included. Red: used up; amber: over 80%.",
+          "empty": "Nobody has used more than half of their allowance this month."
+        },
+        "activity": {
+          "title": "AI requests per day",
+          "description": "Last {{count}} days, {{total}} requests in total (UTC days). A sudden drop to zero usually means something broke.",
+          "empty": "No AI requests in this period."
+        },
+        "accounts": {
+          "title": "Accounts by role",
+          "description": "Enabled accounts by role; disabled accounts counted apart.",
+          "disabled": "Disabled"
+        },
+        "accessFlow": {
+          "title": "Membership request flow",
+          "description": "Learners ask; an operator approves or rejects.",
+          "pending": "Waiting",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "shareFlow": {
+          "title": "Course share flow",
+          "description": "Learners ask to share a course; once approved every member can open it.",
+          "pending": "Waiting",
+          "shared": "Shared"
+        },
+        "usageKinds": {
+          "title": "AI requests by kind",
+          "description": "Requests over the last {{count}} days, by kind of service."
+        },
+        "content": {
+          "title": "Classes & open content",
+          "description": "What is open to learners, and the classes with the most members.",
+          "shared": "Shared courses",
+          "previews": "Free previews",
+          "classes": "Classes",
+          "courses": "· {{count}} courses",
+          "empty": "No classes yet."
+        },
+        "providers": {
+          "title": "AI providers",
+          "description": "Which kinds of AI service the server has configured.",
+          "missing": "Not configured",
+          "unknown": "The provider list could not be loaded.",
+          "kinds": {
+            "providers": "Language model (LLM)",
+            "tts": "Text to speech",
+            "asr": "Speech recognition",
+            "pdf": "PDF reading",
+            "image": "Image generation",
+            "video": "Video generation",
+            "webSearch": "Web search"
+          }
+        }
+      },
+      "details": "Details",
+      "groups": {
+        "people": "People & support",
+        "queues": "Review queues",
+        "usage": "AI usage",
+        "system": "Content & system"
+      }
+    },
+    "table": {
+      "search": "Search…",
+      "all": "All",
+      "loading": "Loading…",
+      "noMatch": "No rows match the filters.",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Rows per page",
+      "rows": "{{count}} per page",
+      "prev": "Previous page",
+      "next": "Next page",
+      "page": "Page {{page}} of {{pages}}",
+      "actions": "Actions",
+      "requested": "Requested",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "courses": {
+      "title": "コース",
+      "description": "このシステムのすべてのコースです。開いて確認するか、ID をコピーしてお試し公開やクラスへの追加に使います。",
+      "open": "新しいタブでコースを開く",
+      "copy": "ID {{id}} をコピー",
+      "copied": "{{id}} をコピーしました",
+      "owner": "所有者",
+      "anonymous": "未ログイン",
+      "updated": "更新日",
+      "empty": "コースはまだありません。"
     }
   },
   "learning": {
@@ -2195,21 +2731,30 @@
       "NOT_FOUND": "見つかりません。",
       "MEMBERSHIP_REQUIRED": "この操作には有効な会員資格が必要です。",
       "QUOTA_EXCEEDED": "今月のAI利用枠を使い切りました。",
-      "ACCOUNTS_NOT_CONFIGURED": "このデプロイでは アカウント機能が有効ではありません。"
+      "ACCOUNTS_NOT_CONFIGURED": "このデプロイでは アカウント機能が有効ではありません。",
+      "ALREADY_MEMBER": "すでに有効な会員資格があります。",
+      "MEMBERSHIP_SUSPENDED": "会員資格は管理者により一時停止されています。",
+      "REQUEST_PENDING": "管理者の確認待ちの申請がすでにあります。",
+      "REQUEST_TOO_SOON": "却下された申請は、しばらくしてから再送できます。",
+      "COURSE_NOT_FOUND": "この ID のコースはありません。コースのアドレス（/classroom/<ID>）の ID を確認してください。",
+      "RATE_LIMITED": "未回答の問い合わせが多すぎます。返信をお待ちください。",
+      "COMMUNITY_BLOCKED": "あなたのアカウントはコミュニティへの投稿が禁止されています。"
     }
   },
   "catalog": {
     "title": "カタログ",
     "description": {
       "member": "無料プレビュー、共有コース、所属クラスのコース。",
-      "guest": "無料プレビューです。サインインするとさらに表示されます。"
+      "guest": "無料プレビューです。サインインするとさらに表示されます。",
+      "signedIn": "無料のお試しコースです。メンバーは共有コースと所属クラスも見られます。"
     },
     "signInToSee": "サインインすると、共有コースを見たりクラスに参加できます。",
     "join": {
       "title": "クラスに参加",
       "code": "参加コード",
       "submit": "参加",
-      "done": "{{name}} に参加しました。"
+      "done": "{{name}} に参加しました。",
+      "description": "受け取ったコードを入力すると、クラスに参加できます。"
     },
     "empty": "まだ閲覧できるものがありません。",
     "kind": {
@@ -2218,14 +2763,265 @@
       "class": "所属クラス"
     },
     "open": "開く",
-    "unavailable": "このデプロイではカタログを利用できません。"
+    "unavailable": "このデプロイではカタログを利用できません。",
+    "back": "カタログに戻る",
+    "membersOnly": "共有コースとクラスはメンバー向けです。"
   },
   "courseShare": {
     "request": "会員と共有",
-    "pending": "承認待ち",
     "stop": "共有を停止",
     "requested": "リクエストを送信しました。運用担当者が確認します。",
     "withdrawn": "共有を停止しました。すでに持っている学習者は、コピーを引き続き利用できます。",
-    "failed": "コースを共有できませんでした。もう一度お試しください。"
+    "failed": "コースを共有できませんでした。もう一度お試しください。",
+    "rejected": "共有の申請は却下されました。",
+    "rejectedWithReason": "共有の申請は却下されました：{{reason}}",
+    "requestWithdrawn": "共有の申請を取り下げました。",
+    "menu": "メンバーと共有",
+    "packing": "コースをパッケージ化しています…",
+    "updateSent": "更新を送信しました。承認されるまで読者には旧版が表示されます。",
+    "updatePending": "更新が審査待ちです。読者には承認済みの版が表示されます。",
+    "updateRejected": "更新は却下されました：{{reason}}",
+    "sharedStatus": "メンバーと共有中です。",
+    "pendingStatus": "運営の審査待ちです。",
+    "privateStatus": "まだ共有されていません。",
+    "update": "共有版を更新",
+    "resend": "最新版をもう一度送る",
+    "withdraw": "申請を取り下げる",
+    "reviewNote": "コースは今見ている状態のまま（編集とメディアを含めて）送られます。どの版も運営の承認が必要です。"
+  },
+  "support": {
+    "title": "管理者に問い合わせ",
+    "description": "運営チームに質問や依頼を送れます。返信はここに表示されます。",
+    "contact": "管理者に問い合わせ",
+    "panelTitle": "サポート受信箱",
+    "panelDescription": "学習者からの質問と依頼。返信待ちのものが先頭に並びます。",
+    "new": "新しい問い合わせ",
+    "subject": "件名",
+    "body": "本文",
+    "username": "送信先（ユーザー名）",
+    "send": "送信",
+    "reply": "返信",
+    "replyPlaceholder": "返信を書く…",
+    "close": "解決済みにする",
+    "reopen": "再開",
+    "empty": "問い合わせはまだありません。",
+    "pick": "問い合わせを選んで表示します。",
+    "staff": "運営チーム",
+    "waiting": "返信待ち",
+    "unread": "新着",
+    "unreadCount": "新しい返信 {{count}} 件",
+    "sent": "送信しました。",
+    "state": {
+      "open": "対応中",
+      "closed": "解決済み"
+    },
+    "filter": {
+      "label": "状態で絞り込み"
+    },
+    "subjects": {
+      "renew": "メンバーシップを更新したい",
+      "resume": "メンバーシップを再開したい",
+      "quota": "AI の上限を増やしたい"
+    }
+  },
+  "community": {
+    "title": "コミュニティ",
+    "description": "学習者がスライド上で直接した質問に、AI アシスタントと他のメンバーが答えます。",
+    "signIn": "コミュニティを見るにはサインインしてください。",
+    "empty": "まだ質問はありません。",
+    "answer": "回答する",
+    "answerPlaceholder": "回答を書く…（Markdown と $x^2$ のような数式が使えます）",
+    "answers": "回答 {{count}} 件",
+    "answerCount": "回答 {{count}} 件",
+    "vote": "役に立った（{{count}}）",
+    "best": "ベスト",
+    "bestMarked": "ベストアンサーを選びました。",
+    "bestRewarded": "選びました。{{name}} さんに {{tokens}} トークンの報酬。",
+    "solved": "解決済み",
+    "locked": "ロック中",
+    "lockedHint": "この質問はロックされ、回答を受け付けません。",
+    "hidden": "非表示",
+    "markBest": "ベストに選ぶ",
+    "openSlide": "スライドを開く",
+    "ai": {
+      "name": "AI アシスタント",
+      "writing": "AI アシスタントが回答を書いています…",
+      "retry": "もう一度 AI に聞く"
+    },
+    "ask": {
+      "button": "質問する",
+      "title": "質問",
+      "titlePlaceholder": "何がわかりませんか？",
+      "body": "詳細（任意）",
+      "bodyPlaceholder": "試したこと、つまずいた所…",
+      "submit": "質問を投稿",
+      "onScene": "質問はスライド「{{scene}}」に紐づきます。",
+      "onCourse": "質問はコース全体に紐づきます。",
+      "aiNote": "AI アシスタントがすぐに答え、他のメンバーも補足できます。"
+    },
+    "join": {
+      "title": "ディスカッションに参加",
+      "body": "メンバーは質問して AI アシスタントからすぐに答えをもらい、他の人を助け、回答がベストに選ばれると報酬トークンがもらえます。",
+      "cta": "メンバーになる"
+    },
+    "report": {
+      "action": "報告",
+      "title": "内容を報告",
+      "description": "この内容が不適切な理由を運営チームに伝えてください。",
+      "reason": "理由",
+      "send": "報告を送信",
+      "done": "報告を送りました。ありがとうございます。"
+    },
+    "mod": {
+      "hide": "非表示にする",
+      "show": "表示する",
+      "hidden": "内容を非表示にしました。",
+      "shown": "内容を再表示しました。",
+      "lock": "ロック",
+      "unlock": "ロック解除",
+      "ban": "投稿を禁止",
+      "banned": "{{name}} さんの投稿を禁止しました。",
+      "unban": "禁止を解除",
+      "unbanned": "{{name}} さんは再び投稿できます。"
+    },
+    "scene": {
+      "button": "このスライドのディスカッション",
+      "title": "ディスカッション",
+      "thisSlide": "このスライド",
+      "wholeCourse": "コース全体",
+      "scope": "範囲",
+      "pick": "質問を選んで読むか、新しく質問してください。"
+    },
+    "feed": {
+      "all": "すべて",
+      "unsolved": "未解決",
+      "mine": "自分の質問",
+      "filter": "質問を絞り込む",
+      "search": "質問を検索",
+      "pick": "質問を選ぶと回答が表示されます。",
+      "howToAsk": "質問したいときは、レッスンを開き、つまずいたスライドでツールバーのディスカッションボタンを押してください。"
+    },
+    "reports": {
+      "title": "コミュニティの報告",
+      "description": "報告された質問と回答。違反した内容を非表示にし、誤った報告は却下し、必要なら投稿者の投稿を禁止します。",
+      "empty": "対応待ちの報告はありません。",
+      "count": "報告 {{count}} 件",
+      "reasons": "理由",
+      "open": "開く",
+      "dismiss": "却下",
+      "dismissed": "報告を却下しました。",
+      "banned": "投稿禁止のアカウント",
+      "kind": {
+        "question": "質問",
+        "answer": "回答"
+      }
+    },
+    "tabs": {
+      "questions": "Q&A",
+      "challenges": "週間チャレンジ"
+    }
+  },
+  "challenge": {
+    "none": "まだチャレンジはありません。",
+    "pick": "チャレンジを選んで表示します。",
+    "entries": "提出 {{count}} 件",
+    "phase": {
+      "upcoming": "近日開始",
+      "open": "提出受付中",
+      "voting": "投票中",
+      "finished": "終了"
+    },
+    "when": {
+      "upcoming": "{{date}} に開始",
+      "open": "提出締切：{{date}}",
+      "voting": "投票締切：{{date}}",
+      "finished": "{{date}} に終了"
+    },
+    "prize": "{{rank}} 位：{{tokens}} トークン",
+    "prizeBadge": "+ 週間チャンピオンのバッジ",
+    "rank": "{{rank}} 位",
+    "yours": "あなたの提出",
+    "aiScore": "AI 評価 {{score}}/10",
+    "aiFeedback": "AI のコメント（あなたにだけ表示）",
+    "reward": "+{{tokens}} トークン",
+    "vote": "投票（{{count}}）",
+    "voteHint": "良いと思う解答に投票してください。自分の解答には投票できません。",
+    "yourEntry": "あなたの解答",
+    "editEntry": "解答を編集",
+    "entryPlaceholder": "解答を書く…（Markdown と $x^2$ のような数式が使えます）",
+    "gradeNote": "提出するとすぐに AI アシスタントが仮採点します。締切までは修正・再提出でき、他のメンバーは締切後に見られます。",
+    "grading": "提出して採点中…",
+    "submit": "解答を提出",
+    "resubmit": "再提出",
+    "submitted": "提出しました。AI の評価とコメントは下にあります。",
+    "notGraded": {
+      "quota": "提出しましたが、今月の AI 利用枠を使い切ったため採点されていません。",
+      "failed": "提出しましたが、AI が採点できませんでした。再提出してもう一度お試しください。"
+    },
+    "showReference": "模範解答を表示",
+    "hideReference": "模範解答を隠す",
+    "results": "結果",
+    "allEntries": "解答一覧",
+    "noEntries": "提出はありません。",
+    "leaderboard": {
+      "title": "今月のランキング",
+      "empty": "今月はまだ誰も得点していません。",
+      "points": "{{count}} ポイント",
+      "rule": "提出ごとに 1 ポイント、1 / 2 / 3 位に 3 / 2 / 1 ポイントを追加。"
+    },
+    "admin": {
+      "panelTitle": "週間チャレンジ",
+      "panelDescription": "チャレンジごとに問題、提出と投票の期間、報酬を設定します。投票終了時に結果が自動で決まります。",
+      "create": "新しいチャレンジ",
+      "edit": "チャレンジを編集",
+      "saved": "チャレンジを保存しました。",
+      "title": "タイトル",
+      "statement": "問題",
+      "markdownHint": "Markdown と $...$ の数式",
+      "reference": "模範解答（投票まで非公開）",
+      "referenceHint": "AI の仮採点に使います。学習者には投票開始後に表示されます。",
+      "opensAt": "開始日時",
+      "submissionDays": "提出期間（日）",
+      "votingDays": "投票期間（日）",
+      "rewards": "上位 3 名のトークン報酬",
+      "rewardsHint": "少額にしてください。報酬は各自の月間報酬上限に含まれます。",
+      "hidden": "このチャレンジを非表示"
+    },
+    "settings": {
+      "title": "週間チャレンジ：AI 採点",
+      "description": "提出ごとに AI が 1 回採点します。そのトークンを誰が負担するか選んでください。",
+      "paidBy": "AI 採点の費用負担",
+      "submitter": "提出者の利用枠",
+      "submitterHint": "利用枠を使い切った学習者も提出できますが、AI の評価は付きません。",
+      "system": "システム負担",
+      "systemHint": "学習者の利用枠は使わず、運営予算に計上します。",
+      "adminOnly": "この設定は管理者のみ変更できます。",
+      "saved": "設定を保存しました。"
+    }
+  },
+  "remix": {
+    "menu": "リミックス",
+    "action": "このコースをリミックス",
+    "creating": "リミックスを作成しています…",
+    "created": "リミックスができました。",
+    "note": "自分のコピーを作って編集し、もう一度共有できます。元の作者の名前が表示され、リミックスが読まれると報酬の一部が元の作者にも入ります。",
+    "of": "{{author}} さんの「{{title}}」のリミックス",
+    "list": "リミックス {{count}} 件",
+    "refused": {
+      "MEMBERSHIP_REQUIRED": "リミックスにはメンバーシップが必要です。",
+      "FORBIDDEN": "このコースはリミックスできません。",
+      "OWN_COURSE": "これはあなたのコースです。",
+      "RATE_LIMITED": "今日のリミックス上限に達しました。"
+    },
+    "settings": {
+      "title": "コースのリミックス",
+      "description": "読者報酬のうち元の作者の取り分と、1 人が 1 日に作れるリミックス数。",
+      "royaltyPercent": "元の作者の取り分（%）",
+      "dailyLimit": "1 日のリミックス上限"
+    }
+  },
+  "nav": {
+    "home": "ホーム",
+    "main": "メインナビゲーション"
   }
 }

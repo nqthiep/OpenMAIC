@@ -90,8 +90,15 @@
       "style-clone": "名師複刻",
       "teacher-style-clone": "名師風格",
       "vocational": "職業實訓",
-      "workshop-style": "互動工作坊"
-    }
+      "workshop-style": "互動工作坊",
+      "fact-check": "事實查核",
+      "feynman-learning": "費曼學習法",
+      "learning-to-learn": "學會學習（Learning to Learn）",
+      "social-emotional-learning": "社會情緒學習（SEL）",
+      "spiral-curriculum": "螺旋式課程設計",
+      "understanding-by-design": "理解為先的教學設計（UbD）"
+    },
+    "contentLoadFailed": "無法載入完整的 Skill 內容"
   },
   "thinking": {
     "active": "思考中…",
