@@ -15,6 +15,7 @@ import {
   type DocumentAccess,
 } from '@/lib/persistence/document-access';
 import { createOwnerBoundDocumentStore } from '@/lib/persistence/owner-bound-document-store';
+import { canReadStageDocument } from '@/lib/server/authz/viewer';
 import {
   authenticatePersistenceRequest,
   SHARED_ASSET_PRINCIPAL,
@@ -24,6 +25,11 @@ import {
   type PersistencePoolFactory,
 } from '@/lib/persistence/server-provider';
 import { readStageMeta } from '@/lib/persistence/stage-meta';
+import {
+  isValidClassroomId,
+  readClassroom,
+  readClassroomAccess,
+} from '@/lib/server/classroom-storage';
 import { APP_RUNTIME_PAYLOAD_VALIDATORS } from '@/lib/runtime/payload-validators';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 
@@ -161,6 +167,16 @@ async function createPersistenceHandler(
     assetStore,
     ...(byteEgress === undefined ? {} : { byteEgress }),
   });
+}
+
+/**
+ * A server-generated course lives in `data/classrooms/<id>.json` until its first open saves it as
+ * a document under the same id, and that save makes the saver the document's owner. Only the
+ * classroom's recorded owner may make it; a classroom with no recorded owner is claimed by nobody.
+ */
+async function mayClaimClassroomId(stageId: string, ownerId: string): Promise<boolean> {
+  if (!isValidClassroomId(stageId) || !(await readClassroom(stageId))) return true;
+  return (await readClassroomAccess(stageId))?.ownerId === ownerId;
 }
 
 function routeRelativePath(request: Request): string {
@@ -346,6 +362,8 @@ export async function handlePersistenceRequest(
                 .query('SELECT 1 FROM document_stages WHERE id = $1', [stageId])
                 .then((result) => result.rows.length > 0),
             (stageId) => readStageMeta(queryable, stageId),
+            (meta) => canReadStageDocument(request.headers, meta),
+            (stageId) => mayClaimClassroomId(stageId, ownerId),
           );
         }
 

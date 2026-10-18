@@ -7,6 +7,7 @@ import { makeDocument, makeSlideScene } from './_stage-fixtures';
 const mocks = vi.hoisted(() => ({
   runtimeConfigured: true,
   resolveRequestOwnerId: vi.fn(),
+  canRead: true,
   fakeStore: null as ReturnType<typeof createFakeDocumentStore> | null,
 }));
 
@@ -16,6 +17,9 @@ vi.mock('@/lib/config/feature-flags', () => ({
 }));
 vi.mock('@/lib/server/agent-runtime/owner', () => ({
   resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+}));
+vi.mock('@/lib/server/authz/viewer', () => ({
+  canReadStageById: async () => mocks.canRead,
 }));
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
   getOwnerScopedDocumentStore: async () => mocks.fakeStore!.store,
@@ -34,6 +38,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.runtimeConfigured = true;
   mocks.resolveRequestOwnerId.mockReturnValue('owner-1');
+  mocks.canRead = true;
   mocks.fakeStore = createFakeDocumentStore();
   mocks.fakeStore.docs.set(
     STAGE_ID,
@@ -46,6 +51,12 @@ beforeEach(() => {
 });
 
 describe('GET /api/stages/[id]/scenes?ids=', () => {
+  it("answers 404 for another owner's course the caller may not read", async () => {
+    mocks.canRead = false;
+    const response = await call('?ids=scene-1');
+    expect(response.status).toBe(404);
+  });
+
   it('returns exactly the requested scenes in document order', async () => {
     const response = await call('?ids=scene-2,scene-1');
     expect(response.status).toBe(200);

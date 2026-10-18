@@ -25,7 +25,13 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import { isServerPersistenceConfigured } from '@/lib/config/feature-flags';
-import { resolveStageAccess } from '@/lib/server/stage-access';
+import { getStageAccessDb, resolveStageAccess } from '@/lib/server/stage-access';
+import { canReadClassroom, canReadStageDocument } from '@/lib/server/authz/viewer';
+import {
+  isValidClassroomId,
+  readClassroom,
+  readClassroomAccess,
+} from '@/lib/server/classroom-storage';
 import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { apiError } from '@/lib/server/api-response';
 import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
@@ -53,8 +59,16 @@ export async function GET(req: NextRequest, { params }: Params) {
     try {
       const access = await resolveStageAccess(stageId);
 
-      // Absent or tombstoned — indistinguishable, deliberately.
       if (!access) {
+        const fromFile = await classroomFileMeta(req.headers, stageId, ownerId);
+        if (fromFile) return NextResponse.json(fromFile, { status: 200, headers: responseHeaders });
+      }
+
+      // Absent, tombstoned or not readable by this caller — indistinguishable, deliberately.
+      if (
+        !access ||
+        (access.ownerId !== ownerId && !(await canReadStageDocument(req.headers, access)))
+      ) {
         return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
 
@@ -87,4 +101,29 @@ export async function GET(req: NextRequest, { params }: Params) {
       );
     }
   });
+}
+
+/**
+ * A course generated on the server lives only in `data/classrooms/<id>.json` until its owner
+ * first opens it, and only that owner may create its document (the persistence route's claim
+ * gate). Without this answer a reader's page stayed editable and every save was refused, so the
+ * file's recorded owner answers instead. Only while the id has no `stage_meta` or document row
+ * at all: a tombstoned document stays a 404 even though its classroom file is still on disk.
+ */
+async function classroomFileMeta(headers: Headers, stageId: string, ownerId: string) {
+  if (!isValidClassroomId(stageId) || !(await readClassroom(stageId))) return null;
+  const db = await getStageAccessDb();
+  const rows = await db.query(
+    `SELECT 1 FROM stage_meta WHERE stage_id = $1
+     UNION ALL SELECT 1 FROM document_stages WHERE id = $1 LIMIT 1`,
+    [stageId],
+  );
+  if (rows.rows.length > 0 || !(await canReadClassroom(headers, stageId))) return null;
+  return {
+    isOwner: (await readClassroomAccess(stageId))?.ownerId === ownerId,
+    isPublic: false,
+    publishedAt: null,
+    generationComplete: false,
+    source: 'classroom',
+  };
 }

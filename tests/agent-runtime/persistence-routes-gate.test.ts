@@ -48,6 +48,11 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/server/agent-runtime/owner', () => ({
   resolveRequestOwnerId: mocks.resolveRequestOwnerId,
 }));
+// The per-viewer read gate is covered by tests/agent-runtime/stage-meta-routes.test.ts.
+vi.mock('@/lib/server/authz/viewer', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/authz/viewer')>()),
+  canReadStageDocument: async () => true,
+}));
 vi.mock('@/lib/persistence/server-provider', () => ({
   getServerPersistenceProvider: async () => ({
     documentStore: mocks.fakeStore!.store,

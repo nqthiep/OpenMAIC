@@ -11,6 +11,10 @@ export type DocumentAction =
 export type DocumentAccess = 'allow' | 'forbid' | 'not-found';
 export type StageMetaReader = (stageId: string) => Promise<StageMetaRow | null>;
 export type DocumentExistenceReader = (stageId: string) => Promise<boolean>;
+/** Whether a caller who does not own the course may read it (published, shared with them, staff). */
+export type DocumentReadGate = (meta: StageMetaRow) => Promise<boolean>;
+/** Whether the caller may be the first owner of a document under this id. */
+export type DocumentClaimGate = (stageId: string) => Promise<boolean>;
 
 const LONE_SURROGATE = /[\uD800-\uDFFF]/u;
 
@@ -61,6 +65,8 @@ export async function decideDocumentAccess(
   readMeta: StageMetaReader,
   documentExists: DocumentExistenceReader,
   rereadMeta: StageMetaReader = readMeta,
+  mayRead: DocumentReadGate = async () => true,
+  mayClaim: DocumentClaimGate = async () => true,
 ): Promise<DocumentAccess> {
   if (!ownerId) return 'forbid';
   switch (action.kind) {
@@ -69,8 +75,10 @@ export async function decideDocumentAccess(
       return 'forbid';
     case 'read': {
       const meta = await readMeta(action.stageId);
-      if (!meta) return 'not-found';
-      return meta.deletedAt === null ? 'allow' : 'not-found';
+      if (!meta || meta.deletedAt !== null) return 'not-found';
+      // A course the caller may not read is reported as missing, so the id is not an oracle.
+      if (meta.ownerId === ownerId || (await mayRead(meta))) return 'allow';
+      return 'not-found';
     }
     case 'write': {
       const meta = await readMeta(action.stageId);
@@ -89,7 +97,10 @@ export async function decideDocumentAccess(
         if (meta.ownerId !== ownerId) return 'forbid';
         return meta.deletedAt === null ? 'allow' : 'not-found';
       }
-      if (!(await documentExists(action.stageId))) return 'allow';
+      if (!(await documentExists(action.stageId))) {
+        // The first save of an id claims it, so an id that already names someone's course is refused.
+        return (await mayClaim(action.stageId)) ? 'allow' : 'forbid';
+      }
       const concurrentMeta = await rereadMeta(action.stageId);
       if (!concurrentMeta) return 'not-found';
       if (concurrentMeta.ownerId !== ownerId) return 'forbid';

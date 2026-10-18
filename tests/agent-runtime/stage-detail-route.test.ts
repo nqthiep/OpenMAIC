@@ -9,6 +9,7 @@ import { FIXED_NOW, makeDocument, makeSlideScene } from './_stage-fixtures';
 const mocks = vi.hoisted(() => ({
   runtimeConfigured: true,
   resolveRequestOwnerId: vi.fn(),
+  canRead: true,
   fakeStore: null as ReturnType<typeof createFakeDocumentStore> | null,
 }));
 
@@ -18,6 +19,9 @@ vi.mock('@/lib/config/feature-flags', () => ({
 }));
 vi.mock('@/lib/server/agent-runtime/owner', () => ({
   resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+}));
+vi.mock('@/lib/server/authz/viewer', () => ({
+  canReadStageById: async () => mocks.canRead,
 }));
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
   getOwnerScopedDocumentStore: async () => mocks.fakeStore!.store,
@@ -49,6 +53,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.runtimeConfigured = true;
   mocks.resolveRequestOwnerId.mockReturnValue('owner-1');
+  mocks.canRead = true;
   mocks.fakeStore = createFakeDocumentStore();
   mocks.fakeStore.docs.set(
     STAGE_ID,

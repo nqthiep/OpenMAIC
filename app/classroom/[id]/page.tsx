@@ -7,7 +7,9 @@ import { useSettingsStore } from '@/lib/store/settings';
 import { claimStageSceneLoadToken, isCurrentStageSceneLoadToken } from '@/lib/store/stage';
 import { loadImageMapping } from '@/lib/utils/image-storage';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { FileQuestion } from 'lucide-react';
 import { useSceneGenerator } from '@/lib/hooks/use-scene-generator';
 import { useMediaGenerationStore } from '@/lib/store/media-generation';
 import { useNarrationAdoption } from '@/lib/audio/use-narration-adoption';
@@ -15,6 +17,7 @@ import { clearNarrationAllocations } from '@/lib/audio/narration-allocations';
 import { clearPendingMediaAllocations } from '@/lib/media/pending-media-allocations';
 import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { createLogger } from '@/lib/logger';
+import { useI18n } from '@/lib/hooks/use-i18n';
 import { MediaStageProvider } from '@/lib/contexts/media-stage-context';
 import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
 import { useAgentRegistry } from '@/lib/orchestration/registry/store';
@@ -42,11 +45,15 @@ const log = createLogger('Classroom');
 export default function ClassroomDetailPage() {
   const params = useParams();
   const classroomId = params?.id as string;
+  const { t } = useI18n();
 
   const { loadFromStorage } = useStageStore();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // The load finished and no source has this course: missing, deleted, or not readable by this
+  // viewer (the server answers 404 for both). Terminal, so it offers no retry.
+  const [notFound, setNotFound] = useState(false);
   // Not a boolean on purpose: `false` would say "this is a stranger's course",
   // which is neither what an unanswered sidecar nor a 404 means. Held in the
   // shared permission store rather than in local state, so the retry
@@ -69,6 +76,7 @@ export default function ClassroomDetailPage() {
     async (isEffectCurrent: () => boolean = () => true) => {
       const loadToken = claimStageSceneLoadToken();
       const isCurrent = () => isEffectCurrent() && isCurrentStageSceneLoadToken(loadToken);
+      let failed = false;
 
       await runClassroomLoad({
         classroomId,
@@ -93,10 +101,18 @@ export default function ClassroomDetailPage() {
         getSettings: () => useSettingsStore.getState(),
         getAgent: (id) => useAgentRegistry.getState().getAgent(id),
         restoreAgentSelection: defaultClassroomLoadDeps.restoreAgentSelection,
-        setError,
+        setError: (message) => {
+          failed = true;
+          setError(message);
+        },
         setLoading,
         log,
       });
+
+      if (isCurrent() && !failed && useStageStore.getState().stage?.id !== classroomId) {
+        setNotFound(true);
+        return;
+      }
 
       // The stage-meta sidecar resolves the viewer-facing ownership facts the
       // document seam does not carry — `isOwner` decides read-only vs editable
@@ -159,6 +175,7 @@ export default function ClassroomDetailPage() {
     /* eslint-disable react-hooks/set-state-in-effect -- Course switch must hide stale Stage before async load */
     setLoading(true);
     setError(null);
+    setNotFound(false);
     /* eslint-enable react-hooks/set-state-in-effect */
     // Ownership belongs to the departing course; the new one must re-earn it
     // before anything it holds may be generated.
@@ -289,13 +306,33 @@ export default function ClassroomDetailPage() {
           {loading ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
               <div className="text-center text-muted-foreground">
-                <p>Loading classroom...</p>
+                <p>{t('common.loadingClassroom')}</p>
+              </div>
+            </div>
+          ) : notFound ? (
+            <div
+              className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900"
+              data-testid="classroom-not-found"
+            >
+              <div className="flex flex-col items-center gap-3 text-center max-w-md px-6">
+                <FileQuestion className="h-10 w-10 text-muted-foreground" />
+                <p className="text-lg font-medium">{t('classroom.notFound')}</p>
+                <p className="text-sm text-muted-foreground">{t('classroom.notFoundDesc')}</p>
+                <Link
+                  href="/"
+                  className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                >
+                  {t('classroom.backToHome')}
+                </Link>
               </div>
             </div>
           ) : error ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
               <div className="text-center">
-                <p className="text-destructive mb-4">Error: {error}</p>
+                <p className="text-destructive mb-4">
+                  {t('common.errorPrefix')}
+                  {error}
+                </p>
                 <button
                   onClick={() => {
                     setError(null);
@@ -304,7 +341,7 @@ export default function ClassroomDetailPage() {
                   }}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
                 >
-                  Retry
+                  {t('common.retry')}
                 </button>
               </div>
             </div>

@@ -515,7 +515,7 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
   );
 
   it(
-    'reads a course by its id for any account or anonymous visitor, while writes and deletes stay with the owner',
+    'keeps a private course to its owner, opens a published one to everyone, and keeps writes and deletes with the owner',
     async () => {
       const stageId = 'stage-capability-read';
       const owner = await signUp('read-owner');
@@ -523,10 +523,19 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
       const created = await persistence(`/documents/${stageId}`, {
         method: 'PUT',
         cookie: owner.cookie,
-        body: course(stageId, 'Shared by id'),
+        body: course(stageId, 'Private course'),
       });
       expect(created.status).toBe(204);
 
+      const ownRead = await persistence(`/documents/${stageId}`, { cookie: owner.cookie });
+      expect(ownRead.status).toBe(200);
+      // A private course answers as missing to anyone else, so the id is not an oracle.
+      for (const cookie of [other.cookie, `anonymous_id=${VISITOR_B}`]) {
+        const read = await persistence(`/documents/${stageId}`, { cookie });
+        expect(read.status).toBe(404);
+      }
+
+      await pool.query('UPDATE stage_meta SET is_public = true WHERE stage_id = $1', [stageId]);
       for (const cookie of [other.cookie, `anonymous_id=${VISITOR_B}`]) {
         const read = await persistence(`/documents/${stageId}`, { cookie });
         expect(read.status).toBe(200);

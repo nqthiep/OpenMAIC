@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   persistenceConfigured: true,
   resolveRequestOwnerId: vi.fn(),
   accessRow: null as Record<string, unknown> | null,
+  canRead: vi.fn(async () => true),
   updatedRows: [] as unknown[],
 }));
 
@@ -15,6 +16,9 @@ vi.mock('@/lib/config/feature-flags', () => ({
 }));
 vi.mock('@/lib/server/agent-runtime/owner', () => ({
   resolveRequestOwnerId: mocks.resolveRequestOwnerId,
+}));
+vi.mock('@/lib/server/authz/viewer', () => ({
+  canReadStageDocument: mocks.canRead,
 }));
 vi.mock('@/lib/persistence/server-provider', () => ({
   getServerPersistenceProvider: async () => ({
@@ -52,6 +56,7 @@ beforeEach(() => {
   mocks.runtimeConfigured = true;
   mocks.persistenceConfigured = true;
   mocks.resolveRequestOwnerId.mockReturnValue('owner-1');
+  mocks.canRead.mockResolvedValue(true);
   mocks.accessRow = {
     meta_owner_id: 'owner-1',
     meta_is_public: false,
@@ -86,6 +91,21 @@ describe('GET /api/stage-meta/[stageId]', () => {
       stageMetaParams(STAGE_ID),
     );
     await expect(response.json()).resolves.toMatchObject({ isOwner: false });
+  });
+
+  it("answers 404 for another owner's course the caller may not read", async () => {
+    mocks.accessRow!.meta_owner_id = 'someone-else';
+    mocks.canRead.mockResolvedValue(false);
+    const meta = await getStageMeta(
+      new NextRequest(`http://localhost/api/stage-meta/${STAGE_ID}`),
+      stageMetaParams(STAGE_ID),
+    );
+    expect(meta.status).toBe(404);
+    const status = await getStatus(
+      new NextRequest(`http://localhost/api/stages/${STAGE_ID}/status`),
+      params(STAGE_ID),
+    );
+    expect(status.status).toBe(404);
   });
 
   it('answers 404 for an absent or tombstoned course', async () => {

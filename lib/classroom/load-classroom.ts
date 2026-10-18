@@ -259,13 +259,18 @@ export async function fetchClassroomFromApi(
   _deps: DocumentMigrationDeps = {},
 ): Promise<ClassroomPayload | null> {
   const res = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}`);
-  if (!res.ok) return null;
+  // A definite "no such course" (the route also answers 404 when the viewer may not read it)
+  // is `null`. Anything else is a failure the caller can retry, not a missing course.
+  if (res.status === 400 || res.status === 404 || res.status === 410) return null;
+  if (!res.ok) throw new Error(`Failed to load classroom (HTTP ${res.status})`);
 
   const json = (await res.json()) as {
     success?: boolean;
     classroom?: ClassroomPayload;
   };
-  if (!json.success || !json.classroom) return null;
+  // A published copy carries no outlines, so a course without scenes never gets any: nothing to
+  // show. Applying it would leave the page on its loading header (and persist a viewer's copy).
+  if (!json.success || !json.classroom?.scenes?.length) return null;
   return json.classroom;
 }
 

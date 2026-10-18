@@ -98,7 +98,7 @@ describe('reference-fidelity stage access', () => {
     expect(provider.pool).toBe(pool);
   });
 
-  it('allows capability reads, refuses foreign writes, and filters the owner library', async () => {
+  it('keeps a private course to its owner, refuses foreign writes, and filters the owner library', async () => {
     const connectionString = process.env.DATABASE_URL!;
     const { getServerPersistenceProvider } = await import('@/lib/persistence/server-provider');
     await getServerPersistenceProvider(connectionString, () => pool as never);
@@ -118,8 +118,7 @@ describe('reference-fidelity stage access', () => {
       }),
       { poolFactory: () => pool as never },
     );
-    expect(visitorRead.status).toBe(200);
-    await expect(visitorRead.json()).resolves.toMatchObject({ stage: { id: stageId } });
+    expect(visitorRead.status).toBe(404);
 
     const foreignWrite = await handlePersistenceRequest(
       new Request(`http://localhost/api/persistence/documents/${stageId}`, {

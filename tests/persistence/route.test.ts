@@ -12,7 +12,8 @@ describe('embedded persistence route', () => {
       readStageMeta: vi.fn().mockResolvedValue({
         stageId: 'adapter-test',
         ownerId: 'adapter-test-owner',
-        isPublic: false,
+        // Public, so the transport tests below read it without the per-viewer read gate.
+        isPublic: true,
         deletedAt: null,
       }),
     }));

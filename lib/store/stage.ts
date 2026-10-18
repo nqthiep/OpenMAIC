@@ -227,6 +227,10 @@ function clearedStageState(state: Pick<StageState, 'generationEpoch'>) {
     currentGeneratingOrder: -1,
     failedOutlines: [],
     generatingOutlines: [],
+    // Viewer access belongs to the stage it was probed for; saves skip
+    // document writes while it says read-only.
+    isOwner: true,
+    readOnly: false,
   };
 }
 
@@ -408,12 +412,39 @@ type StagePersistenceSnapshot = Pick<
   | 'chatSnapshot'
   | 'outlines'
   | 'generationComplete'
+  | 'readOnly'
 >;
 
 function persistenceSnapshot(state: StageState): StagePersistenceSnapshot {
-  const { stage, scenes, currentSceneId, chats, chatSnapshot, outlines, generationComplete } =
-    state;
-  return { stage, scenes, currentSceneId, chats, chatSnapshot, outlines, generationComplete };
+  const {
+    stage,
+    scenes,
+    currentSceneId,
+    chats,
+    chatSnapshot,
+    outlines,
+    generationComplete,
+    readOnly,
+  } = state;
+  return {
+    stage,
+    scenes,
+    currentSceneId,
+    chats,
+    chatSnapshot,
+    outlines,
+    generationComplete,
+    readOnly,
+  };
+}
+
+/**
+ * A viewer of someone else's course may read its document but not write it:
+ * the server answers `403 FORBIDDEN_DOCUMENTS`. Only the viewer's own rows
+ * (current scene, chat sessions) are persisted for it.
+ */
+function isViewerWritable(change: PendingChange): boolean {
+  return change.kind === 'currentScene' || change.kind === 'chats';
 }
 
 function delay(ms: number): Promise<void> {
@@ -438,7 +469,9 @@ async function persistDirtySnapshot(
   const { saveStageDataIncremental } = await stageStorageModulePromise;
   const result = await saveStageDataIncremental(
     stageId,
-    [...dirtySnapshot.values()].map(({ change }) => change),
+    [...dirtySnapshot.values()]
+      .map(({ change }) => change)
+      .filter((change) => !snapshot.readOnly || isViewerWritable(change)),
     {
       stage: snapshot.stage,
       scenes: snapshot.scenes,
@@ -841,6 +874,11 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
       log.warn('Cannot save: stage.id is required');
       return false;
     }
+    if (get().readOnly) {
+      // The aggregate save writes the document; a viewer saves only its own rows.
+      markPendingChanges(stage.id, { kind: 'currentScene' }, { kind: 'chats' });
+      return false;
+    }
 
     // Epoch captured with the state read above: a deletion during the PBL
     // preparation await below permanently invalidates this write.
@@ -1087,6 +1125,10 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
           // mode='edit'. Refresh already reset via initial store value;
           // this normalises the SPA path to match.
           mode: 'playback',
+          // Upstream defaults until the stage-meta probe answers for this stage;
+          // never the previous course's answer.
+          isOwner: true,
+          readOnly: false,
         });
         resetPendingChanges(stageId);
         if (generationComplete && !persistedComplete) void get().saveToStorage();

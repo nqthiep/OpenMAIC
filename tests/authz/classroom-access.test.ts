@@ -40,6 +40,7 @@ const learning = {
   membership: undefined as undefined | { active: boolean; monthlyQuota: number },
   usedTokens: 0,
   bonusTokens: 0,
+  shared: false,
 };
 vi.mock('@/lib/server/learning/store', () => ({
   readMembership: async () =>
@@ -48,7 +49,8 @@ vi.mock('@/lib/server/learning/store', () => ({
       ...learning.membership,
       expiresAt: '2100-01-01T00:00:00.000Z',
     },
-  readCourseShare: async () => undefined,
+  readCourseShare: async () =>
+    learning.shared ? { ownerId: OTHER_OWNER_ID, title: 'Shared', state: 'shared' } : undefined,
   isCoursePreview: async () => false,
   isCourseInClassOf: async () => false,
   readBonusTokens: async () => learning.bonusTokens,
@@ -73,6 +75,7 @@ beforeEach(() => {
   learning.membership = { active: true, monthlyQuota: 1000 };
   learning.usedTokens = 0;
   learning.bonusTokens = 0;
+  learning.shared = false;
 });
 
 afterEach(() => {
@@ -192,5 +195,34 @@ describe('classroom sidecar storage', () => {
     >('@/lib/server/classroom-storage');
     await expect(readClassroomAccess('../escape', dir)).resolves.toBeUndefined();
     expect(() => resolveClassroomAccessPath('../escape', dir)).toThrow();
+  });
+});
+
+describe('canReadStageDocument', () => {
+  const stage = (ownerId: string, isPublic = false) => ({ stageId: 'stage-x', ownerId, isPublic });
+
+  it('keeps a private course to its owner', async () => {
+    const { canReadStageDocument } = await import('@/lib/server/authz/viewer');
+    expect(await canReadStageDocument(ANON_OWNER, stage(OWNER_ID))).toBe(true);
+    expect(await canReadStageDocument(ANON_OTHER, stage(OWNER_ID))).toBe(false);
+    expect(await canReadStageDocument(SIGNED_IN, stage(OWNER_ID))).toBe(false);
+    expect(await canReadStageDocument(headers(), stage(OWNER_ID))).toBe(false);
+  });
+
+  it('opens a published course to everyone, signed in or not', async () => {
+    const { canReadStageDocument } = await import('@/lib/server/authz/viewer');
+    expect(await canReadStageDocument(ANON_OTHER, stage(OWNER_ID, true))).toBe(true);
+    expect(await canReadStageDocument(headers(), stage(OWNER_ID, true))).toBe(true);
+  });
+
+  it('lets an active member read a shared course, and staff read any course', async () => {
+    const { canReadStageDocument } = await import('@/lib/server/authz/viewer');
+    learning.shared = true;
+    expect(await canReadStageDocument(SIGNED_IN, stage(OWNER_ID))).toBe(true);
+    learning.membership = { active: false, monthlyQuota: 0 };
+    expect(await canReadStageDocument(SIGNED_IN, stage(OWNER_ID))).toBe(false);
+    learning.shared = false;
+    signedInRole = 'operator';
+    expect(await canReadStageDocument(SIGNED_IN, stage(OWNER_ID))).toBe(true);
   });
 });

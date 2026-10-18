@@ -67,6 +67,21 @@ afterEach(() => {
 });
 
 describe('incremental stage flush', () => {
+  it('never writes the document of a course the viewer does not own', async () => {
+    useStageStore.getState().setViewerAccess({ isOwner: false });
+    useStageStore.getState().updateScene('scene-2', { title: 'changed' });
+
+    await expect(useStageStore.getState().saveToStorage()).resolves.toBe(false);
+    expect(fullSave).not.toHaveBeenCalled();
+
+    await flushStageSave();
+    expect(incrementalSave).toHaveBeenCalledOnce();
+    expect(incrementalSave.mock.calls[0]![1]).toEqual([
+      { kind: 'currentScene' },
+      { kind: 'chats' },
+    ]);
+  });
+
   it('marks only the updated scene and drains the pending debounce', async () => {
     useStageStore.getState().updateScene('scene-2', { title: 'changed' });
 
