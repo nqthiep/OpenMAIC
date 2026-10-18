@@ -1,8 +1,11 @@
 import { type NextRequest } from 'next/server';
+import { accountServiceDeps } from '@/lib/server/accounts/runtime';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { requireExporter } from '@/lib/server/authz/viewer';
 import { proxyFetch } from '@/lib/server/proxy-fetch';
 import { resolveRenderServiceUrl } from '@/lib/server/render-service';
 import { capBodyStream } from '@/lib/server/capped-stream';
+import { recordRenderJob } from '@/lib/server/learning/store';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
 
@@ -43,9 +46,13 @@ function clientIdentity(req: NextRequest): string {
  * Submit an export ZIP for MP4 rendering. Streams the multipart body straight
  * to the render service (no `formData()` buffering here) and relays its
  * `202 { jobId }`. Returns 501 when the service is not configured so the client
- * can degrade to a local ZIP download.
+ * can degrade to a local ZIP download. With accounts on, only a member or staff
+ * may submit, and the job is recorded under the submitter.
  */
 export async function POST(req: NextRequest) {
+  const access = await requireExporter(req.headers);
+  if (access.denied) return access.denied;
+
   const resolved = resolveRenderServiceUrl();
   if ('error' in resolved) {
     return apiError('PROVIDER_DISABLED', 501, 'Render service is not configured');
@@ -98,6 +105,10 @@ export async function POST(req: NextRequest) {
       return apiError(code, status, 'Render service rejected the request', detail);
     }
 
+    if (typeof data.jobId === 'string' && access.ownerId !== undefined) {
+      const deps = await accountServiceDeps();
+      await recordRenderJob(deps.db, data.jobId, access.ownerId);
+    }
     return apiSuccess({ jobId: data.jobId, pollIntervalMs: 3000 }, 202);
   } catch (error) {
     // A cap trip aborts the forwarded stream, surfacing here as a fetch error.

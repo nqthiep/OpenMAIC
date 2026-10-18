@@ -12,6 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSignedIn } from '@/lib/server/authz/viewer';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
@@ -23,6 +24,10 @@ const log = createLogger('ProxyMedia');
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
+  // An open fetch for any URL is for signed-in accounts only. The SSRF guard below still applies.
+  const denied = await requireSignedIn(request.headers);
+  if (denied) return denied;
+
   let url: string | undefined;
   try {
     ({ url } = await request.json());

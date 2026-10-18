@@ -3,6 +3,7 @@
  * AccountRequestError that carries the server's error code and retry hint.
  * Neither the submitted password nor the response body is kept on the error.
  */
+import type { Capabilities } from '@/lib/server/authz/capabilities';
 
 export interface AccountSession {
   readonly enabled: boolean;
@@ -15,6 +16,8 @@ export interface AccountSession {
   readonly membership?: AccountMembership | null;
   /** True only when the signed-in account is an administrator. */
   readonly administrator?: boolean;
+  /** What this visitor may do. The interface gates on these; the server checks each request again. */
+  readonly capabilities?: Capabilities;
 }
 
 export interface AccountMembership {
@@ -67,6 +70,34 @@ function failureFrom(response: Response, body: unknown): AccountRequestError {
   return new AccountRequestError(response.status, errorCode, serverMessage, retryAfterSeconds);
 }
 
+const CAPABILITY_KEYS: readonly (keyof Capabilities)[] = [
+  'generate',
+  'proMode',
+  'joinClass',
+  'exportCourse',
+  'shareCourse',
+  'requestAccess',
+  'personalProviderKey',
+  'viewProviders',
+  'dashboard',
+  'viewUsage',
+  'manageMembers',
+  'decideShares',
+  'markPreviews',
+  'manageClasses',
+  'viewAudit',
+  'changeRoles',
+  'disableLearners',
+];
+
+/** Any capability the server did not send is false: a missing flag never unlocks anything. */
+function capabilitiesFrom(value: unknown): Capabilities {
+  const record = isRecord(value) ? value : {};
+  return Object.fromEntries(
+    CAPABILITY_KEYS.map((key) => [key, record[key] === true]),
+  ) as unknown as Capabilities;
+}
+
 export async function fetchAccountSession(): Promise<AccountSession> {
   const response = await fetch('/api/auth/session', {
     method: 'GET',
@@ -97,7 +128,29 @@ export async function fetchAccountSession(): Promise<AccountSession> {
         }
       : null,
     administrator: body.administrator === true,
+    capabilities: capabilitiesFrom(body.capabilities),
   };
+}
+
+export const ACCOUNT_SESSION_CHANGED_EVENT = 'openmaic:account-session-changed';
+
+let sharedSession: Promise<AccountSession> | undefined;
+
+/** The session, fetched once and shared by every reader until it changes. */
+export function loadSharedSession(): Promise<AccountSession> {
+  sharedSession ??= fetchAccountSession().catch((error: unknown) => {
+    sharedSession = undefined;
+    throw error;
+  });
+  return sharedSession;
+}
+
+/** Forgets the shared session and tells every mounted reader to ask again. */
+export function sessionChanged(): void {
+  sharedSession = undefined;
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(ACCOUNT_SESSION_CHANGED_EVENT));
+  }
 }
 
 async function postCredentials(
@@ -122,12 +175,18 @@ async function postCredentials(
   return { username: body.account.username };
 }
 
-export function signIn(credentials: AccountCredentials): Promise<{ username: string }> {
-  return postCredentials('/api/auth/login', credentials);
+export async function signIn(credentials: AccountCredentials): Promise<{ username: string }> {
+  const account = await postCredentials('/api/auth/login', credentials);
+  sessionChanged();
+  return account;
 }
 
-export function createAccount(credentials: AccountCredentials): Promise<{ username: string }> {
-  return postCredentials('/api/auth/register', credentials);
+export async function createAccount(
+  credentials: AccountCredentials,
+): Promise<{ username: string }> {
+  const account = await postCredentials('/api/auth/register', credentials);
+  sessionChanged();
+  return account;
 }
 
 export async function signOut(): Promise<void> {
@@ -141,6 +200,7 @@ export async function signOut(): Promise<void> {
   if (!response.ok || !isRecord(body) || body.success !== true) {
     throw failureFrom(response, body);
   }
+  sessionChanged();
 }
 
 /** Signs out every other session of this account. Resolves with how many were signed out. */
@@ -233,6 +293,32 @@ export async function changeAccountRole(accountId: string, role: AccountRole): P
   if (!response.ok || !isRecord(body) || body.success !== true) {
     throw failureFrom(response, body);
   }
+}
+
+/** Changes the signed-in account's password. Other sessions are signed out; this one stays. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const response = await fetch('/api/auth/password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  const body = await readJson(response);
+  if (!response.ok || !isRecord(body) || body.success !== true) {
+    throw failureFrom(response, body);
+  }
+}
+
+/** Gives an account a one-time password (staff only) and returns it, to hand over once. */
+export async function resetAccountPassword(accountId: string): Promise<string> {
+  const response = await fetch(`/api/admin/accounts/${encodeURIComponent(accountId)}/password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  });
+  const body = await readJson(response);
+  if (!response.ok || !isRecord(body) || body.success !== true) {
+    throw failureFrom(response, body);
+  }
+  return typeof body.temporaryPassword === 'string' ? body.temporaryPassword : '';
 }
 
 async function postAccountDisabled(accountId: string, action: 'disable' | 'enable'): Promise<void> {

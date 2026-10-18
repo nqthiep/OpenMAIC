@@ -10,16 +10,23 @@ import {
   accountsEnabled,
   resolveRequestAccount,
 } from '@/lib/server/accounts/runtime';
+import { EXPIRING_WITHIN_DAYS } from '@/lib/home/learner-status';
 import { apiError } from '@/lib/server/api-response';
 import { readClassroomAccess } from '@/lib/server/classroom-storage';
 import {
   isCourseInClassOf,
   isCoursePreview,
+  READER_REWARD_TOKENS,
   readBonusTokens,
   readCourseShare,
   readMembership,
+  readRenderJobOwner,
+  type MembershipView,
   recordCourseRead,
 } from '@/lib/server/learning/store';
+import { readRemixSource } from '@/lib/server/learning/remix';
+import { readSetting } from '@/lib/server/learning/settings';
+import { resolveStageAccess } from '@/lib/server/stage-access';
 import { monthlyLlmTokens } from '@/lib/server/usage-storage';
 
 import { enterSpendOwner } from './spend-context';
@@ -28,6 +35,8 @@ import { can, type Viewer } from './policy';
 export interface ResolvedViewer extends Viewer {
   /** The monthly token allowance of the signed-in account's membership, when it has one. */
   monthlyQuota?: number;
+  /** The membership record, when the account has one. Returned only to the account's own session. */
+  membership?: MembershipView | null;
 }
 
 /** The UTC month a usage record and a quota belong to, as `YYYY-MM`. */
@@ -45,7 +54,11 @@ export async function resolveViewer(headers: Headers): Promise<ResolvedViewer> {
       ownerId: accountOwnerId(account.accountId),
       role: account.role,
       memberActive: membership?.active === true,
+      memberRenewable:
+        membership?.active === true &&
+        new Date(membership.expiresAt).getTime() - Date.now() < EXPIRING_WITHIN_DAYS * 86_400_000,
       monthlyQuota: membership?.monthlyQuota,
+      membership: membership ?? null,
     };
   }
   return { ownerId: readAnonymousOwnerId(headers) };
@@ -62,12 +75,40 @@ export async function canReadClassroom(headers: Headers, classroomId: string): P
   return can(viewer, 'classroom.read', facts);
 }
 
-async function courseFacts(viewer: ResolvedViewer, courseId: string) {
+/**
+ * Whether the caller may read a course stored as a server document. Its owner comes from
+ * `stage_meta`, and a published course is open to everyone. Otherwise the rule is the one
+ * `canReadClassroom` applies, so a private course is for its owner (and staff) only.
+ */
+export async function canReadStageDocument(
+  headers: Headers,
+  stage: { stageId: string; ownerId: string; isPublic: boolean },
+): Promise<boolean> {
+  if (stage.isPublic || !accountsEnabled()) return true;
+  const viewer = await resolveViewer(headers);
+  if (viewer.ownerId === stage.ownerId) return true;
+  return can(viewer, 'classroom.read', await courseFacts(viewer, stage.stageId, stage.ownerId));
+}
+
+/**
+ * `canReadStageDocument` by id, for a route that reads through the owner-scoped store (whose
+ * reads are open by id). `ownerId` is the request's owner. Absent or deleted reads as false.
+ */
+export async function canReadStageById(
+  headers: Headers,
+  stageId: string,
+  ownerId: string,
+): Promise<boolean> {
+  const access = await resolveStageAccess(stageId);
+  if (!access) return false;
+  return access.ownerId === ownerId || canReadStageDocument(headers, access);
+}
+
+async function courseFacts(viewer: ResolvedViewer, courseId: string, ownerId?: string) {
   const deps = await accountServiceDeps();
-  const access = await readClassroomAccess(courseId);
   const share = await readCourseShare(deps.db, courseId);
   return {
-    ownerId: access?.ownerId,
+    ownerId: ownerId ?? (await readClassroomAccess(courseId))?.ownerId,
     shared: share?.state === 'shared',
     previewed: await isCoursePreview(deps.db, courseId),
     inClass: viewer.accountId
@@ -89,16 +130,37 @@ export async function rewardReaderIfEligible(headers: Headers, classroomId: stri
     const access = await readClassroomAccess(classroomId);
     const share = await readCourseShare(deps.db, classroomId);
     if (!access || share?.state !== 'shared' || access.ownerId === viewer.ownerId) return;
+    // A remix also pays the author of the course it came from, unless that author is the reader.
+    const source = await readRemixSource(deps.db, classroomId);
+    const percent = source ? await readSetting(deps.db, 'remix.royaltyPercent') : 0;
     await recordCourseRead(deps.db, {
       courseId: classroomId,
       readerId: viewer.accountId,
       authorId: access.ownerId,
       month: currentMonth(),
       now: new Date(),
+      ...(source?.sourceOwnerId && source.sourceOwnerId !== viewer.ownerId
+        ? {
+            royalty: {
+              ownerId: source.sourceOwnerId,
+              tokens: Math.floor((READER_REWARD_TOKENS * percent) / 100),
+            },
+          }
+        : {}),
     });
   } catch (error) {
     console.error('[learning] reader reward failed', error);
   }
+}
+
+/**
+ * Gate for a route that any signed-in account may use, whatever its role or membership. With
+ * accounts off nothing is checked.
+ */
+export async function requireSignedIn(headers: Headers): Promise<Response | undefined> {
+  if (!accountsEnabled()) return undefined;
+  if (await resolveRequestAccount(headers)) return undefined;
+  return apiError('LOGIN_REQUIRED', 401, 'Sign in to use this.');
 }
 
 /**
@@ -131,5 +193,50 @@ export async function requireSpender(headers: Headers): Promise<Response | undef
     }
   }
   enterSpendOwner(viewer.ownerId);
+  return undefined;
+}
+
+/**
+ * Gate for a route that renders a course to video. With accounts off there is no identity to
+ * check. With accounts on, a visitor without a live session gets 401, and a signed-in account
+ * without an active membership (and not staff) gets 403. On success returns the owner the render
+ * is recorded under, or none when accounts are off.
+ */
+export async function requireExporter(
+  headers: Headers,
+): Promise<{ ownerId?: string; denied?: Response }> {
+  if (!accountsEnabled()) return {};
+  const viewer = await resolveViewer(headers);
+  if (viewer.accountId === undefined) {
+    return { denied: apiError('LOGIN_REQUIRED', 401, 'Sign in to export a course.') };
+  }
+  if (!can(viewer, 'export.course')) {
+    return {
+      denied: apiError(
+        'MEMBERSHIP_REQUIRED',
+        403,
+        'An active membership is needed to export a course.',
+      ),
+    };
+  }
+  return { ownerId: viewer.ownerId };
+}
+
+/**
+ * Gate for the status, cancel and download routes of a render job. Staff pass. Anyone else
+ * passes only when they submitted the job. A job the caller may not see answers 404, the same as
+ * a job that does not exist, so job ids cannot be probed. With accounts off nothing is checked.
+ */
+export async function requireRenderJobOwner(
+  headers: Headers,
+  jobId: string,
+): Promise<Response | undefined> {
+  if (!accountsEnabled()) return undefined;
+  const viewer = await resolveViewer(headers);
+  const deps = await accountServiceDeps();
+  const ownerId = await readRenderJobOwner(deps.db, jobId);
+  if (ownerId === undefined || !can(viewer, 'job.read', { ownerId })) {
+    return apiError('NOT_FOUND', 404, 'Render job not found');
+  }
   return undefined;
 }
