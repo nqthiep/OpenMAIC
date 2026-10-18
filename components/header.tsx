@@ -13,6 +13,8 @@ import { HeaderControls } from './stage/header-controls';
 
 interface HeaderProps {
   readonly currentSceneTitle: string;
+  /** Shown above the scene title so a learner sees which course they are in. */
+  readonly courseTitle?: string;
   readonly mode?: StageMode;
   readonly proModeActive?: boolean;
   readonly canEdit?: boolean;
@@ -36,6 +38,7 @@ interface HeaderProps {
 
 export function Header({
   currentSceneTitle,
+  courseTitle,
   mode,
   proModeActive,
   canEdit,
@@ -88,8 +91,8 @@ export function Header({
               CommandBar title during the cross-fade. */}
           {mode !== 'edit' && (
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase tracking-widest font-bold text-brand-yellow mb-0.5">
-                {t('stage.currentScene')}
+              <span className="truncate text-[10px] uppercase tracking-widest font-bold text-brand-yellow mb-0.5">
+                {courseTitle || t('stage.currentScene')}
               </span>
               <h1
                 className="text-xl font-bold text-white tracking-tight truncate"

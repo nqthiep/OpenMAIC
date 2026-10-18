@@ -118,7 +118,8 @@
       "classes": "Joining classes is for members.",
       "contactAdmin": "Ask an administrator to add you as a member.",
       "quota": "This month's AI allowance is used up.",
-      "quotaReset": "Creating courses opens again on {{date}}."
+      "quotaReset": "Creating courses opens again on {{date}}.",
+      "previews": "Try the free previews"
     },
     "quota": {
       "label": "AI allowance this month",
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "Members: {{count}}",
-      "noCourses": "No courses are attached to this class yet.",
+      "noCourses": "No courses have been added to this class yet. Check back later, or keep studying in your own library.",
       "untitled": "Course {{number}}",
-      "hint": "A teacher or an operator creates a class and adds its courses. Without a class you can still study on your own."
+      "hint": "A class is a set of courses a teacher or an operator picked for you. Join one to open those courses, even ones that are not public. Without a class you can still study on your own.",
+      "assigned": "Your teacher assigned {{count}} course(s) to this class. Go through them from the top; press \"Start learning\" to begin.",
+      "open": "Start learning",
+      "leave": "Leave class",
+      "leaveTitle": "Leave {{name}}?",
+      "leaveBody": "You will no longer be able to open this class's own courses. To come back, enter the class code again.",
+      "left": "You left {{name}}.",
+      "progressVisible": "Teachers and operators can see your progress in the courses of a class."
     },
     "starter": {
       "title": "Not sure where to start? Try one of these:",
@@ -1355,7 +1363,11 @@
     "webSearchFailed": "Web search failed",
     "outlinesReadyCount": "{{ready}} / {{total}} sections ready",
     "jumpToBlankTitle": "Jump to a section that still needs a title",
-    "analyzingMediaMaterial": "Analyzing audio/video"
+    "analyzingMediaMaterial": "Analyzing audio/video",
+    "failedHint": "The course could not be created this time. Go back and try again. If it keeps failing, tell an administrator.",
+    "leaveTitle": "Stop creating the course?",
+    "leaveBody": "If you go to the home page now, creation stops and you will have to start again.",
+    "leaveStay": "Stay"
   },
   "settings": {
     "title": "Settings",
@@ -2544,6 +2556,11 @@
         "noMembership": "No membership",
         "add": "Add",
         "added": "{{username}} added to the class."
+      },
+      "progress": {
+        "summary": "{{done}}/{{total}} courses done",
+        "last": "last studied {{date}}",
+        "none": "has not started the class courses"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "Change setting",
         "share_update-approve": "Shared update approved",
         "share_update-reject": "Shared update rejected",
-        "class_add": "Member added"
+        "class_add": "Member added",
+        "class_leave": "Left class"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "Optional. You can study on your own without a class: your courses, free previews and shared courses. Enter a code only if a teacher or an operator gave you one.",
       "needsMembership": "You don't need a class to study on your own. If a teacher gave you a class code, you need a membership first, then enter the code on this page.",
       "invited": "You were invited to a class. Sign in with a membership, then press Join on this page.",
-      "invitedMember": "You were invited to a class. Check the code and press Join."
+      "invitedMember": "You were invited to a class. Check the code and press Join.",
+      "notFound": "No class uses this code. Check the code with your teacher or operator."
     },
     "empty": "Nothing to browse yet.",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "Open",
     "unavailable": "The catalog is not available on this deployment.",
     "back": "Back to the catalog",
-    "membersOnly": "Shared courses and classes are for members."
+    "membersOnly": "Shared courses and classes are for members.",
+    "sceneCount": "{{count}} scenes"
+  },
+  "courseProgress": {
+    "done": "Completed",
+    "quizScore": "Quiz: {{score}}%"
   },
   "courseShare": {
     "request": "Share with members",
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "Q&A",
       "challenges": "Weekly challenges"
-    }
+    },
+    "challengeDescription": "Weekly challenges: submit a solution, get an AI pre-grade, vote on each other's work and earn bonus tokens if you finish in the top three."
   },
   "challenge": {
     "none": "No challenges yet.",

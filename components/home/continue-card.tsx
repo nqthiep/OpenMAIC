@@ -5,8 +5,16 @@ import Link from 'next/link';
 import type { Slide } from '@openmaic/dsl';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import { GLASS } from '@/components/home/site-shell';
+import {
+  fetchCatalog,
+  fetchProgress,
+  type CatalogEntry,
+  type ProgressRow,
+} from '@/components/learning/learning-api';
 import { SlideThumbnail } from '@/components/slide-renderer/SlideThumbnail';
+import { useAccountSession } from '@/lib/capabilities/use-capabilities';
 import { accessDocument, loadCurrentScene } from '@/lib/document-store';
+import { pickRemoteContinue } from '@/lib/home/course-progress';
 import { pickContinue } from '@/lib/home/learner-status';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import type { StageListItem } from '@/lib/utils/stage-storage';
@@ -20,9 +28,11 @@ interface Position {
 }
 
 /**
- * The course the learner studied last, with where they stopped. The saved position lives on this
- * device only, so on another device the card falls back to the course changed last. Renders
- * nothing while the positions are being read, and when no course has a scene yet.
+ * The course the learner studied last, with where they stopped. The position of the learner's own
+ * courses lives on this device only, so on another device the card falls back to the course
+ * changed last. A class, shared or preview course keeps its position on the server, so it is
+ * offered on any device when it was studied after the best own course. Renders nothing while the
+ * positions are being read, and when no course has a scene yet.
  */
 export function ContinueCard({
   classrooms,
@@ -36,6 +46,27 @@ export function ContinueCard({
   const [progress, setProgress] = useState<{ id: string; current: number; total: number } | null>(
     null,
   );
+  const signedIn = useAccountSession()?.authenticated === true;
+  const [remote, setRemote] = useState<{
+    rows: ProgressRow[];
+    catalog: Map<string, CatalogEntry>;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    let current = true;
+    Promise.all([fetchProgress(), fetchCatalog()])
+      .then(([rows, catalog]) => {
+        if (current)
+          setRemote({ rows, catalog: new Map(catalog.courses.map((c) => [c.courseId, c])) });
+      })
+      .catch(() => {
+        // The card works with the courses on this device alone.
+      });
+    return () => {
+      current = false;
+    };
+  }, [signedIn]);
 
   useEffect(() => {
     let current = true;
@@ -58,9 +89,17 @@ export function ContinueCard({
     };
   }, [classrooms]);
 
-  const pick = positions
+  const local = positions
     ? pickContinue(classrooms, new Map([...positions].map(([id, position]) => [id, position.at])))
     : undefined;
+  const localAt = local ? positions?.get(local.id)?.at : undefined;
+  const server =
+    positions && remote
+      ? pickRemoteContinue(remote.rows, new Set(classrooms.map((c) => c.id)), remote.catalog)
+      : undefined;
+  // A studied own course competes on time; one only "changed last" never beats a studied one.
+  const useServer = server !== undefined && (localAt === undefined || server.at > localAt);
+  const pick = useServer ? undefined : local;
   const pickId = pick?.id;
   const sceneId = pickId ? positions?.get(pickId)?.sceneId : undefined;
 
@@ -81,13 +120,20 @@ export function ContinueCard({
     };
   }, [pickId, sceneId]);
 
-  if (!pick) return null;
-  const slide = thumbnails[pick.id];
-  const shown = progress?.id === pick.id ? progress : null;
+  if (!pick && !server) return null;
+  const target = useServer
+    ? { id: server.courseId, name: server.title, slide: undefined, shown: server }
+    : {
+        id: pick!.id,
+        name: pick!.name,
+        slide: thumbnails[pick!.id],
+        shown: progress?.id === pick!.id ? progress : null,
+      };
+  const { slide, shown } = target;
 
   return (
     <Link
-      href={`/classroom/${pick.id}`}
+      href={`/classroom/${target.id}`}
       className={cn(
         GLASS,
         'group mb-4 flex w-full items-center gap-5 rounded-3xl p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-brand-800/15',
@@ -119,7 +165,7 @@ export function ContinueCard({
           {t('home.continue.title')}
         </span>
         <span className="truncate text-lg font-bold text-brand-800 dark:text-white">
-          {pick.name}
+          {target.name}
         </span>
         {shown && (
           <div className="flex items-center gap-3 text-sm text-muted-foreground">

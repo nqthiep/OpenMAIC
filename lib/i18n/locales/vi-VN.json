@@ -118,11 +118,12 @@
       "classes": "Tham gia lớp dành cho thành viên.",
       "contactAdmin": "Hãy nhờ quản trị viên thêm bạn vào danh sách thành viên.",
       "quota": "Hạn mức AI tháng này đã dùng hết.",
-      "quotaReset": "Tạo bài mới sẽ mở lại từ {{date}}."
+      "quotaReset": "Tạo bài mới sẽ mở lại từ {{date}}.",
+      "previews": "Xem thử các bài học miễn phí"
     },
     "quota": {
       "label": "Hạn mức AI tháng này",
-      "used": "Đã dùng {{used}} / {{quota}} token"
+      "used": "Đã dùng {{used}} / {{quota}} xu"
     },
     "classes": {
       "mine": "Lớp của tôi"
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "Thành viên: {{count}}",
-      "noCourses": "Lớp này chưa được gắn khoá học nào.",
+      "noCourses": "Thầy cô chưa thêm khoá học nào vào lớp này. Bạn quay lại sau, hoặc cứ tự học ở thư viện của bạn.",
       "untitled": "Khoá học {{number}}",
-      "hint": "Lớp do thầy cô hoặc người vận hành tạo và gắn khoá học vào. Không tham gia lớp, bạn vẫn tự học bình thường."
+      "hint": "Lớp là nhóm khoá học do thầy cô hoặc người vận hành chọn cho bạn. Vào lớp để mở các khoá học đó, kể cả khoá chưa công khai. Không vào lớp, bạn vẫn tự học bình thường.",
+      "assigned": "Thầy cô giao {{count}} khoá học cho lớp này. Học lần lượt từ trên xuống, bấm \"Vào học\" để bắt đầu.",
+      "open": "Vào học",
+      "leave": "Rời lớp",
+      "leaveTitle": "Rời lớp {{name}}?",
+      "leaveBody": "Bạn sẽ không mở được các khoá học riêng của lớp này nữa. Muốn quay lại, bạn cần nhập lại mã lớp.",
+      "left": "Bạn đã rời {{name}}.",
+      "progressVisible": "Thầy cô và người vận hành xem được tiến độ học của bạn trong các khoá của lớp."
     },
     "starter": {
       "title": "Chưa biết bắt đầu từ đâu? Thử một gợi ý:",
@@ -155,8 +163,8 @@
     "access": {
       "prompt": "Gửi yêu cầu để quản trị viên thêm bạn làm thành viên.",
       "promptRenew": "Gửi yêu cầu để quản trị viên gia hạn gói thành viên của bạn.",
-      "notePlaceholder": "Ghi chú ngắn (không bắt buộc): bạn là ai, vì sao cần quyền này",
-      "button": "Xin quyền",
+      "notePlaceholder": "Ghi chú ngắn (không bắt buộc): bạn là ai, vì sao muốn làm thành viên",
+      "button": "Xin làm thành viên",
       "renewButton": "Xin gia hạn",
       "pending": "Yêu cầu của bạn đã gửi ngày {{date}}. Quản trị viên sẽ xem xét.",
       "rejected": "Yêu cầu gần nhất chưa được chấp nhận. Bạn có thể gửi lại từ {{date}}.",
@@ -169,7 +177,7 @@
       "pending": "Đang chờ duyệt",
       "readers": "Độc giả",
       "bonus": "Thưởng tháng này",
-      "bonusValue": "+{{tokens}} / {{cap}} token",
+      "bonusValue": "+{{tokens}} / {{cap}} xu",
       "badges": "Huy hiệu",
       "badge": {
         "readers-10": "10 độc giả",
@@ -894,13 +902,13 @@
     "elementCount": "{{count}} phần tử"
   },
   "quiz": {
-    "title": "Câu đố",
+    "title": "Bài kiểm tra",
     "subtitle": "Kiểm tra kiến thức của bạn",
     "questionsCount": "câu hỏi",
     "totalPrefix": "",
     "pointsSuffix": "điểm",
     "startQuiz": "Bắt đầu làm",
-    "multipleChoiceHint": "(Chọn nhiều đáp án — hãy chọn tất cả đáp án đúng)",
+    "multipleChoiceHint": "Chọn tất cả đáp án đúng.",
     "inputPlaceholder": "Nhập câu trả lời của bạn ở đây…",
     "charCount": "ký tự",
     "yourAnswer": "Câu trả lời của bạn:",
@@ -912,7 +920,7 @@
     "analysis": "Phân tích: ",
     "excellent": "Xuất sắc!",
     "keepGoing": "Cố lên!",
-    "needsReview": "Cần xem lại",
+    "needsReview": "Hãy ôn lại phần chưa đúng",
     "correct": "đúng",
     "incorrect": "sai",
     "answering": "Đang làm",
@@ -1239,7 +1247,7 @@
     "pdfSizeLimit": "Nhận tệp PDF tối đa 50MB",
     "courseMaterialSizeLimit": "Tài liệu, slide, bảng tính, ảnh và văn bản thuần — tối đa 50MB (định dạng được nhận tùy vào bộ bóc tách đang chọn)",
     "generateFailed": "Không tạo được khoá học, vui lòng thử lại",
-    "requirementPlaceholder": "Hãy nói bạn muốn học gì, ví dụ\n\"Dạy tôi Python từ đầu trong 30 phút\"\n\"Giảng phép biến đổi Fourier trên bảng\"\n\"Cách chơi board game Avalon\"",
+    "requirementPlaceholder": "Hãy nói bạn muốn ôn gì, ví dụ\n\"Ôn đạo hàm cho kỳ thi THPT trong 30 phút\"\n\"Giải thích bất phương trình bậc hai, từng bước\"\n\"Soạn 10 câu luyện tập về xác suất kèm lời giải\"",
     "requirementRequired": "Vui lòng nhập yêu cầu về khoá học",
     "fileTooLarge": "Tệp quá lớn. Vui lòng chọn tệp nhỏ hơn 50MB",
     "courseMaterialCountLimit": "Bạn chỉ tải lên được tối đa 5 tệp tài liệu",
@@ -1295,7 +1303,7 @@
     "noOutlines": "Chưa có đề cương cảnh nào",
     "sceneTitlePlaceholder": "Tên cảnh",
     "sceneTypeSlide": "Trang chiếu",
-    "sceneTypeQuiz": "Câu đố",
+    "sceneTypeQuiz": "Bài kiểm tra",
     "sceneTypeInteractive": "Tương tác",
     "sceneTypePbl": "Học theo dự án",
     "sceneDescriptionPlaceholder": "Mô tả ngắn mục đích và nội dung của cảnh này",
@@ -1355,7 +1363,11 @@
     "webSearchFailed": "Tìm trên web không thành công",
     "outlinesReadyCount": "{{ready}} / {{total}} phần đã xong",
     "jumpToBlankTitle": "Nhảy tới phần còn thiếu tên",
-    "analyzingMediaMaterial": "Đang phân tích âm thanh/video"
+    "analyzingMediaMaterial": "Đang phân tích âm thanh/video",
+    "failedHint": "Không tạo được khoá học lần này. Hãy quay lại và thử lại. Nếu vẫn lỗi, hãy báo quản trị viên.",
+    "leaveTitle": "Dừng tạo khoá học?",
+    "leaveBody": "Nếu về trang chủ bây giờ, việc tạo khoá học sẽ dừng và bạn phải bắt đầu lại.",
+    "leaveStay": "Ở lại"
   },
   "settings": {
     "title": "Cài đặt",
@@ -2357,7 +2369,7 @@
       "deniedSignIn": "Hãy đăng nhập bằng tài khoản người vận hành hoặc quản trị viên."
     },
     "membership": {
-      "active": "Gói thành viên đến {{date}} · {{quota}} token mỗi tháng",
+      "active": "Gói thành viên đến {{date}} · {{quota}} xu mỗi tháng",
       "none": "Chưa có gói thành viên"
     },
     "password": {
@@ -2544,6 +2556,11 @@
         "noMembership": "Chưa có gói",
         "add": "Thêm",
         "added": "Đã thêm {{username}} vào lớp."
+      },
+      "progress": {
+        "summary": "{{done}}/{{total}} khoá đã xong",
+        "last": "học gần nhất {{date}}",
+        "none": "chưa học khoá nào của lớp"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "Đổi cài đặt",
         "share_update-approve": "Duyệt bản cập nhật chia sẻ",
         "share_update-reject": "Từ chối bản cập nhật chia sẻ",
-        "class_add": "Thêm thành viên vào lớp"
+        "class_add": "Thêm thành viên vào lớp",
+        "class_leave": "Rời lớp"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "Không bắt buộc. Bạn vẫn tự học được mà không cần lớp: khoá học của bạn, bài xem thử miễn phí và khoá học được chia sẻ. Chỉ nhập mã khi thầy cô hoặc người vận hành đưa cho bạn.",
       "needsMembership": "Không cần tham gia lớp để tự học. Nếu thầy cô đưa bạn mã lớp, bạn cần gói thành viên trước, rồi nhập mã ở trang này.",
       "invited": "Bạn được mời vào một lớp. Hãy đăng nhập bằng tài khoản có gói thành viên, rồi bấm Tham gia ở trang này.",
-      "invitedMember": "Bạn được mời vào một lớp. Kiểm tra mã rồi bấm Tham gia."
+      "invitedMember": "Bạn được mời vào một lớp. Kiểm tra mã rồi bấm Tham gia.",
+      "notFound": "Không có lớp nào dùng mã này. Hãy kiểm tra lại mã với thầy cô hoặc người vận hành."
     },
     "empty": "Chưa có nội dung để xem.",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "Mở",
     "unavailable": "Danh mục không khả dụng trên hệ thống này.",
     "back": "Quay lại danh mục",
-    "membersOnly": "Khoá học được chia sẻ và khoá học của lớp dành cho thành viên."
+    "membersOnly": "Khoá học được chia sẻ và khoá học của lớp dành cho thành viên.",
+    "sceneCount": "{{count}} cảnh"
+  },
+  "courseProgress": {
+    "done": "Đã hoàn thành",
+    "quizScore": "Bài kiểm tra: {{score}}%"
   },
   "courseShare": {
     "request": "Chia sẻ cho thành viên",
@@ -2885,7 +2909,7 @@
     "vote": "Hữu ích ({{count}})",
     "best": "Hay nhất",
     "bestMarked": "Đã chọn câu trả lời hay nhất.",
-    "bestRewarded": "Đã chọn. {{name}} được thưởng {{tokens}} token.",
+    "bestRewarded": "Đã chọn. {{name}} được thưởng {{tokens}} xu.",
     "solved": "Đã giải",
     "locked": "Đã khoá",
     "lockedHint": "Câu hỏi này đã khoá, không nhận thêm trả lời.",
@@ -2910,7 +2934,7 @@
     },
     "join": {
       "title": "Tham gia thảo luận cùng cộng đồng",
-      "body": "Thành viên được đặt câu hỏi, nhận lời giải ngay từ trợ giảng AI, trả lời giúp người khác và nhận token thưởng khi câu trả lời được chọn là hay nhất.",
+      "body": "Thành viên được đặt câu hỏi, nhận lời giải ngay từ trợ giảng AI, trả lời giúp người khác và nhận xu thưởng khi câu trả lời được chọn là hay nhất.",
       "cta": "Đăng ký thành viên"
     },
     "report": {
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "Hỏi đáp",
       "challenges": "Thử thách tuần"
-    }
+    },
+    "challengeDescription": "Thử thách hằng tuần: nộp lời giải, được AI chấm sơ bộ, bình chọn cho nhau và nhận xu thưởng nếu vào top 3."
   },
   "challenge": {
     "none": "Chưa có thử thách nào.",
@@ -2986,13 +3011,13 @@
       "voting": "Bình chọn đến {{date}}",
       "finished": "Đã kết thúc lúc {{date}}"
     },
-    "prize": "Hạng {{rank}}: {{tokens}} token",
+    "prize": "Hạng {{rank}}: {{tokens}} xu",
     "prizeBadge": "+ huy hiệu Cao thủ tuần",
     "rank": "Hạng {{rank}}",
     "yours": "Của bạn",
     "aiScore": "AI chấm {{score}}/10",
     "aiFeedback": "Nhận xét của AI (chỉ bạn thấy)",
-    "reward": "+{{tokens}} token",
+    "reward": "+{{tokens}} xu",
     "vote": "Bình chọn ({{count}})",
     "voteHint": "Bình chọn cho lời giải bạn thấy hay nhất. Bạn không thể bình chọn cho bài của mình.",
     "yourEntry": "Lời giải của bạn",

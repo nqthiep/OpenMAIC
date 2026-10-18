@@ -314,6 +314,7 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
               {onCollapseChange && (
                 <button
                   onClick={() => onCollapseChange(true)}
+                  aria-label={t('roundtable.toggleChat')}
                   className="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center bg-gray-100/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 ring-1 ring-black/[0.04] dark:ring-white/[0.06] hover:bg-gray-200/90 dark:hover:bg-gray-700/90 hover:text-gray-700 dark:hover:text-gray-200 active:scale-90 transition-all duration-200"
                 >
                   <PanelRightClose className="w-4 h-4" />

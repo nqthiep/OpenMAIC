@@ -5,6 +5,7 @@ import {
   estimateTier,
   imageProviderWorks,
   pickModel,
+  TEMPLATE_BLANK,
   usableModels,
   type ModelChoice,
 } from '@/lib/home/simple-composer';
@@ -94,5 +95,15 @@ describe('canChooseProvider', () => {
     expect(canChooseProvider(as({ enabled: true }))).toBe(false);
     expect(canChooseProvider(undefined)).toBe(false);
     expect(canChooseProvider(null)).toBe(false);
+  });
+});
+
+describe('TEMPLATE_BLANK', () => {
+  it('matches a starter prompt that still has its blank', () => {
+    expect(TEMPLATE_BLANK.test('Giải thích [chủ đề] cho người mới bắt đầu')).toBe(true);
+  });
+  it('lets a filled prompt through', () => {
+    expect(TEMPLATE_BLANK.test('Giải thích đạo hàm cho người mới bắt đầu')).toBe(false);
+    expect(TEMPLATE_BLANK.test('Giải thích []')).toBe(false);
   });
 });

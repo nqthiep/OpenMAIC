@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   attach: vi.fn(),
   detach: vi.fn(),
   members: vi.fn(),
+  progress: vi.fn(),
   accounts: vi.fn(),
   addMember: vi.fn(),
   success: vi.fn(),
@@ -32,6 +33,7 @@ vi.mock('@/components/learning/learning-api', () => ({
   attachCourse: mocks.attach,
   detachCourse: mocks.detach,
   fetchClassMembers: mocks.members,
+  fetchClassProgress: mocks.progress,
   fetchAllMembers: mocks.accounts,
   addClassMember: mocks.addMember,
   LearningRequestError: class extends Error {},
@@ -90,6 +92,7 @@ beforeEach(() => {
     { id: 'id-carol', username: 'carol', membership: null },
   ]);
   mocks.addMember.mockResolvedValue({});
+  mocks.progress.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -152,5 +155,38 @@ describe('ClassesPanel', () => {
     )!;
     await act(async () => bobRow.querySelector('button')!.click());
     expect(mocks.addMember).toHaveBeenCalledWith('class-1', 'id-bob');
+  });
+
+  it('shows each member how far they got in the class courses, and who has not started', async () => {
+    mocks.classes.mockResolvedValue([{ ...CLASS, courseIds: ['c-shared', 'c-other'] }]);
+    mocks.members.mockResolvedValue([
+      { accountId: 'id-alice', username: 'alice', joinedAt: '2026-10-18T00:00:00.000Z' },
+      { accountId: 'id-bob', username: 'bob', joinedAt: '2026-10-18T00:00:00.000Z' },
+    ]);
+    mocks.progress.mockResolvedValue([
+      {
+        accountId: 'id-alice',
+        courseId: 'c-shared',
+        sceneId: 's3',
+        sceneIndex: 3,
+        sceneCount: 3,
+        quizScore: 90,
+        doneAt: '2026-10-18T08:00:00.000Z',
+        updatedAt: '2026-10-18T08:00:00.000Z',
+      },
+    ]);
+    await render();
+    const open = [...document.querySelectorAll('button')].find((b) =>
+      b.textContent?.startsWith('admin.classes.manageMembers'),
+    )!;
+    await act(async () => open.click());
+    await act(async () => {});
+
+    const memberRows = [...dialog()!.querySelectorAll('ul')][0]!.querySelectorAll('li');
+    expect(mocks.progress).toHaveBeenCalledWith('class-1');
+    expect(memberRows[0]!.textContent).toContain(
+      'admin.classes.progress.summary {"done":1,"total":2}',
+    );
+    expect(memberRows[1]!.textContent).toContain('admin.classes.progress.none');
   });
 });

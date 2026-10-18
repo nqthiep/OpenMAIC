@@ -118,7 +118,8 @@
       "classes": "加入班級僅限會員。",
       "contactAdmin": "請讓管理員將你加為會員。",
       "quota": "本月 AI 額度已用完。",
-      "quotaReset": "{{date}} 起可再次建立課程。"
+      "quotaReset": "{{date}} 起可再次建立課程。",
+      "previews": "試看免費預覽"
     },
     "quota": {
       "label": "本月 AI 額度",
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "成員：{{count}}",
-      "noCourses": "這個班級還沒有課程。",
+      "noCourses": "這個班級尚未加入課程。請稍後再來，或繼續在自己的資料庫中學習。",
       "untitled": "課程 {{number}}",
-      "hint": "班級由老師或營運人員建立並加入課程。不加入班級也可以照常自學。"
+      "hint": "班級是老師或營運人員為你挑選的一組課程。加入後可開啟這些課程，包括未公開的課程。不加入班級，你仍可自學。",
+      "assigned": "老師為這個班級安排了 {{count}} 門課程。請由上而下依序學習，按「開始學習」即可開始。",
+      "open": "開始學習",
+      "leave": "退出班級",
+      "leaveTitle": "退出 {{name}}？",
+      "leaveBody": "你將無法再開啟該班級專屬的課程。如需回來，請重新輸入班級碼。",
+      "left": "你已退出 {{name}}。",
+      "progressVisible": "老師和營運人員可以看到你在班級課程中的學習進度。"
     },
     "starter": {
       "title": "不知道從哪裡開始？試試這些：",
@@ -1340,7 +1348,11 @@
     "webSearchFailed": "網路搜尋失敗",
     "outlinesReadyCount": "{{ready}} / {{total}} 章節就緒",
     "jumpToBlankTitle": "跳至待補充標題的章節",
-    "analyzingMediaMaterial": "解析音影片內容"
+    "analyzingMediaMaterial": "解析音影片內容",
+    "failedHint": "這次未能建立課程。請返回重試；若仍然失敗，請聯絡管理員。",
+    "leaveTitle": "停止建立課程？",
+    "leaveBody": "現在返回首頁會中斷建立，需要重新開始。",
+    "leaveStay": "留下"
   },
   "settings": {
     "title": "設定",
@@ -2544,6 +2556,11 @@
         "noMembership": "無會員資格",
         "add": "加入",
         "added": "已將 {{username}} 加入班級。"
+      },
+      "progress": {
+        "summary": "已完成 {{done}}/{{total}} 門課程",
+        "last": "最近學習 {{date}}",
+        "none": "尚未開始班級課程"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "修改設定",
         "share_update-approve": "已核准分享更新",
         "share_update-reject": "已拒絕分享更新",
-        "class_add": "加入成員"
+        "class_add": "加入成員",
+        "class_leave": "退出班級"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "可選。不加入班級也能自學：你的課程、免費試看課程和已分享課程。只有老師或營運人員給了你班級碼時才需要輸入。",
       "needsMembership": "自學不需要加入班級。如果老師給了你班級碼，需要先有會員資格，再於此頁面輸入。",
       "invited": "你被邀請加入一個班級。請用有會員資格的帳號登入，再於此頁面按「加入」。",
-      "invitedMember": "你被邀請加入一個班級。請核對加入碼後按「加入」。"
+      "invitedMember": "你被邀請加入一個班級。請核對加入碼後按「加入」。",
+      "notFound": "沒有使用此代碼的班級。請向老師或營運人員確認代碼。"
     },
     "empty": "暫時沒有可瀏覽的內容。",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "開啟",
     "unavailable": "此部署不提供課程目錄。",
     "back": "返回課程目錄",
-    "membersOnly": "共享課程和班級僅對會員開放。"
+    "membersOnly": "共享課程和班級僅對會員開放。",
+    "sceneCount": "{{count}} 個場景"
+  },
+  "courseProgress": {
+    "done": "已完成",
+    "quizScore": "測驗：{{score}}%"
   },
   "courseShare": {
     "request": "與會員分享",
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "問答",
       "challenges": "每週挑戰"
-    }
+    },
+    "challengeDescription": "每週挑戰：提交解答，取得 AI 初評，互相投票，進入前三名可獲得獎勵代幣。"
   },
   "challenge": {
     "none": "還沒有挑戰。",

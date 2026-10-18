@@ -91,6 +91,7 @@ async function loadRoutes() {
     adminClass,
     joinCodeRoute,
     classMembers,
+    leave,
   ] = await Promise.all([
     import('@/app/api/auth/register/route'),
     import('@/app/api/courses/[id]/share/route'),
@@ -108,6 +109,7 @@ async function loadRoutes() {
     import('@/app/api/admin/classes/[id]/route'),
     import('@/app/api/admin/classes/[id]/join-code/route'),
     import('@/app/api/admin/classes/[id]/members/route'),
+    import('@/app/api/classes/[id]/route'),
   ]);
   return {
     register: register.POST,
@@ -132,6 +134,7 @@ async function loadRoutes() {
     shareRevoke: shareDecide.DELETE,
     audit: audit.GET,
     addMember: classMembers.POST,
+    leaveClass: leave.DELETE,
   };
 }
 
@@ -290,6 +293,37 @@ describe('learning routes', () => {
       ),
     );
     expect(byLearner).toMatchObject({ status: 403, body: { errorCode: 'FORBIDDEN' } });
+  });
+
+  it('a member leaves a class, loses its courses and the audit log records it', async () => {
+    const routes = await loadRoutes();
+    const root = await signUp(routes, ROOT);
+    const bob = await signUp(routes, BOB);
+    await routes.memberGrant(
+      jsonRequest('/x', 'POST', { action: 'grant', days: 30, monthlyQuota: 1000 }, root),
+      params(await idOf('bob')),
+    );
+    const created = await json(
+      await routes.createClass(jsonRequest('/x', 'POST', { name: 'Grade 7' }, root)),
+    );
+    const { id, joinCode } = created.body as { id: string; joinCode: string };
+    await routes.joinClass(jsonRequest('/x', 'POST', { code: joinCode }, bob));
+
+    const left = await json(
+      await routes.leaveClass(jsonRequest('/x', 'DELETE', undefined, bob), params(id)),
+    );
+    expect(left).toMatchObject({ status: 200, body: { classId: id } });
+    const mine = await json(await routes.myClasses(getRequest('/api/classes', bob)));
+    expect(mine.body.classes).toEqual([]);
+
+    const again = await json(
+      await routes.leaveClass(jsonRequest('/x', 'DELETE', undefined, bob), params(id)),
+    );
+    expect(again).toMatchObject({ status: 404 });
+    const rows = await db!.query<{ action: string }>(
+      "SELECT action FROM account_admin_audit WHERE action LIKE 'class:leave:%'",
+    );
+    expect(rows.rows).toEqual([{ action: `class:leave:${id}` }]);
   });
 
   it('a learner without a membership cannot use classes; a joined member sees the class courses', async () => {

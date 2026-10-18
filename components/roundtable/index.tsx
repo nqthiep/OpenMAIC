@@ -1876,6 +1876,8 @@ export function Roundtable({
                   behavior: 'smooth',
                 });
               }}
+              aria-hidden="true"
+              tabIndex={-1}
               className="absolute left-0 top-0 bottom-0 w-5 z-10 flex items-center justify-center bg-gradient-to-r from-gray-50/90 dark:from-gray-900/90 to-transparent opacity-0 group-hover/scroll:opacity-100 transition-opacity cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
@@ -2025,6 +2027,8 @@ export function Roundtable({
                   behavior: 'smooth',
                 });
               }}
+              aria-hidden="true"
+              tabIndex={-1}
               className="absolute right-0 top-0 bottom-0 w-5 z-10 flex items-center justify-center bg-gradient-to-l from-gray-50/90 dark:from-gray-900/90 to-transparent opacity-0 group-hover/scroll:opacity-100 transition-opacity cursor-pointer"
             >
               <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
@@ -2093,6 +2097,9 @@ export function Roundtable({
                       if (asrEnabled) handleToggleVoice();
                     }}
                     disabled={!asrEnabled}
+                    aria-label={
+                      asrEnabled ? t('roundtable.voiceInput') : t('roundtable.voiceInputDisabled')
+                    }
                     className={cn(
                       'w-8 h-8 rounded-full border flex items-center justify-center transition-all active:scale-95 shadow-sm',
                       !asrEnabled
@@ -2113,6 +2120,8 @@ export function Roundtable({
                       e.stopPropagation();
                       handleToggleInput();
                     }}
+                    aria-label={t('roundtable.textInput')}
+                    aria-pressed={isInputOpen}
                     className={cn(
                       'w-8 h-8 rounded-full border flex items-center justify-center transition-all active:scale-95 shadow-sm',
                       isInputOpen

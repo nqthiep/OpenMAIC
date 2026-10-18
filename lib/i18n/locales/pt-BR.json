@@ -118,7 +118,8 @@
       "classes": "Entrar em turmas é para membros.",
       "contactAdmin": "Peça a um administrador que adicione você como membro.",
       "quota": "A cota de IA deste mês acabou.",
-      "quotaReset": "A criação de cursos será liberada novamente em {{date}}."
+      "quotaReset": "A criação de cursos será liberada novamente em {{date}}.",
+      "previews": "Ver as prévias gratuitas"
     },
     "quota": {
       "label": "Limite de IA deste mês",
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "Membros: {{count}}",
-      "noCourses": "Esta turma ainda não tem cursos.",
+      "noCourses": "Nenhum curso foi adicionado a esta turma ainda. Volte mais tarde ou continue estudando na sua própria biblioteca.",
       "untitled": "Curso {{number}}",
-      "hint": "Um professor ou operador cria a turma e adiciona os cursos. Sem turma você continua estudando sozinho."
+      "hint": "Uma turma é um conjunto de cursos que um professor ou operador escolheu para você. Entre para abrir esses cursos, mesmo os não públicos. Sem turma, você ainda pode estudar por conta própria.",
+      "assigned": "Seu professor atribuiu {{count}} curso(s) a esta turma. Siga de cima para baixo; toque em \"Começar a estudar\" para iniciar.",
+      "open": "Começar a estudar",
+      "leave": "Sair da turma",
+      "leaveTitle": "Sair de {{name}}?",
+      "leaveBody": "Você não poderá mais abrir os cursos próprios desta turma. Para voltar, digite o código da turma novamente.",
+      "left": "Você saiu de {{name}}.",
+      "progressVisible": "Professores e operadores podem ver seu progresso nos cursos da turma."
     },
     "starter": {
       "title": "Não sabe por onde começar? Experimente uma destas ideias:",
@@ -1355,7 +1363,11 @@
     "webSearchFailed": "Falha na pesquisa na web",
     "outlinesReadyCount": "{{ready}} / {{total}} seções prontas",
     "jumpToBlankTitle": "Ir para uma seção que ainda precisa de título",
-    "analyzingMediaMaterial": "Analisando áudio/vídeo"
+    "analyzingMediaMaterial": "Analisando áudio/vídeo",
+    "failedHint": "Não foi possível criar o curso desta vez. Volte e tente de novo. Se continuar falhando, avise um administrador.",
+    "leaveTitle": "Parar a criação do curso?",
+    "leaveBody": "Se voltar à página inicial agora, a criação para e você terá que recomeçar.",
+    "leaveStay": "Ficar"
   },
   "settings": {
     "title": "Configurações",
@@ -2544,6 +2556,11 @@
         "noMembership": "Sem assinatura",
         "add": "Adicionar",
         "added": "{{username}} adicionado à turma."
+      },
+      "progress": {
+        "summary": "{{done}}/{{total}} cursos concluídos",
+        "last": "último estudo em {{date}}",
+        "none": "ainda não começou os cursos da turma"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "Alterar configuração",
         "share_update-approve": "Atualização compartilhada aprovada",
         "share_update-reject": "Atualização compartilhada recusada",
-        "class_add": "Membro adicionado"
+        "class_add": "Membro adicionado",
+        "class_leave": "Saiu da turma"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "Opcional. Você pode estudar sozinho sem turma: seus cursos, prévias gratuitas e cursos compartilhados. Digite um código só se um professor ou operador tiver dado um a você.",
       "needsMembership": "Você não precisa de turma para estudar sozinho. Se um professor deu um código de turma, primeiro você precisa de uma assinatura e depois digita o código nesta página.",
       "invited": "Você foi convidado para uma turma. Entre com uma conta com assinatura e clique em Entrar nesta página.",
-      "invitedMember": "Você foi convidado para uma turma. Confira o código e clique em Entrar."
+      "invitedMember": "Você foi convidado para uma turma. Confira o código e clique em Entrar.",
+      "notFound": "Nenhuma turma usa este código. Confira o código com seu professor ou o operador."
     },
     "empty": "Nada para explorar ainda.",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "Abrir",
     "unavailable": "O catálogo não está disponível nesta instalação.",
     "back": "Voltar ao catálogo",
-    "membersOnly": "Cursos compartilhados e turmas são para membros."
+    "membersOnly": "Cursos compartilhados e turmas são para membros.",
+    "sceneCount": "{{count}} cenas"
+  },
+  "courseProgress": {
+    "done": "Concluído",
+    "quizScore": "Quiz: {{score}}%"
   },
   "courseShare": {
     "request": "Compartilhar com os membros",
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "Perguntas",
       "challenges": "Desafios da semana"
-    }
+    },
+    "challengeDescription": "Desafios semanais: envie uma solução, receba uma pré-avaliação da IA, vote nos trabalhos dos colegas e ganhe tokens de bônus se ficar entre os três primeiros."
   },
   "challenge": {
     "none": "Nenhum desafio ainda.",

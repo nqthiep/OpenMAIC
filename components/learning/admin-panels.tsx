@@ -42,6 +42,7 @@ import {
   fetchAudit,
   fetchClasses,
   fetchClassMembers,
+  fetchClassProgress,
   fetchCourses,
   fetchPreviews,
   fetchServerProviders,
@@ -58,6 +59,7 @@ import {
   updateMembership,
   type AuditRow,
   type ClassMember,
+  type ClassProgressRow,
   type ClassRow,
   type CourseEntry,
   type MemberRow,
@@ -971,6 +973,8 @@ function ClassMembersDialog({
   const { t, locale } = useI18n();
   const failure = useFailureMessage();
   const [members, setMembers] = useState<ClassMember[] | null>(null);
+  // How far each member got in the class courses. Missing rows read as "not started".
+  const [progress, setProgress] = useState<ClassProgressRow[]>([]);
   // Every account, for adding learners without a code. Loaded with the dialog.
   const [accounts, setAccounts] = useState<MemberRow[] | null>(null);
   const [query, setQuery] = useState('');
@@ -997,6 +1001,13 @@ function ClassMembersDialog({
       .catch((error: unknown) => {
         if (active) toast.error(failure(error));
       });
+    fetchClassProgress(classId)
+      .then((next) => {
+        if (active) setProgress(next);
+      })
+      .catch(() => {
+        // The member list works without progress.
+      });
     fetchAllMembers()
       .then((next) => {
         if (active) setAccounts(next);
@@ -1008,6 +1019,14 @@ function ClassMembersDialog({
       active = false;
     };
   }, [classId, failure]);
+
+  const progressText = (accountId: string, total: number) => {
+    const mine = progress.filter((p) => p.accountId === accountId);
+    if (mine.length === 0) return t('admin.classes.progress.none');
+    const done = mine.filter((p) => p.doneAt !== null).length;
+    const last = mine.reduce((latest, p) => (p.updatedAt > latest ? p.updatedAt : latest), '');
+    return `${t('admin.classes.progress.summary', { done, total })} · ${t('admin.classes.progress.last', { date: day(last, locale) })}`;
+  };
 
   const inClass = new Set((members ?? []).map((m) => m.accountId));
   const needle = query.trim().toLowerCase();
@@ -1051,6 +1070,9 @@ function ClassMembersDialog({
                   <span className="truncate text-sm font-medium">{m.username}</span>
                   <span className="text-xs text-muted-foreground">
                     {t('admin.classes.joined', { date: day(m.joinedAt, locale) })}
+                    {row && row.courseIds.length > 0
+                      ? ` · ${progressText(m.accountId, row.courseIds.length)}`
+                      : ''}
                   </span>
                 </div>
                 <ConfirmButton

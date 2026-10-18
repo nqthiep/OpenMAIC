@@ -12,13 +12,16 @@ import { MyClasses } from '@/components/home/my-classes';
 import { GLASS, Reveal, SiteShell } from '@/components/home/site-shell';
 import {
   fetchCatalog,
+  fetchProgress,
   joinClass,
   LearningRequestError,
   type CatalogEntry,
+  type ProgressRow,
 } from '@/components/learning/learning-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useDocumentTitle } from '@/lib/hooks/use-document-title';
 import { useMembershipStatus } from '@/lib/home/use-membership-status';
 import { cn } from '@/lib/utils';
 import { catalogClassroomHref } from '@/lib/workbench/classroom-exit';
@@ -30,7 +33,10 @@ import { catalogClassroomHref } from '@/lib/workbench/classroom-exit';
  */
 export default function CatalogPage() {
   const { t } = useI18n();
+  useDocumentTitle(t('catalog.title'));
   const [courses, setCourses] = useState<CatalogEntry[] | null>(null);
+  // Where the signed-in learner stopped, by course id; the grid shows it on each card.
+  const [progress, setProgress] = useState<Map<string, ProgressRow>>(new Map());
   const [member, setMember] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
@@ -38,6 +44,7 @@ export default function CatalogPage() {
   const [joins, setJoins] = useState(0);
   const membershipStatus = useMembershipStatus();
   const [code, setCode] = useState('');
+  const [joinError, setJoinError] = useState<string | null>(null);
   // Set when the page was opened from an invite link (/catalog?join=CODE).
   const [invited, setInvited] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,7 +54,14 @@ export default function CatalogPage() {
   const readAll = async () => {
     const catalog = await fetchCatalog();
     const session = await fetchAccountSession();
+    // The class courses are shown by MyClasses, which reads their progress itself.
+    const gridIds = catalog.courses.filter((c) => c.kind !== 'class').map((c) => c.courseId);
+    const rows =
+      session.authenticated && gridIds.length > 0
+        ? await fetchProgress(gridIds).catch(() => [])
+        : [];
     return {
+      progress: new Map(rows.map((row) => [row.courseId, row])),
       courses: catalog.courses,
       member: catalog.member,
       signedIn: session.authenticated,
@@ -57,6 +71,7 @@ export default function CatalogPage() {
 
   const apply = (data: Awaited<ReturnType<typeof readAll>>) => {
     setCourses(data.courses);
+    setProgress(data.progress);
     setMember(data.member);
     setSignedIn(data.signedIn);
     setRegistrationOpen(data.registrationOpen);
@@ -105,6 +120,7 @@ export default function CatalogPage() {
   const join = async () => {
     const trimmed = code.trim();
     if (trimmed === '') return;
+    setJoinError(null);
     try {
       const joined = await joinClass(trimmed);
       setCode('');
@@ -117,12 +133,17 @@ export default function CatalogPage() {
       setJoins((count) => count + 1);
       apply(await readAll());
     } catch (error) {
+      // Shown at the field: a toast at the top of the page is out of sight from the card below.
+      const errorCode = error instanceof LearningRequestError ? error.errorCode : undefined;
       const key =
-        error instanceof LearningRequestError && error.errorCode
-          ? `learning.errors.${error.errorCode}`
-          : 'learning.errors.generic';
+        errorCode === 'NOT_FOUND'
+          ? 'catalog.join.notFound'
+          : errorCode
+            ? `learning.errors.${errorCode}`
+            : 'learning.errors.generic';
       const text = t(key);
-      toast.error(text === key ? t('learning.errors.generic') : text);
+      setJoinError(text === key ? t('learning.errors.generic') : text);
+      document.getElementById('join')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   };
 
@@ -149,6 +170,42 @@ export default function CatalogPage() {
       </SiteShell>
     );
   }
+
+  // A member sees it after their classes; a learner without membership sees it before the request.
+  const courseGrid = (
+    <section>
+      {courses === null ? (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+          {[0, 1, 2].map((slot) => (
+            <div key={slot} className="h-52 rounded-2xl bg-muted/60 motion-safe:animate-pulse" />
+          ))}
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-white/40 px-6 py-14 text-center dark:bg-white/[0.02]">
+          <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
+            <BookOpen className="size-6 text-violet-600 dark:text-violet-300" aria-hidden="true" />
+          </span>
+          <p className="text-sm text-muted-foreground">{t('catalog.empty')}</p>
+        </div>
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {/* Class courses are listed once, under their class in MyClasses above. */}
+          {courses
+            .filter((entry) => entry.kind !== 'class')
+            .map((entry, index) => (
+              <Reveal key={entry.courseId} delay={(index % 3) * 0.06}>
+                <CourseCard
+                  entry={entry}
+                  index={index}
+                  href={catalogClassroomHref(entry.courseId)}
+                  progress={progress.get(entry.courseId)}
+                />
+              </Reveal>
+            ))}
+        </div>
+      )}
+    </section>
+  );
 
   return (
     <SiteShell mainClassName="gap-10 pb-20 pt-10 md:pt-14" bandClassName="h-[300px] md:h-[320px]">
@@ -192,6 +249,8 @@ export default function CatalogPage() {
         </Reveal>
       ) : null}
 
+      {courses !== null && signedIn && !member ? courseGrid : null}
+
       {courses !== null && signedIn && !member ? (
         <Reveal>
           <AccessRequest kind={membershipStatus.notice.kind} reason={t('catalog.membersOnly')} />
@@ -205,40 +264,7 @@ export default function CatalogPage() {
       {/* Each class with its courses as links; read again after a join. */}
       {member ? <MyClasses key={joins} courseHref={catalogClassroomHref} /> : null}
 
-      <section>
-        {courses === null ? (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
-            {[0, 1, 2].map((slot) => (
-              <div key={slot} className="h-52 rounded-2xl bg-muted/60 motion-safe:animate-pulse" />
-            ))}
-          </div>
-        ) : courses.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-white/40 px-6 py-14 text-center dark:bg-white/[0.02]">
-            <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
-              <BookOpen
-                className="size-6 text-violet-600 dark:text-violet-300"
-                aria-hidden="true"
-              />
-            </span>
-            <p className="text-sm text-muted-foreground">{t('catalog.empty')}</p>
-          </div>
-        ) : (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {/* Class courses are listed once, under their class in MyClasses above. */}
-            {courses
-              .filter((entry) => entry.kind !== 'class')
-              .map((entry, index) => (
-                <Reveal key={entry.courseId} delay={(index % 3) * 0.06}>
-                  <CourseCard
-                    entry={entry}
-                    index={index}
-                    href={catalogClassroomHref(entry.courseId)}
-                  />
-                </Reveal>
-              ))}
-          </div>
-        )}
-      </section>
+      {member || !signedIn ? courseGrid : null}
 
       {/* Joining a class is optional: self-study needs none. The card sits last and says so. */}
       {member ? (
@@ -272,7 +298,12 @@ export default function CatalogPage() {
               placeholder={t('catalog.join.code')}
               className="h-9 max-w-xs bg-white/70 font-mono uppercase dark:bg-slate-900/50"
               value={code}
-              onChange={(event) => setCode(event.target.value)}
+              aria-invalid={joinError ? true : undefined}
+              aria-describedby={joinError ? 'join-error' : undefined}
+              onChange={(event) => {
+                setCode(event.target.value);
+                setJoinError(null);
+              }}
             />
             <Button
               type="submit"
@@ -282,6 +313,11 @@ export default function CatalogPage() {
             >
               {t('catalog.join.submit')}
             </Button>
+            {joinError ? (
+              <p id="join-error" role="alert" className="w-full text-sm text-destructive">
+                {joinError}
+              </p>
+            ) : null}
           </form>
         </section>
       ) : null}

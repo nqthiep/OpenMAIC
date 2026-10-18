@@ -440,6 +440,30 @@ describe('catalog titles', () => {
     }
   });
 
+  it('counts the scenes of a course when its scenes are stored, and omits the count otherwise', async () => {
+    await pg.exec(`CREATE TABLE document_stages (id TEXT PRIMARY KEY, name TEXT)`);
+    try {
+      await pg.exec(`INSERT INTO document_stages VALUES ('c-class', 'Binary search')`);
+      await arrange();
+      const counts = async () =>
+        Object.fromEntries(
+          (await listCatalog(db, { accountId: 'alice', memberActive: true })).map((e) => [
+            e.courseId,
+            e.sceneCount,
+          ]),
+        );
+      // Documents without a scenes table: no counts, and nothing fails.
+      expect((await counts())['c-class']).toBeUndefined();
+      await pg.exec(`CREATE TABLE document_scenes (stage_id TEXT NOT NULL, id TEXT NOT NULL)`);
+      await pg.exec(`INSERT INTO document_scenes VALUES ('c-class', 's1'), ('c-class', 's2')`);
+      expect(await counts()).toMatchObject({ 'c-class': 2 });
+      expect((await counts())['c-empty']).toBeUndefined();
+    } finally {
+      await pg.exec(`DROP TABLE IF EXISTS document_scenes`);
+      await pg.exec(`DROP TABLE document_stages`);
+    }
+  });
+
   it('falls back to the id when the course documents are not in this database', async () => {
     await arrange();
     expect(await titles({ accountId: 'alice', memberActive: true })).toEqual({

@@ -118,7 +118,8 @@
       "classes": "Klassen beizutreten ist Mitgliedern vorbehalten.",
       "contactAdmin": "Bitten Sie einen Administrator, Sie als Mitglied hinzuzufügen.",
       "quota": "Das KI-Kontingent dieses Monats ist aufgebraucht.",
-      "quotaReset": "Neue Kurse können ab {{date}} wieder erstellt werden."
+      "quotaReset": "Neue Kurse können ab {{date}} wieder erstellt werden.",
+      "previews": "Kostenlose Vorschauen ansehen"
     },
     "quota": {
       "label": "KI-Kontingent in diesem Monat",
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "Mitglieder: {{count}}",
-      "noCourses": "Dieser Klasse sind noch keine Kurse zugeordnet.",
+      "noCourses": "Dieser Klasse wurden noch keine Kurse hinzugefügt. Schau später wieder vorbei oder lerne in deiner eigenen Bibliothek weiter.",
       "untitled": "Kurs {{number}}",
-      "hint": "Eine Lehrkraft oder ein Betreuer legt eine Klasse an und fügt Kurse hinzu. Ohne Klasse kannst du trotzdem selbst lernen."
+      "hint": "Eine Klasse ist eine Gruppe von Kursen, die eine Lehrkraft oder ein Betreiber für dich ausgewählt hat. Tritt bei, um diese Kurse zu öffnen, auch nicht öffentliche. Ohne Klasse kannst du weiterhin allein lernen.",
+      "assigned": "Deine Lehrkraft hat dieser Klasse {{count}} Kurs(e) zugewiesen. Gehe sie von oben nach unten durch; mit „Lernen starten“ beginnst du.",
+      "open": "Lernen starten",
+      "leave": "Klasse verlassen",
+      "leaveTitle": "{{name}} verlassen?",
+      "leaveBody": "Du kannst die Kurse dieser Klasse dann nicht mehr öffnen. Um zurückzukehren, gib den Klassencode erneut ein.",
+      "left": "Du hast {{name}} verlassen.",
+      "progressVisible": "Lehrkräfte und Betreiber können deinen Fortschritt in den Kursen der Klasse sehen."
     },
     "starter": {
       "title": "Sie wissen nicht, wo Sie anfangen sollen? Probieren Sie eines davon:",
@@ -1355,7 +1363,11 @@
     "webSearchFailed": "Websuche fehlgeschlagen",
     "outlinesReadyCount": "Abschnitte bereit: {{ready}} / {{total}}",
     "jumpToBlankTitle": "Zu einem Abschnitt ohne Titel springen",
-    "analyzingMediaMaterial": "Audio- und Videomaterial wird analysiert"
+    "analyzingMediaMaterial": "Audio- und Videomaterial wird analysiert",
+    "failedHint": "Der Kurs konnte diesmal nicht erstellt werden. Gehe zurück und versuche es erneut. Wenn es weiter fehlschlägt, melde es einem Administrator.",
+    "leaveTitle": "Kurserstellung abbrechen?",
+    "leaveBody": "Wenn du jetzt zur Startseite gehst, wird die Erstellung abgebrochen und du musst von vorn beginnen.",
+    "leaveStay": "Bleiben"
   },
   "settings": {
     "title": "Einstellungen",
@@ -2544,6 +2556,11 @@
         "noMembership": "Keine Mitgliedschaft",
         "add": "Hinzufügen",
         "added": "{{username}} wurde der Klasse hinzugefügt."
+      },
+      "progress": {
+        "summary": "{{done}}/{{total}} Kurse abgeschlossen",
+        "last": "zuletzt gelernt am {{date}}",
+        "none": "hat die Kurse der Klasse noch nicht begonnen"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "Einstellung geändert",
         "share_update-approve": "Geteilte Aktualisierung freigegeben",
         "share_update-reject": "Geteilte Aktualisierung abgelehnt",
-        "class_add": "Mitglied hinzugefügt"
+        "class_add": "Mitglied hinzugefügt",
+        "class_leave": "Klasse verlassen"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "Optional. Du kannst ohne Klasse selbst lernen: mit deinen Kursen, kostenlosen Vorschauen und geteilten Kursen. Gib nur einen Code ein, den dir eine Lehrkraft oder ein Betreuer gegeben hat.",
       "needsMembership": "Zum Selbstlernen brauchst du keine Klasse. Hast du einen Klassencode bekommen, brauchst du zuerst eine Mitgliedschaft und gibst den Code dann hier ein.",
       "invited": "Du wurdest in eine Klasse eingeladen. Melde dich mit einer Mitgliedschaft an und drücke dann auf dieser Seite „Beitreten“.",
-      "invitedMember": "Du wurdest in eine Klasse eingeladen. Prüfe den Code und drücke „Beitreten“."
+      "invitedMember": "Du wurdest in eine Klasse eingeladen. Prüfe den Code und drücke „Beitreten“.",
+      "notFound": "Keine Klasse verwendet diesen Code. Prüfe den Code bei deiner Lehrkraft oder dem Betreiber."
     },
     "empty": "Noch nichts zum Durchstöbern.",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "Öffnen",
     "unavailable": "Der Katalog ist auf dieser Installation nicht verfügbar.",
     "back": "Zurück zum Katalog",
-    "membersOnly": "Geteilte Kurse und Klassen sind für Mitglieder."
+    "membersOnly": "Geteilte Kurse und Klassen sind für Mitglieder.",
+    "sceneCount": "{{count}} Szenen"
+  },
+  "courseProgress": {
+    "done": "Abgeschlossen",
+    "quizScore": "Quiz: {{score}} %"
   },
   "courseShare": {
     "request": "Mit Mitgliedern teilen",
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "Fragen",
       "challenges": "Wöchentliche Challenges"
-    }
+    },
+    "challengeDescription": "Wöchentliche Challenges: Lösung einreichen, eine KI-Vorbewertung erhalten, gegenseitig abstimmen und als Top 3 Bonus-Tokens verdienen."
   },
   "challenge": {
     "none": "Noch keine Challenges.",

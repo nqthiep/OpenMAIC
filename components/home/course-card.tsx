@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { ArrowRight, BookOpen } from 'lucide-react';
+import { CourseProgressLine } from '@/components/home/course-progress-line';
 import { GLASS, THUMBNAILS } from '@/components/home/site-shell';
-import type { CatalogEntry } from '@/components/learning/learning-api';
+import type { CatalogEntry, ProgressRow } from '@/components/learning/learning-api';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 
@@ -18,9 +19,12 @@ export function CourseCard({
   entry,
   index,
   href = `/classroom/${encodeURIComponent(entry.courseId)}`,
+  progress,
 }: {
   entry: CatalogEntry;
   index: number;
+  /** Where the signed-in learner stopped; replaces the scene count. */
+  progress?: ProgressRow;
   /** Where the card opens; the catalog passes a URL whose back arrow returns to it. */
   href?: string;
 }) {
@@ -51,7 +55,16 @@ export function CourseCard({
         </span>
       </div>
       <div className="flex flex-1 items-center justify-between gap-3 p-4">
-        <span className="line-clamp-2 break-words text-sm font-medium">{entry.title}</span>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span className="line-clamp-2 break-words text-sm font-medium">{entry.title}</span>
+          {progress ? (
+            <CourseProgressLine row={progress} sceneCount={entry.sceneCount} />
+          ) : entry.sceneCount ? (
+            <span className="text-xs text-muted-foreground">
+              {t('catalog.sceneCount', { count: entry.sceneCount })}
+            </span>
+          ) : null}
+        </span>
         <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
           {t('catalog.open')}
           <ArrowRight

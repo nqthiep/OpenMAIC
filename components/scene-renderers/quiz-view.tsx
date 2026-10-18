@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { reportQuizScore } from '@/lib/hooks/use-course-progress';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { createLogger } from '@/lib/logger';
 
@@ -265,7 +266,7 @@ function SingleChoiceQuestion({
                   'border-gray-200 dark:border-gray-600 hover:border-violet-200 dark:hover:border-violet-700 hover:bg-violet-50/50 dark:hover:bg-violet-900/30',
                 !isReview &&
                   selected &&
-                  'border-violet-400 bg-violet-50 dark:bg-violet-900/30 ring-1 ring-violet-200 dark:ring-violet-700',
+                  'border-violet-500 bg-violet-100/70 dark:bg-violet-900/50 ring-2 ring-violet-300 dark:ring-violet-600 font-medium',
                 // Review states
                 isReview &&
                   isCorrectOpt &&
@@ -274,10 +275,7 @@ function SingleChoiceQuestion({
                   isWrong &&
                   !isCorrectOpt &&
                   'border-red-300 bg-red-50 dark:bg-red-900/30',
-                isReview &&
-                  !isCorrectOpt &&
-                  !selected &&
-                  'border-gray-100 dark:border-gray-700 opacity-60',
+                isReview && !isCorrectOpt && !selected && 'border-gray-200 dark:border-gray-700',
                 disabled && !isReview && 'cursor-default',
               )}
             >
@@ -301,11 +299,14 @@ function SingleChoiceQuestion({
               <span
                 className={cn(
                   'flex-1',
-                  isReview && !isCorrectOpt && !selected && 'text-gray-400 dark:text-gray-500',
+                  isReview && !isCorrectOpt && !selected && 'text-gray-600 dark:text-gray-300',
                 )}
               >
                 <QuizMathText text={opt.label} />
               </span>
+              {!isReview && selected && (
+                <CheckCircle2 className="w-5 h-5 text-violet-500 shrink-0" />
+              )}
               {isReview && isCorrectOpt && (
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
               )}
@@ -374,15 +375,12 @@ function MultipleChoiceQuestion({
                   'border-gray-200 dark:border-gray-600 hover:border-violet-200 dark:hover:border-violet-700 hover:bg-violet-50/50 dark:hover:bg-violet-900/30',
                 !isReview &&
                   isSelected &&
-                  'border-violet-400 bg-violet-50 dark:bg-violet-900/30 ring-1 ring-violet-200 dark:ring-violet-700',
+                  'border-violet-500 bg-violet-100/70 dark:bg-violet-900/50 ring-2 ring-violet-300 dark:ring-violet-600 font-medium',
                 isReview &&
                   isCorrectOpt &&
                   'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
                 isReview && isWrong && 'border-red-300 bg-red-50 dark:bg-red-900/30',
-                isReview &&
-                  !isCorrectOpt &&
-                  !isSelected &&
-                  'border-gray-100 dark:border-gray-700 opacity-60',
+                isReview && !isCorrectOpt && !isSelected && 'border-gray-200 dark:border-gray-700',
                 disabled && !isReview && 'cursor-default',
               )}
             >
@@ -406,11 +404,14 @@ function MultipleChoiceQuestion({
               <span
                 className={cn(
                   'flex-1',
-                  isReview && !isCorrectOpt && !isSelected && 'text-gray-400 dark:text-gray-500',
+                  isReview && !isCorrectOpt && !isSelected && 'text-gray-600 dark:text-gray-300',
                 )}
               >
                 <QuizMathText text={opt.label} />
               </span>
+              {!isReview && isSelected && (
+                <CheckCircle2 className="w-5 h-5 text-violet-500 shrink-0" />
+              )}
               {isReview && isCorrectOpt && (
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
               )}
@@ -615,7 +616,7 @@ function ScoreBanner({
   const correctCount = results.filter((r) => r.status === 'correct').length;
   const incorrectCount = results.filter((r) => r.status === 'incorrect').length;
 
-  const color = pct >= 80 ? 'emerald' : pct >= 60 ? 'amber' : 'red';
+  const color = pct >= 80 ? 'emerald' : pct >= 60 ? 'amber' : 'calm';
   const colorMap = {
     emerald: {
       bg: 'from-emerald-500 to-teal-500',
@@ -629,10 +630,11 @@ function ScoreBanner({
       ring: 'bg-amber-400/30',
       text: t('quiz.keepGoing'),
     },
-    red: {
-      bg: 'from-red-500 to-rose-500',
-      shadow: 'shadow-red-200/50 dark:shadow-red-900/50',
-      ring: 'bg-red-400/30',
+    // Not red: a low score is a cue to review, not an alarm.
+    calm: {
+      bg: 'from-sky-500 to-indigo-500',
+      shadow: 'shadow-sky-200/50 dark:shadow-sky-900/50',
+      ring: 'bg-sky-400/30',
       text: t('quiz.needsReview'),
     },
   };
@@ -837,12 +839,18 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
       if (cancelled) return;
       setResults(ordered);
       setPhase('reviewing');
+      if (totalPoints > 0) {
+        reportQuizScore(
+          stageId,
+          (ordered.reduce((sum, r) => sum + r.earned, 0) / totalPoints) * 100,
+        );
+      }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [phase, questions, answers, locale, sceneId, stageId, attemptId, runtimeWriter]);
+  }, [phase, questions, answers, locale, sceneId, stageId, attemptId, runtimeWriter, totalPoints]);
 
   const handleRetry = useCallback(async () => {
     if (!attemptId || retrying) return;
@@ -1057,7 +1065,7 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
                 type="button"
                 onClick={() => void handleRetry()}
                 disabled={retrying}
-                className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg border border-violet-200 px-3 py-1.5 text-xs font-medium text-violet-600 transition-colors hover:bg-violet-50 dark:border-violet-700 dark:text-violet-300 dark:hover:bg-violet-900/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 {t('quiz.retry')}
@@ -1108,6 +1116,17 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
                   />
                 );
               })}
+              <div className="flex justify-center pb-2">
+                <button
+                  type="button"
+                  onClick={() => void handleRetry()}
+                  disabled={retrying}
+                  className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 px-6 py-2 text-sm font-medium text-white shadow-md transition-shadow hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  {t('quiz.retry')}
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

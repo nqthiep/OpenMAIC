@@ -1609,6 +1609,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
             before the parent flips mode to 'edit'. */}
           {!isPresenting && !hideHeader && (
             <Header
+              courseTitle={stage?.name}
               currentSceneTitle={
                 currentScene?.title ||
                 (isCourseComplete && isPendingScene ? t('stage.courseComplete') : '')

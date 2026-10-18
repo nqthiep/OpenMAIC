@@ -147,6 +147,7 @@ export function AccessRequest({
       <LockedNotice
         reason={reason}
         hint={(renew ? t('home.access.promptRenew') : t('home.access.prompt')) + refusal}
+        quietContact
       />
       <div className="flex flex-col gap-3 rounded-3xl border border-brand-100 bg-white p-4 shadow-lg shadow-brand-800/[0.06] dark:border-white/10 dark:bg-slate-900">
         <Textarea

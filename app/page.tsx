@@ -109,6 +109,7 @@ import {
   estimateTier,
   imageProviderWorks,
   pickModel,
+  TEMPLATE_BLANK,
   usableModels,
 } from '@/lib/home/simple-composer';
 import { arrivedByProSwap, startProSwap } from '@/lib/workbench/pro-swap';
@@ -749,7 +750,8 @@ function HomePage() {
     return date.toLocaleDateString();
   };
 
-  const canGenerate = !!form.requirement.trim() && hasUsableProvider;
+  const canGenerate =
+    !!form.requirement.trim() && !TEMPLATE_BLANK.test(form.requirement) && hasUsableProvider;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
@@ -972,7 +974,14 @@ function HomePage() {
             <StarterPrompts
               onPick={(text) => {
                 updateForm('requirement', text);
-                textareaRef.current?.focus();
+                // Select the blank so typing replaces it; wait for the controlled value to land.
+                requestAnimationFrame(() => {
+                  const box = textareaRef.current;
+                  const blank = TEMPLATE_BLANK.exec(text);
+                  box?.focus();
+                  if (box && blank)
+                    box.setSelectionRange(blank.index, blank.index + blank[0].length);
+                });
               }}
             />
           )}
@@ -1254,7 +1263,17 @@ function HomePage() {
                 </Gate>
                 {folders.length === 0 && classrooms.length === 0 ? (
                   <div className="pt-8 pb-2 text-center text-[13px] text-muted-foreground/60">
-                    {t('classroom.emptyLibraryHint')}
+                    {/* Without the right to create, "create one above" points at a locked box. */}
+                    <Gate
+                      capability="generate"
+                      locked={
+                        <Link href="/catalog" className="underline underline-offset-4">
+                          {t('home.locked.previews')}
+                        </Link>
+                      }
+                    >
+                      {t('classroom.emptyLibraryHint')}
+                    </Gate>
                   </div>
                 ) : !isSearching && currentFolderId && currentFolderClassrooms.length === 0 ? (
                   // Empty folder: hint directly below the centered path bar.

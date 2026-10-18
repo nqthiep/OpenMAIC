@@ -250,7 +250,12 @@ export function AccountControl() {
             <LogOut className="size-4" aria-hidden="true" />
             {t('account.signOut')}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={handleSignOutOthers} className="cursor-pointer gap-2">
+          {/* Apart from "sign out": a slip next to it would end the other devices' sessions. */}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={handleSignOutOthers}
+            className="cursor-pointer gap-2 text-muted-foreground"
+          >
             <LogOut className="size-4" aria-hidden="true" />
             {t('account.signOutOthers')}
           </DropdownMenuItem>

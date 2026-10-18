@@ -65,6 +65,8 @@ export interface CatalogEntry {
   courseId: string;
   title: string;
   kind: 'preview' | 'shared' | 'class';
+  /** Absent when the server does not store course documents. */
+  sceneCount?: number;
 }
 
 export interface AuditRow {
@@ -420,6 +422,10 @@ export async function fetchMyClasses(): Promise<ClassRow[]> {
   return body.classes;
 }
 
+export function leaveClass(classId: string): Promise<unknown> {
+  return call('DELETE', `/api/classes/${encodeURIComponent(classId)}`);
+}
+
 export function joinClass(code: string): Promise<{ class: { id: string; name: string } }> {
   return call('POST', '/api/classes/join', { code });
 }
@@ -766,4 +772,49 @@ export function fetchRemixInfo(courseId: string): Promise<RemixInfo> {
 
 export function recordRemix(courseId: string, sourceId: string): Promise<unknown> {
   return call('POST', `/api/courses/${encodeURIComponent(courseId)}/remix`, { sourceId });
+}
+
+/** Where the learner stopped in a course they read but did not write. */
+export interface ProgressRow {
+  courseId: string;
+  sceneId: string;
+  /** 1-based position of the scene. */
+  sceneIndex: number;
+  sceneCount: number;
+  /** Score of the last quiz submitted in the course, 0 to 100. */
+  quizScore: number | null;
+  doneAt: string | null;
+  updatedAt: string;
+}
+
+export interface ClassProgressRow extends ProgressRow {
+  accountId: string;
+}
+
+export interface ProgressReport {
+  courseId: string;
+  sceneId: string;
+  sceneIndex: number;
+  sceneCount: number;
+  quizScore?: number;
+}
+
+/** The learner's own progress: the named courses, or the ones studied last. */
+export async function fetchProgress(courseIds?: readonly string[]): Promise<ProgressRow[]> {
+  const query = courseIds ? `?courseIds=${courseIds.map(encodeURIComponent).join(',')}` : '';
+  const body = await call<{ progress: ProgressRow[] }>('GET', `/api/progress${query}`);
+  return body.progress;
+}
+
+export function putProgress(report: ProgressReport): Promise<unknown> {
+  return call('PUT', '/api/progress', report);
+}
+
+/** Staff: how far each member of a class got in the courses attached to it. */
+export async function fetchClassProgress(classId: string): Promise<ClassProgressRow[]> {
+  const body = await call<{ progress: ClassProgressRow[] }>(
+    'GET',
+    `/api/admin/classes/${encodeURIComponent(classId)}/progress`,
+  );
+  return body.progress;
 }

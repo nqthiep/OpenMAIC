@@ -6,6 +6,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, Sparkles, AlertCircle, AlertTriangle, ArrowLeft, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { BrandBand } from '@/components/home/brand-band';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { OutlinesEditor } from '@/components/generation/outlines-editor';
@@ -117,6 +127,7 @@ function GenerationPreviewContent() {
   const [error, setError] = useState<string | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isComplete] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [streamingOutlines, setStreamingOutlines] = useState<SceneOutline[] | null>(null);
   const [isOutlineStreaming, setIsOutlineStreaming] = useState(false);
@@ -1059,6 +1070,8 @@ function GenerationPreviewContent() {
         return;
       }
       sessionStorage.removeItem('generationSession');
+      // The raw message goes to the log; the learner reads a plain sentence (`generation.failedHint`).
+      log.error('[GenerationPreview] Generation failed', err);
       setError(err instanceof Error ? err.message : String(err));
     }
   };
@@ -1078,6 +1091,9 @@ function GenerationPreviewContent() {
     sessionStorage.removeItem('generationSession');
     router.push('/');
   };
+
+  // Leaving aborts the run, so ask first; after a failure there is nothing left to lose.
+  const requestGoBack = () => (error ? goBackToHome() : setLeaveOpen(true));
 
   // Triggered when the user clicks the streaming outline card mid-stream.
   // SSE keeps running; only the surface morph + intent flag change.
@@ -1225,6 +1241,21 @@ function GenerationPreviewContent() {
       : ALL_STEPS[0];
   const activeStepText = getGenerationStepText(activeStep, session);
 
+  const leaveDialog = (
+    <AlertDialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('generation.leaveTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('generation.leaveBody')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('generation.leaveStay')}</AlertDialogCancel>
+          <AlertDialogAction onClick={goBackToHome}>{t('generation.backToHome')}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (isReviewingOutlines) {
     const outlineStepIndex = Math.max(
       0,
@@ -1237,6 +1268,7 @@ function GenerationPreviewContent() {
     return (
       <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex flex-col items-center p-4 relative overflow-hidden">
         <BrandBand className="inset-x-0 top-0 h-[17rem]" />
+        {leaveDialog}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1246,7 +1278,7 @@ function GenerationPreviewContent() {
             variant="ghost"
             size="sm"
             className="text-white hover:bg-white/10 hover:text-white"
-            onClick={goBackToHome}
+            onClick={requestGoBack}
             disabled={isConfirmingOutlines}
           >
             <ArrowLeft className="size-4 mr-2" />
@@ -1289,7 +1321,7 @@ function GenerationPreviewContent() {
 
             {error && (
               <div className="mx-auto max-w-2xl rounded-md border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-300">
-                {error}
+                {t('generation.failedHint')}
               </div>
             )}
 
@@ -1297,7 +1329,7 @@ function GenerationPreviewContent() {
               outlines={editorOutlines}
               onChange={handleOutlinesChange}
               onConfirm={handleConfirmOutlines}
-              onBack={goBackToHome}
+              onBack={requestGoBack}
               alwaysReview={reviewOutlineEnabled}
               onAlwaysReviewChange={setReviewOutlineEnabled}
               isLoading={isConfirmingOutlines}
@@ -1314,6 +1346,7 @@ function GenerationPreviewContent() {
     <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
       {/* Background Decor */}
       <BrandBand className="inset-x-0 top-0 h-[44vh]" />
+      {leaveDialog}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div
           className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl animate-pulse"
@@ -1331,7 +1364,7 @@ function GenerationPreviewContent() {
           variant="ghost"
           size="sm"
           className="text-white hover:bg-white/10 hover:text-white"
-          onClick={goBackToHome}
+          onClick={requestGoBack}
         >
           <ArrowLeft className="size-4 mr-2" />
           {t('generation.backToHome')}
@@ -1427,7 +1460,7 @@ function GenerationPreviewContent() {
                     </h2>
                     <p className="text-muted-foreground text-base">
                       {error
-                        ? error
+                        ? t('generation.failedHint')
                         : isComplete
                           ? t('generation.classroomReady')
                           : statusMessage || t(activeStepText.description)}
@@ -1513,7 +1546,7 @@ function GenerationPreviewContent() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-center gap-3 text-sm text-muted-foreground/50 font-medium uppercase tracking-widest"
+                className="flex items-center gap-3 text-sm text-muted-foreground font-medium tracking-wide"
               >
                 <Sparkles className="size-3 animate-pulse" />
                 {t('generation.aiWorking')}

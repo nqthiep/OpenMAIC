@@ -18,6 +18,8 @@ import { clearPendingMediaAllocations } from '@/lib/media/pending-media-allocati
 import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { createLogger } from '@/lib/logger';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useDocumentTitle } from '@/lib/hooks/use-document-title';
+import { useCourseProgress } from '@/lib/hooks/use-course-progress';
 import { MediaStageProvider } from '@/lib/contexts/media-stage-context';
 import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
 import { useAgentRegistry } from '@/lib/orchestration/registry/store';
@@ -48,6 +50,7 @@ export default function ClassroomDetailPage() {
   const { t } = useI18n();
 
   const { loadFromStorage } = useStageStore();
+  useDocumentTitle(useStageStore((s) => s.stage?.name));
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -211,6 +214,7 @@ export default function ClassroomDetailPage() {
   // derived key that only this browser can resolve. The owner's browser still
   // has the bytes, so it converts them once per load, with no provider call.
   useNarrationAdoption(classroomId, { ready: !loading && !error, mayGenerate });
+  useCourseProgress(classroomId, !loading && !error && !notFound);
 
   // Auto-resume generation for pending outlines
   useEffect(() => {

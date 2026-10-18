@@ -13,6 +13,9 @@ export type ModelTier = 'fast' | 'balanced' | 'strong';
 const HEAVY =
   /chứng minh|phân tích|so sánh|tổng hợp|thuật toán|lập trình|đạo hàm|tích phân|phương trình|bài toán|bài tập|đề thi|ôn thi|olympiad|prove|derive|algorithm|analy[sz]e|compare|calculus|equation/gi;
 
+/** A starter prompt's blank, e.g. `[chủ đề]`: the learner must replace it before generating. */
+export const TEMPLATE_BLANK = /\[[^\]]+\]/;
+
 /** [Inference] A heuristic on the request text, not a measured difficulty. */
 export function estimateTier(requirement: string, hasMaterials: boolean): ModelTier {
   const text = requirement.trim();

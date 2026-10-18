@@ -936,6 +936,29 @@ export async function listClassMembers(
 }
 
 /**
+ * A member leaves a class of their own accord and can join again with the class code. False when
+ * they were not in it. Logged as `class:leave:<classId>` with the account as actor and target.
+ */
+export async function leaveClass(
+  db: AccountQueryable,
+  input: { classId: string; accountId: string; now: Date },
+): Promise<boolean> {
+  const result = await db.query(
+    `WITH removed AS (
+       DELETE FROM class_members WHERE class_id = $1::text AND account_id = $2::text
+       RETURNING class_id
+     ), audit AS (
+       INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
+       SELECT $2::text, $2::text, 'class:leave:' || $1::text, NULL, $3::timestamptz FROM removed
+       RETURNING id
+     )
+     SELECT class_id FROM removed`,
+    [input.classId, input.accountId, input.now.toISOString()],
+  );
+  return result.rows.length > 0;
+}
+
+/**
  * Takes a member out of a class; they can join again only with the class code, so rotate the code
  * to keep them out. Logged as `class:remove:<classId>` with the account as target.
  */
@@ -1174,6 +1197,8 @@ export interface CatalogEntry {
   courseId: string;
   title: string;
   kind: 'preview' | 'shared' | 'class';
+  /** How many scenes the course has; absent when the course documents are not stored here. */
+  sceneCount?: number;
 }
 
 /**
@@ -1226,7 +1251,28 @@ export async function listCatalog(
     const current = byId.get(entry.courseId);
     if (!current || rank[entry.kind] > rank[current.kind]) byId.set(entry.courseId, entry);
   }
-  return [...byId.values()].sort((a, b) => a.title.localeCompare(b.title));
+  const entries = [...byId.values()];
+  await addSceneCounts(db, entries);
+  return entries.sort((a, b) => a.title.localeCompare(b.title));
+}
+
+/** Fills `sceneCount` from the stored course documents, one query for the whole list. */
+async function addSceneCounts(db: AccountQueryable, entries: CatalogEntry[]): Promise<void> {
+  if (entries.length === 0) return;
+  const present = await db.query(`SELECT to_regclass('document_scenes') IS NOT NULL AS present`);
+  if ((present.rows[0] as { present: boolean }).present !== true) return;
+  const counts = await db.query(
+    `SELECT stage_id, COUNT(*)::int AS n FROM document_scenes
+      WHERE stage_id = ANY($1::text[]) GROUP BY stage_id`,
+    [entries.map((entry) => entry.courseId)],
+  );
+  const byCourse = new Map(
+    (counts.rows as Array<{ stage_id: string; n: number }>).map((row) => [row.stage_id, row.n]),
+  );
+  for (const entry of entries) {
+    const n = byCourse.get(entry.courseId);
+    if (n !== undefined) entry.sceneCount = n;
+  }
 }
 
 // ── Audit ────────────────────────────────────────────────────────────────────

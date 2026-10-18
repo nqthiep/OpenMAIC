@@ -64,9 +64,12 @@ export function useFailureToast() {
 export function ContactAdminButton({
   subject,
   className,
+  quiet,
 }: {
   subject?: string;
   className?: string;
+  /** A plain link, for a place where another button is the main action. */
+  quiet?: boolean;
 }) {
   const { t } = useI18n();
   const session = useAccountSession();
@@ -77,7 +80,7 @@ export function ContactAdminButton({
     <Button
       type="button"
       size="sm"
-      variant="outline"
+      variant={quiet ? 'link' : 'outline'}
       onClick={() => openSupport(subject)}
       className={cn('shrink-0 cursor-pointer gap-1.5', className)}
     >
@@ -418,18 +421,21 @@ function Inbox({ staff, initialSubject }: { staff: boolean; initialSubject?: str
   return (
     <div className="grid min-h-[24rem] grid-cols-[16rem_1fr] gap-4">
       <div className="flex min-h-0 flex-col gap-3 border-r pr-4">
-        <Button
-          type="button"
-          size="sm"
-          onClick={() => {
-            setSelected(null);
-            setComposing(true);
-          }}
-          className="gap-1.5"
-        >
-          <Plus className="size-4" aria-hidden="true" />
-          {t('support.new')}
-        </Button>
+        {/* The form is already open on the right, so a button for it would do nothing. */}
+        {showForm ? null : (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => {
+              setSelected(null);
+              setComposing(true);
+            }}
+            className="gap-1.5"
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            {t('support.new')}
+          </Button>
+        )}
         {staff ? (
           <div className="flex gap-1" role="group" aria-label={t('support.filter.label')}>
             {(['open', 'closed'] as const).map((state) => (

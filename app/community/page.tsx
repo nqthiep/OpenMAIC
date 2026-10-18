@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAccountSession } from '@/lib/capabilities/use-capabilities';
 import { useMembershipStatus } from '@/lib/home/use-membership-status';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useDocumentTitle } from '@/lib/hooks/use-document-title';
 import { cn } from '@/lib/utils';
 
 type CommunityTab = 'questions' | 'challenges';
@@ -29,6 +30,7 @@ const TABS: { id: CommunityTab; icon: typeof Trophy }[] = [
  */
 export default function CommunityPage() {
   const { t } = useI18n();
+  useDocumentTitle(t('community.title'));
   const session = useAccountSession();
   const membershipStatus = useMembershipStatus();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -57,7 +59,14 @@ export default function CommunityPage() {
         <h1 className="pb-1 text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
           {t('community.title')}
         </h1>
-        <p className="max-w-2xl text-sm text-white/85 md:text-base">{t('community.description')}</p>
+        <p className="max-w-2xl text-sm text-white/85 md:text-base">
+          {/* Tabs exist only for a signed-in visitor, and `signedIn` is false until the session loads, so the server HTML and the first client render agree. */}
+          {t(
+            signedIn && tab === 'challenges'
+              ? 'community.challengeDescription'
+              : 'community.description',
+          )}
+        </p>
       </Reveal>
 
       {session === undefined ? (

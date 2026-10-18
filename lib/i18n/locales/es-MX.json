@@ -118,7 +118,8 @@
       "classes": "Unirse a clases es para miembros.",
       "contactAdmin": "Pide a un administrador que te agregue como miembro.",
       "quota": "La cuota de IA de este mes se agotó.",
-      "quotaReset": "Podrás crear cursos de nuevo a partir del {{date}}."
+      "quotaReset": "Podrás crear cursos de nuevo a partir del {{date}}.",
+      "previews": "Ver las vistas previas gratuitas"
     },
     "quota": {
       "label": "Cupo de IA de este mes",
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "Miembros: {{count}}",
-      "noCourses": "Esta clase aún no tiene cursos.",
+      "noCourses": "Aún no se han agregado cursos a esta clase. Vuelve más tarde o sigue estudiando en tu propia biblioteca.",
       "untitled": "Curso {{number}}",
-      "hint": "Un docente o un operador crea la clase y le agrega cursos. Sin clase puedes seguir estudiando por tu cuenta."
+      "hint": "Una clase es un conjunto de cursos que un docente o un operador eligió para ti. Únete para abrir esos cursos, incluso los que no son públicos. Sin clase, igual puedes estudiar por tu cuenta.",
+      "assigned": "Tu docente asignó {{count}} curso(s) a esta clase. Avanza de arriba hacia abajo; pulsa «Empezar a aprender» para comenzar.",
+      "open": "Empezar a aprender",
+      "leave": "Salir de la clase",
+      "leaveTitle": "¿Salir de {{name}}?",
+      "leaveBody": "Ya no podrás abrir los cursos propios de esta clase. Para volver, ingresa de nuevo el código de la clase.",
+      "left": "Saliste de {{name}}.",
+      "progressVisible": "Los docentes y los operadores pueden ver tu avance en los cursos de la clase."
     },
     "starter": {
       "title": "¿No sabes por dónde empezar? Prueba una de estas ideas:",
@@ -1355,7 +1363,11 @@
     "webSearchFailed": "Falló la búsqueda web",
     "outlinesReadyCount": "{{ready}} / {{total}} secciones listas",
     "jumpToBlankTitle": "Ir a una sección que aún necesita título",
-    "analyzingMediaMaterial": "Analizando audio/video"
+    "analyzingMediaMaterial": "Analizando audio/video",
+    "failedHint": "No se pudo crear el curso esta vez. Regresa e inténtalo de nuevo. Si sigue fallando, avisa a un administrador.",
+    "leaveTitle": "¿Detener la creación del curso?",
+    "leaveBody": "Si vas al inicio ahora, la creación se detiene y tendrás que empezar de nuevo.",
+    "leaveStay": "Quedarme"
   },
   "settings": {
     "title": "Configuración",
@@ -2544,6 +2556,11 @@
         "noMembership": "Sin membresía",
         "add": "Agregar",
         "added": "{{username}} se agregó a la clase."
+      },
+      "progress": {
+        "summary": "{{done}}/{{total}} cursos terminados",
+        "last": "último estudio el {{date}}",
+        "none": "aún no empieza los cursos de la clase"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "Cambiar ajuste",
         "share_update-approve": "Actualización compartida aprobada",
         "share_update-reject": "Actualización compartida rechazada",
-        "class_add": "Miembro agregado"
+        "class_add": "Miembro agregado",
+        "class_leave": "Salió de la clase"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "Opcional. Puedes estudiar por tu cuenta sin una clase: tus cursos, las vistas previas gratuitas y los cursos compartidos. Escribe un código solo si un docente o un operador te lo dio.",
       "needsMembership": "No necesitas una clase para estudiar por tu cuenta. Si un docente te dio un código de clase, primero necesitas una membresía y después lo escribes en esta página.",
       "invited": "Te invitaron a una clase. Inicia sesión con una membresía y luego pulsa Unirse en esta página.",
-      "invitedMember": "Te invitaron a una clase. Revisa el código y pulsa Unirse."
+      "invitedMember": "Te invitaron a una clase. Revisa el código y pulsa Unirse.",
+      "notFound": "Ninguna clase usa este código. Revisa el código con tu docente o el operador."
     },
     "empty": "Todavía no hay nada que explorar.",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "Abrir",
     "unavailable": "El catálogo no está disponible en esta instalación.",
     "back": "Volver al catálogo",
-    "membersOnly": "Los cursos compartidos y las clases son para miembros."
+    "membersOnly": "Los cursos compartidos y las clases son para miembros.",
+    "sceneCount": "{{count}} escenas"
+  },
+  "courseProgress": {
+    "done": "Completado",
+    "quizScore": "Cuestionario: {{score}} %"
   },
   "courseShare": {
     "request": "Compartir con los miembros",
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "Preguntas",
       "challenges": "Retos de la semana"
-    }
+    },
+    "challengeDescription": "Retos semanales: envía una solución, recibe una precalificación de la IA, vota los trabajos de los demás y gana tokens de bonificación si quedas entre los tres primeros."
   },
   "challenge": {
     "none": "Aún no hay retos.",

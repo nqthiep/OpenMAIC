@@ -257,6 +257,21 @@ CREATE TABLE IF NOT EXISTS course_share_rejections (
   rejected_at TIMESTAMPTZ NOT NULL
 );
 
+-- Where a learner stopped in a course they read but did not write (a class, shared or preview
+-- course): the scene (1-based position and id), the course's scene count when last seen, the
+-- score of the last quiz submitted (0 to 100) and when the last scene was first reached.
+CREATE TABLE IF NOT EXISTS course_progress (
+  account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL,
+  scene_id TEXT NOT NULL,
+  scene_index INT NOT NULL CHECK (scene_index >= 1),
+  scene_count INT NOT NULL CHECK (scene_count >= scene_index),
+  quiz_score INT CHECK (quiz_score BETWEEN 0 AND 100),
+  done_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, course_id)
+);
+
 -- Why the last access request was refused, shown to the learner. NULL after approval or a new request.
 ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS decision_reason TEXT;
 `;

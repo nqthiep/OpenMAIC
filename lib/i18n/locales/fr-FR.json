@@ -118,7 +118,8 @@
       "classes": "Rejoindre une classe est réservé aux membres.",
       "contactAdmin": "Demandez à un administrateur de vous ajouter comme membre.",
       "quota": "Le quota d'IA de ce mois est épuisé.",
-      "quotaReset": "La création de cours sera de nouveau possible à partir du {{date}}."
+      "quotaReset": "La création de cours sera de nouveau possible à partir du {{date}}.",
+      "previews": "Voir les aperçus gratuits"
     },
     "quota": {
       "label": "Quota IA de ce mois",
@@ -142,9 +143,16 @@
     },
     "myClasses": {
       "members": "Membres : {{count}}",
-      "noCourses": "Aucun cours n'est encore rattaché à cette classe.",
+      "noCourses": "Aucun cours n’a encore été ajouté à cette classe. Revenez plus tard, ou continuez à étudier dans votre propre bibliothèque.",
       "untitled": "Cours {{number}}",
-      "hint": "Un enseignant ou un opérateur crée la classe et y ajoute des cours. Sans classe, vous pouvez toujours apprendre seul."
+      "hint": "Une classe est un ensemble de cours choisis pour vous par un enseignant ou un opérateur. Rejoignez-en une pour ouvrir ces cours, même non publics. Sans classe, vous pouvez toujours étudier seul.",
+      "assigned": "Votre enseignant a attribué {{count}} cours à cette classe. Suivez-les de haut en bas ; appuyez sur « Commencer » pour démarrer.",
+      "open": "Commencer",
+      "leave": "Quitter la classe",
+      "leaveTitle": "Quitter {{name}} ?",
+      "leaveBody": "Vous ne pourrez plus ouvrir les cours propres à cette classe. Pour revenir, saisissez à nouveau le code de la classe.",
+      "left": "Vous avez quitté {{name}}.",
+      "progressVisible": "Les enseignants et les opérateurs peuvent voir votre progression dans les cours de la classe."
     },
     "starter": {
       "title": "Vous ne savez pas par où commencer ? Essayez l'une de ces idées :",
@@ -1355,7 +1363,11 @@
     "webSearchFailed": "Échec de la recherche web",
     "outlinesReadyCount": "{{ready}} / {{total}} sections prêtes",
     "jumpToBlankTitle": "Aller à une section dont le titre manque encore",
-    "analyzingMediaMaterial": "Analyse de l’audio et de la vidéo"
+    "analyzingMediaMaterial": "Analyse de l’audio et de la vidéo",
+    "failedHint": "Le cours n'a pas pu être créé cette fois. Revenez en arrière et réessayez. Si l'échec persiste, prévenez un administrateur.",
+    "leaveTitle": "Arrêter la création du cours ?",
+    "leaveBody": "Si vous retournez à l'accueil maintenant, la création s'arrête et vous devrez recommencer.",
+    "leaveStay": "Rester"
   },
   "settings": {
     "title": "Paramètres",
@@ -2544,6 +2556,11 @@
         "noMembership": "Sans adhésion",
         "add": "Ajouter",
         "added": "{{username}} ajouté à la classe."
+      },
+      "progress": {
+        "summary": "{{done}}/{{total}} cours terminés",
+        "last": "dernière étude le {{date}}",
+        "none": "n’a pas commencé les cours de la classe"
       }
     },
     "audit": {
@@ -2604,7 +2621,8 @@
         "settings_update": "Modification d'un réglage",
         "share_update-approve": "Mise à jour partagée approuvée",
         "share_update-reject": "Mise à jour partagée refusée",
-        "class_add": "Membre ajouté"
+        "class_add": "Membre ajouté",
+        "class_leave": "A quitté la classe"
       }
     },
     "accessRequests": {
@@ -2803,7 +2821,8 @@
       "description": "Facultatif. Vous pouvez apprendre seul sans classe : vos cours, les aperçus gratuits et les cours partagés. Saisissez un code seulement si un enseignant ou un opérateur vous l'a donné.",
       "needsMembership": "Pas besoin de classe pour apprendre seul. Si un enseignant vous a donné un code de classe, il faut d'abord une adhésion, puis saisir le code sur cette page.",
       "invited": "Vous êtes invité dans une classe. Connectez-vous avec une adhésion, puis cliquez sur Rejoindre sur cette page.",
-      "invitedMember": "Vous êtes invité dans une classe. Vérifiez le code et cliquez sur Rejoindre."
+      "invitedMember": "Vous êtes invité dans une classe. Vérifiez le code et cliquez sur Rejoindre.",
+      "notFound": "Aucune classe n'utilise ce code. Vérifiez le code auprès de votre enseignant ou de l'opérateur."
     },
     "empty": "Rien à parcourir pour l'instant.",
     "kind": {
@@ -2814,7 +2833,12 @@
     "open": "Ouvrir",
     "unavailable": "Le catalogue n'est pas disponible sur ce déploiement.",
     "back": "Retour au catalogue",
-    "membersOnly": "Les cours partagés et les classes sont réservés aux membres."
+    "membersOnly": "Les cours partagés et les classes sont réservés aux membres.",
+    "sceneCount": "{{count}} scènes"
+  },
+  "courseProgress": {
+    "done": "Terminé",
+    "quizScore": "Quiz : {{score}} %"
   },
   "courseShare": {
     "request": "Partager avec les membres",
@@ -2968,7 +2992,8 @@
     "tabs": {
       "questions": "Questions",
       "challenges": "Défis de la semaine"
-    }
+    },
+    "challengeDescription": "Défis hebdomadaires : soumettez une solution, obtenez une pré-évaluation par l'IA, votez pour les travaux des autres et gagnez des jetons bonus si vous finissez dans le top 3."
   },
   "challenge": {
     "none": "Aucun défi pour l'instant.",
