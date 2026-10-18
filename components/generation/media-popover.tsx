@@ -37,6 +37,8 @@ import type { SettingsSection } from '@/lib/types/settings';
 
 interface MediaPopoverProps {
   onSettingsOpen: (section: SettingsSection) => void;
+  /** False keeps only the on/off switches: no provider or model choice, no settings link. */
+  canChooseProvider?: boolean;
 }
 
 // ─── Provider icon maps ───
@@ -57,9 +59,10 @@ const VIDEO_PROVIDER_ICONS: Record<string, string> = {
 
 type TabId = 'image' | 'video' | 'tts' | 'asr';
 
-const TABS: Array<{ id: TabId; icon: LucideIcon; label: string }> = [
-  { id: 'image', icon: ImageIcon, label: 'Image' },
-  { id: 'video', icon: Video, label: 'Video' },
+// TTS/ASR stay as abbreviations in every language.
+const TABS: Array<{ id: TabId; icon: LucideIcon; label?: string; labelKey?: string }> = [
+  { id: 'image', icon: ImageIcon, labelKey: 'settings.usage.kindImage' },
+  { id: 'video', icon: Video, labelKey: 'settings.usage.kindVideo' },
   { id: 'tts', icon: Volume2, label: 'TTS' },
   { id: 'asr', icon: Mic, label: 'ASR' },
 ];
@@ -75,7 +78,7 @@ function providerModels<T extends { id: string; name: string }>(
   return [...builtInModels, ...customModels];
 }
 
-export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
+export function MediaPopover({ onSettingsOpen, canChooseProvider = true }: MediaPopoverProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('image');
@@ -273,7 +276,9 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
                   )}
                 >
                   <Icon className="size-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="hidden sm:inline">
+                    {tab.labelKey ? t(tab.labelKey) : tab.label}
+                  </span>
                   {isEnabled && !isActive && (
                     <span className="absolute top-1 right-1 size-1.5 rounded-full bg-violet-500" />
                   )}
@@ -292,15 +297,17 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
               enabled={imageGenerationEnabled}
               onToggle={setImageGenerationEnabled}
             >
-              <GroupedSelect
-                groups={imageGroups}
-                selectedGroupId={imageProviderId}
-                selectedItemId={imageModelId}
-                onSelect={(gid, iid) => {
-                  setImageProvider(gid as ImageProviderId);
-                  setImageModelId(iid);
-                }}
-              />
+              {canChooseProvider && (
+                <GroupedSelect
+                  groups={imageGroups}
+                  selectedGroupId={imageProviderId}
+                  selectedItemId={imageModelId}
+                  onSelect={(gid, iid) => {
+                    setImageProvider(gid as ImageProviderId);
+                    setImageModelId(iid);
+                  }}
+                />
+              )}
             </TabPanel>
           )}
 
@@ -311,15 +318,17 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
               enabled={videoGenerationEnabled}
               onToggle={setVideoGenerationEnabled}
             >
-              <GroupedSelect
-                groups={videoGroups}
-                selectedGroupId={videoProviderId}
-                selectedItemId={videoModelId}
-                onSelect={(gid, iid) => {
-                  setVideoProvider(gid as VideoProviderId);
-                  setVideoModelId(iid);
-                }}
-              />
+              {canChooseProvider && (
+                <GroupedSelect
+                  groups={videoGroups}
+                  selectedGroupId={videoProviderId}
+                  selectedItemId={videoModelId}
+                  onSelect={(gid, iid) => {
+                    setVideoProvider(gid as VideoProviderId);
+                    setVideoModelId(iid);
+                  }}
+                />
+              )}
             </TabPanel>
           )}
 
@@ -339,21 +348,23 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
               enabled={asrEnabled}
               onToggle={setASREnabled}
             >
-              <GroupedSelect
-                groups={asrGroups}
-                selectedGroupId={asrProviderId}
-                selectedItemId={asrLanguage}
-                onSelect={(gid, iid) => {
-                  setASRProvider(gid as ASRProviderId);
-                  setASRLanguage(iid);
-                }}
-              />
+              {canChooseProvider && (
+                <GroupedSelect
+                  groups={asrGroups}
+                  selectedGroupId={asrProviderId}
+                  selectedItemId={asrLanguage}
+                  onSelect={(gid, iid) => {
+                    setASRProvider(gid as ASRProviderId);
+                    setASRLanguage(iid);
+                  }}
+                />
+              )}
             </TabPanel>
           )}
         </div>
 
         {/* ── Footer ── */}
-        <div className="border-t border-border/40">
+        <div className={cn('border-t border-border/40', !canChooseProvider && 'hidden')}>
           <button
             onClick={() => {
               setOpen(false);

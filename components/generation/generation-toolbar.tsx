@@ -71,6 +71,13 @@ export interface GenerationToolbarProps {
    * in the UI.
    */
   materialsLocked?: boolean;
+  /**
+   * The learner's plain composer: only the document attachment (and the "set up a provider" prompt
+   * when none is usable). The model, web search and media choices are made by the page's defaults.
+   */
+  simple?: boolean;
+  /** False hides every provider and model choice (learners); the server defaults apply. */
+  canChooseProvider?: boolean;
 }
 
 // ─── Component ───────────────────────────────────────────────
@@ -83,6 +90,8 @@ export function GenerationToolbar({
   onCourseMaterialRemove,
   onPdfError,
   materialsLocked = false,
+  simple = false,
+  canChooseProvider = true,
 }: GenerationToolbarProps) {
   const { t } = useI18n();
   const currentProviderId = useSettingsStore((s) => s.providerId);
@@ -230,20 +239,22 @@ export function GenerationToolbar({
   return (
     <div className="flex items-center gap-1 flex-wrap">
       {/* ── Model selector ── */}
-      {configuredProviders.length > 0 ? (
-        <ModelSettingsPopover
-          configuredProviders={configuredProviders}
-          currentProviderId={currentProviderId}
-          currentModelId={currentModelId}
-          currentProviderConfig={currentProviderConfig}
-          currentModel={currentModel}
-          setModel={setModel}
-          thinkingConfig={currentThinkingConfig}
-          onThinkingChange={(config) =>
-            setThinkingConfig(currentProviderId, currentModelId, config)
-          }
-          t={t}
-        />
+      {!canChooseProvider ? null : configuredProviders.length > 0 ? (
+        simple ? null : (
+          <ModelSettingsPopover
+            configuredProviders={configuredProviders}
+            currentProviderId={currentProviderId}
+            currentModelId={currentModelId}
+            currentProviderConfig={currentProviderConfig}
+            currentModel={currentModel}
+            setModel={setModel}
+            thinkingConfig={currentThinkingConfig}
+            onThinkingChange={(config) =>
+              setThinkingConfig(currentProviderId, currentModelId, config)
+            }
+            t={t}
+          />
+        )
       ) : (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -265,7 +276,7 @@ export function GenerationToolbar({
 
       <div className="flex min-w-0 items-center gap-1">
         {/* ── Separator ── */}
-        <div className="w-px h-4 bg-border/60 mx-1" />
+        {!simple && canChooseProvider && <div className="w-px h-4 bg-border/60 mx-1" />}
 
         {/* ── Course material (extractor + upload) combined Popover ── */}
         <Popover>
@@ -287,7 +298,12 @@ export function GenerationToolbar({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-72 p-0">
             {/* Extractor selector */}
-            <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+            <div
+              className={cn(
+                'flex items-center gap-2 px-3 pt-3 pb-2',
+                !canChooseProvider && 'hidden',
+              )}
+            >
               <span className="text-xs font-medium text-muted-foreground shrink-0">
                 {t('toolbar.documentExtractor')}
               </span>
@@ -331,7 +347,7 @@ export function GenerationToolbar({
             </div>
 
             {/* Upload area / file info */}
-            <div className="px-3 pb-3">
+            <div className={cn('px-3 pb-3', !canChooseProvider && 'pt-3')}>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -428,7 +444,7 @@ export function GenerationToolbar({
         </Popover>
 
         {/* ── Web Search ── */}
-        {webSearchAvailable ? (
+        {simple ? null : webSearchAvailable ? (
           <Popover>
             <PopoverTrigger asChild>
               <button className={webSearch ? pillActive : pillMuted}>
@@ -476,7 +492,7 @@ export function GenerationToolbar({
               </button>
 
               {/* Provider selector */}
-              <div className="flex items-center gap-2">
+              <div className={cn('flex items-center gap-2', !canChooseProvider && 'hidden')}>
                 <span className="text-xs font-medium text-muted-foreground shrink-0">
                   {t('toolbar.webSearchProvider')}
                 </span>
@@ -525,11 +541,15 @@ export function GenerationToolbar({
           </Tooltip>
         )}
 
-        {/* ── Separator ── */}
-        <div className="w-px h-4 bg-border/60 mx-1" />
+        {!simple && (
+          <>
+            {/* ── Separator ── */}
+            <div className="w-px h-4 bg-border/60 mx-1" />
 
-        {/* ── Media popover ── */}
-        <MediaPopover onSettingsOpen={onSettingsOpen} />
+            {/* ── Media popover ── */}
+            <MediaPopover onSettingsOpen={onSettingsOpen} canChooseProvider={canChooseProvider} />
+          </>
+        )}
       </div>
     </div>
   );
@@ -870,7 +890,7 @@ function ModelSettingsPopover({
                 'inline-flex h-8 min-w-0 items-center gap-1.5 rounded-full border px-2 text-xs font-medium transition-all',
                 'border-violet-200/70 bg-violet-50 text-violet-700 hover:bg-violet-100 dark:border-violet-800/70 dark:bg-violet-950/30 dark:text-violet-300',
                 currentModelId &&
-                  'shadow-[0_0_0_1px_rgba(124,58,237,0.12)] dark:shadow-[0_0_0_1px_rgba(167,139,250,0.16)]',
+                  'shadow-[0_0_0_1px_rgba(37,99,235,0.12)] dark:shadow-[0_0_0_1px_rgba(96,165,250,0.16)]',
               )}
             >
               {currentProviderIcon ? (

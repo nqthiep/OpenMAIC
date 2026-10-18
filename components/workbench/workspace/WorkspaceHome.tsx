@@ -40,6 +40,9 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { useBrand, useIsDesktop } from '@/lib/brand/brand-context';
 import { arrivedByProSwap } from '@/lib/workbench/pro-swap';
 import { cn } from '@/lib/utils/cn';
+import { BrandBand, Slogan } from '@/components/home/brand-band';
+import { ComposerGate } from '@/components/home/composer-gate';
+import { useMembershipStatus } from '@/lib/home/use-membership-status';
 import { ProBadge } from '@/components/workbench/ProBadge';
 import { ProLaunchPanel } from '@/components/workbench/ProLaunchPanel';
 import type { CourseMentionSource } from '@/lib/workbench/course-mention';
@@ -64,6 +67,7 @@ export function WorkspaceHome({
   const { t } = useI18n();
   const brand = useBrand();
   const isDesktop = useIsDesktop();
+  const membershipStatus = useMembershipStatus();
 
   // Someone who arrived through the Pro swap has just watched the surfaces
   // crossfade around a fixed lockup and the composer turn over into this face;
@@ -76,8 +80,12 @@ export function WorkspaceHome({
     <main
       data-testid="pro-workspace-home"
       aria-label={t('workspace.homeAria')}
-      className="ws-canvas relative flex min-w-0 flex-1 flex-col overflow-y-auto"
+      className="ws-canvas relative isolate flex min-w-0 flex-1 flex-col overflow-y-auto"
     >
+      {/* The brand's blue band behind the lockup, ending just below the composer's top edge so the
+          composer rises off it, as on `/`. Sized in the viewport units the first screen is centred
+          in (`.ws-home-first`). */}
+      <BrandBand className="-z-10 inset-x-0 top-0 h-[calc(48vh+56px)]" />
       {/* Below `md` the sidebar is gone, so the exit switch needs a home. A
           plain button, not a second ProBadge: two elements answering to
           `pro-mode-exit` would be one testid too many. */}
@@ -141,7 +149,7 @@ export function WorkspaceHome({
                   src={brand.logoSrc}
                   alt={brand.productName}
                   data-testid="pro-workspace-hero-logo"
-                  className="ws-hero-logo"
+                  className="ws-hero-logo logo-on-brand"
                 />
               )}
               {/* At the wordmark's cap height, where a trademark mark goes —
@@ -152,13 +160,18 @@ export function WorkspaceHome({
                 data-pro-morph="badge"
                 data-pro-stamp
               >
-                <ProBadge active onToggle={onExitPro} testId="pro-workspace-hero-badge" />
+                <ProBadge
+                  active
+                  onToggle={onExitPro}
+                  testId="pro-workspace-hero-badge"
+                  className="!border-white !bg-brand-yellow !text-brand-950"
+                />
               </div>
             </div>
 
             <div className="mt-3.5 flex items-center gap-3">
               <p className="ws-tagline" data-testid="pro-workspace-hero-tagline">
-                {t('home.slogan')}
+                <Slogan text={t('home.slogan')} />
               </p>
             </div>
           </div>
@@ -167,13 +180,15 @@ export function WorkspaceHome({
               craft spent on it. It gets the larger gap of the two, because the
               gap is what says which of them the page is actually about. */}
           <div className={cn('mt-8', !swapped && 'ws-enter ws-d2')}>
-            <ProLaunchPanel
-              autoFocus
-              focusSignal={composerReset}
-              variant="workspace"
-              courseOptions={courseOptions}
-              onSessionCreated={onOpenSession}
-            />
+            <ComposerGate status={membershipStatus}>
+              <ProLaunchPanel
+                autoFocus
+                focusSignal={composerReset}
+                variant="workspace"
+                courseOptions={courseOptions}
+                onSessionCreated={onOpenSession}
+              />
+            </ComposerGate>
           </div>
         </section>
 

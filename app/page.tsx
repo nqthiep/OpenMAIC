@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useDeferredValue } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useRef, useDeferredValue, Suspense } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowUp,
@@ -16,10 +17,6 @@ import {
   Pencil,
   Trash2,
   Search,
-  Settings,
-  Sun,
-  Moon,
-  Monitor,
   ChevronUp,
   Upload,
   Sparkles,
@@ -27,10 +24,26 @@ import {
   X,
   Presentation,
   Loader2,
+  BookOpen,
+  SlidersHorizontal,
 } from 'lucide-react';
+import { useBrand } from '@/lib/brand/brand-context';
+import { HomeHero, Slogan } from '@/components/home/brand-band';
+import { SiteHeader } from '@/components/home/site-shell';
 import { useI18n } from '@/lib/hooks/use-i18n';
-import { AccountControl } from '@/components/account/account-control';
-import { LanguageSwitcher } from '@/components/language-switcher';
+import { Gate } from '@/components/capability/gate';
+import { GuestHome } from '@/components/home/guest-home';
+import { ComposerGate } from '@/components/home/composer-gate';
+import { ContinueCard } from '@/components/home/continue-card';
+import { ContributionBlock } from '@/components/home/contribution';
+import { LearningFocus } from '@/components/home/learning-focus';
+import { MyClasses } from '@/components/home/my-classes';
+import { StarterPrompts } from '@/components/home/starter-prompts';
+import { StatusStrip } from '@/components/home/status-strip';
+import { composeUserBio } from '@/lib/home/learning-focus';
+import { useMembershipStatus } from '@/lib/home/use-membership-status';
+import { rememberStaffLearning, staffChoseLearning } from '@/lib/home/staff-learning';
+import { useAccountSession, useCapabilities } from '@/lib/capabilities/use-capabilities';
 import { createLogger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupInput, InputGroupButton } from '@/components/ui/input-group';
@@ -39,7 +52,6 @@ import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
 import { GenerationToolbar } from '@/components/generation/generation-toolbar';
 import { AgentBar } from '@/components/agent/agent-bar';
-import { useTheme } from '@/lib/hooks/use-theme';
 import { nanoid } from 'nanoid';
 import { deleteDocumentBlob, storeDocumentBlob } from '@/lib/utils/image-storage';
 import { normalizeDocumentMimeType } from '@/lib/document/mime';
@@ -53,6 +65,7 @@ import type {
   UserRequirements,
 } from '@/lib/types/generation';
 import { useSettingsStore } from '@/lib/store/settings';
+import type { ProviderId } from '@/lib/ai/providers';
 import { hasUsableLLMProvider } from '@/lib/store/settings-validation';
 import { useUserProfileStore, AVATAR_OPTIONS } from '@/lib/store/user-profile';
 import {
@@ -91,6 +104,13 @@ import {
 import { useImportPptx } from '@/lib/import/use-import-pptx';
 import { InteractiveModeButton } from '@/components/generation/interactive-mode-button';
 import { ProBadge } from '@/components/workbench/ProBadge';
+import {
+  canChooseProvider,
+  estimateTier,
+  imageProviderWorks,
+  pickModel,
+  usableModels,
+} from '@/lib/home/simple-composer';
 import { arrivedByProSwap, startProSwap } from '@/lib/workbench/pro-swap';
 import {
   readLastWorkspaceSessionId,
@@ -102,6 +122,7 @@ const log = createLogger('Home');
 const WEB_SEARCH_STORAGE_KEY = 'webSearchEnabled';
 const RECENT_OPEN_STORAGE_KEY = 'recentClassroomsOpen';
 const INTERACTIVE_MODE_STORAGE_KEY = 'interactiveModeEnabled';
+const ADVANCED_COMPOSER_STORAGE_KEY = 'composerAdvanced';
 
 // PPTX import is still scaffolding: `useImportPptx` has no `onImported` consumer
 // yet, so the flow only logs the parsed slides. Hide the entry point behind a
@@ -129,7 +150,7 @@ const initialFormState: FormState = {
 
 function HomePage() {
   const { t } = useI18n();
-  const { theme, setTheme } = useTheme();
+  const brand = useBrand();
   const router = useRouter();
   // Do not replay the classic hero's entrance after the route handoff already
   // carried the lockup and composer into place.
@@ -156,7 +177,11 @@ function HomePage() {
       cancelled = true;
     };
   }, [workbenchBuildEnabled]);
-  const workbenchEntryEnabled = workbenchBuildEnabled && workbenchRuntimeEnabled;
+  const capabilities = useCapabilities();
+  const proMode = capabilities?.proMode === true;
+  const providerChoice = canChooseProvider(useAccountSession());
+  const membershipStatus = useMembershipStatus();
+  const workbenchEntryEnabled = workbenchBuildEnabled && workbenchRuntimeEnabled && proMode;
   const enterWorkbench = () => {
     const href = workspaceResumeHref(readLastWorkspaceSessionId());
     startProSwap(href, (next) => router.push(next));
@@ -165,6 +190,9 @@ function HomePage() {
     if (workbenchEntryEnabled) router.prefetch('/workspace');
   }, [router, workbenchEntryEnabled]);
   const [form, setForm] = useState<FormState>(initialFormState);
+  // The learner's composer is plain by default; "Advanced" brings back the model, web search,
+  // media, interactive-mode and agent choices.
+  const [advanced, setAdvanced] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<
     import('@/lib/types/settings').SettingsSection | undefined
@@ -189,11 +217,19 @@ function HomePage() {
     }
   };
 
+  // On a wide screen the cursor starts in the composer, the one thing to do here.
+  useEffect(() => {
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      textareaRef.current?.focus({ preventScroll: true });
+    }
+  }, []);
+
   // Hydrate client-only state after mount (avoids SSR mismatch)
   useEffect(() => {
     try {
       const saved = localStorage.getItem(RECENT_OPEN_STORAGE_KEY);
       if (saved !== null) setRecentOpen(saved !== 'false');
+      setAdvanced(localStorage.getItem(ADVANCED_COMPOSER_STORAGE_KEY) === 'true');
     } catch {
       /* localStorage unavailable */
     }
@@ -223,7 +259,6 @@ function HomePage() {
     setForm((prev) => (prev.requirement ? prev : { ...prev, requirement: cachedRequirement }));
   }, [cachedRequirement]);
 
-  const [themeOpen, setThemeOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // True while the Generate click drains upload-time ingests and builds the
   // generation session. Doubles as the guard flag that freezes the course
@@ -253,7 +288,6 @@ function HomePage() {
   const [createAndMoveTarget, setCreateAndMoveTarget] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const thumbnailsRef = useRef<Record<string, Slide>>({});
 
@@ -263,18 +297,6 @@ function HomePage() {
     setThumbnails(slides);
     window.setTimeout(() => revokeThumbnailSlideMediaUrls(previous), 0);
   };
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    if (!themeOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
-        setThemeOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [themeOpen]);
 
   const loadClassrooms = async () => {
     try {
@@ -289,7 +311,7 @@ function HomePage() {
       }
     } catch (err) {
       log.error('Failed to load classrooms:', err);
-      toast.error('Persistence is unavailable. Saved classrooms could not be loaded.');
+      toast.error(t('classroom.loadFailed'));
     }
   };
 
@@ -364,7 +386,7 @@ function HomePage() {
       await loadClassrooms();
     } catch (err) {
       log.error('Failed to delete classroom:', err);
-      toast.error('Failed to delete classroom');
+      toast.error(t('classroom.deleteFailed'));
     }
   };
 
@@ -519,6 +541,16 @@ function HomePage() {
     }
   };
 
+  const toggleAdvanced = () => {
+    const next = !advanced;
+    setAdvanced(next);
+    try {
+      localStorage.setItem(ADVANCED_COMPOSER_STORAGE_KEY, String(next));
+    } catch {
+      /* ignore */
+    }
+  };
+
   const addCourseMaterials = (files: File[]) => {
     // The set is frozen for the duration of generate-prep: adding is inert
     // while `preparingGenerate` is set (the toolbar affordance is disabled
@@ -605,13 +637,36 @@ function HomePage() {
     // Flip the generating UI state before material bytes are copied locally.
     setPreparingGenerate(true);
     try {
+      // The plain composer makes the choices the learner no longer sees: a model sized to the
+      // request, and illustrations when the image provider works. (Interactive mode is forced on
+      // in the requirements below.)
+      if (!advanced) {
+        const store = useSettingsStore.getState();
+        const pick = pickModel(
+          estimateTier(form.requirement, form.courseMaterials.length > 0),
+          usableModels(store.providersConfig),
+          { providerId: store.providerId, modelId: store.modelId },
+        );
+        if (pick.providerId !== store.providerId || pick.modelId !== store.modelId) {
+          store.setModel(pick.providerId as ProviderId, pick.modelId);
+        }
+        const imageConfig = store.imageProvidersConfig?.[store.imageProviderId];
+        store.setImageGenerationEnabled(
+          await imageProviderWorks(store.imageProviderId, store.imageModelId, imageConfig),
+        );
+      }
+
       const userProfile = useUserProfileStore.getState();
       const requirements: UserRequirements = {
         requirement: form.requirement,
         userNickname: userProfile.nickname || undefined,
-        userBio: userProfile.bio || undefined,
+        userBio: composeUserBio(
+          userProfile.bio,
+          userProfile.learningSubject,
+          userProfile.learningLevel,
+        ),
         webSearch: form.webSearch || undefined,
-        interactiveMode: form.vocationalTestMode ? true : form.interactiveMode,
+        interactiveMode: form.vocationalTestMode || !advanced ? true : form.interactiveMode,
         ...(form.vocationalTestMode ? { taskEngineMode: true } : {}),
       };
 
@@ -704,7 +759,9 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
+    <div className="min-h-[100dvh] w-full bg-background flex flex-col items-center p-4 pt-0 md:p-8 md:pt-0 overflow-x-clip">
+      {/* Full width despite the page padding; `overflow-x-clip` above keeps it sticky. */}
+      <SiteHeader className="-mx-4 self-stretch md:-mx-8" />
       <input
         ref={fileInputRef}
         type="file"
@@ -721,90 +778,6 @@ function HomePage() {
           className="hidden"
         />
       )}
-      {/* ═══ Top-right pill (unchanged) ═══ */}
-      <div
-        ref={toolbarRef}
-        className="fixed top-4 right-4 z-50 flex items-center gap-1 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md px-2 py-1.5 rounded-full border border-gray-100/50 dark:border-gray-700/50 shadow-sm"
-      >
-        {/* Language Selector */}
-        <LanguageSwitcher onOpen={() => setThemeOpen(false)} />
-
-        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
-
-        {/* Theme Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setThemeOpen(!themeOpen);
-            }}
-            className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all"
-          >
-            {theme === 'light' && <Sun className="w-4 h-4" />}
-            {theme === 'dark' && <Moon className="w-4 h-4" />}
-            {theme === 'system' && <Monitor className="w-4 h-4" />}
-          </button>
-          {themeOpen && (
-            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px]">
-              <button
-                onClick={() => {
-                  setTheme('light');
-                  setThemeOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-                  theme === 'light' &&
-                    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-                )}
-              >
-                <Sun className="w-4 h-4" />
-                {t('settings.themeOptions.light')}
-              </button>
-              <button
-                onClick={() => {
-                  setTheme('dark');
-                  setThemeOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-                  theme === 'dark' &&
-                    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-                )}
-              >
-                <Moon className="w-4 h-4" />
-                {t('settings.themeOptions.dark')}
-              </button>
-              <button
-                onClick={() => {
-                  setTheme('system');
-                  setThemeOpen(false);
-                }}
-                className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-                  theme === 'system' &&
-                    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-                )}
-              >
-                <Monitor className="w-4 h-4" />
-                {t('settings.themeOptions.system')}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
-
-        {/* Settings Button */}
-        <div className="relative">
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
-          >
-            <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-          </button>
-        </div>
-        {/* Renders nothing unless browser persistence and accounts are enabled. */}
-        <AccountControl />
-      </div>
       <SettingsDialog
         open={settingsOpen}
         onOpenChange={(open) => {
@@ -814,157 +787,207 @@ function HomePage() {
         initialSection={settingsSection}
       />
 
-      {/* ═══ Background Decor ═══ */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '4s' }}
-        />
-        <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '6s' }}
-        />
-      </div>
-
       {/* ═══ Hero section: title + input (centered, wider) ═══ */}
       <motion.div
         initial={heroEnter({ opacity: 0, y: 20 })}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className={cn('relative z-20 w-full max-w-[800px] flex flex-col items-center mt-[10vh]')}
+        className={cn(
+          'relative z-20 w-full max-w-6xl flex flex-col items-center px-5 md:px-8 mt-[6vh]',
+        )}
       >
-        {/* ── Logo ── */}
-        <div className="relative" data-pro-morph="lockup">
-          <motion.img
-            src="/logo-horizontal.png"
-            alt="OpenMAIC"
-            initial={heroEnter({ opacity: 0, scale: 0.9 })}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              delay: 0.1,
-              type: 'spring',
-              stiffness: 200,
-              damping: 20,
-            }}
-            className="h-12 md:h-16 mb-2 -ml-2 md:-ml-3"
-          />
-          {workbenchEntryEnabled ? (
-            <div
-              className="absolute left-full top-0 ml-1.5 mt-[10px] md:ml-2 md:mt-[14px]"
-              data-pro-morph="badge"
-            >
-              <ProBadge active={false} onToggle={enterWorkbench} />
-            </div>
-          ) : null}
-        </div>
+        <HomeHero>
+          {/* ── Logo ── */}
+          <div className="relative" data-pro-morph="lockup">
+            <motion.img
+              src={brand.logoSrc}
+              alt={brand.productName}
+              initial={heroEnter({ opacity: 0, scale: 0.9 })}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                delay: 0.1,
+                type: 'spring',
+                stiffness: 200,
+                damping: 20,
+              }}
+              className="logo-on-brand h-14 md:h-[68px] mb-3 -ml-2 md:-ml-3"
+            />
+            {workbenchEntryEnabled ? (
+              <div
+                className="absolute left-full top-0 ml-1.5 mt-[10px] md:ml-2 md:mt-[14px]"
+                data-pro-morph="badge"
+              >
+                <ProBadge active={false} onToggle={enterWorkbench} />
+              </div>
+            ) : null}
+          </div>
 
-        {/* ── Slogan ── */}
-        <motion.p
-          initial={heroEnter({ opacity: 0 })}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25 }}
-          className="text-sm text-muted-foreground/60 mb-8"
-        >
-          {t('home.slogan')}
-        </motion.p>
+          {/* ── Slogan ── */}
+          <motion.h1
+            initial={heroEnter({ opacity: 0 })}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.25 }}
+            className="mb-6 max-w-[34rem] text-center text-2xl font-bold leading-tight tracking-tight text-white md:text-[34px]"
+          >
+            <Slogan text={t('home.slogan')} />
+          </motion.h1>
+        </HomeHero>
 
         {/* ── Unified input area ── */}
-        <motion.div
-          initial={heroEnter({ opacity: 0, scale: 0.97 })}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.35 }}
-          className="w-full"
-        >
-          <div
-            data-pro-morph="composer"
-            className="w-full rounded-2xl border border-border/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-black/[0.03] dark:shadow-black/20 transition-shadow focus-within:shadow-2xl focus-within:shadow-violet-500/[0.06]"
+        <ComposerGate status={membershipStatus}>
+          <motion.div
+            initial={heroEnter({ opacity: 0, scale: 0.97 })}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.35 }}
+            className="w-full"
           >
-            {/* ── Greeting + Profile + Agents ── */}
-            <div className="relative z-20 flex items-start justify-between">
-              <GreetingBar />
-              <div className="pr-3 pt-3.5 shrink-0">
-                <AgentBar />
-              </div>
-            </div>
-
-            {/* Textarea */}
-            <textarea
-              ref={textareaRef}
-              placeholder={t('upload.requirementPlaceholder')}
-              className="w-full resize-none border-0 bg-transparent px-4 pt-1 pb-2 text-[13px] leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none min-h-[140px] max-h-[300px]"
-              value={form.requirement}
-              onChange={(e) => updateForm('requirement', e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={4}
-            />
-
-            {/* Toolbar row */}
-            <div className="px-3 pb-3 flex items-end gap-2">
-              <div className="flex-1 min-w-0">
-                <GenerationToolbar
-                  webSearch={form.webSearch}
-                  onWebSearchChange={(v) => updateForm('webSearch', v)}
-                  onSettingsOpen={(section) => {
-                    setSettingsSection(section);
-                    setSettingsOpen(true);
-                  }}
-                  courseMaterials={form.courseMaterials}
-                  onCourseMaterialsAdd={addCourseMaterials}
-                  onCourseMaterialRemove={removeCourseMaterial}
-                  onPdfError={setError}
-                  materialsLocked={preparingGenerate}
-                />
-              </div>
-
-              {/* Interactive mode toggle */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InteractiveModeButton
-                    pressed={form.interactiveMode}
-                    label={t('toolbar.interactiveModeLabel')}
-                    onPressedChange={(pressed) => updateForm('interactiveMode', pressed)}
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="text-xs">
-                  {t('toolbar.interactiveModeHint')}
-                </TooltipContent>
-              </Tooltip>
-
-              {/* Voice input */}
-              <SpeechButton
-                size="md"
-                onTranscription={(text) => {
-                  setForm((prev) => {
-                    const next = prev.requirement + (prev.requirement ? ' ' : '') + text;
-                    updateRequirementCache(next);
-                    return { ...prev, requirement: next };
-                  });
-                }}
-              />
-
-              {/* Send button */}
-              <button
-                onClick={handleGenerate}
-                disabled={!canGenerate || preparingGenerate}
-                className={cn(
-                  'shrink-0 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all px-3',
-                  canGenerate && !preparingGenerate
-                    ? 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm cursor-pointer'
-                    : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
-                )}
+            {/* The one thing to do on this page: a bright ring and a glow set the composer apart. */}
+            <div className="w-full rounded-[1.9rem] bg-gradient-to-br from-brand-yellow via-brand-400 to-brand-600 p-[3px] shadow-[0_28px_70px_-18px_rgba(37,99,235,0.65)] transition-shadow focus-within:shadow-[0_32px_90px_-14px_rgba(251,191,36,0.55)]">
+              <div
+                data-pro-morph="composer"
+                className="w-full rounded-[1.75rem] bg-white dark:bg-slate-900"
               >
-                <span className="text-xs font-medium">
-                  {preparingGenerate ? t('stage.generating') : t('toolbar.enterClassroom')}
-                </span>
-                {preparingGenerate ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <ArrowUp className="size-3.5" />
-                )}
-              </button>
+                <h2 className="flex items-center gap-2 px-5 pt-5 text-lg font-bold tracking-tight text-brand-800 md:text-xl dark:text-white">
+                  <Sparkles className="size-5 text-brand-yellow" aria-hidden="true" />
+                  {t('home.composer.title')}
+                </h2>
+                {/* ── Greeting + Profile + Agents ── */}
+                <div className="relative z-20 flex items-start justify-between">
+                  <GreetingBar />
+                  {advanced && (
+                    <div className="pr-3 pt-3.5 shrink-0">
+                      <AgentBar />
+                    </div>
+                  )}
+                </div>
+
+                {/* Textarea */}
+                <textarea
+                  ref={textareaRef}
+                  placeholder={t('upload.requirementPlaceholder')}
+                  className="w-full resize-none border-0 bg-transparent px-5 pt-1 pb-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none min-h-[130px] max-h-[300px] md:text-[17px]"
+                  value={form.requirement}
+                  onChange={(e) => updateForm('requirement', e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  rows={4}
+                />
+
+                {/* Toolbar row */}
+                <div className="px-3 pb-3 flex items-end gap-2">
+                  <div className="flex-1 min-w-0">
+                    <GenerationToolbar
+                      webSearch={form.webSearch}
+                      onWebSearchChange={(v) => updateForm('webSearch', v)}
+                      onSettingsOpen={(section) => {
+                        setSettingsSection(section);
+                        setSettingsOpen(true);
+                      }}
+                      courseMaterials={form.courseMaterials}
+                      onCourseMaterialsAdd={addCourseMaterials}
+                      onCourseMaterialRemove={removeCourseMaterial}
+                      onPdfError={setError}
+                      materialsLocked={preparingGenerate}
+                      simple={!advanced}
+                      canChooseProvider={providerChoice}
+                    />
+                  </div>
+
+                  {/* Interactive mode toggle */}
+                  {advanced && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <InteractiveModeButton
+                          pressed={form.interactiveMode}
+                          label={t('toolbar.interactiveModeLabel')}
+                          onPressedChange={(pressed) => updateForm('interactiveMode', pressed)}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">
+                        {t('toolbar.interactiveModeHint')}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+
+                  {/* Plain / advanced switch */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-pressed={advanced}
+                        onClick={toggleAdvanced}
+                        className={cn(
+                          'inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors',
+                          advanced
+                            ? 'border-brand-300 bg-brand-50 text-brand-700 dark:border-brand-500/50 dark:bg-brand-500/15 dark:text-brand-200'
+                            : 'border-border/60 text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                        )}
+                      >
+                        <SlidersHorizontal className="size-3.5" aria-hidden="true" />
+                        {t('toolbar.advanced')}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs text-xs">
+                      {t('toolbar.advancedHint')}
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* Voice input */}
+                  <SpeechButton
+                    size="md"
+                    onTranscription={(text) => {
+                      setForm((prev) => {
+                        const next = prev.requirement + (prev.requirement ? ' ' : '') + text;
+                        updateRequirementCache(next);
+                        return { ...prev, requirement: next };
+                      });
+                    }}
+                  />
+
+                  {/* Send button */}
+                  <button
+                    onClick={handleGenerate}
+                    disabled={!canGenerate || preparingGenerate}
+                    className={cn(
+                      'shrink-0 h-12 rounded-xl flex items-center justify-center gap-2 transition-all px-6',
+                      canGenerate && !preparingGenerate
+                        ? 'bg-primary text-primary-foreground hover:opacity-90 shadow-md shadow-brand-600/30 cursor-pointer'
+                        : 'bg-muted text-muted-foreground/60 cursor-not-allowed',
+                    )}
+                  >
+                    <span className="text-base font-bold">
+                      {preparingGenerate ? t('stage.generating') : t('toolbar.enterClassroom')}
+                    </span>
+                    {preparingGenerate ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <ArrowUp className="size-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+          <LearningFocus />
+          {hydrated && classrooms.length === 0 && !form.requirement && (
+            <StarterPrompts
+              onPick={(text) => {
+                updateForm('requirement', text);
+                textareaRef.current?.focus();
+              }}
+            />
+          )}
+        </ComposerGate>
+
+        <div className="mt-6 w-full empty:hidden">
+          <StatusStrip status={membershipStatus} />
+        </div>
+        <ContinueCard classrooms={classrooms} thumbnails={thumbnails} />
+
+        <Gate capability="joinClass">
+          <MyClasses />
+        </Gate>
+
+        <ContributionBlock />
 
         {showVocationalTestUi && (
           <motion.div
@@ -1039,14 +1062,14 @@ function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="relative z-10 mt-10 w-full max-w-6xl flex flex-col items-center"
+          className="relative z-10 mt-10 w-full max-w-6xl flex flex-col items-center px-5 md:px-8"
         >
           {/* Trigger — divider-line with centered text. Fixed height keeps the
               bar geometrically stable when the New-folder action or the folder
               path appears/disappears (entering vs leaving a folder). */}
           <div className="group w-full flex items-center gap-4 h-9">
-            <div className="flex-1 h-px bg-border/40 group-hover:bg-border/70 transition-colors" />
-            <div className="shrink-0 flex items-center gap-3 text-[13px] text-muted-foreground/60 select-none">
+            <div className="flex-1 h-px bg-brand-200/70 dark:bg-white/10 group-hover:bg-brand-300 transition-colors" />
+            <div className="shrink-0 flex items-center gap-3 text-sm font-medium text-brand-800/80 dark:text-brand-100/80 select-none">
               <button
                 onClick={() => {
                   if (currentFolderId) setCurrentFolderId(undefined);
@@ -1179,6 +1202,21 @@ function HomePage() {
                   </span>
                 </button>
               )}
+              <Gate
+                capability="joinClass"
+                locked={
+                  <span className="rounded-full px-1.5 py-0.5 text-[12px] text-muted-foreground/40">
+                    {t('home.locked.classes')}
+                  </span>
+                }
+              >
+                <Link
+                  href="/catalog"
+                  className="rounded-full px-1.5 py-0.5 text-[12px] text-muted-foreground/50 hover:text-muted-foreground/80 hover:bg-muted/50 transition-colors"
+                >
+                  {t('home.classes.mine')}
+                </Link>
+              </Gate>
               {/* New folder — round icon button, matches the import/upload affordances. */}
               {!currentFolderId && !isSearching && (
                 <button
@@ -1349,7 +1387,7 @@ function HomePage() {
 
       {/* Footer — flows with content, at the very end */}
       <div className="mt-auto pt-12 pb-4 text-center text-xs text-muted-foreground/40">
-        OpenMAIC Open Source Project
+        {t('home.guest.footerTagline')}
       </div>
     </div>
   );
@@ -1724,7 +1762,7 @@ function ClassroomCard({
       {/* Thumbnail — large radius, no border, subtle bg */}
       <div
         ref={thumbRef}
-        className="relative w-full aspect-[16/9] rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]"
+        className="relative w-full aspect-[16/9] rounded-2xl bg-brand-50 shadow-md shadow-brand-800/10 ring-1 ring-brand-100 dark:bg-slate-800/80 dark:ring-white/10 overflow-hidden transition-all duration-200 group-hover:scale-[1.02] group-hover:shadow-xl group-hover:shadow-brand-800/15"
       >
         {slide && thumbWidth > 0 ? (
           <SlideThumbnail
@@ -1735,8 +1773,8 @@ function ClassroomCard({
           />
         ) : !slide ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="size-12 rounded-2xl bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30 flex items-center justify-center">
-              <span className="text-xl opacity-50">📄</span>
+            <div className="size-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30 flex items-center justify-center">
+              <BookOpen className="size-6" aria-hidden="true" />
             </div>
           </div>
         ) : null}
@@ -1862,7 +1900,7 @@ function ClassroomCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <p
-                className="font-medium text-[15px] truncate text-foreground/90 min-w-0 cursor-text"
+                className="font-semibold text-[15px] truncate text-foreground min-w-0 cursor-text"
                 onDoubleClick={startRename}
               >
                 {classroom.name}
@@ -1895,5 +1933,39 @@ function ClassroomCard({
 }
 
 export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <HomeRouter />
+    </Suspense>
+  );
+}
+
+/**
+ * Chooses the home. A visitor who is not signed in gets the guest page. An operator or administrator
+ * goes to the operations dashboard unless `?learn=1` asks for the learning home, a choice kept for
+ * the tab (`staff-learning.ts`). Everyone else gets the learning home. Renders nothing until the
+ * session is known.
+ */
+function HomeRouter() {
+  const router = useRouter();
+  const session = useAccountSession();
+  const learnParam = useSearchParams().get('learn') === '1';
+  // Read only once the session is known, which is after hydration, so the server render agrees.
+  const learning = learnParam || (session !== undefined && staffChoseLearning());
+  const staff = session?.role === 'operator' || session?.role === 'admin';
+  const toDashboard = session?.enabled === true && session.authenticated && staff && !learning;
+
+  useEffect(() => {
+    if (learnParam) rememberStaffLearning(true);
+  }, [learnParam]);
+
+  useEffect(() => {
+    if (toDashboard) router.replace('/admin');
+  }, [toDashboard, router]);
+
+  if (session === undefined || toDashboard) return null;
+  if (session?.enabled === true && !session.authenticated) {
+    return <GuestHome registrationOpen={session.registrationOpen} />;
+  }
   return <HomePage />;
 }

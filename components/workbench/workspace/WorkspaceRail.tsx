@@ -93,6 +93,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useCapabilities } from '@/lib/capabilities/use-capabilities';
 import { useBrand } from '@/lib/brand/brand-context';
 import type { HomeDiscoveryState, useHomeDiscovery } from '@/lib/hooks/use-home-discovery';
 import { ProBadge } from '@/components/workbench/ProBadge';
@@ -262,6 +263,8 @@ export function WorkspaceRail({
   const [folderToDelete, setFolderToDelete] = useState<{ id: string; name: string } | null>(null);
   /** The model/provider settings dialog, opened from the rail's foot cluster. */
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Settings configures providers: staff only (and single-user mode). Learners never see it.
+  const canOpenSettings = useCapabilities()?.viewProviders === true;
 
   /**
    * Commit a folder rename. Returns null when it landed and a readable message
@@ -686,16 +689,18 @@ export function WorkspaceRail({
               providers the surface depends on. */}
           <RailOverflow testId="pro-rail-more-mini" mini withLanguage />
           <ThemeToggle />
-          <button
-            type="button"
-            data-testid="pro-nav-settings-mini"
-            onClick={() => setSettingsOpen(true)}
-            aria-label={t('settings.title')}
-            title={t('settings.title')}
-            className="ws-mini-btn"
-          >
-            <Settings className="size-4" aria-hidden="true" />
-          </button>
+          {canOpenSettings ? (
+            <button
+              type="button"
+              data-testid="pro-nav-settings-mini"
+              onClick={() => setSettingsOpen(true)}
+              aria-label={t('settings.title')}
+              title={t('settings.title')}
+              className="ws-mini-btn"
+            >
+              <Settings className="size-4" aria-hidden="true" />
+            </button>
+          ) : null}
         </div>
       </nav>
     );
@@ -1190,7 +1195,7 @@ export function WorkspaceRail({
         ) : null}
       </div>
 
-      <RailUtilities onOpenSettings={() => setSettingsOpen(true)} />
+      <RailUtilities onOpenSettings={canOpenSettings ? () => setSettingsOpen(true) : undefined} />
 
       {resizeHandle}
 
@@ -2067,7 +2072,7 @@ function SessionDot({ status }: { readonly status: ProHomeSessionItem['status'] 
  * belongs to the community dialog), so there is nothing to cluster here for
  * notifications.
  */
-function RailUtilities({ onOpenSettings }: { readonly onOpenSettings: () => void }) {
+function RailUtilities({ onOpenSettings }: { readonly onOpenSettings?: () => void }) {
   const { t } = useI18n();
   return (
     <div className="shrink-0" data-testid="pro-rail-utilities">
@@ -2080,16 +2085,18 @@ function RailUtilities({ onOpenSettings }: { readonly onOpenSettings: () => void
         <AccountControl />
         <LanguageSwitcher />
         <ThemeToggle />
-        <button
-          type="button"
-          data-testid="pro-nav-settings"
-          onClick={onOpenSettings}
-          aria-label={t('settings.title')}
-          title={t('settings.title')}
-          className="ws-util-btn"
-        >
-          <Settings className="size-4" aria-hidden="true" />
-        </button>
+        {onOpenSettings ? (
+          <button
+            type="button"
+            data-testid="pro-nav-settings"
+            onClick={onOpenSettings}
+            aria-label={t('settings.title')}
+            title={t('settings.title')}
+            className="ws-util-btn"
+          >
+            <Settings className="size-4" aria-hidden="true" />
+          </button>
+        ) : null}
       </div>
     </div>
   );

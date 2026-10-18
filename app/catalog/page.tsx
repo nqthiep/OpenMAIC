@@ -1,45 +1,55 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, BookOpen, GraduationCap, Lock } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { fetchAccountSession } from '@/components/account/account-api';
+import { AccountDialog } from '@/components/account/account-dialog';
+import { CourseCard } from '@/components/home/course-card';
+import { AccessRequest } from '@/components/home/access-request';
+import { MyClasses } from '@/components/home/my-classes';
+import { GLASS, Reveal, SiteShell } from '@/components/home/site-shell';
 import {
   fetchCatalog,
-  fetchMyClasses,
   joinClass,
   LearningRequestError,
   type CatalogEntry,
-  type ClassRow,
 } from '@/components/learning/learning-api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useMembershipStatus } from '@/lib/home/use-membership-status';
+import { cn } from '@/lib/utils';
+import { catalogClassroomHref } from '@/lib/workbench/classroom-exit';
 
 /**
  * The catalog: free previews for everyone, and for an active member the shared courses and the
- * courses of their classes. A member joins a class with the code it was given.
+ * courses of their classes. A member joins a class with the code it was given. It shares its frame
+ * and its course cards with the home, so the two read as one product.
  */
 export default function CatalogPage() {
   const { t } = useI18n();
   const [courses, setCourses] = useState<CatalogEntry[] | null>(null);
   const [member, setMember] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
-  const [classes, setClasses] = useState<ClassRow[]>([]);
+  const [joins, setJoins] = useState(0);
+  const membershipStatus = useMembershipStatus();
   const [code, setCode] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const returnFocusTo = useRef<HTMLElement | null>(null);
 
   // Reads everything the page shows, without touching state. Callers apply the result.
   const readAll = async () => {
     const catalog = await fetchCatalog();
     const session = await fetchAccountSession();
-    const mine = catalog.member ? await fetchMyClasses() : [];
     return {
       courses: catalog.courses,
       member: catalog.member,
       signedIn: session.authenticated,
-      classes: mine,
+      registrationOpen: session.registrationOpen,
     };
   };
 
@@ -47,7 +57,7 @@ export default function CatalogPage() {
     setCourses(data.courses);
     setMember(data.member);
     setSignedIn(data.signedIn);
-    setClasses(data.classes);
+    setRegistrationOpen(data.registrationOpen);
   };
 
   const failed = (error: unknown) => {
@@ -78,6 +88,7 @@ export default function CatalogPage() {
       const joined = await joinClass(trimmed);
       setCode('');
       toast.success(t('catalog.join.done', { name: joined.class.name }));
+      setJoins((count) => count + 1);
       apply(await readAll());
     } catch (error) {
       const key =
@@ -89,78 +100,148 @@ export default function CatalogPage() {
     }
   };
 
+  const openSignIn = (event: React.MouseEvent<HTMLElement>) => {
+    returnFocusTo.current = event.currentTarget;
+    setDialogOpen(true);
+  };
+
   if (unavailable) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16">
-        <p className="text-sm text-muted-foreground">{t('catalog.unavailable')}</p>
-      </main>
+      <SiteShell mainClassName="pb-20 pt-16">
+        <div
+          className={cn(
+            'mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl p-8 text-center',
+            GLASS,
+          )}
+        >
+          <BookOpen className="size-8 text-violet-600 dark:text-violet-300" aria-hidden="true" />
+          <p className="text-sm text-muted-foreground">{t('catalog.unavailable')}</p>
+          <Button asChild variant="outline" size="sm" className="cursor-pointer">
+            <Link href="/">{t('workspace.homeAria')}</Link>
+          </Button>
+        </div>
+      </SiteShell>
     );
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold">{t('catalog.title')}</h1>
-        <p className="text-sm text-muted-foreground">
-          {member ? t('catalog.description.member') : t('catalog.description.guest')}
+    <SiteShell mainClassName="gap-10 pb-20 pt-10 md:pt-14" bandClassName="h-[300px] md:h-[320px]">
+      <Reveal className="flex flex-col gap-3">
+        <h1 className="pb-1 text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
+          {t('catalog.title')}
+        </h1>
+        <p className="max-w-2xl text-sm text-white/85 md:text-base">
+          {member
+            ? t('catalog.description.member')
+            : signedIn
+              ? t('catalog.description.signedIn')
+              : t('catalog.description.guest')}
         </p>
-        {!signedIn ? <p className="text-sm">{t('catalog.signInToSee')}</p> : null}
-      </header>
+      </Reveal>
 
-      {member ? (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold">{t('catalog.join.title')}</h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              aria-label={t('catalog.join.code')}
-              placeholder={t('catalog.join.code')}
-              className="h-9 max-w-xs font-mono uppercase"
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-            />
-            <Button variant="outline" size="sm" onClick={() => void join()}>
-              {t('catalog.join.submit')}
+      {courses !== null && !signedIn ? (
+        <Reveal>
+          <div
+            className={cn(
+              'flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5 md:p-6',
+              GLASS,
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-300">
+                <Lock className="size-5" aria-hidden="true" />
+              </span>
+              <p className="text-sm font-medium">{t('catalog.signInToSee')}</p>
+            </div>
+            <Button onClick={openSignIn} className="cursor-pointer">
+              {t('home.guest.signIn')}
+              <ArrowRight className="size-4" aria-hidden="true" />
             </Button>
           </div>
-          {classes.length > 0 ? (
-            <ul className="divide-y rounded-lg border">
-              {classes.map((row) => (
-                <li key={row.id} className="px-3 py-2.5 text-sm font-medium">
-                  {row.name}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
+        </Reveal>
       ) : null}
 
-      <section className="flex flex-col gap-3">
-        {courses === null ? null : courses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('catalog.empty')}</p>
-        ) : (
-          <ul className="divide-y rounded-lg border">
-            {courses.map((entry) => (
-              <li
-                key={entry.courseId}
-                className="flex flex-wrap items-center justify-between gap-3 px-3 py-3"
-              >
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="break-words text-sm font-medium">{entry.title}</span>
-                  <Badge variant="outline" className="w-fit">
-                    {t(`catalog.kind.${entry.kind}`)}
-                  </Badge>
-                </div>
-                <Link
-                  href={`/classroom/${encodeURIComponent(entry.courseId)}`}
-                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  {t('catalog.open')}
-                </Link>
-              </li>
+      {courses !== null && signedIn && !member ? (
+        <Reveal>
+          <AccessRequest kind={membershipStatus.notice.kind} reason={t('catalog.membersOnly')} />
+        </Reveal>
+      ) : null}
+
+      {member ? (
+        <Reveal>
+          <section className={cn('flex flex-col gap-5 rounded-2xl p-6', GLASS)}>
+            <div className="flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-md shadow-violet-500/25">
+                <GraduationCap className="size-5" aria-hidden="true" />
+              </span>
+              <div className="flex flex-col gap-0.5">
+                <h2 className="text-base font-semibold">{t('catalog.join.title')}</h2>
+                <p className="text-sm text-muted-foreground">{t('catalog.join.description')}</p>
+              </div>
+            </div>
+            <form
+              className="flex flex-wrap items-center gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void join();
+              }}
+            >
+              <Input
+                aria-label={t('catalog.join.code')}
+                placeholder={t('catalog.join.code')}
+                className="h-9 max-w-xs bg-white/70 font-mono uppercase dark:bg-slate-900/50"
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
+              />
+              <Button type="submit" variant="outline" size="sm" className="cursor-pointer">
+                {t('catalog.join.submit')}
+              </Button>
+            </form>
+          </section>
+        </Reveal>
+      ) : null}
+
+      {/* Each class with its courses as links; read again after a join. */}
+      {member ? <MyClasses key={joins} courseHref={catalogClassroomHref} /> : null}
+
+      <section>
+        {courses === null ? (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+            {[0, 1, 2].map((slot) => (
+              <div key={slot} className="h-52 rounded-2xl bg-muted/60 motion-safe:animate-pulse" />
             ))}
-          </ul>
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-white/40 px-6 py-14 text-center dark:bg-white/[0.02]">
+            <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
+              <BookOpen
+                className="size-6 text-violet-600 dark:text-violet-300"
+                aria-hidden="true"
+              />
+            </span>
+            <p className="text-sm text-muted-foreground">{t('catalog.empty')}</p>
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {courses.map((entry, index) => (
+              <Reveal key={entry.courseId} delay={(index % 3) * 0.06}>
+                <CourseCard
+                  entry={entry}
+                  index={index}
+                  href={catalogClassroomHref(entry.courseId)}
+                />
+              </Reveal>
+            ))}
+          </div>
         )}
       </section>
-    </main>
+
+      <AccountDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        registrationOpen={registrationOpen}
+        returnFocusTo={returnFocusTo}
+      />
+    </SiteShell>
   );
 }

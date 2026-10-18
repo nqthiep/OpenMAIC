@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, Sparkles, AlertCircle, AlertTriangle, ArrowLeft, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { BrandBand } from '@/components/home/brand-band';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { OutlinesEditor } from '@/components/generation/outlines-editor';
 import { cn } from '@/lib/utils';
@@ -1191,7 +1192,7 @@ function GenerationPreviewContent() {
   // Still loading session from sessionStorage
   if (!sessionLoaded) {
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex items-center justify-center p-4">
         <div className="text-center text-muted-foreground">
           <div className="size-8 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
@@ -1202,7 +1203,7 @@ function GenerationPreviewContent() {
   // No session found
   if (!session) {
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex items-center justify-center p-4">
         <Card className="p-8 max-w-md w-full">
           <div className="text-center space-y-4">
             <AlertCircle className="size-12 text-muted-foreground mx-auto" />
@@ -1234,13 +1235,20 @@ function GenerationPreviewContent() {
     const editorOutlines = session.sceneOutlines ?? streamingOutlines ?? [];
 
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center p-4 relative overflow-hidden">
+      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex flex-col items-center p-4 relative overflow-hidden">
+        <BrandBand className="inset-x-0 top-0 h-[17rem]" />
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-4 left-4 z-20"
         >
-          <Button variant="ghost" size="sm" onClick={goBackToHome} disabled={isConfirmingOutlines}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10 hover:text-white"
+            onClick={goBackToHome}
+            disabled={isConfirmingOutlines}
+          >
             <ArrowLeft className="size-4 mr-2" />
             {t('generation.backToHome')}
           </Button>
@@ -1259,20 +1267,20 @@ function GenerationPreviewContent() {
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-500',
                     idx < outlineStepIndex
-                      ? 'w-1.5 bg-blue-500/30'
+                      ? 'w-1.5 bg-white/50'
                       : idx === outlineStepIndex
-                        ? 'w-8 bg-blue-500'
-                        : 'w-1.5 bg-muted/50',
+                        ? 'w-8 bg-brand-yellow'
+                        : 'w-1.5 bg-white/25',
                   )}
                 />
               ))}
             </div>
 
             <div className="max-w-2xl space-y-2 text-center mx-auto">
-              <h2 className="text-2xl font-bold tracking-tight">
+              <h2 className="text-2xl font-bold tracking-tight text-white">
                 {t('generation.reviewOutlineTitle')}
               </h2>
-              <p className="text-muted-foreground text-sm md:text-base">
+              <p className="text-sm text-white/80 md:text-base">
                 {isOutlineStreaming
                   ? t('generation.reviewOutlineStreamingDesc')
                   : t('generation.reviewOutlineDesc')}
@@ -1303,15 +1311,12 @@ function GenerationPreviewContent() {
   }
 
   return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
+    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
       {/* Background Decor */}
+      <BrandBand className="inset-x-0 top-0 h-[44vh]" />
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div
-          className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '4s' }}
-        />
-        <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl animate-pulse"
           style={{ animationDuration: '6s' }}
         />
       </div>
@@ -1322,7 +1327,12 @@ function GenerationPreviewContent() {
         animate={{ opacity: 1, y: 0 }}
         className="absolute top-4 left-4 z-20"
       >
-        <Button variant="ghost" size="sm" onClick={goBackToHome}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white hover:bg-white/10 hover:text-white"
+          onClick={goBackToHome}
+        >
           <ArrowLeft className="size-4 mr-2" />
           {t('generation.backToHome')}
         </Button>
@@ -1335,7 +1345,7 @@ function GenerationPreviewContent() {
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          <Card className="relative overflow-hidden border-muted/40 shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl min-h-[400px] flex flex-col items-center justify-center p-8 md:p-12">
+          <Card className="relative overflow-hidden rounded-3xl border-brand-100/80 shadow-2xl shadow-brand-800/15 bg-white dark:border-white/10 dark:bg-slate-900 min-h-[400px] flex flex-col items-center justify-center p-8 md:p-12">
             {/* Progress Dots */}
             <div className="absolute top-6 left-0 right-0 flex justify-center gap-2">
               {activeSteps.map((step, idx) => (
@@ -1344,9 +1354,9 @@ function GenerationPreviewContent() {
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-500',
                     idx < currentStepIndex
-                      ? 'w-1.5 bg-blue-500/30'
+                      ? 'w-1.5 bg-brand-500/30'
                       : idx === currentStepIndex
-                        ? 'w-8 bg-blue-500'
+                        ? 'w-8 bg-brand-600'
                         : 'w-1.5 bg-muted/50',
                   )}
                 />
@@ -1510,7 +1520,7 @@ function GenerationPreviewContent() {
                 {generatedAgents.length > 0 && !showAgentReveal && (
                   <button
                     onClick={() => setShowAgentReveal(true)}
-                    className="ml-2 flex items-center gap-1.5 rounded-full border border-purple-300/30 bg-purple-500/10 px-3 py-1 text-xs font-medium normal-case tracking-normal text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-purple-300"
+                    className="ml-2 flex items-center gap-1.5 rounded-full border border-brand-300/40 bg-brand-500/10 px-3 py-1 text-xs font-medium normal-case tracking-normal text-brand-600 transition-colors hover:bg-brand-500/20 dark:text-brand-300 dark:hover:text-brand-200"
                   >
                     <Bot className="size-3" />
                     {t('generation.viewAgents')}
@@ -1540,7 +1550,7 @@ export default function GenerationPreviewPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
+        <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex items-center justify-center">
           <div className="animate-pulse space-y-4 text-center">
             <div className="h-8 w-48 bg-muted rounded mx-auto" />
             <div className="h-4 w-64 bg-muted rounded mx-auto" />
