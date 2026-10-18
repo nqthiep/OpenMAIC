@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+/* ÔN THI brand tokens and the violet/purple remap (see brand.css). */
+@import './brand.css';
 /* Workbench chat (agent workbench surface): scoped .wbchat tokens + prose skin. */
 @import '../components/workbench/chat/workbench-chat.css';
 
@@ -61,77 +63,81 @@
 }
 
 :root {
-  /* Inter is loaded from @fontsource in app/layout.tsx, which declares one
-     @font-face per unicode subset. Previously this came from next/font wrapping
-     a single latin-only file, which left Cyrillic and Vietnamese text to OS
-     fallback fonts. */
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #722ed1;
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Be Vietnam Pro (brand) then Inter, both loaded from @fontsource in
+     app/layout.tsx, which declares one @font-face per unicode subset. Inter
+     stays in the stack for what Be Vietnam Pro does not cover (Cyrillic).
+     Previously this came from next/font wrapping a single latin-only file,
+     which left Cyrillic and Vietnamese text to OS fallback fonts. */
+  --font-sans: 'Be Vietnam Pro', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --background: var(--color-brand-page);
+  --foreground: var(--color-brand-ink);
+  --card: #ffffff;
+  --card-foreground: var(--color-brand-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-brand-ink);
+  --primary: var(--color-brand-600);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-brand-50);
+  --secondary-foreground: var(--color-brand-800);
+  --muted: #f1f5f9;
+  --muted-foreground: var(--color-brand-mute);
+  --accent: var(--color-brand-50);
+  --accent-foreground: var(--color-brand-800);
   --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: var(--color-brand-line);
+  --input: var(--color-brand-line);
+  --ring: var(--color-brand-600);
+  --chart-1: var(--color-brand-400);
+  --chart-2: var(--color-brand-600);
+  --chart-3: var(--color-brand-800);
+  --chart-4: var(--color-brand-yellow);
+  --chart-5: var(--color-brand-mute);
+  --radius: 0.75rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--color-brand-ink);
+  --sidebar-primary: var(--color-brand-600);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--color-brand-50);
+  --sidebar-accent-foreground: var(--color-brand-800);
+  --sidebar-border: var(--color-brand-line);
+  --sidebar-ring: var(--color-brand-600);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: #8b47ea;
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* The guidelines define no dark theme; this one is derived from the same
+     blues [Inference]. Primary is the lighter 500 step with navy text so both
+     the label on a button and a link on the page clear 4.5:1. */
+  --background: #0b1220;
+  --foreground: var(--color-brand-page);
+  --card: #111a2e;
+  --card-foreground: var(--color-brand-page);
+  --popover: #111a2e;
+  --popover-foreground: var(--color-brand-page);
+  --primary: var(--color-brand-500);
+  --primary-foreground: #0b1220;
+  --secondary: #1b2a47;
+  --secondary-foreground: var(--color-brand-100);
+  --muted: #172033;
+  --muted-foreground: #98a2b3;
+  --accent: #1e2b4a;
+  --accent-foreground: var(--color-brand-page);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --ring: var(--color-brand-400);
+  --chart-1: var(--color-brand-300);
+  --chart-2: var(--color-brand-500);
+  --chart-3: var(--color-brand-600);
+  --chart-4: var(--color-brand-yellow);
+  --chart-5: #98a2b3;
+  --sidebar: #111a2e;
+  --sidebar-foreground: var(--color-brand-page);
+  --sidebar-primary: var(--color-brand-500);
+  --sidebar-primary-foreground: #0b1220;
+  --sidebar-accent: #1e2b4a;
+  --sidebar-accent-foreground: var(--color-brand-page);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: var(--color-brand-400);
 }
 
 @layer base {

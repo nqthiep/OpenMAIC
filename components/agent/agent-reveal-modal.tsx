@@ -314,7 +314,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                       <div
                         className="absolute inset-0 rounded-2xl p-[2px]"
                         style={{
-                          background: 'linear-gradient(160deg, #6366f1, #a855f7, #6366f1)',
+                          background: 'linear-gradient(160deg, #1d4ed8, #60a5fa, #1d4ed8)',
                         }}
                       >
                         <div

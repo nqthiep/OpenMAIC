@@ -97,7 +97,7 @@ export function CanvasArea({
   );
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-gray-900 group/canvas">
+    <div className="w-full h-full flex flex-col bg-brand-50/70 dark:bg-[#0b1220] group/canvas">
       {/* Slide area — takes remaining space */}
       <div
         className={cn(
@@ -111,7 +111,7 @@ export function CanvasArea({
           workbench={inWorkbenchPanel}
           interactive={currentScene?.type === 'interactive'}
           className={cn(
-            'bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden relative transition-all duration-700',
+            'bg-white dark:bg-gray-800 shadow-2xl shadow-brand-800/15 ring-1 ring-brand-100 dark:ring-white/10 rounded-xl overflow-hidden relative transition-all duration-700',
             showControls && !isLiveSession && currentScene?.type === 'slide' && 'cursor-pointer',
             currentScene?.type === 'interactive'
               ? 'shadow-blue-200/50 dark:shadow-blue-900/50 ring-1 ring-blue-900/5 dark:ring-blue-500/10'
@@ -258,7 +258,7 @@ export function CanvasArea({
                         ease: 'easeInOut',
                       },
                     }}
-                    className="w-20 h-20 rounded-full bg-white/95 dark:bg-gray-800/95 flex items-center justify-center shadow-[0_4px_30px_rgba(147,51,234,0.15),inset_0_0_0_1px_rgba(233,213,255,0.5)] dark:shadow-[0_4px_30px_rgba(147,51,234,0.3),inset_0_0_0_1px_rgba(126,34,206,0.3)]"
+                    className="w-20 h-20 rounded-full bg-white/95 dark:bg-gray-800/95 flex items-center justify-center shadow-[0_4px_30px_rgba(37,99,235,0.15),inset_0_0_0_1px_rgba(191,219,254,0.5)] dark:shadow-[0_4px_30px_rgba(37,99,235,0.3),inset_0_0_0_1px_rgba(11,68,170,0.3)]"
                     style={{ willChange: 'transform' }}
                   >
                     <Play className="w-7 h-7 text-purple-600 dark:text-purple-400 fill-purple-600/90 dark:fill-purple-400/90 ml-0.5" />
@@ -276,7 +276,7 @@ export function CanvasArea({
           className={cn(
             'shrink-0 h-9 px-2',
             'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl',
-            'border-t border-gray-200/40 dark:border-gray-700/40',
+            'border-t border-brand-100 dark:border-gray-700/40',
           )}
           currentSceneIndex={currentSceneIndex}
           scenesCount={scenesCount}

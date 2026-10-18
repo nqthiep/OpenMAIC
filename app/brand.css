@@ -1,0 +1,89 @@
+/*
+ * ÔN THI brand tokens (guidelines v1.0, sections 5, 6 and 7).
+ *
+ * This is the one place that names the brand colors. `globals.css` maps the
+ * shadcn semantic tokens (`--primary`, `--ring`, ...) onto them; components
+ * should use those tokens or the named utilities below (`bg-brand-600`,
+ * `text-brand-800`, `bg-brand-yellow`), not hex values.
+ *
+ * Imported from `globals.css` so Tailwind sees the `@theme` block.
+ */
+
+@theme {
+  /* Blue ramp. 600 is "Xanh tri thức" (primary, main call to action) and 800 is
+     "Xanh đậm" (headings, navigation). The other steps are tints and shades of
+     the same hue [Inference]: the guidelines name only these two. */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #0b44aa;
+  --color-brand-900: #0a3580;
+  --color-brand-950: #08275c;
+
+  /* "Vàng thành công": accent, badges, achievements. Not for text on white
+     (contrast 1.6:1): put dark text on it. */
+  --color-brand-yellow: #fbbf24;
+
+  /* Neutrals: text, notes, borders, page. */
+  --color-brand-ink: #1f2937;
+  --color-brand-mute: #667085;
+  --color-brand-line: #e5e7eb;
+  --color-brand-page: #f8fafc;
+
+  /* The product's accent used to be violet. About a thousand `violet-*`,
+     `purple-*` and `indigo-*` utilities in the app (and the vendored upstream code we keep
+     merging) express "the accent", so the three palettes follow the brand ramp
+     instead of every call site being edited. A `violet-500` in markup is brand blue. For new code use `brand-*`. */
+  --color-violet-50: var(--color-brand-50);
+  --color-violet-100: var(--color-brand-100);
+  --color-violet-200: var(--color-brand-200);
+  --color-violet-300: var(--color-brand-300);
+  --color-violet-400: var(--color-brand-400);
+  --color-violet-500: var(--color-brand-500);
+  --color-violet-600: var(--color-brand-600);
+  --color-violet-700: var(--color-brand-700);
+  --color-violet-800: var(--color-brand-800);
+  --color-violet-900: var(--color-brand-900);
+  --color-violet-950: var(--color-brand-950);
+  --color-purple-50: var(--color-brand-50);
+  --color-purple-100: var(--color-brand-100);
+  --color-purple-200: var(--color-brand-200);
+  --color-purple-300: var(--color-brand-300);
+  --color-purple-400: var(--color-brand-400);
+  --color-purple-500: var(--color-brand-500);
+  --color-purple-600: var(--color-brand-600);
+  --color-purple-700: var(--color-brand-700);
+  --color-purple-800: var(--color-brand-800);
+  --color-purple-900: var(--color-brand-900);
+  --color-purple-950: var(--color-brand-950);
+  --color-indigo-950: var(--color-brand-950);
+  --color-indigo-50: var(--color-brand-50);
+  --color-indigo-100: var(--color-brand-100);
+  --color-indigo-200: var(--color-brand-200);
+  --color-indigo-300: var(--color-brand-300);
+  --color-indigo-400: var(--color-brand-400);
+  --color-indigo-500: var(--color-brand-500);
+  --color-indigo-600: var(--color-brand-600);
+  --color-indigo-700: var(--color-brand-700);
+  --color-indigo-800: var(--color-brand-800);
+  --color-indigo-900: var(--color-brand-900);
+}
+
+/* The logo as a one-colour white mark, for use on the blue band. */
+.logo-on-brand {
+  filter: brightness(0) invert(1);
+}
+
+/* The color logo and mark are navy on a transparent background, which disappears
+   on a dark surface. There they take the one-color white version the guidelines
+   allow (section 4). No white tile: its percentage padding resolved against the
+   parent's width and blew a 20px mark up to a 54px white square. */
+.dark img[src='/brand/logo-horizontal.png'],
+.dark img[src='/brand/mark.png'] {
+  filter: brightness(0) invert(1);
+}

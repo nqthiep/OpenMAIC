@@ -13,6 +13,10 @@ export interface BrandConfig {
   productName: string;
   /** Short name for space-constrained spots. */
   shortName: string;
+  /** Public domain, written exactly like this (guidelines, section 4). */
+  domain: string;
+  /** One sentence for `<meta name="description">`. */
+  description: string;
   /** Horizontal logo asset under `public/`. */
   logoSrc: string;
   /** Whether `logoSrc` already carries the product wordmark. */
@@ -23,12 +27,15 @@ export interface BrandConfig {
   themeColor: string;
 }
 
-/** The default brand: the product itself, with no vendor overrides. */
+/** The default brand: ÔN THI (guidelines v1.0), with no vendor overrides. */
 export const DEFAULT_BRAND: BrandConfig = {
-  productName: 'OpenMAIC',
-  shortName: 'OpenMAIC',
-  logoSrc: '/logo-horizontal.png',
+  productName: 'ÔN THI',
+  shortName: 'ÔN THI',
+  domain: 'onthi.ap.vn',
+  description:
+    'Nền tảng học tập và luyện thi trực tuyến: hiểu chắc kiến thức, vững bước vào kỳ thi.',
+  logoSrc: '/brand/logo-horizontal.png',
   logoHasWordmark: true,
-  markSrc: '/openmaic-mark.png',
-  themeColor: '#722ed1',
+  markSrc: '/brand/mark.png',
+  themeColor: '#2563EB',
 };

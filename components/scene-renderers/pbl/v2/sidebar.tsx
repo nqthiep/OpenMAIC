@@ -446,7 +446,7 @@ function MicrotaskRow({
       className={cn(
         'rounded-md px-1.5 py-1 text-[11px] transition-colors',
         task.status === 'in_progress' &&
-          'bg-cyan-100/[0.08] text-foreground font-medium shadow-[inset_2px_0_0_rgba(157,140,255,0.9)]',
+          'bg-cyan-100/[0.08] text-foreground font-medium shadow-[inset_2px_0_0_rgba(96,165,250,0.9)]',
         task.status === 'completed' && 'text-muted-foreground line-through',
         task.status === 'todo' && 'text-muted-foreground/72',
       )}
@@ -462,7 +462,7 @@ function MicrotaskRow({
           disabled={taskBusy}
           className={cn(
             'ml-5 mt-1.5 inline-flex min-w-[64px] items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold',
-            'border border-violet-100/15 bg-primary/72 text-white shadow-[0_6px_16px_rgba(157,140,255,0.16)] transition-colors hover:bg-primary/88',
+            'border border-violet-100/15 bg-primary/72 text-white shadow-[0_6px_16px_rgba(96,165,250,0.16)] transition-colors hover:bg-primary/88',
             'disabled:cursor-not-allowed disabled:opacity-60',
           )}
         >

@@ -123,7 +123,7 @@ export function UsageDashboard() {
     if (!chart) return;
     const axis = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
     const split = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const accent = isDark ? '#a78bfa' : '#7c3aed'; // violet, matches primary
+    const accent = isDark ? '#60a5fa' : '#2563eb'; // violet, matches primary
 
     chart.setOption({
       tooltip: { trigger: 'axis' },
@@ -159,8 +159,8 @@ export function UsageDashboard() {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: isDark ? 'rgba(167,139,250,0.35)' : 'rgba(124,58,237,0.25)' },
-                { offset: 1, color: isDark ? 'rgba(167,139,250,0.02)' : 'rgba(124,58,237,0.02)' },
+                { offset: 0, color: isDark ? 'rgba(96,165,250,0.35)' : 'rgba(37,99,235,0.25)' },
+                { offset: 1, color: isDark ? 'rgba(96,165,250,0.02)' : 'rgba(37,99,235,0.02)' },
               ],
             },
           },

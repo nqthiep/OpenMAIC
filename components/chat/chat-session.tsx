@@ -256,15 +256,15 @@ export function ChatSessionComponent({
                       opacity: 1,
                       y: 0,
                       boxShadow: [
-                        '0 0 0 0 rgba(124, 58, 237, 0)',
-                        '0 0 20px 0 rgba(124, 58, 237, 0.15)',
-                        '0 0 8px 0 rgba(124, 58, 237, 0.08)',
+                        '0 0 0 0 rgba(37, 99, 235, 0)',
+                        '0 0 20px 0 rgba(37, 99, 235, 0.15)',
+                        '0 0 8px 0 rgba(37, 99, 235, 0.08)',
                       ],
                     }
                   : {
                       opacity: 1,
                       y: 0,
-                      boxShadow: '0 0 0 0 rgba(124, 58, 237, 0)',
+                      boxShadow: '0 0 0 0 rgba(37, 99, 235, 0)',
                     }
               }
               transition={
