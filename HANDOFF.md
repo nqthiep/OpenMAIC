@@ -80,7 +80,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Hãy rà soát lại toàn bộ các user journey của learner để có nhận xét chi tiết cụ thể về UI và UX."
 - Assignment status: Done (review and implementation, 2026-10-18; owner may change the choices under "Open questions"). Rows 6 to 17: every row is Done and seen in a browser (2026-10-18, as `rv_check`, `rv_nomember` and `admin`); the owner's open decisions are listed under "Open questions". Other assignments below belong to other sessions and stay open.
-- Branch and commit: `it-math` @ `e9f9359d` (rows 6 to 16 code, the class-leave work and row 10), pushed: no. The owner asked for the commit on 2026-10-18; push not requested. Left uncommitted on purpose, not part of this handoff: `lib/playback/engine.ts` and `tests/playback/speech-browser-fallback.test.ts` (another session's TTS fallback), `tests/security/*` (red tests for log redaction), `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`. `git pull` found nothing new.
+- Branch and commit: `it-math` @ `df928269` (rows 6 to 17; earlier commit `e9f9359d` holds rows 6 to 16 code, the class-leave work and row 10), pushed: no. The owner asked for the commit on 2026-10-18; push not requested. Left uncommitted on purpose, not part of this handoff: `lib/playback/engine.ts` and `tests/playback/speech-browser-fallback.test.ts` (another session's TTS fallback), `tests/security/*` (red tests for log redaction), `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`. `git pull` found nothing new.
 - Last updated: 2026-10-18 (UTC time not recorded)
 
 ### Task table
