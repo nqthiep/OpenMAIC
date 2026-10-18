@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import { transcribeAudio } from '@/lib/audio/asr-providers';
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
     managed = isServerConfiguredProvider('asr', effectiveProviderId);
-    const clientBaseUrl = managed ? undefined : baseUrl || undefined;
+    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
+    const clientBaseUrl = keysAllowed ? baseUrl || undefined : undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
@@ -78,7 +80,7 @@ export async function POST(req: NextRequest) {
       // client model directly.
       modelId: resolveASRModel(effectiveProviderId, modelId),
       language: language || 'auto',
-      apiKey: resolveASRApiKey(effectiveProviderId, managed ? undefined : apiKey || undefined),
+      apiKey: resolveASRApiKey(effectiveProviderId, keysAllowed ? apiKey || undefined : undefined),
       baseUrl: resolveASRBaseUrl(effectiveProviderId, clientBaseUrl),
     };
     // Reflect the resolved (possibly server-pinned) model in failure logs.

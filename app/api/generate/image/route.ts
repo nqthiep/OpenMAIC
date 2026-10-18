@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Image Generation API
@@ -85,10 +86,11 @@ export async function POST(request: NextRequest) {
     if (isServerProviderDisabled('image', providerId)) {
       return apiError('PROVIDER_DISABLED', 403, 'This image provider is disabled by the server');
     }
-    // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
+    // Managed providers are admin-owned. Only an administrator's own key is used otherwise.
     managed = isServerConfiguredProvider('image', providerId);
-    const clientApiKey = managed ? undefined : request.headers.get('x-api-key') || undefined;
-    const clientBaseUrl = managed ? undefined : request.headers.get('x-base-url') || undefined;
+    const keysAllowed = !managed && (await clientKeysAllowed(request.headers));
+    const clientApiKey = keysAllowed ? request.headers.get('x-api-key') || undefined : undefined;
+    const clientBaseUrl = keysAllowed ? request.headers.get('x-base-url') || undefined : undefined;
     const clientModel = request.headers.get('x-image-model')?.trim() || undefined;
 
     if (clientBaseUrl) {

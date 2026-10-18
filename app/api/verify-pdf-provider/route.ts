@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
@@ -33,8 +34,9 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Provider ID is required');
     }
 
-    // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
+    // Managed providers are admin-owned. Only an administrator's own key is used otherwise.
     managed = isServerConfiguredProvider('pdf', providerId);
+    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
 
     // AliDocMind: verify AK/SK by issuing a lightweight authenticated probe.
     if (providerId === 'alidocmind') {
@@ -54,9 +56,9 @@ export async function POST(req: NextRequest) {
         endpoint = serverCreds.baseUrl;
       } else {
         // Unmanaged: client credentials only — never fall back to server env.
-        ak = (accessKeyId as string | undefined) || undefined;
-        sk = (accessKeySecret as string | undefined) || undefined;
-        endpoint = (baseUrl as string | undefined) || undefined;
+        ak = keysAllowed ? (accessKeyId as string | undefined) || undefined : undefined;
+        sk = keysAllowed ? (accessKeySecret as string | undefined) || undefined : undefined;
+        endpoint = keysAllowed ? (baseUrl as string | undefined) || undefined : undefined;
         if (!ak || !sk) {
           return apiError(
             'MISSING_REQUIRED_FIELD',
@@ -93,7 +95,9 @@ export async function POST(req: NextRequest) {
 
     // MinerU Cloud: verify by calling the cloud API with the token
     if (providerId === 'mineru-cloud') {
-      const clientCloudBase = managed ? undefined : (baseUrl as string | undefined) || undefined;
+      const clientCloudBase = keysAllowed
+        ? (baseUrl as string | undefined) || undefined
+        : undefined;
       if (clientCloudBase) {
         const ssrfError = await validateUrlForSSRF(clientCloudBase);
         if (ssrfError) {
@@ -101,7 +105,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const resolvedApiKey = resolvePDFApiKey(providerId, managed ? undefined : apiKey);
+      const resolvedApiKey = resolvePDFApiKey(providerId, keysAllowed ? apiKey : undefined);
       if (!resolvedApiKey) {
         return apiError('MISSING_REQUIRED_FIELD', 400, 'API Key is required for MinerU Cloud');
       }
@@ -142,7 +146,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Self-hosted providers: verify by connecting to the base URL
-    const clientBaseUrl = managed ? undefined : (baseUrl as string | undefined) || undefined;
+    const clientBaseUrl = keysAllowed ? (baseUrl as string | undefined) || undefined : undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
@@ -155,7 +159,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Base URL is required');
     }
 
-    const resolvedApiKey = resolvePDFApiKey(providerId, managed ? undefined : apiKey);
+    const resolvedApiKey = resolvePDFApiKey(providerId, keysAllowed ? apiKey : undefined);
 
     const headers: Record<string, string> = {};
     if (resolvedApiKey) {

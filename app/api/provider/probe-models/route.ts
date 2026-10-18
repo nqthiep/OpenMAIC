@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { fetchModels, ModelFetchError } from '@/lib/server/model-fetch';
 
@@ -18,6 +19,14 @@ const NON_CHAT_PATTERN = /(tts|asr|whisper|embedding|rerank|mineru|image|video|v
  * a typed status so the UI can fall back to manual model entry.
  */
 export async function POST(req: NextRequest) {
+  // Probing a custom endpoint with a key is an administrator's own task, so nobody else may do it.
+  if (!(await clientKeysAllowed(req.headers))) {
+    return apiError(
+      'FORBIDDEN',
+      403,
+      'Only an administrator can probe a custom provider endpoint.',
+    );
+  }
   try {
     const body = await req.json();
     const { baseUrl, apiKey, modelsUrl } = body as {

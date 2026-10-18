@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Pi Director Chat API Endpoint
@@ -121,6 +122,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const keysAllowed = await clientKeysAllowed(req.headers);
     const {
       model: languageModel,
       apiKey: resolvedApiKey,
@@ -131,8 +133,8 @@ export async function POST(req: NextRequest) {
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
-      apiKey: body.apiKey,
-      baseUrl: body.baseUrl,
+      apiKey: keysAllowed ? body.apiKey : undefined,
+      baseUrl: keysAllowed ? body.baseUrl : undefined,
       providerType: body.providerType,
       // Let resolveModel arbitrate thinking too: a routed chat-adapter's thinking
       // wins, an unrouted one honors this client thinking (see resolve-model.ts).
@@ -227,8 +229,8 @@ export async function POST(req: NextRequest) {
         childRuntimeMode === 'native'
           ? resolveClassroomWebSearchConfig({
               webSearchProviderId: body.webSearchProviderId,
-              webSearchApiKey: body.webSearchApiKey,
-              webSearchBaseUrl: body.webSearchBaseUrl,
+              webSearchApiKey: keysAllowed ? body.webSearchApiKey : undefined,
+              webSearchBaseUrl: keysAllowed ? body.webSearchBaseUrl : undefined,
               webSearchModelId: body.webSearchModelId,
               baiduSubSources: body.baiduSubSources,
             })

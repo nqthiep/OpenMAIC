@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Stateless Chat API Endpoint
@@ -89,6 +90,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: config.agentIds');
     }
 
+    const keysAllowed = await clientKeysAllowed(req.headers);
     const {
       model: languageModel,
       apiKey: resolvedApiKey,
@@ -98,8 +100,8 @@ export async function POST(req: NextRequest) {
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
-      apiKey: body.apiKey,
-      baseUrl: body.baseUrl,
+      apiKey: keysAllowed ? body.apiKey : undefined,
+      baseUrl: keysAllowed ? body.baseUrl : undefined,
       providerType: body.providerType,
       // Let resolveModel arbitrate thinking too: a routed chat-adapter's thinking
       // wins, an unrouted one honors this client thinking (see resolve-model.ts).

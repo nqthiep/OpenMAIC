@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Auto-voice registration API (provider-neutral).
@@ -148,7 +149,8 @@ export async function POST(req: NextRequest) {
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
     managed = isServerConfiguredProvider('tts', providerId);
-    const clientBaseUrl = managed ? undefined : body.ttsBaseUrl || undefined;
+    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
+    const clientBaseUrl = keysAllowed ? body.ttsBaseUrl || undefined : undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
@@ -156,7 +158,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const apiKey = resolveTTSApiKey(providerId, managed ? undefined : body.ttsApiKey || undefined);
+    const apiKey = resolveTTSApiKey(
+      providerId,
+      keysAllowed ? body.ttsApiKey || undefined : undefined,
+    );
     const baseUrl = resolveTTSBaseUrl(providerId, clientBaseUrl);
     if (!baseUrl) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'TTS base URL is required');
@@ -178,7 +183,7 @@ export async function POST(req: NextRequest) {
       // Vendor IDs may be present in exported classroom data, so possession of
       // an ID is not ownership. Only a caller-supplied account key authorizes
       // provider-side deletion; a managed server key must never be used here.
-      if (managed || !body.ttsApiKey?.trim()) {
+      if (managed || !keysAllowed || !body.ttsApiKey?.trim()) {
         return apiSuccess({
           voiceId,
           deleted: false,

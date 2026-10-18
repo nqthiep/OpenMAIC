@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import { createLogger } from '@/lib/logger';
@@ -18,6 +19,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { apiKey, baseUrl, providerType } = body;
     model = body.model;
+    const keysAllowed = await clientKeysAllowed(req.headers);
 
     if (!model) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Model name is required');
@@ -28,8 +30,8 @@ export async function POST(req: NextRequest) {
     try {
       const result = await resolveModel({
         modelString: model,
-        apiKey: apiKey || '',
-        baseUrl: baseUrl || undefined,
+        apiKey: keysAllowed ? apiKey || '' : '',
+        baseUrl: keysAllowed ? baseUrl || undefined : undefined,
         providerType,
       });
       languageModel = result.model;

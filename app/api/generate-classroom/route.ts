@@ -1,6 +1,7 @@
 import { after, type NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender, resolveViewer } from '@/lib/server/authz/viewer';
 import { type GenerateClassroomInput } from '@/lib/server/classroom-generation';
 import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
@@ -37,13 +38,17 @@ export async function POST(req: NextRequest) {
     }
     const rawBody = read.value as Partial<GenerateClassroomInput>;
     requirementLength = rawBody.requirement?.length;
+    // Only an administrator's own web-search key is used; others get the server's provider.
+    const keysAllowed = await clientKeysAllowed(req.headers);
     const body: GenerateClassroomInput = {
       requirement: rawBody.requirement || '',
       ...(rawBody.pdfContent ? { pdfContent: rawBody.pdfContent } : {}),
 
       ...(rawBody.enableWebSearch != null ? { enableWebSearch: rawBody.enableWebSearch } : {}),
       ...(rawBody.webSearchProviderId ? { webSearchProviderId: rawBody.webSearchProviderId } : {}),
-      ...(rawBody.webSearchApiKey ? { webSearchApiKey: rawBody.webSearchApiKey } : {}),
+      ...(keysAllowed && rawBody.webSearchApiKey
+        ? { webSearchApiKey: rawBody.webSearchApiKey }
+        : {}),
       ...(rawBody.webSearchModelId ? { webSearchModelId: rawBody.webSearchModelId } : {}),
       ...(rawBody.baiduSubSources ? { baiduSubSources: rawBody.baiduSubSources } : {}),
       ...(rawBody.enableImageGeneration != null

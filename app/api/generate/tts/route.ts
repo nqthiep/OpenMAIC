@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Single TTS Generation API
@@ -118,7 +119,8 @@ export async function POST(req: NextRequest) {
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
     managed = isServerConfiguredProvider('tts', ttsProviderId);
-    const clientBaseUrl = managed ? undefined : ttsBaseUrl || undefined;
+    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
+    const clientBaseUrl = keysAllowed ? ttsBaseUrl || undefined : undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
@@ -126,7 +128,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const apiKey = resolveTTSApiKey(ttsProviderId, managed ? undefined : ttsApiKey || undefined);
+    const apiKey = resolveTTSApiKey(
+      ttsProviderId,
+      keysAllowed ? ttsApiKey || undefined : undefined,
+    );
     const baseUrl = resolveTTSBaseUrl(ttsProviderId, clientBaseUrl);
 
     // Pre-flight the same key requirement the library enforces: a keyed provider

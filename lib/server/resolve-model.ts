@@ -8,6 +8,7 @@
 import type { NextRequest } from 'next/server';
 import { getModel, getProvider, parseModelString, type ModelWithInfo } from '@/lib/ai/providers';
 import type { ProviderType, ThinkingConfig } from '@/lib/types/provider';
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import {
   isServerConfiguredProvider,
   resolveApiKey,
@@ -165,7 +166,8 @@ function getThinkingConfigFromBody(body: unknown): ThinkingConfig | undefined {
 /**
  * Resolve a language model from standard request headers.
  *
- * Reads: x-model, x-api-key, x-base-url, x-provider-type
+ * Reads: x-model, x-api-key, x-base-url, x-provider-type. The key and base URL are used only
+ * for an administrator's own key; other callers get the server's providers.
  * Note: requiresApiKey is derived server-side from the provider registry,
  * never from client headers, to prevent auth bypass.
  */
@@ -174,11 +176,12 @@ export async function resolveModelFromHeaders(
   stage?: LlmStage,
   thinkingConfig?: ThinkingConfig,
 ): Promise<ResolvedModel> {
+  const keysAllowed = await clientKeysAllowed(req.headers);
   return resolveModel({
     modelString: req.headers.get('x-model') || undefined,
     stage,
-    apiKey: req.headers.get('x-api-key') || undefined,
-    baseUrl: req.headers.get('x-base-url') || undefined,
+    apiKey: keysAllowed ? req.headers.get('x-api-key') || undefined : undefined,
+    baseUrl: keysAllowed ? req.headers.get('x-base-url') || undefined : undefined,
     providerType: req.headers.get('x-provider-type') || undefined,
     thinkingConfig,
   });

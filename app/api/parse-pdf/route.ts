@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
 import {
@@ -52,7 +53,8 @@ export async function POST(req: NextRequest) {
 
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
     managed = isServerConfiguredProvider('pdf', effectiveProviderId);
-    const clientBaseUrl = managed ? undefined : baseUrl || undefined;
+    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
+    const clientBaseUrl = keysAllowed ? baseUrl || undefined : undefined;
     if (clientBaseUrl) {
       const ssrfError = await validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     const config = {
       providerId: effectiveProviderId,
-      apiKey: resolvePDFApiKey(effectiveProviderId, managed ? undefined : apiKey || undefined),
+      apiKey: resolvePDFApiKey(effectiveProviderId, keysAllowed ? apiKey || undefined : undefined),
       baseUrl: resolvePDFBaseUrl(effectiveProviderId, clientBaseUrl),
     };
 

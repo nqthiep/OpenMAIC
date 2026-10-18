@@ -3,6 +3,7 @@ import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 const log = createLogger('Azure Voices');
 
 export const maxDuration = 30;
@@ -12,6 +13,14 @@ export const maxDuration = 30;
  * Fetches available voices from Azure Speech Services
  */
 export async function POST(req: NextRequest) {
+  // Listing voices with a key and endpoint of one's own is an administrator's task only.
+  if (!(await clientKeysAllowed(req.headers))) {
+    return apiError(
+      'FORBIDDEN',
+      403,
+      'Only an administrator can list voices for a custom endpoint.',
+    );
+  }
   let baseUrl: string | undefined;
   try {
     const body = await req.json();

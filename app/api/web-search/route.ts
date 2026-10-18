@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Web Search API
@@ -103,9 +104,10 @@ export async function POST(req: NextRequest) {
     // key/baseUrl. The server config is authoritative, so a stale client base
     // URL is dropped rather than failing the request.
     managed = isServerConfiguredProvider('webSearch', providerId);
-    const clientApiKey = managed ? undefined : bodyApiKey;
+    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
+    const clientApiKey = keysAllowed ? bodyApiKey : undefined;
     // SearXNG base URLs are operator-managed only (SEARXNG_BASE_URL); never trust client input.
-    const clientBaseUrl = managed || providerId === 'searxng' ? undefined : bodyBaseUrl;
+    const clientBaseUrl = keysAllowed && providerId !== 'searxng' ? bodyBaseUrl : undefined;
     const apiKey = resolveWebSearchApiKey(providerId, clientApiKey);
     if (provider.requiresApiKey && !apiKey) {
       return apiError(

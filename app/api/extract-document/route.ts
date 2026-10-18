@@ -1,3 +1,4 @@
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest, NextResponse } from 'next/server';
 import {
@@ -644,7 +645,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return await runExtraction(source, requestConfig, logState, isAssetIdForm);
+    // Only an administrator's own keys and endpoint are used. Everyone else gets the server's providers.
+    const keysAllowed = await clientKeysAllowed(req.headers);
+    const config = keysAllowed
+      ? requestConfig
+      : {
+          ...requestConfig,
+          apiKey: undefined,
+          baseUrl: undefined,
+          accessKeyId: undefined,
+          accessKeySecret: undefined,
+        };
+    return await runExtraction(source, config, logState, isAssetIdForm);
   } catch (error) {
     log.error(
       `Document extraction failed [provider=${logState.resolvedProviderId ?? 'unknown'}, file="${sanitizeLogValue(
