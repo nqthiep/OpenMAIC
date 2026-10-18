@@ -116,6 +116,37 @@ function emitItem(
 }
 
 /**
+ * Reads the raw array text in `buffer` (which starts at `[`): how many top-level items are closed,
+ * and whether the array's own `]` has arrived. The repaired parse cannot answer either: on a buffer
+ * cut at `"latex":"\\frac{`, jsonrepair ends the string at `\\frac` and reads the `{` as a new
+ * item, and a buffer cut at `"a [b]` ends with `]`. Both made a half-streamed action look complete,
+ * which drew a red `\frac` with no position on the whiteboard.
+ */
+function scanTopLevel(buffer: string): { closedItems: number; arrayClosed: boolean } {
+  let closedItems = 0;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = 1; i < buffer.length; i++) {
+    const ch = buffer[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') {
+        inString = false;
+        if (depth === 0) closedItems++;
+      }
+    } else if (ch === '"') inString = true;
+    else if (ch === '{' || ch === '[') depth++;
+    else if (ch === '}' || ch === ']') {
+      if (depth === 0) return { closedItems, arrayClosed: true };
+      if (--depth === 0) closedItems++;
+    }
+  }
+  return { closedItems, arrayClosed: false };
+}
+
+/**
  * Parse streaming chunks of structured JSON Array output.
  *
  * The LLM is expected to produce a JSON array like:
@@ -134,7 +165,12 @@ function emitItem(
  * @param state - Current parser state (mutated in place)
  * @returns Parsed text chunks and tool calls from this chunk
  */
-export function parseStructuredChunk(chunk: string, state: ParserState): ParseResult {
+export function parseStructuredChunk(
+  chunk: string,
+  state: ParserState,
+  /** Internal: set by `finalizeParser` once no more chunks will come. */
+  streamEnded = false,
+): ParseResult {
   const result: ParseResult = {
     textChunks: [],
     actions: [],
@@ -159,9 +195,12 @@ export function parseStructuredChunk(chunk: string, state: ParserState): ParseRe
     state.jsonStarted = true;
   }
 
-  // Step 2: Check if the array is complete (closing `]` found)
+  // Step 2: Check if the array is complete (closing `]` found). Once the stream has ended, a
+  // trailing `]` is trusted too, so a model that left a quote unescaped still gets its last item.
   const trimmed = state.buffer.trimEnd();
-  const isArrayClosed = trimmed.endsWith(']') && trimmed.length > 1;
+  const scan = scanTopLevel(state.buffer);
+  const isArrayClosed =
+    scan.arrayClosed || (streamEnded && trimmed.endsWith(']') && trimmed.length > 1);
 
   // Step 3: Try incremental parse — jsonrepair first (fixes unescaped quotes), fallback to partial-json
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial-json returns any[]
@@ -187,7 +226,9 @@ export function parseStructuredChunk(chunk: string, state: ParserState): ParseRe
   // Step 4: Determine how many items are fully complete
   // When the array is closed, all items are complete.
   // When still streaming, items [0..N-2] are complete; item [N-1] may be partial.
-  const completeUpTo = isArrayClosed ? parsed.length : Math.max(0, parsed.length - 1);
+  const completeUpTo = isArrayClosed
+    ? parsed.length
+    : Math.max(0, Math.min(parsed.length - 1, scan.closedItems));
 
   // Count segment indices for items already emitted
   let textSegmentIndex = 0;
@@ -369,7 +410,7 @@ export function finalizeParser(state: ParserState): ParseResult {
     // parser can still recover. Intentionally NO raw-buffer fallback:
     // suppressing a truncated structured tail is safer than leaking
     // `{"type":"text",...` as visible speech.
-    const finalChunk = parseStructuredChunk('', state);
+    const finalChunk = parseStructuredChunk('', state, true);
     result.textChunks.push(...finalChunk.textChunks);
     result.actions.push(...finalChunk.actions);
     result.ordered.push(...finalChunk.ordered);
