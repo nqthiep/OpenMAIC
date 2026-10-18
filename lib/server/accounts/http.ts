@@ -78,7 +78,10 @@ async function readBodyUpTo(request: Request, maxBytes: number): Promise<string 
  * Reads a JSON object body. The application/json requirement matters: an HTML
  * form cannot send that content type cross-site, so it cannot forge a sign-in.
  */
-export async function readJsonObject(request: Request): Promise<JsonObjectRead> {
+export async function readJsonObject(
+  request: Request,
+  maxBytes = MAX_CREDENTIALS_BODY_BYTES,
+): Promise<JsonObjectRead> {
   const contentType = request.headers.get('content-type') ?? '';
   if (!contentType.toLowerCase().startsWith('application/json')) {
     return {
@@ -87,7 +90,7 @@ export async function readJsonObject(request: Request): Promise<JsonObjectRead> 
     };
   }
 
-  const text = await readBodyUpTo(request, MAX_CREDENTIALS_BODY_BYTES);
+  const text = await readBodyUpTo(request, maxBytes);
   if (text === undefined) {
     return { ok: false, response: apiError('INVALID_REQUEST', 413, 'Request body is too large') };
   }

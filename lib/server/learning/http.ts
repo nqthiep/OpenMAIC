@@ -14,6 +14,7 @@ import {
 import type { AccountQueryable } from '@/lib/server/accounts/store';
 import { can, type Action, type Resource } from '@/lib/server/authz/policy';
 import { resolveViewer, type ResolvedViewer } from '@/lib/server/authz/viewer';
+import { isBanned } from '@/lib/server/learning/community';
 
 export interface LearningContext {
   viewer: ResolvedViewer;
@@ -51,10 +52,25 @@ export function authorize(
 /** The JSON object of a request body, or the refusal to send back. */
 export async function bodyOf(
   request: Request,
+  maxBytes?: number,
 ): Promise<{ ok: true; body: Record<string, unknown> } | { ok: false; response: Response }> {
-  return readJsonObject(request);
+  return readJsonObject(request, maxBytes);
 }
 
 export function invalid(message: string): Response {
   return apiError('INVALID_REQUEST', 400, message);
+}
+
+/** A refusal for asking, answering or voting in the community, or undefined when the viewer may. */
+export async function communityPostRefusal(ctx: LearningContext): Promise<Response | undefined> {
+  if (ctx.viewer.accountId === undefined) {
+    return apiError('UNAUTHENTICATED', 401, 'Sign in to continue.');
+  }
+  if (!can(ctx.viewer, 'community.post')) {
+    return apiError('MEMBERSHIP_REQUIRED', 403, 'An active membership is needed to post.');
+  }
+  if (await isBanned(ctx.db, ctx.viewer.accountId)) {
+    return apiError('COMMUNITY_BLOCKED', 403, 'Posting is blocked for this account.');
+  }
+  return undefined;
 }
