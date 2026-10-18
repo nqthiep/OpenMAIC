@@ -80,7 +80,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Hãy rà soát lại toàn bộ các user journey của learner để có nhận xét chi tiết cụ thể về UI và UX."
 - Assignment status: In progress. Review done. Implementation started 2026-10-18 in the suggested order: rows 6, 7, 8, 9, 11, 13, 14 are Done and seen in a browser (2026-10-18, as `rv_check`); rows 12, 15, 16 are Blocked on the failed-state check or on owner decisions; row 10 has code and tests (built by another session) and is Blocked on its own signed-in browser check; row 17 is new. Other assignments below belong to other sessions and stay open.
-- Branch and commit: `it-math` @ `7a6be525` plus uncommitted changes (rows 6 to 8, 11 to 16 and the earlier assignments' edits), pushed: no. No git writes requested, so nothing was committed. `git pull` found nothing new.
+- Branch and commit: `it-math` @ `e9f9359d` (rows 6 to 16 code, the class-leave work and row 10), pushed: no. The owner asked for the commit on 2026-10-18; push not requested. Left uncommitted on purpose, not part of this handoff: `lib/playback/engine.ts` and `tests/playback/speech-browser-fallback.test.ts` (another session's TTS fallback), `tests/security/*` (red tests for log redaction), `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`. `git pull` found nothing new.
 - Last updated: 2026-10-18 (UTC time not recorded)
 
 ### Task table
