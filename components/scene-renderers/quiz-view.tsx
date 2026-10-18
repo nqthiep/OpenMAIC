@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { requestNextScene } from '@/components/scene-renderers/next-scene-event';
 import { reportQuizScore } from '@/lib/hooks/use-course-progress';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { createLogger } from '@/lib/logger';
@@ -1116,12 +1117,20 @@ export function QuizView({ questions, sceneId, stageId }: QuizViewProps) {
                   />
                 );
               })}
-              <div className="flex justify-center pb-2">
+              <div className="flex flex-wrap justify-center gap-3 pb-2">
+                <button
+                  type="button"
+                  onClick={requestNextScene}
+                  className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 px-6 py-2 text-sm font-medium text-white shadow-md transition-shadow hover:shadow-lg"
+                >
+                  {t('quiz.continue')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
                 <button
                   type="button"
                   onClick={() => void handleRetry()}
                   disabled={retrying}
-                  className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 px-6 py-2 text-sm font-medium text-white shadow-md transition-shadow hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-full border border-violet-200 px-6 py-2 text-sm font-medium text-violet-600 transition-colors hover:bg-violet-50 dark:border-violet-700 dark:text-violet-300 dark:hover:bg-violet-900/30 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <RotateCcw className="w-4 h-4" />
                   {t('quiz.retry')}

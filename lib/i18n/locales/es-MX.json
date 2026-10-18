@@ -928,7 +928,8 @@
     "aiGrading": "La IA está calificando...",
     "aiGradingWait": "Espera un momento, analizando tus respuestas",
     "quizReport": "Reporte del cuestionario",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "continue": "Continuar"
   },
   "roundtable": {
     "teacher": "DOCENTE",
@@ -2268,7 +2269,8 @@
     },
     "hints": {
       "username": "De 3 a 32 caracteres: letras latinas, números, puntos, guiones bajos o guiones. Debe empezar con una letra o un número.",
-      "password": "De 8 a 256 caracteres."
+      "password": "De 8 a 256 caracteres.",
+      "forgot": "¿Olvidaste tu contraseña? Pide a un administrador o a tu docente que la restablezca."
     },
     "submit": {
       "signIn": "Iniciar sesión",
@@ -2895,6 +2897,11 @@
       "renew": "Renovar mi membresía",
       "resume": "Reanudar mi membresía",
       "quota": "Aumentar mi límite de IA"
+    },
+    "templates": {
+      "membership": "Pregunta sobre la membresía",
+      "problem": "Reportar un problema",
+      "other": "Otra pregunta"
     }
   },
   "community": {

@@ -67,6 +67,7 @@ import {
   getSlideElementTypeLabel,
 } from '@/components/canvas/slide-element-pick-overlay';
 import { shouldClearDraftElementReference } from '@/components/chat/element-reference-receipt';
+import { NEXT_SCENE_EVENT } from '@/components/scene-renderers/next-scene-event';
 
 type DraftElementReference = {
   reference: ElementReference;
@@ -1222,6 +1223,12 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
         void gatedSceneSwitch(PENDING_SCENE_ID);
       }
     }, [currentSceneId, gatedSceneSwitch, canAdvanceToPendingSlot, isPendingScene, scenes]);
+
+    // The quiz report's "continue" button asks for the next scene (see `next-scene-event.ts`).
+    useEffect(() => {
+      window.addEventListener(NEXT_SCENE_EVENT, handleNextScene);
+      return () => window.removeEventListener(NEXT_SCENE_EVENT, handleNextScene);
+    }, [handleNextScene]);
 
     const currentSceneIndex = isPendingScene
       ? scenes.length

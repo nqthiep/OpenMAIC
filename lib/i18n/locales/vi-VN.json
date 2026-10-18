@@ -928,7 +928,8 @@
     "aiGrading": "AI đang chấm…",
     "aiGradingWait": "Vui lòng đợi, đang phân tích câu trả lời của bạn",
     "quizReport": "Báo cáo kết quả",
-    "retry": "Làm lại"
+    "retry": "Làm lại",
+    "continue": "Học tiếp"
   },
   "roundtable": {
     "teacher": "GIẢNG VIÊN",
@@ -2268,7 +2269,8 @@
     },
     "hints": {
       "username": "Từ 3 đến 32 ký tự: chữ cái Latinh, chữ số, dấu chấm, gạch dưới hoặc gạch nối. Bắt đầu bằng chữ cái hoặc chữ số.",
-      "password": "Từ 8 đến 256 ký tự."
+      "password": "Từ 8 đến 256 ký tự.",
+      "forgot": "Quên mật khẩu? Nhờ quản trị viên hoặc thầy cô đặt lại mật khẩu cho bạn."
     },
     "submit": {
       "signIn": "Đăng nhập",
@@ -2895,6 +2897,11 @@
       "renew": "Gia hạn gói thành viên",
       "resume": "Mở lại gói thành viên",
       "quota": "Tăng hạn mức AI"
+    },
+    "templates": {
+      "membership": "Hỏi về gói thành viên",
+      "problem": "Báo lỗi",
+      "other": "Câu hỏi khác"
     }
   },
   "community": {

@@ -928,7 +928,8 @@
     "aiGrading": "AI 正在批改中...",
     "aiGradingWait": "请稍候，正在分析你的答案",
     "quizReport": "答题报告",
-    "retry": "重新答题"
+    "retry": "重新答题",
+    "continue": "继续学习"
   },
   "roundtable": {
     "teacher": "教师",
@@ -2268,7 +2269,8 @@
     },
     "hints": {
       "username": "3–32 个字符，可使用英文字母、数字、点、下划线或连字符，且以字母或数字开头。",
-      "password": "8–256 个字符。"
+      "password": "8–256 个字符。",
+      "forgot": "忘记密码？请让管理员或老师为你重置密码。"
     },
     "submit": {
       "signIn": "登录",
@@ -2895,6 +2897,11 @@
       "renew": "续订会员",
       "resume": "恢复会员",
       "quota": "提高 AI 额度"
+    },
+    "templates": {
+      "membership": "咨询会员资格",
+      "problem": "报告问题",
+      "other": "其他问题"
     }
   },
   "community": {

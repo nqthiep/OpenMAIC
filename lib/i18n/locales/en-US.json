@@ -928,7 +928,8 @@
     "aiGrading": "AI is grading...",
     "aiGradingWait": "Please wait, analyzing your answers",
     "quizReport": "Quiz Report",
-    "retry": "Retry"
+    "retry": "Retry",
+    "continue": "Continue"
   },
   "roundtable": {
     "teacher": "TEACHER",
@@ -2286,7 +2287,8 @@
     },
     "hints": {
       "username": "3–32 characters: English letters, digits, dots, underscores or hyphens. Start with a letter or digit.",
-      "password": "8–256 characters."
+      "password": "8–256 characters.",
+      "forgot": "Forgot your password? Ask an administrator or your teacher to reset it for you."
     },
     "submit": {
       "signIn": "Sign in",
@@ -2895,6 +2897,11 @@
       "renew": "Renew my membership",
       "resume": "Resume my membership",
       "quota": "Raise my AI allowance"
+    },
+    "templates": {
+      "membership": "Question about membership",
+      "problem": "Report a problem",
+      "other": "Other question"
     }
   },
   "community": {

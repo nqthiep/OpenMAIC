@@ -325,6 +325,26 @@ export function Roundtable({
     el.scrollTo({ top: scrollableHeight, behavior: 'smooth' });
   }, [sourceText, isInLiveFlow]);
 
+  // A lecture caption arrives whole, not streamed, so the lines below the bubble would stay hidden.
+  // While it plays, scroll from where it is to the last line over the speech's estimated length.
+  // ponytail: ~14 characters a second, not synced to the audio; use the audio clock if drift shows.
+  useEffect(() => {
+    const el = bubbleScrollRef.current;
+    if (isInLiveFlow || engineMode !== 'playing' || !lectureSpeech || !el) return;
+    const distance = el.scrollHeight - el.clientHeight;
+    if (distance <= 0) return;
+    const from = el.scrollTop;
+    if (from >= distance) return;
+    const duration = Math.max(2000, lectureSpeech.length * 70) * (1 - from / distance);
+    const start = performance.now();
+    let frame = requestAnimationFrame(function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      el.scrollTop = from + (distance - from) * t;
+      if (t < 1) frame = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [lectureSpeech, engineMode, isInLiveFlow]);
+
   // Clear user message early when agent starts responding
   useEffect(() => {
     const feedbackStarted = hasAgentFeedback && !prevHasAgentFeedbackRef.current;
@@ -1659,7 +1679,7 @@ export function Roundtable({
                         onPlayPause?.();
                       }}
                       className={cn(
-                        'relative px-4 pt-2 pb-3 rounded-2xl text-[15px] leading-relaxed transition-all border w-[min(420px,calc(100%-3rem))] group/bubble flex flex-col max-h-[110px]',
+                        'relative px-4 pt-2 pb-3 rounded-2xl text-[15px] leading-relaxed transition-all border w-[min(420px,calc(100%-3rem))] group/bubble flex flex-col max-h-[138px]',
                         bubbleRole === 'teacher' ? 'pl-4 pr-10' : 'pl-4 pr-10',
                         bubbleRole === 'user'
                           ? 'bg-purple-600/95 dark:bg-purple-500/95 backdrop-blur-sm border-purple-400/40 dark:border-purple-300/40 text-white rounded-br-sm shadow-md shadow-purple-300/30 dark:shadow-purple-800/30'
@@ -1704,7 +1724,7 @@ export function Roundtable({
                           );
                         })()}
 
-                      <div ref={bubbleScrollRef} className="overflow-y-auto scrollbar-hide">
+                      <div ref={bubbleScrollRef} className="overflow-y-auto [scrollbar-width:thin]">
                         {/* Agent name + audio indicator header */}
                         {bubbleRole !== 'user' && bubbleName && (
                           <div className="flex items-center gap-1 mb-0.5">

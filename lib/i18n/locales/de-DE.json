@@ -928,7 +928,8 @@
     "aiGrading": "Die KI wertet aus...",
     "aiGradingWait": "Bitte warten, deine Antworten werden ausgewertet",
     "quizReport": "Quizbericht",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "continue": "Weiterlernen"
   },
   "roundtable": {
     "teacher": "LEHRKRAFT",
@@ -2268,7 +2269,8 @@
     },
     "hints": {
       "username": "3–32 Zeichen: lateinische Buchstaben, Ziffern, Punkte, Unterstriche oder Bindestriche. Beginne mit einem Buchstaben oder einer Ziffer.",
-      "password": "8–256 Zeichen."
+      "password": "8–256 Zeichen.",
+      "forgot": "Passwort vergessen? Bitte den Administrator oder deine Lehrkraft, es zurückzusetzen."
     },
     "submit": {
       "signIn": "Anmelden",
@@ -2895,6 +2897,11 @@
       "renew": "Mitgliedschaft verlängern",
       "resume": "Mitgliedschaft fortsetzen",
       "quota": "KI-Kontingent erhöhen"
+    },
+    "templates": {
+      "membership": "Frage zur Mitgliedschaft",
+      "problem": "Problem melden",
+      "other": "Andere Frage"
     }
   },
   "community": {

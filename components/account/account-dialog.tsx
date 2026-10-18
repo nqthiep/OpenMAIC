@@ -257,11 +257,14 @@ export function AccountDialog({
                 value={username}
                 onChange={(event) => editField('username', event.target.value)}
                 aria-invalid={usernameInvalid || undefined}
-                aria-describedby={joinIds(usernameHintId, usernameInvalid && errorId)}
+                aria-describedby={joinIds(creating && usernameHintId, usernameInvalid && errorId)}
               />
-              <p id={usernameHintId} className="text-xs text-muted-foreground">
-                {t('account.hints.username')}
-              </p>
+              {/* The name rules matter when choosing a name, not when signing in. */}
+              {creating ? (
+                <p id={usernameHintId} className="text-xs text-muted-foreground">
+                  {t('account.hints.username')}
+                </p>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -278,7 +281,7 @@ export function AccountDialog({
                 aria-describedby={joinIds(passwordHintId, passwordInvalid && errorId)}
               />
               <p id={passwordHintId} className="text-xs text-muted-foreground">
-                {t('account.hints.password')}
+                {creating ? t('account.hints.password') : t('account.hints.forgot')}
               </p>
             </div>
           </div>

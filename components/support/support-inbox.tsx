@@ -166,6 +166,22 @@ function NewThreadForm({
           onChange={(e) => setSubject(e.target.value)}
         />
       </label>
+      {staff ? null : (
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('support.subject')}>
+          {(['membership', 'problem', 'other'] as const).map((kind) => (
+            <Button
+              key={kind}
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 rounded-full px-3 text-xs"
+              onClick={() => setSubject(t(`support.templates.${kind}`))}
+            >
+              {t(`support.templates.${kind}`)}
+            </Button>
+          ))}
+        </div>
+      )}
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium">{t('support.body')}</span>
         <Textarea
