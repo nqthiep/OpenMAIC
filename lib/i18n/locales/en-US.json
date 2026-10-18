@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "Members: {{count}}",
       "noCourses": "No courses are attached to this class yet.",
-      "untitled": "Course {{number}}"
+      "untitled": "Course {{number}}",
+      "hint": "A teacher or an operator creates a class and adds its courses. Without a class you can still study on your own."
     },
     "starter": {
       "title": "Not sure where to start? Try one of these:",
@@ -1231,7 +1232,8 @@
     "notFoundDesc": "This course does not exist, has been deleted, or you do not have access to it.",
     "backToHome": "Back to home",
     "loadFailed": "Persistence is unavailable. Saved classrooms could not be loaded.",
-    "deleteFailed": "Failed to delete classroom"
+    "deleteFailed": "Failed to delete classroom",
+    "privateHint": "The courses you create are private. To let other members see one, open it and use \"Share with members\"."
   },
   "upload": {
     "pdfSizeLimit": "Supports PDF files up to 50MB",
@@ -2316,7 +2318,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "Make {{username}} {{role}}?",
+        "roleAction": "Change role",
+        "roleDescription": {
+          "learner": "They lose access to the operator pages at once.",
+          "operator": "They can see every account, membership, class, course and the audit log, and manage them. The change is written to the audit log.",
+          "admin": "They get full control, including roles and deployment settings. The change is written to the audit log."
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "Classes",
-      "description": "Members join a class with its code. Attach courses so the class can open them.",
+      "description": "Only operators and administrators manage classes. A class groups learners so they can all open the courses attached to it.",
       "name": "Class name",
       "create": "Create class",
-      "joinCode": "Join code for {{code}}. It is shown once, so copy it now.",
       "empty": "No classes yet.",
       "members": "{{count}} members",
       "courses": "{{count}} courses",
-      "attach": "Attach course",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "Remove",
       "removeMemberTitle": "Remove {{username}} from {{name}}?",
       "removeMemberDescription": "They lose the courses of this class. The change is written to the audit log.",
-      "memberRemoved": "{{username}} removed from the class."
+      "memberRemoved": "{{username}} removed from the class.",
+      "steps": {
+        "create": "Create a class: type a name and press Create class. You get a join code.",
+        "share": "Invite learners: send the invite link or the code, or press Members to add learners yourself. Learners need an active membership to open the class courses.",
+        "attach": "Add courses: press Choose courses in the class row, then Attach next to a course. Only shared courses, free previews and courses made by staff can be attached. Members find them under My classes."
+      },
+      "joinCodeTitle": "Join code for {{name}}",
+      "joinCodeHint": "Shown only once. Send learners the invite link (it opens the right place to join), or the code to type in.",
+      "copyCode": "Copy code",
+      "codeCopied": "Join code copied.",
+      "copyFailed": "Could not copy. Select the code and copy it by hand.",
+      "closeCode": "Hide the code",
+      "manageCourses": "Choose courses",
+      "coursesDialog": {
+        "title": "Courses of {{name}}",
+        "description": "Attach a course so the members of this class can open it. A learner's private course has to be shared first.",
+        "search": "Search by course title or creator",
+        "empty": "No course matches.",
+        "owner": "Created by {{name}}",
+        "isAttached": "Attached",
+        "attach": "Attach",
+        "detach": "Detach",
+        "private": "Private · share it first",
+        "attached": "“{{title}}” attached to the class.",
+        "detached": "“{{title}}” detached from the class."
+      },
+      "copyLink": "Copy invite link",
+      "linkCopied": "Invite link copied.",
+      "manageMembers": "Members ({{count}})",
+      "addMember": {
+        "title": "Add learners",
+        "description": "Add someone to this class directly, without a code. Without an active membership they can only open the class courses once they have one.",
+        "search": "Search by username",
+        "empty": "No account matches.",
+        "noMembership": "No membership",
+        "add": "Add",
+        "added": "{{username}} added to the class."
+      }
     },
     "audit": {
       "title": "Audit log",
@@ -2559,7 +2603,8 @@
         "challenge_update": "Edit challenge",
         "settings_update": "Change setting",
         "share_update-approve": "Shared update approved",
-        "share_update-reject": "Shared update rejected"
+        "share_update-reject": "Shared update rejected",
+        "class_add": "Member added"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "Courses",
-      "description": "Every course on this system. Open one to review it, or copy its ID to mark it as a preview or attach it to a class.",
+      "description": "Every course on this system. Open one to review it, or copy its ID to mark it as a free preview.",
       "open": "Open the course in a new tab",
       "copy": "Copy ID {{id}}",
       "copied": "Copied {{id}}",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "A rejected request can be sent again later.",
       "COURSE_NOT_FOUND": "There is no course with this ID. Check the ID in the course address (/classroom/<ID>).",
       "RATE_LIMITED": "You have too many unanswered requests. Wait for a reply first.",
-      "COMMUNITY_BLOCKED": "Your account is blocked from posting in the community."
+      "COMMUNITY_BLOCKED": "Your account is blocked from posting in the community.",
+      "COURSE_NOT_ATTACHABLE": "Only a shared course, a free preview, or a course made by an operator or administrator can be attached. Ask the owner to share their course first."
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "Join code",
       "submit": "Join",
       "done": "You joined {{name}}.",
-      "description": "Enter the code you were given to join a class."
+      "description": "Optional. You can study on your own without a class: your courses, free previews and shared courses. Enter a code only if a teacher or an operator gave you one.",
+      "needsMembership": "You don't need a class to study on your own. If a teacher gave you a class code, you need a membership first, then enter the code on this page.",
+      "invited": "You were invited to a class. Sign in with a membership, then press Join on this page.",
+      "invitedMember": "You were invited to a class. Check the code and press Join."
     },
     "empty": "Nothing to browse yet.",
     "kind": {

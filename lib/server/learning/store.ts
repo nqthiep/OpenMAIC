@@ -939,6 +939,33 @@ export async function listClassMembers(
  * Takes a member out of a class; they can join again only with the class code, so rotate the code
  * to keep them out. Logged as `class:remove:<classId>` with the account as target.
  */
+/**
+ * Staff add an account to a class without a join code. False when the class or the account does
+ * not exist or the account is already a member. Logged as `class:add:<classId>`.
+ */
+export async function addClassMember(
+  db: AccountQueryable,
+  input: { classId: string; accountId: string; actorId: string; now: Date },
+): Promise<boolean> {
+  const result = await db.query(
+    `WITH added AS (
+       INSERT INTO class_members (class_id, account_id, joined_at)
+       SELECT c.id, a.id, $4::timestamptz
+         FROM classes c, accounts a
+        WHERE c.id = $1::text AND a.id = $2::text
+       ON CONFLICT (class_id, account_id) DO NOTHING
+       RETURNING class_id
+     ), audit AS (
+       INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
+       SELECT $3::text, $2::text, 'class:add:' || $1::text, NULL, $4::timestamptz FROM added
+       RETURNING id
+     )
+     SELECT class_id FROM added`,
+    [input.classId, input.accountId, input.actorId, input.now.toISOString()],
+  );
+  return result.rows.length > 0;
+}
+
 export async function removeClassMember(
   db: AccountQueryable,
   input: { classId: string; accountId: string; actorId: string; now: Date },

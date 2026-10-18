@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "Mitglieder: {{count}}",
       "noCourses": "Dieser Klasse sind noch keine Kurse zugeordnet.",
-      "untitled": "Kurs {{number}}"
+      "untitled": "Kurs {{number}}",
+      "hint": "Eine Lehrkraft oder ein Betreuer legt eine Klasse an und fügt Kurse hinzu. Ohne Klasse kannst du trotzdem selbst lernen."
     },
     "starter": {
       "title": "Sie wissen nicht, wo Sie anfangen sollen? Probieren Sie eines davon:",
@@ -1231,7 +1232,8 @@
     "notFoundDesc": "Dieser Kurs existiert nicht, wurde gelöscht oder du hast keine Berechtigung, ihn anzusehen.",
     "backToHome": "Zurück zur Startseite",
     "loadFailed": "Speicher nicht verfügbar. Gespeicherte Klassenräume konnten nicht geladen werden.",
-    "deleteFailed": "Klassenraum konnte nicht gelöscht werden"
+    "deleteFailed": "Klassenraum konnte nicht gelöscht werden",
+    "privateHint": "Deine eigenen Kurse sind privat. Damit andere Mitglieder einen sehen, öffne ihn und wähle „Mit Mitgliedern teilen“."
   },
   "upload": {
     "pdfSizeLimit": "Unterstützt PDF-Dateien bis zu 50 MB",
@@ -2298,7 +2300,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "{{username}} zu {{role}} machen?",
+        "roleAction": "Rolle ändern",
+        "roleDescription": {
+          "learner": "Die Person verliert sofort den Zugang zu den Betreuerseiten.",
+          "operator": "Die Person sieht und verwaltet alle Konten, Mitgliedschaften, Klassen, Kurse und das Prüfprotokoll. Die Änderung wird protokolliert.",
+          "admin": "Die Person erhält volle Kontrolle, auch über Rollen und Systemeinstellungen. Die Änderung wird protokolliert."
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "Klassen",
-      "description": "Mitglieder treten einer Klasse mit dem Code bei. Kurse zuordnen, damit die Klasse sie öffnen kann.",
+      "description": "Nur Betreuer und Administratoren verwalten Klassen. Eine Klasse fasst Lernende zusammen, damit alle die zugeordneten Kurse öffnen können.",
       "name": "Klassenname",
       "create": "Klasse erstellen",
-      "joinCode": "Beitrittscode: {{code}}. Er wird nur einmal angezeigt, kopieren Sie ihn jetzt.",
       "empty": "Noch keine Klassen.",
       "members": "{{count}} Mitglieder",
       "courses": "{{count}} Kurse",
-      "attach": "Kurs zuordnen",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "Entfernen",
       "removeMemberTitle": "{{username}} aus {{name}} entfernen?",
       "removeMemberDescription": "Die Person verliert die Kurse dieser Klasse. Die Aktion wird protokolliert.",
-      "memberRemoved": "{{username}} aus der Klasse entfernt."
+      "memberRemoved": "{{username}} aus der Klasse entfernt.",
+      "steps": {
+        "create": "Klasse anlegen: Namen eingeben und „Klasse anlegen“ drücken. Du erhältst einen Beitrittscode.",
+        "share": "Lernende einladen: Einladungslink oder Code senden oder über „Mitglieder“ selbst hinzufügen. Lernende brauchen eine aktive Mitgliedschaft, um die Kurse der Klasse zu öffnen.",
+        "attach": "Kurse hinzufügen: in der Zeile der Klasse auf „Kurse wählen“ und dann neben einem Kurs auf „Zuordnen“ drücken. Nur geteilte Kurse, kostenlose Vorschauen und Kurse von Betreuern. Mitglieder finden sie unter Meine Klassen."
+      },
+      "joinCodeTitle": "Beitrittscode für {{name}}",
+      "joinCodeHint": "Wird nur einmal angezeigt. Sende den Lernenden den Einladungslink (er öffnet die richtige Stelle zum Beitreten) oder den Code zum Eintippen.",
+      "copyCode": "Code kopieren",
+      "codeCopied": "Beitrittscode kopiert.",
+      "copyFailed": "Kopieren fehlgeschlagen. Markiere den Code und kopiere ihn von Hand.",
+      "closeCode": "Code ausblenden",
+      "manageCourses": "Kurse wählen",
+      "coursesDialog": {
+        "title": "Kurse von {{name}}",
+        "description": "Ordne einen Kurs zu, damit die Mitglieder dieser Klasse ihn öffnen können. Den privaten Kurs eines Lernenden muss dieser zuerst teilen.",
+        "search": "Nach Kurstitel oder Ersteller suchen",
+        "empty": "Kein Kurs passt.",
+        "owner": "Erstellt von {{name}}",
+        "isAttached": "Zugeordnet",
+        "attach": "Zuordnen",
+        "detach": "Entfernen",
+        "private": "Privat · zuerst teilen",
+        "attached": "„{{title}}“ der Klasse zugeordnet.",
+        "detached": "„{{title}}“ aus der Klasse entfernt."
+      },
+      "copyLink": "Einladungslink kopieren",
+      "linkCopied": "Einladungslink kopiert.",
+      "manageMembers": "Mitglieder ({{count}})",
+      "addMember": {
+        "title": "Lernende hinzufügen",
+        "description": "Füge jemanden ohne Code direkt hinzu. Ohne aktive Mitgliedschaft kann die Person die Kurse der Klasse erst öffnen, wenn sie eine hat.",
+        "search": "Nach Benutzername suchen",
+        "empty": "Kein Konto passt.",
+        "noMembership": "Keine Mitgliedschaft",
+        "add": "Hinzufügen",
+        "added": "{{username}} wurde der Klasse hinzugefügt."
+      }
     },
     "audit": {
       "title": "Audit-Protokoll",
@@ -2559,7 +2603,8 @@
         "challenge_update": "Challenge bearbeitet",
         "settings_update": "Einstellung geändert",
         "share_update-approve": "Geteilte Aktualisierung freigegeben",
-        "share_update-reject": "Geteilte Aktualisierung abgelehnt"
+        "share_update-reject": "Geteilte Aktualisierung abgelehnt",
+        "class_add": "Mitglied hinzugefügt"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "Kurse",
-      "description": "Alle Kurse im System. Öffne einen Kurs zur Prüfung oder kopiere seine ID, um ihn als Vorschau zu markieren oder einer Klasse zuzuordnen.",
+      "description": "Alle Kurse in diesem System. Öffne einen zur Prüfung oder kopiere seine ID, um ihn als kostenlose Vorschau zu markieren.",
       "open": "Kurs in neuem Tab öffnen",
       "copy": "ID {{id}} kopieren",
       "copied": "{{id}} kopiert",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "Eine abgelehnte Anfrage kann später erneut gesendet werden.",
       "COURSE_NOT_FOUND": "Es gibt keinen Kurs mit dieser ID. Prüfe die ID in der Kursadresse (/classroom/<ID>).",
       "RATE_LIMITED": "Sie haben zu viele unbeantwortete Anfragen. Warten Sie zuerst auf eine Antwort.",
-      "COMMUNITY_BLOCKED": "Ihr Konto darf in der Community nichts veröffentlichen."
+      "COMMUNITY_BLOCKED": "Ihr Konto darf in der Community nichts veröffentlichen.",
+      "COURSE_NOT_ATTACHABLE": "Nur geteilte Kurse, kostenlose Vorschauen oder Kurse von Betreuern oder Administratoren können zugeordnet werden. Bitte die Person, ihren Kurs zuerst zu teilen."
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "Beitrittscode",
       "submit": "Beitreten",
       "done": "Sie sind {{name}} beigetreten.",
-      "description": "Geben Sie den Code ein, den Sie erhalten haben, um einer Klasse beizutreten."
+      "description": "Optional. Du kannst ohne Klasse selbst lernen: mit deinen Kursen, kostenlosen Vorschauen und geteilten Kursen. Gib nur einen Code ein, den dir eine Lehrkraft oder ein Betreuer gegeben hat.",
+      "needsMembership": "Zum Selbstlernen brauchst du keine Klasse. Hast du einen Klassencode bekommen, brauchst du zuerst eine Mitgliedschaft und gibst den Code dann hier ein.",
+      "invited": "Du wurdest in eine Klasse eingeladen. Melde dich mit einer Mitgliedschaft an und drücke dann auf dieser Seite „Beitreten“.",
+      "invitedMember": "Du wurdest in eine Klasse eingeladen. Prüfe den Code und drücke „Beitreten“."
     },
     "empty": "Noch nichts zum Durchstöbern.",
     "kind": {

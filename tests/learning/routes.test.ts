@@ -90,6 +90,7 @@ async function loadRoutes() {
     audit,
     adminClass,
     joinCodeRoute,
+    classMembers,
   ] = await Promise.all([
     import('@/app/api/auth/register/route'),
     import('@/app/api/courses/[id]/share/route'),
@@ -106,6 +107,7 @@ async function loadRoutes() {
     import('@/app/api/admin/audit/route'),
     import('@/app/api/admin/classes/[id]/route'),
     import('@/app/api/admin/classes/[id]/join-code/route'),
+    import('@/app/api/admin/classes/[id]/members/route'),
   ]);
   return {
     register: register.POST,
@@ -129,6 +131,7 @@ async function loadRoutes() {
     rotateJoinCode: joinCodeRoute.POST,
     shareRevoke: shareDecide.DELETE,
     audit: audit.GET,
+    addMember: classMembers.POST,
   };
 }
 
@@ -313,7 +316,7 @@ describe('learning routes', () => {
     );
     expect(joined).toMatchObject({ status: 200, body: { class: { name: 'Grade 6' } } });
 
-    courses.set('course-class', { ownerId: `acct:${await idOf('alice')}`, title: 'Class lesson' });
+    courses.set('course-class', { ownerId: `acct:${await idOf('root')}`, title: 'Class lesson' });
     await routes.attachCourse(
       jsonRequest('/x', 'POST', { courseId: 'course-class' }, root),
       params(id),
@@ -369,7 +372,7 @@ describe('learning routes', () => {
       params(classId),
     );
     expect(renamed.status).toBe(200);
-    courses.set('course-class', { ownerId: `acct:${aliceId}`, title: 'Class lesson' });
+    courses.set('course-class', { ownerId: `acct:${await idOf('root')}`, title: 'Class lesson' });
     await routes.attachCourse(
       jsonRequest('/x', 'POST', { courseId: 'course-class' }, root),
       params(classId),
@@ -487,6 +490,76 @@ describe('learning routes', () => {
     const audit = await json(await routes.audit(getRequest('/api/admin/audit', root)));
     expect((audit.body.entries as Array<{ action: string }>).map((e) => e.action)).toContain(
       'class:code',
+    );
+  });
+
+  it("a learner's private course is attached to a class only once it is shared or previewed", async () => {
+    const routes = await loadRoutes();
+    const root = await signUp(routes, ROOT);
+    const alice = await signUp(routes, ALICE);
+    const aliceId = await idOf('alice');
+    await routes.memberGrant(
+      jsonRequest('/x', 'POST', { action: 'grant', days: 30, monthlyQuota: 1000 }, root),
+      params(aliceId),
+    );
+    const created = await json(
+      await routes.createClass(jsonRequest('/x', 'POST', { name: 'Grade 6' }, root)),
+    );
+    const { id } = created.body as { id: string };
+    const attach = async (courseId: string) =>
+      json(await routes.attachCourse(jsonRequest('/x', 'POST', { courseId }, root), params(id)));
+
+    courses.set('alice-private', { ownerId: `acct:${aliceId}`, title: 'Private' });
+    expect(await attach('alice-private')).toMatchObject({
+      status: 403,
+      body: { errorCode: 'COURSE_NOT_ATTACHABLE' },
+    });
+
+    await routes.sharePost(jsonRequest('/x', 'POST', {}, alice), params('alice-private'));
+    // A pending share is not enough; the operator has to approve it first.
+    expect((await attach('alice-private')).status).toBe(403);
+    await routes.shareDecide(
+      jsonRequest('/x', 'POST', { decision: 'approve' }, root),
+      params('alice-private'),
+    );
+    expect((await attach('alice-private')).status).toBe(200);
+
+    courses.set('alice-preview', { ownerId: `acct:${aliceId}`, title: 'Preview' });
+    await routes.previewSet(
+      jsonRequest('/x', 'POST', { courseId: 'alice-preview', on: true }, root),
+    );
+    expect((await attach('alice-preview')).status).toBe(200);
+  });
+
+  it('staff add a learner to a class without a code, once, and the change is logged', async () => {
+    const routes = await loadRoutes();
+    const root = await signUp(routes, ROOT);
+    const alice = await signUp(routes, ALICE);
+    const bob = await signUp(routes, BOB);
+    const bobId = await idOf('bob');
+    await routes.memberGrant(
+      jsonRequest('/x', 'POST', { action: 'grant', days: 30, monthlyQuota: 1000 }, root),
+      params(bobId),
+    );
+    const created = await json(
+      await routes.createClass(jsonRequest('/x', 'POST', { name: 'Grade 6' }, root)),
+    );
+    const { id } = created.body as { id: string };
+    const add = (cookie: string, accountId: string) =>
+      routes.addMember(jsonRequest('/x', 'POST', { accountId }, cookie), params(id));
+
+    expect((await add(alice, bobId)).status).toBe(403);
+    expect((await add(root, 'not-an-id')).status).toBe(400);
+    expect((await add(root, bobId)).status).toBe(200);
+    expect((await add(root, bobId)).status).toBe(404);
+
+    const mine = await json(await routes.myClasses(getRequest('/api/classes', bob)));
+    expect(mine.body.classes as Array<{ name: string }>).toEqual([
+      expect.objectContaining({ name: 'Grade 6' }),
+    ]);
+    const audit = await json(await routes.audit(getRequest('/api/admin/audit', root)));
+    expect((audit.body.entries as Array<{ action: string }>).map((e) => e.action)).toContain(
+      `class:add:${id}`,
     );
   });
 });

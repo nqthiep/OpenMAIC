@@ -162,11 +162,7 @@ describe('AccountAdminPanel', () => {
     });
     await renderPanel();
 
-    const created = new Date(ALICE.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    const created = new Date(ALICE.createdAt).toLocaleDateString('en-US');
     expect(container.textContent).toContain('Accounts');
     expect(container.textContent).toContain('alice');
     expect(container.textContent).toContain(created);
@@ -211,6 +207,40 @@ describe('AccountAdminPanel', () => {
     });
     expect(button('Enable alice')).not.toBeNull();
     expect(dialog()).toBeNull();
+  });
+
+  it('asks for confirmation before changing a role, and sends nothing when cancelled', async () => {
+    stubFetch({
+      'GET /api/auth/session': { status: 200, body: SIGNED_IN_AS_ROOT },
+      'GET /api/admin/accounts': { status: 200, body: LIST },
+      'POST /api/admin/accounts/id-alice/role': { status: 200, body: { success: true } },
+    });
+    await renderPanel();
+    const select = () =>
+      container.querySelector<HTMLSelectElement>('select[aria-label="Change role of alice"]')!;
+    const pick = async (role: string) => {
+      await act(async () => {
+        select().value = role;
+        select().dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      await settle();
+    };
+
+    await pick('operator');
+    expect(dialog()?.textContent).toContain('Make alice Operator?');
+    expect(sentChange()).toBe(false);
+    await click(dialogButton('Cancel'));
+    expect(dialog()).toBeNull();
+    expect(sentChange()).toBe(false);
+    expect(select().value).toBe('learner');
+
+    await pick('operator');
+    await click(dialogButton('Change role'));
+    expect(requests[requests.length - 1]).toEqual({
+      key: 'POST /api/admin/accounts/id-alice/role',
+      body: '{"role":"operator"}',
+    });
+    expect(select().value).toBe('operator');
   });
 
   it('asks for confirmation before enabling a disabled account', async () => {

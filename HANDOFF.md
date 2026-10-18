@@ -2,6 +2,93 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Join a class without typing a code (invite link, staff adds members)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "ok, làm A và B trước đi" (A = invite link `/catalog?join=CODE`; B = staff add learners to a class directly; C = open classes, deferred)
+- Assignment status: Done (committed on `it-math` 2026-10-18 at the owner's request, not pushed). Test data added: class "RV Lớp mời" with `rv_guest` and `rv_member`
+- Branch and commit: `it-math` @ `a2404f01` plus uncommitted changes, pushed: no. Owner asked for a commit on 2026-10-18; push not requested.
+- Last updated: 2026-10-18 (UTC time not recorded)
+
+### Design
+- A: the join-code box (shown once after create / new code) also shows an invite link `<origin>/catalog?join=<CODE>` with a copy button. `/catalog?join=` fills the code, scrolls to the join card and highlights it; the learner still presses "Tham gia" (explicit consent). Guests and non-members see the existing sign-in / membership notes; the link survives sign-in because the URL stays.
+- B: `POST /api/admin/classes/[id]/members { accountId }` (`class.manage`), audit `class:add:<classId>`. The members dialog gets an "add learners" list: search by username, membership badge, Add button; accounts without an active membership can be added but are marked (they cannot open class courses until they have one).
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | A: invite link in the join-code box; catalog reads `?join=` | Done | Join-code box shows `<origin>/catalog?join=<CODE>` with "Sao chép link mời"; catalog fills the code, highlights and scrolls to the card, shows `catalog.join.invited` to guests/non-members, removes `?join=` after a successful join. Browser: guest saw the invite note; after signing in as `rv_member` on the same URL the code was filled; Join added "RV Lớp mời" and the URL became `/catalog` |
+| 2 | B: add-member store function, route, audit label, route test | Done | `addClassMember` (audit `class:add:<id>`), `POST /api/admin/classes/[id]/members`; label `admin.audit.actions.class_add`. `pnpm vitest run tests/learning/routes.test.ts`: 9 pass (learner 403, bad id 400, add 200, repeat 404, class listed for the learner, audit entry) |
+| 3 | B: add-learners UI in the members dialog, component test | Done | Members column is now a "Thành viên (n)" button; dialog lists accounts not in the class, search, "Chưa có gói" badge, Add. Dialog loading text now `admin.table.loading`. `tests/learning/classes-panel.test.ts`: 3 pass. Browser: added `rv_guest` to "RV Lớp mời" |
+| 4 | Translations in 12 locales | Done | 14 keys + `admin.audit.actions.class_add`; `pnpm check:i18n-keys` passes |
+| 5 | Verify: tests, tsc, eslint, prettier, i18n, browser | Done | `pnpm vitest run tests/learning tests/components tests/admin tests/home tests/i18n`: 41 files, 294 pass; tsc clean outside `.next/` and untracked `tests/security/`; eslint 0 errors; prettier clean. Not verified: copying the link (the pane refuses clipboard writes) [Unverified]. Seen but not fixed: the admin page jumps scroll position after a panel reloads (seen before this work too) |
+
+## Assignment: Classes are optional for learners; interactive course attach; two explanations
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "1. Như vậy có gây ra khó sử dụng cho học viên không, vì họ nghĩ là \"họ tự vào học, cần gì phải tham gia lớp nào, nếu họ không tham gia lớp thì có tự học được không?\" => Nêm bạn cần thiết kế UX của chức năng này sao cho phù hợp. 2. Việc gán khoá học và lớp học nên thực hiện trực quan qua UI tương tác thay vì copy và paste mã. 3. Xử lý hai việc nhỏ còn thiếu."
+- Assignment status: Done (committed on `it-math` 2026-10-18 at the owner's request, not pushed)
+- Branch and commit: `it-math` @ `a2404f01` plus uncommitted changes, pushed: no. Owner asked for a commit on 2026-10-18; push not requested.
+- Last updated: 2026-10-18 (UTC time not recorded)
+
+### Design
+- Learners: a class is optional. The catalog lists what the learner can open first (their classes if any, then the course grid); "Tham gia lớp" moves to a light card at the bottom (`#join`) that says it is optional and only for a code from a teacher or operator. Home link "Tham gia lớp" points to `/catalog#join`.
+- "Lớp của tôi" gets one line: who makes a class and that self-study works without one.
+- Home library gets one line (members only): a course you create is private; open it and use "Chia sẻ với thành viên" to share.
+- Admin: each class row has a "Chọn khoá học" button that opens a dialog listing every course with search, status (attached / can attach / private, needs sharing) and Attach / Detach buttons. No IDs to copy.
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Catalog: join card optional and last, `#join` scroll; non-member hint says self-study works | Done | `app/catalog/page.tsx`: card moved below the grid with `id="join"`, dashed and light, text "Không bắt buộc…"; scroll after 600 ms (MyClasses loads on its own and pushes the card down). Browser: `/catalog#join` as `rv_member` ends with the card in view |
+| 2 | "Lớp của tôi" explanation; library private-course explanation | Done | `home.myClasses.hint` under the heading; `classroom.privateHint` in the home library behind `Gate capability="shareCourse"`; home link → `/catalog#join`. Seen in the browser as `rv_member` |
+| 3 | Admin class courses dialog replaces the inline select | Done | `ClassCoursesDialog` in `components/learning/admin-panels.tsx`: search by title or creator, attached first, Attach/Detach buttons, private courses labelled "Riêng tư · cần chia sẻ trước". `tests/learning/classes-panel.test.ts` 2 pass. Browser as `admin`: attach then detach "QA Đạo hàm cơ bản" on "RV Lớp review" with toasts; search "learner" filters |
+| 4 | Translations in 12 locales | Done | 17 keys set (new or reworded), `admin.classes.{pickCourse,noAttachable,attach}` removed; `pnpm check:i18n-keys` passes |
+| 5 | Verify: tests, tsc, eslint, prettier, i18n, browser | Done | `pnpm vitest run tests/learning tests/components tests/admin tests/home tests/i18n`: 41 files, 292 pass; tsc clean outside `.next/` and untracked `tests/security/`; eslint 0 errors (old `loadClassrooms` warning); prettier clean incl. locales. Full `pnpm test` not rerun after this assignment |
+
+## Assignment: Fix the class/course clarity issues found in the review
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "vậy hãy giải quyết tất cả các vấn đề mà bạn đã chỉ ra đi"
+- Owner decisions (2026-10-18, in chat): attaching a course to a class is limited to shared, preview or staff-owned courses; a teacher role is out of scope for now, the UI only states that operators and administrators manage classes.
+- Assignment status: Done (committed on `it-math` 2026-10-18 at the owner's request, not pushed)
+- Branch and commit: `it-math` @ `a2404f01` plus uncommitted changes, pushed: no. Owner asked for a commit on 2026-10-18; push not requested.
+- Last updated: 2026-10-18 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | vi-VN wording: "lớp/lớp học" only means a class group; a course is "khoá học" (home button, import/export, library, workspace, mention, myClasses) | Done | 84 keys in `lib/i18n/locales/vi-VN.json` (script: "bài học"/"lớp học"/"khóa học" → "khoá học" outside class keys, plus overrides, e.g. `toolbar.enterClassroom` = "Tạo khoá học"); `pnpm check:i18n-keys` passes |
+| 2 | Home library toolbar link "Lớp của tôi" → "Tham gia lớp" | Done | `app/page.tsx` reuses `catalog.join.title` (no new key) |
+| 3 | Catalog: class courses only under "Lớp của tôi" (not again as "Lớp của bạn" cards); non-member sees why a class code needs membership | Done | `app/catalog/page.tsx` filters `kind === 'class'` from the grid; new key `catalog.join.needsMembership` shown to guests and signed-in non-members |
+| 4 | Server: attach only shared, preview or staff-owned courses; new error `COURSE_NOT_ATTACHABLE`; route tests | Done | `lib/server/learning/attachable.ts`, attach route returns 403 `COURSE_NOT_ATTACHABLE`; `/api/admin/courses` adds `attachable`. `pnpm vitest run tests/learning/routes.test.ts`: 8 pass (new case: private → 403, pending share → 403, approved share → 200, preview → 200; two older cases now attach a staff-owned course). Existing attachments are not touched |
+| 5 | Classes panel: pick a course from a list instead of pasting an ID, keep input on error, join code box with copy button and how-to, step guide that names who manages classes | Done | `ClassesPanel` in `components/learning/admin-panels.tsx`: select of attachable courses by title, choice kept when attach fails (`useAction` now returns success), join code box with copy/hide, 3-step guide; new `admin.classes.*` keys in 12 locales, `admin.classes.joinCode` removed. Code shown once with `select-all`. Browser: guide, course select, attach via select, new-code box all seen at localhost:3002 as `admin` |
+| 6 | Accounts panel: confirm before a role change; username no longer wraps; one date format | Done | `components/settings/account-admin-panel.tsx` role AlertDialog + numeric date; `whitespace-nowrap` usernames there and in `admin-panels.tsx`. `pnpm vitest run tests/components/account-admin-panel.test.ts`: 9 pass (new role-confirm case; date expectation updated) |
+| 7 | Verify: tsc, eslint, vitest, check:i18n-keys, browser on localhost:3002 | Done | tsc: no errors outside `.next/` and untracked `tests/security/`; eslint 0 errors (old `loadClassrooms` warning); prettier clean incl. 12 locales; `pnpm check:i18n-keys` passes; `pnpm vitest run tests/learning tests/components tests/admin tests/home tests/i18n`: 40 files, 290 pass; full `pnpm test`: only the known failing files. Browser (1024 px, vi-VN): `rv_guest` catalog shows the membership hint; `admin` Classes panel guide, select, attach, join-code box; direct `POST` of private course `6Qw9egz1Vc` → 403 `COURSE_NOT_ATTACHABLE`; `rv_member` catalog has no duplicate class card, home shows "Tạo khoá học", "Nhập khoá học", "Tham gia lớp" and one "Lớp của tôi". Not verified in the pane: copy success (the pane refuses clipboard writes, the old "Sao chép ID" button fails the same way; the error toast was seen) and the role dialog (native select popups cannot be driven; covered by the component test) [Unverified] |
+
+### Next step (exact)
+- Owner reviews the diff and asks for a commit if it is wanted.
+- Open: courses attached before this change are not re-checked; the new rule applies only to new attachments. [Unverified] whether any existing attachment (for example "Tìm kiếm nhị phân" on "Lớp thử 10A") is a private learner course.
+- Open: test data in the dev DB (class "RV Lớp review", accounts `rv_*`, passwords in `review-accounts.local.yml`); owner to decide whether to delete.
+- Later (owner decision 2026-10-18): a teacher role is a separate assignment.
+
+## Assignment: Review of class/course roles, purpose and UI clarity
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "lớp học do ai tạo, tạo lớp học nhằm mục đích gì? khoá học do ai tạo, tạo khoá học nhằm mục đích gì? liên kết giữa lớp học và khoá học do ai thực hiện, việc liên kết nhằm mục đích gì? Có nội dung hoặc hướng dẫn rõ ràng về các việc trên không? Người thực hiện có thể hiểu một cách dễ dàng không? Hãy review lại layout, giao diện và việc hiển thị trên chức năng để cho tôi biết."
+- Assignment status: Done (review only, no code changed). The "Healthy learning habits" assignment below is still open; it was not moved to closed.
+- Branch and commit: `it-math` @ `a2404f01`, pushed: no. No git writes requested.
+- Last updated: 2026-10-18 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read code for classes, courses, attach, permissions | Done | `lib/server/authz/policy.ts` (`class.manage` = staff), `app/api/admin/classes/**`, `components/learning/admin-panels.tsx` `ClassesPanel`, `components/home/my-classes.tsx`, `app/catalog/page.tsx`, `lib/i18n/locales/vi-VN.json` |
+| 2 | Check live UI | Done (partial) | `http://localhost:3002/catalog` as guest only. `/admin` needs an operator/admin login; no test credentials in the repo, so the admin panel was reviewed from code only |
+| 3 | Report findings to owner | Done | Findings in chat reply 2026-10-18; no user guide found (`docs/` absent) |
+| 4 | Create role test accounts for a live review | Done | Registered `rv_admin`, `rv_operator`, `rv_member`, `rv_guest` via `POST /api/auth/register` → 201; passwords in `review-accounts.local.yml` (ignored via `.git/info/exclude`). Owner gave the existing `admin` login in chat (password not recorded here). As `admin` in the UI: `rv_operator` → operator (checked with `GET /api/admin/accounts`), `rv_member` granted 30 days / 1,000,000 tokens. `rv_admin` stays `learner` (not needed) |
+| 5 | Live review of admin Classes panel and learner join/catalog/home | Done | localhost:3002 at 1024 px. Created class `RV Lớp review`, attached `EklnYqdaAs`; wrong input "Ky nang giai thich" → generic toast and the field was cleared. `rv_member` joined with the code, saw the course in catalog "Lớp của tôi" and as a "Lớp của bạn" card, opened `/classroom/EklnYqdaAs`. Home shows two headings "Lớp của tôi" (class group and own-courses toolbar link). `rv_guest` catalog: no join box, no hint that a code needs membership. Operator view not opened (same `class.manage` check per `policy.ts`) |
+| 6 | Clean up review data | Todo | Class `RV Lớp review` and the four `rv_*` accounts are still in the dev DB; owner to decide |
+
+### Next step (exact)
+- Owner decides which findings to fix (terminology, attach-by-course-picker, in-panel guide).
+
 ## Assignment: Healthy learning habits (plan)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "tính năng cộng đồng này có được thiết kế và chức năng hấp dẫn gây nghiện việc học cho mọi người dùng không?" then "ý tôi là gây nghiện học lành mạnh, chứ không phải nghiện kỹ thuật số như tiktok, youtube, facebook" then "viết thành plan handoff đi"

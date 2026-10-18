@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "Membros: {{count}}",
       "noCourses": "Esta turma ainda não tem cursos.",
-      "untitled": "Curso {{number}}"
+      "untitled": "Curso {{number}}",
+      "hint": "Um professor ou operador cria a turma e adiciona os cursos. Sem turma você continua estudando sozinho."
     },
     "starter": {
       "title": "Não sabe por onde começar? Experimente uma destas ideias:",
@@ -1231,7 +1232,8 @@
     "notFoundDesc": "Este curso não existe, foi excluído ou você não tem permissão para vê-lo.",
     "backToHome": "Voltar ao início",
     "loadFailed": "O armazenamento está indisponível. Não foi possível carregar as salas salvas.",
-    "deleteFailed": "Falha ao excluir a sala de aula"
+    "deleteFailed": "Falha ao excluir a sala de aula",
+    "privateHint": "Os cursos que você cria são privados. Para outros membros verem um, abra-o e use \"Compartilhar com membros\"."
   },
   "upload": {
     "pdfSizeLimit": "Suporta arquivos PDF de até 50 MB",
@@ -2298,7 +2300,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "Tornar {{username}} {{role}}?",
+        "roleAction": "Mudar função",
+        "roleDescription": {
+          "learner": "A pessoa perde na hora o acesso às páginas de operação.",
+          "operator": "A pessoa poderá ver e gerenciar todas as contas, assinaturas, turmas, cursos e o registro de auditoria. A mudança é registrada.",
+          "admin": "A pessoa terá controle total, inclusive funções e configurações do sistema. A mudança é registrada."
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "Turmas",
-      "description": "Os membros entram em uma turma com o código. Anexe cursos para que a turma possa abri-los.",
+      "description": "Só operadores e administradores gerenciam turmas. Uma turma reúne alunos para que todos abram os cursos vinculados.",
       "name": "Nome da turma",
       "create": "Criar turma",
-      "joinCode": "Código de entrada: {{code}}. Ele é mostrado uma única vez, copie agora.",
       "empty": "Ainda não há turmas.",
       "members": "{{count}} membros",
       "courses": "{{count}} cursos",
-      "attach": "Anexar curso",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "Remover",
       "removeMemberTitle": "Remover {{username}} de {{name}}?",
       "removeMemberDescription": "A pessoa perde os cursos desta turma. A ação fica no registro de auditoria.",
-      "memberRemoved": "{{username}} removido da turma."
+      "memberRemoved": "{{username}} removido da turma.",
+      "steps": {
+        "create": "Crie uma turma: digite um nome e clique em Criar turma. Você recebe um código de acesso.",
+        "share": "Convide alunos: envie o link ou o código, ou clique em Membros para adicioná-los você mesmo. Eles precisam de uma assinatura ativa para abrir os cursos da turma.",
+        "attach": "Adicione cursos: clique em Escolher cursos na linha da turma e depois em Vincular ao lado de um curso. Só cursos compartilhados, prévias gratuitas e cursos da equipe. Os membros os veem em Minhas turmas."
+      },
+      "joinCodeTitle": "Código de acesso de {{name}}",
+      "joinCodeHint": "Mostrado só uma vez. Envie aos alunos o link de convite (ele abre o lugar certo para entrar) ou o código para digitarem.",
+      "copyCode": "Copiar código",
+      "codeCopied": "Código copiado.",
+      "copyFailed": "Não foi possível copiar. Selecione o código e copie manualmente.",
+      "closeCode": "Ocultar o código",
+      "manageCourses": "Escolher cursos",
+      "coursesDialog": {
+        "title": "Cursos de {{name}}",
+        "description": "Vincule um curso para que os membros desta turma possam abri-lo. O curso privado de um aluno precisa ser compartilhado antes.",
+        "search": "Buscar por título do curso ou autor",
+        "empty": "Nenhum curso encontrado.",
+        "owner": "Criado por {{name}}",
+        "isAttached": "Vinculado",
+        "attach": "Vincular",
+        "detach": "Desvincular",
+        "private": "Privado · compartilhe antes",
+        "attached": "“{{title}}” vinculado à turma.",
+        "detached": "“{{title}}” desvinculado da turma."
+      },
+      "copyLink": "Copiar link de convite",
+      "linkCopied": "Link de convite copiado.",
+      "manageMembers": "Membros ({{count}})",
+      "addMember": {
+        "title": "Adicionar alunos",
+        "description": "Adicione alguém diretamente, sem código. Sem assinatura ativa, a pessoa só abre os cursos da turma quando tiver uma.",
+        "search": "Buscar por nome de usuário",
+        "empty": "Nenhuma conta encontrada.",
+        "noMembership": "Sem assinatura",
+        "add": "Adicionar",
+        "added": "{{username}} adicionado à turma."
+      }
     },
     "audit": {
       "title": "Log de auditoria",
@@ -2559,7 +2603,8 @@
         "challenge_update": "Editar desafio",
         "settings_update": "Alterar configuração",
         "share_update-approve": "Atualização compartilhada aprovada",
-        "share_update-reject": "Atualização compartilhada recusada"
+        "share_update-reject": "Atualização compartilhada recusada",
+        "class_add": "Membro adicionado"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "Cursos",
-      "description": "Todos os cursos do sistema. Abra um para revisar ou copie o ID para marcá-lo como prévia ou vinculá-lo a uma turma.",
+      "description": "Todos os cursos do sistema. Abra um para revisar ou copie o ID para marcá-lo como prévia gratuita.",
       "open": "Abrir o curso em uma nova aba",
       "copy": "Copiar ID {{id}}",
       "copied": "{{id}} copiado",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "Um pedido recusado pode ser enviado de novo mais tarde.",
       "COURSE_NOT_FOUND": "Não há curso com este ID. Confira o ID no endereço do curso (/classroom/<ID>).",
       "RATE_LIMITED": "Você tem muitos pedidos sem resposta. Aguarde uma resposta primeiro.",
-      "COMMUNITY_BLOCKED": "Sua conta está impedida de publicar na comunidade."
+      "COMMUNITY_BLOCKED": "Sua conta está impedida de publicar na comunidade.",
+      "COURSE_NOT_ATTACHABLE": "Só é possível vincular cursos compartilhados, prévias gratuitas ou cursos criados por operadores ou administradores. Peça ao autor que compartilhe o curso primeiro."
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "Código de entrada",
       "submit": "Entrar",
       "done": "Você entrou em {{name}}.",
-      "description": "Digite o código que você recebeu para entrar em uma turma."
+      "description": "Opcional. Você pode estudar sozinho sem turma: seus cursos, prévias gratuitas e cursos compartilhados. Digite um código só se um professor ou operador tiver dado um a você.",
+      "needsMembership": "Você não precisa de turma para estudar sozinho. Se um professor deu um código de turma, primeiro você precisa de uma assinatura e depois digita o código nesta página.",
+      "invited": "Você foi convidado para uma turma. Entre com uma conta com assinatura e clique em Entrar nesta página.",
+      "invitedMember": "Você foi convidado para uma turma. Confira o código e clique em Entrar."
     },
     "empty": "Nada para explorar ainda.",
     "kind": {

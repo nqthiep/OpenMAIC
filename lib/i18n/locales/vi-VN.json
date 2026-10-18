@@ -5,7 +5,7 @@
     "cancel": "Hủy",
     "loading": "Đang tải…",
     "errorPrefix": "Lỗi: ",
-    "loadingClassroom": "Đang tải lớp học...",
+    "loadingClassroom": "Đang tải khoá học...",
     "retry": "Thử lại",
     "close": "Đóng"
   },
@@ -17,7 +17,7 @@
       "title": "Học theo nhịp của bạn, có AI hỗ trợ bên cạnh",
       "description": "Bài giảng, trình chiếu và thảo luận được soạn với sự hỗ trợ của AI, và được người thật xem lại trước khi chia sẻ. Bạn có thể xem thử miễn phí trước, không cần tài khoản.",
       "signIn": "Đăng nhập",
-      "browseCatalog": "Xem danh mục bài học",
+      "browseCatalog": "Xem danh mục khoá học",
       "stepsTitle": "Cách hoạt động",
       "step1": {
         "title": "Xem thử miễn phí",
@@ -25,18 +25,18 @@
       },
       "step2": {
         "title": "Đăng nhập",
-        "body": "Đăng nhập bằng tài khoản được cấp. Khách có thể xem thử nhưng chưa tạo được bài học.",
+        "body": "Đăng nhập bằng tài khoản được cấp. Khách có thể xem thử nhưng chưa tạo được khoá học.",
         "titleOpen": "Đăng nhập hoặc tạo tài khoản",
-        "bodyOpen": "Tạo tài khoản miễn phí hoặc đăng nhập. Trước khi trở thành thành viên, bạn có thể xem thử nhưng chưa tạo được bài học."
+        "bodyOpen": "Tạo tài khoản miễn phí hoặc đăng nhập. Trước khi trở thành thành viên, bạn có thể xem thử nhưng chưa tạo được khoá học."
       },
       "step3": {
         "title": "Trở thành thành viên",
-        "body": "Thành viên có thể tạo bài học bằng AI, tham gia lớp và chia sẻ những gì mình làm."
+        "body": "Thành viên có thể tạo khoá học bằng AI, tham gia lớp và chia sẻ những gì mình làm."
       },
       "previewsTitle": "Bài xem thử",
       "previewsEmpty": "Chưa có bài xem thử. Quay lại sau nhé.",
       "membershipTitle": "Trở thành thành viên",
-      "membershipBody": "Thành viên có hạn mức hằng tháng để tạo bài học bằng AI, tham gia lớp bằng mã mời và chia sẻ bài với các thành viên khác.",
+      "membershipBody": "Thành viên có hạn mức hằng tháng để tạo khoá học bằng AI, tham gia lớp bằng mã mời và chia sẻ khoá học với các thành viên khác.",
       "nav": {
         "features": "Tính năng",
         "how": "Cách hoạt động",
@@ -61,7 +61,7 @@
         },
         "f2": {
           "title": "Trình chiếu và bảng trắng",
-          "body": "Mỗi bài học có slide, bảng trắng trực tiếp và minh họa trực quan."
+          "body": "Mỗi khoá học có slide, bảng trắng trực tiếp và minh họa trực quan."
         },
         "f3": {
           "title": "Bài kiểm tra và dự án",
@@ -77,15 +77,15 @@
         },
         "f6": {
           "title": "Mang bài đi bất cứ đâu",
-          "body": "Xuất bài học thành trang web, tệp PowerPoint hoặc video."
+          "body": "Xuất khoá học thành trang web, tệp PowerPoint hoặc video."
         }
       },
       "previewsSubtitle": "Mở ngay các bài này, không cần tài khoản.",
       "perks": {
-        "p1": "Hạn mức AI hằng tháng để tự tạo bài học",
+        "p1": "Hạn mức AI hằng tháng để tự tạo khoá học",
         "p2": "Tham gia lớp bằng mã mời",
-        "p3": "Chia sẻ bài học với các thành viên khác",
-        "p4": "Xuất bài học thành trang web, PowerPoint hoặc video"
+        "p3": "Chia sẻ khoá học với các thành viên khác",
+        "p4": "Xuất khoá học thành trang web, PowerPoint hoặc video"
       },
       "cta": {
         "title": "Muốn tự mình trải nghiệm?",
@@ -101,7 +101,7 @@
         },
         "t2": {
           "title": "Được xem lại trước khi chia sẻ",
-          "body": "Quản trị viên xem lại bài học trước khi các thành viên khác nhìn thấy."
+          "body": "Quản trị viên xem lại khoá học trước khi các thành viên khác nhìn thấy."
         },
         "t3": {
           "title": "Nói thật về giới hạn",
@@ -114,7 +114,7 @@
       }
     },
     "locked": {
-      "membership": "Tạo bài học bằng AI dành cho thành viên.",
+      "membership": "Tạo khoá học bằng AI dành cho thành viên.",
       "classes": "Tham gia lớp dành cho thành viên.",
       "contactAdmin": "Hãy nhờ quản trị viên thêm bạn vào danh sách thành viên.",
       "quota": "Hạn mức AI tháng này đã dùng hết.",
@@ -131,9 +131,9 @@
       "ok": "Gói thành viên đến {{date}} · còn {{days}} ngày",
       "expiring": "Gói thành viên của bạn hết hạn ngày {{date}} (còn {{days}} ngày). Hãy nhờ quản trị viên gia hạn.",
       "quotaNear": "Bạn đã dùng {{percent}}% hạn mức AI của tháng này.",
-      "quotaOut": "Hạn mức AI tháng này đã dùng hết. Các bài học của bạn vẫn mở để học.",
-      "expired": "Gói thành viên của bạn đã hết hạn từ {{date}}. Các bài học của bạn vẫn đọc được. Hãy nhờ quản trị viên gia hạn để tạo bài mới.",
-      "suspended": "Gói thành viên của bạn đang tạm dừng. Các bài học của bạn vẫn đọc được. Hãy nhờ quản trị viên mở lại."
+      "quotaOut": "Hạn mức AI tháng này đã dùng hết. Các khoá học của bạn vẫn mở để học.",
+      "expired": "Gói thành viên của bạn đã hết hạn từ {{date}}. Các khoá học của bạn vẫn đọc được. Hãy nhờ quản trị viên gia hạn để tạo khoá học mới.",
+      "suspended": "Gói thành viên của bạn đang tạm dừng. Các khoá học của bạn vẫn đọc được. Hãy nhờ quản trị viên mở lại."
     },
     "continue": {
       "title": "Tiếp tục học",
@@ -142,8 +142,9 @@
     },
     "myClasses": {
       "members": "Thành viên: {{count}}",
-      "noCourses": "Lớp này chưa có bài học nào.",
-      "untitled": "Bài học {{number}}"
+      "noCourses": "Lớp này chưa được gắn khoá học nào.",
+      "untitled": "Khoá học {{number}}",
+      "hint": "Lớp do thầy cô hoặc người vận hành tạo và gắn khoá học vào. Không tham gia lớp, bạn vẫn tự học bình thường."
     },
     "starter": {
       "title": "Chưa biết bắt đầu từ đâu? Thử một gợi ý:",
@@ -200,7 +201,7 @@
     "pdfUpload": "Tải PDF lên",
     "removePdf": "Bỏ tệp",
     "documentExtractor": "Bộ bóc tách",
-    "courseMaterialUpload": "Tải tài liệu bài học",
+    "courseMaterialUpload": "Tải tài liệu khoá học",
     "courseMaterialsSelected": "Đã chọn {{n}} tài liệu",
     "courseMaterialMergeOrder": "Tài liệu được gộp theo thứ tự bên dưới.",
     "removeCourseMaterial": "Bỏ tệp",
@@ -211,8 +212,8 @@
     "webSearchNoProvider": "Hãy đặt khóa API tìm kiếm trong Cài đặt",
     "selectProvider": "Chọn nhà cung cấp",
     "configureProvider": "Thiết lập model",
-    "configureProviderHint": "Cần thiết lập ít nhất một nhà cung cấp model để tạo bài học",
-    "enterClassroom": "Vào lớp học",
+    "configureProviderHint": "Cần thiết lập ít nhất một nhà cung cấp model để tạo khoá học",
+    "enterClassroom": "Tạo khoá học",
     "advancedSettings": "Cài đặt nâng cao",
     "thinking": "Suy luận",
     "thinkingBudget": "Hạn mức",
@@ -237,8 +238,8 @@
     "exporting": "Đang xuất…",
     "exportSuccess": "Xuất thành công",
     "exportFailed": "Xuất không thành công",
-    "classroomZip": "Xuất lớp học dạng ZIP",
-    "classroomZipDesc": "Cấu trúc bài học + tệp phương tiện",
+    "classroomZip": "Xuất khoá học dạng ZIP",
+    "classroomZipDesc": "Cấu trúc khoá học + tệp phương tiện",
     "scriptMd": "Tải kịch bản (.md)",
     "scriptMdDesc": "Văn bản tường thuật dưới dạng Markdown",
     "script": "Tải kịch bản",
@@ -247,7 +248,7 @@
     "slideFallback": "Trang chiếu {{order}}",
     "textOnly": "Xuất kịch bản",
     "mediaPending": "Đang chờ tạo xong phương tiện",
-    "inlinePartial": "Có {{count}} tài nguyên ngoài không gói được; bài học có thể hiển thị không đúng khi ngoại tuyến.",
+    "inlinePartial": "Có {{count}} tài nguyên ngoài không gói được; khoá học có thể hiển thị không đúng khi ngoại tuyến.",
     "video": "Xuất video",
     "videoDesc": "Dự án Hyperframes độc lập (kết xuất ra MP4)",
     "videoNoScenes": "Không có cảnh nào để xuất.",
@@ -286,26 +287,26 @@
     "subtitlesEmpty": "Không có lời giảng để tạo phụ đề",
     "subtitlesFailed": "Tải phụ đề không thành công",
     "noSlides": "Không có slide nào để xuất",
-    "noSlidesSkipped": "Bài học này không có slide — đã bỏ qua PPTX",
+    "noSlidesSkipped": "Khoá học này không có slide — đã bỏ qua PPTX",
     "nothingToExport": "Không có gì để xuất"
   },
   "import": {
-    "classroom": "Nhập lớp học",
+    "classroom": "Nhập khoá học",
     "pptx": "Nhập PPTX",
     "parsing": "Đang đọc ZIP…",
     "parsingPptx": "Đang đọc PPTX…",
     "validating": "Đang kiểm tra dữ liệu…",
     "writingMedia": "Đang ghi tệp phương tiện…",
-    "writingCourse": "Đang ghi dữ liệu bài học…",
-    "success": "Đã nhập lớp học thành công",
+    "writingCourse": "Đang ghi dữ liệu khoá học…",
+    "success": "Đã nhập khoá học thành công",
     "pptxSuccess": "Đã đọc PPTX thành công ({{count}} slide, kết quả ghi ra console)",
     "error": {
       "invalidZip": "Tệp không hợp lệ. Vui lòng chọn tệp .maic.zip đúng định dạng.",
       "invalidPptx": "Không đọc được PPTX. Vui lòng kiểm tra lại tệp.",
       "parserUnavailable": "Không dùng được chức năng nhập PPTX: chưa triển khai gói bộ đọc. Hãy chạy lại install/sync.",
-      "invalidManifest": "Tệp lớp học không hợp lệ: thiếu hoặc hỏng manifest.json.",
-      "missingData": "Tệp lớp học không hợp lệ: thiếu dữ liệu bài học bắt buộc.",
-      "storageFull": "Nhập không thành công: bộ nhớ trình duyệt đã đầy. Hãy xóa bớt lớp học cũ."
+      "invalidManifest": "Tệp khoá học không hợp lệ: thiếu hoặc hỏng manifest.json.",
+      "missingData": "Tệp khoá học không hợp lệ: thiếu dữ liệu bắt buộc.",
+      "storageFull": "Nhập không thành công: bộ nhớ trình duyệt đã đầy. Hãy xóa bớt khoá học cũ."
     }
   },
   "chat": {
@@ -403,8 +404,8 @@
   },
   "agentBar": {
     "readyToLearn": "Cùng học nhé?",
-    "expandedTitle": "Thiết lập vai trò trong lớp",
-    "configTooltip": "Bấm để thiết lập vai trò trong lớp",
+    "expandedTitle": "Thiết lập vai trò trong khoá học",
+    "configTooltip": "Bấm để thiết lập vai trò trong khoá học",
     "voiceLabel": "Giọng đọc",
     "voiceLoading": "Đang tải…",
     "voiceAutoAssign": "Giọng đọc sẽ được gán tự động",
@@ -434,9 +435,9 @@
     "courseComplete": "Đã học xong bài",
     "fullscreen": "Toàn màn hình",
     "exitFullscreen": "Thoát toàn màn hình",
-    "editCourse": "Sửa bài học",
+    "editCourse": "Sửa khoá học",
     "doneEditing": "Sửa xong",
-    "proModeDisabledHint": "Trang này không sửa được — hãy mở một slide bài học để dùng chế độ Pro."
+    "proModeDisabledHint": "Trang này không sửa được — hãy mở một slide của khoá học để dùng chế độ Pro."
   },
   "edit": {
     "proMode": "Pro",
@@ -953,7 +954,7 @@
     "pause": "Tạm dừng"
   },
   "pbl": {
-    "emptyProject": "Chưa tạo dự án nào. Hãy tạo trong lúc soạn bài học.",
+    "emptyProject": "Chưa tạo dự án nào. Hãy tạo trong lúc soạn khoá học.",
     "v2": {
       "hero": {
         "title": "Học theo dự án",
@@ -1191,14 +1192,14 @@
     "deleteConfirmTitle": "Xóa",
     "delete": "Xóa",
     "rename": "Đổi tên",
-    "renamePlaceholder": "Nhập tên lớp học",
-    "renameFailed": "Không đổi được tên lớp học",
-    "searchPlaceholder": "Tìm bài học…",
-    "searchAriaLabel": "Tìm bài học",
+    "renamePlaceholder": "Nhập tên khoá học",
+    "renameFailed": "Không đổi được tên khoá học",
+    "searchPlaceholder": "Tìm khoá học…",
+    "searchAriaLabel": "Tìm khoá học",
     "clearSearch": "Xóa",
-    "searchEmpty": "Không có bài học nào khớp",
+    "searchEmpty": "Không có khoá học nào khớp",
     "newFolderTitle": "Thư mục mới",
-    "newFolderDesc": "Nhóm các bài học theo chủ đề để dễ tìm hơn.",
+    "newFolderDesc": "Nhóm các khoá học theo chủ đề để dễ tìm hơn.",
     "newFolderInline": "Thư mục mới…",
     "folderNameLabel": "Tên thư mục",
     "folderNamePlaceholder": "Ví dụ: Toán, Tiếng Anh, Môn chuyên ngành",
@@ -1208,10 +1209,10 @@
     "folderWidth": "Độ dài {{width}}/{{max}}",
     "folderCreate": "Tạo",
     "folderBadge": "Thư mục",
-    "folderCourseCountUnit": "bài học",
+    "folderCourseCountUnit": "khoá học",
     "deleteFolderTitle": "Xóa thư mục \"{{name}}\"",
     "deleteFolderEmptyDesc": "Thư mục này đang trống. Đã xóa thì không khôi phục được.",
-    "deleteFolderUngroupDesc": "Các bài học vẫn còn trong thư viện, chỉ là không thuộc thư mục nào.",
+    "deleteFolderUngroupDesc": "Các khoá học vẫn còn trong thư viện, chỉ là không thuộc thư mục nào.",
     "moveToFolder": "Chuyển vào thư mục",
     "moveToFolderLabel": "Chuyển tới…",
     "ungrouped": "Chưa phân nhóm",
@@ -1219,26 +1220,27 @@
     "folderCreateFailed": "Không tạo được thư mục",
     "folderRenameFailed": "Không đổi được tên thư mục",
     "folderDeleteFailed": "Không xóa được thư mục",
-    "moveFailed": "Không chuyển được bài học",
+    "moveFailed": "Không chuyển được khoá học",
     "emptyFolderHint": "Thư mục này đang trống",
-    "emptyLibraryHint": "Chưa có bài học nào — tạo mới ở trên hoặc nhập một bài học vào.",
+    "emptyLibraryHint": "Chưa có khoá học nào — tạo mới ở trên hoặc nhập một khoá học vào.",
     "folderNameEmpty": "Tên thư mục không được để trống",
     "deleteFolderOnly": "Chỉ xóa thư mục",
-    "deleteFolderAndCourses": "Xóa thư mục và {{count}} bài học",
-    "deleteFolderAndCourses_other": "Xóa thư mục và {{count}} bài học",
-    "deleteFolderConfirmRemove": "Thao tác này xóa thư mục cùng các bài học bên trong, gồm cả lịch sử trò chuyện.",
-    "notFound": "Không tìm thấy khóa học",
-    "notFoundDesc": "Khóa học này không tồn tại, đã bị xóa, hoặc bạn chưa có quyền xem.",
+    "deleteFolderAndCourses": "Xóa thư mục và {{count}} khoá học",
+    "deleteFolderAndCourses_other": "Xóa thư mục và {{count}} khoá học",
+    "deleteFolderConfirmRemove": "Thao tác này xóa thư mục cùng các khoá học bên trong, gồm cả lịch sử trò chuyện.",
+    "notFound": "Không tìm thấy khoá học",
+    "notFoundDesc": "Khoá học này không tồn tại, đã bị xóa, hoặc bạn chưa có quyền xem.",
     "backToHome": "Về trang chủ",
-    "loadFailed": "Không truy cập được bộ lưu trữ. Không tải được các lớp học đã lưu.",
-    "deleteFailed": "Không xóa được lớp học"
+    "loadFailed": "Không truy cập được bộ lưu trữ. Không tải được các khoá học đã lưu.",
+    "deleteFailed": "Không xóa được khoá học",
+    "privateHint": "Khoá học bạn tạo chỉ mình bạn xem được. Muốn thành viên khác xem, hãy mở khoá học và bấm \"Chia sẻ với thành viên\"."
   },
   "upload": {
     "pdfSizeLimit": "Nhận tệp PDF tối đa 50MB",
     "courseMaterialSizeLimit": "Tài liệu, slide, bảng tính, ảnh và văn bản thuần — tối đa 50MB (định dạng được nhận tùy vào bộ bóc tách đang chọn)",
-    "generateFailed": "Không tạo được lớp học, vui lòng thử lại",
+    "generateFailed": "Không tạo được khoá học, vui lòng thử lại",
     "requirementPlaceholder": "Hãy nói bạn muốn học gì, ví dụ\n\"Dạy tôi Python từ đầu trong 30 phút\"\n\"Giảng phép biến đổi Fourier trên bảng\"\n\"Cách chơi board game Avalon\"",
-    "requirementRequired": "Vui lòng nhập yêu cầu về bài học",
+    "requirementRequired": "Vui lòng nhập yêu cầu về khoá học",
     "fileTooLarge": "Tệp quá lớn. Vui lòng chọn tệp nhỏ hơn 50MB",
     "courseMaterialCountLimit": "Bạn chỉ tải lên được tối đa 5 tệp tài liệu",
     "courseMaterialTotalSizeLimit": "Tổng dung lượng tài liệu phải dưới 150MB",
@@ -1249,10 +1251,10 @@
     "pdfParseFailed": "Đọc PDF không thành công",
     "analyzingCourseMaterial": "Đang phân tích tài liệu",
     "analyzingCourseMaterialDesc": "Đang bóc tách cấu trúc và nội dung tài liệu…",
-    "courseMaterialLoadFailed": "Không nạp được tài liệu bài học, vui lòng thử lại",
-    "courseMaterialParseFailed": "Đọc tài liệu bài học không thành công",
+    "courseMaterialLoadFailed": "Không nạp được tài liệu khoá học, vui lòng thử lại",
+    "courseMaterialParseFailed": "Đọc tài liệu khoá học không thành công",
     "streamNotReadable": "Không đọc được luồng dữ liệu tạo bài",
-    "generatingOutlines": "Đang dựng đề cương bài học",
+    "generatingOutlines": "Đang dựng đề cương khoá học",
     "generatingOutlinesDesc": "Đang sắp xếp lộ trình học…",
     "generatingSlideContent": "Đang tạo nội dung từng trang",
     "generatingSlideContentDesc": "Đang tạo slide, câu đố và phần tương tác…",
@@ -1265,15 +1267,15 @@
     "retryingScene": "Đang tạo lại…",
     "backToHome": "Về trang chủ",
     "sessionNotFound": "Không tìm thấy phiên làm việc",
-    "sessionNotFoundDesc": "Vui lòng nhập yêu cầu bài học để bắt đầu tạo.",
+    "sessionNotFoundDesc": "Vui lòng nhập yêu cầu khoá học để bắt đầu tạo.",
     "goBackAndRetry": "Quay lại và thử lại",
     "classroomReady": "Môi trường học tập AI riêng của bạn đã được tạo xong.",
     "aiWorking": "Các tác nhân AI đang làm việc…",
     "textTruncated": "Tài liệu khá dài, chỉ dùng {{n}} ký tự đầu để tạo bài",
     "imageTruncated": "Tìm thấy {{total}} ảnh, vượt giới hạn {{max}} ảnh. Số ảnh dư sẽ chỉ dùng mô tả bằng chữ",
-    "agentGeneration": "Đang tạo vai trò trong lớp",
-    "agentGenerationDesc": "Đang tạo vai trò dựa trên nội dung bài học…",
-    "agentRevealTitle": "Các vai trò trong lớp của bạn",
+    "agentGeneration": "Đang tạo vai trò trong khoá học",
+    "agentGenerationDesc": "Đang tạo vai trò dựa trên nội dung khoá học…",
+    "agentRevealTitle": "Các vai trò trong khoá học của bạn",
     "viewAgents": "Xem vai trò",
     "continue": "Tiếp tục",
     "outlineRetrying": "Đề cương gặp sự cố, đang thử lại…",
@@ -1283,7 +1285,7 @@
     "sceneGenerateAuthFailed": "Tạo cảnh không thành công vì nhà cung cấp model từ chối thông tin đăng nhập. Vui lòng kiểm tra cấu hình model.",
     "sceneGenerateRateLimited": "Việc tạo cảnh đang bị giới hạn tốc độ. Vui lòng đợi một lát rồi thử lại.",
     "sceneGenerateProviderUnavailable": "Nhà cung cấp model tạm thời không khả dụng. Vui lòng thử lại sau.",
-    "sceneGenerateInvalidResponse": "Model không trả về nội dung cảnh hợp lệ. Hãy thử model khác hoặc điều chỉnh yêu cầu bài học.",
+    "sceneGenerateInvalidResponse": "Model không trả về nội dung cảnh hợp lệ. Hãy thử model khác hoặc điều chỉnh yêu cầu khoá học.",
     "reviewOutlineTitle": "Xem lại đề cương",
     "reviewOutlineDesc": "Sửa, đổi thứ tự, xóa hoặc thêm cảnh trước khi bắt đầu tạo nội dung.",
     "reviewOutlineAutoContinue": "Quá trình tạo sẽ tự tiếp tục nếu bạn không xem lại đề cương.",
@@ -1346,7 +1348,7 @@
     "dragSceneHint": "Kéo để đổi thứ tự, hoặc chọn rồi bấm Ctrl + mũi tên lên / xuống",
     "deleteScene": "Xóa cảnh",
     "backToRequirements": "Quay lại phần yêu cầu",
-    "confirmAndGenerateCourse": "Xác nhận và tạo bài học",
+    "confirmAndGenerateCourse": "Xác nhận và tạo khoá học",
     "generatingInProgress": "Đang tạo…",
     "webSearching": "Tìm trên web",
     "webSearchingDesc": "Đang tìm trên web để lấy thông tin mới nhất",
@@ -1590,8 +1592,8 @@
     "ttsDescription": "TTS — chuyển văn bản thành giọng nói",
     "asrDescription": "ASR — chuyển giọng nói thành văn bản",
     "enableTTS": "Bật chuyển văn bản thành giọng nói",
-    "ttsEnabledDescription": "Khi bật, hệ thống sẽ tạo giọng đọc trong lúc soạn bài học",
-    "ttsVoiceConfigHint": "Giọng riêng cho từng nhân vật được đặt trong \"Cấu hình vai trong lớp\" ở trang chủ",
+    "ttsEnabledDescription": "Khi bật, hệ thống sẽ tạo giọng đọc trong lúc soạn khoá học",
+    "ttsVoiceConfigHint": "Giọng riêng cho từng nhân vật được đặt trong \"Thiết lập vai trò trong khoá học\" ở trang chủ",
     "enableASR": "Bật nhận dạng giọng nói",
     "asrEnabledDescription": "Khi bật, sinh viên có thể dùng micrô để nhập bằng giọng nói",
     "ttsProvider": "Nhà cung cấp giọng đọc",
@@ -1921,7 +1923,7 @@
     "featureLayoutAnalysis": "Phân tích bố cục",
     "featureMetadata": "Thông tin mô tả",
     "enableImageGeneration": "Bật tạo ảnh bằng AI",
-    "imageGenerationDisabledHint": "Khi bật, ảnh sẽ được tạo tự động trong lúc soạn bài học",
+    "imageGenerationDisabledHint": "Khi bật, ảnh sẽ được tạo tự động trong lúc soạn khoá học",
     "imageSettings": "Tạo ảnh",
     "imageSection": "Văn bản thành ảnh",
     "imageProvider": "Nhà cung cấp tạo ảnh",
@@ -1945,7 +1947,7 @@
     "imageGenerating": "Đang tạo ảnh…",
     "imageGenerationFailed": "Tạo ảnh không thành công",
     "enableVideoGeneration": "Bật tạo video bằng AI",
-    "videoGenerationDisabledHint": "Khi bật, video sẽ được tạo tự động trong lúc soạn bài học",
+    "videoGenerationDisabledHint": "Khi bật, video sẽ được tạo tự động trong lúc soạn khoá học",
     "videoSettings": "Tạo video",
     "videoSection": "Văn bản thành video",
     "videoProvider": "Nhà cung cấp tạo video",
@@ -1986,10 +1988,10 @@
     "modelNotConfigured": "Vui lòng chọn một model để bắt đầu",
     "dangerZone": "Vùng nguy hiểm",
     "clearCache": "Xóa dữ liệu cục bộ",
-    "clearCacheDescription": "Xóa toàn bộ dữ liệu lưu trên máy, gồm lớp học đã tạo, lịch sử trò chuyện, âm thanh tạm và cài đặt ứng dụng. Không thể hoàn tác.",
+    "clearCacheDescription": "Xóa toàn bộ dữ liệu lưu trên máy, gồm khoá học đã tạo, lịch sử trò chuyện, âm thanh tạm và cài đặt ứng dụng. Không thể hoàn tác.",
     "clearCacheConfirmTitle": "Bạn có chắc muốn xóa toàn bộ dữ liệu?",
     "clearCacheConfirmDescription": "Việc này sẽ xóa vĩnh viễn toàn bộ dữ liệu sau và không thể phục hồi:",
-    "clearCacheConfirmItems": "Lớp học và các cảnh, Lịch sử trò chuyện, Âm thanh và ảnh tạm, Cài đặt và tùy chọn ứng dụng",
+    "clearCacheConfirmItems": "Khoá học và các cảnh, Lịch sử trò chuyện, Âm thanh và ảnh tạm, Cài đặt và tùy chọn ứng dụng",
     "clearCacheConfirmInput": "Gõ \"DELETE\" để tiếp tục",
     "clearCacheConfirmPhrase": "DELETE",
     "clearCacheButton": "Xóa vĩnh viễn toàn bộ dữ liệu",
@@ -2106,10 +2108,10 @@
     "sceneCount_one": "{{count}} trang",
     "sceneCount_other": "{{count}} trang",
     "courseLinkHint": "Mở {{name}} ở khung bên phải",
-    "courseLinkMore": "Còn {{count}} lớp học nữa",
+    "courseLinkMore": "Còn {{count}} khoá học nữa",
     "courseMention": {
-      "title": "Nhắc đến một lớp học trong tin nhắn này",
-      "empty": "Không có lớp học nào khớp",
+      "title": "Nhắc đến một khoá học trong tin nhắn này",
+      "empty": "Không có khoá học nào khớp",
       "alreadyNamed": "Đã được nhắc đến",
       "remove": "Bỏ {{name}}",
       "pillHint": "Tin nhắn này nhắc đến {{name}}",
@@ -2159,14 +2161,14 @@
     "utilitiesAria": "Tuỳ chọn và tài khoản",
     "resizeAria": "Kéo để đổi kích thước thanh bên",
     "chatPaneAria": "Khung trò chuyện",
-    "classroomPaneAria": "Lớp học",
+    "classroomPaneAria": "Khoá học",
     "collapseNav": "Thu gọn thanh điều hướng",
     "expandNav": "Mở rộng thanh điều hướng",
     "expandNavInto": "Mở rộng thanh điều hướng · {{section}}",
     "collapseChat": "Thu gọn cuộc trò chuyện",
     "expandChat": "Cuộc trò chuyện",
-    "collapseClassroom": "Thu gọn lớp học",
-    "expandClassroom": "Lớp học",
+    "collapseClassroom": "Thu gọn khoá học",
+    "expandClassroom": "Khoá học",
     "readOnlyBadge": "Chỉ xem",
     "noCourseTitle": "Chưa mở khoá học nào",
     "noCourseHint": "Mở một khoá học từ liên kết trong cuộc trò chuyện, hoặc chọn từ danh sách bên trái. Cuộc trò chuyện vẫn được giữ nguyên",
@@ -2175,7 +2177,7 @@
     "autoSaving": "Đang tự động lưu…",
     "autoSaved": "Đã lưu",
     "collapsedTitle": "Cả hai khung đang được thu gọn",
-    "collapsedHint": "Dùng các thẻ bên trái để mở lại cuộc trò chuyện hoặc lớp học",
+    "collapsedHint": "Dùng các thẻ bên trái để mở lại cuộc trò chuyện hoặc khoá học",
     "moreUtilities": "Thêm",
     "rowMore": "Thao tác khác cho {{name}}",
     "folderDeleteHint": "Các khoá học bên trong sẽ trở về cấp trên cùng, không bị xoá.",
@@ -2202,7 +2204,7 @@
     "chooseAvatar": "Chọn ảnh đại diện",
     "uploadAvatar": "Tải lên",
     "bioPlaceholder": "Giới thiệu một chút về bạn — giảng viên AI sẽ dựa vào đó để soạn bài phù hợp với bạn…",
-    "avatarHint": "Ảnh đại diện của bạn sẽ hiện trong phần thảo luận và trò chuyện của lớp",
+    "avatarHint": "Ảnh đại diện của bạn sẽ hiện trong phần thảo luận và trò chuyện của khoá học",
     "fileTooLarge": "Ảnh quá lớn — vui lòng chọn ảnh dưới 5 MB",
     "invalidFileType": "Vui lòng chọn một tệp ảnh",
     "editTooltip": "Bấm để sửa trang cá nhân"
@@ -2298,7 +2300,14 @@
         "disableAction": "Vô hiệu hoá tài khoản",
         "enableTitle": "Bật lại {{username}}?",
         "enableDescription": "Họ có thể đăng nhập lại. Các phiên đã kết thúc khi tài khoản bị vô hiệu hoá sẽ không tự khôi phục.",
-        "enableAction": "Bật lại tài khoản"
+        "enableAction": "Bật lại tài khoản",
+        "roleTitle": "Đổi {{username}} thành {{role}}?",
+        "roleAction": "Đổi vai trò",
+        "roleDescription": {
+          "learner": "Người này mất quyền vào trang vận hành ngay lập tức.",
+          "operator": "Người này xem và quản lý được mọi tài khoản, gói thành viên, lớp, khoá học và nhật ký. Thay đổi được ghi vào nhật ký.",
+          "admin": "Người này có toàn quyền, kể cả đổi vai trò và cài đặt hệ thống. Thay đổi được ghi vào nhật ký."
+        }
       },
       "errors": {
         "loadFailed": "Chưa tải được danh sách tài khoản. Bạn hãy thử lại.",
@@ -2365,7 +2374,7 @@
   },
   "proMode": {
     "attach": "Đính kèm tài liệu",
-    "mentionCourse": "Nhắc đến một lớp học",
+    "mentionCourse": "Nhắc đến một khoá học",
     "loadSkill": "Nạp skill",
     "skillMenuTitle": "Chọn skill thiết kế khoá học",
     "skillsLoading": "Đang tải skill…",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "Lớp học",
-      "description": "Thành viên tham gia lớp bằng mã lớp. Gắn khoá học để thành viên lớp có thể mở.",
+      "description": "Chỉ người vận hành và quản trị viên quản lý lớp. Lớp gom một nhóm học viên để cả nhóm cùng mở các khoá học được gắn vào lớp.",
       "name": "Tên lớp",
       "create": "Tạo lớp",
-      "joinCode": "Mã tham gia: {{code}}. Mã chỉ hiện một lần, hãy sao chép ngay.",
       "empty": "Chưa có lớp nào.",
       "members": "{{count}} thành viên",
       "courses": "{{count}} khoá học",
-      "attach": "Gắn khoá học",
       "columns": {
         "members": "Thành viên",
         "courses": "Khoá học đã gắn"
@@ -2500,7 +2507,44 @@
       "removeMember": "Gỡ khỏi lớp",
       "removeMemberTitle": "Gỡ {{username}} khỏi lớp {{name}}?",
       "removeMemberDescription": "Người này sẽ không còn mở được khoá học của lớp. Thao tác được ghi vào nhật ký.",
-      "memberRemoved": "Đã gỡ {{username}} khỏi lớp."
+      "memberRemoved": "Đã gỡ {{username}} khỏi lớp.",
+      "steps": {
+        "create": "Tạo lớp: nhập tên rồi bấm Tạo lớp. Hệ thống cấp một mã tham gia.",
+        "share": "Mời học viên: gửi link mời hoặc mã, hoặc bấm Thành viên để tự thêm học viên vào lớp. Học viên cần gói thành viên đang hoạt động để mở khoá học của lớp.",
+        "attach": "Gắn khoá học: bấm Chọn khoá học ở dòng của lớp, rồi bấm Gắn cạnh khoá học muốn thêm. Chỉ gắn được khoá học đã chia sẻ, bài xem thử miễn phí và khoá học do người vận hành/quản trị viên tạo. Thành viên lớp thấy chúng ở mục Lớp của tôi."
+      },
+      "joinCodeTitle": "Mã tham gia lớp {{name}}",
+      "joinCodeHint": "Chỉ hiện một lần. Gửi link mời cho học viên (bấm vào là tới đúng chỗ tham gia), hoặc gửi mã để họ tự nhập.",
+      "copyCode": "Sao chép mã",
+      "codeCopied": "Đã sao chép mã tham gia.",
+      "copyFailed": "Không sao chép được. Hãy chọn mã và sao chép thủ công.",
+      "closeCode": "Ẩn mã",
+      "manageCourses": "Chọn khoá học",
+      "coursesDialog": {
+        "title": "Khoá học của lớp {{name}}",
+        "description": "Gắn khoá học để thành viên lớp mở được. Khoá học riêng của học viên cần được chia sẻ trước.",
+        "search": "Tìm theo tên khoá học hoặc người tạo",
+        "empty": "Không có khoá học nào khớp.",
+        "owner": "Người tạo: {{name}}",
+        "isAttached": "Đã gắn",
+        "attach": "Gắn",
+        "detach": "Gỡ",
+        "private": "Riêng tư · cần chia sẻ trước",
+        "attached": "Đã gắn “{{title}}” vào lớp.",
+        "detached": "Đã gỡ “{{title}}” khỏi lớp."
+      },
+      "copyLink": "Sao chép link mời",
+      "linkCopied": "Đã sao chép link mời.",
+      "manageMembers": "Thành viên ({{count}})",
+      "addMember": {
+        "title": "Thêm học viên",
+        "description": "Thêm thẳng một người vào lớp, không cần mã. Người chưa có gói thành viên chỉ mở được khoá học của lớp khi đã có gói.",
+        "search": "Tìm theo tên tài khoản",
+        "empty": "Không có tài khoản nào khớp.",
+        "noMembership": "Chưa có gói",
+        "add": "Thêm",
+        "added": "Đã thêm {{username}} vào lớp."
+      }
     },
     "audit": {
       "title": "Nhật ký kiểm tra",
@@ -2559,7 +2603,8 @@
         "challenge_update": "Sửa thử thách",
         "settings_update": "Đổi cài đặt",
         "share_update-approve": "Duyệt bản cập nhật chia sẻ",
-        "share_update-reject": "Từ chối bản cập nhật chia sẻ"
+        "share_update-reject": "Từ chối bản cập nhật chia sẻ",
+        "class_add": "Thêm thành viên vào lớp"
       }
     },
     "accessRequests": {
@@ -2604,7 +2649,7 @@
         "info": "Lưu ý"
       },
       "alerts": {
-        "noProviders": "Máy chủ chưa có nhà cung cấp AI (LLM) nào: không ai tạo được bài học.",
+        "noProviders": "Máy chủ chưa có nhà cung cấp AI (LLM) nào: không ai tạo được khoá học.",
         "quotaOver": "{{count}} học viên đã dùng hết hạn mức AI tháng này và đang bị chặn tạo bài.",
         "accessRequestsOverdue": "{{count}} yêu cầu xin quyền đang chờ; yêu cầu cũ nhất đã chờ {{hours}} giờ.",
         "accessRequestsPending": "{{count}} yêu cầu xin quyền đang chờ duyệt.",
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "Khoá học",
-      "description": "Mọi khoá học trên hệ thống. Mở để xem lại, hoặc sao chép ID để đánh dấu xem thử hay gắn vào lớp.",
+      "description": "Mọi khoá học trên hệ thống. Mở để xem lại, hoặc sao chép ID để đánh dấu xem thử.",
       "open": "Mở khoá học trong tab mới",
       "copy": "Sao chép ID {{id}}",
       "copied": "Đã sao chép {{id}}",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "Yêu cầu bị từ chối chưa thể gửi lại ngay.",
       "COURSE_NOT_FOUND": "Không có khoá học nào với ID này. Hãy kiểm tra ID trong địa chỉ khoá học (/classroom/<ID>).",
       "RATE_LIMITED": "Bạn đang có quá nhiều yêu cầu chưa được trả lời. Hãy chờ trả lời trước.",
-      "COMMUNITY_BLOCKED": "Tài khoản của bạn đang bị chặn đăng trong cộng đồng."
+      "COMMUNITY_BLOCKED": "Tài khoản của bạn đang bị chặn đăng trong cộng đồng.",
+      "COURSE_NOT_ATTACHABLE": "Chỉ gắn được khoá học đã chia sẻ, bài xem thử miễn phí, hoặc khoá học do người vận hành/quản trị viên tạo. Hãy nhờ chủ khoá học chia sẻ trước."
     }
   },
   "catalog": {
@@ -2746,7 +2792,7 @@
     "description": {
       "member": "Bài xem thử miễn phí, khoá học được chia sẻ và khoá học của lớp bạn.",
       "guest": "Bài xem thử miễn phí. Đăng nhập để xem thêm.",
-      "signedIn": "Bài xem thử miễn phí. Thành viên xem thêm khoá học được chia sẻ và lớp học của mình."
+      "signedIn": "Bài xem thử miễn phí. Thành viên xem thêm khoá học được chia sẻ và khoá học của lớp mình."
     },
     "signInToSee": "Đăng nhập để xem khoá học được chia sẻ và tham gia lớp.",
     "join": {
@@ -2754,18 +2800,21 @@
       "code": "Mã tham gia",
       "submit": "Tham gia",
       "done": "Bạn đã tham gia {{name}}.",
-      "description": "Nhập mã bạn được cấp để tham gia lớp."
+      "description": "Không bắt buộc. Bạn vẫn tự học được mà không cần lớp: khoá học của bạn, bài xem thử miễn phí và khoá học được chia sẻ. Chỉ nhập mã khi thầy cô hoặc người vận hành đưa cho bạn.",
+      "needsMembership": "Không cần tham gia lớp để tự học. Nếu thầy cô đưa bạn mã lớp, bạn cần gói thành viên trước, rồi nhập mã ở trang này.",
+      "invited": "Bạn được mời vào một lớp. Hãy đăng nhập bằng tài khoản có gói thành viên, rồi bấm Tham gia ở trang này.",
+      "invitedMember": "Bạn được mời vào một lớp. Kiểm tra mã rồi bấm Tham gia."
     },
     "empty": "Chưa có nội dung để xem.",
     "kind": {
       "preview": "Xem thử miễn phí",
       "shared": "Đã chia sẻ",
-      "class": "Lớp của bạn"
+      "class": "Khoá học của lớp"
     },
     "open": "Mở",
     "unavailable": "Danh mục không khả dụng trên hệ thống này.",
     "back": "Quay lại danh mục",
-    "membersOnly": "Khoá học được chia sẻ và lớp học dành cho thành viên."
+    "membersOnly": "Khoá học được chia sẻ và khoá học của lớp dành cho thành viên."
   },
   "courseShare": {
     "request": "Chia sẻ cho thành viên",
@@ -2899,7 +2948,7 @@
       "filter": "Lọc câu hỏi",
       "search": "Tìm câu hỏi",
       "pick": "Chọn một câu hỏi để xem lời giải.",
-      "howToAsk": "Muốn hỏi? Mở một bài học, đến slide bạn vướng và bấm nút Thảo luận trên thanh công cụ."
+      "howToAsk": "Muốn hỏi? Mở một khoá học, đến slide bạn vướng và bấm nút Thảo luận trên thanh công cụ."
     },
     "reports": {
       "title": "Báo cáo cộng đồng",

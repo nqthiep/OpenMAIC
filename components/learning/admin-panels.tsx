@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { Copy, ExternalLink, Pencil, Trash2, X } from 'lucide-react';
+import { Copy, ExternalLink, Link2, ListPlus, Pencil, Trash2, Users, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { DataTable, type Column } from './data-table';
 import {
   AUDIT_MAX,
+  addClassMember,
   attachCourse,
   createClass,
   decideAccessRequest,
@@ -115,14 +116,18 @@ function useRows<T>(fetcher: () => Promise<T[]>) {
 function useAction(reload: () => Promise<void>) {
   const failure = useFailureMessage();
   return useCallback(
-    async (change: () => Promise<unknown>, done?: string) => {
+    /** Runs a change, toasts the outcome, reloads, and says whether the change went through. */
+    async (change: () => Promise<unknown>, done?: string): Promise<boolean> => {
+      let ok = true;
       try {
         await change();
         if (done) toast.success(done);
       } catch (error) {
         toast.error(failure(error));
+        ok = false;
       }
       await reload();
+      return ok;
     },
     [failure, reload],
   );
@@ -198,7 +203,7 @@ function ConfirmButton({
   title: string;
   description: string;
   confirm: string;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => Promise<unknown>;
   icon?: boolean;
 }) {
   const { t } = useI18n();
@@ -352,7 +357,7 @@ export function MembershipPanel() {
       id: 'username',
       header: t('admin.members.columns.username'),
       sort: (r) => r.username,
-      cell: (r) => <span className="break-all font-medium">{r.username}</span>,
+      cell: (r) => <span className="whitespace-nowrap font-medium">{r.username}</span>,
     },
     {
       id: 'state',
@@ -552,7 +557,7 @@ export function AccessRequestsPanel() {
       id: 'username',
       header: t('admin.members.columns.username'),
       sort: (r) => r.username,
-      cell: (r) => <span className="break-all font-medium">{r.username}</span>,
+      cell: (r) => <span className="whitespace-nowrap font-medium">{r.username}</span>,
     },
     {
       id: 'membership',
@@ -966,6 +971,10 @@ function ClassMembersDialog({
   const { t, locale } = useI18n();
   const failure = useFailureMessage();
   const [members, setMembers] = useState<ClassMember[] | null>(null);
+  // Every account, for adding learners without a code. Loaded with the dialog.
+  const [accounts, setAccounts] = useState<MemberRow[] | null>(null);
+  const [query, setQuery] = useState('');
+  const [adding, setAdding] = useState<string | null>(null);
   const classId = row?.id;
 
   const load = useCallback(async () => {
@@ -988,20 +997,50 @@ function ClassMembersDialog({
       .catch((error: unknown) => {
         if (active) toast.error(failure(error));
       });
+    fetchAllMembers()
+      .then((next) => {
+        if (active) setAccounts(next);
+      })
+      .catch((error: unknown) => {
+        if (active) toast.error(failure(error));
+      });
     return () => {
       active = false;
     };
   }, [classId, failure]);
 
+  const inClass = new Set((members ?? []).map((m) => m.accountId));
+  const needle = query.trim().toLowerCase();
+  const candidates = (accounts ?? [])
+    .filter(
+      (a) => !inClass.has(a.id) && (needle === '' || a.username.toLowerCase().includes(needle)),
+    )
+    .sort((a, b) => a.username.localeCompare(b.username));
+
+  const add = async (account: MemberRow) => {
+    if (!classId) return;
+    setAdding(account.id);
+    try {
+      await addClassMember(classId, account.id);
+      toast.success(t('admin.classes.addMember.added', { username: account.username }));
+    } catch (error) {
+      toast.error(failure(error));
+    } finally {
+      setAdding(null);
+    }
+    await load();
+    await onChanged();
+  };
+
   return (
     <Dialog open={row !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{t('admin.classes.membersOf', { name: row?.name ?? '' })}</DialogTitle>
           <DialogDescription>{t('admin.classes.membersDescription')}</DialogDescription>
         </DialogHeader>
         {members === null ? (
-          <p className="text-sm text-muted-foreground">{t('admin.ops.loading')}</p>
+          <p className="text-sm text-muted-foreground">{t('admin.table.loading')}</p>
         ) : members.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('admin.classes.noMembers')}</p>
         ) : (
@@ -1038,6 +1077,170 @@ function ClassMembersDialog({
             ))}
           </ul>
         )}
+        <section className="flex flex-col gap-2 border-t pt-4">
+          <h3 className="text-sm font-semibold">{t('admin.classes.addMember.title')}</h3>
+          <p className="text-xs text-muted-foreground">
+            {t('admin.classes.addMember.description')}
+          </p>
+          <Input
+            aria-label={t('admin.classes.addMember.search')}
+            placeholder={t('admin.classes.addMember.search')}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          {accounts === null ? (
+            <p className="text-sm text-muted-foreground">{t('admin.table.loading')}</p>
+          ) : candidates.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('admin.classes.addMember.empty')}</p>
+          ) : (
+            <ul className="flex max-h-64 flex-col divide-y overflow-y-auto rounded-lg border">
+              {candidates.map((a) => (
+                <li key={a.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-sm font-medium">{a.username}</span>
+                    {a.membership?.active ? null : (
+                      <Badge variant="outline" className="shrink-0 text-xs">
+                        {t('admin.classes.addMember.noMembership')}
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={adding !== null}
+                    onClick={() => void add(a)}
+                  >
+                    {t('admin.classes.addMember.add')}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Picks the courses of one class: every course with a search box, what it is (attached, can be
+ * attached, or private and waiting to be shared) and a button to attach or detach it. Replaces
+ * copying course IDs by hand.
+ */
+function ClassCoursesDialog({
+  row,
+  courses,
+  onClose,
+  onAttach,
+  onDetach,
+}: {
+  row: ClassRow | null;
+  courses: CourseEntry[] | null;
+  onClose: () => void;
+  onAttach: (courseId: string, title: string) => Promise<unknown>;
+  onDetach: (courseId: string, title: string) => Promise<unknown>;
+}) {
+  const { t } = useI18n();
+  const [query, setQuery] = useState('');
+  const [busy, setBusy] = useState<string | null>(null);
+  const attached = new Set(row?.courseIds ?? []);
+  const needle = query.trim().toLowerCase();
+  const rank = (c: CourseEntry) => (attached.has(c.courseId) ? 0 : c.attachable ? 1 : 2);
+  const list = (courses ?? [])
+    .filter(
+      (c) =>
+        needle === '' ||
+        c.title.toLowerCase().includes(needle) ||
+        (c.owner ?? '').toLowerCase().includes(needle),
+    )
+    .sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title));
+
+  const run = async (courseId: string, change: () => Promise<unknown>) => {
+    setBusy(courseId);
+    try {
+      await change();
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Dialog
+      open={row !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          setQuery('');
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
+            {t('admin.classes.coursesDialog.title', { name: row?.name ?? '' })}
+          </DialogTitle>
+          <DialogDescription>{t('admin.classes.coursesDialog.description')}</DialogDescription>
+        </DialogHeader>
+        <Input
+          aria-label={t('admin.classes.coursesDialog.search')}
+          placeholder={t('admin.classes.coursesDialog.search')}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        {courses === null ? (
+          <p className="text-sm text-muted-foreground">{t('admin.table.loading')}</p>
+        ) : list.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('admin.classes.coursesDialog.empty')}</p>
+        ) : (
+          <ul className="flex max-h-96 flex-col divide-y overflow-y-auto rounded-lg border">
+            {list.map((c) => {
+              const isAttached = attached.has(c.courseId);
+              return (
+                <li key={c.courseId} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate text-sm font-medium">
+                      <CourseLink courseId={c.courseId}>{c.title}</CourseLink>
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {t('admin.classes.coursesDialog.owner', {
+                        name: c.owner ?? t('admin.courses.anonymous'),
+                      })}
+                    </span>
+                  </div>
+                  {isAttached ? (
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Badge variant="secondary">
+                        {t('admin.classes.coursesDialog.isAttached')}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={busy !== null}
+                        onClick={() => void run(c.courseId, () => onDetach(c.courseId, c.title))}
+                      >
+                        {t('admin.classes.coursesDialog.detach')}
+                      </Button>
+                    </div>
+                  ) : c.attachable ? (
+                    <Button
+                      size="sm"
+                      className="shrink-0"
+                      disabled={busy !== null}
+                      onClick={() => void run(c.courseId, () => onAttach(c.courseId, c.title))}
+                    >
+                      {t('admin.classes.coursesDialog.attach')}
+                    </Button>
+                  ) : (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {t('admin.classes.coursesDialog.private')}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -1046,11 +1249,14 @@ function ClassMembersDialog({
 export function ClassesPanel() {
   const { t } = useI18n();
   const { rows, reload } = useRows(fetchClasses);
-  const titles = useCourseTitles();
+  const { rows: courses } = useRows(fetchCourses);
+  const titles = new Map((courses ?? []).map((c) => [c.courseId, c.title]));
   const act = useAction(reload);
   const [name, setName] = useState('');
-  const [joinCode, setJoinCode] = useState<string | null>(null);
-  const [courseIds, setCourseIds] = useState<Record<string, string>>({});
+  // The join code of the class just created or given a new code. The server shows it only once.
+  const [joinCode, setJoinCode] = useState<{ name: string; code: string } | null>(null);
+  // The class whose course picker is open, by id, so the dialog follows reloads of its row.
+  const [choosingId, setChoosingId] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ row: ClassRow; name: string } | null>(null);
   const [viewing, setViewing] = useState<ClassRow | null>(null);
   const failure = useFailureMessage();
@@ -1061,18 +1267,23 @@ export function ClassesPanel() {
     try {
       const created = await createClass(trimmed);
       setName('');
-      setJoinCode(`${created.name}: ${created.joinCode}`);
+      setJoinCode({ name: created.name, code: created.joinCode });
     } catch (error) {
       toast.error(failure(error));
     }
     await reload();
   };
 
-  const attach = async (row: ClassRow) => {
-    const courseId = (courseIds[row.id] ?? '').trim();
-    if (courseId === '') return;
-    await act(() => attachCourse(row.id, courseId));
-    setCourseIds((current) => ({ ...current, [row.id]: '' }));
+  const choosing = rows?.find((r) => r.id === choosingId) ?? null;
+
+  // A learner who opens this lands on the catalog with the code filled in; they still press Join.
+  const inviteLink = (code: string) =>
+    `${window.location.origin}/catalog?join=${encodeURIComponent(code)}`;
+  const copy = (text: string, done: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => toast.success(t(done)),
+      () => toast.error(t('admin.classes.copyFailed')),
+    );
   };
 
   const columns: Column<ClassRow>[] = [
@@ -1088,14 +1299,16 @@ export function ClassesPanel() {
       align: 'right',
       sort: (r) => r.memberCount,
       cell: (r) => (
-        <button
-          type="button"
-          className="tabular-nums text-primary hover:underline"
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7"
           aria-label={t('admin.classes.membersOf', { name: r.name })}
           onClick={() => setViewing(r)}
         >
-          {r.memberCount}
-        </button>
+          <Users />
+          {t('admin.classes.manageMembers', { count: r.memberCount })}
+        </Button>
       ),
     },
     {
@@ -1127,26 +1340,15 @@ export function ClassesPanel() {
               ))}
             </div>
           ) : null}
-          <form
-            className="flex items-center gap-1.5"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void attach(r);
-            }}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 self-start"
+            onClick={() => setChoosingId(r.id)}
           >
-            <Input
-              aria-label={t('admin.previews.courseId')}
-              placeholder={t('admin.previews.courseId')}
-              className="h-7 w-40 text-xs"
-              value={courseIds[r.id] ?? ''}
-              onChange={(event) =>
-                setCourseIds((current) => ({ ...current, [r.id]: event.target.value }))
-              }
-            />
-            <Button type="submit" variant="outline" size="sm" className="h-7">
-              {t('admin.classes.attach')}
-            </Button>
-          </form>
+            <ListPlus />
+            {t('admin.classes.manageCourses')}
+          </Button>
         </div>
       ),
     },
@@ -1169,7 +1371,7 @@ export function ClassesPanel() {
             onConfirm={() =>
               act(async () => {
                 const rotated = await rotateJoinCode(r.id);
-                setJoinCode(`${r.name}: ${rotated.joinCode}`);
+                setJoinCode({ name: r.name, code: rotated.joinCode });
               })
             }
           />
@@ -1193,10 +1395,54 @@ export function ClassesPanel() {
       title={t('admin.classes.title')}
       description={t('admin.classes.description')}
     >
+      <ol className="flex list-decimal flex-col gap-1 rounded-md border bg-muted/30 py-3 pl-8 pr-4 text-sm text-muted-foreground">
+        <li>{t('admin.classes.steps.create')}</li>
+        <li>{t('admin.classes.steps.share')}</li>
+        <li>{t('admin.classes.steps.attach')}</li>
+      </ol>
       {joinCode ? (
-        <p className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm">
-          {t('admin.classes.joinCode', { code: joinCode })}
-        </p>
+        <div
+          role="status"
+          className="flex flex-wrap items-center gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm dark:border-amber-500/40 dark:bg-amber-500/10"
+        >
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="font-medium">
+              {t('admin.classes.joinCodeTitle', { name: joinCode.name })}
+            </span>
+            <span className="text-muted-foreground">{t('admin.classes.joinCodeHint')}</span>
+            <span className="select-all break-all font-mono text-xs text-muted-foreground">
+              {inviteLink(joinCode.code)}
+            </span>
+          </div>
+          <code className="select-all rounded bg-background px-3 py-1.5 font-mono text-lg font-semibold tracking-widest">
+            {joinCode.code}
+          </code>
+          <Button
+            size="sm"
+            onClick={() => copy(inviteLink(joinCode.code), 'admin.classes.linkCopied')}
+          >
+            <Link2 />
+            {t('admin.classes.copyLink')}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => copy(joinCode.code, 'admin.classes.codeCopied')}
+          >
+            <Copy />
+            {t('admin.classes.copyCode')}
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={t('admin.classes.closeCode')}
+            title={t('admin.classes.closeCode')}
+            onClick={() => setJoinCode(null)}
+          >
+            <X />
+          </Button>
+        </div>
       ) : null}
       <DataTable
         rows={rows}
@@ -1224,6 +1470,23 @@ export function ClassesPanel() {
               {t('admin.classes.create')}
             </Button>
           </form>
+        }
+      />
+      <ClassCoursesDialog
+        row={choosing}
+        courses={courses}
+        onClose={() => setChoosingId(null)}
+        onAttach={(courseId, title) =>
+          act(
+            () => attachCourse(choosing!.id, courseId),
+            t('admin.classes.coursesDialog.attached', { title }),
+          )
+        }
+        onDetach={(courseId, title) =>
+          act(
+            () => detachCourse(choosing!.id, courseId),
+            t('admin.classes.coursesDialog.detached', { title }),
+          )
         }
       />
       <ClassMembersDialog

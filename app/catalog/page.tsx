@@ -38,6 +38,8 @@ export default function CatalogPage() {
   const [joins, setJoins] = useState(0);
   const membershipStatus = useMembershipStatus();
   const [code, setCode] = useState('');
+  // Set when the page was opened from an invite link (/catalog?join=CODE).
+  const [invited, setInvited] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const returnFocusTo = useRef<HTMLElement | null>(null);
 
@@ -81,12 +83,36 @@ export default function CatalogPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // An invite link fills the code; the learner still presses Join, so nobody is added by a click on a link.
+  useEffect(() => {
+    const fromLink = new URLSearchParams(window.location.search).get('join')?.trim();
+    if (fromLink) {
+      setCode(fromLink);
+      setInvited(true);
+    }
+  }, []);
+
+  // The home links here as /catalog#join and invites as ?join=; the card renders after the catalog loads.
+  // ponytail: fixed delay for MyClasses (its own fetch) to push the card down; observe layout if it misses.
+  useEffect(() => {
+    if (!member || (window.location.hash !== '#join' && !invited)) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('join')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 600);
+    return () => window.clearTimeout(timer);
+  }, [member, invited]);
+
   const join = async () => {
     const trimmed = code.trim();
     if (trimmed === '') return;
     try {
       const joined = await joinClass(trimmed);
       setCode('');
+      if (invited) {
+        // Drop the code from the address so a reload or a shared screenshot does not carry it.
+        window.history.replaceState(null, '', '/catalog');
+        setInvited(false);
+      }
       toast.success(t('catalog.join.done', { name: joined.class.name }));
       setJoins((count) => count + 1);
       apply(await readAll());
@@ -151,7 +177,12 @@ export default function CatalogPage() {
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-300">
                 <Lock className="size-5" aria-hidden="true" />
               </span>
-              <p className="text-sm font-medium">{t('catalog.signInToSee')}</p>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm font-medium">{t('catalog.signInToSee')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t(invited ? 'catalog.join.invited' : 'catalog.join.needsMembership')}
+                </p>
+              </div>
             </div>
             <Button onClick={openSignIn} className="cursor-pointer">
               {t('home.guest.signIn')}
@@ -164,40 +195,10 @@ export default function CatalogPage() {
       {courses !== null && signedIn && !member ? (
         <Reveal>
           <AccessRequest kind={membershipStatus.notice.kind} reason={t('catalog.membersOnly')} />
-        </Reveal>
-      ) : null}
-
-      {member ? (
-        <Reveal>
-          <section className={cn('flex flex-col gap-5 rounded-2xl p-6', GLASS)}>
-            <div className="flex items-start gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-md shadow-violet-500/25">
-                <GraduationCap className="size-5" aria-hidden="true" />
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <h2 className="text-base font-semibold">{t('catalog.join.title')}</h2>
-                <p className="text-sm text-muted-foreground">{t('catalog.join.description')}</p>
-              </div>
-            </div>
-            <form
-              className="flex flex-wrap items-center gap-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void join();
-              }}
-            >
-              <Input
-                aria-label={t('catalog.join.code')}
-                placeholder={t('catalog.join.code')}
-                className="h-9 max-w-xs bg-white/70 font-mono uppercase dark:bg-slate-900/50"
-                value={code}
-                onChange={(event) => setCode(event.target.value)}
-              />
-              <Button type="submit" variant="outline" size="sm" className="cursor-pointer">
-                {t('catalog.join.submit')}
-              </Button>
-            </form>
-          </section>
+          <p className="mt-3 flex items-center gap-2 px-1 text-sm text-muted-foreground">
+            <GraduationCap className="size-4 shrink-0" aria-hidden="true" />
+            {t(invited ? 'catalog.join.invited' : 'catalog.join.needsMembership')}
+          </p>
         </Reveal>
       ) : null}
 
@@ -223,18 +224,67 @@ export default function CatalogPage() {
           </div>
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((entry, index) => (
-              <Reveal key={entry.courseId} delay={(index % 3) * 0.06}>
-                <CourseCard
-                  entry={entry}
-                  index={index}
-                  href={catalogClassroomHref(entry.courseId)}
-                />
-              </Reveal>
-            ))}
+            {/* Class courses are listed once, under their class in MyClasses above. */}
+            {courses
+              .filter((entry) => entry.kind !== 'class')
+              .map((entry, index) => (
+                <Reveal key={entry.courseId} delay={(index % 3) * 0.06}>
+                  <CourseCard
+                    entry={entry}
+                    index={index}
+                    href={catalogClassroomHref(entry.courseId)}
+                  />
+                </Reveal>
+              ))}
           </div>
         )}
       </section>
+
+      {/* Joining a class is optional: self-study needs none. The card sits last and says so. */}
+      {member ? (
+        <section
+          id="join"
+          className={cn(
+            'flex scroll-mt-24 flex-col gap-4 rounded-2xl border border-dashed border-border bg-white/40 p-5 dark:bg-white/[0.02]',
+            invited && 'border-solid border-primary ring-2 ring-primary/30',
+          )}
+        >
+          <div className="flex items-start gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground">
+              <GraduationCap className="size-4" aria-hidden="true" />
+            </span>
+            <div className="flex flex-col gap-0.5">
+              <h2 className="text-sm font-semibold">{t('catalog.join.title')}</h2>
+              <p className="text-sm text-muted-foreground">
+                {t(invited ? 'catalog.join.invitedMember' : 'catalog.join.description')}
+              </p>
+            </div>
+          </div>
+          <form
+            className="flex flex-wrap items-center gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void join();
+            }}
+          >
+            <Input
+              aria-label={t('catalog.join.code')}
+              placeholder={t('catalog.join.code')}
+              className="h-9 max-w-xs bg-white/70 font-mono uppercase dark:bg-slate-900/50"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+            />
+            <Button
+              type="submit"
+              variant={invited ? 'default' : 'outline'}
+              size="sm"
+              className="cursor-pointer"
+            >
+              {t('catalog.join.submit')}
+            </Button>
+          </form>
+        </section>
+      ) : null}
 
       <AccountDialog
         open={dialogOpen}

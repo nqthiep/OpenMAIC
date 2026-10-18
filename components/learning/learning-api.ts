@@ -219,6 +219,8 @@ export interface CourseEntry {
   /** Owner's username; null for an anonymous or unrecorded owner. */
   owner: string | null;
   updatedAt: string | null;
+  /** Shared, a preview, or owned by staff, so it may be attached to a class. */
+  attachable: boolean;
 }
 
 /** Every course staff can open, for review and for copying its ID. */
@@ -239,6 +241,11 @@ export async function fetchClassMembers(classId: string): Promise<ClassMember[]>
     `/api/admin/classes/${encodeURIComponent(classId)}/members`,
   );
   return body.members;
+}
+
+/** Adds an account to a class without a join code. Staff only. */
+export function addClassMember(classId: string, accountId: string): Promise<unknown> {
+  return call('POST', `/api/admin/classes/${encodeURIComponent(classId)}/members`, { accountId });
 }
 
 export function removeClassMember(classId: string, accountId: string): Promise<unknown> {

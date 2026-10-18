@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "Miembros: {{count}}",
       "noCourses": "Esta clase aún no tiene cursos.",
-      "untitled": "Curso {{number}}"
+      "untitled": "Curso {{number}}",
+      "hint": "Un docente o un operador crea la clase y le agrega cursos. Sin clase puedes seguir estudiando por tu cuenta."
     },
     "starter": {
       "title": "¿No sabes por dónde empezar? Prueba una de estas ideas:",
@@ -1231,7 +1232,8 @@
     "notFoundDesc": "Este curso no existe, fue eliminado o no tienes permiso para verlo.",
     "backToHome": "Volver al inicio",
     "loadFailed": "El almacenamiento no está disponible. No se pudieron cargar las aulas guardadas.",
-    "deleteFailed": "No se pudo eliminar el aula"
+    "deleteFailed": "No se pudo eliminar el aula",
+    "privateHint": "Los cursos que creas son privados. Para que otros miembros vean uno, ábrelo y usa \"Compartir con miembros\"."
   },
   "upload": {
     "pdfSizeLimit": "Admite archivos PDF de hasta 50 MB",
@@ -2298,7 +2300,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "¿Cambiar a {{username}} a {{role}}?",
+        "roleAction": "Cambiar rol",
+        "roleDescription": {
+          "learner": "Pierde de inmediato el acceso a las páginas de operación.",
+          "operator": "Podrá ver y gestionar todas las cuentas, membresías, clases, cursos y el registro de auditoría. El cambio queda registrado.",
+          "admin": "Tendrá control total, incluidos los roles y la configuración del sistema. El cambio queda registrado."
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "Clases",
-      "description": "Los miembros se unen a una clase con su código. Asocia cursos para que la clase pueda abrirlos.",
+      "description": "Solo operadores y administradores gestionan las clases. Una clase agrupa a estudiantes para que todos abran los cursos asignados.",
       "name": "Nombre de la clase",
       "create": "Crear clase",
-      "joinCode": "Código para unirse: {{code}}. Se muestra una sola vez, cópialo ahora.",
       "empty": "Todavía no hay clases.",
       "members": "{{count}} miembros",
       "courses": "{{count}} cursos",
-      "attach": "Asociar curso",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "Quitar",
       "removeMemberTitle": "¿Quitar a {{username}} de {{name}}?",
       "removeMemberDescription": "Perderá los cursos de esta clase. La acción queda en el registro de auditoría.",
-      "memberRemoved": "{{username}} quitado de la clase."
+      "memberRemoved": "{{username}} quitado de la clase.",
+      "steps": {
+        "create": "Crea una clase: escribe un nombre y pulsa Crear clase. Recibirás un código de acceso.",
+        "share": "Invita estudiantes: envía el enlace o el código, o pulsa Miembros para agregarlos tú mismo. Necesitan una membresía activa para abrir los cursos de la clase.",
+        "attach": "Agrega cursos: pulsa Elegir cursos en la fila de la clase y luego Asignar junto a un curso. Solo cursos compartidos, vistas previas gratuitas y cursos del personal. Los miembros los ven en Mis clases."
+      },
+      "joinCodeTitle": "Código de acceso de {{name}}",
+      "joinCodeHint": "Solo se muestra una vez. Envía a tus estudiantes el enlace de invitación (abre el lugar correcto para unirse) o el código para que lo escriban.",
+      "copyCode": "Copiar código",
+      "codeCopied": "Código copiado.",
+      "copyFailed": "No se pudo copiar. Selecciona el código y cópialo a mano.",
+      "closeCode": "Ocultar el código",
+      "manageCourses": "Elegir cursos",
+      "coursesDialog": {
+        "title": "Cursos de {{name}}",
+        "description": "Asigna un curso para que los miembros de esta clase puedan abrirlo. El curso privado de un estudiante debe compartirse primero.",
+        "search": "Buscar por título del curso o autor",
+        "empty": "Ningún curso coincide.",
+        "owner": "Creado por {{name}}",
+        "isAttached": "Asignado",
+        "attach": "Asignar",
+        "detach": "Quitar",
+        "private": "Privado · compártelo primero",
+        "attached": "“{{title}}” asignado a la clase.",
+        "detached": "“{{title}}” quitado de la clase."
+      },
+      "copyLink": "Copiar enlace de invitación",
+      "linkCopied": "Enlace de invitación copiado.",
+      "manageMembers": "Miembros ({{count}})",
+      "addMember": {
+        "title": "Agregar estudiantes",
+        "description": "Agrega a alguien directamente, sin código. Sin membresía activa solo podrá abrir los cursos de la clase cuando tenga una.",
+        "search": "Buscar por nombre de usuario",
+        "empty": "Ninguna cuenta coincide.",
+        "noMembership": "Sin membresía",
+        "add": "Agregar",
+        "added": "{{username}} se agregó a la clase."
+      }
     },
     "audit": {
       "title": "Bitácora de auditoría",
@@ -2559,7 +2603,8 @@
         "challenge_update": "Editar reto",
         "settings_update": "Cambiar ajuste",
         "share_update-approve": "Actualización compartida aprobada",
-        "share_update-reject": "Actualización compartida rechazada"
+        "share_update-reject": "Actualización compartida rechazada",
+        "class_add": "Miembro agregado"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "Cursos",
-      "description": "Todos los cursos del sistema. Abre uno para revisarlo o copia su ID para marcarlo como vista previa o vincularlo a una clase.",
+      "description": "Todos los cursos del sistema. Abre uno para revisarlo o copia su ID para marcarlo como vista previa gratuita.",
       "open": "Abrir el curso en una pestaña nueva",
       "copy": "Copiar ID {{id}}",
       "copied": "{{id}} copiado",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "Una solicitud rechazada se puede volver a enviar más tarde.",
       "COURSE_NOT_FOUND": "No hay ningún curso con este ID. Revisa el ID en la dirección del curso (/classroom/<ID>).",
       "RATE_LIMITED": "Tienes demasiadas solicitudes sin respuesta. Espera una respuesta primero.",
-      "COMMUNITY_BLOCKED": "Tu cuenta tiene bloqueadas las publicaciones en la comunidad."
+      "COMMUNITY_BLOCKED": "Tu cuenta tiene bloqueadas las publicaciones en la comunidad.",
+      "COURSE_NOT_ATTACHABLE": "Solo se pueden asignar cursos compartidos, vistas previas gratuitas o cursos creados por operadores o administradores. Pide al autor que comparta su curso primero."
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "Código de acceso",
       "submit": "Unirse",
       "done": "Te uniste a {{name}}.",
-      "description": "Escribe el código que te dieron para unirte a una clase."
+      "description": "Opcional. Puedes estudiar por tu cuenta sin una clase: tus cursos, las vistas previas gratuitas y los cursos compartidos. Escribe un código solo si un docente o un operador te lo dio.",
+      "needsMembership": "No necesitas una clase para estudiar por tu cuenta. Si un docente te dio un código de clase, primero necesitas una membresía y después lo escribes en esta página.",
+      "invited": "Te invitaron a una clase. Inicia sesión con una membresía y luego pulsa Unirse en esta página.",
+      "invitedMember": "Te invitaron a una clase. Revisa el código y pulsa Unirse."
     },
     "empty": "Todavía no hay nada que explorar.",
     "kind": {

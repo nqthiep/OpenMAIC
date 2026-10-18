@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "成员：{{count}}",
       "noCourses": "这个班级还没有课程。",
-      "untitled": "课程 {{number}}"
+      "untitled": "课程 {{number}}",
+      "hint": "班级由老师或运营人员创建并添加课程。不加入班级也可以照常自学。"
     },
     "starter": {
       "title": "不知道从哪里开始？试试这些：",
@@ -1231,7 +1232,8 @@
     "notFoundDesc": "课程不存在、已被删除，或你没有查看权限。",
     "backToHome": "返回首页",
     "loadFailed": "存储不可用，无法加载已保存的课堂。",
-    "deleteFailed": "删除课堂失败"
+    "deleteFailed": "删除课堂失败",
+    "privateHint": "你创建的课程只有你能看到。想让其他成员看到，请打开课程并使用“与会员分享”。"
   },
   "upload": {
     "pdfSizeLimit": "支持最大50MB的PDF文件",
@@ -2298,7 +2300,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "将 {{username}} 设为{{role}}？",
+        "roleAction": "更改角色",
+        "roleDescription": {
+          "learner": "该用户将立即失去运营页面的访问权限。",
+          "operator": "该用户可以查看并管理所有账户、会员、班级、课程和审计日志。此更改会记入审计日志。",
+          "admin": "该用户将拥有全部权限，包括角色和系统设置。此更改会记入审计日志。"
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "班级",
-      "description": "会员使用班级代码加入班级。为班级添加课程，班级成员即可打开。",
+      "description": "只有运营人员和管理员可以管理班级。班级把学员组织在一起，让大家都能打开关联到班级的课程。",
       "name": "班级名称",
       "create": "创建班级",
-      "joinCode": "加入代码：{{code}}。只显示一次，请立即复制。",
       "empty": "还没有班级。",
       "members": "{{count}} 名会员",
       "courses": "{{count}} 门课程",
-      "attach": "添加课程",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "移出",
       "removeMemberTitle": "将 {{username}} 移出 {{name}}？",
       "removeMemberDescription": "该成员将无法再打开本班级的课程。此操作会记入日志。",
-      "memberRemoved": "已将 {{username}} 移出班级。"
+      "memberRemoved": "已将 {{username}} 移出班级。",
+      "steps": {
+        "create": "创建班级：输入名称并点击“创建班级”，系统会生成加入码。",
+        "share": "邀请学员：发送邀请链接或加入码，或点击“成员”直接添加。学员需要有效会员资格才能打开班级课程。",
+        "attach": "添加课程：在班级所在行点击“选择课程”，再点击课程旁的“关联”。只能关联已共享课程、免费试看课程和工作人员创建的课程。成员可在“我的班级”中看到。"
+      },
+      "joinCodeTitle": "{{name}} 的加入码",
+      "joinCodeHint": "只显示一次。把邀请链接发给学员（点开即到加入位置），或发送加入码让他们输入。",
+      "copyCode": "复制加入码",
+      "codeCopied": "已复制加入码。",
+      "copyFailed": "复制失败。请选中加入码手动复制。",
+      "closeCode": "隐藏加入码",
+      "manageCourses": "选择课程",
+      "coursesDialog": {
+        "title": "{{name}} 的课程",
+        "description": "关联课程后，班级成员即可打开。学员的私有课程需要先共享。",
+        "search": "按课程名称或创建者搜索",
+        "empty": "没有匹配的课程。",
+        "owner": "创建者：{{name}}",
+        "isAttached": "已关联",
+        "attach": "关联",
+        "detach": "移除",
+        "private": "私有 · 需先共享",
+        "attached": "已将“{{title}}”关联到班级。",
+        "detached": "已将“{{title}}”从班级移除。"
+      },
+      "copyLink": "复制邀请链接",
+      "linkCopied": "已复制邀请链接。",
+      "manageMembers": "成员（{{count}}）",
+      "addMember": {
+        "title": "添加学员",
+        "description": "无需加入码，直接把某人加入班级。没有有效会员资格的人，要等有了会员资格才能打开班级课程。",
+        "search": "按用户名搜索",
+        "empty": "没有匹配的账户。",
+        "noMembership": "无会员资格",
+        "add": "添加",
+        "added": "已将 {{username}} 加入班级。"
+      }
     },
     "audit": {
       "title": "审计日志",
@@ -2559,7 +2603,8 @@
         "challenge_update": "编辑挑战",
         "settings_update": "修改设置",
         "share_update-approve": "已批准分享更新",
-        "share_update-reject": "已拒绝分享更新"
+        "share_update-reject": "已拒绝分享更新",
+        "class_add": "添加成员"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "课程",
-      "description": "系统中的所有课程。打开即可审阅，或复制 ID 用于设为试看或加入班级。",
+      "description": "系统中的所有课程。可打开查看，或复制 ID 将其标记为免费试看。",
       "open": "在新标签页中打开课程",
       "copy": "复制 ID {{id}}",
       "copied": "已复制 {{id}}",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "被拒绝的申请需要稍后才能再次提交。",
       "COURSE_NOT_FOUND": "没有此 ID 的课程。请核对课程地址中的 ID（/classroom/<ID>）。",
       "RATE_LIMITED": "你有太多未回复的请求。请先等待回复。",
-      "COMMUNITY_BLOCKED": "你的账号已被禁止在社区发帖。"
+      "COMMUNITY_BLOCKED": "你的账号已被禁止在社区发帖。",
+      "COURSE_NOT_ATTACHABLE": "只能关联已共享的课程、免费试看课程，或由运营人员/管理员创建的课程。请先让作者共享该课程。"
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "加入代码",
       "submit": "加入",
       "done": "你已加入 {{name}}。",
-      "description": "输入你收到的邀请码即可加入班级。"
+      "description": "可选。不加入班级也能自学：你的课程、免费试看课程和已共享课程。只有老师或运营人员给了你班级码时才需要输入。",
+      "needsMembership": "自学不需要加入班级。如果老师给了你班级码，需要先有会员资格，再在此页面输入。",
+      "invited": "你被邀请加入一个班级。请用有会员资格的账户登录，然后在此页面点击“加入”。",
+      "invitedMember": "你被邀请加入一个班级。请核对加入码后点击“加入”。"
     },
     "empty": "暂时没有可浏览的内容。",
     "kind": {

@@ -1211,10 +1211,10 @@ function HomePage() {
                 }
               >
                 <Link
-                  href="/catalog"
+                  href="/catalog#join"
                   className="rounded-full px-1.5 py-0.5 text-[12px] text-muted-foreground/50 hover:text-muted-foreground/80 hover:bg-muted/50 transition-colors"
                 >
-                  {t('home.classes.mine')}
+                  {t('catalog.join.title')}
                 </Link>
               </Gate>
               {/* New folder — round icon button, matches the import/upload affordances. */}
@@ -1246,6 +1246,12 @@ function HomePage() {
                 transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 className="w-full overflow-hidden"
               >
+                {/* Members can share; say once that a new course is private until they do. */}
+                <Gate capability="shareCourse">
+                  <p className="pt-3 text-center text-[12px] text-muted-foreground/70">
+                    {t('classroom.privateHint')}
+                  </p>
+                </Gate>
                 {folders.length === 0 && classrooms.length === 0 ? (
                   <div className="pt-8 pb-2 text-center text-[13px] text-muted-foreground/60">
                     {t('classroom.emptyLibraryHint')}

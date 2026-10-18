@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "メンバー：{{count}}",
       "noCourses": "このクラスにはまだ講座がありません。",
-      "untitled": "講座 {{number}}"
+      "untitled": "講座 {{number}}",
+      "hint": "クラスは先生やオペレーターが作成し、コースを追加します。クラスがなくても自習はできます。"
     },
     "starter": {
       "title": "どこから始めるか迷ったら、こちらをどうぞ：",
@@ -1231,7 +1232,8 @@
     "notFoundDesc": "このコースは存在しないか、削除されたか、閲覧する権限がありません。",
     "backToHome": "ホームに戻る",
     "loadFailed": "ストレージを利用できません。保存済みの教室を読み込めませんでした。",
-    "deleteFailed": "教室を削除できませんでした"
+    "deleteFailed": "教室を削除できませんでした",
+    "privateHint": "作成したコースは自分だけが見られます。ほかのメンバーに見せるには、コースを開いて「メンバーと共有」を使ってください。"
   },
   "upload": {
     "pdfSizeLimit": "50MBまでのPDFファイルに対応しています",
@@ -2298,7 +2300,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "{{username}} を {{role}} にしますか？",
+        "roleAction": "ロールを変更",
+        "roleDescription": {
+          "learner": "運用ページへのアクセスはすぐに無効になります。",
+          "operator": "すべてのアカウント、メンバーシップ、クラス、コース、監査ログを閲覧・管理できるようになります。変更は監査ログに記録されます。",
+          "admin": "ロールやシステム設定を含むすべての権限を持ちます。変更は監査ログに記録されます。"
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "クラス",
-      "description": "会員はクラスのコードで参加します。クラスにコースを追加すると、メンバーが開けるようになります。",
+      "description": "クラスを管理できるのはオペレーターと管理者だけです。クラスは学習者をまとめ、追加されたコースを全員が開けるようにします。",
       "name": "クラス名",
       "create": "クラスを作成",
-      "joinCode": "参加コード: {{code}}。一度しか表示されないので、今すぐコピーしてください。",
       "empty": "まだクラスはありません。",
       "members": "{{count}} 人",
       "courses": "{{count}} コース",
-      "attach": "コースを追加",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "外す",
       "removeMemberTitle": "{{username}} を {{name}} から外しますか？",
       "removeMemberDescription": "このクラスのコースは開けなくなります。操作は監査ログに記録されます。",
-      "memberRemoved": "{{username}} をクラスから外しました。"
+      "memberRemoved": "{{username}} をクラスから外しました。",
+      "steps": {
+        "create": "クラスを作成：名前を入力して「クラスを作成」を押すと、参加コードが発行されます。",
+        "share": "学習者を招待：招待リンクかコードを送るか、「メンバー」から直接追加します。クラスのコースを開くには有効なメンバーシップが必要です。",
+        "attach": "コースを追加：クラスの行で「コースを選択」を押し、コースの横の「追加」を押します。共有済みのコース、無料プレビュー、スタッフが作成したコースのみ追加できます。メンバーは「マイクラス」で見られます。"
+      },
+      "joinCodeTitle": "{{name}} の参加コード",
+      "joinCodeHint": "表示は一度だけです。学習者に招待リンク（参加する場所が開きます）か、入力用のコードを送ってください。",
+      "copyCode": "コードをコピー",
+      "codeCopied": "参加コードをコピーしました。",
+      "copyFailed": "コピーできませんでした。コードを選択して手動でコピーしてください。",
+      "closeCode": "コードを隠す",
+      "manageCourses": "コースを選択",
+      "coursesDialog": {
+        "title": "{{name}} のコース",
+        "description": "コースを追加すると、このクラスのメンバーが開けるようになります。学習者の非公開コースは先に共有が必要です。",
+        "search": "コース名または作成者で検索",
+        "empty": "一致するコースはありません。",
+        "owner": "作成者: {{name}}",
+        "isAttached": "追加済み",
+        "attach": "追加",
+        "detach": "外す",
+        "private": "非公開・先に共有が必要",
+        "attached": "「{{title}}」をクラスに追加しました。",
+        "detached": "「{{title}}」をクラスから外しました。"
+      },
+      "copyLink": "招待リンクをコピー",
+      "linkCopied": "招待リンクをコピーしました。",
+      "manageMembers": "メンバー（{{count}}）",
+      "addMember": {
+        "title": "学習者を追加",
+        "description": "コードなしで直接クラスに追加します。有効なメンバーシップがない場合、取得するまでクラスのコースは開けません。",
+        "search": "ユーザー名で検索",
+        "empty": "一致するアカウントはありません。",
+        "noMembership": "メンバーシップなし",
+        "add": "追加",
+        "added": "{{username}} をクラスに追加しました。"
+      }
     },
     "audit": {
       "title": "監査ログ",
@@ -2559,7 +2603,8 @@
         "challenge_update": "チャレンジ編集",
         "settings_update": "設定変更",
         "share_update-approve": "共有更新を承認",
-        "share_update-reject": "共有更新を却下"
+        "share_update-reject": "共有更新を却下",
+        "class_add": "メンバーを追加"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "コース",
-      "description": "このシステムのすべてのコースです。開いて確認するか、ID をコピーしてお試し公開やクラスへの追加に使います。",
+      "description": "このシステムのすべてのコース。開いて確認するか、ID をコピーして無料プレビューに設定できます。",
       "open": "新しいタブでコースを開く",
       "copy": "ID {{id}} をコピー",
       "copied": "{{id}} をコピーしました",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "却下された申請は、しばらくしてから再送できます。",
       "COURSE_NOT_FOUND": "この ID のコースはありません。コースのアドレス（/classroom/<ID>）の ID を確認してください。",
       "RATE_LIMITED": "未回答の問い合わせが多すぎます。返信をお待ちください。",
-      "COMMUNITY_BLOCKED": "あなたのアカウントはコミュニティへの投稿が禁止されています。"
+      "COMMUNITY_BLOCKED": "あなたのアカウントはコミュニティへの投稿が禁止されています。",
+      "COURSE_NOT_ATTACHABLE": "クラスに追加できるのは、共有済みのコース、無料プレビュー、またはオペレーター・管理者が作成したコースだけです。先に作成者にコースを共有してもらってください。"
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "参加コード",
       "submit": "参加",
       "done": "{{name}} に参加しました。",
-      "description": "受け取ったコードを入力すると、クラスに参加できます。"
+      "description": "任意です。クラスに参加しなくても、自分のコース、無料プレビュー、共有コースで自習できます。先生やオペレーターからコードを受け取った場合だけ入力してください。",
+      "needsMembership": "自習にクラスは必要ありません。先生からクラスコードを受け取った場合は、まずメンバーシップが必要です。その後このページでコードを入力してください。",
+      "invited": "クラスに招待されています。メンバーシップのあるアカウントでログインし、このページで「参加」を押してください。",
+      "invitedMember": "クラスに招待されています。コードを確認して「参加」を押してください。"
     },
     "empty": "まだ閲覧できるものがありません。",
     "kind": {

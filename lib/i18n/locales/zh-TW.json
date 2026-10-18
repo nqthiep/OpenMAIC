@@ -143,7 +143,8 @@
     "myClasses": {
       "members": "成員：{{count}}",
       "noCourses": "這個班級還沒有課程。",
-      "untitled": "課程 {{number}}"
+      "untitled": "課程 {{number}}",
+      "hint": "班級由老師或營運人員建立並加入課程。不加入班級也可以照常自學。"
     },
     "starter": {
       "title": "不知道從哪裡開始？試試這些：",
@@ -1216,7 +1217,8 @@
     "notFoundDesc": "課程不存在、已被刪除，或你沒有檢視權限。",
     "backToHome": "返回首頁",
     "loadFailed": "儲存空間無法使用，無法載入已儲存的課堂。",
-    "deleteFailed": "刪除課堂失敗"
+    "deleteFailed": "刪除課堂失敗",
+    "privateHint": "你建立的課程只有你看得到。想讓其他成員看到，請開啟課程並使用「與會員分享」。"
   },
   "upload": {
     "pdfSizeLimit": "支援最大50MB的PDF檔案",
@@ -2283,7 +2285,14 @@
         "disableAction": "Disable account",
         "enableTitle": "Enable {{username}}?",
         "enableDescription": "They can sign in again. Sessions that ended when the account was disabled stay ended.",
-        "enableAction": "Enable account"
+        "enableAction": "Enable account",
+        "roleTitle": "將 {{username}} 設為{{role}}？",
+        "roleAction": "變更角色",
+        "roleDescription": {
+          "learner": "該使用者將立即失去營運頁面的存取權限。",
+          "operator": "該使用者可以檢視並管理所有帳號、會員、班級、課程與稽核紀錄。此變更會寫入稽核紀錄。",
+          "admin": "該使用者將擁有全部權限，包括角色與系統設定。此變更會寫入稽核紀錄。"
+        }
       },
       "errors": {
         "loadFailed": "Accounts could not be loaded. Try again.",
@@ -2472,14 +2481,12 @@
     },
     "classes": {
       "title": "班級",
-      "description": "會員使用班級代碼加入班級。為班級加入課程，班級成員即可開啟。",
+      "description": "只有營運人員和管理員可以管理班級。班級把學員組織在一起，讓大家都能開啟連結到班級的課程。",
       "name": "班級名稱",
       "create": "建立班級",
-      "joinCode": "加入代碼：{{code}}。只會顯示一次，請立即複製。",
       "empty": "還沒有班級。",
       "members": "{{count}} 位會員",
       "courses": "{{count}} 門課程",
-      "attach": "加入課程",
       "columns": {
         "members": "Members",
         "courses": "Attached courses"
@@ -2500,7 +2507,44 @@
       "removeMember": "移出",
       "removeMemberTitle": "將 {{username}} 移出 {{name}}？",
       "removeMemberDescription": "該成員將無法再開啟本班級的課程。此操作會記入日誌。",
-      "memberRemoved": "已將 {{username}} 移出班級。"
+      "memberRemoved": "已將 {{username}} 移出班級。",
+      "steps": {
+        "create": "建立班級：輸入名稱並按「建立班級」，系統會產生加入碼。",
+        "share": "邀請學員：傳送邀請連結或加入碼，或按「成員」直接加入。學員需要有效會員資格才能開啟班級課程。",
+        "attach": "加入課程：在班級那一列按「選擇課程」，再按課程旁的「連結」。只能連結已分享課程、免費試看課程和工作人員建立的課程。成員可在「我的班級」看到。"
+      },
+      "joinCodeTitle": "{{name}} 的加入碼",
+      "joinCodeHint": "只顯示一次。把邀請連結傳給學員（點開即到加入位置），或傳送加入碼讓他們輸入。",
+      "copyCode": "複製加入碼",
+      "codeCopied": "已複製加入碼。",
+      "copyFailed": "複製失敗。請選取加入碼手動複製。",
+      "closeCode": "隱藏加入碼",
+      "manageCourses": "選擇課程",
+      "coursesDialog": {
+        "title": "{{name}} 的課程",
+        "description": "連結課程後，班級成員即可開啟。學員的私人課程需要先分享。",
+        "search": "依課程名稱或建立者搜尋",
+        "empty": "沒有符合的課程。",
+        "owner": "建立者：{{name}}",
+        "isAttached": "已連結",
+        "attach": "連結",
+        "detach": "移除",
+        "private": "私人 · 需先分享",
+        "attached": "已將「{{title}}」連結到班級。",
+        "detached": "已將「{{title}}」從班級移除。"
+      },
+      "copyLink": "複製邀請連結",
+      "linkCopied": "已複製邀請連結。",
+      "manageMembers": "成員（{{count}}）",
+      "addMember": {
+        "title": "加入學員",
+        "description": "不需加入碼，直接把某人加入班級。沒有有效會員資格的人，要等有了會員資格才能開啟班級課程。",
+        "search": "依使用者名稱搜尋",
+        "empty": "沒有符合的帳號。",
+        "noMembership": "無會員資格",
+        "add": "加入",
+        "added": "已將 {{username}} 加入班級。"
+      }
     },
     "audit": {
       "title": "稽核紀錄",
@@ -2559,7 +2603,8 @@
         "challenge_update": "編輯挑戰",
         "settings_update": "修改設定",
         "share_update-approve": "已核准分享更新",
-        "share_update-reject": "已拒絕分享更新"
+        "share_update-reject": "已拒絕分享更新",
+        "class_add": "加入成員"
       }
     },
     "accessRequests": {
@@ -2712,7 +2757,7 @@
     },
     "courses": {
       "title": "課程",
-      "description": "系統中的所有課程。開啟即可審閱，或複製 ID 用於設為試看或加入班級。",
+      "description": "系統中的所有課程。可開啟檢視，或複製 ID 將其標為免費試看。",
       "open": "在新分頁中開啟課程",
       "copy": "複製 ID {{id}}",
       "copied": "已複製 {{id}}",
@@ -2738,7 +2783,8 @@
       "REQUEST_TOO_SOON": "被拒絕的申請需要稍後才能再次送出。",
       "COURSE_NOT_FOUND": "沒有此 ID 的課程。請核對課程網址中的 ID（/classroom/<ID>）。",
       "RATE_LIMITED": "你有太多未回覆的請求。請先等待回覆。",
-      "COMMUNITY_BLOCKED": "你的帳號已被禁止在社群發文。"
+      "COMMUNITY_BLOCKED": "你的帳號已被禁止在社群發文。",
+      "COURSE_NOT_ATTACHABLE": "只能連結已分享的課程、免費試看課程，或由營運人員/管理員建立的課程。請先請作者分享該課程。"
     }
   },
   "catalog": {
@@ -2754,7 +2800,10 @@
       "code": "加入代碼",
       "submit": "加入",
       "done": "你已加入 {{name}}。",
-      "description": "輸入你收到的邀請碼即可加入班級。"
+      "description": "可選。不加入班級也能自學：你的課程、免費試看課程和已分享課程。只有老師或營運人員給了你班級碼時才需要輸入。",
+      "needsMembership": "自學不需要加入班級。如果老師給了你班級碼，需要先有會員資格，再於此頁面輸入。",
+      "invited": "你被邀請加入一個班級。請用有會員資格的帳號登入，再於此頁面按「加入」。",
+      "invitedMember": "你被邀請加入一個班級。請核對加入碼後按「加入」。"
     },
     "empty": "暫時沒有可瀏覽的內容。",
     "kind": {

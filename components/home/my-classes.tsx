@@ -48,6 +48,7 @@ export function MyClasses({
   return (
     <section className="mt-8 flex w-full flex-col gap-3" aria-label={t('home.classes.mine')}>
       <SectionTitle>{t('home.classes.mine')}</SectionTitle>
+      <p className="text-sm text-muted-foreground">{t('home.myClasses.hint')}</p>
       <ul className="flex flex-col gap-3">
         {data.classes.map((row) => (
           <li key={row.id} className={cn(GLASS, 'flex flex-col gap-4 rounded-3xl p-5')}>

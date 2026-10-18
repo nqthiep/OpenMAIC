@@ -64,12 +64,9 @@ function errorName(error: unknown): string {
   return error instanceof Error ? error.name : 'unknown error';
 }
 
+// Same numeric date as the other operator tables, so one page never mixes two formats.
 function formatCreated(createdAt: string, locale: string): string {
-  return new Date(createdAt).toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return new Date(createdAt).toLocaleDateString(locale);
 }
 
 /**
@@ -95,6 +92,8 @@ export function AccountAdminPanel() {
   const [resetting, setResetting] = useState<AccountRow | null>(null);
   const [issued, setIssued] = useState<string | null>(null);
   const [resetBusy, setResetBusy] = useState(false);
+  // A role picked in a row's select, waiting for the administrator to confirm it.
+  const [roleChange, setRoleChange] = useState<{ row: AccountRow; role: AccountRole } | null>(null);
 
   const reportListFailure = useCallback(
     (error: unknown) => {
@@ -229,7 +228,7 @@ export function AccountAdminPanel() {
       header: t('account.admin.columns.username'),
       sort: (row) => row.username,
       cell: (row) => (
-        <span className="break-all font-medium">
+        <span className="whitespace-nowrap font-medium">
           {row.username}
           {row.username === viewer ? (
             <span className="ml-1.5 text-xs font-normal text-muted-foreground">
@@ -248,7 +247,10 @@ export function AccountAdminPanel() {
           <select
             aria-label={t('account.admin.changeRoleLabel', { username: row.username })}
             value={row.role}
-            onChange={(event) => void changeRole(row, event.target.value as AccountRole)}
+            onChange={(event) => {
+              const role = event.target.value as AccountRole;
+              if (role !== row.role) setRoleChange({ row, role });
+            }}
             className={SELECT_CLASS}
           >
             {ROLE_OPTIONS.map((role) => (
@@ -417,6 +419,38 @@ export function AccountAdminPanel() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog
+        open={roleChange !== null}
+        onOpenChange={(open) => {
+          if (!open) setRoleChange(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {roleChange &&
+                t('account.admin.confirm.roleTitle', {
+                  username: roleChange.row.username,
+                  role: t(`account.roles.${roleChange.role}`),
+                })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {roleChange && t(`account.admin.confirm.roleDescription.${roleChange.role}`)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <Button
+              onClick={() => {
+                if (roleChange) void changeRole(roleChange.row, roleChange.role);
+                setRoleChange(null);
+              }}
+            >
+              {t('account.admin.confirm.roleAction')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog
         open={dialogOpen}
         onOpenChange={(open) => {
