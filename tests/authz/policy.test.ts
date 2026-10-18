@@ -83,6 +83,16 @@ describe('can: changing roles and spending the operator budget', () => {
   });
 });
 
+describe('can: asking for a membership', () => {
+  it('is for a signed-in learner without an active membership', () => {
+    expect(can(LEARNER, 'access.request')).toBe(true);
+    expect(can({ ...LEARNER, memberActive: true }, 'access.request')).toBe(false);
+    expect(can(ANON, 'access.request')).toBe(false);
+    expect(can(OPERATOR, 'access.request')).toBe(false);
+    expect(can(ADMIN, 'access.request')).toBe(false);
+  });
+});
+
 describe('can: course access by sharing, preview and class', () => {
   const MEMBER: Viewer = { ...LEARNER, memberActive: true };
   const LAPSED: Viewer = { ...LEARNER, memberActive: false };
@@ -113,7 +123,9 @@ describe('can: course access by sharing, preview and class', () => {
   });
 
   it('only the owner requests a share; only staff decide, mark previews, manage memberships, classes and the audit log', () => {
-    expect(can(LEARNER, 'share.request', OWNED_BY_LEARNER)).toBe(true);
+    // Sharing needs an active membership: a learner without one is refused even as owner.
+    expect(can(LEARNER, 'share.request', OWNED_BY_LEARNER)).toBe(false);
+    expect(can({ ...LEARNER, memberActive: true }, 'share.request', OWNED_BY_LEARNER)).toBe(true);
     expect(can(LEARNER, 'share.request', OWNED_BY_OTHER)).toBe(false);
     expect(can(GUEST_OWNER, 'share.request', { ownerId: GUEST_OWNER.ownerId })).toBe(false);
     for (const action of [
