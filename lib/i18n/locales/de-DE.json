@@ -2839,7 +2839,50 @@
     "unavailable": "Der Katalog ist auf dieser Installation nicht verfügbar.",
     "back": "Zurück zum Katalog",
     "membersOnly": "Geteilte Kurse und Klassen sind für Mitglieder.",
-    "sceneCount": "{{count}} Szenen"
+    "sceneCount": "{{count}} Szenen",
+    "search": {
+      "label": "Kurse durchsuchen",
+      "placeholder": "Nach Kursname suchen…",
+      "clear": "Suche löschen"
+    },
+    "filter": {
+      "status": "Status",
+      "kind": "Art",
+      "content": "Inhalt",
+      "length": "Länge"
+    },
+    "status": {
+      "new": "Nicht begonnen",
+      "learning": "In Bearbeitung",
+      "done": "Abgeschlossen"
+    },
+    "sort": {
+      "label": "Sortieren",
+      "title": "Name A–Z",
+      "recent": "Zuletzt gelernt",
+      "short": "Kürzeste zuerst",
+      "updated": "Zuletzt aktualisiert"
+    },
+    "continue": "Weiterlernen",
+    "results": "Kurse: {{count}}",
+    "noMatch": "Kein Kurs passt. Versuchen Sie ein anderes Wort oder entfernen Sie einen Filter.",
+    "clearFilters": "Filter zurücksetzen",
+    "showMore": "{{count}} weitere anzeigen",
+    "content": {
+      "quiz": "Mit Quiz",
+      "interactive": "Mit interaktiven Teilen"
+    },
+    "length": {
+      "short": "Kurz (bis {{short}} Szenen)",
+      "medium": "Mittel ({{from}}–{{to}} Szenen)",
+      "long": "Lang (über {{to}} Szenen)"
+    },
+    "layout": {
+      "label": "Ansicht",
+      "grid": "Raster",
+      "list": "Kompakte Liste"
+    },
+    "updatedOn": "Aktualisiert am {{date}}"
   },
   "courseProgress": {
     "done": "Abgeschlossen",

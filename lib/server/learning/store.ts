@@ -1199,6 +1199,15 @@ export interface CatalogEntry {
   kind: 'preview' | 'shared' | 'class';
   /** How many scenes the course has; absent when the course documents are not stored here. */
   sceneCount?: number;
+  /**
+   * When readers last got new content, as an ISO time: the approval of a shared course (readers see
+   * the approved copy), else the course's own last update. Absent when neither is known.
+   */
+  updatedAt?: string;
+  /** The course has a quiz scene. Absent together with `sceneCount`. */
+  hasQuiz?: boolean;
+  /** The course has an interactive or project scene. Absent together with `sceneCount`. */
+  hasInteractive?: boolean;
 }
 
 /**
@@ -1225,15 +1234,17 @@ export async function listCatalog(
   const stageName = (courseId: string) =>
     named ? `(SELECT NULLIF(d.name, '') FROM document_stages d WHERE d.id = ${courseId})` : 'NULL';
   const result = await db.query(
-    `SELECT s.course_id, s.title, 'shared' AS kind
+    `SELECT s.course_id, s.title, 'shared' AS kind, s.decided_at AS approved_at
        FROM course_shares s
       WHERE s.state = 'shared' AND $1::boolean
      UNION ALL
-     SELECT p.course_id, COALESCE(s.title, ${stageName('p.course_id')}, p.course_id) AS title, 'preview' AS kind
+     SELECT p.course_id, COALESCE(s.title, ${stageName('p.course_id')}, p.course_id) AS title, 'preview' AS kind,
+            NULL::timestamptz AS approved_at
        FROM course_previews p
        LEFT JOIN course_shares s ON s.course_id = p.course_id
      UNION ALL
-     SELECT cc.course_id, COALESCE(s.title, ${stageName('cc.course_id')}, cc.course_id) AS title, 'class' AS kind
+     SELECT cc.course_id, COALESCE(s.title, ${stageName('cc.course_id')}, cc.course_id) AS title, 'class' AS kind,
+            NULL::timestamptz AS approved_at
        FROM class_courses cc
        JOIN class_members m ON m.class_id = cc.class_id
        LEFT JOIN course_shares s ON s.course_id = cc.course_id
@@ -1246,32 +1257,60 @@ export async function listCatalog(
     course_id: string;
     title: string;
     kind: CatalogEntry['kind'];
+    approved_at: Date | string | null;
   }>) {
     const entry: CatalogEntry = { courseId: row.course_id, title: row.title, kind: row.kind };
+    if (row.approved_at !== null) entry.updatedAt = new Date(row.approved_at).toISOString();
     const current = byId.get(entry.courseId);
     if (!current || rank[entry.kind] > rank[current.kind]) byId.set(entry.courseId, entry);
   }
   const entries = [...byId.values()];
-  await addSceneCounts(db, entries);
+  await addDocumentFacts(db, entries);
   return entries.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-/** Fills `sceneCount` from the stored course documents, one query for the whole list. */
-async function addSceneCounts(db: AccountQueryable, entries: CatalogEntry[]): Promise<void> {
+/**
+ * Fills what the stored course documents say, one query for the whole list: the scene count, whether
+ * there is a quiz or an interactive scene, and, for a course that is not shared, its last update.
+ */
+async function addDocumentFacts(db: AccountQueryable, entries: CatalogEntry[]): Promise<void> {
   if (entries.length === 0) return;
   const present = await db.query(`SELECT to_regclass('document_scenes') IS NOT NULL AS present`);
   if ((present.rows[0] as { present: boolean }).present !== true) return;
-  const counts = await db.query(
-    `SELECT stage_id, COUNT(*)::int AS n FROM document_scenes
-      WHERE stage_id = ANY($1::text[]) GROUP BY stage_id`,
+  const facts = await db.query(
+    `SELECT sc.stage_id,
+            COUNT(*)::int AS n,
+            COUNT(*) FILTER (WHERE sc.data->>'type' = 'quiz')::int AS quizzes,
+            COUNT(*) FILTER (WHERE sc.data->>'type' IN ('interactive', 'pbl'))::int AS interactive,
+            MAX(st.updated_at) AS updated_at
+       FROM document_scenes sc
+       LEFT JOIN document_stages st ON st.id = sc.stage_id
+      WHERE sc.stage_id = ANY($1::text[])
+      GROUP BY sc.stage_id`,
     [entries.map((entry) => entry.courseId)],
   );
   const byCourse = new Map(
-    (counts.rows as Array<{ stage_id: string; n: number }>).map((row) => [row.stage_id, row.n]),
+    (
+      facts.rows as Array<{
+        stage_id: string;
+        n: number;
+        quizzes: number;
+        interactive: number;
+        updated_at: number | string | null;
+      }>
+    ).map((row) => [row.stage_id, row]),
   );
   for (const entry of entries) {
-    const n = byCourse.get(entry.courseId);
-    if (n !== undefined) entry.sceneCount = n;
+    const row = byCourse.get(entry.courseId);
+    if (!row) continue;
+    entry.sceneCount = row.n;
+    entry.hasQuiz = row.quizzes > 0;
+    entry.hasInteractive = row.interactive > 0;
+    // A shared course keeps its approval time: readers see the approved copy, not later edits.
+    const edited = Number(row.updated_at);
+    if (entry.updatedAt === undefined && row.updated_at !== null && Number.isFinite(edited)) {
+      entry.updatedAt = new Date(edited).toISOString();
+    }
   }
 }
 

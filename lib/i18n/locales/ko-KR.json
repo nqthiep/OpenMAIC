@@ -2839,7 +2839,50 @@
     "unavailable": "이 배포에서는 카탈로그를 사용할 수 없습니다.",
     "back": "카탈로그로 돌아가기",
     "membersOnly": "공유 강의와 반은 회원 전용입니다.",
-    "sceneCount": "장면 {{count}}개"
+    "sceneCount": "장면 {{count}}개",
+    "search": {
+      "label": "강좌 검색",
+      "placeholder": "강좌 이름으로 검색…",
+      "clear": "검색어 지우기"
+    },
+    "filter": {
+      "status": "상태",
+      "kind": "유형",
+      "content": "내용",
+      "length": "길이"
+    },
+    "status": {
+      "new": "학습 전",
+      "learning": "학습 중",
+      "done": "완료"
+    },
+    "sort": {
+      "label": "정렬",
+      "title": "이름순 A–Z",
+      "recent": "최근 학습순",
+      "short": "짧은 순",
+      "updated": "최근 업데이트순"
+    },
+    "continue": "이어서 학습",
+    "results": "강좌 {{count}}개",
+    "noMatch": "일치하는 강좌가 없습니다. 다른 검색어를 입력하거나 필터를 줄여 보세요.",
+    "clearFilters": "필터 지우기",
+    "showMore": "{{count}}개 더 보기",
+    "content": {
+      "quiz": "퀴즈 포함",
+      "interactive": "인터랙티브 포함"
+    },
+    "length": {
+      "short": "짧음(장면 {{short}}개 이하)",
+      "medium": "보통(장면 {{from}}–{{to}}개)",
+      "long": "김(장면 {{to}}개 초과)"
+    },
+    "layout": {
+      "label": "보기 방식",
+      "grid": "격자",
+      "list": "간단한 목록"
+    },
+    "updatedOn": "{{date}} 업데이트"
   },
   "courseProgress": {
     "done": "완료",

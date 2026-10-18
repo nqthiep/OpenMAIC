@@ -2839,7 +2839,50 @@
     "unavailable": "Le catalogue n'est pas disponible sur ce déploiement.",
     "back": "Retour au catalogue",
     "membersOnly": "Les cours partagés et les classes sont réservés aux membres.",
-    "sceneCount": "{{count}} scènes"
+    "sceneCount": "{{count}} scènes",
+    "search": {
+      "label": "Rechercher un cours",
+      "placeholder": "Rechercher par nom de cours…",
+      "clear": "Effacer la recherche"
+    },
+    "filter": {
+      "status": "Statut",
+      "kind": "Type",
+      "content": "Contenu",
+      "length": "Durée"
+    },
+    "status": {
+      "new": "Non commencé",
+      "learning": "En cours",
+      "done": "Terminé"
+    },
+    "sort": {
+      "label": "Trier",
+      "title": "Nom A–Z",
+      "recent": "Étudié récemment",
+      "short": "Plus courts d'abord",
+      "updated": "Mis à jour récemment"
+    },
+    "continue": "Reprendre",
+    "results": "Cours : {{count}}",
+    "noMatch": "Aucun cours ne correspond. Essayez un autre mot ou retirez un filtre.",
+    "clearFilters": "Effacer les filtres",
+    "showMore": "Afficher {{count}} de plus",
+    "content": {
+      "quiz": "Avec quiz",
+      "interactive": "Avec parties interactives"
+    },
+    "length": {
+      "short": "Court (jusqu'à {{short}} scènes)",
+      "medium": "Moyen ({{from}}–{{to}} scènes)",
+      "long": "Long (plus de {{to}} scènes)"
+    },
+    "layout": {
+      "label": "Affichage",
+      "grid": "Grille",
+      "list": "Liste compacte"
+    },
+    "updatedOn": "Mis à jour le {{date}}"
   },
   "courseProgress": {
     "done": "Terminé",

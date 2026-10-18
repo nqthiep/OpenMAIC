@@ -43,6 +43,20 @@ describe('resolveClassroomExit', () => {
     expect(catalogClassroomHref('a b')).toBe('/classroom/a%20b?returnTo=catalog');
   });
 
+  it('returns to the same search and filters, and keeps nothing else from the link', () => {
+    const href = catalogClassroomHref('c1', 'q=dao+ham&status=learning');
+    expect(href).toBe('/classroom/c1?returnTo=catalog&cq=q%3Ddao%2Bham%26status%3Dlearning');
+
+    const back = new URL(href, 'http://localhost').searchParams;
+    expect(resolveClassroomExit({ searchParams: back })).toEqual({
+      kind: 'push',
+      href: '/catalog?q=dao+ham&status=learning',
+    });
+    expect(
+      resolveClassroomExit({ searchParams: params('returnTo=catalog&cq=evil%3D1%26q%3Dx') }),
+    ).toEqual({ kind: 'push', href: '/catalog?q=x' });
+  });
+
   it('returns to home explicitly instead of reopening Pro through browser history', () => {
     expect(resolveClassroomExit({ searchParams: params('returnTo=home') })).toEqual({
       kind: 'push',

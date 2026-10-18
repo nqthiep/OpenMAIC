@@ -441,9 +441,11 @@ describe('catalog titles', () => {
   });
 
   it('counts the scenes of a course when its scenes are stored, and omits the count otherwise', async () => {
-    await pg.exec(`CREATE TABLE document_stages (id TEXT PRIMARY KEY, name TEXT)`);
+    await pg.exec(
+      `CREATE TABLE document_stages (id TEXT PRIMARY KEY, name TEXT, updated_at DOUBLE PRECISION)`,
+    );
     try {
-      await pg.exec(`INSERT INTO document_stages VALUES ('c-class', 'Binary search')`);
+      await pg.exec(`INSERT INTO document_stages (id, name) VALUES ('c-class', 'Binary search')`);
       await arrange();
       const counts = async () =>
         Object.fromEntries(
@@ -454,10 +456,78 @@ describe('catalog titles', () => {
         );
       // Documents without a scenes table: no counts, and nothing fails.
       expect((await counts())['c-class']).toBeUndefined();
-      await pg.exec(`CREATE TABLE document_scenes (stage_id TEXT NOT NULL, id TEXT NOT NULL)`);
-      await pg.exec(`INSERT INTO document_scenes VALUES ('c-class', 's1'), ('c-class', 's2')`);
+      await pg.exec(
+        `CREATE TABLE document_scenes (stage_id TEXT NOT NULL, id TEXT NOT NULL, data JSONB NOT NULL DEFAULT '{}')`,
+      );
+      await pg.exec(
+        `INSERT INTO document_scenes (stage_id, id) VALUES ('c-class', 's1'), ('c-class', 's2')`,
+      );
       expect(await counts()).toMatchObject({ 'c-class': 2 });
       expect((await counts())['c-empty']).toBeUndefined();
+    } finally {
+      await pg.exec(`DROP TABLE IF EXISTS document_scenes`);
+      await pg.exec(`DROP TABLE document_stages`);
+    }
+  });
+
+  it('says whether a course has a quiz or an interactive scene, and when it was last updated', async () => {
+    await pg.exec(
+      `CREATE TABLE document_stages (id TEXT PRIMARY KEY, name TEXT, updated_at DOUBLE PRECISION)`,
+    );
+    await pg.exec(
+      `CREATE TABLE document_scenes (stage_id TEXT NOT NULL, id TEXT NOT NULL, data JSONB NOT NULL)`,
+    );
+    try {
+      const edited = Date.parse('2026-10-15T08:00:00.000Z');
+      await pg.exec(
+        `INSERT INTO document_stages VALUES
+           ('c-class', 'Binary search', ${edited}), ('c-prev', 'Fractions', ${edited}),
+           ('s-shared', 'Shared stage', ${edited})`,
+      );
+      const scene = (stage: string, id: string, type: string) =>
+        `('${stage}', '${id}', '{"type":"${type}"}'::jsonb)`;
+      await pg.exec(
+        `INSERT INTO document_scenes VALUES
+           ${scene('c-class', 'a', 'slide')}, ${scene('c-class', 'b', 'quiz')},
+           ${scene('c-prev', 'a', 'slide')}, ${scene('c-prev', 'b', 'pbl')},
+           ${scene('s-shared', 'a', 'interactive')}`,
+      );
+      await arrange();
+      await setCoursePreview(db, { actorId: 'op', courseId: 'c-prev', on: true, now: NOW });
+      await requestCourseShare(db, {
+        courseId: 's-shared',
+        ownerId: 'acct:bob',
+        title: 'Shared',
+        now: NOW,
+      });
+      await decideCourseShare(db, {
+        actorId: 'op',
+        courseId: 's-shared',
+        decision: 'approve',
+        now: NOW,
+      });
+      const byId = Object.fromEntries(
+        (await listCatalog(db, { accountId: 'alice', memberActive: true })).map((e) => [
+          e.courseId,
+          e,
+        ]),
+      );
+      expect(byId['c-class']).toMatchObject({
+        sceneCount: 2,
+        hasQuiz: true,
+        hasInteractive: false,
+        updatedAt: '2026-10-15T08:00:00.000Z',
+      });
+      // A project scene counts as interactive.
+      expect(byId['c-prev']).toMatchObject({ hasQuiz: false, hasInteractive: true });
+      // A shared course keeps its approval time, not the author's later edit.
+      expect(byId['s-shared']).toMatchObject({
+        hasInteractive: true,
+        updatedAt: NOW.toISOString(),
+      });
+      // No scenes stored: nothing is claimed about content.
+      expect(byId['c-empty'].hasQuiz).toBeUndefined();
+      expect(byId['c-empty'].updatedAt).toBeUndefined();
     } finally {
       await pg.exec(`DROP TABLE IF EXISTS document_scenes`);
       await pg.exec(`DROP TABLE document_stages`);

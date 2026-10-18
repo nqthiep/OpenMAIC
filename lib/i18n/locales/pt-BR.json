@@ -2839,7 +2839,50 @@
     "unavailable": "O catálogo não está disponível nesta instalação.",
     "back": "Voltar ao catálogo",
     "membersOnly": "Cursos compartilhados e turmas são para membros.",
-    "sceneCount": "{{count}} cenas"
+    "sceneCount": "{{count}} cenas",
+    "search": {
+      "label": "Buscar cursos",
+      "placeholder": "Buscar pelo nome do curso…",
+      "clear": "Limpar busca"
+    },
+    "filter": {
+      "status": "Status",
+      "kind": "Tipo",
+      "content": "Conteúdo",
+      "length": "Duração"
+    },
+    "status": {
+      "new": "Não iniciado",
+      "learning": "Em andamento",
+      "done": "Concluído"
+    },
+    "sort": {
+      "label": "Ordenar",
+      "title": "Nome A–Z",
+      "recent": "Estudado recentemente",
+      "short": "Mais curtos primeiro",
+      "updated": "Atualizados recentemente"
+    },
+    "continue": "Continuar estudando",
+    "results": "Cursos: {{count}}",
+    "noMatch": "Nenhum curso corresponde. Tente outra palavra ou remova um filtro.",
+    "clearFilters": "Limpar filtros",
+    "showMore": "Mostrar mais {{count}}",
+    "content": {
+      "quiz": "Com quiz",
+      "interactive": "Com partes interativas"
+    },
+    "length": {
+      "short": "Curto (até {{short}} cenas)",
+      "medium": "Médio ({{from}}–{{to}} cenas)",
+      "long": "Longo (mais de {{to}} cenas)"
+    },
+    "layout": {
+      "label": "Exibição",
+      "grid": "Grade",
+      "list": "Lista compacta"
+    },
+    "updatedOn": "Atualizado em {{date}}"
   },
   "courseProgress": {
     "done": "Concluído",

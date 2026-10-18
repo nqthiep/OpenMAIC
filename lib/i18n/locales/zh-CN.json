@@ -2839,7 +2839,50 @@
     "unavailable": "此部署不提供课程目录。",
     "back": "返回课程目录",
     "membersOnly": "共享课程和班级仅对会员开放。",
-    "sceneCount": "{{count}} 个场景"
+    "sceneCount": "{{count}} 个场景",
+    "search": {
+      "label": "搜索课程",
+      "placeholder": "按课程名称搜索…",
+      "clear": "清除搜索"
+    },
+    "filter": {
+      "status": "状态",
+      "kind": "类型",
+      "content": "内容",
+      "length": "长度"
+    },
+    "status": {
+      "new": "未学习",
+      "learning": "学习中",
+      "done": "已完成"
+    },
+    "sort": {
+      "label": "排序",
+      "title": "名称 A–Z",
+      "recent": "最近学习",
+      "short": "最短优先",
+      "updated": "最近更新"
+    },
+    "continue": "继续学习",
+    "results": "共 {{count}} 门课程",
+    "noMatch": "没有匹配的课程。试试其他关键词，或取消部分筛选。",
+    "clearFilters": "清除筛选",
+    "showMore": "再显示 {{count}} 门课程",
+    "content": {
+      "quiz": "含测验",
+      "interactive": "含互动"
+    },
+    "length": {
+      "short": "短（最多 {{short}} 个场景）",
+      "medium": "中（{{from}}–{{to}} 个场景）",
+      "long": "长（超过 {{to}} 个场景）"
+    },
+    "layout": {
+      "label": "显示方式",
+      "grid": "网格",
+      "list": "紧凑列表"
+    },
+    "updatedOn": "更新于 {{date}}"
   },
   "courseProgress": {
     "done": "已完成",

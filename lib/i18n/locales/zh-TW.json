@@ -2839,7 +2839,50 @@
     "unavailable": "此部署不提供課程目錄。",
     "back": "返回課程目錄",
     "membersOnly": "共享課程和班級僅對會員開放。",
-    "sceneCount": "{{count}} 個場景"
+    "sceneCount": "{{count}} 個場景",
+    "search": {
+      "label": "搜尋課程",
+      "placeholder": "依課程名稱搜尋…",
+      "clear": "清除搜尋"
+    },
+    "filter": {
+      "status": "狀態",
+      "kind": "類型",
+      "content": "內容",
+      "length": "長度"
+    },
+    "status": {
+      "new": "未學習",
+      "learning": "學習中",
+      "done": "已完成"
+    },
+    "sort": {
+      "label": "排序",
+      "title": "名稱 A–Z",
+      "recent": "最近學習",
+      "short": "最短優先",
+      "updated": "最近更新"
+    },
+    "continue": "繼續學習",
+    "results": "共 {{count}} 門課程",
+    "noMatch": "沒有符合的課程。試試其他關鍵字，或取消部分篩選。",
+    "clearFilters": "清除篩選",
+    "showMore": "再顯示 {{count}} 門課程",
+    "content": {
+      "quiz": "含測驗",
+      "interactive": "含互動"
+    },
+    "length": {
+      "short": "短（最多 {{short}} 個場景）",
+      "medium": "中（{{from}}–{{to}} 個場景）",
+      "long": "長（超過 {{to}} 個場景）"
+    },
+    "layout": {
+      "label": "顯示方式",
+      "grid": "網格",
+      "list": "精簡清單"
+    },
+    "updatedOn": "更新於 {{date}}"
   },
   "courseProgress": {
     "done": "已完成",

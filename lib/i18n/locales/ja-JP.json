@@ -2839,7 +2839,50 @@
     "unavailable": "このデプロイではカタログを利用できません。",
     "back": "カタログに戻る",
     "membersOnly": "共有コースとクラスはメンバー向けです。",
-    "sceneCount": "{{count}} シーン"
+    "sceneCount": "{{count}} シーン",
+    "search": {
+      "label": "コースを検索",
+      "placeholder": "コース名で検索…",
+      "clear": "検索をクリア"
+    },
+    "filter": {
+      "status": "ステータス",
+      "kind": "種類",
+      "content": "内容",
+      "length": "長さ"
+    },
+    "status": {
+      "new": "未学習",
+      "learning": "学習中",
+      "done": "完了"
+    },
+    "sort": {
+      "label": "並べ替え",
+      "title": "名前順 A–Z",
+      "recent": "最近学習した順",
+      "short": "短い順",
+      "updated": "最近更新された順"
+    },
+    "continue": "学習を続ける",
+    "results": "{{count}} 件のコース",
+    "noMatch": "一致するコースがありません。別のキーワードを試すか、絞り込みを減らしてください。",
+    "clearFilters": "絞り込みをクリア",
+    "showMore": "さらに {{count}} 件表示",
+    "content": {
+      "quiz": "テストあり",
+      "interactive": "インタラクティブあり"
+    },
+    "length": {
+      "short": "短い（{{short}} シーンまで）",
+      "medium": "中くらい（{{from}}〜{{to}} シーン）",
+      "long": "長い（{{to}} シーン超）"
+    },
+    "layout": {
+      "label": "表示",
+      "grid": "グリッド",
+      "list": "コンパクトリスト"
+    },
+    "updatedOn": "{{date}} 更新"
   },
   "courseProgress": {
     "done": "完了",

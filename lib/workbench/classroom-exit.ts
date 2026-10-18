@@ -1,6 +1,8 @@
+import { cleanViewSearch } from '@/lib/home/catalog-filter';
+
 export type ClassroomExitDecision = {
   readonly kind: 'push';
-  readonly href: '/workspace' | '/catalog' | '/';
+  readonly href: '/workspace' | '/' | `/catalog${string}`;
 };
 
 interface ClassroomExitContext {
@@ -38,9 +40,10 @@ export function resolveClassroomExit({
   if (searchParams.get('returnTo') === 'home') {
     return { kind: 'push', href: '/' };
   }
-  // A course opened from the catalog goes back to the catalog.
+  // A course opened from the catalog goes back to the catalog, to the same search and filters.
   if (searchParams.get('returnTo') === 'catalog') {
-    return { kind: 'push', href: '/catalog' };
+    const view = cleanViewSearch(searchParams.get('cq') ?? '');
+    return { kind: 'push', href: view ? `/catalog?${view}` : '/catalog' };
   }
   return { kind: 'push', href: '/' };
 }
@@ -61,9 +64,13 @@ export function classroomExitLabelKey(
   return 'generation.backToHome';
 }
 
-/** The classroom URL for a course opened from the catalog, so its back arrow returns there. */
-export function catalogClassroomHref(courseId: string): string {
-  return `/classroom/${encodeURIComponent(courseId)}?returnTo=catalog`;
+/**
+ * The classroom URL for a course opened from the catalog, so its back arrow returns there.
+ * `viewQuery` is the catalog list's own query (search, filters), carried as `cq`.
+ */
+export function catalogClassroomHref(courseId: string, viewQuery = ''): string {
+  const carried = viewQuery ? `&cq=${encodeURIComponent(viewQuery)}` : '';
+  return `/classroom/${encodeURIComponent(courseId)}?returnTo=catalog${carried}`;
 }
 
 export function classroomEntryHref(stageId: string, discoverOnly: boolean): string {

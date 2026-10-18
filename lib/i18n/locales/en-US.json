@@ -2839,7 +2839,50 @@
     "unavailable": "The catalog is not available on this deployment.",
     "back": "Back to the catalog",
     "membersOnly": "Shared courses and classes are for members.",
-    "sceneCount": "{{count}} scenes"
+    "sceneCount": "{{count}} scenes",
+    "search": {
+      "label": "Search courses",
+      "placeholder": "Search by course name…",
+      "clear": "Clear search"
+    },
+    "filter": {
+      "status": "Status",
+      "kind": "Type",
+      "content": "Content",
+      "length": "Length"
+    },
+    "status": {
+      "new": "Not started",
+      "learning": "In progress",
+      "done": "Done"
+    },
+    "sort": {
+      "label": "Sort",
+      "title": "Name A–Z",
+      "recent": "Last studied",
+      "short": "Shortest first",
+      "updated": "Recently updated"
+    },
+    "continue": "Continue learning",
+    "results": "Courses: {{count}}",
+    "noMatch": "No course matches. Try another word or remove a filter.",
+    "clearFilters": "Clear filters",
+    "showMore": "Show {{count}} more",
+    "content": {
+      "quiz": "Has a quiz",
+      "interactive": "Has interactive parts"
+    },
+    "length": {
+      "short": "Short (up to {{short}} scenes)",
+      "medium": "Medium ({{from}}–{{to}} scenes)",
+      "long": "Long (over {{to}} scenes)"
+    },
+    "layout": {
+      "label": "View",
+      "grid": "Grid",
+      "list": "Compact list"
+    },
+    "updatedOn": "Updated {{date}}"
   },
   "courseProgress": {
     "done": "Completed",

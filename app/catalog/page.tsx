@@ -6,7 +6,7 @@ import { ArrowRight, BookOpen, GraduationCap, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchAccountSession } from '@/components/account/account-api';
 import { AccountDialog } from '@/components/account/account-dialog';
-import { CourseCard } from '@/components/home/course-card';
+import { CatalogBrowser } from '@/components/home/catalog-browser';
 import { AccessRequest } from '@/components/home/access-request';
 import { MyClasses } from '@/components/home/my-classes';
 import { GLASS, Reveal, SiteShell } from '@/components/home/site-shell';
@@ -126,7 +126,10 @@ export default function CatalogPage() {
       setCode('');
       if (invited) {
         // Drop the code from the address so a reload or a shared screenshot does not carry it.
-        window.history.replaceState(null, '', '/catalog');
+        const params = new URLSearchParams(window.location.search);
+        params.delete('join');
+        const rest = params.toString();
+        window.history.replaceState(null, '', rest ? `/catalog?${rest}` : '/catalog');
         setInvited(false);
       }
       toast.success(t('catalog.join.done', { name: joined.class.name }));
@@ -188,21 +191,12 @@ export default function CatalogPage() {
           <p className="text-sm text-muted-foreground">{t('catalog.empty')}</p>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {/* Class courses are listed once, under their class in MyClasses above. */}
-          {courses
-            .filter((entry) => entry.kind !== 'class')
-            .map((entry, index) => (
-              <Reveal key={entry.courseId} delay={(index % 3) * 0.06}>
-                <CourseCard
-                  entry={entry}
-                  index={index}
-                  href={catalogClassroomHref(entry.courseId)}
-                  progress={progress.get(entry.courseId)}
-                />
-              </Reveal>
-            ))}
-        </div>
+        // Class courses are listed once, under their class in MyClasses above.
+        <CatalogBrowser
+          courses={courses.filter((entry) => entry.kind !== 'class')}
+          progress={progress}
+          href={catalogClassroomHref}
+        />
       )}
     </section>
   );

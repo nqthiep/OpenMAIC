@@ -2839,7 +2839,50 @@
     "unavailable": "Danh mục không khả dụng trên hệ thống này.",
     "back": "Quay lại danh mục",
     "membersOnly": "Khoá học được chia sẻ và khoá học của lớp dành cho thành viên.",
-    "sceneCount": "{{count}} cảnh"
+    "sceneCount": "{{count}} cảnh",
+    "search": {
+      "label": "Tìm khoá học",
+      "placeholder": "Tìm theo tên khoá học…",
+      "clear": "Xoá tìm kiếm"
+    },
+    "filter": {
+      "status": "Trạng thái",
+      "kind": "Loại",
+      "content": "Nội dung",
+      "length": "Độ dài"
+    },
+    "status": {
+      "new": "Chưa học",
+      "learning": "Đang học",
+      "done": "Đã xong"
+    },
+    "sort": {
+      "label": "Sắp xếp",
+      "title": "Tên A–Z",
+      "recent": "Học gần nhất",
+      "short": "Ngắn trước",
+      "updated": "Mới cập nhật"
+    },
+    "continue": "Tiếp tục học",
+    "results": "{{count}} khoá học",
+    "noMatch": "Không có khoá học nào khớp. Hãy thử từ khoá khác hoặc bỏ bớt bộ lọc.",
+    "clearFilters": "Xoá bộ lọc",
+    "showMore": "Hiện thêm {{count}} khoá học",
+    "content": {
+      "quiz": "Có bài kiểm tra",
+      "interactive": "Có tương tác"
+    },
+    "length": {
+      "short": "Ngắn (đến {{short}} cảnh)",
+      "medium": "Vừa ({{from}}–{{to}} cảnh)",
+      "long": "Dài (trên {{to}} cảnh)"
+    },
+    "layout": {
+      "label": "Kiểu hiển thị",
+      "grid": "Dạng lưới",
+      "list": "Danh sách gọn"
+    },
+    "updatedOn": "Cập nhật {{date}}"
   },
   "courseProgress": {
     "done": "Đã hoàn thành",

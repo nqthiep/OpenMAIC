@@ -67,6 +67,10 @@ export interface CatalogEntry {
   kind: 'preview' | 'shared' | 'class';
   /** Absent when the server does not store course documents. */
   sceneCount?: number;
+  /** When readers last got new content (ISO time); absent when unknown. */
+  updatedAt?: string;
+  hasQuiz?: boolean;
+  hasInteractive?: boolean;
 }
 
 export interface AuditRow {
@@ -832,10 +836,27 @@ export interface ProgressReport {
 
 /** The learner's own progress: the named courses, or the ones studied last. */
 export async function fetchProgress(courseIds?: readonly string[]): Promise<ProgressRow[]> {
-  const query = courseIds ? `?courseIds=${courseIds.map(encodeURIComponent).join(',')}` : '';
-  const body = await call<{ progress: ProgressRow[] }>('GET', `/api/progress${query}`);
-  return body.progress;
+  if (!courseIds) {
+    return (await call<{ progress: ProgressRow[] }>('GET', '/api/progress')).progress;
+  }
+  // The route takes at most 100 ids (and ids are up to 128 characters, in a URL), so ask in
+  // batches: one long list used to be refused whole, and every progress line vanished.
+  const batches: string[][] = [];
+  for (let at = 0; at < courseIds.length; at += PROGRESS_BATCH) {
+    batches.push(courseIds.slice(at, at + PROGRESS_BATCH));
+  }
+  const answers = await Promise.all(
+    batches.map((batch) =>
+      call<{ progress: ProgressRow[] }>(
+        'GET',
+        `/api/progress?courseIds=${batch.map(encodeURIComponent).join(',')}`,
+      ),
+    ),
+  );
+  return answers.flatMap((answer) => answer.progress);
 }
+
+const PROGRESS_BATCH = 50;
 
 export function putProgress(report: ProgressReport): Promise<unknown> {
   return call('PUT', '/api/progress', report);
