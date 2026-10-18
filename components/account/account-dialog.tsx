@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type FormEvent, type RefObject } from 'react';
 import { LoaderCircle } from 'lucide-react';
+import { BRAND_GRADIENT, BrandDecor } from '@/components/home/brand-band';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useBrand } from '@/lib/brand/brand-context';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 import { AccountRequestError, createAccount, signIn, type AccountCredentials } from './account-api';
@@ -52,6 +54,7 @@ export function AccountDialog({
   returnFocusTo,
 }: AccountDialogProps) {
   const { t } = useI18n();
+  const brand = useBrand();
   const idBase = useId();
   const usernameId = `${idBase}-username`;
   const passwordId = `${idBase}-password`;
@@ -183,6 +186,17 @@ export function AccountDialog({
           returnFocusTo?.current?.focus();
         }}
       >
+        <div
+          aria-hidden="true"
+          className={cn('relative -mx-6 -mt-6 h-24 overflow-hidden rounded-t-xl', BRAND_GRADIENT)}
+        >
+          <BrandDecor compact />
+          <img
+            src={brand.markSrc}
+            alt=""
+            className="logo-on-brand absolute left-1/2 top-1/2 size-14 -translate-x-1/2 -translate-y-1/2"
+          />
+        </div>
         <DialogHeader>
           <DialogTitle className="text-base font-semibold">
             {creating ? t('account.dialog.createTitle') : t('account.dialog.signInTitle')}

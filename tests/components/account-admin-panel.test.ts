@@ -149,7 +149,8 @@ describe('AccountAdminPanel', () => {
     });
     await renderPanel();
 
-    expect(container.querySelector('select')).toBeNull();
+    // The table has filter selects of its own; no row has a role select.
+    expect(container.querySelector('tbody select')).toBeNull();
     expect(container.querySelector('[aria-label="Disable alice"]')).not.toBeNull();
     expect(container.querySelector('[aria-label="Disable root"]')).toBeNull();
   });
@@ -168,7 +169,7 @@ describe('AccountAdminPanel', () => {
     });
     expect(container.textContent).toContain('Accounts');
     expect(container.textContent).toContain('alice');
-    expect(container.textContent).toContain(`Created ${created}`);
+    expect(container.textContent).toContain(created);
     expect(container.textContent).toContain('Disabled');
     expect(container.textContent).toContain('You');
     expect(button('Disable alice')).not.toBeNull();

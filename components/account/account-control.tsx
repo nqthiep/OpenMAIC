@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { BookOpen, LogIn, LogOut, UserRound } from 'lucide-react';
+import { KeyRound, LifeBuoy, LogIn, LogOut, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -16,9 +16,16 @@ import { createLogger } from '@/lib/logger';
 import { isBrowserPersistenceEnabled } from '@/lib/persistence/bootstrap';
 import { SESSION_ENDED_EVENT } from '@/lib/persistence/session-end';
 import { cn } from '@/lib/utils';
+import {
+  SUPPORT_OPEN_EVENT,
+  SupportDialog,
+  useSupportUnread,
+} from '@/components/support/support-inbox';
 import { AccountDialog } from './account-dialog';
+import { ChangePasswordDialog } from './change-password-dialog';
 import {
   fetchAccountSession,
+  sessionChanged,
   signOut,
   signOutOtherSessions,
   type AccountSession,
@@ -42,6 +49,23 @@ export function AccountControl() {
   const signingOutRef = useRef(false);
   const signingOutOthersRef = useRef(false);
   const signInTriggerRef = useRef<HTMLButtonElement>(null);
+  const [support, setSupport] = useState<{ open: boolean; subject?: string }>({ open: false });
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const learnerSignedIn =
+    session?.authenticated === true && session.role !== 'operator' && session.role !== 'admin';
+  const supportUnread = useSupportUnread(learnerSignedIn);
+
+  // "Contact the admin" buttons elsewhere on the page open the dialog mounted here.
+  useEffect(() => {
+    if (!learnerSignedIn) return;
+    const onOpen = (event: Event) =>
+      setSupport({
+        open: true,
+        subject: (event as CustomEvent<{ subject?: string }>).detail?.subject,
+      });
+    window.addEventListener(SUPPORT_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(SUPPORT_OPEN_EVENT, onOpen);
+  }, [learnerSignedIn]);
 
   useEffect(() => {
     if (!isBrowserPersistenceEnabled()) return;
@@ -73,6 +97,7 @@ export function AccountControl() {
             }
           : current,
       );
+      sessionChanged();
       toast(t('account.errors.sessionEnded'));
     };
     window.addEventListener(SESSION_ENDED_EVENT, onSessionEnded);
@@ -84,15 +109,6 @@ export function AccountControl() {
   if (!session.authenticated) {
     return (
       <>
-        <a
-          href="/catalog"
-          aria-label={t('catalog.title')}
-          title={t('catalog.title')}
-          className={cn(TRIGGER_CLASS, 'w-9 px-0 sm:px-3')}
-        >
-          <BookOpen className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">{t('catalog.title')}</span>
-        </a>
         <button
           ref={signInTriggerRef}
           type="button"
@@ -118,6 +134,7 @@ export function AccountControl() {
   const username = session.account?.username ?? '';
   const role = session.role;
   const isStaff = role === 'operator' || role === 'admin';
+  const membership = session.membership;
 
   const handleSignOut = () => {
     if (signingOutRef.current) return;
@@ -151,57 +168,102 @@ export function AccountControl() {
   };
 
   return (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label={t('account.accountMenu', { username })}
-          className={cn(TRIGGER_CLASS, 'w-9 px-0 sm:w-auto sm:px-3')}
+    <>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label={
+              supportUnread > 0
+                ? `${t('account.accountMenu', { username })} · ${t('support.unreadCount', { count: supportUnread })}`
+                : t('account.accountMenu', { username })
+            }
+            className={cn(TRIGGER_CLASS, 'relative w-9 px-0 lg:w-auto lg:px-3')}
+          >
+            <UserRound className="size-4" aria-hidden="true" />
+            <span className="hidden max-w-[8rem] truncate lg:inline-block">{username}</span>
+            {supportUnread > 0 ? (
+              <span
+                aria-hidden="true"
+                className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900"
+              />
+            ) : null}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          sideOffset={8}
+          className="min-w-[200px] motion-reduce:animate-none"
         >
-          <UserRound className="size-4" aria-hidden="true" />
-          <span className="hidden max-w-[8rem] truncate sm:inline-block">{username}</span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        sideOffset={8}
-        className="min-w-[200px] motion-reduce:animate-none"
-      >
-        <DropdownMenuLabel className="flex flex-col gap-0.5 font-normal">
-          <span className="text-xs text-muted-foreground">{t('account.signedInAs')}</span>
-          <span className="truncate text-sm font-medium text-foreground">{username}</span>
-          {role ? (
-            <span className="text-xs text-muted-foreground">{t(`account.roles.${role}`)}</span>
-          ) : null}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={() => window.location.assign('/catalog')}
-          className="cursor-pointer gap-2"
-        >
-          {t('catalog.title')}
-        </DropdownMenuItem>
-        {isStaff ? (
+          <DropdownMenuLabel className="flex flex-col gap-0.5 font-normal">
+            <span className="text-xs text-muted-foreground">{t('account.signedInAs')}</span>
+            <span className="truncate text-sm font-medium text-foreground">{username}</span>
+            {role ? (
+              <span className="text-xs text-muted-foreground">{t(`account.roles.${role}`)}</span>
+            ) : null}
+            {isStaff ? null : (
+              <span className="text-xs text-muted-foreground">
+                {membership?.active
+                  ? t('account.membership.active', {
+                      date: new Date(membership.expiresAt).toLocaleDateString(),
+                      quota: membership.monthlyQuota.toLocaleString(),
+                    })
+                  : t('account.membership.none')}
+              </span>
+            )}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {/* Places (home, catalog, community, dashboard) are links in the top bar; this menu
+              keeps what belongs to the account. */}
+          {isStaff ? (
+            <DropdownMenuItem
+              onSelect={() => window.location.assign('/admin#support')}
+              className="cursor-pointer gap-2"
+            >
+              <LifeBuoy className="size-4" aria-hidden="true" />
+              {t('support.panelTitle')}
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              onSelect={() => setSupport({ open: true })}
+              className="cursor-pointer gap-2"
+            >
+              <LifeBuoy className="size-4" aria-hidden="true" />
+              <span className="flex-1">{t('support.contact')}</span>
+              {supportUnread > 0 ? (
+                <span className="rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white tabular-nums">
+                  {supportUnread}
+                </span>
+              ) : null}
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setPasswordOpen(true)} className="cursor-pointer gap-2">
+            <KeyRound className="size-4" aria-hidden="true" />
+            {t('account.password.title')}
+          </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() => window.location.assign('/admin')}
+            disabled={signingOut}
+            onSelect={handleSignOut}
             className="cursor-pointer gap-2"
           >
-            {t('account.administration')}
+            <LogOut className="size-4" aria-hidden="true" />
+            {t('account.signOut')}
           </DropdownMenuItem>
-        ) : null}
-        <DropdownMenuItem
-          disabled={signingOut}
-          onSelect={handleSignOut}
-          className="cursor-pointer gap-2"
-        >
-          <LogOut className="size-4" aria-hidden="true" />
-          {t('account.signOut')}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={handleSignOutOthers} className="cursor-pointer gap-2">
-          <LogOut className="size-4" aria-hidden="true" />
-          {t('account.signOutOthers')}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem onSelect={handleSignOutOthers} className="cursor-pointer gap-2">
+            <LogOut className="size-4" aria-hidden="true" />
+            {t('account.signOutOthers')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {learnerSignedIn ? (
+        <SupportDialog
+          open={support.open}
+          initialSubject={support.subject}
+          onOpenChange={(open) => setSupport({ open })}
+        />
+      ) : null}
+      <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
+    </>
   );
 }

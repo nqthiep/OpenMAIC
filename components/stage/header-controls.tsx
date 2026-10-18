@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useCapabilities } from '@/lib/capabilities/use-capabilities';
 import { useTheme } from '@/lib/hooks/use-theme';
 import { useStageStore } from '@/lib/store';
 import { useMediaGenerationStore } from '@/lib/store/media-generation';
@@ -27,6 +28,8 @@ import { useVideoRenderStore } from '@/lib/store/video-render';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { VideoExportDialog } from './video-export-dialog';
 import { CourseShareButton } from '@/components/learning/course-share-button';
+import { SceneDiscussionButton } from '@/components/community/community';
+import { RemixControls } from '@/components/community/remix';
 import { useExportEntitlement } from '@/lib/membership/use-export-entitlement';
 import { LanguageSwitcher } from '../language-switcher';
 import { SettingsDialog } from '../settings';
@@ -83,6 +86,8 @@ export function HeaderControls({
   const { t } = useI18n();
   const { theme, setTheme } = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Settings configures providers: staff only (and single-user mode). Learners never see it.
+  const canOpenSettings = useCapabilities()?.viewProviders === true;
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
   // Export plumbing — uses the stage / media task stores to check
@@ -129,7 +134,7 @@ export function HeaderControls({
     return onToggleEditMode ? (
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-          {t('stage.proMode')}
+          {t('edit.proMode')}
         </span>
         <Switch
           checked={proChecked}
@@ -155,7 +160,7 @@ export function HeaderControls({
           'shrink-0 flex items-center gap-1 backdrop-blur-md shadow-sm rounded-full',
           compact
             ? 'bg-zinc-100/70 dark:bg-zinc-800/70 border border-zinc-200/60 dark:border-zinc-700/60 px-1.5 py-1'
-            : 'bg-white/60 dark:bg-gray-800/60 border border-gray-100/50 dark:border-gray-700/50 px-2 py-1.5',
+            : 'bg-white/85 dark:bg-gray-800/80 border border-gray-100/50 dark:border-gray-700/50 px-2 py-1.5',
         )}
       >
         {/* Language — Radix DropdownMenu so its menu portals to body
@@ -213,13 +218,15 @@ export function HeaderControls({
         </DropdownMenu>
 
         {/* Settings */}
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
-          aria-label={t('settings.title')}
-        >
-          <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-        </button>
+        {canOpenSettings ? (
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
+            aria-label={t('settings.title')}
+          >
+            <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
+          </button>
+        ) : null}
       </div>
 
       {/* Pro Switch — toggle property: on/off both clickable, not a
@@ -274,6 +281,12 @@ export function HeaderControls({
 
       {/* Share with members. Shows only to the course owner, with accounts on. */}
       <CourseShareButton courseId={stageId} />
+
+      {/* Questions pinned to this slide. Shows only on a course open to the community. */}
+      <SceneDiscussionButton />
+
+      {/* Remix credit, remixes of this course, and the Remix action. */}
+      <RemixControls />
 
       {/* Export / Download — lives to the right of the Pro Switch.
           Not a settings function so it does not belong inside the

@@ -1,27 +1,67 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Copy, ExternalLink, Pencil, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { useI18n } from '@/lib/hooks/use-i18n';
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { SectionTitle } from '@/components/home/section-title';
+import { GLASS } from '@/components/home/site-shell';
+import { useI18n } from '@/lib/hooks/use-i18n';
+import { cn } from '@/lib/utils';
+import { DataTable, type Column } from './data-table';
+import {
+  AUDIT_MAX,
   attachCourse,
   createClass,
+  decideAccessRequest,
   decideShare,
+  deleteClass,
+  detachCourse,
+  fetchAccessRequests,
+  fetchAllMembers,
   fetchAudit,
   fetchClasses,
-  fetchMembers,
+  fetchClassMembers,
+  fetchCourses,
   fetchPreviews,
+  fetchServerProviders,
   fetchShares,
   grantMembership,
   LearningRequestError,
+  renameClass,
+  revokeMembership,
+  revokeShare,
+  removeClassMember,
+  rotateJoinCode,
   setMembershipSuspended,
   setPreview,
+  updateMembership,
   type AuditRow,
+  type ClassMember,
   type ClassRow,
+  type CourseEntry,
   type MemberRow,
+  type PendingAccessRequestRow,
+  type PreviewRow,
   type ShareRow,
 } from './learning-api';
 
@@ -31,364 +71,989 @@ const DEFAULT_QUOTA = 1_000_000;
 /** A translated line for a failed request. The server's own text is English and stays out of the UI. */
 function useFailureMessage() {
   const { t } = useI18n();
-  return (error: unknown): string => {
-    const code = error instanceof LearningRequestError ? error.errorCode : undefined;
-    const key = code ? `learning.errors.${code}` : 'learning.errors.generic';
-    const text = t(key);
-    return text === key ? t('learning.errors.generic') : text;
-  };
+  // Stable on purpose: the panels list it as an effect dependency, and a new function on every
+  // render made each panel fetch again after every fetch.
+  return useCallback(
+    (error: unknown): string => {
+      const code = error instanceof LearningRequestError ? error.errorCode : undefined;
+      const key = code ? `learning.errors.${code}` : 'learning.errors.generic';
+      const text = t(key);
+      return text === key ? t('learning.errors.generic') : text;
+    },
+    [t],
+  );
+}
+
+/** Loads `fetcher` once and on `reload`; a failed load shows a toast and keeps the last rows. */
+function useRows<T>(fetcher: () => Promise<T[]>) {
+  const failure = useFailureMessage();
+  const [rows, setRows] = useState<T[] | null>(null);
+  const reload = useCallback(async () => {
+    try {
+      setRows(await fetcher());
+    } catch (error) {
+      toast.error(failure(error));
+    }
+  }, [fetcher, failure]);
+  useEffect(() => {
+    let active = true;
+    fetcher()
+      .then((next) => {
+        if (active) setRows(next);
+      })
+      .catch((error: unknown) => {
+        if (active) toast.error(failure(error));
+      });
+    return () => {
+      active = false;
+    };
+  }, [fetcher, failure]);
+  return { rows, reload };
+}
+
+/** Runs a change, then reloads; a refusal becomes a translated toast. */
+function useAction(reload: () => Promise<void>) {
+  const failure = useFailureMessage();
+  return useCallback(
+    async (change: () => Promise<unknown>, done?: string) => {
+      try {
+        await change();
+        if (done) toast.success(done);
+      } catch (error) {
+        toast.error(failure(error));
+      }
+      await reload();
+    },
+    [failure, reload],
+  );
 }
 
 function Section({
+  id,
   title,
   description,
   children,
 }: {
+  /** Anchor the overview's diagrams scroll to. */
+  id?: string;
   title: string;
   description: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="text-xs text-muted-foreground">{description}</p>
+    <section id={id} className={cn('flex scroll-mt-6 flex-col gap-4 rounded-3xl p-6', GLASS)}>
+      <div className="flex flex-col gap-1.5">
+        <SectionTitle>{title}</SectionTitle>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {children}
     </section>
   );
 }
 
+function day(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale);
+}
+
+/** `YYYY-MM-DD` of an instant in the viewer's time zone, the value an `<input type="date">` shows. */
+function localDate(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Opens the course in a new tab, so a reviewer keeps their place in the dashboard. */
+function CourseLink({ courseId, children }: { courseId: string; children: ReactNode }) {
+  const { t } = useI18n();
+  return (
+    <a
+      href={`/classroom/${encodeURIComponent(courseId)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={t('admin.courses.open')}
+      className="inline-flex items-center gap-1 hover:text-primary hover:underline"
+    >
+      {children}
+      <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
+    </a>
+  );
+}
+
+/** Course titles by ID, so panels that store only IDs can show names. Empty until loaded. */
+function useCourseTitles(): Map<string, string> {
+  const { rows } = useRows(fetchCourses);
+  return new Map((rows ?? []).map((c) => [c.courseId, c.title]));
+}
+
+/** A delete or revoke button that asks first. Every confirmed change lands in the audit log. */
+function ConfirmButton({
+  label,
+  title,
+  description,
+  confirm,
+  onConfirm,
+  icon = true,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  confirm: string;
+  onConfirm: () => Promise<void>;
+  icon?: boolean;
+}) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="text-red-600 hover:text-red-700 dark:text-red-400"
+        onClick={() => setOpen(true)}
+      >
+        {icon ? <Trash2 /> : null}
+        {label}
+      </Button>
+      <AlertDialog open={open} onOpenChange={(next) => !busy && setOpen(next)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{title}</AlertDialogTitle>
+            <AlertDialogDescription>{description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{t('common.cancel')}</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                await onConfirm();
+                setBusy(false);
+                setOpen(false);
+              }}
+            >
+              {confirm}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+/** An edit form in a dialog. `onSave` returns false to keep the dialog open. */
+function EditDialog({
+  title,
+  description,
+  open,
+  onOpenChange,
+  onSave,
+  submitLabel,
+  children,
+}: {
+  title: string;
+  description?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: () => Promise<boolean>;
+  /** The submit button's text; "Save" when absent. */
+  submitLabel?: string;
+  children: ReactNode;
+}) {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={(next) => !busy && onOpenChange(next)}>
+      <DialogContent>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            setBusy(true);
+            const ok = await onSave();
+            setBusy(false);
+            if (ok) onOpenChange(false);
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            {description ? <DialogDescription>{description}</DialogDescription> : null}
+          </DialogHeader>
+          {children}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {submitLabel ?? t('admin.table.save')}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-sm">
+      <span className="font-medium">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+// ── Members ─────────────────────────────────────────────────────────────────
+
+type MemberState = 'active' | 'expired' | 'suspended' | 'none';
+
+function memberState(row: MemberRow): MemberState {
+  if (!row.membership) return 'none';
+  if (row.membership.status === 'suspended') return 'suspended';
+  return row.membership.active ? 'active' : 'expired';
+}
+
+const STATE_BADGE: Record<MemberState, string> = {
+  active:
+    'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300',
+  expired:
+    'border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-300',
+  suspended:
+    'border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300',
+  none: '',
+};
+
+/** Who has a membership, and the controls to grant, edit, suspend and revoke one. */
 export function MembershipPanel() {
   const { t, locale } = useI18n();
-  const failure = useFailureMessage();
-  const [rows, setRows] = useState<MemberRow[]>([]);
-  const [nextAfter, setNextAfter] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Record<string, { days: string; quota: string }>>({});
+  const { rows, reload } = useRows(fetchAllMembers);
+  const act = useAction(reload);
+  // One dialog for both granting (no membership, or extend) and editing the exact values.
+  const [editing, setEditing] = useState<{
+    row: MemberRow;
+    mode: 'grant' | 'edit';
+    days: string;
+    quota: string;
+    expires: string;
+  } | null>(null);
 
-  const load = useCallback(
-    async (after?: string) => {
-      try {
-        const page = await fetchMembers(after);
-        setRows((current) =>
-          after === undefined ? page.accounts : [...current, ...page.accounts],
-        );
-        setNextAfter(page.nextAfter);
-      } catch (error) {
-        toast.error(failure(error));
-      }
+  const open = (row: MemberRow, mode: 'grant' | 'edit') =>
+    setEditing({
+      row,
+      mode,
+      days: String(DEFAULT_DAYS),
+      quota: String(row.membership?.monthlyQuota ?? DEFAULT_QUOTA),
+      expires: row.membership ? localDate(row.membership.expiresAt) : '',
+    });
+
+  const columns: Column<MemberRow>[] = [
+    {
+      id: 'username',
+      header: t('admin.members.columns.username'),
+      sort: (r) => r.username,
+      cell: (r) => <span className="break-all font-medium">{r.username}</span>,
     },
-    [failure],
-  );
+    {
+      id: 'state',
+      header: t('admin.members.columns.status'),
+      sort: (r) => memberState(r),
+      cell: (r) => (
+        <Badge variant="outline" className={STATE_BADGE[memberState(r)]}>
+          {t(`membership.status.${memberState(r)}`)}
+        </Badge>
+      ),
+    },
+    {
+      id: 'expires',
+      header: t('admin.members.columns.expires'),
+      sort: (r) => r.membership?.expiresAt ?? '',
+      cell: (r) => (r.membership ? day(r.membership.expiresAt, locale) : '—'),
+    },
+    {
+      id: 'quota',
+      header: t('admin.members.quota'),
+      align: 'right',
+      sort: (r) => r.membership?.monthlyQuota ?? -1,
+      cell: (r) => (
+        <span className="tabular-nums">
+          {r.membership ? r.membership.monthlyQuota.toLocaleString(locale) : '—'}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('admin.table.actions'),
+      align: 'right',
+      cell: (r) => (
+        <div className="flex flex-wrap justify-end gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => open(r, 'grant')}>
+            {t('admin.members.grant')}
+          </Button>
+          {r.membership ? (
+            <>
+              <Button variant="outline" size="sm" onClick={() => open(r, 'edit')}>
+                <Pencil />
+                {t('admin.table.edit')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  void act(() => setMembershipSuspended(r.id, r.membership?.status !== 'suspended'))
+                }
+              >
+                {r.membership.status === 'suspended'
+                  ? t('admin.members.resume')
+                  : t('admin.members.suspend')}
+              </Button>
+              <ConfirmButton
+                label={t('admin.members.revoke')}
+                title={t('admin.members.revokeTitle', { name: r.username })}
+                description={t('admin.members.revokeDescription')}
+                confirm={t('admin.members.revoke')}
+                onConfirm={() =>
+                  act(
+                    () => revokeMembership(r.id),
+                    t('admin.members.revoked', { name: r.username }),
+                  )
+                }
+              />
+            </>
+          ) : null}
+        </div>
+      ),
+    },
+  ];
 
-  useEffect(() => {
-    let active = true;
-    fetchMembers()
-      .then((page) => {
-        if (active) {
-          setRows(page.accounts);
-          setNextAfter(page.nextAfter);
-        }
-      })
-      .catch((error: unknown) => {
-        if (active) toast.error(failure(error));
-      });
-    return () => {
-      active = false;
-    };
-  }, [failure]);
-
-  const statusLabel = (row: MemberRow): string => {
-    if (!row.membership) return t('membership.status.none');
-    if (row.membership.status === 'suspended') return t('membership.status.suspended');
-    return row.membership.active ? t('membership.status.active') : t('membership.status.expired');
-  };
-
-  const grant = async (row: MemberRow) => {
-    const entry = draft[row.id] ?? { days: String(DEFAULT_DAYS), quota: String(DEFAULT_QUOTA) };
-    try {
-      await grantMembership(row.id, Number(entry.days), Number(entry.quota));
-      toast.success(t('membership.granted'));
-      await load();
-    } catch (error) {
-      toast.error(failure(error));
+  const save = async (): Promise<boolean> => {
+    if (!editing) return false;
+    const quota = Number(editing.quota);
+    if (!Number.isInteger(quota) || quota < 0) {
+      toast.error(t('admin.members.invalidQuota'));
+      return false;
     }
-  };
-
-  const toggle = async (row: MemberRow) => {
-    try {
-      await setMembershipSuspended(row.id, row.membership?.status !== 'suspended');
-      await load();
-    } catch (error) {
-      toast.error(failure(error));
+    if (editing.mode === 'grant') {
+      const days = Number(editing.days);
+      if (!Number.isInteger(days) || days < 1) {
+        toast.error(t('admin.members.invalidDays'));
+        return false;
+      }
+      await act(() => grantMembership(editing.row.id, days, quota), t('membership.granted'));
+      return true;
     }
+    if (!editing.expires) {
+      toast.error(t('admin.members.invalidDate'));
+      return false;
+    }
+    // The end of the chosen day in the operator's time zone, the day the table then shows, so
+    // "until 2026-12-31" includes that day.
+    const expiresAt = new Date(`${editing.expires}T23:59:59`).toISOString();
+    await act(() => updateMembership(editing.row.id, expiresAt, quota), t('admin.members.updated'));
+    return true;
   };
 
   return (
-    <Section title={t('admin.members.title')} description={t('admin.members.description')}>
-      <ul className="divide-y rounded-lg border">
-        {rows.map((row) => {
-          const entry = draft[row.id] ?? {
-            days: String(DEFAULT_DAYS),
-            quota: String(DEFAULT_QUOTA),
-          };
-          return (
-            <li
-              key={row.id}
-              className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5"
-            >
-              <div className="min-w-0 flex-1 basis-40">
-                <p className="break-all text-sm font-medium">{row.username}</p>
-                {row.membership ? (
-                  <p className="text-xs text-muted-foreground">
-                    {t('membership.expiresOn', {
-                      date: new Date(row.membership.expiresAt).toLocaleDateString(locale),
-                    })}
-                    {' · '}
-                    {t('admin.members.quotaValue', {
-                      tokens: row.membership.monthlyQuota.toLocaleString(locale),
-                    })}
-                  </p>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline">{statusLabel(row)}</Badge>
-                <Input
-                  aria-label={t('admin.members.days')}
-                  inputMode="numeric"
-                  className="h-8 w-20"
-                  value={entry.days}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      [row.id]: { ...entry, days: event.target.value },
-                    }))
-                  }
-                />
-                <Input
-                  aria-label={t('admin.members.quota')}
-                  inputMode="numeric"
-                  className="h-8 w-32"
-                  value={entry.quota}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      [row.id]: { ...entry, quota: event.target.value },
-                    }))
-                  }
-                />
-                <Button variant="outline" size="sm" onClick={() => void grant(row)}>
-                  {t('admin.members.grant')}
-                </Button>
-                {row.membership ? (
-                  <Button variant="outline" size="sm" onClick={() => void toggle(row)}>
-                    {row.membership.status === 'suspended'
-                      ? t('admin.members.resume')
-                      : t('admin.members.suspend')}
-                  </Button>
-                ) : null}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      {nextAfter !== null ? (
-        <div className="flex justify-center">
-          <Button variant="outline" size="sm" onClick={() => void load(nextAfter)}>
-            {t('account.admin.loadMore')}
+    <Section
+      id="ops-members"
+      title={t('admin.members.title')}
+      description={t('admin.members.description')}
+    >
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => r.id}
+        searchText={(r) => r.username}
+        filters={[
+          {
+            id: 'state',
+            label: t('admin.members.columns.status'),
+            options: (['active', 'expired', 'suspended', 'none'] as const).map((s) => ({
+              value: s,
+              label: t(`membership.status.${s}`),
+            })),
+            test: (r, v) => memberState(r) === v,
+          },
+        ]}
+        initialSort={{ id: 'username', dir: 'asc' }}
+        empty={t('admin.members.empty')}
+      />
+      <EditDialog
+        open={editing !== null}
+        onOpenChange={(next) => !next && setEditing(null)}
+        title={
+          editing
+            ? t(editing.mode === 'grant' ? 'admin.members.grantTitle' : 'admin.members.editTitle', {
+                name: editing.row.username,
+              })
+            : ''
+        }
+        description={
+          editing?.mode === 'grant'
+            ? t('admin.members.grantDescription')
+            : t('admin.members.editDescription')
+        }
+        onSave={save}
+      >
+        {editing?.mode === 'grant' ? (
+          <Field label={t('admin.members.days')}>
+            <Input
+              inputMode="numeric"
+              value={editing.days}
+              onChange={(e) => setEditing({ ...editing, days: e.target.value })}
+            />
+          </Field>
+        ) : editing ? (
+          <Field label={t('admin.members.columns.expires')}>
+            <Input
+              type="date"
+              value={editing.expires}
+              onChange={(e) => setEditing({ ...editing, expires: e.target.value })}
+            />
+          </Field>
+        ) : null}
+        {editing ? (
+          <Field label={t('admin.members.quota')}>
+            <Input
+              inputMode="numeric"
+              value={editing.quota}
+              onChange={(e) => setEditing({ ...editing, quota: e.target.value })}
+            />
+          </Field>
+        ) : null}
+      </EditDialog>
+    </Section>
+  );
+}
+
+// ── Access requests ─────────────────────────────────────────────────────────
+
+/**
+ * Learners asking for a membership, oldest first. Approving grants the same defaults as the members
+ * panel (30 days and the default monthly allowance); the operator can change them there afterwards.
+ * The optional reason goes to the audit log with the decision.
+ */
+export function AccessRequestsPanel() {
+  const { t, locale } = useI18n();
+  const { rows, reload } = useRows(fetchAccessRequests);
+  const act = useAction(reload);
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+
+  const decide = (row: PendingAccessRequestRow, decision: 'approve' | 'reject') =>
+    act(
+      () => decideAccessRequest(row.accountId, decision, reasons[row.accountId]?.trim()),
+      decision === 'approve'
+        ? t('admin.accessRequests.approved', { name: row.username })
+        : t('admin.accessRequests.rejected', { name: row.username }),
+    );
+
+  const columns: Column<PendingAccessRequestRow>[] = [
+    {
+      id: 'username',
+      header: t('admin.members.columns.username'),
+      sort: (r) => r.username,
+      cell: (r) => <span className="break-all font-medium">{r.username}</span>,
+    },
+    {
+      id: 'membership',
+      header: t('admin.members.columns.status'),
+      sort: (r) => r.membership,
+      cell: (r) => <Badge variant="secondary">{t(`membership.status.${r.membership}`)}</Badge>,
+    },
+    {
+      id: 'requested',
+      header: t('admin.table.requested'),
+      sort: (r) => r.requestedAt,
+      cell: (r) => day(r.requestedAt, locale),
+    },
+    {
+      id: 'note',
+      header: t('admin.accessRequests.note'),
+      className: 'max-w-xs',
+      cell: (r) => (r.note ? <span className="break-words">“{r.note}”</span> : '—'),
+    },
+    {
+      id: 'reason',
+      header: t('admin.accessRequests.reason'),
+      cell: (r) => (
+        <Input
+          value={reasons[r.accountId] ?? ''}
+          maxLength={200}
+          className="h-8 min-w-40"
+          placeholder={t('admin.accessRequests.reasonPlaceholder')}
+          aria-label={t('admin.accessRequests.reasonPlaceholder')}
+          onChange={(event) =>
+            setReasons((current) => ({ ...current, [r.accountId]: event.target.value }))
+          }
+        />
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('admin.table.actions'),
+      align: 'right',
+      cell: (r) => (
+        <div className="flex justify-end gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => void decide(r, 'approve')}>
+            {t('admin.accessRequests.approve')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void decide(r, 'reject')}>
+            {t('admin.accessRequests.reject')}
           </Button>
         </div>
-      ) : null}
-    </Section>
-  );
-}
-
-export function SharesPanel() {
-  const { t, locale } = useI18n();
-  const failure = useFailureMessage();
-  const [rows, setRows] = useState<ShareRow[] | null>(null);
-
-  const load = useCallback(async () => {
-    try {
-      setRows(await fetchShares('pending'));
-    } catch (error) {
-      toast.error(failure(error));
-    }
-  }, [failure]);
-
-  useEffect(() => {
-    let active = true;
-    fetchShares('pending')
-      .then((page) => {
-        if (active) setRows(page);
-      })
-      .catch((error: unknown) => {
-        if (active) toast.error(failure(error));
-      });
-    return () => {
-      active = false;
-    };
-  }, [failure]);
-
-  const decide = async (row: ShareRow, decision: 'approve' | 'reject') => {
-    try {
-      await decideShare(row.courseId, decision);
-      toast.success(
-        decision === 'approve' ? t('admin.shares.approved') : t('admin.shares.rejected'),
-      );
-      await load();
-    } catch (error) {
-      toast.error(failure(error));
-    }
-  };
+      ),
+    },
+  ];
 
   return (
-    <Section title={t('admin.shares.title')} description={t('admin.shares.description')}>
-      {rows && rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('admin.shares.empty')}</p>
-      ) : null}
-      {rows && rows.length > 0 ? (
-        <ul className="divide-y rounded-lg border">
-          {rows.map((row) => (
-            <li
-              key={row.courseId}
-              className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5"
-            >
-              <div className="min-w-0 flex-1 basis-40">
-                <p className="break-all text-sm font-medium">{row.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('admin.shares.requested', {
-                    date: new Date(row.requestedAt).toLocaleDateString(locale),
-                  })}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => void decide(row, 'approve')}>
-                  {t('admin.shares.approve')}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => void decide(row, 'reject')}>
-                  {t('admin.shares.reject')}
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+    <Section
+      id="ops-access-requests"
+      title={t('admin.accessRequests.title')}
+      description={t('admin.accessRequests.description')}
+    >
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => r.accountId}
+        searchText={(r) => `${r.username} ${r.note ?? ''}`}
+        initialSort={{ id: 'requested', dir: 'asc' }}
+        empty={t('admin.accessRequests.empty')}
+      />
     </Section>
   );
 }
 
+// ── Shares ──────────────────────────────────────────────────────────────────
+
+// A shared course with an update waiting appears once, as the update to decide.
+const fetchAllShares = async () => {
+  const pending = await fetchShares('pending');
+  const waiting = new Set(pending.map((r) => r.courseId));
+  const shared = (await fetchShares('shared')).filter((r) => !waiting.has(r.courseId));
+  return [...pending, ...shared] as ShareRow[];
+};
+
+/** Share requests to decide, and shared courses an operator can take back. */
+export function SharesPanel() {
+  const { t, locale } = useI18n();
+  const { rows, reload } = useRows(fetchAllShares);
+  const act = useAction(reload);
+  // The request being refused, with the reason its owner will see.
+  const [rejecting, setRejecting] = useState<{ row: ShareRow; reason: string } | null>(null);
+
+  const columns: Column<ShareRow>[] = [
+    {
+      id: 'title',
+      header: t('admin.shares.columns.title'),
+      sort: (r) => r.title,
+      cell: (r) => (
+        <div className="flex flex-col">
+          <span className="font-medium">
+            <CourseLink courseId={r.courseId}>{r.title}</CourseLink>
+          </span>
+          <span className="break-all font-mono text-xs text-muted-foreground">{r.courseId}</span>
+          {r.remixOf ? (
+            <span className="text-xs text-muted-foreground">
+              {t('admin.shares.remixOf', { title: r.remixOf.sourceTitle })}{' '}
+              <CourseLink courseId={r.remixOf.sourceId}>{r.remixOf.sourceId}</CourseLink>
+            </span>
+          ) : null}
+          {r.snapshot ? (
+            <span className="text-xs text-muted-foreground">
+              {t('admin.shares.snapshot', {
+                name: r.snapshot.name,
+                count: r.snapshot.sceneCount,
+                media: r.snapshot.mediaCount,
+                size: `${(r.snapshot.bytes / 1_048_576).toFixed(1)} MB`,
+              })}
+              {r.snapshot.sceneTitles.length > 0
+                ? ` · ${r.snapshot.sceneTitles.slice(0, 8).join(' · ')}`
+                : ''}
+            </span>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      id: 'state',
+      header: t('admin.members.columns.status'),
+      sort: (r) => r.state,
+      cell: (r) => (
+        <Badge variant={r.state === 'pending' || r.update ? 'secondary' : 'outline'}>
+          {r.update ? t('admin.shares.state.update') : t(`admin.shares.state.${r.state}`)}
+        </Badge>
+      ),
+    },
+    {
+      id: 'requested',
+      header: t('admin.table.requested'),
+      sort: (r) => r.requestedAt,
+      cell: (r) => day(r.requestedAt, locale),
+    },
+    {
+      id: 'actions',
+      header: t('admin.table.actions'),
+      align: 'right',
+      cell: (r) =>
+        r.state === 'pending' || r.update ? (
+          <div className="flex justify-end gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                void act(() => decideShare(r.courseId, 'approve'), t('admin.shares.approved'))
+              }
+            >
+              {t('admin.shares.approve')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRejecting({ row: r, reason: '' })}
+            >
+              {t('admin.shares.reject')}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex justify-end">
+            <ConfirmButton
+              label={t('admin.shares.revoke')}
+              title={t('admin.shares.revokeTitle', { title: r.title })}
+              description={t('admin.shares.revokeDescription')}
+              confirm={t('admin.shares.revoke')}
+              onConfirm={() => act(() => revokeShare(r.courseId), t('admin.shares.revoked'))}
+            />
+          </div>
+        ),
+    },
+  ];
+
+  return (
+    <Section
+      id="ops-shares"
+      title={t('admin.shares.title')}
+      description={t('admin.shares.description')}
+    >
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => r.courseId}
+        searchText={(r) => `${r.title} ${r.courseId}`}
+        filters={[
+          {
+            id: 'state',
+            label: t('admin.members.columns.status'),
+            options: (['pending', 'shared'] as const).map((s) => ({
+              value: s,
+              label: t(`admin.shares.state.${s}`),
+            })),
+            initial: 'pending',
+            test: (r, v) => r.state === v,
+          },
+        ]}
+        initialSort={{ id: 'requested', dir: 'asc' }}
+        empty={t('admin.shares.empty')}
+      />
+      <EditDialog
+        open={rejecting !== null}
+        onOpenChange={(next) => !next && setRejecting(null)}
+        title={t('admin.shares.rejectTitle', { title: rejecting?.row.title ?? '' })}
+        description={t('admin.shares.rejectDescription')}
+        submitLabel={t('admin.shares.reject')}
+        onSave={async () => {
+          if (!rejecting) return false;
+          const reason = rejecting.reason.trim();
+          await act(
+            () => decideShare(rejecting.row.courseId, 'reject', reason === '' ? undefined : reason),
+            t('admin.shares.rejected'),
+          );
+          return true;
+        }}
+      >
+        <Field label={t('admin.shares.rejectReason')}>
+          <Input
+            value={rejecting?.reason ?? ''}
+            maxLength={200}
+            onChange={(e) => rejecting && setRejecting({ ...rejecting, reason: e.target.value })}
+          />
+        </Field>
+      </EditDialog>
+    </Section>
+  );
+}
+
+// ── Previews ────────────────────────────────────────────────────────────────
+
 export function PreviewsPanel() {
-  const { t } = useI18n();
-  const failure = useFailureMessage();
-  const [previews, setPreviews] = useState<string[]>([]);
+  const { t, locale } = useI18n();
+  const { rows, reload } = useRows(fetchPreviews);
+  const titles = useCourseTitles();
+  const act = useAction(reload);
   const [courseId, setCourseId] = useState('');
-
-  const load = useCallback(async () => {
-    try {
-      setPreviews(await fetchPreviews());
-    } catch (error) {
-      toast.error(failure(error));
-    }
-  }, [failure]);
-
-  useEffect(() => {
-    let active = true;
-    fetchPreviews()
-      .then((page) => {
-        if (active) setPreviews(page);
-      })
-      .catch((error: unknown) => {
-        if (active) toast.error(failure(error));
-      });
-    return () => {
-      active = false;
-    };
-  }, [failure]);
 
   const add = async () => {
     const id = courseId.trim();
     if (id === '') return;
-    try {
-      await setPreview(id, true);
-      setCourseId('');
-      await load();
-    } catch (error) {
-      toast.error(failure(error));
-    }
+    await act(() => setPreview(id, true));
+    setCourseId('');
   };
 
-  const remove = async (id: string) => {
-    try {
-      await setPreview(id, false);
-      await load();
-    } catch (error) {
-      toast.error(failure(error));
-    }
-  };
+  const columns: Column<PreviewRow>[] = [
+    {
+      id: 'course',
+      header: t('admin.previews.courseId'),
+      sort: (r) => titles.get(r.courseId) ?? r.courseId,
+      cell: (r) => (
+        <div className="flex flex-col">
+          <span className="font-medium">
+            <CourseLink courseId={r.courseId}>{titles.get(r.courseId) ?? r.courseId}</CourseLink>
+          </span>
+          <span className="break-all font-mono text-xs text-muted-foreground">{r.courseId}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'marked',
+      header: t('admin.previews.marked'),
+      sort: (r) => r.markedAt,
+      cell: (r) => day(r.markedAt, locale),
+    },
+    {
+      id: 'actions',
+      header: t('admin.table.actions'),
+      align: 'right',
+      cell: (r) => (
+        <div className="flex justify-end">
+          <ConfirmButton
+            label={t('admin.previews.remove')}
+            title={t('admin.previews.removeTitle', { id: r.courseId })}
+            description={t('admin.previews.removeDescription')}
+            confirm={t('admin.previews.remove')}
+            onConfirm={() => act(() => setPreview(r.courseId, false))}
+          />
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Section title={t('admin.previews.title')} description={t('admin.previews.description')}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          aria-label={t('admin.previews.courseId')}
-          placeholder={t('admin.previews.courseId')}
-          className="h-8 max-w-xs"
-          value={courseId}
-          onChange={(event) => setCourseId(event.target.value)}
-        />
-        <Button variant="outline" size="sm" onClick={() => void add()}>
-          {t('admin.previews.add')}
-        </Button>
-      </div>
-      {previews.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('admin.previews.empty')}</p>
-      ) : null}
-      {previews.length > 0 ? (
-        <ul className="divide-y rounded-lg border">
-          {previews.map((id) => (
-            <li key={id} className="flex items-center justify-between gap-3 px-3 py-2">
-              <span className="break-all font-mono text-xs">{id}</span>
-              <Button variant="outline" size="sm" onClick={() => void remove(id)}>
-                {t('admin.previews.remove')}
-              </Button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+    <Section
+      id="ops-previews"
+      title={t('admin.previews.title')}
+      description={t('admin.previews.description')}
+    >
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => r.courseId}
+        searchText={(r) => r.courseId}
+        initialSort={{ id: 'marked', dir: 'desc' }}
+        empty={t('admin.previews.empty')}
+        toolbar={
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void add();
+            }}
+          >
+            <Input
+              aria-label={t('admin.previews.courseId')}
+              placeholder={t('admin.previews.courseId')}
+              className="h-8 w-56"
+              value={courseId}
+              onChange={(event) => setCourseId(event.target.value)}
+            />
+            <Button type="submit" size="sm">
+              {t('admin.previews.add')}
+            </Button>
+          </form>
+        }
+      />
     </Section>
+  );
+}
+
+// ── Courses ─────────────────────────────────────────────────────────────────
+
+/** Every course, so staff can review one and copy its ID for a preview or a class. */
+export function CoursesPanel() {
+  const { t, locale } = useI18n();
+  const { rows } = useRows(fetchCourses);
+
+  const copy = (id: string) => {
+    navigator.clipboard
+      .writeText(id)
+      .then(() => toast.success(t('admin.courses.copied', { id })))
+      .catch(() => toast.error(t('learning.errors.generic')));
+  };
+
+  const columns: Column<CourseEntry>[] = [
+    {
+      id: 'title',
+      header: t('admin.shares.columns.title'),
+      sort: (r) => r.title,
+      cell: (r) => (
+        <span className="font-medium">
+          <CourseLink courseId={r.courseId}>{r.title}</CourseLink>
+        </span>
+      ),
+    },
+    {
+      id: 'id',
+      header: t('admin.previews.courseId'),
+      sort: (r) => r.courseId,
+      cell: (r) => (
+        <span className="inline-flex items-center gap-1">
+          <span className="break-all font-mono text-xs">{r.courseId}</span>
+          <button
+            type="button"
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label={t('admin.courses.copy', { id: r.courseId })}
+            title={t('admin.courses.copy', { id: r.courseId })}
+            onClick={() => copy(r.courseId)}
+          >
+            <Copy className="size-3.5" />
+          </button>
+        </span>
+      ),
+    },
+    {
+      id: 'owner',
+      header: t('admin.courses.owner'),
+      sort: (r) => r.owner ?? '',
+      cell: (r) =>
+        r.owner ?? <span className="text-muted-foreground">{t('admin.courses.anonymous')}</span>,
+    },
+    {
+      id: 'updated',
+      header: t('admin.courses.updated'),
+      sort: (r) => r.updatedAt ?? '',
+      cell: (r) => (r.updatedAt ? day(r.updatedAt, locale) : '—'),
+    },
+  ];
+
+  return (
+    <Section
+      id="ops-courses"
+      title={t('admin.courses.title')}
+      description={t('admin.courses.description')}
+    >
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => r.courseId}
+        searchText={(r) => `${r.title} ${r.courseId} ${r.owner ?? ''}`}
+        initialSort={{ id: 'updated', dir: 'desc' }}
+        empty={t('admin.courses.empty')}
+      />
+    </Section>
+  );
+}
+
+// ── Classes ─────────────────────────────────────────────────────────────────
+
+/** The members of one class, each with a way to take them out. Closes with `onClose`. */
+function ClassMembersDialog({
+  row,
+  onClose,
+  onChanged,
+}: {
+  row: ClassRow | null;
+  onClose: () => void;
+  onChanged: () => Promise<void>;
+}) {
+  const { t, locale } = useI18n();
+  const failure = useFailureMessage();
+  const [members, setMembers] = useState<ClassMember[] | null>(null);
+  const classId = row?.id;
+
+  const load = useCallback(async () => {
+    if (!classId) return;
+    try {
+      setMembers(await fetchClassMembers(classId));
+    } catch (error) {
+      toast.error(failure(error));
+    }
+  }, [classId, failure]);
+
+  // Mounted per class (keyed by its id), so the list starts empty for each one.
+  useEffect(() => {
+    if (!classId) return;
+    let active = true;
+    fetchClassMembers(classId)
+      .then((next) => {
+        if (active) setMembers(next);
+      })
+      .catch((error: unknown) => {
+        if (active) toast.error(failure(error));
+      });
+    return () => {
+      active = false;
+    };
+  }, [classId, failure]);
+
+  return (
+    <Dialog open={row !== null} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('admin.classes.membersOf', { name: row?.name ?? '' })}</DialogTitle>
+          <DialogDescription>{t('admin.classes.membersDescription')}</DialogDescription>
+        </DialogHeader>
+        {members === null ? (
+          <p className="text-sm text-muted-foreground">{t('admin.ops.loading')}</p>
+        ) : members.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('admin.classes.noMembers')}</p>
+        ) : (
+          <ul className="flex max-h-80 flex-col divide-y overflow-y-auto rounded-lg border">
+            {members.map((m) => (
+              <li key={m.accountId} className="flex items-center justify-between gap-3 px-3 py-2">
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate text-sm font-medium">{m.username}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('admin.classes.joined', { date: day(m.joinedAt, locale) })}
+                  </span>
+                </div>
+                <ConfirmButton
+                  icon={false}
+                  label={t('admin.classes.removeMember')}
+                  title={t('admin.classes.removeMemberTitle', {
+                    username: m.username,
+                    name: row?.name ?? '',
+                  })}
+                  description={t('admin.classes.removeMemberDescription')}
+                  confirm={t('admin.classes.removeMember')}
+                  onConfirm={async () => {
+                    try {
+                      await removeClassMember(classId!, m.accountId);
+                      toast.success(t('admin.classes.memberRemoved', { username: m.username }));
+                    } catch (error) {
+                      toast.error(failure(error));
+                    }
+                    await load();
+                    await onChanged();
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export function ClassesPanel() {
   const { t } = useI18n();
-  const failure = useFailureMessage();
-  const [classes, setClasses] = useState<ClassRow[]>([]);
+  const { rows, reload } = useRows(fetchClasses);
+  const titles = useCourseTitles();
+  const act = useAction(reload);
   const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [courseIds, setCourseIds] = useState<Record<string, string>>({});
-
-  const load = useCallback(async () => {
-    try {
-      setClasses(await fetchClasses());
-    } catch (error) {
-      toast.error(failure(error));
-    }
-  }, [failure]);
-
-  useEffect(() => {
-    let active = true;
-    fetchClasses()
-      .then((page) => {
-        if (active) setClasses(page);
-      })
-      .catch((error: unknown) => {
-        if (active) toast.error(failure(error));
-      });
-    return () => {
-      active = false;
-    };
-  }, [failure]);
+  const [renaming, setRenaming] = useState<{ row: ClassRow; name: string } | null>(null);
+  const [viewing, setViewing] = useState<ClassRow | null>(null);
+  const failure = useFailureMessage();
 
   const create = async () => {
     const trimmed = name.trim();
@@ -397,141 +1062,343 @@ export function ClassesPanel() {
       const created = await createClass(trimmed);
       setName('');
       setJoinCode(`${created.name}: ${created.joinCode}`);
-      await load();
     } catch (error) {
       toast.error(failure(error));
     }
+    await reload();
   };
 
   const attach = async (row: ClassRow) => {
     const courseId = (courseIds[row.id] ?? '').trim();
     if (courseId === '') return;
-    try {
-      await attachCourse(row.id, courseId);
-      setCourseIds((current) => ({ ...current, [row.id]: '' }));
-      await load();
-    } catch (error) {
-      toast.error(failure(error));
-    }
+    await act(() => attachCourse(row.id, courseId));
+    setCourseIds((current) => ({ ...current, [row.id]: '' }));
   };
 
+  const columns: Column<ClassRow>[] = [
+    {
+      id: 'name',
+      header: t('admin.classes.name'),
+      sort: (r) => r.name,
+      cell: (r) => <span className="font-medium">{r.name}</span>,
+    },
+    {
+      id: 'members',
+      header: t('admin.classes.columns.members'),
+      align: 'right',
+      sort: (r) => r.memberCount,
+      cell: (r) => (
+        <button
+          type="button"
+          className="tabular-nums text-primary hover:underline"
+          aria-label={t('admin.classes.membersOf', { name: r.name })}
+          onClick={() => setViewing(r)}
+        >
+          {r.memberCount}
+        </button>
+      ),
+    },
+    {
+      id: 'courses',
+      header: t('admin.classes.columns.courses'),
+      sort: (r) => r.courseIds.length,
+      className: 'min-w-64',
+      cell: (r) => (
+        <div className="flex flex-col gap-1.5">
+          {r.courseIds.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {r.courseIds.map((id) => (
+                <span
+                  key={id}
+                  className="inline-flex items-center gap-1 rounded-md border bg-muted/40 py-0.5 pl-2 pr-1 text-xs"
+                  title={id}
+                >
+                  <CourseLink courseId={id}>{titles.get(id) ?? id}</CourseLink>
+                  <button
+                    type="button"
+                    className="rounded p-0.5 text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
+                    aria-label={t('admin.classes.detach', { id })}
+                    title={t('admin.classes.detach', { id })}
+                    onClick={() => void act(() => detachCourse(r.id, id))}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <form
+            className="flex items-center gap-1.5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void attach(r);
+            }}
+          >
+            <Input
+              aria-label={t('admin.previews.courseId')}
+              placeholder={t('admin.previews.courseId')}
+              className="h-7 w-40 text-xs"
+              value={courseIds[r.id] ?? ''}
+              onChange={(event) =>
+                setCourseIds((current) => ({ ...current, [r.id]: event.target.value }))
+              }
+            />
+            <Button type="submit" variant="outline" size="sm" className="h-7">
+              {t('admin.classes.attach')}
+            </Button>
+          </form>
+        </div>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('admin.table.actions'),
+      align: 'right',
+      cell: (r) => (
+        <div className="flex justify-end gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => setRenaming({ row: r, name: r.name })}>
+            <Pencil />
+            {t('admin.table.edit')}
+          </Button>
+          <ConfirmButton
+            icon={false}
+            label={t('admin.classes.newCode')}
+            title={t('admin.classes.newCodeTitle', { name: r.name })}
+            description={t('admin.classes.newCodeDescription')}
+            confirm={t('admin.classes.newCode')}
+            onConfirm={() =>
+              act(async () => {
+                const rotated = await rotateJoinCode(r.id);
+                setJoinCode(`${r.name}: ${rotated.joinCode}`);
+              })
+            }
+          />
+          <ConfirmButton
+            label={t('admin.table.delete')}
+            title={t('admin.classes.deleteTitle', { name: r.name })}
+            description={t('admin.classes.deleteDescription', { count: r.memberCount })}
+            confirm={t('admin.table.delete')}
+            onConfirm={() =>
+              act(() => deleteClass(r.id), t('admin.classes.deleted', { name: r.name }))
+            }
+          />
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <Section title={t('admin.classes.title')} description={t('admin.classes.description')}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          aria-label={t('admin.classes.name')}
-          placeholder={t('admin.classes.name')}
-          className="h-8 max-w-xs"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-        <Button variant="outline" size="sm" onClick={() => void create()}>
-          {t('admin.classes.create')}
-        </Button>
-      </div>
+    <Section
+      id="ops-classes"
+      title={t('admin.classes.title')}
+      description={t('admin.classes.description')}
+    >
       {joinCode ? (
         <p className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm">
           {t('admin.classes.joinCode', { code: joinCode })}
         </p>
       ) : null}
-      {classes.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('admin.classes.empty')}</p>
-      ) : null}
-      <ul className="divide-y rounded-lg border">
-        {classes.map((row) => (
-          <li key={row.id} className="flex flex-col gap-2 px-3 py-2.5">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-medium">{row.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {t('admin.classes.members', { count: row.memberCount })} ·{' '}
-                {t('admin.classes.courses', { count: row.courseIds.length })}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Input
-                aria-label={t('admin.previews.courseId')}
-                placeholder={t('admin.previews.courseId')}
-                className="h-8 max-w-xs"
-                value={courseIds[row.id] ?? ''}
-                onChange={(event) =>
-                  setCourseIds((current) => ({ ...current, [row.id]: event.target.value }))
-                }
-              />
-              <Button variant="outline" size="sm" onClick={() => void attach(row)}>
-                {t('admin.classes.attach')}
-              </Button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => r.id}
+        searchText={(r) => `${r.name} ${r.courseIds.join(' ')}`}
+        initialSort={{ id: 'name', dir: 'asc' }}
+        empty={t('admin.classes.empty')}
+        toolbar={
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void create();
+            }}
+          >
+            <Input
+              aria-label={t('admin.classes.name')}
+              placeholder={t('admin.classes.name')}
+              className="h-8 w-48"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+            <Button type="submit" size="sm">
+              {t('admin.classes.create')}
+            </Button>
+          </form>
+        }
+      />
+      <ClassMembersDialog
+        key={viewing?.id ?? 'none'}
+        row={viewing}
+        onClose={() => setViewing(null)}
+        onChanged={reload}
+      />
+      <EditDialog
+        open={renaming !== null}
+        onOpenChange={(next) => !next && setRenaming(null)}
+        title={t('admin.classes.renameTitle')}
+        onSave={async () => {
+          const next = renaming?.name.trim() ?? '';
+          if (!renaming || next === '') return false;
+          if (next !== renaming.row.name) {
+            await act(() => renameClass(renaming.row.id, next), t('admin.classes.renamed'));
+          }
+          return true;
+        }}
+      >
+        <Field label={t('admin.classes.name')}>
+          <Input
+            value={renaming?.name ?? ''}
+            maxLength={80}
+            onChange={(e) => renaming && setRenaming({ ...renaming, name: e.target.value })}
+          />
+        </Field>
+      </EditDialog>
     </Section>
   );
 }
 
+// ── Audit log ───────────────────────────────────────────────────────────────
+
+/** The first part of an action (`class:attach:<id>` → `class`); `list` is a view, not a change. */
+function category(action: string): string {
+  return action.split(':')[0]!;
+}
+
+const CATEGORIES = [
+  'membership',
+  'access',
+  'share',
+  'preview',
+  'class',
+  'set_role',
+  'disable',
+  'enable',
+  'password_reset',
+];
+
+function actionLabel(action: string, t: (key: string) => string): string {
+  // `class:attach:<classId>` reads as "class:attach"; the class is in the target column.
+  const key = `admin.audit.actions.${action.split(':').slice(0, 2).join('_')}`;
+  const text = t(key);
+  return text === key ? action : text;
+}
+
 export function AuditPanel() {
   const { t, locale } = useI18n();
-  const failure = useFailureMessage();
-  const [rows, setRows] = useState<AuditRow[]>([]);
-  const [more, setMore] = useState(true);
+  const { rows } = useRows(fetchAudit);
 
-  const load = useCallback(
-    async (before?: number) => {
-      try {
-        const page = await fetchAudit(before);
-        setRows((current) => (before === undefined ? page : [...current, ...page]));
-        setMore(page.length === 50);
-      } catch (error) {
-        toast.error(failure(error));
-      }
+  const columns: Column<AuditRow>[] = [
+    {
+      id: 'time',
+      header: t('admin.audit.columns.time'),
+      sort: (r) => r.id,
+      className: 'whitespace-nowrap',
+      cell: (r) => (
+        <span className="tabular-nums">{new Date(r.createdAt).toLocaleString(locale)}</span>
+      ),
     },
-    [failure],
+    {
+      id: 'actor',
+      header: t('admin.audit.columns.actor'),
+      sort: (r) => r.actorName ?? r.actorId,
+      cell: (r) => r.actorName ?? <span className="font-mono text-xs">{r.actorId}</span>,
+    },
+    {
+      id: 'action',
+      header: t('admin.audit.columns.action'),
+      sort: (r) => r.action,
+      cell: (r) => (
+        <Badge variant="outline" title={r.action}>
+          {actionLabel(r.action, t)}
+        </Badge>
+      ),
+    },
+    {
+      id: 'target',
+      header: t('admin.audit.columns.target'),
+      sort: (r) => r.targetName ?? r.targetId,
+      cell: (r) =>
+        r.targetName ?? <span className="break-all font-mono text-xs">{r.targetId}</span>,
+    },
+    {
+      id: 'reason',
+      header: t('admin.audit.columns.details'),
+      className: 'max-w-xs',
+      cell: (r) => (r.reason ? <span className="break-words">{r.reason}</span> : '—'),
+    },
+  ];
+
+  return (
+    <Section
+      id="ops-audit"
+      title={t('admin.audit.title')}
+      description={t('admin.audit.description', { max: AUDIT_MAX })}
+    >
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(r) => String(r.id)}
+        searchText={(r) =>
+          [r.actorName, r.actorId, r.targetName, r.targetId, r.action, r.reason].join(' ')
+        }
+        filters={[
+          {
+            id: 'category',
+            label: t('admin.audit.columns.action'),
+            options: [
+              { value: 'changes', label: t('admin.audit.categories.changes') },
+              ...CATEGORIES.map((c) => ({ value: c, label: t(`admin.audit.categories.${c}`) })),
+              { value: 'list', label: t('admin.audit.categories.list') },
+            ],
+            // Viewing the account list is logged too; it is noise next to the changes.
+            initial: 'changes',
+            test: (r, v) =>
+              v === 'changes' ? category(r.action) !== 'list' : category(r.action) === v,
+          },
+        ]}
+        initialSort={{ id: 'time', dir: 'desc' }}
+        empty={t('admin.audit.empty')}
+      />
+    </Section>
   );
+}
+
+/** Which providers the server manages. Read-only: they are set in the server configuration, never here. */
+export function ProviderStatusPanel() {
+  const { t } = useI18n();
+  const [ids, setIds] = useState<string[] | null>(null);
 
   useEffect(() => {
     let active = true;
-    fetchAudit()
-      .then((page) => {
-        if (active) {
-          setRows(page);
-          setMore(page.length === 50);
-        }
+    fetchServerProviders()
+      .then((byKind) => {
+        if (active) setIds([...new Set(Object.values(byKind).flat())]);
       })
-      .catch((error: unknown) => {
-        if (active) toast.error(failure(error));
+      .catch(() => {
+        // Without the list the panel shows its empty line.
       });
     return () => {
       active = false;
     };
-  }, [failure]);
+  }, []);
 
   return (
-    <Section title={t('admin.audit.title')} description={t('admin.audit.description')}>
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('admin.audit.empty')}</p>
-      ) : null}
-      {rows.length > 0 ? (
-        <ul className="divide-y rounded-lg border text-xs">
-          {rows.map((row) => (
-            <li
-              key={row.id}
-              className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
-            >
-              <span className="font-mono">{row.action}</span>
-              <span className="text-muted-foreground">
-                {new Date(row.createdAt).toLocaleString(locale)}
-                {row.reason ? ` · ${row.reason}` : ''}
-              </span>
-            </li>
+    <Section
+      id="ops-providers"
+      title={t('account.adminPage.providers.title')}
+      description={t('account.adminPage.providers.description')}
+    >
+      {ids === null || ids.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('account.adminPage.providers.empty')}</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {ids.map((id) => (
+            <Badge key={id} variant="outline">
+              {id}
+            </Badge>
           ))}
-        </ul>
-      ) : null}
-      {more && rows.length > 0 ? (
-        <div className="flex justify-center">
-          <Button variant="outline" size="sm" onClick={() => void load(rows[rows.length - 1]!.id)}>
-            {t('account.admin.loadMore')}
-          </Button>
         </div>
-      ) : null}
+      )}
     </Section>
   );
 }

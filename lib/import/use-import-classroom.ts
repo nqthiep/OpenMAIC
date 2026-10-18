@@ -342,14 +342,13 @@ export function useImportClassroom(onSuccess?: (importedStageId: string) => void
     fileInputRef.current?.click();
   }, []);
 
-  const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      // Reset input so same file can be re-selected
-      e.target.value = '';
-
+  /**
+   * Imports a classroom ZIP as a new course. Resolves with the new course id once it is
+   * committed, or undefined when the import failed (the toast already said why). The file picker
+   * and the in-memory remix (`components/community/remix.tsx`) both go through here.
+   */
+  const importFile = useCallback(
+    async (file: Blob): Promise<string | undefined> => {
       setImporting(true);
       setPhase('parsing');
       const toastId = toast.loading(t('import.parsing'));
@@ -561,8 +560,22 @@ export function useImportClassroom(onSuccess?: (importedStageId: string) => void
         toast.success(t('import.success'), { id: toastId });
         onSuccess?.(importedStageId!);
       }
+      return importCommitted ? importedStageId : undefined;
     },
     [t, onSuccess],
+  );
+
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Reset input so same file can be re-selected
+      e.target.value = '';
+
+      await importFile(file);
+    },
+    [importFile],
   );
 
   return {
@@ -571,5 +584,6 @@ export function useImportClassroom(onSuccess?: (importedStageId: string) => void
     fileInputRef,
     triggerFileSelect,
     handleFileChange,
+    importFile,
   };
 }

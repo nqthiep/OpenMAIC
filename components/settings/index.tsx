@@ -31,6 +31,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useCapabilities } from '@/lib/capabilities/use-capabilities';
 import { useSettingsStore } from '@/lib/store/settings';
 import { toast } from 'sonner';
 import { type ProviderId } from '@/lib/ai/providers';
@@ -228,7 +229,10 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   const setASRProvider = useSettingsStore((state) => state.setASRProvider);
 
   // Navigation
-  const [activeSection, setActiveSection] = useState<SettingsSection>('providers');
+  // Provider and key settings are the administrator's own. Everyone else sees General only.
+  const canConfigure = useCapabilities()?.personalProviderKey === true;
+  const [requestedSection, setActiveSection] = useState<SettingsSection>('providers');
+  const activeSection: SettingsSection = canConfigure ? requestedSection : 'general';
   const [selectedProviderId, setSelectedProviderId] = useState<ProviderId>(providerId);
   const [selectedPdfProviderId, setSelectedPdfProviderId] = useState<PDFProviderId>(pdfProviderId);
   const [selectedWebSearchProviderId, setSelectedWebSearchProviderId] =
@@ -736,125 +740,147 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
       <DialogContent className="h-[85vh] p-0 gap-0 block" showCloseButton={false}>
         <DialogTitle className="sr-only">{t('settings.title')}</DialogTitle>
         <DialogDescription className="sr-only">{t('settings.description')}</DialogDescription>
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1.5 rounded-t-[inherit] bg-gradient-to-r from-brand-700 via-brand-500 to-brand-yellow" />
         <div className="flex h-full overflow-hidden">
           {/* Left Sidebar - Navigation */}
-          <div className="flex-shrink-0 bg-muted/30 p-3 space-y-1" style={{ width: sidebarWidth }}>
-            <button
-              onClick={() => setActiveSection('token-plan')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'token-plan'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <CreditCard className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.tokenPlan.nav')}</span>
-            </button>
+          <div
+            className="flex-shrink-0 bg-brand-50/60 p-3 space-y-1 dark:bg-white/[0.03]"
+            style={{ width: sidebarWidth }}
+          >
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('token-plan')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'token-plan'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <CreditCard className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.tokenPlan.nav')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('providers')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'providers'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <Box className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.providers')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('providers')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'providers'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <Box className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.providers')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('image')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'image'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <ImageIcon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.imageSettings')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('image')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'image'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <ImageIcon className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.imageSettings')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('video')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'video'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <Film className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.videoSettings')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('video')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'video'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <Film className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.videoSettings')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('tts')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'tts'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <Volume2 className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.ttsSettings')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('tts')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'tts'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <Volume2 className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.ttsSettings')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('asr')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'asr'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <Mic className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.asrSettings')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('asr')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'asr'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <Mic className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.asrSettings')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('pdf')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'pdf'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <FileText className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.documentParsingSettings')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('pdf')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'pdf'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <FileText className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.documentParsingSettings')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('web-search')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'web-search'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <Search className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.webSearchSettings')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('web-search')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'web-search'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <Search className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.webSearchSettings')}</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveSection('skills')}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'skills'
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted',
-              )}
-            >
-              <Sparkles className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('settings.skills.nav')}</span>
-            </button>
+            {canConfigure && (
+              <button
+                onClick={() => setActiveSection('skills')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                  activeSection === 'skills'
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'hover:bg-muted',
+                )}
+              >
+                <Sparkles className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('settings.skills.nav')}</span>
+              </button>
+            )}
 
             <button
               onClick={() => setActiveSection('general')}
@@ -1053,7 +1079,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
           {/* Right - Configuration Panel */}
           <div className="flex-1 flex flex-col overflow-hidden min-w-0">
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b">
+            <div className="flex items-center justify-between border-b border-brand-100 bg-gradient-to-r from-brand-50 to-background p-5 dark:border-white/10 dark:from-brand-950/60 [&_h2]:text-brand-800 dark:[&_h2]:text-white">
               <div className="flex items-center gap-3">{getHeaderContent()}</div>
               <div className="flex items-center gap-2">
                 {activeSection === 'providers' &&

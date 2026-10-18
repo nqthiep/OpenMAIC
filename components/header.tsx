@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import type { StageMode } from '@/lib/types/stage';
 import { classroomExitLabelKey, exitClassroom } from '@/lib/workbench/classroom-exit';
 import { AccountControl } from '@/components/account/account-control';
+import { BRAND_GRADIENT, BrandDecor } from '@/components/home/brand-band';
+import { cn } from '@/lib/utils';
 import { HeaderControls } from './stage/header-controls';
 
 interface HeaderProps {
@@ -50,14 +52,25 @@ export function Header({
 
   return (
     <>
-      <header className="h-20 px-8 flex items-center justify-between z-10 bg-transparent gap-4">
+      <header
+        className={cn(
+          'relative isolate h-20 px-8 flex items-center justify-between z-10 gap-4 text-white shadow-lg shadow-brand-800/20',
+          BRAND_GRADIENT,
+        )}
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        >
+          <BrandDecor compact />
+        </div>
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {hideBackControl
             ? null
             : (backControl ?? (
                 <button
                   onClick={() => exitClassroom(router, searchParams)}
-                  className="shrink-0 p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  className="shrink-0 p-2 rounded-lg text-white/80 hover:bg-white/15 hover:text-white transition-colors"
                   title={exitLabel}
                   aria-label={exitLabel}
                 >
@@ -75,11 +88,11 @@ export function Header({
               CommandBar title during the cross-fade. */}
           {mode !== 'edit' && (
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400 dark:text-gray-500 mb-0.5">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-brand-yellow mb-0.5">
                 {t('stage.currentScene')}
               </span>
               <h1
-                className="text-xl font-bold text-gray-800 dark:text-gray-200 tracking-tight truncate"
+                className="text-xl font-bold text-white tracking-tight truncate"
                 suppressHydrationWarning
               >
                 {currentSceneTitle || t('common.loading')}
@@ -87,11 +100,6 @@ export function Header({
             </div>
           )}
         </div>
-
-        {/* Account entry: application-global, so a workbench-attached classroom
-            hides it with the other global controls. Renders nothing unless
-            server accounts are enabled. */}
-        {hideGlobalControls ? null : <AccountControl />}
 
         {/* Standalone classroom keeps the full cluster. Workbench-attached
             classrooms omit both the global capsule and course share/export. */}
@@ -103,6 +111,11 @@ export function Header({
           showGlobalControls={!hideGlobalControls}
           showCourseActions={!hideCourseActions}
         />
+
+        {/* Account entry last, as in the site top bar: application-global, so a
+            workbench-attached classroom hides it with the other global controls.
+            Renders nothing unless server accounts are enabled. */}
+        {hideGlobalControls ? null : <AccountControl />}
       </header>
     </>
   );

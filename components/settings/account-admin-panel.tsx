@@ -9,6 +9,7 @@ import {
   disableAccount,
   enableAccount,
   fetchAccountSession,
+  resetAccountPassword,
   fetchAdminAccounts,
   type AccountRole,
   type AdminAccount,
@@ -24,6 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DataTable, SELECT_CLASS, type Column } from '@/components/learning/data-table';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { createLogger } from '@/lib/logger';
 import { isBrowserPersistenceEnabled } from '@/lib/persistence/bootstrap';
@@ -82,7 +84,6 @@ export function AccountAdminPanel() {
   // Only an administrator changes roles. An operator sees the list and the disable control.
   const [isAdministrator, setIsAdministrator] = useState(false);
   const [rows, setRows] = useState<AccountRow[] | null>(null);
-  const [nextAfter, setNextAfter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pending, setPending] = useState<AccountRow | null>(null);
@@ -90,6 +91,10 @@ export function AccountAdminPanel() {
   const savingRef = useRef(false);
   // The control that opened the dialog. Focus returns to it when the dialog closes.
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  // Password reset: the account asked about, then the one-time password, shown once.
+  const [resetting, setResetting] = useState<AccountRow | null>(null);
+  const [issued, setIssued] = useState<string | null>(null);
+  const [resetBusy, setResetBusy] = useState(false);
 
   const reportListFailure = useCallback(
     (error: unknown) => {
@@ -107,9 +112,15 @@ export function AccountAdminPanel() {
   const reload = useCallback(async () => {
     setLoading(true);
     try {
-      const page = await fetchAdminAccounts();
-      setRows(page.accounts.map(toRow));
-      setNextAfter(page.nextAfter);
+      // Every page, so the table can sort and filter the whole list.
+      const all: AccountRow[] = [];
+      let after: string | undefined;
+      do {
+        const page = await fetchAdminAccounts(after);
+        all.push(...page.accounts.map(toRow));
+        after = page.nextAfter ?? undefined;
+      } while (after !== undefined);
+      setRows(all);
       setStatus('shown');
     } catch (error) {
       reportListFailure(error);
@@ -161,20 +172,6 @@ export function AccountAdminPanel() {
     }
   };
 
-  const loadMore = async () => {
-    if (nextAfter === null) return;
-    setLoading(true);
-    try {
-      const page = await fetchAdminAccounts(nextAfter);
-      setRows((current) => [...(current ?? []), ...page.accounts.map(toRow)]);
-      setNextAfter(page.nextAfter);
-    } catch (error) {
-      reportListFailure(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const requestChange = (button: HTMLButtonElement, row: AccountRow) => {
     triggerRef.current = button;
     setPending(row);
@@ -206,6 +203,111 @@ export function AccountAdminPanel() {
     }
   };
 
+  const confirmReset = async () => {
+    if (!resetting) return;
+    setResetBusy(true);
+    try {
+      setIssued(await resetAccountPassword(resetting.id));
+    } catch (error) {
+      log.warn('Password reset failed', errorName(error));
+      toast.error(t('account.admin.errors.changeFailed'));
+      setResetting(null);
+    } finally {
+      setResetBusy(false);
+    }
+  };
+
+  const closeReset = () => {
+    if (resetBusy) return;
+    setResetting(null);
+    setIssued(null);
+  };
+
+  const columns: Column<AccountRow>[] = [
+    {
+      id: 'username',
+      header: t('account.admin.columns.username'),
+      sort: (row) => row.username,
+      cell: (row) => (
+        <span className="break-all font-medium">
+          {row.username}
+          {row.username === viewer ? (
+            <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+              ({t('account.admin.you')})
+            </span>
+          ) : null}
+        </span>
+      ),
+    },
+    {
+      id: 'role',
+      header: t('account.admin.columns.role'),
+      sort: (row) => row.role,
+      cell: (row) =>
+        isAdministrator && row.username !== viewer ? (
+          <select
+            aria-label={t('account.admin.changeRoleLabel', { username: row.username })}
+            value={row.role}
+            onChange={(event) => void changeRole(row, event.target.value as AccountRole)}
+            className={SELECT_CLASS}
+          >
+            {ROLE_OPTIONS.map((role) => (
+              <option key={role} value={role}>
+                {t(`account.roles.${role}`)}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <Badge variant="outline">{t(`account.roles.${row.role}`)}</Badge>
+        ),
+    },
+    {
+      id: 'created',
+      header: t('account.admin.columns.created'),
+      sort: (row) => row.createdAt,
+      cell: (row) => formatCreated(row.createdAt, locale),
+    },
+    {
+      id: 'status',
+      header: t('account.admin.columns.status'),
+      sort: (row) => (row.disabled ? 1 : 0),
+      cell: (row) => (
+        <Badge variant={row.disabled ? 'destructive' : 'secondary'}>
+          {t(row.disabled ? 'account.admin.status.disabled' : 'account.admin.status.active')}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('account.admin.columns.actions'),
+      align: 'right',
+      cell: (row) =>
+        row.username !== viewer && (isAdministrator || row.role !== 'admin') ? (
+          <div className="flex justify-end gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label={t('account.admin.resetPasswordLabel', { username: row.username })}
+              onClick={() => setResetting(row)}
+            >
+              {t('account.admin.resetPassword')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label={t(
+                row.disabled ? 'account.admin.enableLabel' : 'account.admin.disableLabel',
+                { username: row.username },
+              )}
+              onClick={(event) => requestChange(event.currentTarget, row)}
+            >
+              {t(row.disabled ? 'account.admin.enable' : 'account.admin.disable')}
+            </Button>
+          </div>
+        ) : null,
+    },
+  ];
+
   if (status !== 'shown') return null;
 
   const disabling = pending !== null && !pending.disabled;
@@ -235,73 +337,85 @@ export function AccountAdminPanel() {
 
       <p className="text-xs text-muted-foreground">{t('account.admin.description')}</p>
 
-      {rows?.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('account.admin.empty')}</p>
-      ) : null}
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        searchText={(row) => row.username}
+        filters={[
+          {
+            id: 'role',
+            label: t('account.admin.columns.role'),
+            options: ROLE_OPTIONS.map((role) => ({
+              value: role,
+              label: t(`account.roles.${role}`),
+            })),
+            test: (row, value) => row.role === value,
+          },
+          {
+            id: 'status',
+            label: t('account.admin.columns.status'),
+            options: [
+              { value: 'active', label: t('account.admin.status.active') },
+              { value: 'disabled', label: t('account.admin.status.disabled') },
+            ],
+            test: (row, value) => (value === 'disabled') === row.disabled,
+          },
+        ]}
+        initialSort={{ id: 'created', dir: 'desc' }}
+        empty={t('account.admin.empty')}
+      />
 
-      {rows && rows.length > 0 ? (
-        <ul className="divide-y rounded-lg border">
-          {rows.map((row) => (
-            <li
-              key={row.id}
-              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2.5"
-            >
-              <div className="min-w-0 flex-1 basis-40">
-                <p className="break-all text-sm font-medium">{row.username}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('account.admin.created', { date: formatCreated(row.createdAt, locale) })}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {isAdministrator && row.username !== viewer ? (
-                  <select
-                    aria-label={t('account.admin.changeRoleLabel', { username: row.username })}
-                    value={row.role}
-                    onChange={(event) => void changeRole(row, event.target.value as AccountRole)}
-                    className="h-8 rounded-md border bg-background px-2 text-sm"
-                  >
-                    {ROLE_OPTIONS.map((role) => (
-                      <option key={role} value={role}>
-                        {t(`account.roles.${role}`)}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <Badge variant="outline">{t(`account.roles.${row.role}`)}</Badge>
-                )}
-                <Badge variant={row.disabled ? 'destructive' : 'secondary'}>
-                  {t(
-                    row.disabled ? 'account.admin.status.disabled' : 'account.admin.status.active',
-                  )}
-                </Badge>
-                {row.username === viewer ? (
-                  <span className="text-xs text-muted-foreground">{t('account.admin.you')}</span>
-                ) : isAdministrator || row.role !== 'admin' ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label={t(
-                      row.disabled ? 'account.admin.enableLabel' : 'account.admin.disableLabel',
-                      { username: row.username },
-                    )}
-                    onClick={(event) => requestChange(event.currentTarget, row)}
-                  >
-                    {t(row.disabled ? 'account.admin.enable' : 'account.admin.disable')}
-                  </Button>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {nextAfter !== null ? (
-        <div className="flex justify-center">
-          <Button variant="outline" size="sm" onClick={() => void loadMore()} disabled={loading}>
-            {t('account.admin.loadMore')}
-          </Button>
-        </div>
-      ) : null}
+      <AlertDialog open={resetting !== null} onOpenChange={(open) => !open && closeReset()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('account.admin.resetTitle', { username: resetting?.username ?? '' })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {issued === null
+                ? t('account.admin.resetDescription')
+                : t('account.admin.resetDone', { username: resetting?.username ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {issued !== null ? (
+            <div className="flex items-center gap-2">
+              <code className="flex-1 select-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm">
+                {issued}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  void navigator.clipboard
+                    .writeText(issued)
+                    .then(() => toast.success(t('account.admin.resetCopied')))
+                    .catch(() => undefined)
+                }
+              >
+                {t('account.admin.resetCopy')}
+              </Button>
+            </div>
+          ) : null}
+          <AlertDialogFooter>
+            {issued === null ? (
+              <>
+                <AlertDialogCancel disabled={resetBusy}>{t('common.cancel')}</AlertDialogCancel>
+                <Button
+                  variant="destructive"
+                  disabled={resetBusy}
+                  onClick={() => void confirmReset()}
+                >
+                  {resetBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {t('account.admin.resetPassword')}
+                </Button>
+              </>
+            ) : (
+              <Button onClick={closeReset}>{t('account.admin.resetClose')}</Button>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={dialogOpen}
