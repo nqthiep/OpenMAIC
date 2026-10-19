@@ -2,6 +2,58 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Catalog page that scales to many courses (phase 3a: subject, grade and topic tags)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "Bàn giai đoạn 3 của trang danh mục: thẻ chủ đề và lớp. Ai gắn thẻ, bộ thẻ cố định gồm gì, lưu ở đâu, và có nên đổi mặc định sang Mới cập nhật không." Then: "Hệ thống dạy nhiều môn. Hãy đề xuất trục Môn và danh sách chủ đề cho từng môn trước khi làm giai đoạn 3a." Then: "Các môn chính như Toán, lý, hoá, tin học, tiếng anh, và sinh học"
+- Reading of the last answer (mine, confirm if wrong): the Môn axis is those six subjects plus "Khác" (other); topics are defined for those six only. The 2026 THPT exam subjects and the other subjects of my earlier proposal (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, vocational, life skills) are NOT in this phase.
+- Assignment status: Done for phase 3a (code, tests, browser check on mock data), committed and pushed.
+- Branch and commit: `it-math` @ `bbd175a1` (the feature) plus a docs commit for this file, pushed: yes, to `origin` (`https://github.com/nqthiep/OpenMAIC.git`). The owner asked for it ("Commit riêng các file của giai đoạn 3a ... rồi push lên origin/it-math"). Only this phase's 28 files were staged, by path; `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` and `tests/security/*` were left out. The push was a fast-forward from `ec7b4104` and also carried `ada5c244` (another session's header fix, committed before and not pushed until now). `git ls-remote origin refs/heads/it-math` printed `bbd175a10ae625926e86f2ed7bfd653578ee6f68` after the push.
+- Last updated: 2026-10-19 (UTC time not recorded)
+
+### Design (from the proposal in this session)
+- Taxonomy in code, `lib/learning/taxonomy.ts` (pure): subjects `math physics chemistry informatics english biology other`; grades `10 11 12`; topics per subject (none for `other`). A tag is a string: `subject:math`, `grade:12`, `topic:math.derivative`. A course has at most 1 subject, 2 grades, 3 topics, and topics must belong to its subject. Subject and grade names are i18n keys in 12 locales. Topic names are `{ vi, en }` constants in code and every other language shows the English one (56 topic names times 11 languages would be about 600 unreviewed technical strings; add them if wanted). The topic lists are written from memory of the 2018 curriculum, NOT checked against the official text [Unverified]; a teacher should review them.
+- Storage: new table `course_tags (course_id, tag, set_by, set_at, PRIMARY KEY (course_id, tag))` in `lib/server/learning/schema.ts`, one row per tag, so it serves shared courses and previews alike. Staff set the whole list with `PUT /api/admin/courses/[id]/tags` (action `share.decide`, so operator and admin), only for a course that has a share record or a preview mark. Each change writes an audit row `course:tags`.
+- Staff UI: a "Thẻ" column and an edit dialog in the shares panel and the previews panel. Tags show on the catalog only for courses the catalog lists (shared or preview), so a tag on a pending request is not public.
+- Catalog: `CatalogEntry.tags`; filters `subject`, `grade`, `topic` in the address (`?subject=math&grade=12&topic=math.derivative`); values within one group mean "any of", groups combine with "and". Chips show a count that respects the other active filters; a chip with no courses is hidden unless chosen. "Chủ đề" chips appear only while exactly one subject is chosen. Courses without tags stay in the unfiltered list and in search.
+- The default sort stays A to Z (decided in the proposal).
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, `git status`, branch `it-math` | Done | Branch `it-math` @ `ada5c244`; tracked files clean; untracked: `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`, `tests/security/*` (not mine) |
+| 2 | Taxonomy module + `course_tags` table + store functions (`setCourseTags`, `listCourseTags`) + tests | Done | `lib/learning/taxonomy.ts` (7 subjects, 3 grades, 56 topics for the six subjects, `validateTags`, `readTags`, `tagsFor`, `topicName`); `tests/learning/taxonomy.test.ts`: 7 passed. `course_tags` in `lib/server/learning/schema.ts` (the schema text is split on semicolons, so a comment there must not contain one: the first run failed on that). `lib/server/learning/store.ts`: `listCourseTags` (taxonomy order, unknown stored tags ignored), `isTaggableCourse`, `setCourseTags` (one statement removes, adds and writes the audit row `course:tags`; returns false and writes nothing when the set is unchanged) |
+| 3 | API: `PUT /api/admin/courses/[id]/tags`, tags in `listCatalog`, in `GET /api/admin/shares` and `GET /api/admin/previews` + tests | Done | `app/api/admin/courses/[id]/tags/route.ts` (action `share.decide`; 400 for a bad list, 404 for a course with neither a share record nor a preview mark). `tests/learning/course-tags-routes.test.ts` on PGlite: 4 passed (staff only, bad lists, tags visible to staff and to a member or guest in the catalog and clearing them, one audit row per real change) |
+| 4 | Staff UI: tags column and edit dialog in the shares and previews panels + component test | Done | `components/learning/course-tags-editor.tsx` (new), `TagsCell` and `TagsDialog` in `components/learning/admin-panels.tsx`, audit category `course`. `tests/learning/course-tags-panel.test.ts`: 2 passed (topics only after a subject, grade and topic limits disable the rest, saved in taxonomy order, a new subject drops the old topics). Browser: see row 8 |
+| 5 | Catalog: subject, grade, topic filters with counts + address + tests | Done | `lib/home/catalog-filter.ts` (`subject`, `grade`, `topic`, `facetCounts`; a topic is kept only while exactly its own subject is chosen), `components/home/catalog-browser.tsx` (three chip groups with counts), `components/home/filter-chip.tsx` (the chip moved out of the browser). `tests/home/catalog-filter.test.ts`: 22 passed |
+| 6 | i18n keys in 12 locales | Done | New: `taxonomy.subject.*`, `taxonomy.grade.*`, `catalog.filter.{subject,grade,topic}`, `admin.tags.*`, `admin.audit.categories.course`, `admin.audit.actions.course_tags`. `pnpm check:i18n-keys` passed; prettier clean. The 11 non-Vietnamese texts are mine, not reviewed by a native speaker [Unverified]. Topic names are in code (`vi` and `en`), see the design section |
+| 7 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/learning tests/workbench tests/i18n tests/components tests/admin`: 133 files, 1508 passed. `npx tsc --noEmit`: no error outside `.next/` and `tests/security/`. `pnpm exec eslint` on the 16 changed code files: 0 problems. `prettier --check` on them and the 12 locales: clean |
+| 8 | Browser check at 768 px and wider | Done (mock data) | `p3.localhost:3002`, this session's own `next dev`. Catalog with 42 mock courses (fetch replaced in the page, nothing written to the database): groups "Môn" with counts (Toán 7, Vật lí 6, Hoá học 7, Tin học 6, Tiếng Anh 6, Sinh học 6, Khác 1) and "Khối"; choosing "Toán" adds "Chủ đề" with counts; "Đạo hàm" gives 2 courses (matches the mock) and the address `?subject=math&topic=math.derivative`; choosing a second subject hides the topics and clears them (`?subject=math%2Cphysics`, 13 courses). Admin page with a mocked admin session and mocked `/api/admin/shares`: the shares table shows a "Thẻ" column with "Toán, Khối 12, Sửa thẻ" and "Gắn thẻ"; the dialog offers topics after "Vật lí", disables the rest after 3 topics and after 2 grades; Lưu sent `PUT /api/admin/courses/share-2/tags` with `subject:physics, grade:11, topic:physics.kinematics, topic:physics.oscillation, topic:physics.waves` and the row then showed them. Not seen: the previews panel in the browser (same component, covered by the shares test), 768 px with the new toolbar rows (checked at the pane's 800 px), a real database |
+| 9 | Update this section and report | Done | this section |
+| 10 | Commit this phase's files by path and push `it-math` (owner asked after the report) | Done | `bbd175a1`, 28 files; `git push origin it-math`: `ec7b4104..bbd175a1`; `git ls-remote origin refs/heads/it-math`: `bbd175a1`. This section's own update is a docs commit after it |
+
+### Done so far
+- `lib/learning/taxonomy.ts`, `course_tags` table and store functions, the staff route, tags in `listCatalog` and in the two admin lists.
+- Staff dialog in the shares and previews panels. Catalog filters "Môn", "Khối", "Chủ đề" with counts and an address.
+- Tests: `tests/learning/taxonomy.test.ts`, `course-tags-routes.test.ts`, `course-tags-panel.test.ts`, extended `tests/home/catalog-filter.test.ts`. 12 locales.
+
+### Decisions and reasons
+- Topic names live in code as `{ vi, en }` and every other language shows the English name. Reason: 56 names times 11 languages would be about 600 unreviewed technical strings. Subject and grade names are in all 12 locales. Say if the topic names should be translated too.
+- A tag on a pending request is allowed (staff tag before approving) but not public: the catalog lists only shared and preview courses.
+- Courses without tags stay in the unfiltered list and in search. There is no "Chưa phân loại" chip yet: once a subject chip is chosen they are hidden.
+- Chip counts follow the other active filters, and a chip with no course is hidden unless chosen. Counts for subjects ignore the chosen topics so a topic does not hide the other subjects.
+- The default sort stays A to Z.
+
+### Next step (exact)
+- Owner: (1) a teacher reviews the topic lists in `lib/learning/taxonomy.ts` (written from memory of the 2018 curriculum, not checked); (2) restart `next dev` once so `course_tags` is created (the schema runs when the database pool starts); (3) staff tag the courses already shared and the previews, otherwise the new filters show nothing.
+
+### Open questions and blockers
+- Not verified: the new table in a real PostgreSQL (tests use PGlite, the schema applied there); the previews panel and a real admin session in the browser; the 768 px width with the longer toolbar.
+- `Số phức` (complex numbers) is not in the Toán list: I could not confirm it is in the 2018 programme.
+
+### How to verify
+- `pnpm vitest run tests/learning/taxonomy.test.ts tests/learning/course-tags-routes.test.ts tests/learning/course-tags-panel.test.ts tests/home/catalog-filter.test.ts`: expected all pass.
+- As staff, tag a shared course in `/admin` (tab "Nội dung & lớp"), then open `/catalog` with more than 12 courses: the "Môn" chips show the subject with a count.
+
 ## Assignment: Catalog page that scales to many courses (phase 2)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Làm giai đoạn 2 của trang danh mục: lọc có bài kiểm tra/tương tác, lọc độ dài, kiểu danh sách gọn, thêm updatedAt và sắp xếp Mới cập nhật. Ghi bảng task vào HANDOFF.md trước khi làm."
