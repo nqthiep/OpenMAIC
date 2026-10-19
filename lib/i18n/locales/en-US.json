@@ -2802,7 +2802,8 @@
       "grade": "Grade (up to {{max}})",
       "topic": "Topics (up to {{max}})",
       "noTopics": "This subject has no topic list yet.",
-      "pickSubject": "Pick a subject first to choose topics."
+      "pickSubject": "Pick a subject first to choose topics.",
+      "suggested": "Filled in from the course's titles, please check before saving."
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "Name A–Z",
       "recent": "Last studied",
       "short": "Shortest first",
-      "updated": "Recently updated"
+      "updated": "Recently updated",
+      "match": "Best match"
     },
     "continue": "Continue learning",
     "results": "Courses: {{count}}",
@@ -2900,7 +2902,9 @@
       "grid": "Grid",
       "list": "Compact list"
     },
-    "updatedOn": "Updated {{date}}"
+    "updatedOn": "Updated {{date}}",
+    "new": "New",
+    "subjectNone": "Not classified"
   },
   "courseProgress": {
     "done": "Completed",

@@ -30,6 +30,8 @@ vi.mock('@/lib/server/learning/store', async (importOriginal) => ({
   readRenderJobOwner: async () => undefined,
   listSharesByOwner: async (_db: unknown, ownerId: string) =>
     ownerId === 'acct:author' ? SHARES : [],
+  listCourseTags: async (_db: unknown, ids: readonly string[]) =>
+    new Map(ids.includes('c1') ? [['c1', ['subject:math', 'grade:12']]] : []),
   countDistinctReaders: async (_db: unknown, ownerId: string) =>
     ownerId === 'acct:author' ? 11 : 0,
   readBonusTokens: async (_db: unknown, ownerId: string) =>
@@ -61,7 +63,8 @@ describe('GET /api/membership/contribution', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toMatchObject({
-      shares: SHARES,
+      // The tags staff gave a course come with it; a course without tags carries none.
+      shares: [{ ...SHARES[0], tags: ['subject:math', 'grade:12'] }, SHARES[1]],
       readers: 11,
       bonus: { tokens: 220_000, cap: 200_000 },
       badges: ['readers-10'],

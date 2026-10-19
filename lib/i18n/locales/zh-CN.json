@@ -2802,7 +2802,8 @@
       "grade": "年级（最多 {{max}} 个）",
       "topic": "主题（最多 {{max}} 个）",
       "noTopics": "该科目暂无主题列表。",
-      "pickSubject": "请先选择科目，再选择主题。"
+      "pickSubject": "请先选择科目，再选择主题。",
+      "suggested": "已根据课程标题预填，保存前请核对。"
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "名称 A–Z",
       "recent": "最近学习",
       "short": "最短优先",
-      "updated": "最近更新"
+      "updated": "最近更新",
+      "match": "匹配度"
     },
     "continue": "继续学习",
     "results": "共 {{count}} 门课程",
@@ -2900,7 +2902,9 @@
       "grid": "网格",
       "list": "紧凑列表"
     },
-    "updatedOn": "更新于 {{date}}"
+    "updatedOn": "更新于 {{date}}",
+    "new": "新",
+    "subjectNone": "未分类"
   },
   "courseProgress": {
     "done": "已完成",

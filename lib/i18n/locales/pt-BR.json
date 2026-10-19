@@ -2802,7 +2802,8 @@
       "grade": "Ano (até {{max}})",
       "topic": "Tópicos (até {{max}})",
       "noTopics": "Esta disciplina ainda não tem lista de tópicos.",
-      "pickSubject": "Escolha primeiro uma disciplina para selecionar tópicos."
+      "pickSubject": "Escolha primeiro uma disciplina para selecionar tópicos.",
+      "suggested": "Preenchido a partir dos títulos do curso; confira antes de salvar."
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "Nome A–Z",
       "recent": "Estudado recentemente",
       "short": "Mais curtos primeiro",
-      "updated": "Atualizados recentemente"
+      "updated": "Atualizados recentemente",
+      "match": "Mais relevantes"
     },
     "continue": "Continuar estudando",
     "results": "Cursos: {{count}}",
@@ -2900,7 +2902,9 @@
       "grid": "Grade",
       "list": "Lista compacta"
     },
-    "updatedOn": "Atualizado em {{date}}"
+    "updatedOn": "Atualizado em {{date}}",
+    "new": "Novo",
+    "subjectNone": "Sem classificação"
   },
   "courseProgress": {
     "done": "Concluído",

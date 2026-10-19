@@ -14,7 +14,10 @@ import {
 
 export type CatalogStatus = 'new' | 'learning' | 'done';
 export type CatalogKind = 'preview' | 'shared';
-export type CatalogSort = 'title' | 'updated' | 'recent' | 'short';
+/** `match` ranks by how well the title fits the search box; it is chosen for the learner while they search. */
+export type CatalogSort = 'title' | 'updated' | 'recent' | 'short' | 'match';
+/** A subject, or `none` for a course that has no subject tag yet ("not classified"). */
+export type SubjectFilter = Subject | 'none';
 /** What a course must contain. */
 export type CatalogContent = 'quiz' | 'interactive';
 export type CatalogLength = 'short' | 'medium' | 'long';
@@ -49,7 +52,7 @@ export interface CatalogView {
   /** Empty means any length. */
   readonly len: readonly CatalogLength[];
   /** The course's subject is one of these. */
-  readonly subject: readonly Subject[];
+  readonly subject: readonly SubjectFilter[];
   /** The course is for one of these grades. */
   readonly grade: readonly Grade[];
   /** The course covers one of these topics (values such as `math.derivative`). Needs one subject. */
@@ -87,7 +90,20 @@ export const CATALOG_STATUSES: readonly CatalogStatus[] = ['new', 'learning', 'd
 export const CATALOG_KINDS: readonly CatalogKind[] = ['preview', 'shared'];
 export const CATALOG_CONTENT: readonly CatalogContent[] = ['quiz', 'interactive'];
 export const CATALOG_LENGTHS: readonly CatalogLength[] = ['short', 'medium', 'long'];
+/** The sorts a learner can pick any time; `match` is offered only while searching. */
 export const CATALOG_SORTS: readonly CatalogSort[] = ['title', 'updated', 'recent', 'short'];
+const ALL_SORTS: readonly CatalogSort[] = [...CATALOG_SORTS, 'match'];
+/** The subject chips: every subject, then the courses that have none. */
+export const SUBJECT_FILTERS: readonly SubjectFilter[] = [...SUBJECTS, 'none'];
+
+/** A course changed within this many days is new. */
+export const NEW_DAYS = 14;
+
+/** Whether a course changed recently enough to be marked "new". */
+export function isNew(updatedAt: string | undefined, now: number): boolean {
+  const at = Date.parse(updatedAt ?? '');
+  return Number.isFinite(at) && at <= now && now - at <= NEW_DAYS * 86_400_000;
+}
 const KEYS = [
   'q',
   'status',
@@ -134,7 +150,7 @@ export function filterCourses<T extends CatalogCourse>(
     const tags = readTags(course.tags);
     return (
       matches(course.title, words) &&
-      (view.subject.length === 0 || (!!tags.subject && view.subject.includes(tags.subject))) &&
+      (view.subject.length === 0 || view.subject.includes(tags.subject ?? 'none')) &&
       (view.grade.length === 0 || tags.grades.some((grade) => view.grade.includes(grade))) &&
       (view.topic.length === 0 || tags.topics.some((topic) => view.topic.includes(topic))) &&
       (view.kind.length === 0 || view.kind.includes(course.kind as CatalogKind)) &&
@@ -172,14 +188,32 @@ export function facetCounts<T extends CatalogCourse>(
   return counts;
 }
 
+/**
+ * How well a title fits what was typed: 0 when it starts with it, 1 when every word typed starts
+ * a word of the title, 2 when the words are only somewhere inside.
+ */
+function matchRank(title: string, query: string): number {
+  const folded = foldText(title);
+  const typed = foldText(query);
+  if (typed === '' || folded.startsWith(typed)) return 0;
+  const startsWord = (word: string) => folded.startsWith(word) || folded.includes(` ${word}`);
+  return typed.split(/\s+/).every(startsWord) ? 1 : 2;
+}
+
 export function sortCourses<T extends CatalogCourse>(
   courses: readonly T[],
   sort: CatalogSort,
   progress: ReadonlyMap<string, CatalogProgress>,
+  query = '',
 ): T[] {
   const byTitle = (a: T, b: T) => a.title.localeCompare(b.title);
   const studiedAt = (course: T) => Date.parse(progress.get(course.courseId)?.updatedAt ?? '') || 0;
   const copy = [...courses];
+  if (sort === 'match') {
+    return copy.sort(
+      (a, b) => matchRank(a.title, query) - matchRank(b.title, query) || byTitle(a, b),
+    );
+  }
   if (sort === 'updated') {
     // A course with no known update goes last, in A to Z order.
     const changedAt = (course: T) => Date.parse(course.updatedAt ?? '') || 0;
@@ -236,7 +270,22 @@ export function withoutFilters(view: CatalogView): CatalogView {
     subject: [],
     grade: [],
     topic: [],
+    // The match order means nothing without a search.
+    sort: view.sort === 'match' ? DEFAULT_VIEW.sort : view.sort,
   };
+}
+
+/**
+ * The sort to use after the search text changed: ranking by match starts when the learner begins
+ * to search from the default order, and ends when the search box is emptied. Any sort the learner
+ * picked themselves stays.
+ */
+export function sortAfterTyping(sort: CatalogSort, before: string, after: string): CatalogSort {
+  const was = before.trim() !== '';
+  const is = after.trim() !== '';
+  if (!was && is && sort === DEFAULT_VIEW.sort) return 'match';
+  if (was && !is && sort === 'match') return DEFAULT_VIEW.sort;
+  return sort;
 }
 
 function listOf<T extends string>(raw: string | null, allowed: readonly T[]): T[] {
@@ -247,7 +296,7 @@ function listOf<T extends string>(raw: string | null, allowed: readonly T[]): T[
 export function parseView(search: string): CatalogView {
   const params = new URLSearchParams(search);
   const sort = params.get('sort');
-  const subject = listOf(params.get('subject'), SUBJECTS);
+  const subject = listOf(params.get('subject'), SUBJECT_FILTERS);
   // A topic belongs to its subject, so topics only count while exactly that one subject is chosen.
   const topic = (params.get('topic') ?? '')
     .split(',')
@@ -267,7 +316,7 @@ export function parseView(search: string): CatalogView {
     subject,
     grade: listOf(params.get('grade'), GRADES),
     topic,
-    sort: CATALOG_SORTS.find((value) => value === sort) ?? DEFAULT_VIEW.sort,
+    sort: ALL_SORTS.find((value) => value === sort) ?? DEFAULT_VIEW.sort,
     layout: params.get('layout') === 'list' ? 'list' : 'grid',
   };
 }

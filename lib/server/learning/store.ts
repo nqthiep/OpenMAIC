@@ -1128,6 +1128,8 @@ export interface OwnShare {
   readers: number;
   /** Why a refused request was refused, when staff gave a reason. */
   reason?: string | null;
+  /** The subject, grade and topic tags staff gave the course, when they did. */
+  tags?: string[];
 }
 
 /**

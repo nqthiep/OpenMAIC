@@ -2802,7 +2802,8 @@
       "grade": "Klassenstufe (bis zu {{max}})",
       "topic": "Themen (bis zu {{max}})",
       "noTopics": "Für dieses Fach gibt es noch keine Themenliste.",
-      "pickSubject": "Wählen Sie zuerst ein Fach, um Themen auszuwählen."
+      "pickSubject": "Wählen Sie zuerst ein Fach, um Themen auszuwählen.",
+      "suggested": "Anhand der Titel des Kurses vorausgefüllt, bitte vor dem Speichern prüfen."
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "Name A–Z",
       "recent": "Zuletzt gelernt",
       "short": "Kürzeste zuerst",
-      "updated": "Zuletzt aktualisiert"
+      "updated": "Zuletzt aktualisiert",
+      "match": "Beste Treffer"
     },
     "continue": "Weiterlernen",
     "results": "Kurse: {{count}}",
@@ -2900,7 +2902,9 @@
       "grid": "Raster",
       "list": "Kompakte Liste"
     },
-    "updatedOn": "Aktualisiert am {{date}}"
+    "updatedOn": "Aktualisiert am {{date}}",
+    "new": "Neu",
+    "subjectNone": "Nicht zugeordnet"
   },
   "courseProgress": {
     "done": "Abgeschlossen",

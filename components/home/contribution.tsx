@@ -3,11 +3,18 @@
 import { useEffect, useState } from 'react';
 import { Award } from 'lucide-react';
 import { SectionTitle } from '@/components/home/section-title';
+import { useTagLine } from '@/components/learning/tag-names';
 import { GLASS } from '@/components/home/site-shell';
 import { fetchContribution, type Contribution } from '@/components/learning/learning-api';
 import { useAccountSession } from '@/lib/capabilities/use-capabilities';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
+
+/** Where staff filed a course (subject and grade), read-only; nothing for an untagged one. */
+function ShareTags({ tags }: { tags?: readonly string[] }) {
+  const line = useTagLine(tags);
+  return line ? <span className="truncate text-muted-foreground">{line}</span> : null;
+}
 
 /** How many of the learner's shared courses the block lists. */
 const SHARES_SHOWN = 5;
@@ -114,7 +121,10 @@ export function ContributionBlock() {
           <ul className="flex flex-col divide-y divide-border/50 text-xs">
             {shares.slice(0, SHARES_SHOWN).map((share) => (
               <li key={share.courseId} className="flex items-center justify-between gap-3 py-1.5">
-                <span className="truncate text-foreground">{share.title}</span>
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate text-foreground">{share.title}</span>
+                  <ShareTags tags={share.tags} />
+                </span>
                 {share.state === 'rejected' ? (
                   <span className="min-w-0 shrink text-right text-red-600 dark:text-red-400">
                     {share.reason

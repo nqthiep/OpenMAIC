@@ -5,6 +5,8 @@ import { ArrowRight, BookOpen } from 'lucide-react';
 import { CourseProgressLine } from '@/components/home/course-progress-line';
 import { GLASS, THUMBNAILS } from '@/components/home/site-shell';
 import type { CatalogEntry, ProgressRow } from '@/components/learning/learning-api';
+import { useTagLine } from '@/components/learning/tag-names';
+import { isNew } from '@/lib/home/catalog-filter';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +22,7 @@ export function CourseCard({
   index,
   href = `/classroom/${encodeURIComponent(entry.courseId)}`,
   progress,
+  now,
 }: {
   entry: CatalogEntry;
   index: number;
@@ -27,8 +30,11 @@ export function CourseCard({
   progress?: ProgressRow;
   /** Where the card opens; the catalog passes a URL whose back arrow returns to it. */
   href?: string;
+  /** The time to judge "new" against, in milliseconds; without it no course is marked new. */
+  now?: number;
 }) {
   const { t } = useI18n();
+  const tagLine = useTagLine(entry.tags);
 
   return (
     <Link
@@ -53,10 +59,16 @@ export function CourseCard({
         >
           {t(`catalog.kind.${entry.kind}`)}
         </span>
+        {now !== undefined && isNew(entry.updatedAt, now) ? (
+          <span className="absolute right-3 top-3 rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-semibold text-amber-950">
+            {t('catalog.new')}
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-1 items-center justify-between gap-3 p-4">
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="line-clamp-2 break-words text-sm font-medium">{entry.title}</span>
+          {tagLine ? <span className="text-xs text-muted-foreground">{tagLine}</span> : null}
           {progress ? (
             <CourseProgressLine row={progress} sceneCount={entry.sceneCount} />
           ) : entry.sceneCount ? (

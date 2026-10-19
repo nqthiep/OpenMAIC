@@ -35,19 +35,42 @@ import {
   PAGE_SIZE,
   parseView,
   SHORT_MAX,
+  sortAfterTyping,
   sortCourses,
+  SUBJECT_FILTERS,
   viewSearch,
   withoutFilters,
   type CatalogLayout,
   type CatalogSort,
   type CatalogView,
+  type SubjectFilter,
 } from '@/lib/home/catalog-filter';
 import { useI18n } from '@/lib/hooks/use-i18n';
-import { GRADES, SUBJECTS, TOPICS, topicName, topicValue } from '@/lib/learning/taxonomy';
+import { GRADES, TOPICS, topicName, topicValue, type Subject } from '@/lib/learning/taxonomy';
 import { cn } from '@/lib/utils';
 
 function toggle<T>(values: readonly T[], value: T): T[] {
   return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
+}
+
+const LAYOUT_KEY = 'openmaic.catalog.layout';
+
+/** The layout the learner chose last time, if the browser lets us read it. */
+function savedLayout(): CatalogLayout | undefined {
+  try {
+    const value = window.localStorage.getItem(LAYOUT_KEY);
+    return value === 'list' || value === 'grid' ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function saveLayout(layout: CatalogLayout): void {
+  try {
+    window.localStorage.setItem(LAYOUT_KEY, layout);
+  } catch {
+    // Private windows and blocked storage: the choice lasts until the page closes.
+  }
 }
 
 /**
@@ -72,11 +95,17 @@ export function CatalogBrowser({
   const { t, locale } = useI18n();
   // Mounted only after the catalog loaded in the browser, so reading the address here cannot
   // differ between the server's page and the client's.
-  const [view, setView] = useState<CatalogView>(() =>
-    parseView(typeof window === 'undefined' ? '' : window.location.search),
-  );
+  const [view, setView] = useState<CatalogView>(() => {
+    if (typeof window === 'undefined') return parseView('');
+    const parsed = parseView(window.location.search);
+    // An address that says nothing about the layout gets the one the learner chose last time.
+    const chosen = new URLSearchParams(window.location.search).has('layout');
+    return chosen ? parsed : { ...parsed, layout: savedLayout() ?? parsed.layout };
+  });
   // How many pages of the list are shown; "show more" adds one.
   const [pages, setPages] = useState(1);
+  // "New" is judged against the time the list was opened.
+  const [now] = useState(() => Date.now());
   const showTools = courses.length > FILTER_THRESHOLD;
   const active = showTools ? view : DEFAULT_VIEW;
   const narrowed = isFiltered(active);
@@ -86,9 +115,11 @@ export function CatalogBrowser({
   const shown = pages * pageSize;
 
   const update = (patch: Partial<CatalogView>) => {
+    if (patch.layout) saveLayout(patch.layout);
     setView((current) => ({ ...current, ...patch }));
     setPages(1);
   };
+  const search = (q: string) => update({ q, sort: sortAfterTyping(view.sort, view.q, q) });
   const clearFilters = () => {
     setView(withoutFilters);
     setPages(1);
@@ -108,7 +139,7 @@ export function CatalogBrowser({
   // Colours follow the course's place in the whole list, so they do not change while filtering.
   const place = useMemo(() => new Map(courses.map((c, index) => [c.courseId, index])), [courses]);
   const list = useMemo(
-    () => sortCourses(filterCourses(courses, active, progress), active.sort, progress),
+    () => sortCourses(filterCourses(courses, active, progress), active.sort, progress, active.q),
     [courses, active, progress],
   );
   const resume = useMemo(
@@ -121,13 +152,20 @@ export function CatalogBrowser({
   const knowsLength = courses.some((c) => c.sceneCount !== undefined);
   // Staff tag courses; until some are tagged there is nothing to filter by.
   const knowsTags = courses.some((c) => (c.tags?.length ?? 0) > 0);
-  const oneSubject = active.subject.length === 1 ? active.subject[0] : undefined;
+  const only = active.subject.length === 1 ? active.subject[0] : undefined;
+  // Topics belong to a real subject, so "not classified" has none.
+  const oneSubject: Subject | undefined = only && only !== 'none' ? only : undefined;
   const topicValues = oneSubject ? TOPICS[oneSubject].map((t) => topicValue(oneSubject, t.id)) : [];
+  const subjectName = (subject: SubjectFilter) =>
+    t(subject === 'none' ? 'catalog.subjectNone' : `taxonomy.subject.${subject}`);
+  // The match order is offered while searching, and kept visible if the address asked for it.
+  const sorts: readonly CatalogSort[] =
+    view.q.trim() !== '' || view.sort === 'match' ? [...CATALOG_SORTS, 'match'] : CATALOG_SORTS;
   const tagCounts = useMemo(
     () =>
       showTools && knowsTags
         ? {
-            subject: facetCounts(courses, active, progress, 'subject', SUBJECTS),
+            subject: facetCounts(courses, active, progress, 'subject', SUBJECT_FILTERS),
             grade: facetCounts(courses, active, progress, 'grade', GRADES),
             topic: facetCounts(courses, active, progress, 'topic', topicValues),
           }
@@ -154,14 +192,14 @@ export function CatalogBrowser({
                 placeholder={t('catalog.search.placeholder')}
                 className="h-9 bg-white/70 pl-9 pr-9 dark:bg-slate-900/50"
                 value={view.q}
-                onChange={(event) => update({ q: event.target.value })}
+                onChange={(event) => search(event.target.value)}
               />
               {view.q !== '' ? (
                 <button
                   type="button"
                   aria-label={t('catalog.search.clear')}
                   className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  onClick={() => update({ q: '' })}
+                  onClick={() => search('')}
                 >
                   <X className="size-3.5" aria-hidden="true" />
                 </button>
@@ -178,7 +216,7 @@ export function CatalogBrowser({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {CATALOG_SORTS.map((sort) => (
+                {sorts.map((sort) => (
                   <SelectItem key={sort} value={sort}>
                     {t(`catalog.sort.${sort}`)}
                   </SelectItem>
@@ -218,7 +256,7 @@ export function CatalogBrowser({
             {tagCounts ? (
               <>
                 <ChipGroup label={t('catalog.filter.subject')}>
-                  {SUBJECTS.filter(
+                  {SUBJECT_FILTERS.filter(
                     (subject) =>
                       (tagCounts.subject.get(subject) ?? 0) > 0 || view.subject.includes(subject),
                   ).map((subject) => (
@@ -228,7 +266,7 @@ export function CatalogBrowser({
                       // Another subject drops the topics of the old one.
                       onClick={() => update({ subject: toggle(view.subject, subject), topic: [] })}
                     >
-                      {t(`taxonomy.subject.${subject}`)} ({tagCounts.subject.get(subject) ?? 0})
+                      {subjectName(subject)} ({tagCounts.subject.get(subject) ?? 0})
                     </Chip>
                   ))}
                 </ChipGroup>
@@ -383,6 +421,7 @@ export function CatalogBrowser({
                 entry={entry}
                 href={href(entry.courseId, viewQuery)}
                 progress={progress.get(entry.courseId)}
+                now={now}
               />
             </li>
           ))}
@@ -396,6 +435,7 @@ export function CatalogBrowser({
                 index={place.get(entry.courseId) ?? 0}
                 href={href(entry.courseId, viewQuery)}
                 progress={progress.get(entry.courseId)}
+                now={now}
               />
             </Reveal>
           ))}

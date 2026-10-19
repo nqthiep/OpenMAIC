@@ -2802,7 +2802,8 @@
       "grade": "Khối (tối đa {{max}})",
       "topic": "Chủ đề (tối đa {{max}})",
       "noTopics": "Môn này chưa có danh sách chủ đề.",
-      "pickSubject": "Chọn môn trước để chọn chủ đề."
+      "pickSubject": "Chọn môn trước để chọn chủ đề.",
+      "suggested": "Đã điền sẵn theo tên khoá, hãy kiểm tra trước khi lưu."
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "Tên A–Z",
       "recent": "Học gần nhất",
       "short": "Ngắn trước",
-      "updated": "Mới cập nhật"
+      "updated": "Mới cập nhật",
+      "match": "Độ khớp"
     },
     "continue": "Tiếp tục học",
     "results": "{{count}} khoá học",
@@ -2900,7 +2902,9 @@
       "grid": "Dạng lưới",
       "list": "Danh sách gọn"
     },
-    "updatedOn": "Cập nhật {{date}}"
+    "updatedOn": "Cập nhật {{date}}",
+    "new": "Mới",
+    "subjectNone": "Chưa phân loại"
   },
   "courseProgress": {
     "done": "Đã hoàn thành",

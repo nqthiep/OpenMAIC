@@ -101,6 +101,28 @@ describe('ContributionBlock', () => {
     expect(text).toContain('"count":"89","badge":"readers-100"');
   });
 
+  it('shows where staff filed a shared course, read-only, and nothing for an untagged one', async () => {
+    mocks.fetch.mockResolvedValue({
+      ...EMPTY,
+      shares: [
+        {
+          courseId: 'c1',
+          title: 'Derivatives',
+          state: 'shared' as const,
+          readers: 4,
+          tags: ['subject:math', 'grade:12', 'topic:math.derivative'],
+        },
+        { courseId: 'c2', title: 'Untagged', state: 'shared' as const, readers: 1 },
+      ],
+    });
+    const container = await render();
+    const [tagged, untagged] = [...container.querySelectorAll('ul > li')];
+    expect(tagged!.textContent).toContain('taxonomy.subject.math · taxonomy.grade.12');
+    expect(untagged!.textContent).not.toContain('taxonomy.');
+    // Read-only: no way to change the tags from here.
+    expect(tagged!.querySelector('button, input, select')).toBeNull();
+  });
+
   it('shows only the first five shared courses', async () => {
     mocks.fetch.mockResolvedValue({
       ...EMPTY,

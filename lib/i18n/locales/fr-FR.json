@@ -2802,7 +2802,8 @@
       "grade": "Niveau (jusqu'à {{max}})",
       "topic": "Thèmes (jusqu'à {{max}})",
       "noTopics": "Cette matière n'a pas encore de liste de thèmes.",
-      "pickSubject": "Choisissez d'abord une matière pour sélectionner des thèmes."
+      "pickSubject": "Choisissez d'abord une matière pour sélectionner des thèmes.",
+      "suggested": "Prérempli d'après les titres du cours, à vérifier avant d'enregistrer."
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "Nom A–Z",
       "recent": "Étudié récemment",
       "short": "Plus courts d'abord",
-      "updated": "Mis à jour récemment"
+      "updated": "Mis à jour récemment",
+      "match": "Pertinence"
     },
     "continue": "Reprendre",
     "results": "Cours : {{count}}",
@@ -2900,7 +2902,9 @@
       "grid": "Grille",
       "list": "Liste compacte"
     },
-    "updatedOn": "Mis à jour le {{date}}"
+    "updatedOn": "Mis à jour le {{date}}",
+    "new": "Nouveau",
+    "subjectNone": "Non classé"
   },
   "courseProgress": {
     "done": "Terminé",

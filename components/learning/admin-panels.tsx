@@ -23,7 +23,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { CourseTagsEditor, TagBadges } from '@/components/learning/course-tags-editor';
+import { CourseTagsEditor } from '@/components/learning/course-tags-editor';
+import { TagBadges } from '@/components/learning/tag-names';
+import { suggestTags } from '@/lib/learning/tag-suggest';
 import { SectionTitle } from '@/components/home/section-title';
 import { GLASS } from '@/components/home/site-shell';
 import { useI18n } from '@/lib/hooks/use-i18n';
@@ -647,6 +649,23 @@ interface TagTarget {
   courseId: string;
   title: string;
   tags: string[];
+  /** The tags were guessed from the course's titles, not set by anyone yet. */
+  suggested: boolean;
+}
+
+/**
+ * What the tag editor opens with: the course's own tags, or when it has none a suggestion from its
+ * title and scene titles. Nothing is saved until staff press Save.
+ */
+function tagTarget(
+  courseId: string,
+  title: string,
+  tags: readonly string[] | undefined,
+  sceneTitles: readonly string[] = [],
+): TagTarget {
+  if (tags && tags.length > 0) return { courseId, title, tags: [...tags], suggested: false };
+  const guess = suggestTags([title, ...sceneTitles]);
+  return { courseId, title, tags: guess, suggested: guess.length > 0 };
 }
 
 /** A course's tags with a button that opens the tag editor. */
@@ -679,7 +698,11 @@ function TagsDialog({
       open={target !== null}
       onOpenChange={(next) => !next && onTarget(null)}
       title={t('admin.tags.title', { title: target?.title ?? '' })}
-      description={t('admin.tags.description')}
+      description={
+        target?.suggested
+          ? `${t('admin.tags.description')} ${t('admin.tags.suggested')}`
+          : t('admin.tags.description')
+      }
       onSave={async () => {
         if (!target) return false;
         return act(() => setCourseTags(target.courseId, target.tags), t('admin.tags.saved'));
@@ -741,7 +764,7 @@ export function SharesPanel() {
       cell: (r) => (
         <TagsCell
           tags={r.tags}
-          onEdit={() => setTagging({ courseId: r.courseId, title: r.title, tags: r.tags ?? [] })}
+          onEdit={() => setTagging(tagTarget(r.courseId, r.title, r.tags, r.snapshot?.sceneTitles))}
         />
       ),
     },
@@ -892,11 +915,7 @@ export function PreviewsPanel() {
         <TagsCell
           tags={r.tags}
           onEdit={() =>
-            setTagging({
-              courseId: r.courseId,
-              title: titles.get(r.courseId) ?? r.courseId,
-              tags: r.tags ?? [],
-            })
+            setTagging(tagTarget(r.courseId, titles.get(r.courseId) ?? r.courseId, r.tags))
           }
         />
       ),

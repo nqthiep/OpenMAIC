@@ -3,6 +3,7 @@ import { currentMonth } from '@/lib/server/authz/viewer';
 import { learningRoute } from '@/lib/server/learning/http';
 import {
   countDistinctReaders,
+  listCourseTags,
   listSharesByOwner,
   MONTHLY_REWARD_CAP_TOKENS,
   nextBadge,
@@ -30,8 +31,16 @@ export async function GET(request: Request): Promise<Response> {
       readBonusTokens(ctx.db, viewer.ownerId, month),
       readBadges(ctx.db, viewer.ownerId),
     ]);
+    // The tags staff gave the courses, so the owner sees where each one is filed.
+    const tags = await listCourseTags(
+      ctx.db,
+      shares.map((share) => share.courseId),
+    );
     return apiSuccess({
-      shares,
+      shares: shares.map((share) => {
+        const own = tags.get(share.courseId);
+        return own ? { ...share, tags: own } : share;
+      }),
       readers,
       bonus: { month, tokens: bonus, cap: MONTHLY_REWARD_CAP_TOKENS },
       badges,

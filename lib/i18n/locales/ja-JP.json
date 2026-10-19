@@ -2802,7 +2802,8 @@
       "grade": "学年（最大 {{max}} 件）",
       "topic": "トピック（最大 {{max}} 件）",
       "noTopics": "この教科にはまだトピック一覧がありません。",
-      "pickSubject": "先に教科を選ぶとトピックを選べます。"
+      "pickSubject": "先に教科を選ぶとトピックを選べます。",
+      "suggested": "コースのタイトルから自動入力しました。保存前にご確認ください。"
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "名前順 A–Z",
       "recent": "最近学習した順",
       "short": "短い順",
-      "updated": "最近更新された順"
+      "updated": "最近更新された順",
+      "match": "一致度"
     },
     "continue": "学習を続ける",
     "results": "{{count}} 件のコース",
@@ -2900,7 +2902,9 @@
       "grid": "グリッド",
       "list": "コンパクトリスト"
     },
-    "updatedOn": "{{date}} 更新"
+    "updatedOn": "{{date}} 更新",
+    "new": "新着",
+    "subjectNone": "未分類"
   },
   "courseProgress": {
     "done": "完了",

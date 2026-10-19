@@ -7,8 +7,11 @@ import {
   filterCourses,
   foldText,
   isFiltered,
+  isNew,
   lengthOf,
   parseView,
+  sortAfterTyping,
+  SUBJECT_FILTERS,
   sortCourses,
   statusOf,
   withoutFilters,
@@ -156,6 +159,65 @@ describe('subject, grade and topic filters', () => {
     ).toEqual(['a']);
     const topic = view({ subject: ['math'], topic: ['math.derivative'] });
     expect(ids(filterCourses(courses, topic, progress))).toEqual(['a']);
+  });
+});
+
+describe('the "not classified" subject', () => {
+  it('matches the courses that have no subject tag, alone or with real subjects', () => {
+    expect(ids(filterCourses(courses, view({ subject: ['none'] }), progress))).toEqual(['c']);
+    expect(ids(filterCourses(courses, view({ subject: ['none', 'physics'] }), progress))).toEqual([
+      'c',
+      'd',
+    ]);
+    // A course with only a grade tag has no subject either.
+    const gradeOnly = [{ ...courses[2]!, courseId: 'g', tags: ['grade:12'] }];
+    expect(ids(filterCourses(gradeOnly, view({ subject: ['none'] }), progress))).toEqual(['g']);
+  });
+
+  it('is counted like a subject, is kept in the address, and has no topics', () => {
+    const counts = facetCounts(courses, view({}), progress, 'subject', SUBJECT_FILTERS);
+    expect(counts.get('none')).toBe(1);
+    expect(parseView('subject=none').subject).toEqual(['none']);
+    expect(parseView('subject=none&topic=math.limits').topic).toEqual([]);
+    expect(viewSearch(view({ subject: ['none'] }))).toBe('subject=none');
+  });
+});
+
+describe('isNew', () => {
+  const now = Date.parse('2026-10-19T12:00:00Z');
+  it('is true for a change within 14 days and false for older, future or missing dates', () => {
+    expect(isNew('2026-10-19T00:00:00Z', now)).toBe(true);
+    expect(isNew('2026-10-05T12:00:00Z', now)).toBe(true);
+    expect(isNew('2026-10-05T11:59:00Z', now)).toBe(false);
+    expect(isNew('2026-10-20T00:00:00Z', now)).toBe(false);
+    expect(isNew(undefined, now)).toBe(false);
+    expect(isNew('not a date', now)).toBe(false);
+  });
+});
+
+describe('sorting by match', () => {
+  const titled = ['Chuyển động lập phương', 'Định luật áp suất', 'Áp suất chất lỏng'].map(
+    (title, index) => course(`m${index}`, title),
+  );
+
+  it('puts titles that start with the search first, then word starts, then the rest', () => {
+    expect(ids(sortCourses(titled, 'match', new Map(), 'ap'))).toEqual(['m2', 'm1', 'm0']);
+    // A to Z would put the middle one last.
+    expect(ids(sortCourses(titled, 'title', new Map(), 'ap'))).toEqual(['m2', 'm0', 'm1']);
+  });
+
+  it('starts when the learner begins to search from the default order and stops with the search', () => {
+    expect(sortAfterTyping('title', '', 'a')).toBe('match');
+    expect(sortAfterTyping('match', 'a', 'ab')).toBe('match');
+    expect(sortAfterTyping('match', 'a', '  ')).toBe('title');
+    // A sort the learner picked stays.
+    expect(sortAfterTyping('short', '', 'a')).toBe('short');
+    expect(sortAfterTyping('updated', 'a', '')).toBe('updated');
+  });
+
+  it('is dropped when the filters are cleared', () => {
+    expect(withoutFilters(view({ q: 'ap', sort: 'match' })).sort).toBe('title');
+    expect(withoutFilters(view({ q: 'ap', sort: 'updated' })).sort).toBe('updated');
   });
 });
 

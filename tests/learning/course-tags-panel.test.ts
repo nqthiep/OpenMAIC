@@ -110,6 +110,44 @@ describe('tagging a course in the shares panel', () => {
     ]);
   });
 
+  it('opens with a suggestion from the title when the course has no tags, and saves only on Save', async () => {
+    mocks.shares.mockImplementation(async (state: string) =>
+      state === 'pending'
+        ? [{ ...SHARE, title: 'Đạo hàm cơ bản lớp 12', tags: [], snapshot: { sceneTitles: [] } }]
+        : [],
+    );
+    await render();
+    await act(async () => buttonIn(document.body, 'admin.tags.add')!.click());
+
+    expect(dialog().textContent).toContain('admin.tags.suggested');
+    expect(buttonIn(dialog(), 'taxonomy.subject.math')!.getAttribute('aria-pressed')).toBe('true');
+    expect(buttonIn(dialog(), 'taxonomy.grade.12')!.getAttribute('aria-pressed')).toBe('true');
+    expect(buttonIn(dialog(), 'Derivatives and function study')!.getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(mocks.setTags).not.toHaveBeenCalled();
+
+    await act(async () => buttonIn(dialog(), 'admin.table.save')!.click());
+    expect(mocks.setTags).toHaveBeenCalledWith('c1', [
+      'subject:math',
+      'grade:12',
+      'topic:math.derivative',
+    ]);
+  });
+
+  it('does not suggest over tags the course already has', async () => {
+    mocks.shares.mockImplementation(async (state: string) =>
+      state === 'pending' ? [{ ...SHARE, title: 'Đạo hàm cơ bản', tags: ['subject:english'] }] : [],
+    );
+    await render();
+    await act(async () => buttonIn(document.body, 'admin.tags.edit')!.click());
+    expect(dialog().textContent).not.toContain('admin.tags.suggested');
+    expect(buttonIn(dialog(), 'taxonomy.subject.english')!.getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(buttonIn(dialog(), 'taxonomy.subject.math')!.getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('drops the topics of the old subject when another subject is picked', async () => {
     mocks.shares.mockImplementation(async (state: string) =>
       state === 'pending'

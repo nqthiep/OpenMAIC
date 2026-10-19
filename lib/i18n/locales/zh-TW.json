@@ -2802,7 +2802,8 @@
       "grade": "年級（最多 {{max}} 個）",
       "topic": "主題（最多 {{max}} 個）",
       "noTopics": "此科目尚無主題清單。",
-      "pickSubject": "請先選擇科目，再選擇主題。"
+      "pickSubject": "請先選擇科目，再選擇主題。",
+      "suggested": "已依課程標題預先填入，儲存前請確認。"
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "名稱 A–Z",
       "recent": "最近學習",
       "short": "最短優先",
-      "updated": "最近更新"
+      "updated": "最近更新",
+      "match": "符合度"
     },
     "continue": "繼續學習",
     "results": "共 {{count}} 門課程",
@@ -2900,7 +2902,9 @@
       "grid": "網格",
       "list": "精簡清單"
     },
-    "updatedOn": "更新於 {{date}}"
+    "updatedOn": "更新於 {{date}}",
+    "new": "新",
+    "subjectNone": "未分類"
   },
   "courseProgress": {
     "done": "已完成",

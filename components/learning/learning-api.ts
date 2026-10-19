@@ -411,6 +411,8 @@ export interface OwnShareRow {
   readonly readers: number;
   /** Why a refused request was refused, when staff gave a reason. */
   readonly reason?: string | null;
+  /** The subject, grade and topic tags staff gave the course. */
+  readonly tags?: readonly string[];
 }
 
 /** What the learner has given and earned through shared courses. */

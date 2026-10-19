@@ -2802,7 +2802,8 @@
       "grade": "Grado (hasta {{max}})",
       "topic": "Temas (hasta {{max}})",
       "noTopics": "Esta materia aún no tiene lista de temas.",
-      "pickSubject": "Elige primero una materia para escoger temas."
+      "pickSubject": "Elige primero una materia para escoger temas.",
+      "suggested": "Rellenado a partir de los títulos del curso; revísalo antes de guardar."
     }
   },
   "learning": {
@@ -2879,7 +2880,8 @@
       "title": "Nombre A–Z",
       "recent": "Estudiado recientemente",
       "short": "Más cortos primero",
-      "updated": "Actualizados recientemente"
+      "updated": "Actualizados recientemente",
+      "match": "Más relevantes"
     },
     "continue": "Continúa aprendiendo",
     "results": "Cursos: {{count}}",
@@ -2900,7 +2902,9 @@
       "grid": "Cuadrícula",
       "list": "Lista compacta"
     },
-    "updatedOn": "Actualizado el {{date}}"
+    "updatedOn": "Actualizado el {{date}}",
+    "new": "Nuevo",
+    "subjectNone": "Sin clasificar"
   },
   "courseProgress": {
     "done": "Completado",

@@ -5,6 +5,8 @@ import { ArrowRight, ListChecks, MousePointerClick } from 'lucide-react';
 import { CourseProgressLine } from '@/components/home/course-progress-line';
 import { GLASS } from '@/components/home/site-shell';
 import type { CatalogEntry, ProgressRow } from '@/components/learning/learning-api';
+import { useTagLine } from '@/components/learning/tag-names';
+import { isNew } from '@/lib/home/catalog-filter';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 
@@ -23,12 +25,16 @@ export function CourseRow({
   entry,
   href,
   progress,
+  now,
 }: {
   entry: CatalogEntry;
   href: string;
   progress?: ProgressRow;
+  /** The time to judge "new" against, in milliseconds; without it no course is marked new. */
+  now?: number;
 }) {
   const { t, locale } = useI18n();
+  const tagLine = useTagLine(entry.tags);
 
   return (
     <Link
@@ -36,11 +42,19 @@ export function CourseRow({
       className="group flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-brand-50 focus-visible:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
     >
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="line-clamp-1 break-words text-sm font-medium">{entry.title}</span>
+        <span className="flex items-center gap-2">
+          <span className="line-clamp-1 break-words text-sm font-medium">{entry.title}</span>
+          {now !== undefined && isNew(entry.updatedAt, now) ? (
+            <span className="shrink-0 rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-semibold text-amber-950">
+              {t('catalog.new')}
+            </span>
+          ) : null}
+        </span>
         <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
           <span className={cn('font-medium', KIND_TEXT[entry.kind])}>
             {t(`catalog.kind.${entry.kind}`)}
           </span>
+          {tagLine ? <span>{tagLine}</span> : null}
           {entry.sceneCount ? (
             <span>{t('catalog.sceneCount', { count: entry.sceneCount })}</span>
           ) : null}
