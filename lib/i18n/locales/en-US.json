@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "Password resets"
+        "password_reset": "Password resets",
+        "course": "Course tags"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "Shared update approved",
         "share_update-reject": "Shared update rejected",
         "class_add": "Member added",
-        "class_leave": "Left class"
+        "class_leave": "Left class",
+        "course_tags": "Edit course tags"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "Not signed in",
       "updated": "Updated",
       "empty": "No courses yet."
+    },
+    "tags": {
+      "column": "Tags",
+      "add": "Add tags",
+      "edit": "Edit tags",
+      "title": "Tags for {{title}}",
+      "description": "Subject, grade and topics help learners find the course. Tags show in the catalog once the course is shared or is a preview.",
+      "saved": "Tags saved.",
+      "subject": "Subject (pick one)",
+      "grade": "Grade (up to {{max}})",
+      "topic": "Topics (up to {{max}})",
+      "noTopics": "This subject has no topic list yet.",
+      "pickSubject": "Pick a subject first to choose topics."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "Status",
       "kind": "Type",
       "content": "Content",
-      "length": "Length"
+      "length": "Length",
+      "subject": "Subject",
+      "grade": "Grade",
+      "topic": "Topic"
     },
     "status": {
       "new": "Not started",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "Home",
     "main": "Main navigation"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "Mathematics",
+      "physics": "Physics",
+      "chemistry": "Chemistry",
+      "informatics": "Computer science",
+      "english": "English",
+      "biology": "Biology",
+      "other": "Other"
+    },
+    "grade": {
+      "10": "Grade 10",
+      "11": "Grade 11",
+      "12": "Grade 12"
+    }
   }
 }

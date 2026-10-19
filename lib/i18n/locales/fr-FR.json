@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "Réinitialisations de mot de passe"
+        "password_reset": "Réinitialisations de mot de passe",
+        "course": "Étiquettes de cours"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "Mise à jour partagée approuvée",
         "share_update-reject": "Mise à jour partagée refusée",
         "class_add": "Membre ajouté",
-        "class_leave": "A quitté la classe"
+        "class_leave": "A quitté la classe",
+        "course_tags": "Modifier les étiquettes du cours"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "Non connecté",
       "updated": "Mis à jour",
       "empty": "Aucun cours pour l’instant."
+    },
+    "tags": {
+      "column": "Étiquettes",
+      "add": "Ajouter des étiquettes",
+      "edit": "Modifier les étiquettes",
+      "title": "Étiquettes de {{title}}",
+      "description": "La matière, le niveau et les thèmes aident les apprenants à trouver le cours. Les étiquettes apparaissent dans le catalogue quand le cours est partagé ou en aperçu.",
+      "saved": "Étiquettes enregistrées.",
+      "subject": "Matière (une seule)",
+      "grade": "Niveau (jusqu'à {{max}})",
+      "topic": "Thèmes (jusqu'à {{max}})",
+      "noTopics": "Cette matière n'a pas encore de liste de thèmes.",
+      "pickSubject": "Choisissez d'abord une matière pour sélectionner des thèmes."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "Statut",
       "kind": "Type",
       "content": "Contenu",
-      "length": "Durée"
+      "length": "Durée",
+      "subject": "Matière",
+      "grade": "Niveau",
+      "topic": "Thème"
     },
     "status": {
       "new": "Non commencé",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "Accueil",
     "main": "Navigation principale"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "Mathématiques",
+      "physics": "Physique",
+      "chemistry": "Chimie",
+      "informatics": "Informatique",
+      "english": "Anglais",
+      "biology": "Biologie",
+      "other": "Autres"
+    },
+    "grade": {
+      "10": "Niveau 10",
+      "11": "Niveau 11",
+      "12": "Niveau 12"
+    }
   }
 }

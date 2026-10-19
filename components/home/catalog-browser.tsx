@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { LayoutGrid, List, Search, SearchX, X } from 'lucide-react';
 import { CourseCard } from '@/components/home/course-card';
+import { Chip, ChipGroup } from '@/components/home/filter-chip';
 import { CourseProgressLine } from '@/components/home/course-progress-line';
 import { CourseRow, CourseRows } from '@/components/home/course-row';
 import { GLASS, Reveal } from '@/components/home/site-shell';
@@ -25,6 +26,7 @@ import {
   CATALOG_STATUSES,
   continueCourses,
   DEFAULT_VIEW,
+  facetCounts,
   filterCourses,
   FILTER_THRESHOLD,
   isFiltered,
@@ -41,45 +43,11 @@ import {
   type CatalogView,
 } from '@/lib/home/catalog-filter';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { GRADES, SUBJECTS, TOPICS, topicName, topicValue } from '@/lib/learning/taxonomy';
 import { cn } from '@/lib/utils';
 
 function toggle<T>(values: readonly T[], value: T): T[] {
   return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
-}
-
-function Chip({
-  pressed,
-  onClick,
-  children,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={cn(
-        'cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        pressed
-          ? 'border-brand-600 bg-brand-600 text-white'
-          : 'border-brand-100 bg-white/70 text-foreground hover:bg-brand-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10',
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function ChipGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </div>
-  );
 }
 
 /**
@@ -101,7 +69,7 @@ export function CatalogBrowser({
   /** Where a course opens; `viewQuery` is the list's own query, for the back arrow to return to. */
   href: (courseId: string, viewQuery: string) => string;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   // Mounted only after the catalog loaded in the browser, so reading the address here cannot
   // differ between the server's page and the client's.
   const [view, setView] = useState<CatalogView>(() =>
@@ -151,6 +119,23 @@ export function CatalogBrowser({
   // Without stored course documents the server sends neither a length nor what a course holds.
   const knowsContent = courses.some((c) => c.hasQuiz !== undefined);
   const knowsLength = courses.some((c) => c.sceneCount !== undefined);
+  // Staff tag courses; until some are tagged there is nothing to filter by.
+  const knowsTags = courses.some((c) => (c.tags?.length ?? 0) > 0);
+  const oneSubject = active.subject.length === 1 ? active.subject[0] : undefined;
+  const topicValues = oneSubject ? TOPICS[oneSubject].map((t) => topicValue(oneSubject, t.id)) : [];
+  const tagCounts = useMemo(
+    () =>
+      showTools && knowsTags
+        ? {
+            subject: facetCounts(courses, active, progress, 'subject', SUBJECTS),
+            grade: facetCounts(courses, active, progress, 'grade', GRADES),
+            topic: facetCounts(courses, active, progress, 'topic', topicValues),
+          }
+        : undefined,
+    // topicValues follows active.subject, which is in the dependencies.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [courses, active, progress, showTools, knowsTags],
+  );
 
   if (courses.length === 0) return null;
 
@@ -230,6 +215,58 @@ export function CatalogBrowser({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            {tagCounts ? (
+              <>
+                <ChipGroup label={t('catalog.filter.subject')}>
+                  {SUBJECTS.filter(
+                    (subject) =>
+                      (tagCounts.subject.get(subject) ?? 0) > 0 || view.subject.includes(subject),
+                  ).map((subject) => (
+                    <Chip
+                      key={subject}
+                      pressed={view.subject.includes(subject)}
+                      // Another subject drops the topics of the old one.
+                      onClick={() => update({ subject: toggle(view.subject, subject), topic: [] })}
+                    >
+                      {t(`taxonomy.subject.${subject}`)} ({tagCounts.subject.get(subject) ?? 0})
+                    </Chip>
+                  ))}
+                </ChipGroup>
+                <ChipGroup label={t('catalog.filter.grade')}>
+                  {GRADES.filter(
+                    (grade) => (tagCounts.grade.get(grade) ?? 0) > 0 || view.grade.includes(grade),
+                  ).map((grade) => (
+                    <Chip
+                      key={grade}
+                      pressed={view.grade.includes(grade)}
+                      onClick={() => update({ grade: toggle(view.grade, grade) })}
+                    >
+                      {t(`taxonomy.grade.${grade}`)} ({tagCounts.grade.get(grade) ?? 0})
+                    </Chip>
+                  ))}
+                </ChipGroup>
+                {topicValues.some(
+                  (value) => (tagCounts.topic.get(value) ?? 0) > 0 || view.topic.includes(value),
+                ) ? (
+                  <ChipGroup label={t('catalog.filter.topic')}>
+                    {topicValues
+                      .filter(
+                        (value) =>
+                          (tagCounts.topic.get(value) ?? 0) > 0 || view.topic.includes(value),
+                      )
+                      .map((value) => (
+                        <Chip
+                          key={value}
+                          pressed={view.topic.includes(value)}
+                          onClick={() => update({ topic: toggle(view.topic, value) })}
+                        >
+                          {topicName(value, locale)} ({tagCounts.topic.get(value) ?? 0})
+                        </Chip>
+                      ))}
+                  </ChipGroup>
+                ) : null}
+              </>
+            ) : null}
             <ChipGroup label={t('catalog.filter.status')}>
               {CATALOG_STATUSES.map((status) => (
                 <Chip

@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { CourseTagsEditor, TagBadges } from '@/components/learning/course-tags-editor';
 import { SectionTitle } from '@/components/home/section-title';
 import { GLASS } from '@/components/home/site-shell';
 import { useI18n } from '@/lib/hooks/use-i18n';
@@ -55,6 +56,7 @@ import {
   removeClassMember,
   rotateJoinCode,
   setMembershipSuspended,
+  setCourseTags,
   setPreview,
   updateMembership,
   type AuditRow,
@@ -640,6 +642,57 @@ const fetchAllShares = async () => {
   return [...pending, ...shared] as ShareRow[];
 };
 
+/** The tags being edited for one course. */
+interface TagTarget {
+  courseId: string;
+  title: string;
+  tags: string[];
+}
+
+/** A course's tags with a button that opens the tag editor. */
+function TagsCell({ tags, onEdit }: { tags: readonly string[] | undefined; onEdit: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col items-start gap-1.5">
+      <TagBadges tags={tags} />
+      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={onEdit}>
+        <Pencil className="size-3" aria-hidden="true" />
+        {t(tags && tags.length > 0 ? 'admin.tags.edit' : 'admin.tags.add')}
+      </Button>
+    </div>
+  );
+}
+
+/** The dialog that sets the subject, grade and topic tags of one course. */
+function TagsDialog({
+  target,
+  onTarget,
+  act,
+}: {
+  target: TagTarget | null;
+  onTarget: (next: TagTarget | null) => void;
+  act: (change: () => Promise<unknown>, done?: string) => Promise<boolean>;
+}) {
+  const { t } = useI18n();
+  return (
+    <EditDialog
+      open={target !== null}
+      onOpenChange={(next) => !next && onTarget(null)}
+      title={t('admin.tags.title', { title: target?.title ?? '' })}
+      description={t('admin.tags.description')}
+      onSave={async () => {
+        if (!target) return false;
+        return act(() => setCourseTags(target.courseId, target.tags), t('admin.tags.saved'));
+      }}
+    >
+      <CourseTagsEditor
+        value={target?.tags ?? []}
+        onChange={(tags) => target && onTarget({ ...target, tags })}
+      />
+    </EditDialog>
+  );
+}
+
 /** Share requests to decide, and shared courses an operator can take back. */
 export function SharesPanel() {
   const { t, locale } = useI18n();
@@ -647,6 +700,7 @@ export function SharesPanel() {
   const act = useAction(reload);
   // The request being refused, with the reason its owner will see.
   const [rejecting, setRejecting] = useState<{ row: ShareRow; reason: string } | null>(null);
+  const [tagging, setTagging] = useState<TagTarget | null>(null);
 
   const columns: Column<ShareRow>[] = [
     {
@@ -679,6 +733,16 @@ export function SharesPanel() {
             </span>
           ) : null}
         </div>
+      ),
+    },
+    {
+      id: 'tags',
+      header: t('admin.tags.column'),
+      cell: (r) => (
+        <TagsCell
+          tags={r.tags}
+          onEdit={() => setTagging({ courseId: r.courseId, title: r.title, tags: r.tags ?? [] })}
+        />
       ),
     },
     {
@@ -785,6 +849,7 @@ export function SharesPanel() {
           />
         </Field>
       </EditDialog>
+      <TagsDialog target={tagging} onTarget={setTagging} act={act} />
     </Section>
   );
 }
@@ -797,6 +862,7 @@ export function PreviewsPanel() {
   const titles = useCourseTitles();
   const act = useAction(reload);
   const [courseId, setCourseId] = useState('');
+  const [tagging, setTagging] = useState<TagTarget | null>(null);
 
   const add = async () => {
     const id = courseId.trim();
@@ -817,6 +883,22 @@ export function PreviewsPanel() {
           </span>
           <span className="break-all font-mono text-xs text-muted-foreground">{r.courseId}</span>
         </div>
+      ),
+    },
+    {
+      id: 'tags',
+      header: t('admin.tags.column'),
+      cell: (r) => (
+        <TagsCell
+          tags={r.tags}
+          onEdit={() =>
+            setTagging({
+              courseId: r.courseId,
+              title: titles.get(r.courseId) ?? r.courseId,
+              tags: r.tags ?? [],
+            })
+          }
+        />
       ),
     },
     {
@@ -877,6 +959,7 @@ export function PreviewsPanel() {
           </form>
         }
       />
+      <TagsDialog target={tagging} onTarget={setTagging} act={act} />
     </Section>
   );
 }
@@ -1554,6 +1637,7 @@ const CATEGORIES = [
   'access',
   'share',
   'preview',
+  'course',
   'class',
   'set_role',
   'disable',

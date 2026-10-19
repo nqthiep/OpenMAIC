@@ -3,6 +3,7 @@
  * Every change that an operator or administrator makes is written to the audit table in the
  * same statement, so the change and its record succeed or fail together.
  */
+import { readTags, tagsFor, validateTags } from '@/lib/learning/taxonomy';
 import type { AccountQueryable } from '@/lib/server/accounts/store';
 import { EXPIRING_WITHIN_DAYS } from '@/lib/home/learner-status';
 
@@ -691,6 +692,8 @@ export async function isCoursePreview(db: AccountQueryable, courseId: string): P
 export interface PreviewRow {
   courseId: string;
   markedAt: string;
+  /** Subject, grade and topic tags (see `lib/learning/taxonomy.ts`). */
+  tags?: string[];
 }
 
 export async function listCoursePreviews(db: AccountQueryable): Promise<PreviewRow[]> {
@@ -1191,6 +1194,77 @@ export async function readBadges(db: AccountQueryable, ownerId: string): Promise
   return (result.rows as Array<{ badge_code: string }>).map((row) => row.badge_code);
 }
 
+// ── Course tags ──────────────────────────────────────────────────────────────
+
+/** The tags of each course, by course id. A course with none is not in the map. */
+export async function listCourseTags(
+  db: AccountQueryable,
+  courseIds: readonly string[],
+): Promise<Map<string, string[]>> {
+  const tags = new Map<string, string[]>();
+  if (courseIds.length === 0) return tags;
+  const result = await db.query(
+    `SELECT course_id, tag FROM course_tags
+      WHERE course_id = ANY($1::text[])
+      ORDER BY course_id, tag`,
+    [[...courseIds]],
+  );
+  for (const row of result.rows as Array<{ course_id: string; tag: string }>) {
+    const list = tags.get(row.course_id);
+    if (list) list.push(row.tag);
+    else tags.set(row.course_id, [row.tag]);
+  }
+  // In the taxonomy's order, and without a stored tag the taxonomy no longer has.
+  for (const [courseId, list] of tags) {
+    const ordered = tagsFor(readTags(list));
+    if (ordered.length > 0) tags.set(courseId, ordered);
+    else tags.delete(courseId);
+  }
+  return tags;
+}
+
+/** Whether staff may tag the course: it has a share record or is marked as a preview. */
+export async function isTaggableCourse(db: AccountQueryable, courseId: string): Promise<boolean> {
+  const result = await db.query(
+    `SELECT 1 FROM course_shares WHERE course_id = $1::text
+     UNION ALL
+     SELECT 1 FROM course_previews WHERE course_id = $1::text`,
+    [courseId],
+  );
+  return result.rows.length > 0;
+}
+
+/**
+ * Replaces the tags of a course with `tags`, which must pass `validateTags`. Returns false when
+ * the course already had exactly these tags (nothing is written then, and no audit row). One
+ * statement does the removal, the addition and the audit row, so a failure leaves none of them.
+ */
+export async function setCourseTags(
+  db: AccountQueryable,
+  input: { courseId: string; tags: readonly string[]; actorId: string; now: Date },
+): Promise<boolean> {
+  const checked = validateTags(input.tags);
+  if (!checked.ok) throw new Error(`Invalid course tags: ${checked.error}`);
+  const before = (await listCourseTags(db, [input.courseId])).get(input.courseId) ?? [];
+  if (before.length === checked.tags.length && checked.tags.every((tag) => before.includes(tag))) {
+    return false;
+  }
+  await db.query(
+    `WITH removed AS (
+       DELETE FROM course_tags WHERE course_id = $1::text AND tag <> ALL($2::text[]) RETURNING 1
+     ), added AS (
+       INSERT INTO course_tags (course_id, tag, set_by, set_at)
+       SELECT $1::text, tag, $3::text, $4::timestamptz FROM unnest($2::text[]) AS tag
+       ON CONFLICT (course_id, tag) DO NOTHING
+       RETURNING 1
+     )
+     INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
+     VALUES ($3::text, $1::text, 'course:tags', $5::text, $4::timestamptz)`,
+    [input.courseId, checked.tags, input.actorId, input.now.toISOString(), checked.tags.join(', ')],
+  );
+  return true;
+}
+
 // ── Catalog ──────────────────────────────────────────────────────────────────
 
 export interface CatalogEntry {
@@ -1208,6 +1282,8 @@ export interface CatalogEntry {
   hasQuiz?: boolean;
   /** The course has an interactive or project scene. Absent together with `sceneCount`. */
   hasInteractive?: boolean;
+  /** Subject, grade and topic tags staff gave it (see `lib/learning/taxonomy.ts`). Absent when none. */
+  tags?: string[];
 }
 
 /**
@@ -1266,6 +1342,14 @@ export async function listCatalog(
   }
   const entries = [...byId.values()];
   await addDocumentFacts(db, entries);
+  const tags = await listCourseTags(
+    db,
+    entries.map((entry) => entry.courseId),
+  );
+  for (const entry of entries) {
+    const own = tags.get(entry.courseId);
+    if (own) entry.tags = own;
+  }
   return entries.sort((a, b) => a.title.localeCompare(b.title));
 }
 

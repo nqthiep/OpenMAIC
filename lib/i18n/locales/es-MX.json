@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "Restablecimientos de contraseña"
+        "password_reset": "Restablecimientos de contraseña",
+        "course": "Etiquetas del curso"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "Actualización compartida aprobada",
         "share_update-reject": "Actualización compartida rechazada",
         "class_add": "Miembro agregado",
-        "class_leave": "Salió de la clase"
+        "class_leave": "Salió de la clase",
+        "course_tags": "Editar etiquetas del curso"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "Sin sesión",
       "updated": "Actualizado",
       "empty": "Aún no hay cursos."
+    },
+    "tags": {
+      "column": "Etiquetas",
+      "add": "Añadir etiquetas",
+      "edit": "Editar etiquetas",
+      "title": "Etiquetas de {{title}}",
+      "description": "La materia, el grado y los temas ayudan a los estudiantes a encontrar el curso. Las etiquetas aparecen en el catálogo cuando el curso se comparte o es una vista previa.",
+      "saved": "Etiquetas guardadas.",
+      "subject": "Materia (elige una)",
+      "grade": "Grado (hasta {{max}})",
+      "topic": "Temas (hasta {{max}})",
+      "noTopics": "Esta materia aún no tiene lista de temas.",
+      "pickSubject": "Elige primero una materia para escoger temas."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "Estado",
       "kind": "Tipo",
       "content": "Contenido",
-      "length": "Duración"
+      "length": "Duración",
+      "subject": "Materia",
+      "grade": "Grado",
+      "topic": "Tema"
     },
     "status": {
       "new": "Sin empezar",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "Inicio",
     "main": "Navegación principal"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "Matemáticas",
+      "physics": "Física",
+      "chemistry": "Química",
+      "informatics": "Informática",
+      "english": "Inglés",
+      "biology": "Biología",
+      "other": "Otros"
+    },
+    "grade": {
+      "10": "Grado 10",
+      "11": "Grado 11",
+      "12": "Grado 12"
+    }
   }
 }

@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "Passwort-Zurücksetzungen"
+        "password_reset": "Passwort-Zurücksetzungen",
+        "course": "Kurs-Tags"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "Geteilte Aktualisierung freigegeben",
         "share_update-reject": "Geteilte Aktualisierung abgelehnt",
         "class_add": "Mitglied hinzugefügt",
-        "class_leave": "Klasse verlassen"
+        "class_leave": "Klasse verlassen",
+        "course_tags": "Kurs-Tags bearbeiten"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "Nicht angemeldet",
       "updated": "Aktualisiert",
       "empty": "Noch keine Kurse."
+    },
+    "tags": {
+      "column": "Tags",
+      "add": "Tags hinzufügen",
+      "edit": "Tags bearbeiten",
+      "title": "Tags für {{title}}",
+      "description": "Fach, Klassenstufe und Themen helfen Lernenden, den Kurs zu finden. Die Tags erscheinen im Katalog, sobald der Kurs geteilt wird oder eine Vorschau ist.",
+      "saved": "Tags gespeichert.",
+      "subject": "Fach (eines wählen)",
+      "grade": "Klassenstufe (bis zu {{max}})",
+      "topic": "Themen (bis zu {{max}})",
+      "noTopics": "Für dieses Fach gibt es noch keine Themenliste.",
+      "pickSubject": "Wählen Sie zuerst ein Fach, um Themen auszuwählen."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "Status",
       "kind": "Art",
       "content": "Inhalt",
-      "length": "Länge"
+      "length": "Länge",
+      "subject": "Fach",
+      "grade": "Klassenstufe",
+      "topic": "Thema"
     },
     "status": {
       "new": "Nicht begonnen",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "Startseite",
     "main": "Hauptnavigation"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "Mathematik",
+      "physics": "Physik",
+      "chemistry": "Chemie",
+      "informatics": "Informatik",
+      "english": "Englisch",
+      "biology": "Biologie",
+      "other": "Sonstiges"
+    },
+    "grade": {
+      "10": "Klasse 10",
+      "11": "Klasse 11",
+      "12": "Klasse 12"
+    }
   }
 }

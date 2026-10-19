@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "إعادات تعيين كلمة المرور"
+        "password_reset": "إعادات تعيين كلمة المرور",
+        "course": "وسوم الدورات"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "تمت الموافقة على تحديث المشاركة",
         "share_update-reject": "تم رفض تحديث المشاركة",
         "class_add": "إضافة عضو",
-        "class_leave": "غادر الصف"
+        "class_leave": "غادر الصف",
+        "course_tags": "تعديل وسوم الدورة"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "غير مسجّل الدخول",
       "updated": "آخر تحديث",
       "empty": "لا توجد دورات بعد."
+    },
+    "tags": {
+      "column": "الوسوم",
+      "add": "إضافة وسوم",
+      "edit": "تعديل الوسوم",
+      "title": "وسوم {{title}}",
+      "description": "تساعد المادة والصف والمواضيع المتعلمين على العثور على الدورة. تظهر الوسوم في الكتالوج عندما تُشارَك الدورة أو تكون معاينة.",
+      "saved": "تم حفظ الوسوم.",
+      "subject": "المادة (اختر واحدة)",
+      "grade": "الصف (حتى {{max}})",
+      "topic": "المواضيع (حتى {{max}})",
+      "noTopics": "لا توجد قائمة مواضيع لهذه المادة بعد.",
+      "pickSubject": "اختر المادة أولًا لاختيار المواضيع."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "الحالة",
       "kind": "النوع",
       "content": "المحتوى",
-      "length": "الطول"
+      "length": "الطول",
+      "subject": "المادة",
+      "grade": "الصف",
+      "topic": "الموضوع"
     },
     "status": {
       "new": "لم تبدأ",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "الرئيسية",
     "main": "التنقل الرئيسي"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "الرياضيات",
+      "physics": "الفيزياء",
+      "chemistry": "الكيمياء",
+      "informatics": "المعلوماتية",
+      "english": "اللغة الإنجليزية",
+      "biology": "الأحياء",
+      "other": "أخرى"
+    },
+    "grade": {
+      "10": "الصف 10",
+      "11": "الصف 11",
+      "12": "الصف 12"
+    }
   }
 }

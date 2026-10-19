@@ -3,7 +3,7 @@ import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { isValidClassroomId } from '@/lib/server/classroom-storage';
 import { courseExists } from '@/lib/server/learning/course-exists';
 import { authorize, bodyOf, invalid, learningRoute } from '@/lib/server/learning/http';
-import { listCoursePreviews, setCoursePreview } from '@/lib/server/learning/store';
+import { listCourseTags, listCoursePreviews, setCoursePreview } from '@/lib/server/learning/store';
 
 export const runtime = 'nodejs';
 
@@ -12,7 +12,14 @@ export async function GET(request: NextRequest): Promise<Response> {
   return learningRoute(request, async (ctx) => {
     const refusal = authorize(ctx, 'preview.mark');
     if (refusal) return refusal;
-    return apiSuccess({ previews: await listCoursePreviews(ctx.db) });
+    const previews = await listCoursePreviews(ctx.db);
+    const tags = await listCourseTags(
+      ctx.db,
+      previews.map((row) => row.courseId),
+    );
+    return apiSuccess({
+      previews: previews.map((row) => ({ ...row, tags: tags.get(row.courseId) ?? [] })),
+    });
   });
 }
 

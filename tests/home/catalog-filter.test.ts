@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   cleanViewSearch,
   continueCourses,
+  facetCounts,
   DEFAULT_VIEW,
   filterCourses,
   foldText,
@@ -25,12 +26,18 @@ const course = (
 ): CatalogCourse => ({ courseId, title, kind, sceneCount });
 
 const courses: CatalogCourse[] = [
-  { ...course('a', 'Đạo hàm cơ bản', 'preview', 10), hasQuiz: true, hasInteractive: false },
+  {
+    ...course('a', 'Đạo hàm cơ bản', 'preview', 10),
+    hasQuiz: true,
+    hasInteractive: false,
+    tags: ['subject:math', 'grade:12', 'topic:math.derivative'],
+  },
   {
     ...course('b', 'Phân số', 'shared', 5),
     hasQuiz: false,
     hasInteractive: true,
     updatedAt: '2026-10-14T00:00:00Z',
+    tags: ['subject:math', 'grade:10'],
   },
   course('c', 'Tích phân', 'shared'),
   {
@@ -38,6 +45,7 @@ const courses: CatalogCourse[] = [
     hasQuiz: true,
     hasInteractive: true,
     updatedAt: '2026-10-16T00:00:00Z',
+    tags: ['subject:physics', 'grade:11', 'grade:12'],
   },
 ];
 
@@ -125,6 +133,73 @@ describe('content and length filters', () => {
   });
 });
 
+describe('subject, grade and topic filters', () => {
+  it('match a course tagged with any chosen value, and never match an untagged course', () => {
+    expect(ids(filterCourses(courses, view({ subject: ['math'] }), progress))).toEqual(['a', 'b']);
+    expect(ids(filterCourses(courses, view({ subject: ['math', 'physics'] }), progress))).toEqual([
+      'a',
+      'b',
+      'd',
+    ]);
+    expect(ids(filterCourses(courses, view({ grade: ['12'] }), progress))).toEqual(['a', 'd']);
+    expect(ids(filterCourses(courses, view({ grade: ['10', '11'] }), progress))).toEqual([
+      'b',
+      'd',
+    ]);
+    // The untagged course 'c' is in the unfiltered list only.
+    expect(ids(filterCourses(courses, view({}), progress))).toContain('c');
+  });
+
+  it('combine: groups are "and", values in a group are "or"', () => {
+    expect(
+      ids(filterCourses(courses, view({ subject: ['math'], grade: ['12'] }), progress)),
+    ).toEqual(['a']);
+    const topic = view({ subject: ['math'], topic: ['math.derivative'] });
+    expect(ids(filterCourses(courses, topic, progress))).toEqual(['a']);
+  });
+});
+
+describe('facetCounts', () => {
+  it('counts what each value would show with the other filters as they are', () => {
+    const subjects = ['math', 'physics', 'chemistry'];
+    expect([...facetCounts(courses, view({}), progress, 'subject', subjects)]).toEqual([
+      ['math', 2],
+      ['physics', 1],
+      ['chemistry', 0],
+    ]);
+    // With grade 12 chosen only 'a' (math) and 'd' (physics) are left.
+    expect([
+      ...facetCounts(courses, view({ grade: ['12'] }), progress, 'subject', subjects),
+    ]).toEqual([
+      ['math', 1],
+      ['physics', 1],
+      ['chemistry', 0],
+    ]);
+    expect([
+      ...facetCounts(courses, view({ subject: ['math'] }), progress, 'grade', ['10', '11', '12']),
+    ]).toEqual([
+      ['10', 1],
+      ['11', 0],
+      ['12', 1],
+    ]);
+  });
+
+  it('does not let a chosen topic hide the other subjects', () => {
+    const chosen = view({ subject: ['math'], topic: ['math.derivative'] });
+    expect(
+      facetCounts(courses, chosen, progress, 'subject', ['math', 'physics']).get('physics'),
+    ).toBe(1);
+    expect(
+      facetCounts(courses, chosen, progress, 'topic', ['math.derivative', 'math.limits']),
+    ).toEqual(
+      new Map([
+        ['math.derivative', 1],
+        ['math.limits', 0],
+      ]),
+    );
+  });
+});
+
 describe('sortCourses', () => {
   it('sorts by title, by last studied (never studied last), and by length (unknown last)', () => {
     expect(ids(sortCourses(courses, 'title', progress))).toEqual(['a', 'd', 'b', 'c']);
@@ -169,12 +244,29 @@ describe('the address', () => {
     expect(isFiltered(view({ has: ['quiz'] }))).toBe(true);
     expect(isFiltered(view({ len: ['long'] }))).toBe(true);
     expect(withoutFilters(wanted)).toEqual({ ...DEFAULT_VIEW, sort: 'updated', layout: 'list' });
+    for (const patch of [{ subject: ['math'] }, { grade: ['12'] }, { topic: ['math.limits'] }]) {
+      expect(isFiltered(view(patch as Partial<CatalogView>))).toBe(true);
+    }
     expect(isFiltered(view({ q: ' ' }))).toBe(false);
     expect(isFiltered(wanted)).toBe(true);
   });
 
   it('keeps parameters that are not the view (the invite code) and replaces the view ones', () => {
     expect(viewSearch(view({ q: 'x' }), 'join=ABC&q=old&sort=short')).toBe('join=ABC&q=x');
+  });
+
+  it('round-trips the tag filters and keeps a topic only while its own single subject is chosen', () => {
+    const tagged = view({ subject: ['math'], grade: ['11', '12'], topic: ['math.derivative'] });
+    expect(parseView(viewSearch(tagged))).toEqual(tagged);
+    expect(viewSearch(tagged)).toContain('subject=math');
+    expect(parseView('topic=math.derivative').topic).toEqual([]);
+    expect(parseView('subject=math,physics&topic=math.derivative').topic).toEqual([]);
+    expect(parseView('subject=physics&topic=math.derivative').topic).toEqual([]);
+    expect(parseView('subject=art&grade=9').subject).toEqual([]);
+    expect(parseView('subject=art&grade=9').grade).toEqual([]);
+    expect(cleanViewSearch('subject=math&grade=12&topic=math.limits,math.limits&x=1')).toBe(
+      'subject=math&grade=12&topic=math.limits',
+    );
   });
 
   it('ignores unknown values and over-long text', () => {

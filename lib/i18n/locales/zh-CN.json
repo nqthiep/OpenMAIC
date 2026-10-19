@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "密码重置"
+        "password_reset": "密码重置",
+        "course": "课程标签"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "已批准分享更新",
         "share_update-reject": "已拒绝分享更新",
         "class_add": "添加成员",
-        "class_leave": "退出班级"
+        "class_leave": "退出班级",
+        "course_tags": "编辑课程标签"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "未登录",
       "updated": "更新时间",
       "empty": "还没有课程。"
+    },
+    "tags": {
+      "column": "标签",
+      "add": "添加标签",
+      "edit": "编辑标签",
+      "title": "课程标签：{{title}}",
+      "description": "科目、年级和主题可帮助学习者找到课程。课程被分享或设为预览后，标签会显示在课程目录中。",
+      "saved": "标签已保存。",
+      "subject": "科目（选一个）",
+      "grade": "年级（最多 {{max}} 个）",
+      "topic": "主题（最多 {{max}} 个）",
+      "noTopics": "该科目暂无主题列表。",
+      "pickSubject": "请先选择科目，再选择主题。"
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "状态",
       "kind": "类型",
       "content": "内容",
-      "length": "长度"
+      "length": "长度",
+      "subject": "科目",
+      "grade": "年级",
+      "topic": "主题"
     },
     "status": {
       "new": "未学习",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "首页",
     "main": "主导航"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "数学",
+      "physics": "物理",
+      "chemistry": "化学",
+      "informatics": "信息技术",
+      "english": "英语",
+      "biology": "生物",
+      "other": "其他"
+    },
+    "grade": {
+      "10": "10 年级",
+      "11": "11 年级",
+      "12": "12 年级"
+    }
   }
 }

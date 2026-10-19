@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { apiSuccess } from '@/lib/server/api-response';
 import { authorize, invalid, learningRoute } from '@/lib/server/learning/http';
-import { listCourseShares, type ShareState } from '@/lib/server/learning/store';
+import { listCourseShares, listCourseTags, type ShareState } from '@/lib/server/learning/store';
 import { listPendingSnapshots } from '@/lib/server/learning/course-snapshot';
 import { readRemixSources } from '@/lib/server/learning/remix';
 
@@ -30,11 +30,16 @@ export async function GET(request: NextRequest): Promise<Response> {
       ctx.db,
       all.map((row) => row.courseId),
     );
+    const tags = await listCourseTags(
+      ctx.db,
+      all.map((row) => row.courseId),
+    );
     const shares = all.map((row) => {
       const snapshot = snapshots.get(row.courseId);
       const remixOf = remixes.get(row.courseId);
       return {
         ...row,
+        tags: tags.get(row.courseId) ?? [],
         ...(remixOf ? { remixOf } : {}),
         update: row.state === 'shared' && snapshot !== undefined,
         ...(snapshot

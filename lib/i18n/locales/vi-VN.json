@@ -2590,7 +2590,8 @@
         "disable": "Khoá tài khoản",
         "enable": "Mở khoá tài khoản",
         "list": "Xem danh sách tài khoản",
-        "password_reset": "Đặt lại mật khẩu"
+        "password_reset": "Đặt lại mật khẩu",
+        "course": "Thẻ khoá học"
       },
       "actions": {
         "membership_grant": "Cấp/gia hạn thành viên",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "Duyệt bản cập nhật chia sẻ",
         "share_update-reject": "Từ chối bản cập nhật chia sẻ",
         "class_add": "Thêm thành viên vào lớp",
-        "class_leave": "Rời lớp"
+        "class_leave": "Rời lớp",
+        "course_tags": "Sửa thẻ khoá học"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "Chưa đăng nhập",
       "updated": "Cập nhật",
       "empty": "Chưa có khoá học nào."
+    },
+    "tags": {
+      "column": "Thẻ",
+      "add": "Gắn thẻ",
+      "edit": "Sửa thẻ",
+      "title": "Thẻ của khoá học: {{title}}",
+      "description": "Môn, khối và chủ đề giúp người học tìm khoá. Thẻ hiện trên danh mục khi khoá được chia sẻ hoặc là bài xem thử.",
+      "saved": "Đã lưu thẻ.",
+      "subject": "Môn (chọn một)",
+      "grade": "Khối (tối đa {{max}})",
+      "topic": "Chủ đề (tối đa {{max}})",
+      "noTopics": "Môn này chưa có danh sách chủ đề.",
+      "pickSubject": "Chọn môn trước để chọn chủ đề."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "Trạng thái",
       "kind": "Loại",
       "content": "Nội dung",
-      "length": "Độ dài"
+      "length": "Độ dài",
+      "subject": "Môn",
+      "grade": "Khối",
+      "topic": "Chủ đề"
     },
     "status": {
       "new": "Chưa học",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "Trang chủ",
     "main": "Điều hướng chính"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "Toán",
+      "physics": "Vật lí",
+      "chemistry": "Hoá học",
+      "informatics": "Tin học",
+      "english": "Tiếng Anh",
+      "biology": "Sinh học",
+      "other": "Khác"
+    },
+    "grade": {
+      "10": "Khối 10",
+      "11": "Khối 11",
+      "12": "Khối 12"
+    }
   }
 }

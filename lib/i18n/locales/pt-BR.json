@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "Redefinições de senha"
+        "password_reset": "Redefinições de senha",
+        "course": "Etiquetas do curso"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "Atualização compartilhada aprovada",
         "share_update-reject": "Atualização compartilhada recusada",
         "class_add": "Membro adicionado",
-        "class_leave": "Saiu da turma"
+        "class_leave": "Saiu da turma",
+        "course_tags": "Editar etiquetas do curso"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "Sem login",
       "updated": "Atualizado",
       "empty": "Ainda não há cursos."
+    },
+    "tags": {
+      "column": "Etiquetas",
+      "add": "Adicionar etiquetas",
+      "edit": "Editar etiquetas",
+      "title": "Etiquetas de {{title}}",
+      "description": "Disciplina, ano e tópicos ajudam os alunos a encontrar o curso. As etiquetas aparecem no catálogo quando o curso é compartilhado ou é uma prévia.",
+      "saved": "Etiquetas salvas.",
+      "subject": "Disciplina (escolha uma)",
+      "grade": "Ano (até {{max}})",
+      "topic": "Tópicos (até {{max}})",
+      "noTopics": "Esta disciplina ainda não tem lista de tópicos.",
+      "pickSubject": "Escolha primeiro uma disciplina para selecionar tópicos."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "Status",
       "kind": "Tipo",
       "content": "Conteúdo",
-      "length": "Duração"
+      "length": "Duração",
+      "subject": "Disciplina",
+      "grade": "Ano",
+      "topic": "Tópico"
     },
     "status": {
       "new": "Não iniciado",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "Início",
     "main": "Navegação principal"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "Matemática",
+      "physics": "Física",
+      "chemistry": "Química",
+      "informatics": "Informática",
+      "english": "Inglês",
+      "biology": "Biologia",
+      "other": "Outros"
+    },
+    "grade": {
+      "10": "10º ano",
+      "11": "11º ano",
+      "12": "12º ano"
+    }
   }
 }

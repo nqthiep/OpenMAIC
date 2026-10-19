@@ -2,6 +2,15 @@
  * What the catalog shows when it holds many courses: search, filters, sort, and the address that
  * keeps them. Pure functions; the component reads the rows and the address, these decide.
  */
+import {
+  GRADES,
+  SUBJECTS,
+  isTopicValue,
+  readTags,
+  subjectOfTopic,
+  type Grade,
+  type Subject,
+} from '@/lib/learning/taxonomy';
 
 export type CatalogStatus = 'new' | 'learning' | 'done';
 export type CatalogKind = 'preview' | 'shared';
@@ -20,6 +29,8 @@ export interface CatalogCourse {
   readonly updatedAt?: string;
   readonly hasQuiz?: boolean;
   readonly hasInteractive?: boolean;
+  /** Subject, grade and topic tags staff gave the course (see `lib/learning/taxonomy.ts`). */
+  readonly tags?: readonly string[];
 }
 
 export interface CatalogProgress {
@@ -37,6 +48,12 @@ export interface CatalogView {
   readonly has: readonly CatalogContent[];
   /** Empty means any length. */
   readonly len: readonly CatalogLength[];
+  /** The course's subject is one of these. */
+  readonly subject: readonly Subject[];
+  /** The course is for one of these grades. */
+  readonly grade: readonly Grade[];
+  /** The course covers one of these topics (values such as `math.derivative`). Needs one subject. */
+  readonly topic: readonly string[];
   readonly sort: CatalogSort;
   readonly layout: CatalogLayout;
 }
@@ -47,6 +64,9 @@ export const DEFAULT_VIEW: CatalogView = {
   kind: [],
   has: [],
   len: [],
+  subject: [],
+  grade: [],
+  topic: [],
   sort: 'title',
   layout: 'grid',
 };
@@ -68,7 +88,18 @@ export const CATALOG_KINDS: readonly CatalogKind[] = ['preview', 'shared'];
 export const CATALOG_CONTENT: readonly CatalogContent[] = ['quiz', 'interactive'];
 export const CATALOG_LENGTHS: readonly CatalogLength[] = ['short', 'medium', 'long'];
 export const CATALOG_SORTS: readonly CatalogSort[] = ['title', 'updated', 'recent', 'short'];
-const KEYS = ['q', 'status', 'kind', 'has', 'len', 'sort', 'layout'] as const;
+const KEYS = [
+  'q',
+  'status',
+  'kind',
+  'has',
+  'len',
+  'subject',
+  'grade',
+  'topic',
+  'sort',
+  'layout',
+] as const;
 
 /** Lower case without accents, so "dao ham" finds "Đạo hàm". `đ` has no decomposition, so it is mapped. */
 export function foldText(text: string): string {
@@ -99,16 +130,46 @@ export function filterCourses<T extends CatalogCourse>(
   progress: ReadonlyMap<string, CatalogProgress>,
 ): T[] {
   const words = foldText(view.q).split(/\s+/).filter(Boolean);
-  return courses.filter(
-    (course) =>
+  return courses.filter((course) => {
+    const tags = readTags(course.tags);
+    return (
       matches(course.title, words) &&
+      (view.subject.length === 0 || (!!tags.subject && view.subject.includes(tags.subject))) &&
+      (view.grade.length === 0 || tags.grades.some((grade) => view.grade.includes(grade))) &&
+      (view.topic.length === 0 || tags.topics.some((topic) => view.topic.includes(topic))) &&
       (view.kind.length === 0 || view.kind.includes(course.kind as CatalogKind)) &&
       (view.status.length === 0 || view.status.includes(statusOf(progress.get(course.courseId)))) &&
       view.has.every(
         (need) => (need === 'quiz' ? course.hasQuiz : course.hasInteractive) === true,
       ) &&
-      (view.len.length === 0 || view.len.some((len) => len === lengthOf(course.sceneCount))),
-  );
+      (view.len.length === 0 || view.len.some((len) => len === lengthOf(course.sceneCount)))
+    );
+  });
+}
+
+/**
+ * How many courses each value of a tag group would show if it alone were chosen, with the other
+ * filters as they are. A course count that shrinks as filters are added tells the learner what
+ * is left to pick. Choosing a subject does not depend on the topics already chosen, since a topic
+ * belongs to its subject.
+ */
+export function facetCounts<T extends CatalogCourse>(
+  courses: readonly T[],
+  view: CatalogView,
+  progress: ReadonlyMap<string, CatalogProgress>,
+  facet: 'subject' | 'grade' | 'topic',
+  values: readonly string[],
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    const probe = {
+      ...view,
+      ...(facet === 'subject' ? { topic: [] } : {}),
+      [facet]: [value],
+    } as CatalogView;
+    counts.set(value, filterCourses(courses, probe, progress).length);
+  }
+  return counts;
 }
 
 export function sortCourses<T extends CatalogCourse>(
@@ -156,13 +217,26 @@ export function isFiltered(view: CatalogView): boolean {
     view.status.length > 0 ||
     view.kind.length > 0 ||
     view.has.length > 0 ||
-    view.len.length > 0
+    view.len.length > 0 ||
+    view.subject.length > 0 ||
+    view.grade.length > 0 ||
+    view.topic.length > 0
   );
 }
 
 /** The view with its search and filters cleared, keeping the sort order and the layout. */
 export function withoutFilters(view: CatalogView): CatalogView {
-  return { ...view, q: '', status: [], kind: [], has: [], len: [] };
+  return {
+    ...view,
+    q: '',
+    status: [],
+    kind: [],
+    has: [],
+    len: [],
+    subject: [],
+    grade: [],
+    topic: [],
+  };
 }
 
 function listOf<T extends string>(raw: string | null, allowed: readonly T[]): T[] {
@@ -173,12 +247,26 @@ function listOf<T extends string>(raw: string | null, allowed: readonly T[]): T[
 export function parseView(search: string): CatalogView {
   const params = new URLSearchParams(search);
   const sort = params.get('sort');
+  const subject = listOf(params.get('subject'), SUBJECTS);
+  // A topic belongs to its subject, so topics only count while exactly that one subject is chosen.
+  const topic = (params.get('topic') ?? '')
+    .split(',')
+    .filter(
+      (value, at, all) =>
+        isTopicValue(value) &&
+        subject.length === 1 &&
+        subjectOfTopic(value) === subject[0] &&
+        all.indexOf(value) === at,
+    );
   return {
     q: (params.get('q') ?? '').slice(0, 100),
     status: listOf(params.get('status'), CATALOG_STATUSES),
     kind: listOf(params.get('kind'), CATALOG_KINDS),
     has: listOf(params.get('has'), CATALOG_CONTENT),
     len: listOf(params.get('len'), CATALOG_LENGTHS),
+    subject,
+    grade: listOf(params.get('grade'), GRADES),
+    topic,
     sort: CATALOG_SORTS.find((value) => value === sort) ?? DEFAULT_VIEW.sort,
     layout: params.get('layout') === 'list' ? 'list' : 'grid',
   };
@@ -196,6 +284,9 @@ export function viewSearch(view: CatalogView, current = ''): string {
   if (view.kind.length > 0) params.set('kind', view.kind.join(','));
   if (view.has.length > 0) params.set('has', view.has.join(','));
   if (view.len.length > 0) params.set('len', view.len.join(','));
+  if (view.subject.length > 0) params.set('subject', view.subject.join(','));
+  if (view.grade.length > 0) params.set('grade', view.grade.join(','));
+  if (view.topic.length > 0) params.set('topic', view.topic.join(','));
   if (view.sort !== DEFAULT_VIEW.sort) params.set('sort', view.sort);
   if (view.layout !== DEFAULT_VIEW.layout) params.set('layout', view.layout);
   return params.toString();

@@ -41,6 +41,8 @@ export interface ShareRow {
   requestedAt: string;
   /** A shared course whose owner sent an updated version for review. */
   update?: boolean;
+  /** Subject, grade and topic tags staff gave the course. */
+  tags?: string[];
   /** The course this one was remixed from. */
   remixOf?: { sourceId: string; sourceTitle: string };
   /** What the course package sent with the request holds. */
@@ -71,6 +73,8 @@ export interface CatalogEntry {
   updatedAt?: string;
   hasQuiz?: boolean;
   hasInteractive?: boolean;
+  /** Subject, grade and topic tags staff gave the course (see `lib/learning/taxonomy.ts`). */
+  tags?: string[];
 }
 
 export interface AuditRow {
@@ -180,6 +184,8 @@ export function decideShare(
 export interface PreviewRow {
   courseId: string;
   markedAt: string;
+  /** Subject, grade and topic tags staff gave the course. */
+  tags?: string[];
 }
 
 export async function fetchPreviews(): Promise<PreviewRow[]> {
@@ -189,6 +195,11 @@ export async function fetchPreviews(): Promise<PreviewRow[]> {
 
 export function setPreview(courseId: string, on: boolean): Promise<unknown> {
   return call('POST', '/api/admin/previews', { courseId, on });
+}
+
+/** Staff: replaces the subject, grade and topic tags of a shared or preview course. */
+export function setCourseTags(courseId: string, tags: readonly string[]): Promise<unknown> {
+  return call('PUT', `/api/admin/courses/${encodeURIComponent(courseId)}/tags`, { tags });
 }
 
 export async function fetchClasses(): Promise<ClassRow[]> {

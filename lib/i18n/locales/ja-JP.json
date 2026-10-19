@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "パスワードのリセット"
+        "password_reset": "パスワードのリセット",
+        "course": "コースのタグ"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "共有更新を承認",
         "share_update-reject": "共有更新を却下",
         "class_add": "メンバーを追加",
-        "class_leave": "クラスを退出"
+        "class_leave": "クラスを退出",
+        "course_tags": "コースのタグを編集"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "未ログイン",
       "updated": "更新日",
       "empty": "コースはまだありません。"
+    },
+    "tags": {
+      "column": "タグ",
+      "add": "タグを追加",
+      "edit": "タグを編集",
+      "title": "{{title}} のタグ",
+      "description": "教科・学年・トピックは学習者がコースを見つける助けになります。コースが共有されるかプレビューになると、カタログにタグが表示されます。",
+      "saved": "タグを保存しました。",
+      "subject": "教科（1つ選択）",
+      "grade": "学年（最大 {{max}} 件）",
+      "topic": "トピック（最大 {{max}} 件）",
+      "noTopics": "この教科にはまだトピック一覧がありません。",
+      "pickSubject": "先に教科を選ぶとトピックを選べます。"
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "ステータス",
       "kind": "種類",
       "content": "内容",
-      "length": "長さ"
+      "length": "長さ",
+      "subject": "教科",
+      "grade": "学年",
+      "topic": "トピック"
     },
     "status": {
       "new": "未学習",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "ホーム",
     "main": "メインナビゲーション"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "数学",
+      "physics": "物理",
+      "chemistry": "化学",
+      "informatics": "情報",
+      "english": "英語",
+      "biology": "生物",
+      "other": "その他"
+    },
+    "grade": {
+      "10": "10年生",
+      "11": "11年生",
+      "12": "12年生"
+    }
   }
 }

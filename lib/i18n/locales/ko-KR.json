@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "비밀번호 재설정"
+        "password_reset": "비밀번호 재설정",
+        "course": "강좌 태그"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "공유 업데이트 승인",
         "share_update-reject": "공유 업데이트 거절",
         "class_add": "멤버 추가",
-        "class_leave": "클래스 나감"
+        "class_leave": "클래스 나감",
+        "course_tags": "강좌 태그 편집"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "로그인 안 함",
       "updated": "업데이트",
       "empty": "아직 강의가 없습니다."
+    },
+    "tags": {
+      "column": "태그",
+      "add": "태그 추가",
+      "edit": "태그 편집",
+      "title": "{{title}} 태그",
+      "description": "과목, 학년, 주제는 학습자가 강좌를 찾는 데 도움이 됩니다. 강좌가 공유되거나 미리보기가 되면 카탈로그에 태그가 표시됩니다.",
+      "saved": "태그를 저장했습니다.",
+      "subject": "과목(하나 선택)",
+      "grade": "학년(최대 {{max}}개)",
+      "topic": "주제(최대 {{max}}개)",
+      "noTopics": "이 과목에는 아직 주제 목록이 없습니다.",
+      "pickSubject": "먼저 과목을 선택해야 주제를 고를 수 있습니다."
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "상태",
       "kind": "유형",
       "content": "내용",
-      "length": "길이"
+      "length": "길이",
+      "subject": "과목",
+      "grade": "학년",
+      "topic": "주제"
     },
     "status": {
       "new": "학습 전",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "홈",
     "main": "주 메뉴"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "수학",
+      "physics": "물리",
+      "chemistry": "화학",
+      "informatics": "정보",
+      "english": "영어",
+      "biology": "생물",
+      "other": "기타"
+    },
+    "grade": {
+      "10": "10학년",
+      "11": "11학년",
+      "12": "12학년"
+    }
   }
 }

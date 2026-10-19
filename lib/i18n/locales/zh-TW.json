@@ -2590,7 +2590,8 @@
         "disable": "Account disabled",
         "enable": "Account enabled",
         "list": "Account list viewed",
-        "password_reset": "密碼重設"
+        "password_reset": "密碼重設",
+        "course": "課程標籤"
       },
       "actions": {
         "membership_grant": "Membership granted",
@@ -2627,7 +2628,8 @@
         "share_update-approve": "已核准分享更新",
         "share_update-reject": "已拒絕分享更新",
         "class_add": "加入成員",
-        "class_leave": "退出班級"
+        "class_leave": "退出班級",
+        "course_tags": "編輯課程標籤"
       }
     },
     "accessRequests": {
@@ -2788,6 +2790,19 @@
       "anonymous": "未登入",
       "updated": "更新時間",
       "empty": "還沒有課程。"
+    },
+    "tags": {
+      "column": "標籤",
+      "add": "新增標籤",
+      "edit": "編輯標籤",
+      "title": "課程標籤：{{title}}",
+      "description": "科目、年級與主題可幫助學習者找到課程。課程被分享或設為預覽後，標籤會顯示在課程目錄中。",
+      "saved": "標籤已儲存。",
+      "subject": "科目（選一個）",
+      "grade": "年級（最多 {{max}} 個）",
+      "topic": "主題（最多 {{max}} 個）",
+      "noTopics": "此科目尚無主題清單。",
+      "pickSubject": "請先選擇科目，再選擇主題。"
     }
   },
   "learning": {
@@ -2849,7 +2864,10 @@
       "status": "狀態",
       "kind": "類型",
       "content": "內容",
-      "length": "長度"
+      "length": "長度",
+      "subject": "科目",
+      "grade": "年級",
+      "topic": "主題"
     },
     "status": {
       "new": "未學習",
@@ -3178,5 +3196,21 @@
   "nav": {
     "home": "首頁",
     "main": "主導覽"
+  },
+  "taxonomy": {
+    "subject": {
+      "math": "數學",
+      "physics": "物理",
+      "chemistry": "化學",
+      "informatics": "資訊科技",
+      "english": "英語",
+      "biology": "生物",
+      "other": "其他"
+    },
+    "grade": {
+      "10": "10 年級",
+      "11": "11 年級",
+      "12": "12 年級"
+    }
   }
 }

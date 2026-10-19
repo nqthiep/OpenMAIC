@@ -272,6 +272,17 @@ CREATE TABLE IF NOT EXISTS course_progress (
   PRIMARY KEY (account_id, course_id)
 );
 
+-- Subject, grade and topic tags of a catalog course, one row per tag. Staff set them, and the
+-- allowed values are in lib/learning/taxonomy.ts. The course may be a share, a preview, or both,
+-- so the tags belong to neither table. (No semicolons in these comments: the schema is split on them.)
+CREATE TABLE IF NOT EXISTS course_tags (
+  course_id TEXT NOT NULL,
+  tag TEXT NOT NULL,
+  set_by TEXT NOT NULL,
+  set_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (course_id, tag)
+);
+
 -- Why the last access request was refused, shown to the learner. NULL after approval or a new request.
 ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS decision_reason TEXT;
 `;
