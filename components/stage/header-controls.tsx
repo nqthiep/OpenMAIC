@@ -282,11 +282,11 @@ export function HeaderControls({
       {/* Share with members. Shows only to the course owner, with accounts on. */}
       <CourseShareButton courseId={stageId} />
 
-      {/* Questions pinned to this slide. Shows only on a course open to the community. */}
-      <SceneDiscussionButton />
-
       {/* Remix credit, remixes of this course, and the Remix action. */}
       <RemixControls />
+
+      {/* Questions pinned to this slide. Shows only on a course open to the community. */}
+      <SceneDiscussionButton />
 
       {/* Export / Download — lives to the right of the Pro Switch.
           Not a settings function so it does not belong inside the
