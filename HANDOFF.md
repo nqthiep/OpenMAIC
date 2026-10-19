@@ -2,6 +2,54 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Catalog page: finish the tag work (3b suggestions, 3c learner side, open checks)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "mới hoàn thành 3a, còn những việc nào nữa?" Then: "Hãy tiếp tục các công việc cho đến khi hoàn thành tất cả các công việc còn dang dở."
+- Assignment status: Done (code, tests, checks on the real PostgreSQL and in the browser), committed and pushed.
+- Branch and commit: `it-math` @ `55656812` (the feature) plus a docs commit for this file, pushed: yes, to `origin` (`https://github.com/nqthiep/OpenMAIC.git`). The owner asked for it ("Commit riêng các file của công việc này ... rồi push lên origin/it-math"). Only this work's 31 files were staged, by path; `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` and `tests/security/*` were left out. The push was a fast-forward from `1b6fc804`; `git ls-remote origin refs/heads/it-math` printed `55656812ca57a5f97d930b452922e9f4ef43da44` after it.
+- Last updated: 2026-10-19 (UTC time not recorded)
+
+### Scope (what "all the remaining work" means here)
+- Done in this assignment: 3c-lite (tags on cards and rows, a "Chưa phân loại" chip, a "Mới" badge, search sorted by match), 3b as keyword suggestions pre-filled in the staff dialog (client side, no API change, and no folder name is sent to the server, which avoids a privacy question), the owner seeing the tags of their own shared courses read-only, remembering the layout choice, and the open checks (real PostgreSQL, previews panel, 768 px, keyboard).
+- Not done on purpose: grouping by topic in shelves and a bulk tagging screen (no tagged courses yet to justify them, add when asked); topic names in the other 10 languages, new subjects (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, nghề, kỹ năng) and grades 6 to 9 (the owner decides); default sort stays A to Z. Owner-only items stay with the owner: restart `next dev`, a teacher reviews the topic lists, staff tag the existing courses.
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, `git status`, branch, remote | Done | `it-math` @ `1b6fc804` = remote; tracked files clean; untracked: `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`, `tests/security/*` (not mine) |
+| 2 | 3c-lite: tags on card and row, `none` subject chip, "Mới" badge, search sorted by match + tests | Done | `lib/home/catalog-filter.ts` (`none` in the subject filter, `isNew`, `NEW_DAYS` = 14, sort `match`, `sortAfterTyping`, `withoutFilters` drops `match`), `components/home/course-card.tsx` and `course-row.tsx` (subject and grade line, "Mới" when the list passes `now`; the home page card passes none, so it is unchanged), `components/learning/tag-names.tsx` (new: `useTagNames`, `useTagLine`, `TagBadges`, moved out of the editor). Match order: title starts with the search, then every word starts a word, then the rest; it is chosen for the learner when they start searching from A to Z and goes back when the box is emptied. Tests: `tests/home/catalog-filter.test.ts` 28, `tests/home/course-card-tags.test.ts` 4 |
+| 3 | 3b: `lib/learning/tag-suggest.ts` and pre-fill in the staff dialog + tests | Done | Keyword suggestion from the title and scene titles, accent-insensitive, word-start matching (three letters or fewer must be a whole word), "Toán" needs its accent and "bài toán" does not count. The dialog opens with the suggestion only when the course has no tags, says so, and saves nothing until Save. No API change and no folder name sent to the server. `tests/learning/tag-suggest.test.ts` 7 (every topic's own name gives a valid list), 2 new cases in `tests/learning/course-tags-panel.test.ts` (4 in all) |
+| 4 | Owner sees the tags of their shared courses; remember the layout choice | Done | `GET /api/membership/contribution` adds `tags` per share (`listCourseTags`), `components/home/contribution.tsx` shows "Toán · Khối 12" read-only under the title; `tests/learning/contribution-route.test.ts`, `tests/home/contribution.test.ts` (6). Layout: `localStorage` key `openmaic.catalog.layout`, read only when the address has no `layout`, writes wrapped in try/catch; `tests/home/catalog-browser-state.test.ts` 4 (remembered, address wins, blocked storage, match order in the address) |
+| 5 | Open checks: real PostgreSQL, previews panel, 768 px, keyboard | Done | **Real PostgreSQL 16.15** (container `openmaic-dev-db-postgres-1`): `course_tags` already existed with the expected columns and primary key and 0 rows. The set, replace and clear statements of `setCourseTags` ran in a transaction that was rolled back (`persisted_tag_rows` 0 after): set gave 2 rows, replace removed the subject, an empty list cleared. The scene-facts query ran on the real document tables: e.g. `EklnYqdaAs` 10 scenes, 2 quizzes, 1 interactive; real scene types are slide, quiz, interactive. `GET /api/catalog` on a dev server of this session returned `sceneCount`, `hasQuiz`, `hasInteractive`, `updatedAt` for the real preview course. **Browser** (`rt.localhost:3002`, mock catalog of 30 courses and mock admin responses, nothing written): the previews panel shows the "Thẻ" column, its dialog opened with "Tiếng Anh, Khối 12, Ngữ pháp" and the note, Lưu sent `PUT /api/admin/courses/prev-1/tags` and the row updated; the shares dialog suggested "Vật lí, Khối 11, Sóng" from the title and scene titles. Catalog at 768 px: no horizontal overflow, rows do not overflow; the toolbar is 314 px tall with every group shown. Keyboard: Tab order search, sort, grid, list, subject chips; Space toggled a chip, focus stayed on it, the count line updated. "Chưa phân loại (4)" gave 4 courses (the mock has 4), "Mới" on 12 of 30 rows (the mock has 12), layout `list` came back after leaving and returning. Not seen: a screen reader |
+| 6 | i18n keys in 12 locales | Done | New: `catalog.new`, `catalog.subjectNone`, `catalog.sort.match`, `admin.tags.suggested`. `pnpm check:i18n-keys` passed; the 11 non-Vietnamese texts are mine, not reviewed by a native speaker [Unverified] |
+| 7 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/learning tests/workbench tests/i18n tests/components tests/admin`: 136 files, 1532 passed. `npx tsc --noEmit`: no error outside `.next/` and `tests/security/`. `pnpm exec eslint` on the 19 changed code files: 0 problems (the first run flagged `Date.now()` in render, so the list now passes `now` down). `prettier --check`: clean |
+| 8 | Update this section and report; ask before commit and push | Done | this section |
+| 9 | Commit this work's files by path and push `it-math` (owner asked after the report) | Done | `55656812`, 31 files; `git push origin it-math`: `1b6fc804..55656812`, a fast-forward (the fetched remote head was `1b6fc804`); `git ls-remote origin refs/heads/it-math`: `55656812`. This section's own update is a docs commit after it |
+
+### Done so far
+- Catalog: tags on cards and rows, "Chưa phân loại" chip, "Mới" badge, match order while searching, remembered layout.
+- Staff: suggestions pre-filled in the tag dialog (shares and previews panels).
+- Owner: sees the tags of their own shared courses read-only in "Đóng góp của tôi".
+- Verified on the real PostgreSQL (rolled-back transaction and read-only queries) and in the browser.
+
+### Decisions and reasons
+- Suggestions run in the browser from titles already on screen. No folder name leaves the learner's device, so there is no privacy question and no API change.
+- "Chưa phân loại" means no subject tag (a course with only a grade tag counts).
+- "New" is relative to the time the list was opened, and is judged by `updatedAt` (the approval date for a shared course, so approving a batch marks the whole batch new).
+- The match order is a real sort value (`sort=match`, shown in the sort menu while searching), so a learner can still pick A to Z while searching.
+
+### Next step (exact)
+- Owner: (1) ask a teacher to review the topic lists in `lib/learning/taxonomy.ts` and the keywords in `lib/learning/tag-suggest.ts`; (2) staff tag the existing shared courses and previews (the dialog now opens with a suggestion); (3) decide the open choices below.
+
+### Open questions and blockers
+- Owner choices not made: more subjects (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, nghề, kỹ năng), grades 6 to 9, translating topic names into the other 10 languages, and whether "Mới cập nhật" should become the default sort (kept A to Z).
+- Not built on purpose (no tagged courses yet to justify them): grouping by topic in shelves, and a bulk tagging screen.
+- Not verified: a screen reader; a real admin session in the browser (admin responses were mocked); the 11 non-Vietnamese translations. At 768 px the toolbar is 314 px tall when every group is shown, which is a third of the screen.
+
+### How to verify
+- `pnpm vitest run tests/home tests/learning`: expected all pass. [Run: with the other suites, 136 files, 1532 passed]
+- As staff open a share request in `/admin` (tab "Nội dung & lớp") and press "Gắn thẻ": the dialog opens with a suggestion from the title.
+
 ## Assignment: Catalog page that scales to many courses (phase 3a: subject, grade and topic tags)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Bàn giai đoạn 3 của trang danh mục: thẻ chủ đề và lớp. Ai gắn thẻ, bộ thẻ cố định gồm gì, lưu ở đâu, và có nên đổi mặc định sang Mới cập nhật không." Then: "Hệ thống dạy nhiều môn. Hãy đề xuất trục Môn và danh sách chủ đề cho từng môn trước khi làm giai đoạn 3a." Then: "Các môn chính như Toán, lý, hoá, tin học, tiếng anh, và sinh học"
