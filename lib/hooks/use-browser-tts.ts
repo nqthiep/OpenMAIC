@@ -5,6 +5,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { detectSpeechLanguage, pickBrowserVoice } from '@/lib/audio/browser-speech-language';
 
 // Note: Window.SpeechSynthesis declaration is already in the global scope
 
@@ -15,19 +16,11 @@ export interface UseBrowserTTSOptions {
   rate?: number; // 0.1 to 10
   pitch?: number; // 0 to 2
   volume?: number; // 0 to 1
-  lang?: string; // e.g., 'zh-CN', 'en-US'
+  lang?: string; // e.g., 'zh-CN'; default: detected from the text
 }
 
 export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
-  const {
-    onStart,
-    onEnd,
-    onError,
-    rate = 1.0,
-    pitch = 1.0,
-    volume = 1.0,
-    lang = 'zh-CN',
-  } = options;
+  const { onStart, onEnd, onError, rate = 1.0, pitch = 1.0, volume = 1.0, lang } = options;
 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -73,15 +66,13 @@ export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
       utterance.rate = rate;
       utterance.pitch = pitch;
       utterance.volume = volume;
-      utterance.lang = lang;
+      utterance.lang = lang ?? detectSpeechLanguage(text);
 
-      // Set voice if specified
-      if (voiceURI) {
-        const voice = availableVoices.find((v) => v.voiceURI === voiceURI);
-        if (voice) {
-          utterance.voice = voice;
-        }
-      }
+      // The named voice if it exists, else a voice for the utterance's language
+      const voice =
+        (voiceURI && availableVoices.find((v) => v.voiceURI === voiceURI)) ||
+        pickBrowserVoice(availableVoices, utterance.lang);
+      if (voice) utterance.voice = voice;
 
       utterance.onstart = () => {
         setIsSpeaking(true);

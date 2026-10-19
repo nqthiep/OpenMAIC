@@ -47,17 +47,10 @@ import {
 } from '@/lib/playback/action-navigation';
 import { useCanvasStore } from '@/lib/store/canvas';
 import { useSettingsStore } from '@/lib/store/settings';
-import { isTTSProviderEnabled } from '@/lib/audio/provider-enablement';
+import { detectSpeechLanguage, pickBrowserVoice } from '@/lib/audio/browser-speech-language';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('PlaybackEngine');
-
-/**
- * If more than 30% of characters are CJK, treat the text as Chinese.
- * Intentionally low: mixed Chinese text often contains punctuation,
- * numbers, and short Latin fragments (e.g. "AI课堂").
- */
-const CJK_LANG_THRESHOLD = 0.3;
 
 export class PlaybackEngine {
   private scenes: Scene[] = [];
@@ -620,37 +613,34 @@ export class PlaybackEngine {
         // which would hang playback on that slide.
         const hasText = !!speechAction.text.trim();
 
+        // Pre-generated audio is missing or failed to play (e.g. the cloud TTS
+        // ran out of credit): speak the line with the browser's Web Speech API
+        // whenever TTS is on, whatever provider the lesson was generated with.
+        const fallback = () => {
+          if (
+            hasText &&
+            useSettingsStore.getState().ttsEnabled &&
+            typeof window !== 'undefined' &&
+            window.speechSynthesis
+          ) {
+            this.playBrowserTTS(speechAction, generation);
+          } else {
+            scheduleReadingTimer();
+          }
+        };
+
         this.audioPlayer
           // The legacy URL of an unconverted pair rides along as the
           // fallback of last resort; converted documents carry no audioUrl.
           .play(speechAction.audioId || '', (speechAction as LegacySpeechAction).audioUrl)
           .then((audioStarted) => {
             if (!this.isCurrentGeneration(generation)) return;
-            if (!audioStarted) {
-              // No pre-generated audio — try browser-native TTS only when it is
-              // the selected provider AND actually enabled (opt-in, #665).
-              const settings = useSettingsStore.getState();
-              if (
-                hasText &&
-                settings.ttsEnabled &&
-                settings.ttsProviderId === 'browser-native-tts' &&
-                isTTSProviderEnabled(
-                  'browser-native-tts',
-                  settings.ttsProvidersConfig?.['browser-native-tts'],
-                ) &&
-                typeof window !== 'undefined' &&
-                window.speechSynthesis
-              ) {
-                this.playBrowserTTS(speechAction, generation);
-              } else {
-                scheduleReadingTimer();
-              }
-            }
+            if (!audioStarted) fallback();
           })
           .catch((err) => {
             if (!this.isCurrentGeneration(generation)) return;
             log.error('TTS error:', err);
-            scheduleReadingTimer();
+            fallback();
           });
         break;
       }
@@ -817,13 +807,11 @@ export class PlaybackEngine {
       }
     }
     if (!voiceFound) {
-      // No usable voice configured — detect text language so the browser
-      // auto-selects an appropriate voice.
-      const cjkRatio =
-        chunkText.length > 0
-          ? (chunkText.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length / chunkText.length
-          : 0;
-      utterance.lang = cjkRatio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
+      // No usable voice configured: speak in the chunk's own language, with a
+      // voice for that language when the browser has one.
+      utterance.lang = detectSpeechLanguage(chunkText);
+      const voice = pickBrowserVoice(voices, utterance.lang);
+      if (voice) utterance.voice = voice;
     }
 
     utterance.onend = () => {

@@ -1,8 +1,9 @@
 'use client';
 
+import { detectSpeechLanguage, pickBrowserVoice } from '@/lib/audio/browser-speech-language';
+
 const VOICES_LOAD_TIMEOUT_MS = 2000;
 const PREVIEW_TIMEOUT_MS = 30000;
-const CJK_LANG_THRESHOLD = 0.3;
 
 type PlayBrowserTTSPreviewOptions = {
   text: string;
@@ -15,12 +16,6 @@ function createAbortError(): Error {
   const error = new Error('Browser TTS preview canceled');
   error.name = 'AbortError';
   return error;
-}
-
-function inferPreviewLang(text: string): string {
-  const cjkCount = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
-  const ratio = text.length > 0 ? cjkCount / text.length : 0;
-  return ratio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
 }
 
 export function isBrowserTTSAbortError(error: unknown): boolean {
@@ -82,9 +77,10 @@ export function resolveBrowserVoice(
         ) || null
       : null;
 
+  const lang = matchedVoice?.lang || detectSpeechLanguage(text);
   return {
-    voice: matchedVoice,
-    lang: matchedVoice?.lang || inferPreviewLang(text),
+    voice: matchedVoice ?? pickBrowserVoice(voices, lang) ?? null,
+    lang,
   };
 }
 

@@ -49,6 +49,22 @@ interface PreparedSegment {
   result: Promise<{ audioUrl: string } | { error: unknown }>;
 }
 
+/**
+ * Put a segment that cloud TTS could not voice at the head of the queue, to be
+ * spoken by the browser. Returns false when the browser has no speech synthesis,
+ * so the segment is dropped as before.
+ */
+function requeueAsBrowserSpeech(queue: QueueItem[], item: QueueItem): boolean {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return false;
+  queue.unshift({
+    ...item,
+    providerId: 'browser-native-tts',
+    modelId: undefined,
+    fallbackVoice: undefined,
+  });
+  return true;
+}
+
 export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: DiscussionTTSOptions) {
   const { locale, t } = useI18n();
   const ttsProvidersConfig = useSettingsStore((s) => s.ttsProvidersConfig);
@@ -81,6 +97,21 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
   const processQueueRef = useRef<() => void>(() => {});
   const agentBindingKeysRef = useRef(new Map<string, string>());
 
+  // Browser speech ended or failed. An error must advance the queue as well, or
+  // one failed utterance stalls every segment behind it.
+  const finishBrowserSegment = () => {
+    if (currentProviderRef.current !== 'browser-native-tts' || !isPlayingRef.current) return;
+    currentItemRef.current = null;
+    currentProviderRef.current = null;
+    isPlayingRef.current = false;
+    segmentDoneCounterRef.current++;
+    onAudioStateChangeRef.current?.(null, 'idle');
+    // Don't advance queue while paused — resume() will kick-start it
+    if (!pausedRef.current) {
+      processQueueRef.current();
+    }
+  };
+
   const {
     speak: browserSpeak,
     pause: browserPause,
@@ -88,18 +119,8 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
     cancel: browserCancel,
   } = useBrowserTTS({
     rate: ttsSpeed,
-    onEnd: () => {
-      if (currentProviderRef.current !== 'browser-native-tts' || !isPlayingRef.current) return;
-      currentItemRef.current = null;
-      currentProviderRef.current = null;
-      isPlayingRef.current = false;
-      segmentDoneCounterRef.current++;
-      onAudioStateChangeRef.current?.(null, 'idle');
-      // Don't advance queue while paused — resume() will kick-start it
-      if (!pausedRef.current) {
-        processQueueRef.current();
-      }
-    },
+    onEnd: finishBrowserSegment,
+    onError: finishBrowserSegment,
   });
   const browserCancelRef = useRef(browserCancel);
   browserCancelRef.current = browserCancel;
@@ -313,6 +334,9 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
     const controller = prefetched?.item === item ? prefetched.controller : new AbortController();
     if (prefetched?.item === item) prefetchedRef.current = null;
     abortControllerRef.current = controller;
+    // Set when the segment is handed to browser speech after a failure. Such a
+    // segment is not done until the browser finishes speaking it.
+    let retriedAsBrowser = false;
 
     try {
       const result =
@@ -342,7 +366,7 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
         audio.pause();
         audio.src = '';
         isPlayingRef.current = false;
-        segmentDoneCounterRef.current++;
+        if (!retriedAsBrowser) segmentDoneCounterRef.current++;
         onAudioStateChangeRef.current?.(item.agentId, 'idle');
         if (!pausedRef.current) {
           queueMicrotask(() => processQueueRef.current());
@@ -350,6 +374,13 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       };
       finishAudioRef.current = finish;
       audio.addEventListener('ended', finish);
+      // Undecodable or unreachable audio: speak the segment with the browser.
+      // Registered before finish so the retry is queued before finish advances.
+      audio.addEventListener('error', () => {
+        if (audioRef.current === audio) {
+          retriedAsBrowser = requeueAsBrowserSpeech(queueRef.current, item);
+        }
+      });
       audio.addEventListener('error', finish);
 
       // If paused during TTS generation, keep audio ready but don't play
@@ -365,6 +396,8 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
     } catch (err) {
       if (controller.signal.aborted || currentItemRef.current !== item) return;
       if (finishAudioRef.current) {
+        // Playback failed (e.g. autoplay rejected): speak the segment with the browser.
+        retriedAsBrowser = requeueAsBrowserSpeech(queueRef.current, item);
         finishAudioRef.current();
         return;
       }
@@ -398,8 +431,10 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       currentItemRef.current = null;
       currentProviderRef.current = null;
       isPlayingRef.current = false;
-      // Retrying a missing clone is still the same speech segment.
-      if (!cloneUnavailable) segmentDoneCounterRef.current++;
+      // A missing clone is retried with its fallback voice, and a failed cloud
+      // segment is spoken by the browser. Either way the segment is still open.
+      const retried = cloneUnavailable || requeueAsBrowserSpeech(queueRef.current, item);
+      if (!retried) segmentDoneCounterRef.current++;
       onAudioStateChangeRef.current?.(item.agentId, 'idle');
       if (!pausedRef.current) {
         queueMicrotask(() => processQueueRef.current());
@@ -413,10 +448,12 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
     (messageId: string, partId: string, fullText: string, agentId: string | null) => {
       if (!enabled || ttsMuted || !fullText.trim()) return;
 
-      // No enabled provider for this agent ⇒ skip TTS (no silent browser-native).
-      const resolved = resolveVoiceForAgent(agentId);
-      if (!resolved) return;
-      const { providerId, modelId, voiceId } = resolved;
+      // No enabled provider for this agent: speak with the browser, as for a failed
+      // cloud call. Without speech synthesis the segment is skipped, not stalled.
+      const { providerId, modelId, voiceId } = resolveVoiceForAgent(agentId) ?? {
+        providerId: 'browser-native-tts' as const,
+        voiceId: 'default',
+      };
       const effectiveModelId = resolveTTSModelForVoice(
         providerId,
         voiceId,

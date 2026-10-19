@@ -463,3 +463,70 @@ describe('discussion TTS synthesis lookahead', () => {
     expect(hook.shouldHold()).toEqual({ holding: true, segmentDone: 1 });
   });
 });
+
+describe('discussion TTS browser fallback', () => {
+  beforeEach(() => {
+    vi.stubGlobal('speechSynthesis', {
+      cancel: vi.fn(),
+      speak: vi.fn(),
+      getVoices: () => [],
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+  });
+
+  it('speaks a segment with the browser when its cloud generation fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    await seal('A');
+    await act(async () =>
+      requests[0].response.resolve(Response.json({ error: 'quota' }, { status: 429 })),
+    );
+    expect(mocks.speak).toHaveBeenCalledWith('Sentence A.', 'alloy');
+    expect(hook.shouldHold()).toEqual({ holding: true, segmentDone: 0 });
+    act(() => mocks.browserOptions.onEnd?.());
+    expect(hook.shouldHold()).toEqual({ holding: false, segmentDone: 1 });
+  });
+
+  it('speaks a segment with the browser when its audio fails to play, counting it once', async () => {
+    await seal('A');
+    await respond(0);
+    await act(async () => FakeAudio.instances[0].dispatchEvent(new Event('error')));
+    expect(mocks.speak).toHaveBeenCalledWith('Sentence A.', 'alloy');
+    expect(FakeAudio.instances).toHaveLength(1);
+    expect(hook.shouldHold()).toEqual({ holding: true, segmentDone: 0 });
+    act(() => mocks.browserOptions.onEnd?.());
+    expect(hook.shouldHold()).toEqual({ holding: false, segmentDone: 1 });
+  });
+
+  it('speaks a segment with the browser when no provider is enabled', async () => {
+    const configured = mocks.settings.ttsProvidersConfig;
+    mocks.settings.ttsProvidersConfig = {} as typeof configured;
+    try {
+      act(() => root.render(createElement(Probe)));
+      await seal('A');
+      expect(requests).toHaveLength(0);
+      expect(mocks.speak).toHaveBeenCalledWith('Sentence A.', 'default');
+    } finally {
+      mocks.settings.ttsProvidersConfig = configured;
+    }
+  });
+
+  it('advances to the next segment when browser speech errors', async () => {
+    agents = [
+      teacher,
+      {
+        ...teacher,
+        id: 'browser-teacher',
+        voiceConfig: { providerId: 'browser-native-tts', voiceId: 'browser-voice' },
+      },
+    ];
+    act(() => root.render(createElement(Probe)));
+    await seal('B', 'browser-teacher');
+    await seal('C');
+    expect(mocks.speak).toHaveBeenCalledWith('Sentence B.', 'browser-voice');
+    act(() => mocks.browserOptions.onError?.('synthesis-failed'));
+    await respond(0);
+    expect(FakeAudio.instances).toHaveLength(1);
+    expect(FakeAudio.instances[0].src).toContain(btoa('audio-0'));
+  });
+});
