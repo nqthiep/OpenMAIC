@@ -175,8 +175,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Original request (verbatim): "Có lỗi khi chạy bài giảng do AI sinh ra thì không nghe thấy âm thanh. Nếu đúng thì dù cho setting hệ thống sử dụng mô hình sinh âm thanh nào, hoặc các provide cloud hết credit thì cũng phải fallback sang sử dụng local của browser để sinh âm thanh."
 - Owner's follow-up (verbatim): "Yes, also make discussion TTS fall back to browser speech." (answer to: "Also make roundtable discussion TTS fall back to browser speech?")
 - Assignment status: In progress. Follow-up "wrong language in browser speech" (rows 11 to 14) is done in code and tests. Audible check in Safari is not done.
-- Branch and commit: `it-math` @ `7a6be525` plus uncommitted changes, pushed: no. No git writes requested, so nothing is committed.
-- Last updated: 2026-10-18 15:36 UTC
+- Branch and commit: `it-math` @ `86467a0e` (the 8 TTS files), pushed: no. The owner asked for the commit on 2026-10-19; push not requested. Left uncommitted on purpose: `tests/security/log-redaction.test.ts` and `tests/security/provider-log-redaction.test.ts` (red tests for modules that do not exist yet), `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` (1.6 MB vendor files, licence not recorded), and a two-line reorder in `components/stage/header-controls.tsx` that belongs to the community work.
+- Last updated: 2026-10-19 (UTC time not recorded)
 
 ### Task table
 | # | Task | Status | Evidence / notes |
@@ -190,7 +190,12 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 7 | Discussion: fall back to browser speech when cloud TTS fails, plays no audio, or no provider is enabled. Browser speech errors advance the queue. A retry is not counted as a finished segment | Done | `lib/hooks/use-discussion-tts.ts`: `requeueAsBrowserSpeech` (module level); `finishBrowserSegment` also wired to `onError`; `retriedAsBrowser` guards `segmentDoneCounterRef` in `finish`; the `error` listener and the play-reject path requeue; the generation-failure path requeues; `handleSegmentSealed` uses browser when `resolveVoiceForAgent` returns null |
 | 8 | Discussion tests | Done | `tests/hooks/use-discussion-tts.test.ts`: 4 new tests in `discussion TTS browser fallback`. The 2 existing tests that assert silence on failure (`handles a prefetched generation failure...` and `advances once if playback errors...`) were not edited: they still pass because jsdom has no `speechSynthesis`, so the new path is not taken there |
 | 9 | Run `tests/hooks`, `tests/playback`, `tests/audio`, tsc, eslint, prettier | Done | `pnpm vitest run tests/hooks tests/playback tests/audio`: 48 files, 374 tests passed. Against HEAD `use-discussion-tts.ts`: the 4 new tests fail, the 17 existing pass. `npx tsc --noEmit`: the same 4 errors as before, none in changed files. `pnpm exec eslint` (4 changed files): exit 0. `prettier --check`: passes |
-| 10 | Update this section and report | Done | this section, checked with `grep -n '^## Assignment: Fall back' HANDOFF.md` |
+| 10 | Update this section and report | Done | this section, checked with `grep -n '^
+
+### Commit check (2026-10-19)
+- `pnpm vitest run tests/hooks tests/playback tests/audio`: 49 files, 388 tests passed. `npx tsc --noEmit`: errors only in the two uncommitted `tests/security/` files. eslint on the 8 files: no output. `prettier --check`: passes.
+
+## Assignment: Fall back' HANDOFF.md` |
 | 11 | Follow-up: browser speech read Vietnamese lessons with an English voice. The lecture fell back to `en-US` for Latin text, and discussion used the hook default `zh-CN`. Choose the language from the text and a voice for that language | Done | New `lib/audio/browser-speech-language.ts` (`detectSpeechLanguage`, `pickBrowserVoice`). Used in `lib/playback/engine.ts` (`playBrowserTTSChunk`), `lib/hooks/use-browser-tts.ts` (`speak`, no `zh-CN` default), `lib/audio/browser-tts-preview.ts` (`resolveBrowserVoice`, settings preview). The old CJK-only checks were removed |
 | 12 | Tests for detection, voice choice, preview, and the lecture Vietnamese case | Done | `pnpm vitest run tests/audio/browser-speech-language.test.ts`: 13 passed. `tests/playback/speech-browser-fallback.test.ts` gained a Vietnamese case (`vi-VN` and the `linh` voice). With `tests/hooks tests/playback tests/audio` it is 71 passed across the 3 related suites |
 | 13 | Checks: tsc, eslint, prettier on the 6 changed files | Done | `npx tsc --noEmit`: 4 errors, the same unrelated ones. `pnpm exec eslint` on the 6 files: exit 0. `prettier --check`: passes after formatting `lib/hooks/use-browser-tts.ts` |
