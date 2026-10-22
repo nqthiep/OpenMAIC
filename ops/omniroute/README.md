@@ -82,4 +82,24 @@ Checked against OmniRoute v3.8.52's own Dockerfile, `.env.example` and source, a
 - `API_HOST=0.0.0.0`: OmniRoute's own material disagrees on the default (its `.env.example` shows `0.0.0.0`, its `src/lib/apiBridgeServer.ts` defaults to `127.0.0.1`). The explicit value is source-verified as what makes `omniroute:20129` reachable from other containers; it has not been observed in a running container.
 - Whether Caddy's `forward_auth` forwards the browser's `Cookie` header to the check route. Its documented expanded form is a `reverse_proxy` clone of the original request, which forwards original headers — the live behavior is exactly what `smoke.sh`'s garbage-cookie test checks.
 - The gate passing the app's non-2xx answer (401/403 + short text) back to the browser — documented Caddy behavior (`forward_auth`), not yet observed through this gate.
-- End to end: the `/__enter` sign-in, the dashboard behind the gate, and the app's calls to `omniroute:20129`. The app-side routes this depends on (`/api/admin/omniroute/enter` and `/check`) are not in this branch yet; until they land, the gate answers 404 and `smoke.sh` reports FAIL by design.
+- End to end: the `/__enter` sign-in, the dashboard behind the gate, and the app's calls to `omniroute:20129`. The app-side routes (`/api/admin/omniroute/{status,open,enter,check}`) are covered by `pnpm vitest run tests/omniroute` (37 tests, the OmniRoute login is mocked); the first real run is on the VPS.
+- Whether OmniRoute accepts the server-side `POST /api/auth/login` from the app container (its login guard looks at the peer address and the Docker bridge address is private). The app answers 502 "OmniRoute did not accept the sign-in" if it does not.
+- Whether the dashboard works at the root of its own hostname behind Caddy with `AUTH_COOKIE_SECURE=true` and the public URL set (it should: no base path is used).
+
+## How the gate behaves
+
+- The ticket from **Open OmniRoute settings** lives 60 seconds and works once. It is checked, then the account is checked again (still an active administrator), then the app signs in to OmniRoute.
+- The browser gets two cookies on the OmniRoute hostname only: `omniroute_gate` (8 hours, HttpOnly, no `Domain`) and OmniRoute's own `auth_token` (30 days). After 8 hours the gate refuses; click the button again. The `openmaic_session` cookie is never sent to this hostname.
+- Every request asks the app first. The answer is remembered for 15 seconds per account, so a demoted or disabled administrator loses access within about 15 seconds. OmniRoute's own cookie lasts longer but is useless without the gate cookie.
+- `omniroute_gate` is also forwarded to OmniRoute with the other cookies. It opens nothing but this dashboard, so this is accepted.
+- The `enter` route also answers on the main hostname if called there. It still needs a valid ticket, which only ever points at the OmniRoute hostname.
+- The live-monitor WebSocket of OmniRoute is switched off (`OMNIROUTE_ENABLE_LIVE_WS=false`): the page that needs it will not update live.
+- `ACCESS_CODE` and this feature do not mix: the app's middleware answers 401 to every `/api/*` call without the access cookie, including the gate's check. The production server no longer sets `ACCESS_CODE`.
+
+## Troubleshooting
+
+- Browser shows "Sign in to OpenMAIC as an administrator, then open OmniRoute from Settings." (401): you came without the button. Open it from the Settings popup.
+- "Administrators only." (403): the account is not an administrator (or was disabled or demoted in the last 15 seconds).
+- "This link has expired." (403) on `/__enter`: the ticket was used or is older than 60 seconds; click the button again.
+- "OmniRoute did not accept the sign-in." (502): `OMNIROUTE_ADMIN_PASSWORD` in `.env` differs from the password OmniRoute holds (it was changed inside OmniRoute, or the volume was created with another value), or OmniRoute locked the app's address after failed attempts, or it is not running (`docker compose --profile omniroute ps`). Fix the value or remove the `omniroute-data` volume to start OmniRoute again from `.env`.
+- The app answers "not set up": one of `OMNIROUTE_PUBLIC_URL`, `OMNIROUTE_GATE_SECRET` (32+ characters), `OMNIROUTE_ADMIN_PASSWORD` (16+ characters) is missing or too short, or the public URL has a path.
