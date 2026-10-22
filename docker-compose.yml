@@ -32,9 +32,17 @@ services:
       # MP4 export disabled and degrades to the ZIP-download path — this URL
       # being set does not, by itself, advertise a working render.
       - RENDER_SERVICE_URL=http://render-service:9000
+      # OmniRoute gateway (opt-in profile "omniroute"; ops/omniroute/README.md).
+      # Empty values keep every OmniRoute feature in the app switched off, so
+      # the default stack behaves exactly as before.
+      - OMNIROUTE_PUBLIC_URL=${OMNIROUTE_PUBLIC_URL:-}
+      - OMNIROUTE_GATE_SECRET=${OMNIROUTE_GATE_SECRET:-}
+      - OMNIROUTE_ADMIN_PASSWORD=${OMNIROUTE_ADMIN_PASSWORD:-}
+      - OMNIROUTE_INTERNAL_URL=${OMNIROUTE_INTERNAL_URL:-http://omniroute:20128}
     networks:
       - default # outbound internet (LLM/media provider APIs, etc.)
       - render # reach the render service over the isolated network
+      - omniroute # reach the OmniRoute gateway (profile "omniroute") on its isolated network
     volumes:
       # AI provider keys are set in the Settings popup (top bar) and stored in the database; put
       # PROVIDER_SECRET_KEY (encrypts them) in .env.local. server-providers.yml is not read.
@@ -133,6 +141,83 @@ services:
       - render
     restart: unless-stopped
 
+  # Optional OmniRoute LLM gateway (third-party image: diegosouzapw/omniroute,
+  # https://github.com/diegosouzapw/OmniRoute) — one OpenAI-compatible endpoint
+  # in front of many AI providers. Opt-in: only starts with
+  # `--profile omniroute`; see ops/omniroute/README.md for setup and secrets.
+  #
+  # Trust boundary: OmniRoute is third-party code, so it gets its own
+  # `omniroute` network (shared with `openmaic` and `omniroute-gate` only) and
+  # publishes no port of its own. Postgres stays on `default`, so OmniRoute
+  # cannot reach the database. Its only ingress is the gate below, which asks
+  # the app to confirm a signed-in admin before proxying anything.
+  omniroute:
+    image: diegosouzapw/omniroute:${OMNIROUTE_VERSION:-3.8.52} # pinned; never latest
+    profiles:
+      - omniroute
+    environment:
+      - DATA_DIR=/app/data
+      - DASHBOARD_PORT=20128
+      - API_PORT=20129
+      # Split-port mode: 20129 is an API-only bridge serving OpenAI-compatible
+      # routes. OmniRoute's docs disagree on API_HOST's default (its .env
+      # example suggests 0.0.0.0, its apiBridgeServer code defaults to
+      # 127.0.0.1), so set it explicitly — 127.0.0.1 would be unreachable from
+      # the app container. Verified against v3.8.52's source; not yet seen in
+      # a running container.
+      - API_HOST=0.0.0.0
+      # Also the image's own default (#13679); kept explicit because the API
+      # bridge binds a non-loopback host here.
+      - REQUIRE_API_KEY=true
+      - AUTH_COOKIE_SECURE=${OMNIROUTE_COOKIE_SECURE:-true}
+      - NEXT_PUBLIC_BASE_URL=${OMNIROUTE_PUBLIC_URL:-}
+      - OMNIROUTE_PUBLIC_BASE_URL=${OMNIROUTE_PUBLIC_URL:-}
+      - OMNIROUTE_ENABLE_LIVE_WS=false
+      # No ${VAR:?} on purpose: compose interpolates services of disabled
+      # profiles too, so a required-but-unset variable would break the default
+      # stack. Fill these in .env (compose reads ${VAR} from .env, not
+      # .env.local) before enabling the profile.
+      - INITIAL_PASSWORD=${OMNIROUTE_ADMIN_PASSWORD:-}
+      - JWT_SECRET=${OMNIROUTE_JWT_SECRET:-}
+      - API_KEY_SECRET=${OMNIROUTE_API_KEY_SECRET:-}
+    volumes:
+      - omniroute-data:/app/data
+    # No healthcheck of our own: the image ships one (HEALTHCHECK in its
+    # Dockerfile runs `node healthcheck.mjs`, probing /healthz on the
+    # dashboard port — verified for v3.8.52).
+    mem_limit: ${OMNIROUTE_MEM_LIMIT:-1g}
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - omniroute
+    restart: unless-stopped
+
+  # The omniroute profile's only published port: a Caddy gate on the host
+  # loopback. cloudflared on the host points here. Every path except the
+  # one-time /__enter ticket flow is checked by the app first (Caddy
+  # forward_auth -> /api/admin/omniroute/check) and only proxied to OmniRoute's
+  # dashboard when the app answers 2xx for a signed-in admin; the app's 401/403
+  # answer is passed back to the browser. See ops/omniroute/Caddyfile.
+  omniroute-gate:
+    image: caddy:2-alpine
+    profiles:
+      - omniroute
+    ports:
+      # Loopback only — never widen to 0.0.0.0: this gate is all that stands
+      # between the public hostname and the OmniRoute dashboard.
+      - '127.0.0.1:${OMNIROUTE_GATE_PORT:-8081}:8081'
+    volumes:
+      - ./ops/omniroute/Caddyfile:/etc/caddy/Caddyfile:ro
+    # A static gate needs little RAM.
+    mem_limit: 64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - omniroute
+    restart: unless-stopped
+
 networks:
   default: {}
   # Isolated network for app <-> render-service traffic. `internal: true` means
@@ -142,7 +227,15 @@ networks:
   # can't use this shared network to reach the app.
   render:
     internal: true
+  # Shared network for openmaic <-> omniroute <-> omniroute-gate. NOT internal:
+  # OmniRoute needs outbound internet to call the AI providers it routes to.
+  # Postgres is not attached to it, so the third-party code cannot reach the
+  # database.
+  omniroute: {}
 
 volumes:
   openmaic-data:
   openmaic-postgres:
+  # OmniRoute's own data (SQLite: provider endpoints, keys, settings). Not yet
+  # covered by ops/backup/backup.sh — see ops/omniroute/README.md ("Backup").
+  omniroute-data:

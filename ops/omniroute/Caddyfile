@@ -1,0 +1,17 @@
+{
+	auto_https off
+}
+:8081 {
+	# One-time ticket from the Settings popup: the app checks it, signs in to OmniRoute for the admin
+	# and answers with the Set-Cookie headers and a redirect. It is the only path that skips forward_auth.
+	handle /__enter {
+		rewrite * /api/admin/omniroute/enter?{query}
+		reverse_proxy openmaic:3000
+	}
+	handle {
+		forward_auth openmaic:3000 {
+			uri /api/admin/omniroute/check
+		}
+		reverse_proxy omniroute:20128
+	}
+}
