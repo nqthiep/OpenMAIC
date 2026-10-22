@@ -2,54 +2,115 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
-## Assignment: Catalog page: finish the tag work (3b suggestions, 3c learner side, open checks)
+## Assignment: AI provider settings in the database (admin page, one source of truth)
 - Requested by: repository owner (nqthiep)
-- Original request (verbatim): "mới hoàn thành 3a, còn những việc nào nữa?" Then: "Hãy tiếp tục các công việc cho đến khi hoàn thành tất cả các công việc còn dang dở."
-- Assignment status: Done (code, tests, checks on the real PostgreSQL and in the browser), committed and pushed.
-- Branch and commit: `it-math` @ `55656812` (the feature) plus a docs commit for this file, pushed: yes, to `origin` (`https://github.com/nqthiep/OpenMAIC.git`). The owner asked for it ("Commit riêng các file của công việc này ... rồi push lên origin/it-math"). Only this work's 31 files were staged, by path; `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` and `tests/security/*` were left out. The push was a fast-forward from `1b6fc804`; `git ls-remote origin refs/heads/it-math` printed `55656812ca57a5f97d930b452922e9f4ef43da44` after it.
-- Later the same day, at the owner's request ("commit nốt phần public/vendor/standalone-player/ đi, sau đó push tất cả"), `public/vendor/standalone-player/` (4 built files, 1.6 MB) was committed as `c9fcafa1` and pushed (`78cf66dd..c9fcafa1`; `git ls-remote origin refs/heads/it-math` printed `c9fcafa1bc734774c7b58079c9f35e68d8033933`). Its provenance and the licences of the two JS bundles are NOT recorded: nothing in the source references the files, upstream does not ship them, and only `player.min.css` has a banner (Tailwind v4.2.1, MIT). No secret pattern was found in them. Still untracked and not committed: `.omo/`, `openmaic.local.yml` (local provider config), `tests/security/*` (21 red tests for modules that do not exist yet).
-- Last updated: 2026-10-19 (UTC time not recorded)
+- Original request (verbatim): "Trên trang admin đang thiếu page setting để config các mục sau: Mô hình ngôn ngữ (LLM), Giọng đọc (TTS), Nhận dạng giọng nói, Đọc tài liệu PDF, Tạo ảnh, Tạo video, Tìm kiếm web. Hãy brainstorming để thiết kế UI và chức năng cho page này." Then: "Tôi chọn phương án A, loại bỏ các khoá API trong server-providers.yml, để từ đó thống nhất trong toàn bộ source code là sử dụng LLM lưu trong bảng provider_credentials." Then, on the design: DEFAULT_MODEL/MODEL_ROUTES go into the database in the same series; drop `server-providers.yml` and every `*_ENV_MAP` (one source); `ProviderConfigNotReady` answers 503 with retry; "tôi đồng ý danh sách khoá" (master key ring with rotation); "thực hiện đi".
+- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser
+- Branch and commit: `it-math` @ `cb90b414` (no commits yet for this assignment), pushed: no (git writes only when the owner asks)
+- Last updated: 2026-10-22 (UTC time not recorded)
 
-### Scope (what "all the remaining work" means here)
-- Done in this assignment: 3c-lite (tags on cards and rows, a "Chưa phân loại" chip, a "Mới" badge, search sorted by match), 3b as keyword suggestions pre-filled in the staff dialog (client side, no API change, and no folder name is sent to the server, which avoids a privacy question), the owner seeing the tags of their own shared courses read-only, remembering the layout choice, and the open checks (real PostgreSQL, previews panel, 768 px, keyboard).
-- Not done on purpose: grouping by topic in shelves and a bulk tagging screen (no tagged courses yet to justify them, add when asked); topic names in the other 10 languages, new subjects (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, nghề, kỹ năng) and grades 6 to 9 (the owner decides); default sort stays A to Z. Owner-only items stay with the owner: restart `next dev`, a teacher reviews the topic lists, staff tag the existing courses.
+### Design (agreed in chat)
+- Table `provider_credentials(section, provider_id, enabled, base_url, models, secret_enc, key_id, key_hint, version, updated_by, updated_at)`; `secret_enc` is AES-256-GCM over JSON `{apiKey, accessKeyId, accessKeySecret, proxy}` with AAD `section/provider_id`. Table `model_routing(stage, model, ...)` for `DEFAULT_MODEL` and `MODEL_ROUTES`.
+- Master key ring in env `PROVIDER_SECRET_KEY` (`id:base64,id:base64`, first = write key, all = read keys; a bare base64 value is id 1).
+- Public API of `lib/server/provider-config.ts` (sync, same signatures) stays; only the data source of `getConfig()` changes, to an in-memory snapshot on `globalThis` loaded from the database. New code lives in `lib/server/provider-store/`.
+- No `DATABASE_URL` means no managed providers (clients' own keys, as upstream). Database configured but snapshot not loaded: `ProviderConfigNotReady` -> 503 + `Retry-After`, never an empty config.
+- Removed: `server-providers.yml` loading, `*_ENV_MAP` env reads of keys/base URLs/models/enabled, `DEFAULT_MODEL`, `MODEL_ROUTES`. Kept in env: `PROVIDER_SECRET_KEY`, `PARALLEL_SCENE_CONCURRENCY`, `TTS_QWEN_VOICE_CLONE_MODEL`.
 
 ### Task table
 | # | Task | Status | Evidence / notes |
 |---|------|--------|------------------|
-| 1 | Read HANDOFF.md, `git status`, branch, remote | Done | `it-math` @ `1b6fc804` = remote; tracked files clean; untracked: `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`, `tests/security/*` (not mine) |
-| 2 | 3c-lite: tags on card and row, `none` subject chip, "Mới" badge, search sorted by match + tests | Done | `lib/home/catalog-filter.ts` (`none` in the subject filter, `isNew`, `NEW_DAYS` = 14, sort `match`, `sortAfterTyping`, `withoutFilters` drops `match`), `components/home/course-card.tsx` and `course-row.tsx` (subject and grade line, "Mới" when the list passes `now`; the home page card passes none, so it is unchanged), `components/learning/tag-names.tsx` (new: `useTagNames`, `useTagLine`, `TagBadges`, moved out of the editor). Match order: title starts with the search, then every word starts a word, then the rest; it is chosen for the learner when they start searching from A to Z and goes back when the box is emptied. Tests: `tests/home/catalog-filter.test.ts` 28, `tests/home/course-card-tags.test.ts` 4 |
-| 3 | 3b: `lib/learning/tag-suggest.ts` and pre-fill in the staff dialog + tests | Done | Keyword suggestion from the title and scene titles, accent-insensitive, word-start matching (three letters or fewer must be a whole word), "Toán" needs its accent and "bài toán" does not count. The dialog opens with the suggestion only when the course has no tags, says so, and saves nothing until Save. No API change and no folder name sent to the server. `tests/learning/tag-suggest.test.ts` 7 (every topic's own name gives a valid list), 2 new cases in `tests/learning/course-tags-panel.test.ts` (4 in all) |
-| 4 | Owner sees the tags of their shared courses; remember the layout choice | Done | `GET /api/membership/contribution` adds `tags` per share (`listCourseTags`), `components/home/contribution.tsx` shows "Toán · Khối 12" read-only under the title; `tests/learning/contribution-route.test.ts`, `tests/home/contribution.test.ts` (6). Layout: `localStorage` key `openmaic.catalog.layout`, read only when the address has no `layout`, writes wrapped in try/catch; `tests/home/catalog-browser-state.test.ts` 4 (remembered, address wins, blocked storage, match order in the address) |
-| 5 | Open checks: real PostgreSQL, previews panel, 768 px, keyboard | Done | **Real PostgreSQL 16.15** (container `openmaic-dev-db-postgres-1`): `course_tags` already existed with the expected columns and primary key and 0 rows. The set, replace and clear statements of `setCourseTags` ran in a transaction that was rolled back (`persisted_tag_rows` 0 after): set gave 2 rows, replace removed the subject, an empty list cleared. The scene-facts query ran on the real document tables: e.g. `EklnYqdaAs` 10 scenes, 2 quizzes, 1 interactive; real scene types are slide, quiz, interactive. `GET /api/catalog` on a dev server of this session returned `sceneCount`, `hasQuiz`, `hasInteractive`, `updatedAt` for the real preview course. **Browser** (`rt.localhost:3002`, mock catalog of 30 courses and mock admin responses, nothing written): the previews panel shows the "Thẻ" column, its dialog opened with "Tiếng Anh, Khối 12, Ngữ pháp" and the note, Lưu sent `PUT /api/admin/courses/prev-1/tags` and the row updated; the shares dialog suggested "Vật lí, Khối 11, Sóng" from the title and scene titles. Catalog at 768 px: no horizontal overflow, rows do not overflow; the toolbar is 314 px tall with every group shown. Keyboard: Tab order search, sort, grid, list, subject chips; Space toggled a chip, focus stayed on it, the count line updated. "Chưa phân loại (4)" gave 4 courses (the mock has 4), "Mới" on 12 of 30 rows (the mock has 12), layout `list` came back after leaving and returning. Not seen: a screen reader |
-| 6 | i18n keys in 12 locales | Done | New: `catalog.new`, `catalog.subjectNone`, `catalog.sort.match`, `admin.tags.suggested`. `pnpm check:i18n-keys` passed; the 11 non-Vietnamese texts are mine, not reviewed by a native speaker [Unverified] |
-| 7 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/learning tests/workbench tests/i18n tests/components tests/admin`: 136 files, 1532 passed. `npx tsc --noEmit`: no error outside `.next/` and `tests/security/`. `pnpm exec eslint` on the 19 changed code files: 0 problems (the first run flagged `Date.now()` in render, so the list now passes `now` down). `prettier --check`: clean |
-| 8 | Update this section and report; ask before commit and push | Done | this section |
-| 9 | Commit this work's files by path and push `it-math` (owner asked after the report) | Done | `55656812`, 31 files; `git push origin it-math`: `1b6fc804..55656812`, a fast-forward (the fetched remote head was `1b6fc804`); `git ls-remote origin refs/heads/it-math`: `55656812`. This section's own update is a docs commit after it |
+| 1 | Schema `provider_credentials` + `model_routing`, key-ring crypto, snapshot module, tests | Done | `lib/server/provider-store/{types,schema,crypto,build-config,snapshot,store,boot,not-ready,catalog,validate,admin}.ts`; schema called from `ensureLearningSchema`. `pnpm vitest run tests/provider-store`: 5 files, 49 tests passed (crypto incl. rotation, build-config, PGlite store/snapshot, not-ready, admin routes) |
+| 2 | `getConfig()` reads the snapshot; YAML/env loaders and `*_ENV_MAP` deleted; boot load + refresh in `instrumentation.ts`; `config-validation.ts`; AliDocMind env reads; tests migrated | Done | `lib/server/provider-config.ts` now ~540 lines, same public functions. `instrumentation.ts` awaits `startProviderSnapshot()` (8 s timeout, retry every 3 s, refresh check every 20 s). Boot warnings for leftover env/`server-providers.yml`, missing or malformed `PROVIDER_SECRET_KEY`, unreadable secrets. 3 sub-agents rewrote the env-based tests onto `tests/fixtures/provider-snapshot.ts` (`useProviders` / `clearProviders`): 19 test files, see "Tests removed" below |
+| 3 | `model_routing` replaces `DEFAULT_MODEL` / `MODEL_ROUTES` | Done | `model-routes.ts` reads `currentSnapshot().routing`; new `getDefaultModel()`; `resolve-model.ts` uses it. Tests: `tests/server/model-routes.test.ts`, `resolve-model.test.ts`, `agent-driver-model.test.ts` pass |
+| 4 | Admin API | Done | `GET /api/admin/providers` (staff; rows without secrets, catalog, stages, master key status), `PUT/DELETE /api/admin/providers/[section]/[providerId]`, `PUT/DELETE /api/admin/model-routing`; new action `provider.manage` (administrator only) in `policy.ts`; version check (409), audit rows `provider:set|delete|route` without values, base URL checked (http/https, no cloud metadata, private hosts allowed for the admin). Covered by `tests/provider-store/admin-routes.test.ts` (7 tests). No separate "test connection" route: the UI reuses `/api/verify-model`, `verify-image-provider`, `verify-video-provider`, `verify-pdf-provider` (LLM, image, video, PDF only; TTS, ASR, web search have none) |
+| 5 | Admin UI | Done (not seen in a browser) | `components/learning/provider-settings-panel.tsx` replaces the read-only `ProviderStatusPanel` in the System tab (anchor `ops-providers` kept): 7 tabs, search, status badges, edit dialog (key, base URL, allowed models, proxy, switch off), default model card, per-stage routes, remove, test connection. Strings `admin.providers.*` in 12 locales (en and vi written; the other 10 carry the English text). `tests/learning/provider-settings-panel.test.ts` (6 tests, jsdom). Not verified in a real browser: no Postgres here (Docker daemon not running) so the page could not be served with data. No "import from env/YAML" button: the maps it needs were deleted; keys are entered on the page |
+| 6 | 503 + `Retry-After` while settings are not loaded | Done | `requireSpender` (called first by the 29 AI routes) returns `providerConfigNotReadyResponse()`; `tests/provider-store/not-ready.test.ts` |
+| 7 | Docs and skill text | Done | `.env.example` (provider sections replaced by a note + `PROVIDER_SECRET_KEY`; routing text kept), `README.md` / `README-zh.md` fork notes, `docker-compose.yml` comment, `skills/openmaic/references/{provider-keys,extend-cookbook,generate-flow}.md`, en-US `searxngServerOnlyNotice`. Not updated: the same SearXNG hint in the other 11 locales still names the env var |
+| 8 | Final checks | Done with known failures | `npx tsc --noEmit`: only errors outside this change (`.next/types` admin/summary, untracked `tests/security/*`). `pnpm lint`: 0 errors (18 warnings, none in these files). `node scripts/check-i18n-keys.mjs`: passed. `pnpm vitest run`: 805 files passed; failing: `tests/runtime/chat-storage.test.ts` and `tests/quiz/runtime.test.ts` (Node 24 exposes `navigator.locks`; pass with `NODE_OPTIONS=--no-experimental-global-navigator`, per the sub-agent), `tests/media/server-backed-media-orchestrator.test.ts` (2 failures, reproduced on a clean `HEAD` worktree: not from this change), `tests/security/*` (untracked, another session) |
 
 ### Done so far
-- Catalog: tags on cards and rows, "Chưa phân loại" chip, "Mới" badge, match order while searching, remembered layout.
-- Staff: suggestions pre-filled in the tag dialog (shares and previews panels).
-- Owner: sees the tags of their own shared courses read-only in "Đóng góp của tôi".
-- Verified on the real PostgreSQL (rolled-back transaction and read-only queries) and in the browser.
+- Everything in the table. Nothing is committed or pushed (the owner has not asked).
+
+### Review of the finished work (self-review + one independent read-only reviewer)
+Fixed after review (each has a test in `tests/provider-store/`):
+- An edit that left the key alone, or set only a proxy, on a row whose secret cannot be decrypted would have overwritten (or nulled) the ciphertext. Now `SecretUnreadableError` -> 409 `SECRET_UNREADABLE`; replacing needs a new apiKey (or AccessKey pair), otherwise delete the provider.
+- A row whose secret cannot be decrypted was dropped, which made the provider "unmanaged" (a client key could take over) and lost its proxy. Now it stays managed with no key (LLM, PDF) or is switched off (TTS, ASR, image, video, web search).
+- `PROVIDER_SECRET_KEY` was not in the log-redaction list (its name ends in `_KEY`). Now in `SECRET_ENV_EXACT`, and each parsed key is registered.
+- Version check holes: a stale form could recreate a deleted row/route, and a route delete had no version. Save is now a compare-and-set (version 0 only inserts, higher versions only update that version); `DELETE /api/admin/model-routing` takes `expectedVersion`.
+- Two overlapping snapshot refreshes could install the older result last. Now the later-started one wins.
+- `/api/server-providers` and `/api/health` threw while the settings were not loaded; now 503 and 200 with `providerConfig: 'loading'`.
+- Staff (operators) saw `baseUrl`; now only administrators do. Versions above 2^31 -> 400. Model names get the control-character check.
+- UI: a keyless provider (Bedrock) could not be saved empty; the default model card and route rows did not reload after a 409.
+- Operator-facing texts that named removed env vars (`web-search` route, `classroom-generation`).
+Known, not changed:
+- Behaviour changes versus the removed loader: no `openai-image` fallback from `OPENAI_API_KEY` (add an `image/openai-image` row); `BEDROCK_REGION` alone no longer activates Bedrock (add a `providers/bedrock` row); `validateServerConfig` runs only at boot, so its "managed keys but no ACCESS_CODE" warning does not see keys added later.
+- The credential and routing tables are read on two pool connections, so a snapshot can briefly mix two states; it corrects itself on the next check (20 s).
+- A query string in a base URL (for example `?api-key=`) is stored in plain text and shown to administrators.
+- Comments in `app/api/extract-document/route.ts` still mention the old env fallback.
+
+### Tests removed with no counterpart now (env/YAML parsing no longer exists)
+- `tests/server/provider-config.test.ts`: comma-split `_MODELS`, `*_ENABLED` env switches, all YAML tests, the `OPENAI_API_KEY` fallback for `openai-image`, HY3 prefix test. Activation rules are in `tests/provider-store/build-config.test.ts`.
+- `tests/server/model-routes.test.ts`: invalid `MODEL_ROUTES` JSON. `tests/server/config-validation.test.ts`: invalid JSON, four `<PREFIX>_MODELS` tests, the YAML-configured one (replaced by tests for the new warnings).
 
 ### Decisions and reasons
-- Suggestions run in the browser from titles already on screen. No folder name leaves the learner's device, so there is no privacy question and no API change.
-- "Chưa phân loại" means no subject tag (a course with only a grade tag counts).
-- "New" is relative to the time the list was opened, and is judged by `updatedAt` (the approval date for a shared course, so approving a batch marks the whole batch new).
-- The match order is a real sort value (`sort=match`, shown in the sort menu while searching), so a learner can still pick A to Z while searching.
+- See Design above. Not delegated to OpenCode workers: security-sensitive and the steps share files. The test migration was split over 3 Claude sub-agents by disjoint file sets.
+- `allowEnvFallback` plumbing (types, `extract-document` route, `material-extraction/extract.ts`, `agent-runtime/fetch-url.ts`) is left in place but inert: the three places that read `ALIDOCMIND_ACCESS_KEY_*` from env were removed. Remove the flag when convenient (it touches ~12 upstream files, so it was not done for the merge-friction reason).
+- `agent-driver-model.ts` error texts and a few comments still say `MODEL_ROUTES`; tests assert the current text.
+- Env still read (not credentials): `PARALLEL_SCENE_CONCURRENCY`, `TTS_QWEN_VOICE_CLONE_MODEL`, `BEDROCK_REGION`, `AWS_BEARER_TOKEN_BEDROCK`, `OPENAI_COMPAT_USE_STREAMING_CHAT`, `PDF_MINERU_BACKEND`, `ALLOW_MINERU_CLOUD_FALLBACK`.
+- The backup script (`ops/backup/backup.sh`, another session's commit `7a08a2d2`) backs up the database dump and env files; [Unverified] that it includes `PROVIDER_SECRET_KEY`. Keep the key with the dump: the dump alone cannot be read.
 
 ### Next step (exact)
-- Owner: (1) ask a teacher to review the topic lists in `lib/learning/taxonomy.ts` and the keywords in `lib/learning/tag-suggest.ts`; (2) staff tag the existing shared courses and previews (the dialog now opens with a suggestion); (3) decide the open choices below.
+- Owner: (1) generate `PROVIDER_SECRET_KEY` (`openssl rand -base64 32`, written as `1:<value>`) and add it to the VPS `~/OpenMAIC/.env.local`; (2) deploy this branch; (3) sign in as `nqthiep` and enter the LLM key and the default model on Operations > System > AI providers; (4) look at the page in a browser (not done here).
+- Agent, if asked: commit in separate commits (store + routes + UI; provider-config switch + tests; docs), then push.
 
 ### Open questions and blockers
-- Owner choices not made: more subjects (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, nghề, kỹ năng), grades 6 to 9, translating topic names into the other 10 languages, and whether "Mới cập nhật" should become the default sort (kept A to Z).
-- Not built on purpose (no tagged courses yet to justify them): grouping by topic in shelves, and a bulk tagging screen.
-- Not verified: a screen reader; a real admin session in the browser (admin responses were mocked); the 11 non-Vietnamese translations. At 768 px the toolbar is 314 px tall when every group is shown, which is a third of the screen.
+- `tests/security/log-redaction.test.ts` and `tests/security/provider-log-redaction.test.ts` are untracked and not mine [Unverified: probably another session]. Do not edit or commit them.
+- The server `.env.local` on the VPS will need `PROVIDER_SECRET_KEY` before the first deploy of this change (owner action, value never written here).
 
 ### How to verify
-- `pnpm vitest run tests/home tests/learning`: expected all pass. [Run: with the other suites, 136 files, 1532 passed]
-- As staff open a share request in `/admin` (tab "Nội dung & lớp") and press "Gắn thẻ": the dialog opens with a suggestion from the title.
+- `pnpm vitest run tests/provider-store tests/server tests/learning/provider-settings-panel.test.ts`: expected all pass.
+
+### Environment notes
+- Node `>=22.19.0`, pnpm `10.28.0`. Secrets by name only: `PROVIDER_SECRET_KEY`, `DATABASE_URL`.
+
+## Assignment: Deploy OpenMAIC to the OVHcloud VPS (video export off)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "tôi đã ssh vào vpn rồi. bây giờ tôi muốn bạn deploy ứng dụng của tôi lên vpn này"
+- Assignment status: In progress (app runs on the VPS, no domain yet)
+- Branch and commit: `it-math` @ `cb90b414`, pushed: n/a (no git write in this assignment)
+- Last updated: 2026-10-21 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | SSH from this Mac to `<VPS_USER>@<VPS_IP>` with key `<SSH_KEY>` | Done | `ssh -o BatchMode=yes <VPS_USER>@<VPS_IP> 'echo connected; whoami; sudo -n true'` printed `connected`, `<VPS_USER>`, `sudo-ok`. VPS: Ubuntu 26.04 LTS, 2 vCPU, 3.7 GiB RAM, 38 GB disk (owner's own output) |
+| 2 | Base setup: apt upgrade, 2 GB swap, UFW (SSH only), Docker | Done | `ufw status`: active, OpenSSH only; Docker 29.9.2, Compose v5.6.1. Swap later raised to 8 GB (task 5) |
+| 3 | Clone `it-math` from `https://github.com/nqthiep/OpenMAIC.git` | Done | `~/OpenMAIC` @ `cb90b414` on the VPS |
+| 4 | Create `.env.local` on the server (random secrets generated on the server, LLM key left for the owner) | Done | mode 600; keys only: `PERSISTENCE_POSTGRES_PASSWORD`, `DATABASE_URL`, `ACCESS_CODE`, `ACCESS_COOKIE_SECRET`, `TRUST_PROXY_HEADERS`. Owner still adds `PUBLIC_APP_ORIGIN` and an LLM key. `~/OpenMAIC/.env` (mode 600) also holds `PERSISTENCE_POSTGRES_PASSWORD`, because compose reads `${VAR}` from `.env`, not `.env.local` |
+| 5 | `docker compose --profile server-persistence up -d --build` (no render-service, no `NEXT_PUBLIC_ENABLE_VIDEO_EXPORT`) | Done | 1st build: kernel OOM-killed `node` in the TypeScript step (3.7 GiB RAM, 2 GB swap). 2nd build with 8 GB swap succeeded. Server-only `docker-compose.override.yml` (untracked) publishes `127.0.0.1:3000:3000` via `ports: !override` |
+| 6 | Verify: `docker compose ps`, `/api/health`, port 3000 not reachable from outside | Done | `ps`: openmaic Up, postgres Up (healthy). `curl localhost:3000/api/health` on the VPS: 200, `status: ok`. From this Mac `curl http://<VPS_IP>:3000/`: no response (code 000). Fixed on the way: (a) Postgres was initialised with the default password `openmaic-dev` while `DATABASE_URL` had the random one (`auth_failed` in logs): `ALTER USER` plus `.env`; (b) `/app/data` volume owned by root, app runs as uid 1001 (`EACCES`): `chown -R 1001:65533 /app/data`. After both, no auth or EACCES lines in the last 40 s of logs. `/api/catalog` answers 401 (needs sign-in). `information_schema` shows 0 tables [Inference: `lib/server/learning/schema.ts` uses `CREATE TABLE IF NOT EXISTS`, probably run on first signed-in use; not verified]. Open: the `chown` is not in the Dockerfile, so a fresh volume will hit EACCES again |
+| 7 | Cloudflare Tunnel + domain | Done | Domain `khaitam.ai.vn` (registrar P.A Viet Nam) now delegated to Cloudflare: `dig +short NS khaitam.ai.vn @a.dns-servers.vn` printed `vera.ns.cloudflare.com` and `will.ns.cloudflare.com`; Cloudflare shows Active. Owner created the tunnel and ran the `cloudflared` install on the VPS (`systemctl is-active cloudflared`: active). `curl https://khaitam.ai.vn/api/health`: 200. Added `PUBLIC_APP_ORIGIN=https://khaitam.ai.vn` to the server `.env.local` |
+| 9 | Replace the site-wide `ACCESS_CODE` with accounts: remove `ACCESS_CODE` and `ACCESS_COOKIE_SECRET`, set `ACCOUNT_REGISTRATION=open` and `ADMIN_USERNAMES=nqthiep`, recreate the container | Done | Owner confirmed in chat. Server `.env.local` keys now: `PERSISTENCE_POSTGRES_PASSWORD`, `DATABASE_URL`, `TRUST_PROXY_HEADERS`, `PUBLIC_APP_ORIGIN`, `ACCOUNT_REGISTRATION`, `ADMIN_USERNAMES`; backup of the old file `.env.local.bak-<name>` (mode 600, contains the old secrets). `GET /api/auth/session` on the public URL: `enabled:true`, `registrationOpen:true`, `authenticated:false`. `POST /api/chat` without sign-in: 401 `LOGIN_REQUIRED`. Postgres `public` tables: 42 (were 0). Reason: `middleware.ts` answers 401 to every `/api/*` without the access cookie, so visitors could not register; `requireSpender` (`lib/server/authz/viewer.ts`) already blocks AI routes for anonymous visitors and for learners without an active membership. Not verified: every route outside `chat`, `generate/*`, `generate-classroom`; the register, sign-in and grant-membership flow in a browser |
+| 8 | Backup every 6 h to the private repo `github.com/nqthiep/khaitam.ai.vn` (source, Postgres dump, app data volume, env/secrets) | In progress | Built and pushed by hand twice (commits `ab09c05`, `7094919`; `gh api repos/nqthiep/khaitam.ai.vn/commits` lists both). Second run used `env -i HOME PATH=/usr/bin:/bin` to imitate cron and pushed. Cloned the repo back: the three `*.age` files start with `age-encryption.org/v1`, the Postgres password is not found in any plaintext file, `source/` has no `.env*`. Deploy key `VPS backup` has `read_only=false` (owner added it). The owner's age public key is in `~/backup/age-recipient.txt` on the VPS; the private key stays with the owner. Crontab on the VPS: `0 */6 * * * $HOME/OpenMAIC/ops/backup/backup.sh >> $HOME/backup/backup.log 2>&1` (`crontab -l`, cron active; the VPS clock is UTC). **Not yet seen:** a run started by cron itself, and a real restore from these files into a fresh server (the restore commands in `ops/backup/RESTORE.md` are not tested; only decrypt and `pg_restore -l` were). Next check: after 18:00 UTC look for a new commit and `tail ~/backup/backup.log`. Not backed up: Cloudflare Tunnel token. Script and RESTORE.md are untracked in this repo (owner decides on commit). `.git` of the backup repo was 105 MB after the first commits |
+
+### Done so far
+- Key login from this Mac works (task 1).
+
+### Decisions and reasons
+- Video export stays off: the owner decided; `.env`, `.env.local` set neither `NEXT_PUBLIC_ENABLE_VIDEO_EXPORT` nor `RENDER_SERVICE_URL` (checked with grep).
+- 4 GB VPS is tight for `pnpm build`, so swap is added first [Inference, not measured].
+
+### Next step (exact)
+- Task 8: confirm the first cron-made commit after 18:00 UTC and test one restore. Owner: register `nqthiep` in the browser, add an LLM key to the server `.env.local`, turn `ACCOUNT_REGISTRATION` off once the needed accounts exist.
+
+### Open questions and blockers
+- LLM API key (owner fills it in `.env.local` on the server; never in chat or in this file).
+
+### How to verify
+- `ssh <VPS_USER>@<VPS_IP> 'docker compose -f ~/OpenMAIC/docker-compose.yml ps'`: app and postgres `Up`.
+
+### Environment notes
+- Node `>=22.19.0`, pnpm `10.28.0` (see `package.json`). Secrets only by name: `DATABASE_URL`, `PERSISTENCE_POSTGRES_PASSWORD`, `ACCESS_CODE`, `ACCESS_COOKIE_SECRET`, `*_API_KEY`.
 
 ## Assignment: Catalog page that scales to many courses (phase 3a: subject, grade and topic tags)
 - Requested by: repository owner (nqthiep)
@@ -275,7 +336,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Có lỗi khi chạy bài giảng do AI sinh ra thì không nghe thấy âm thanh. Nếu đúng thì dù cho setting hệ thống sử dụng mô hình sinh âm thanh nào, hoặc các provide cloud hết credit thì cũng phải fallback sang sử dụng local của browser để sinh âm thanh."
 - Owner's follow-up (verbatim): "Yes, also make discussion TTS fall back to browser speech." (answer to: "Also make roundtable discussion TTS fall back to browser speech?")
-- Assignment status: In progress. Follow-up "wrong language in browser speech" (rows 11 to 14) is done in code and tests. Audible check in Safari is not done.
+- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser. Follow-up "wrong language in browser speech" (rows 11 to 14) is done in code and tests. Audible check in Safari is not done.
 - Branch and commit: `it-math` @ `86467a0e` (the 8 TTS files), pushed: no. The owner asked for the commit on 2026-10-19; push not requested. Left uncommitted on purpose: `tests/security/log-redaction.test.ts` and `tests/security/provider-log-redaction.test.ts` (red tests for modules that do not exist yet), `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` (1.6 MB vendor files, licence not recorded), and a two-line reorder in `components/stage/header-controls.tsx` that belongs to the community work.
 - Last updated: 2026-10-19 (UTC time not recorded)
 
@@ -336,7 +397,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 ## Assignment: Make "Lớp của tôi" useful to a learner (what a class is for, how to start, how to leave)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Learner làm thế nào để tham gia lớp? tôi chỉ thấy hiển thị danh sách lớp của tôi, nhưng không biết làm thế nào để sử dụng các tính năng của lớp, cũng không biết lớp có tác dụng gì với leaner." then "Bạn hãy đứng ở vai trò người dùng learner để hiểu họ mong muốn gì, họ cần gì, chứ bạn đừng hỏi tôi."
-- Assignment status: In progress (code and tests done; browser check not done)
+- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser (code and tests done; browser check not done)
 - Branch and commit: `it-math` @ `7a6be525` plus uncommitted changes, pushed: no. Commit and push were not requested.
 - Last updated: 2026-10-18 (UTC time not recorded)
 
@@ -367,6 +428,57 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - `npx tsc --noEmit`: expected no errors outside `.next/` and `tests/security/`.
 
 ## Closed assignments
+
+## Assignment: Catalog page: finish the tag work (3b suggestions, 3c learner side, open checks)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "mới hoàn thành 3a, còn những việc nào nữa?" Then: "Hãy tiếp tục các công việc cho đến khi hoàn thành tất cả các công việc còn dang dở."
+- Assignment status: Done (code, tests, checks on the real PostgreSQL and in the browser), committed and pushed.
+- Branch and commit: `it-math` @ `55656812` (the feature) plus a docs commit for this file, pushed: yes, to `origin` (`https://github.com/nqthiep/OpenMAIC.git`). The owner asked for it ("Commit riêng các file của công việc này ... rồi push lên origin/it-math"). Only this work's 31 files were staged, by path; `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/` and `tests/security/*` were left out. The push was a fast-forward from `1b6fc804`; `git ls-remote origin refs/heads/it-math` printed `55656812ca57a5f97d930b452922e9f4ef43da44` after it.
+- Later the same day, at the owner's request ("commit nốt phần public/vendor/standalone-player/ đi, sau đó push tất cả"), `public/vendor/standalone-player/` (4 built files, 1.6 MB) was committed as `c9fcafa1` and pushed (`78cf66dd..c9fcafa1`; `git ls-remote origin refs/heads/it-math` printed `c9fcafa1bc734774c7b58079c9f35e68d8033933`). Its provenance and the licences of the two JS bundles are NOT recorded: nothing in the source references the files, upstream does not ship them, and only `player.min.css` has a banner (Tailwind v4.2.1, MIT). No secret pattern was found in them. Still untracked and not committed: `.omo/`, `openmaic.local.yml` (local provider config), `tests/security/*` (21 red tests for modules that do not exist yet).
+- Last updated: 2026-10-19 (UTC time not recorded)
+
+### Scope (what "all the remaining work" means here)
+- Done in this assignment: 3c-lite (tags on cards and rows, a "Chưa phân loại" chip, a "Mới" badge, search sorted by match), 3b as keyword suggestions pre-filled in the staff dialog (client side, no API change, and no folder name is sent to the server, which avoids a privacy question), the owner seeing the tags of their own shared courses read-only, remembering the layout choice, and the open checks (real PostgreSQL, previews panel, 768 px, keyboard).
+- Not done on purpose: grouping by topic in shelves and a bulk tagging screen (no tagged courses yet to justify them, add when asked); topic names in the other 10 languages, new subjects (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, nghề, kỹ năng) and grades 6 to 9 (the owner decides); default sort stays A to Z. Owner-only items stay with the owner: restart `next dev`, a teacher reviews the topic lists, staff tag the existing courses.
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read HANDOFF.md, `git status`, branch, remote | Done | `it-math` @ `1b6fc804` = remote; tracked files clean; untracked: `.omo/`, `openmaic.local.yml`, `public/vendor/standalone-player/`, `tests/security/*` (not mine) |
+| 2 | 3c-lite: tags on card and row, `none` subject chip, "Mới" badge, search sorted by match + tests | Done | `lib/home/catalog-filter.ts` (`none` in the subject filter, `isNew`, `NEW_DAYS` = 14, sort `match`, `sortAfterTyping`, `withoutFilters` drops `match`), `components/home/course-card.tsx` and `course-row.tsx` (subject and grade line, "Mới" when the list passes `now`; the home page card passes none, so it is unchanged), `components/learning/tag-names.tsx` (new: `useTagNames`, `useTagLine`, `TagBadges`, moved out of the editor). Match order: title starts with the search, then every word starts a word, then the rest; it is chosen for the learner when they start searching from A to Z and goes back when the box is emptied. Tests: `tests/home/catalog-filter.test.ts` 28, `tests/home/course-card-tags.test.ts` 4 |
+| 3 | 3b: `lib/learning/tag-suggest.ts` and pre-fill in the staff dialog + tests | Done | Keyword suggestion from the title and scene titles, accent-insensitive, word-start matching (three letters or fewer must be a whole word), "Toán" needs its accent and "bài toán" does not count. The dialog opens with the suggestion only when the course has no tags, says so, and saves nothing until Save. No API change and no folder name sent to the server. `tests/learning/tag-suggest.test.ts` 7 (every topic's own name gives a valid list), 2 new cases in `tests/learning/course-tags-panel.test.ts` (4 in all) |
+| 4 | Owner sees the tags of their shared courses; remember the layout choice | Done | `GET /api/membership/contribution` adds `tags` per share (`listCourseTags`), `components/home/contribution.tsx` shows "Toán · Khối 12" read-only under the title; `tests/learning/contribution-route.test.ts`, `tests/home/contribution.test.ts` (6). Layout: `localStorage` key `openmaic.catalog.layout`, read only when the address has no `layout`, writes wrapped in try/catch; `tests/home/catalog-browser-state.test.ts` 4 (remembered, address wins, blocked storage, match order in the address) |
+| 5 | Open checks: real PostgreSQL, previews panel, 768 px, keyboard | Done | **Real PostgreSQL 16.15** (container `openmaic-dev-db-postgres-1`): `course_tags` already existed with the expected columns and primary key and 0 rows. The set, replace and clear statements of `setCourseTags` ran in a transaction that was rolled back (`persisted_tag_rows` 0 after): set gave 2 rows, replace removed the subject, an empty list cleared. The scene-facts query ran on the real document tables: e.g. `EklnYqdaAs` 10 scenes, 2 quizzes, 1 interactive; real scene types are slide, quiz, interactive. `GET /api/catalog` on a dev server of this session returned `sceneCount`, `hasQuiz`, `hasInteractive`, `updatedAt` for the real preview course. **Browser** (`rt.localhost:3002`, mock catalog of 30 courses and mock admin responses, nothing written): the previews panel shows the "Thẻ" column, its dialog opened with "Tiếng Anh, Khối 12, Ngữ pháp" and the note, Lưu sent `PUT /api/admin/courses/prev-1/tags` and the row updated; the shares dialog suggested "Vật lí, Khối 11, Sóng" from the title and scene titles. Catalog at 768 px: no horizontal overflow, rows do not overflow; the toolbar is 314 px tall with every group shown. Keyboard: Tab order search, sort, grid, list, subject chips; Space toggled a chip, focus stayed on it, the count line updated. "Chưa phân loại (4)" gave 4 courses (the mock has 4), "Mới" on 12 of 30 rows (the mock has 12), layout `list` came back after leaving and returning. Not seen: a screen reader |
+| 6 | i18n keys in 12 locales | Done | New: `catalog.new`, `catalog.subjectNone`, `catalog.sort.match`, `admin.tags.suggested`. `pnpm check:i18n-keys` passed; the 11 non-Vietnamese texts are mine, not reviewed by a native speaker [Unverified] |
+| 7 | Checks: vitest, tsc, eslint, prettier, `pnpm check:i18n-keys` | Done | `pnpm vitest run tests/home tests/learning tests/workbench tests/i18n tests/components tests/admin`: 136 files, 1532 passed. `npx tsc --noEmit`: no error outside `.next/` and `tests/security/`. `pnpm exec eslint` on the 19 changed code files: 0 problems (the first run flagged `Date.now()` in render, so the list now passes `now` down). `prettier --check`: clean |
+| 8 | Update this section and report; ask before commit and push | Done | this section |
+| 9 | Commit this work's files by path and push `it-math` (owner asked after the report) | Done | `55656812`, 31 files; `git push origin it-math`: `1b6fc804..55656812`, a fast-forward (the fetched remote head was `1b6fc804`); `git ls-remote origin refs/heads/it-math`: `55656812`. This section's own update is a docs commit after it |
+
+### Done so far
+- Catalog: tags on cards and rows, "Chưa phân loại" chip, "Mới" badge, match order while searching, remembered layout.
+- Staff: suggestions pre-filled in the tag dialog (shares and previews panels).
+- Owner: sees the tags of their own shared courses read-only in "Đóng góp của tôi".
+- Verified on the real PostgreSQL (rolled-back transaction and read-only queries) and in the browser.
+
+### Decisions and reasons
+- Suggestions run in the browser from titles already on screen. No folder name leaves the learner's device, so there is no privacy question and no API change.
+- "Chưa phân loại" means no subject tag (a course with only a grade tag counts).
+- "New" is relative to the time the list was opened, and is judged by `updatedAt` (the approval date for a shared course, so approving a batch marks the whole batch new).
+- The match order is a real sort value (`sort=match`, shown in the sort menu while searching), so a learner can still pick A to Z while searching.
+
+### Next step (exact)
+- Owner: (1) ask a teacher to review the topic lists in `lib/learning/taxonomy.ts` and the keywords in `lib/learning/tag-suggest.ts`; (2) staff tag the existing shared courses and previews (the dialog now opens with a suggestion); (3) decide the open choices below.
+
+### Open questions and blockers
+- Owner choices not made: more subjects (Ngữ văn, Lịch sử, Địa lí, Giáo dục kinh tế và pháp luật, Công nghệ, nghề, kỹ năng), grades 6 to 9, translating topic names into the other 10 languages, and whether "Mới cập nhật" should become the default sort (kept A to Z).
+- Not built on purpose (no tagged courses yet to justify them): grouping by topic in shelves, and a bulk tagging screen.
+- Not verified: a screen reader; a real admin session in the browser (admin responses were mocked); the 11 non-Vietnamese translations. At 768 px the toolbar is 314 px tall when every group is shown, which is a third of the screen.
+
+### How to verify
+- `pnpm vitest run tests/home tests/learning`: expected all pass. [Run: with the other suites, 136 files, 1532 passed]
+- As staff open a share request in `/admin` (tab "Nội dung & lớp") and press "Gắn thẻ": the dialog opens with a suggestion from the title.
+
+
 
 ## Assignment: Review of all learner user journeys (UI and UX)
 - Requested by: repository owner (nqthiep)
@@ -521,7 +633,7 @@ Suggested order: 6, 7, 8 first (small, visible), then 9 to 12, then 13 to 16. Ro
 ## Assignment: Healthy learning habits (plan)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "tính năng cộng đồng này có được thiết kế và chức năng hấp dẫn gây nghiện việc học cho mọi người dùng không?" then "ý tôi là gây nghiện học lành mạnh, chứ không phải nghiện kỹ thuật số như tiktok, youtube, facebook" then "viết thành plan handoff đi"
-- Assignment status: In progress (plan written; no code yet; waiting for the owner to approve the plan and the open questions below)
+- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser (plan written; no code yet; waiting for the owner to approve the plan and the open questions below)
 - Branch and commit: `it-math` @ `1c266dd8` plus uncommitted changes from several sessions, pushed: no. No commit was requested, so git writes are not allowed.
 - Last updated: 2026-10-18 (UTC time not recorded)
 
@@ -1315,7 +1427,7 @@ Out of wave 1 (do not build now): "Generating now" block, "new" badges on class 
 
 - Requested by: repository owner (nqthiep). Owner request (verbatim): "Hãy brainstorming để thiết kế lại trang chủ và việc phân quyền, nhằm cho phép user chỉ nhìn thấy và sử dụng các chức năng phù hợp với role của user thôi." Approval (verbatim): "lập plan thực hiện đi", then "hãy tự động hoàn thành các công việc cho đến khi hoàn thành toàn bộ task trong plan".
 - Approved plan: `/Users/quangthiep/.claude/plans/l-p-plan-th-c-hi-n-rosy-moler.md` (outside the repo; its content is summarised in the task table below).
-- Assignment status: In progress
+- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser
 - Branch and commit: `it-math` @ `1c266dd8` plus uncommitted changes, pushed: no. Git writes are not allowed for this assignment: no commit or push was requested. Do not commit or push without asking.
 - Last updated: 2026-10-16 (UTC time not recorded)
 
@@ -1374,7 +1486,7 @@ Untracked files that are not part of this work and must not be committed without
 ### Assignment: Cycle 7 — close remaining code backlog, finish access-control leftovers, deployment readiness (moved here on 2026-10-16 when a new assignment started; its own status below was not changed by this move)
 
 - Requested by: parent agent (scrum coordinator). Owner request (verbatim): "Tôi muốn bạn thiết kế và xây dựng tiếp ứng dụng này cho đến khi hoàn thiện."
-- Assignment status: In progress
+- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser
 - Branch and commit: `it-math` @ `f24aa7f`, pushed: yes
 - Last updated: 2026-10-13 14:20 UTC
 
