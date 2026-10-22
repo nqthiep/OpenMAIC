@@ -16,6 +16,9 @@
 			# Without this, Cloudflare may keep OmniRoute's static files (immutable, public) and serve
 			# them to anyone from its edge without asking the app first.
 			header_down Cache-Control "private, no-store"
+			# The gate cookie is for the gate. OmniRoute (third-party code) has no use for it and would
+			# otherwise see it, with the account id and a prefix of the session digest inside.
+			header_up Cookie `omniroute_gate=[^;]*(;\s*)?` ""
 		}
 	}
 }

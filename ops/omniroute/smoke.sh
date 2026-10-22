@@ -9,11 +9,21 @@
 #
 # Gate tests (always run, no cookie and no secret needed): every request except
 # /__enter must be rejected by the app's /api/admin/omniroute/check behind
-# Caddy forward_auth with 401 or 403 — never 200. The garbage-cookie test also
-# checks that the gate forwards the browser's Cookie header to the check route;
-# whether forward_auth really does that is exactly what this test is for (see
-# README, "Not verified yet"). /__enter without a valid one-time ticket must be
-# a 4xx — never 200 and never a redirect.
+# Caddy forward_auth with 401 or 403 — never 200. These only prove that anonymous
+# requests are refused: a missing and a garbage cookie both give 401, so they
+# cannot show that the browser's Cookie header reaches the check route.
+# /__enter without a valid one-time ticket must be a 4xx — never 200 and never a
+# redirect.
+#
+# Two optional tests read the environment, never the command line, so nothing
+# secret shows in `ps` or in the output:
+#   OMNIROUTE_GATE_SECRET  (the value from .env) makes the script sign a gate
+#     cookie for an account that does not exist and expect exactly 403. That
+#     proves the Cookie header reaches the app, the secret matches and the
+#     database lookup ran (no cookie, or a wrong secret, would give 401).
+#   OMNIROUTE_SMOKE_COOKIE (the omniroute_gate cookie of a signed-in admin,
+#     copied from the browser's developer tools) expects the dashboard to answer
+#     below 400 with Cache-Control containing no-store.
 #
 # --internal adds two tests inside the Docker network (they need the running
 # `docker compose --profile omniroute` stack; without the flag, or without
@@ -88,6 +98,59 @@ request 'GET / with Cookie: omniroute_gate=garbage' gate \
   -H 'Cookie: omniroute_gate=garbage' "$base/"
 request 'GET /__enter (no ticket)' enter "$base/__enter"
 request 'GET /__enter?t=garbage' enter "$base/__enter?t=garbage"
+
+# --- cookie forwarding and cache header (optional, read from the environment) ---
+forge_gate_cookie() {
+  python3 - <<'PY'
+import base64, hashlib, hmac, os, time
+secret = os.environ["OMNIROUTE_GATE_SECRET"].encode()
+body = "gate.smoke-no-such-account.%s.%d.smoke" % ("0" * 32, int(time.time() * 1000) + 300000)
+sig = base64.urlsafe_b64encode(hmac.new(secret, body.encode(), hashlib.sha256).digest()).rstrip(b"=").decode()
+print(body + "." + sig)
+PY
+}
+
+echo
+echo '# cookie forwarding (needs OMNIROUTE_GATE_SECRET in the environment)'
+if [ -z "${OMNIROUTE_GATE_SECRET:-}" ] || ! command -v python3 >/dev/null 2>&1; then
+  echo 'SKIP signed cookie for a missing account — set OMNIROUTE_GATE_SECRET (and have python3)'
+else
+  forged="$(forge_gate_cookie)"
+  status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 \
+    -H "Cookie: omniroute_gate=$forged" "$base/" 2>/dev/null || true)"
+  case "$status" in
+    403)
+      printf 'PASS signed cookie for a missing account — HTTP 403 (the app read the cookie and its signature)\n'
+      pass=$((pass + 1))
+      ;;
+    401)
+      echo 'FAIL signed cookie for a missing account — HTTP 401: the Cookie header did not reach the app, or the secret differs from the server'"'"'s'
+      fail=$((fail + 1))
+      ;;
+    *)
+      printf 'FAIL signed cookie for a missing account — expected HTTP 403, got %s\n' "${status:-no response}"
+      fail=$((fail + 1))
+      ;;
+  esac
+fi
+
+echo
+echo '# admitted request and cache header (needs OMNIROUTE_SMOKE_COOKIE in the environment)'
+if [ -z "${OMNIROUTE_SMOKE_COOKIE:-}" ]; then
+  echo 'SKIP admitted request — set OMNIROUTE_SMOKE_COOKIE to the omniroute_gate cookie of a signed-in admin'
+else
+  headers="$(curl -sS -D - -o /dev/null --max-time 10 \
+    -H "Cookie: omniroute_gate=$OMNIROUTE_SMOKE_COOKIE" "$base/" 2>/dev/null || true)"
+  status="$(printf '%s\n' "$headers" | head -n 1 | grep -oE '[0-9]{3}' | head -n 1 || true)"
+  cache="$(printf '%s\n' "$headers" | grep -i '^cache-control:' | tr -d '\r' | head -n 1 || true)"
+  if [ -n "$status" ] && [ "$status" -lt 400 ] && printf '%s' "$cache" | grep -qi 'no-store'; then
+    printf 'PASS admitted request — HTTP %s, cache-control includes no-store\n' "$status"
+    pass=$((pass + 1))
+  else
+    printf 'FAIL admitted request — HTTP %s, cache-control: %s\n' "${status:-none}" "${cache:-missing}"
+    fail=$((fail + 1))
+  fi
+fi
 
 # docker compose commands run from the directory that holds docker-compose.yml
 # (two levels up from this script) so the script works from any CWD.

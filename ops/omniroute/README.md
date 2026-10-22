@@ -69,7 +69,15 @@ ops/omniroute/smoke.sh https://omniroute.khaitam.ai.vn            # through the 
 ops/omniroute/smoke.sh https://omniroute.khaitam.ai.vn --internal # + inside the Docker network
 ```
 
-Every gate test must PASS: anonymous requests — including a garbage `omniroute_gate` cookie — get 401/403, and `/__enter` without a valid ticket gets a 4xx. The script exits non-zero on any FAIL. The garbage-cookie test is also the live check that Caddy's `forward_auth` forwards the browser's `Cookie` header to the app's check route (see **Not verified yet**).
+Every gate test must PASS: anonymous requests, including one with a garbage `omniroute_gate` cookie, get 401/403, and `/__enter` without a valid ticket gets a 4xx. The script exits non-zero on any FAIL. Those tests only show that anonymous requests are refused. Two optional tests read the environment (never the command line, so nothing secret appears in `ps` or in the output):
+
+```bash
+# proves the Cookie header reaches the app and the secret matches: a cookie signed for an account that does not exist must get exactly 403
+OMNIROUTE_GATE_SECRET=<value from .env> ops/omniroute/smoke.sh https://omniroute.khaitam.ai.vn
+# proves a signed-in admin is let in and the dashboard answers with Cache-Control: no-store
+# (copy the omniroute_gate cookie from the browser's developer tools after clicking the button)
+OMNIROUTE_SMOKE_COOKIE=<cookie value> ops/omniroute/smoke.sh https://omniroute.khaitam.ai.vn
+```
 
 ## Backup
 
@@ -80,8 +88,7 @@ The `omniroute-data` volume (OmniRoute's SQLite database: provider endpoints, ke
 Checked against OmniRoute v3.8.52's own Dockerfile, `.env.example` and source, and against Caddy's documentation — but not against a running stack (`docker compose up` was not run on the authoring machine):
 
 - `API_HOST=0.0.0.0`: OmniRoute's own material disagrees on the default (its `.env.example` shows `0.0.0.0`, its `src/lib/apiBridgeServer.ts` defaults to `127.0.0.1`). The explicit value is source-verified as what makes `omniroute:20129` reachable from other containers; it has not been observed in a running container.
-- Whether Caddy's `forward_auth` forwards the browser's `Cookie` header to the check route. Its documented expanded form is a `reverse_proxy` clone of the original request, which forwards original headers — the live behavior is exactly what `smoke.sh`'s garbage-cookie test checks.
-- The gate passing the app's non-2xx answer (401/403 + short text) back to the browser — documented Caddy behavior (`forward_auth`), not yet observed through this gate.
+- Checked on 2026-10-23 with a throwaway `caddy:2-alpine` container running this Caddyfile against fake app and OmniRoute backends (not the real ones): no cookie gives 401; a cookie is forwarded to the check route; the app's 401 is passed back; `/__enter` bypasses the check; `Host` is passed unchanged; `Cache-Control` from OmniRoute is replaced by `private, no-store`; the gate cookie is removed from what OmniRoute receives while its other cookies are kept. The `omniroute-gate` service from `docker-compose.yml` starts with only `CAP_NET_BIND_SERVICE` and `no-new-privileges`, and answers 502 when the app is absent (it fails closed). Without `cap_add: NET_BIND_SERVICE` the Caddy binary cannot even start under `cap_drop: ALL`.
 - End to end: the `/__enter` sign-in, the dashboard behind the gate, and the app's calls to `omniroute:20129`. The app-side routes (`/api/admin/omniroute/{status,open,enter,check}`) are covered by `pnpm vitest run tests/omniroute` (37 tests, the OmniRoute login is mocked); the first real run is on the VPS.
 - Whether OmniRoute accepts the server-side `POST /api/auth/login` from the app container (its login guard looks at the peer address and the Docker bridge address is private). The app answers 502 "OmniRoute did not accept the sign-in" if it does not.
 - Whether the dashboard works at the root of its own hostname behind Caddy with `AUTH_COOKIE_SECURE=true` and the public URL set (it should: no base path is used).
@@ -92,11 +99,12 @@ Checked against OmniRoute v3.8.52's own Dockerfile, `.env.example` and source, a
 - The browser gets two cookies on the OmniRoute hostname only: `omniroute_gate` (up to 8 hours, HttpOnly, no `Domain`) and OmniRoute's own `auth_token` (30 days). The `openmaic_session` cookie is never sent to this hostname.
 - Every request asks the app first. The gate cookie is tied to the OpenMAIC session it was opened from, so signing out of OpenMAIC, an expired session, a demotion or a disabled account closes the gate within about 15 seconds (the answer is remembered that long per session). OmniRoute's own cookie lasts longer but is useless without the gate cookie. After 8 hours click the button again.
 - Caddy sets `Cache-Control: private, no-store` on everything it takes from OmniRoute. Without it Cloudflare could keep OmniRoute's static files at its edge and hand them out without asking the app.
-- `omniroute_gate` is also forwarded to OmniRoute with the other cookies. It opens nothing but this dashboard, so this is accepted.
+- Caddy removes `omniroute_gate` from the cookies it passes to OmniRoute. The cookie names the account and a prefix of the session digest, and OmniRoute is third-party code; its own `auth_token` and any other cookie pass unchanged.
 - The `enter` route also answers on the main hostname if called there. It still needs a valid ticket, which only ever points at the OmniRoute hostname.
 - The live-monitor WebSocket of OmniRoute is switched off (`OMNIROUTE_ENABLE_LIVE_WS=false`): the page that needs it will not update live.
 - `ACCESS_CODE` and this feature do not mix: the app's middleware answers 401 to every `/api/*` call without the access cookie, including the gate's check. The production server no longer sets `ACCESS_CODE`.
-- Same site, not same origin: `omniroute.khaitam.ai.vn` and `khaitam.ai.vn` are one site, so a browser attaches the app's session cookie to requests that code on the dashboard page sends to the app (it cannot read the answers). What stops forged changes is that the app's admin account routes and the routes behind `learningRoute(..., { mutating: true })` refuse any request whose `Sec-Fetch-Site` is not `same-origin`, and that JSON routes require `application/json`, which a cross-origin form cannot send without a CORS preflight the app does not allow. The other POST routes of the app were not audited for this. OmniRoute is third-party code: keep the image tag pinned and read release notes before upgrading. A hostname on a different registrable domain would remove the question.
+- Same site, not same origin: `omniroute.khaitam.ai.vn` and `khaitam.ai.vn` are one site, so a browser attaches the app's session cookie to requests that code on the dashboard page sends to the app (it cannot read the answers, and the cookie itself is host-only and never goes to the dashboard). The app therefore refuses every write under `/api` (any method but GET, HEAD, OPTIONS) whose `Sec-Fetch-Site` header is present and not `same-origin` (`middleware.ts`, `lib/server/same-origin-writes.ts`); requests without the header (servers, curl, the render service) are not affected. What this cannot stop: code on a sibling hostname can still set a cookie named `openmaic_session` for the whole domain; the app then sees two and treats the visitor as signed out (a nuisance, not a way in). Only a hostname on a different registrable domain removes the sibling relationship. OmniRoute is third-party code: keep the image tag pinned and read release notes before upgrading.
+- Network: the app and OmniRoute share the `omniroute` network, so OmniRoute can reach `openmaic:3000` directly (as any client on the internet can) and the internet. The `omniroute` service is not run with `cap_drop: ALL` or a read-only root file system because it was not tried against this image; both are worth testing on the server.
 
 ## Troubleshooting
 

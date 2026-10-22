@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured, isProWorkbenchEnabled } from '@/lib/config/feature-flags';
 import { accessSigningKey, isAccessTokenTimestampFresh } from '@/lib/server/access-token-policy';
+import { isCrossOriginWrite } from '@/lib/server/same-origin-writes';
 
 /** Convert string to Uint8Array */
 function encode(str: string): Uint8Array {
@@ -49,6 +50,13 @@ async function verifyToken(token: string, signingKey: string): Promise<boolean> 
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (isCrossOriginWrite(request.method, pathname, request.headers.get('sec-fetch-site'))) {
+    return NextResponse.json(
+      { success: false, errorCode: 'FORBIDDEN', error: 'Changes must be sent from this site.' },
+      { status: 403 },
+    );
+  }
 
   // Return an actual server-side 404 when either half of the workbench is off.
   // Edge middleware cannot reliably inspect server-only deployment variables,
