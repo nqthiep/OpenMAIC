@@ -2876,6 +2876,14 @@
       "card": {
         "title": "Shared server credential",
         "description": "The key, base URL and models every learner’s AI request uses. Stored encrypted on the server and never shown again. The fields below are only your own key, kept in this browser."
+      },
+      "omniroute": {
+        "title": "OmniRoute",
+        "description": "Opens the OmniRoute dashboard in a new tab. You are signed in automatically while you are signed in here as an administrator.",
+        "open": "Open OmniRoute settings",
+        "opening": "Opening…",
+        "notConfigured": "OmniRoute is not set up on this server (see ops/omniroute/README.md).",
+        "openFailed": "Could not open OmniRoute."
       }
     }
   },

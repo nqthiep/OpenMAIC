@@ -19,6 +19,7 @@ import {
   type ProviderRow,
   type ProviderSettings,
 } from '@/components/learning/learning-api';
+import { OmniRouteLink } from '@/components/settings/omniroute-link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -158,6 +159,7 @@ export function ServerCredentialCard({
         row={row}
         onChanged={reload}
       />
+      {kind === 'providers' && entry.id === 'omniroute' ? <OmniRouteLink /> : null}
       {kind === 'providers' ? (
         <>
           <DefaultModelCard settings={settings} onChange={setSettings} onStale={reload} />

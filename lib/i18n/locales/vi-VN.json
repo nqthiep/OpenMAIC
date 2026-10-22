@@ -2876,6 +2876,14 @@
       "card": {
         "title": "Máy chủ dùng chung",
         "description": "Khoá, địa chỉ gốc và mô hình mà mọi yêu cầu AI của học viên dùng. Lưu mã hoá trên máy chủ và không hiển thị lại. Các ô bên dưới chỉ là khoá riêng của bạn, nằm trong trình duyệt này."
+      },
+      "omniroute": {
+        "title": "OmniRoute",
+        "description": "Mở bảng điều khiển OmniRoute trong một tab mới. Bạn được đăng nhập tự động ở đó khi còn đăng nhập ở đây với vai trò quản trị viên.",
+        "open": "Mở thiết lập OmniRoute",
+        "opening": "Đang mở…",
+        "notConfigured": "Máy chủ này chưa thiết lập OmniRoute (xem ops/omniroute/README.md).",
+        "openFailed": "Không mở được OmniRoute."
       }
     }
   },
