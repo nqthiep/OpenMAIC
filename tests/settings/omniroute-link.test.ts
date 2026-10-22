@@ -229,7 +229,10 @@ describe('the OmniRoute area of the shared credential card', () => {
     expect(mocks.error).toHaveBeenCalledTimes(1);
     expect(mocks.error).toHaveBeenCalledWith('admin.providers.omniroute.openFailed');
 
-    // The browser blocked the tab: the request may even succeed, but there is nowhere to go.
+    // The browser blocked the tab: nothing is asked of the server, since there is nowhere to go.
+    const openRequests = () =>
+      mocks.fetch.mock.calls.filter(([url]) => url === '/api/admin/omniroute/open').length;
+    const before = openRequests();
     mocks.open.mockReturnValue(null);
     mocks.fetch.mockImplementation(async (input: string) =>
       input === '/api/admin/omniroute/status'
@@ -243,6 +246,7 @@ describe('the OmniRoute area of the shared credential card', () => {
     await flush();
     expect(mocks.error).toHaveBeenCalledTimes(2);
     expect(mocks.error).toHaveBeenLastCalledWith('admin.providers.omniroute.openFailed');
+    expect(openRequests()).toBe(before);
   });
 
   it('the shared credential card shows it only for the omniroute provider', async () => {

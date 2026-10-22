@@ -1,4 +1,5 @@
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { hashSessionToken, readSessionCookie } from '@/lib/server/accounts/session';
 import { authorize, learningRoute } from '@/lib/server/learning/http';
 import { omnirouteConfig } from '@/lib/server/omniroute/config';
 import { mintToken, TICKET_TTL_MS } from '@/lib/server/omniroute/token';
@@ -7,7 +8,8 @@ export const runtime = 'nodejs';
 
 /**
  * Hands an administrator the address of the OmniRoute dashboard with a one-time ticket in it.
- * The popup opens that address in a new tab; `enter` turns the ticket into the gate cookie. A POST
+ * The popup opens that address in a new tab; `enter` turns the ticket into the gate cookie. The
+ * ticket names the current OpenMAIC session, so the gate lasts only as long as that session. A POST
  * from this site only, and an audit row names who asked.
  */
 export async function POST(request: Request): Promise<Response> {
@@ -19,12 +21,15 @@ export async function POST(request: Request): Promise<Response> {
       const config = omnirouteConfig();
       if (!config) return apiError('NOT_FOUND', 404, 'OmniRoute is not set up on this server.');
       const accountId = ctx.viewer.accountId!;
+      const sessionToken = readSessionCookie(request.headers);
+      if (!sessionToken) return apiError('UNAUTHENTICATED', 401, 'Sign in to continue.');
+      const sessionKey = hashSessionToken(sessionToken).slice(0, 32);
       await ctx.db.query(
         `INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
          VALUES ($1::text, 'omniroute', 'omniroute:open', NULL, $2::timestamptz)`,
         [accountId, ctx.now.toISOString()],
       );
-      const ticket = mintToken('ticket', accountId, TICKET_TTL_MS, config.gateSecret);
+      const ticket = mintToken('ticket', accountId, sessionKey, TICKET_TTL_MS, config.gateSecret);
       return apiSuccess({ url: `${config.publicUrl}/__enter?t=${ticket}` });
     },
     { mutating: true },

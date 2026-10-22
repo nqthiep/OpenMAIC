@@ -1,6 +1,7 @@
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { hashSessionToken } from '@/lib/server/accounts/session';
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
@@ -9,6 +10,7 @@ const ORIGIN = 'https://omniroute.example.test';
 const THROTTLE_KEY = Symbol.for('openmaic.accounts.loginThrottle');
 const GATE_SECRET = 'g'.repeat(48);
 const ADMIN_PASSWORD = 'p'.repeat(24);
+const NO_SESSION = '0'.repeat(32);
 
 let db: PGlite | undefined;
 
@@ -73,8 +75,9 @@ async function load() {
   };
 }
 type Routes = Awaited<ReturnType<typeof load>>;
+type Who = { cookie: string; id: string; sessionKey: string };
 
-async function signUp(routes: Routes, username: string): Promise<{ cookie: string; id: string }> {
+async function signUp(routes: Routes, username: string): Promise<Who> {
   const response = await routes.register(
     new Request(`${ORIGIN}/api/auth/register`, {
       method: 'POST',
@@ -87,7 +90,24 @@ async function signUp(routes: Routes, username: string): Promise<{ cookie: strin
     .find((v) => v.startsWith('openmaic_session='))!
     .split(';')[0]!;
   const rows = (await db!.query('SELECT id FROM accounts WHERE username = $1', [username])).rows;
-  return { cookie, id: (rows[0] as { id: string }).id };
+  const sessionToken = cookie.slice('openmaic_session='.length);
+  return {
+    cookie,
+    id: (rows[0] as { id: string }).id,
+    sessionKey: hashSessionToken(sessionToken).slice(0, 32),
+  };
+}
+
+/** A gate cookie or ticket for the session `who` signed up with, unless told otherwise. */
+function mint(
+  routes: Routes,
+  kind: 'ticket' | 'gate',
+  who: { id: string; sessionKey: string },
+  options: { secret?: string; now?: number } = {},
+) {
+  const { TICKET_TTL_MS, GATE_TTL_MS, mintToken } = routes.token;
+  const ttl = kind === 'ticket' ? TICKET_TTL_MS : GATE_TTL_MS;
+  return mintToken(kind, who.id, who.sessionKey, ttl, options.secret ?? GATE_SECRET, options.now);
 }
 
 const withCookie = (cookie?: string): RequestInit => (cookie ? { headers: { cookie } } : {});
@@ -115,6 +135,17 @@ const signedIn = () =>
     headers: { 'set-cookie': 'auth_token=jwt-value; Path=/; HttpOnly; SameSite=lax' },
   });
 
+/** Moves `Date` forward so the 15 s memory of the gate check has passed. */
+async function afterCheckMemory<T>(run: () => Promise<T>): Promise<T> {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(Date.now() + 16_000);
+  try {
+    return await run();
+  } finally {
+    vi.useRealTimers();
+  }
+}
+
 describe('status', () => {
   it('answers only an administrator', async () => {
     const routes = await load();
@@ -140,7 +171,7 @@ describe('status', () => {
 });
 
 describe('open', () => {
-  it('gives an administrator a ticket address, and writes an audit row', async () => {
+  it('gives an administrator a ticket for the current session, and writes an audit row', async () => {
     const routes = await load();
     const root = await signUp(routes, 'root');
     const response = await routes.open(post(root.cookie));
@@ -150,6 +181,7 @@ describe('open', () => {
     const ticket = new URL(url).searchParams.get('t')!;
     expect(routes.token.verifyToken('ticket', ticket, GATE_SECRET)).toMatchObject({
       accountId: root.id,
+      sessionKey: root.sessionKey,
     });
     const audit = await db!.query(
       `SELECT actor_id FROM account_admin_audit WHERE action = 'omniroute:open'`,
@@ -165,9 +197,12 @@ describe('open', () => {
     expect((await routes.open(post(alice.cookie))).status).toBe(403);
     const crossSite = await routes.open(post(root.cookie, { 'sec-fetch-site': 'cross-site' }));
     expect(crossSite.status).toBe(403);
-    expect(
-      (await db!.query(`SELECT 1 FROM account_admin_audit WHERE action = 'omniroute:open'`)).rows,
-    ).toHaveLength(0);
+    const sameSite = await routes.open(post(root.cookie, { 'sec-fetch-site': 'same-site' }));
+    expect(sameSite.status).toBe(403);
+    const audit = await db!.query(
+      `SELECT 1 FROM account_admin_audit WHERE action = 'omniroute:open'`,
+    );
+    expect(audit.rows).toHaveLength(0);
   });
 
   it('is 404 when OmniRoute is not set up', async () => {
@@ -182,29 +217,20 @@ describe('check', () => {
   it('lets an administrator with a gate cookie through', async () => {
     const routes = await load();
     const root = await signUp(routes, 'root');
-    const gate = routes.token.mintToken('gate', root.id, routes.token.GATE_TTL_MS, GATE_SECRET);
-    expect((await routes.check(checkRequest(gate))).status).toBe(204);
+    expect((await routes.check(checkRequest(mint(routes, 'gate', root)))).status).toBe(204);
   });
 
   it('refuses no cookie, junk, an expired cookie, a ticket, another secret and a duplicate', async () => {
     const routes = await load();
     const root = await signUp(routes, 'root');
-    const { mintToken, GATE_TTL_MS, TICKET_TTL_MS } = routes.token;
     expect((await routes.check(checkRequest())).status).toBe(401);
     expect((await routes.check(checkRequest('junk'))).status).toBe(401);
-    const expired = mintToken(
-      'gate',
-      root.id,
-      GATE_TTL_MS,
-      GATE_SECRET,
-      Date.now() - 2 * GATE_TTL_MS,
-    );
+    const expired = mint(routes, 'gate', root, { now: Date.now() - 2 * routes.token.GATE_TTL_MS });
     expect((await routes.check(checkRequest(expired))).status).toBe(401);
-    const ticket = mintToken('ticket', root.id, TICKET_TTL_MS, GATE_SECRET);
-    expect((await routes.check(checkRequest(ticket))).status).toBe(401);
-    const foreign = mintToken('gate', root.id, GATE_TTL_MS, 'x'.repeat(48));
+    expect((await routes.check(checkRequest(mint(routes, 'ticket', root)))).status).toBe(401);
+    const foreign = mint(routes, 'gate', root, { secret: 'x'.repeat(48) });
     expect((await routes.check(checkRequest(foreign))).status).toBe(401);
-    const good = mintToken('gate', root.id, GATE_TTL_MS, GATE_SECRET);
+    const good = mint(routes, 'gate', root);
     const twice = new Request(`${ORIGIN}/api/admin/omniroute/check`, {
       headers: { cookie: `omniroute_gate=${good}; omniroute_gate=${good}` },
     });
@@ -213,35 +239,69 @@ describe('check', () => {
 
   it('refuses a learner, a disabled administrator, an unknown account and a closed gate', async () => {
     const routes = await load();
-    const { mintToken, GATE_TTL_MS } = routes.token;
     const alice = await signUp(routes, 'alice');
     const bob = await signUp(routes, 'bob');
     await db!.query(`UPDATE accounts SET role = 'admin', disabled_at = now() WHERE id = $1`, [
       bob.id,
     ]);
-    const gateFor = (id: string) => mintToken('gate', id, GATE_TTL_MS, GATE_SECRET);
-    expect((await routes.check(checkRequest(gateFor(alice.id)))).status).toBe(403);
-    expect((await routes.check(checkRequest(gateFor(bob.id)))).status).toBe(403);
-    expect((await routes.check(checkRequest(gateFor('no-such-account')))).status).toBe(403);
+    expect((await routes.check(checkRequest(mint(routes, 'gate', alice)))).status).toBe(403);
+    expect((await routes.check(checkRequest(mint(routes, 'gate', bob)))).status).toBe(403);
+    const stranger = { id: 'no-such-account', sessionKey: NO_SESSION };
+    expect((await routes.check(checkRequest(mint(routes, 'gate', stranger)))).status).toBe(403);
+    const gate = mint(routes, 'gate', alice);
     vi.stubEnv('OMNIROUTE_GATE_SECRET', '');
-    expect((await routes.check(checkRequest(gateFor(alice.id)))).status).toBe(404);
+    expect((await routes.check(checkRequest(gate))).status).toBe(404);
   });
 
   it('stops admitting an administrator who was demoted, once the 15 s memory has passed', async () => {
     const routes = await load();
     const carol = await signUp(routes, 'carol');
     await db!.query(`UPDATE accounts SET role = 'admin' WHERE id = $1`, [carol.id]);
-    const gate = routes.token.mintToken('gate', carol.id, routes.token.GATE_TTL_MS, GATE_SECRET);
+    const gate = mint(routes, 'gate', carol);
     expect((await routes.check(checkRequest(gate))).status).toBe(204);
     await db!.query(`UPDATE accounts SET role = 'learner' WHERE id = $1`, [carol.id]);
     expect((await routes.check(checkRequest(gate))).status).toBe(204); // remembered
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(Date.now() + 16_000);
-    try {
-      expect((await routes.check(checkRequest(gate))).status).toBe(403);
-    } finally {
-      vi.useRealTimers();
-    }
+    const later = await afterCheckMemory(() => routes.check(checkRequest(gate)));
+    expect(later.status).toBe(403);
+  });
+
+  it('closes the gate when the OpenMAIC session it was opened from is signed out', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    const gate = mint(routes, 'gate', root);
+    expect((await routes.check(checkRequest(gate))).status).toBe(204);
+    await db!.query(
+      `UPDATE account_sessions SET revoked_at = now() WHERE left(token_hash, 32) = $1`,
+      [root.sessionKey],
+    );
+    expect((await routes.check(checkRequest(gate))).status).toBe(204); // remembered
+    const later = await afterCheckMemory(() => routes.check(checkRequest(gate)));
+    expect(later.status).toBe(403);
+  });
+
+  it('closes the gate when that session has expired', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    await db!.query(
+      `UPDATE account_sessions SET expires_at = now() - interval '1 minute' WHERE left(token_hash, 32) = $1`,
+      [root.sessionKey],
+    );
+    expect((await routes.check(checkRequest(mint(routes, 'gate', root)))).status).toBe(403);
+  });
+
+  it('refuses a gate cookie that names a session the account does not have', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    const other = { id: root.id, sessionKey: NO_SESSION };
+    expect((await routes.check(checkRequest(mint(routes, 'gate', other)))).status).toBe(403);
+  });
+
+  it("does not take another account's session for its own", async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    const alice = await signUp(routes, 'alice');
+    const crossed = { id: root.id, sessionKey: alice.sessionKey };
+    expect((await routes.check(checkRequest(mint(routes, 'gate', crossed)))).status).toBe(403);
   });
 });
 
@@ -271,6 +331,10 @@ describe('enter', () => {
     expect(JSON.parse(String(init.body))).toEqual({ password: ADMIN_PASSWORD });
 
     const gateValue = gate.split(';')[0]!.split('=').slice(1).join('=');
+    expect(routes.token.verifyToken('gate', gateValue, GATE_SECRET)).toMatchObject({
+      accountId: root.id,
+      sessionKey: root.sessionKey,
+    });
     expect((await routes.check(checkRequest(gateValue))).status).toBe(204);
   });
 
@@ -278,36 +342,49 @@ describe('enter', () => {
     const routes = await load();
     const root = await signUp(routes, 'root');
     stubOmniRoute(signedIn);
-    const ticket = routes.token.mintToken(
-      'ticket',
-      root.id,
-      routes.token.TICKET_TTL_MS,
-      GATE_SECRET,
-    );
+    const ticket = mint(routes, 'ticket', root);
     expect((await routes.enter(enterRequest(ticket))).status).toBe(302);
     expect((await routes.enter(enterRequest(ticket))).status).toBe(403);
   });
 
   it('refuses a missing, expired, wrong-kind or learner ticket without calling OmniRoute', async () => {
     const routes = await load();
-    const { mintToken, TICKET_TTL_MS, GATE_TTL_MS } = routes.token;
     const root = await signUp(routes, 'root');
     const alice = await signUp(routes, 'alice');
     const fetchMock = stubOmniRoute(signedIn);
-    const expired = mintToken(
-      'ticket',
-      root.id,
-      TICKET_TTL_MS,
-      GATE_SECRET,
-      Date.now() - 2 * TICKET_TTL_MS,
-    );
-    const cookieAsTicket = mintToken('gate', root.id, GATE_TTL_MS, GATE_SECRET);
-    const learner = mintToken('ticket', alice.id, TICKET_TTL_MS, GATE_SECRET);
-    for (const ticket of ['', 'junk', expired, cookieAsTicket, learner]) {
+    const expired = mint(routes, 'ticket', root, {
+      now: Date.now() - 2 * routes.token.TICKET_TTL_MS,
+    });
+    const tickets = [
+      '',
+      'junk',
+      expired,
+      mint(routes, 'gate', root),
+      mint(routes, 'ticket', alice),
+      mint(routes, 'ticket', root, { secret: 'x'.repeat(48) }),
+    ];
+    for (const ticket of tickets) {
       const response = await routes.enter(enterRequest(ticket));
       expect(response.status).toBe(403);
       expect(response.headers.getSetCookie()).toHaveLength(0);
     }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses a ticket from a session that was signed out, or that never existed', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    const fetchMock = stubOmniRoute(signedIn);
+    const ticket = mint(routes, 'ticket', root);
+    await db!.query(
+      `UPDATE account_sessions SET revoked_at = now() WHERE left(token_hash, 32) = $1`,
+      [root.sessionKey],
+    );
+    const signedOut = await routes.enter(enterRequest(ticket));
+    expect(signedOut.status).toBe(403);
+    expect(signedOut.headers.getSetCookie()).toHaveLength(0);
+    const invented = mint(routes, 'ticket', { id: root.id, sessionKey: NO_SESSION });
+    expect((await routes.enter(enterRequest(invented))).status).toBe(403);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -317,17 +394,20 @@ describe('enter', () => {
     const fetchMock = stubOmniRoute(
       () => new Response('{"error":"Invalid password"}', { status: 401 }),
     );
-    const ticket = routes.token.mintToken(
-      'ticket',
-      root.id,
-      routes.token.TICKET_TTL_MS,
-      GATE_SECRET,
-    );
-    const response = await routes.enter(enterRequest(ticket));
+    const response = await routes.enter(enterRequest(mint(routes, 'ticket', root)));
     expect(response.status).toBe(502);
     expect(response.headers.getSetCookie()).toHaveLength(0);
     expect(await response.text()).not.toContain(ADMIN_PASSWORD);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets no cookie when OmniRoute answers without its session cookie', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    stubOmniRoute(() => new Response('{"success":true}', { status: 200 }));
+    const response = await routes.enter(enterRequest(mint(routes, 'ticket', root)));
+    expect(response.status).toBe(502);
+    expect(response.headers.getSetCookie()).toHaveLength(0);
   });
 
   it('sets no cookie when OmniRoute is unreachable', async () => {
@@ -339,13 +419,7 @@ describe('enter', () => {
         throw new Error('ECONNREFUSED');
       }),
     );
-    const ticket = routes.token.mintToken(
-      'ticket',
-      root.id,
-      routes.token.TICKET_TTL_MS,
-      GATE_SECRET,
-    );
-    const response = await routes.enter(enterRequest(ticket));
+    const response = await routes.enter(enterRequest(mint(routes, 'ticket', root)));
     expect(response.status).toBe(502);
     expect(response.headers.getSetCookie()).toHaveLength(0);
   });

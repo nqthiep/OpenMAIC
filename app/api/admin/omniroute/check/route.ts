@@ -1,6 +1,6 @@
 import { accountServiceDeps, accountsEnabled } from '@/lib/server/accounts/runtime';
 import { omnirouteConfig } from '@/lib/server/omniroute/config';
-import { isActiveAdminCached, refusal } from '@/lib/server/omniroute/gate';
+import { isActiveAdminSessionCached, refusal } from '@/lib/server/omniroute/gate';
 import { readGateCookie, verifyToken } from '@/lib/server/omniroute/token';
 
 export const runtime = 'nodejs';
@@ -8,7 +8,8 @@ export const runtime = 'nodejs';
 /**
  * The gate's question, asked by Caddy (`forward_auth`) before every request to the dashboard: 204
  * lets it through, anything else is shown to the browser as it is. The answer depends on the gate
- * cookie only, and on the account still being an administrator. Any failure refuses.
+ * cookie only, and on the OpenMAIC session it was opened from still being live for an account that
+ * is still an administrator. Any failure refuses.
  */
 export async function GET(request: Request): Promise<Response> {
   const config = omnirouteConfig();
@@ -22,7 +23,7 @@ export async function GET(request: Request): Promise<Response> {
   }
   try {
     const { db } = await accountServiceDeps();
-    if (!(await isActiveAdminCached(db, claim.accountId))) {
+    if (!(await isActiveAdminSessionCached(db, claim.accountId, claim.sessionKey))) {
       return refusal(403, 'Administrators only.');
     }
   } catch (error) {

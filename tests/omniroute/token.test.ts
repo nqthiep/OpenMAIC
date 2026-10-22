@@ -13,43 +13,55 @@ import {
 
 const SECRET = 's'.repeat(48);
 const ID = '0b9f0e0e-5f3a-4a39-9c52-0f2c1f3d9a11';
+const SESSION = 'ab'.repeat(16);
 
 describe('gate tokens', () => {
   it('verifies a fresh token of the right kind', () => {
-    const token = mintToken('ticket', ID, TICKET_TTL_MS, SECRET, 1_000);
-    expect(verifyToken('ticket', token, SECRET, 2_000)).toMatchObject({ accountId: ID });
+    const token = mintToken('ticket', ID, SESSION, TICKET_TTL_MS, SECRET, 1_000);
+    expect(verifyToken('ticket', token, SECRET, 2_000)).toMatchObject({
+      accountId: ID,
+      sessionKey: SESSION,
+    });
   });
 
   it('refuses an expired token, and one exactly at its expiry', () => {
-    const token = mintToken('gate', ID, GATE_TTL_MS, SECRET, 1_000);
+    const token = mintToken('gate', ID, SESSION, GATE_TTL_MS, SECRET, 1_000);
     expect(verifyToken('gate', token, SECRET, 1_000 + GATE_TTL_MS - 1)).toBeDefined();
     expect(verifyToken('gate', token, SECRET, 1_000 + GATE_TTL_MS)).toBeUndefined();
   });
 
   it('does not let a ticket work as a cookie or the other way round', () => {
-    const ticket = mintToken('ticket', ID, TICKET_TTL_MS, SECRET);
-    const gate = mintToken('gate', ID, GATE_TTL_MS, SECRET);
+    const ticket = mintToken('ticket', ID, SESSION, TICKET_TTL_MS, SECRET);
+    const gate = mintToken('gate', ID, SESSION, GATE_TTL_MS, SECRET);
     expect(verifyToken('gate', ticket, SECRET)).toBeUndefined();
     expect(verifyToken('ticket', gate, SECRET)).toBeUndefined();
   });
 
   it('refuses a token signed with another secret, or edited', () => {
-    const token = mintToken('gate', ID, GATE_TTL_MS, SECRET);
+    const token = mintToken('gate', ID, SESSION, GATE_TTL_MS, SECRET);
     expect(verifyToken('gate', token, 'x'.repeat(48))).toBeUndefined();
-    const [kind, , expires, nonce, signature] = token.split('.');
-    const other = `${kind}.someone-else.${expires}.${nonce}.${signature}`;
+    const [kind, , session, expires, nonce, signature] = token.split('.');
+    const other = `${kind}.someone-else.${session}.${expires}.${nonce}.${signature}`;
     expect(verifyToken('gate', other, SECRET)).toBeUndefined();
-    const longer = `${kind}.${ID}.${Number(expires) + 1}.${nonce}.${signature}`;
+    const longer = `${kind}.${ID}.${session}.${Number(expires) + 1}.${nonce}.${signature}`;
     expect(verifyToken('gate', longer, SECRET)).toBeUndefined();
+    const elsewhere = `${kind}.${ID}.${'cd'.repeat(16)}.${expires}.${nonce}.${signature}`;
+    expect(verifyToken('gate', elsewhere, SECRET)).toBeUndefined();
   });
 
-  it.each(['', 'a.b.c', 'gate.x.1.n', `${'a.'.repeat(6)}z`])('refuses malformed %j', (value) => {
-    expect(verifyToken('gate', value, SECRET)).toBeUndefined();
-  });
+  it.each(['', 'a.b.c', 'gate.x.1.n', 'gate.x.y.1.n', `${'a.'.repeat(7)}z`])(
+    'refuses malformed %j',
+    (value) => {
+      expect(verifyToken('gate', value, SECRET)).toBeUndefined();
+    },
+  );
 
   it('refuses to mint for an account id that would break the format', () => {
-    expect(() => mintToken('gate', 'a.b', 1, SECRET)).toThrow();
-    expect(() => mintToken('gate', '', 1, SECRET)).toThrow();
+    expect(() => mintToken('gate', 'a.b', SESSION, 1, SECRET)).toThrow();
+    expect(() => mintToken('gate', '', SESSION, 1, SECRET)).toThrow();
+    expect(() => mintToken('gate', ID, 'short', 1, SECRET)).toThrow();
+    expect(() => mintToken('gate', ID, 'AB'.repeat(16), 1, SECRET)).toThrow();
+    expect(() => mintToken('gate', ID, `${SESSION}.`, 1, SECRET)).toThrow();
   });
 
   it('redeems a nonce once', () => {

@@ -88,13 +88,15 @@ Checked against OmniRoute v3.8.52's own Dockerfile, `.env.example` and source, a
 
 ## How the gate behaves
 
-- The ticket from **Open OmniRoute settings** lives 60 seconds and works once. It is checked, then the account is checked again (still an active administrator), then the app signs in to OmniRoute.
-- The browser gets two cookies on the OmniRoute hostname only: `omniroute_gate` (8 hours, HttpOnly, no `Domain`) and OmniRoute's own `auth_token` (30 days). After 8 hours the gate refuses; click the button again. The `openmaic_session` cookie is never sent to this hostname.
-- Every request asks the app first. The answer is remembered for 15 seconds per account, so a demoted or disabled administrator loses access within about 15 seconds. OmniRoute's own cookie lasts longer but is useless without the gate cookie.
+- The ticket from **Open OmniRoute settings** lives 60 seconds and works once. It names the OpenMAIC session it was created in. It is checked, then that session and its account are checked again (session live, account an enabled administrator), then the app signs in to OmniRoute.
+- The browser gets two cookies on the OmniRoute hostname only: `omniroute_gate` (up to 8 hours, HttpOnly, no `Domain`) and OmniRoute's own `auth_token` (30 days). The `openmaic_session` cookie is never sent to this hostname.
+- Every request asks the app first. The gate cookie is tied to the OpenMAIC session it was opened from, so signing out of OpenMAIC, an expired session, a demotion or a disabled account closes the gate within about 15 seconds (the answer is remembered that long per session). OmniRoute's own cookie lasts longer but is useless without the gate cookie. After 8 hours click the button again.
+- Caddy sets `Cache-Control: private, no-store` on everything it takes from OmniRoute. Without it Cloudflare could keep OmniRoute's static files at its edge and hand them out without asking the app.
 - `omniroute_gate` is also forwarded to OmniRoute with the other cookies. It opens nothing but this dashboard, so this is accepted.
 - The `enter` route also answers on the main hostname if called there. It still needs a valid ticket, which only ever points at the OmniRoute hostname.
 - The live-monitor WebSocket of OmniRoute is switched off (`OMNIROUTE_ENABLE_LIVE_WS=false`): the page that needs it will not update live.
 - `ACCESS_CODE` and this feature do not mix: the app's middleware answers 401 to every `/api/*` call without the access cookie, including the gate's check. The production server no longer sets `ACCESS_CODE`.
+- Same site, not same origin: `omniroute.khaitam.ai.vn` and `khaitam.ai.vn` are one site, so a browser attaches the app's session cookie to requests that code on the dashboard page sends to the app (it cannot read the answers). What stops forged changes is that the app's admin account routes and the routes behind `learningRoute(..., { mutating: true })` refuse any request whose `Sec-Fetch-Site` is not `same-origin`, and that JSON routes require `application/json`, which a cross-origin form cannot send without a CORS preflight the app does not allow. The other POST routes of the app were not audited for this. OmniRoute is third-party code: keep the image tag pinned and read release notes before upgrading. A hostname on a different registrable domain would remove the question.
 
 ## Troubleshooting
 

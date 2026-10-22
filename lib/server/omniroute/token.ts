@@ -2,8 +2,9 @@
  * The two signed values of the OmniRoute gate. A ticket (60 seconds, single use) carries an
  * administrator from the Settings popup to the dashboard's own origin, which never receives the
  * `openmaic_session` cookie. The gate cookie (8 hours) is what that origin sends back on every
- * request. Both are `kind.accountId.expiresAtMs.nonce.signature`; the kind is signed, so a ticket
- * cannot be replayed as a cookie.
+ * request. Both are `kind.accountId.sessionKey.expiresAtMs.nonce.signature`. The kind is signed, so
+ * a ticket cannot be replayed as a cookie. The session key names the OpenMAIC session the gate was
+ * opened from, so signing out of OpenMAIC closes the gate too.
  */
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
@@ -15,11 +16,14 @@ export type TokenKind = 'ticket' | 'gate';
 
 export interface TokenClaim {
   accountId: string;
+  /** The first 32 hex digits of the SHA-256 digest of the OpenMAIC session token. */
+  sessionKey: string;
   nonce: string;
   expiresAt: number;
 }
 
 const ACCOUNT_ID = /^[A-Za-z0-9_-]+$/;
+const SESSION_KEY = /^[0-9a-f]{32}$/;
 
 function sign(body: string, secret: string): string {
   return createHmac('sha256', secret).update(body).digest('base64url');
@@ -28,12 +32,14 @@ function sign(body: string, secret: string): string {
 export function mintToken(
   kind: TokenKind,
   accountId: string,
+  sessionKey: string,
   ttlMs: number,
   secret: string,
   now = Date.now(),
 ): string {
   if (!ACCOUNT_ID.test(accountId)) throw new Error('Account id cannot be put in a gate token');
-  const body = `${kind}.${accountId}.${now + ttlMs}.${randomBytes(9).toString('base64url')}`;
+  if (!SESSION_KEY.test(sessionKey)) throw new Error('Session key cannot be put in a gate token');
+  const body = `${kind}.${accountId}.${sessionKey}.${now + ttlMs}.${randomBytes(9).toString('base64url')}`;
   return `${body}.${sign(body, secret)}`;
 }
 
@@ -45,20 +51,21 @@ export function verifyToken(
   now = Date.now(),
 ): TokenClaim | undefined {
   const parts = token.split('.');
-  if (parts.length !== 5) return undefined;
-  const [tokenKind, accountId, expires, nonce, signature] = parts as [
+  if (parts.length !== 6) return undefined;
+  const [tokenKind, accountId, sessionKey, expires, nonce, signature] = parts as [
+    string,
     string,
     string,
     string,
     string,
     string,
   ];
-  const expected = Buffer.from(sign(parts.slice(0, 4).join('.'), secret));
+  const expected = Buffer.from(sign(parts.slice(0, 5).join('.'), secret));
   const given = Buffer.from(signature);
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return undefined;
   const expiresAt = Number(expires);
   if (tokenKind !== kind || !Number.isFinite(expiresAt) || expiresAt <= now) return undefined;
-  return { accountId, nonce, expiresAt };
+  return { accountId, sessionKey, nonce, expiresAt };
 }
 
 const USED_TICKETS = Symbol.for('openmaic.omniroute.usedTickets');

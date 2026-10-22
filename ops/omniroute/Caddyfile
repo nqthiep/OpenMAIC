@@ -12,6 +12,10 @@
 		forward_auth openmaic:3000 {
 			uri /api/admin/omniroute/check
 		}
-		reverse_proxy omniroute:20128
+		reverse_proxy omniroute:20128 {
+			# Without this, Cloudflare may keep OmniRoute's static files (immutable, public) and serve
+			# them to anyone from its edge without asking the app first.
+			header_down Cache-Control "private, no-store"
+		}
 	}
 }

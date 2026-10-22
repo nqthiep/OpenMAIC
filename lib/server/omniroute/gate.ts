@@ -8,16 +8,29 @@ import { effectiveRole, type AccountRole } from '@/lib/server/authz/roles';
 
 import type { OmniRouteConfig } from './config';
 
-/** Whether the account exists, is not disabled and acts as an administrator right now. */
-export async function isActiveAdmin(db: AccountQueryable, accountId: string): Promise<boolean> {
+/**
+ * Whether the OpenMAIC session the gate was opened from is still live (not signed out, not
+ * expired) and its account is an enabled administrator right now.
+ */
+export async function isActiveAdminSession(
+  db: AccountQueryable,
+  accountId: string,
+  sessionKey: string,
+  now = new Date(),
+): Promise<boolean> {
   const result = await db.query(
-    `SELECT username, role, disabled_at IS NOT NULL AS disabled FROM accounts WHERE id = $1::text`,
-    [accountId],
+    `SELECT a.username, a.role
+       FROM account_sessions s
+       JOIN accounts a ON a.id = s.account_id
+      WHERE s.account_id = $1::text
+        AND left(s.token_hash, 32) = $2::text
+        AND s.revoked_at IS NULL
+        AND s.expires_at > $3::timestamptz
+        AND a.disabled_at IS NULL`,
+    [accountId, sessionKey, now.toISOString()],
   );
-  const row = result.rows[0] as
-    | { username: string; role: AccountRole; disabled: boolean }
-    | undefined;
-  if (!row || row.disabled) return false;
+  const row = result.rows[0] as { username: string; role: AccountRole } | undefined;
+  if (!row) return false;
   return can({ accountId, role: effectiveRole(row.username, row.role) }, 'provider.manage');
 }
 
@@ -25,18 +38,22 @@ const CHECK_TTL_MS = 15_000;
 const checked = new Map<string, { ok: boolean; at: number }>();
 
 /**
- * `isActiveAdmin` remembered for 15 seconds: the dashboard loads many files per page and each one
- * asks. A demoted or disabled administrator loses access within that time.
+ * `isActiveAdminSession` remembered for 15 seconds: the dashboard loads many files per page and
+ * each one asks. After signing out of OpenMAIC, or being demoted or disabled, access ends within
+ * that time.
  */
-export async function isActiveAdminCached(
+export async function isActiveAdminSessionCached(
   db: AccountQueryable,
   accountId: string,
+  sessionKey: string,
   now = Date.now(),
 ): Promise<boolean> {
-  const hit = checked.get(accountId);
+  const key = `${accountId}:${sessionKey}`;
+  const hit = checked.get(key);
   if (hit && now - hit.at < CHECK_TTL_MS) return hit.ok;
-  const ok = await isActiveAdmin(db, accountId);
-  checked.set(accountId, { ok, at: now });
+  for (const [seen, entry] of checked) if (now - entry.at >= CHECK_TTL_MS) checked.delete(seen);
+  const ok = await isActiveAdminSession(db, accountId, sessionKey, new Date(now));
+  checked.set(key, { ok, at: now });
   return ok;
 }
 

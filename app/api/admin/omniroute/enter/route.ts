@@ -1,6 +1,6 @@
 import { accountServiceDeps, accountsEnabled } from '@/lib/server/accounts/runtime';
 import { omnirouteConfig } from '@/lib/server/omniroute/config';
-import { isActiveAdmin, refusal, signInToOmniRoute } from '@/lib/server/omniroute/gate';
+import { isActiveAdminSession, refusal, signInToOmniRoute } from '@/lib/server/omniroute/gate';
 import {
   GATE_TTL_MS,
   gateCookieHeader,
@@ -31,7 +31,9 @@ export async function GET(request: Request): Promise<Response> {
 
   try {
     const { db } = await accountServiceDeps();
-    if (!(await isActiveAdmin(db, claim.accountId))) return refusal(403, 'Administrators only.');
+    if (!(await isActiveAdminSession(db, claim.accountId, claim.sessionKey))) {
+      return refusal(403, 'Administrators only.');
+    }
   } catch (error) {
     console.error(
       '[omniroute] account check failed:',
@@ -45,7 +47,7 @@ export async function GET(request: Request): Promise<Response> {
     return refusal(502, 'OmniRoute did not accept the sign-in. See ops/omniroute/README.md.');
   }
 
-  const gate = mintToken('gate', claim.accountId, GATE_TTL_MS, config.gateSecret);
+  const gate = mintToken('gate', claim.accountId, claim.sessionKey, GATE_TTL_MS, config.gateSecret);
   const headers = new Headers({ location: `${config.publicUrl}/`, 'cache-control': 'no-store' });
   headers.append('set-cookie', gateCookieHeader(gate, config.publicUrl.startsWith('https:')));
   headers.append('set-cookie', omnirouteCookie);

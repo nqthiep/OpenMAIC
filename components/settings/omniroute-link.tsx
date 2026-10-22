@@ -52,17 +52,21 @@ export function OmniRouteLink() {
   const open = async () => {
     // Opened before the request, still inside the click, so a popup blocker lets the tab through.
     const win = window.open('', '_blank');
+    if (!win) {
+      // Blocked by the browser: asking the server now would only mint a ticket nobody can use.
+      toast.error(t('admin.providers.omniroute.openFailed'));
+      return;
+    }
     setBusy(true);
     try {
       const response = await fetch('/api/admin/omniroute/open', { method: 'POST' });
       if (!response.ok) throw new Error(`omniroute open: HTTP ${response.status}`);
       const body: { url?: unknown } | null = await response.json();
       if (typeof body?.url !== 'string') throw new Error('omniroute open: no url in the answer');
-      if (!win) throw new Error('omniroute open: the tab was blocked');
       win.opener = null;
       win.location.href = body.url;
     } catch {
-      win?.close();
+      win.close();
       toast.error(t('admin.providers.omniroute.openFailed'));
     } finally {
       setBusy(false);
