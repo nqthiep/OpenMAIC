@@ -1601,6 +1601,17 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
       },
     ],
   },
+
+  omniroute: {
+    id: 'omniroute',
+    name: 'OmniRoute',
+    type: 'openai',
+    defaultBaseUrl: 'http://omniroute:20129/v1',
+    requiresApiKey: true,
+    // Self-hosted OpenAI-compatible gateway: the model list is dynamic
+    // (served by /v1/models), so the catalog pins none.
+    models: [],
+  },
 };
 
 applyModelMetadata(PROVIDERS);
