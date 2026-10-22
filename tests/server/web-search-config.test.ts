@@ -1,25 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 describe('server web search config', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
-    delete process.env.TAVILY_API_KEY;
-    delete process.env.TAVILY_BASE_URL;
-    delete process.env.EXA_API_KEY;
-    delete process.env.EXA_BASE_URL;
-    delete process.env.BOCHA_API_KEY;
-    delete process.env.BOCHA_BASE_URL;
-    delete process.env.BRAVE_API_KEY;
-    delete process.env.BRAVE_BASE_URL;
-    delete process.env.BAIDU_API_KEY;
-    delete process.env.BAIDU_BASE_URL;
-    delete process.env.WEB_SEARCH_MINIMAX_API_KEY;
-    delete process.env.WEB_SEARCH_MINIMAX_BASE_URL;
-    delete process.env.WEB_SEARCH_CLAUDE_API_KEY;
-    delete process.env.WEB_SEARCH_CLAUDE_BASE_URL;
-    delete process.env.WEB_SEARCH_CLAUDE_MODELS;
-    delete process.env.SEARXNG_BASE_URL;
+    clearProviders();
   });
 
   it('rejects client-controlled base URLs outside the provider allowlist', async () => {
@@ -58,9 +44,10 @@ describe('server web search config', () => {
     });
   });
 
-  it('resolves Exa classroom config from server environment variables', async () => {
-    vi.stubEnv('EXA_API_KEY', 'exa-server-key');
-    vi.stubEnv('EXA_BASE_URL', 'https://proxy.example.com/exa');
+  it('resolves Exa classroom config from the managed provider', async () => {
+    useProviders({
+      webSearch: { exa: { apiKey: 'exa-server-key', baseUrl: 'https://proxy.example.com/exa' } },
+    });
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
     expect(resolveClassroomWebSearchConfig({ webSearchProviderId: 'exa' })).toEqual({
@@ -110,8 +97,11 @@ describe('server web search config', () => {
   });
 
   it('uses server base URL for classroom web search config instead of client-controlled URLs', async () => {
-    vi.stubEnv('BOCHA_API_KEY', 'bocha-server-key');
-    vi.stubEnv('BOCHA_BASE_URL', 'http://internal-proxy.local/bocha');
+    useProviders({
+      webSearch: {
+        bocha: { apiKey: 'bocha-server-key', baseUrl: 'http://internal-proxy.local/bocha' },
+      },
+    });
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
@@ -138,9 +128,12 @@ describe('server web search config', () => {
     });
   });
 
-  it('resolves MiniMax classroom web search config from dedicated server env vars', async () => {
-    vi.stubEnv('WEB_SEARCH_MINIMAX_API_KEY', 'minimax-server-key');
-    vi.stubEnv('WEB_SEARCH_MINIMAX_BASE_URL', 'https://api.minimaxi.com');
+  it('resolves MiniMax classroom web search config from the managed provider', async () => {
+    useProviders({
+      webSearch: {
+        minimax: { apiKey: 'minimax-server-key', baseUrl: 'https://api.minimaxi.com' },
+      },
+    });
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
@@ -182,10 +175,16 @@ describe('server web search config', () => {
     });
   });
 
-  it('pins the Claude model from WEB_SEARCH_CLAUDE_MODELS over the client model', async () => {
-    vi.stubEnv('WEB_SEARCH_CLAUDE_API_KEY', 'sk-server-key');
-    vi.stubEnv('WEB_SEARCH_CLAUDE_BASE_URL', 'https://api.anthropic.com/v1');
-    vi.stubEnv('WEB_SEARCH_CLAUDE_MODELS', 'claude-sonnet-5,claude-opus-5');
+  it('pins the Claude model from the managed provider models over the client model', async () => {
+    useProviders({
+      webSearch: {
+        claude: {
+          apiKey: 'sk-server-key',
+          baseUrl: 'https://api.anthropic.com/v1',
+          models: ['claude-sonnet-5', 'claude-opus-5'],
+        },
+      },
+    });
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
@@ -216,7 +215,7 @@ describe('server web search config', () => {
   });
 
   it('resolves SearXNG classroom web search config from server base URL', async () => {
-    vi.stubEnv('SEARXNG_BASE_URL', 'http://192.168.161.100:6060');
+    useProviders({ webSearch: { searxng: { baseUrl: 'http://192.168.161.100:6060' } } });
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
@@ -234,7 +233,7 @@ describe('server web search config', () => {
   });
 
   it('keeps Baidu sub-source toggles in classroom web search config', async () => {
-    vi.stubEnv('BAIDU_API_KEY', 'baidu-server-key');
+    useProviders({ webSearch: { baidu: { apiKey: 'baidu-server-key' } } });
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 

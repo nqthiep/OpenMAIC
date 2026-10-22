@@ -1,600 +1,433 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock fs — only intercept server-providers.yml; delegate everything else to real fs.
-// This prevents YAML config from leaking host-machine state into tests while keeping
-// the mock scoped to what provider-config actually reads.
-let yamlOverride: string | null = null;
+import {
+  enabledProviderIds,
+  enabledServerTTSProviderIds,
+  getParallelSceneConcurrency,
+  getServerASRProviders,
+  getServerImageProviders,
+  getServerPDFProviders,
+  getServerProviders,
+  getServerTTSProviders,
+  getServerVideoProviders,
+  getServerWebSearchProviders,
+  isServerConfiguredProvider,
+  isServerProviderDisabled,
+  isServerTTSProviderDisabled,
+  resolveApiKey,
+  resolveASRApiKey,
+  resolveASRBaseUrl,
+  resolveASRModel,
+  resolveBaseUrl,
+  resolveImageApiKey,
+  resolveImageBaseUrl,
+  resolveImageModel,
+  resolveManagedAliDocMindCredentials,
+  resolvePDFApiKey,
+  resolvePDFBaseUrl,
+  resolveProxy,
+  resolveQwenVoiceCloneModel,
+  resolveServerASRProviderId,
+  resolveServerImageProviderId,
+  resolveServerMediaExtractorConfig,
+  resolveServerVideoProviderId,
+  resolveServerWebSearchProviderId,
+  resolveTTSApiKey,
+  resolveTTSBaseUrl,
+  resolveTTSModel,
+  resolveVideoBaseUrl,
+  resolveVideoModel,
+  resolveWebSearchApiKey,
+  resolveWebSearchBaseUrl,
+  resolveWebSearchModel,
+} from '@/lib/server/provider-config';
+import {
+  ProviderConfigNotReady,
+  resetProviderSnapshot,
+} from '@/lib/server/provider-store/snapshot';
 
-const ENV_PREFIXES_TO_CLEAR = [
-  'OPENAI',
-  'AZURE_OPENAI',
-  'ATLASCLOUD',
-  'ANTHROPIC',
-  'GOOGLE',
-  'DEEPSEEK',
-  'QWEN',
-  'KIMI',
-  'MINIMAX',
-  'GLM',
-  'SILICONFLOW',
-  'DOUBAO',
-  'OPENROUTER',
-  'GROK',
-  'TENCENT',
-  'TENCENT_HUNYUAN',
-  'XIAOMI',
-  'MIMO',
-  'HY3',
-  'OLLAMA',
-  'BEDROCK',
-  'TTS_OPENAI',
-  'TTS_AZURE',
-  'TTS_GLM',
-  'TTS_QWEN',
-  'TTS_DOUBAO',
-  'TTS_ELEVENLABS',
-  'TTS_MINIMAX',
-  'TTS_VOXCPM',
-  'ASR_OPENAI',
-  'ASR_QWEN',
-  'ASR_FUNASR',
-  'PDF_UNPDF',
-  'PDF_MINERU',
-  'PDF_MINERU_CLOUD',
-  'IMAGE_OPENAI',
-  'IMAGE_SEEDREAM',
-  'IMAGE_QWEN_IMAGE',
-  'IMAGE_NANO_BANANA',
-  'IMAGE_MINIMAX',
-  'IMAGE_GROK',
-  'VIDEO_SEEDANCE',
-  'VIDEO_KLING',
-  'VIDEO_VEO',
-  'VIDEO_SORA',
-  'VIDEO_MINIMAX',
-  'VIDEO_GROK',
-  'EXA',
-  'BOCHA',
-  'WEB_SEARCH_MINIMAX',
-  'WEB_SEARCH_CLAUDE',
-  'WEB_SEARCH_DOUBAO',
-];
-
-function clearProviderEnv() {
-  for (const prefix of ENV_PREFIXES_TO_CLEAR) {
-    delete process.env[`${prefix}_API_KEY`];
-    delete process.env[`${prefix}_BASE_URL`];
-    delete process.env[`${prefix}_MODELS`];
-    delete process.env[`${prefix}_ENABLED`];
-  }
-  delete process.env.TAVILY_API_KEY;
-  delete process.env.BOCHA_API_KEY;
-  delete process.env.BOCHA_BASE_URL;
-  delete process.env.ALIDOCMIND_ACCESS_KEY_ID;
-  delete process.env.ALIDOCMIND_ACCESS_KEY_SECRET;
-  delete process.env.ALIDOCMIND_BASE_URL;
-  delete process.env.BEDROCK_REGION;
-  delete process.env.AWS_BEARER_TOKEN_BEDROCK;
-  delete process.env.TTS_QWEN_VOICE_CLONE_MODEL;
-}
-
-vi.mock('fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('fs')>();
-  const isYaml = (p: unknown) => typeof p === 'string' && p.endsWith('server-providers.yml');
-  return {
-    ...actual,
-    default: {
-      ...actual,
-      existsSync: (p: string) => (isYaml(p) ? yamlOverride !== null : actual.existsSync(p)),
-      readFileSync: (p: string, ...args: unknown[]) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        isYaml(p) ? (yamlOverride ?? '') : (actual.readFileSync as any)(p, ...args),
-    },
-    existsSync: (p: string) => (isYaml(p) ? yamlOverride !== null : actual.existsSync(p)),
-    readFileSync: (p: string, ...args: unknown[]) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      isYaml(p) ? (yamlOverride ?? '') : (actual.readFileSync as any)(p, ...args),
-  };
-});
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 describe('provider-config', () => {
   beforeEach(() => {
-    vi.resetModules();
     vi.unstubAllEnvs();
-    clearProviderEnv();
-    yamlOverride = null;
+    // An empty DATABASE_URL reads as "no database", whatever the host environment holds.
+    vi.stubEnv('DATABASE_URL', '');
+    vi.stubEnv('PARALLEL_SCENE_CONCURRENCY', '');
+    vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', '');
+    clearProviders();
+  });
+
+  afterEach(() => {
+    clearProviders();
+    vi.unstubAllEnvs();
+  });
+
+  describe('snapshot readiness', () => {
+    it('throws ProviderConfigNotReady when a database is configured but nothing is loaded', () => {
+      vi.stubEnv('DATABASE_URL', 'postgres://user:pw@localhost:5432/db');
+      resetProviderSnapshot();
+      expect(() => resolveApiKey('openai')).toThrow(ProviderConfigNotReady);
+    });
+
+    it('reads as nothing managed when no database is configured and nothing is installed', () => {
+      expect(resolveApiKey('openai')).toBe('');
+      expect(getServerProviders()).toEqual({});
+    });
   });
 
   describe('resolveApiKey', () => {
-    it('returns client key when provided', async () => {
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
+    it('returns client key when provided', () => {
       expect(resolveApiKey('openai', 'sk-client')).toBe('sk-client');
     });
 
-    it('returns server key from env when no client key', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-server');
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
+    it('returns the server key when no client key', () => {
+      useProviders({ providers: { openai: { apiKey: 'sk-server' } } });
       expect(resolveApiKey('openai')).toBe('sk-server');
     });
 
-    it('returns empty string when neither client nor server key exists', async () => {
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
+    it('returns empty string when neither client nor server key exists', () => {
       expect(resolveApiKey('openai')).toBe('');
     });
 
-    it('ignores client key for a server-managed provider (server is authoritative)', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-server');
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
-      // openai is server-configured ⇒ managed ⇒ client override is ignored.
+    it('ignores client key for a server-managed provider (server is authoritative)', () => {
+      useProviders({ providers: { openai: { apiKey: 'sk-server' } } });
       expect(resolveApiKey('openai', 'sk-client')).toBe('sk-server');
     });
 
-    it('uses the client key for an unmanaged provider', async () => {
-      // No env key for openai ⇒ not managed ⇒ client key flows through.
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
+    it('uses the client key for an unmanaged provider', () => {
+      useProviders({ providers: { anthropic: { apiKey: 'sk-anthropic' } } });
       expect(resolveApiKey('openai', 'sk-client')).toBe('sk-client');
     });
 
-    it('resolves non-OpenAI providers via their env prefix', async () => {
-      vi.stubEnv('ANTHROPIC_API_KEY', 'sk-anthropic');
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
+    it('resolves each managed provider by its own id', () => {
+      useProviders({
+        providers: { anthropic: { apiKey: 'sk-anthropic' }, azure: { apiKey: 'azure-key' } },
+      });
       expect(resolveApiKey('anthropic')).toBe('sk-anthropic');
-    });
-
-    it('resolves Azure OpenAI via its dedicated env prefix', async () => {
-      vi.stubEnv('AZURE_OPENAI_API_KEY', 'azure-key');
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
       expect(resolveApiKey('azure')).toBe('azure-key');
     });
 
-    it('returns empty string for unknown provider with no env var', async () => {
-      const { resolveApiKey } = await import('@/lib/server/provider-config');
+    it('returns empty string for unknown provider with nothing managed', () => {
       expect(resolveApiKey('nonexistent-provider')).toBe('');
     });
   });
 
   describe('getParallelSceneConcurrency', () => {
-    beforeEach(() => {
-      delete process.env.PARALLEL_SCENE_CONCURRENCY;
-    });
-
-    it('defaults to 0 (serial) when unset', async () => {
-      const { getParallelSceneConcurrency } = await import('@/lib/server/provider-config');
+    it('defaults to 0 (serial) when unset', () => {
       expect(getParallelSceneConcurrency()).toBe(0);
     });
 
-    it('reads a positive integer from the env var', async () => {
+    it('reads a positive integer from the env var', () => {
       vi.stubEnv('PARALLEL_SCENE_CONCURRENCY', '3');
-      const { getParallelSceneConcurrency } = await import('@/lib/server/provider-config');
       expect(getParallelSceneConcurrency()).toBe(3);
     });
 
-    it('clamps to a maximum of 10', async () => {
+    it('clamps to a maximum of 10', () => {
       vi.stubEnv('PARALLEL_SCENE_CONCURRENCY', '50');
-      const { getParallelSceneConcurrency } = await import('@/lib/server/provider-config');
       expect(getParallelSceneConcurrency()).toBe(10);
     });
 
-    it('treats zero, negative, and non-numeric values as off', async () => {
+    it('treats zero, negative, and non-numeric values as off', () => {
       for (const value of ['0', '-2', 'abc']) {
-        vi.resetModules();
         vi.stubEnv('PARALLEL_SCENE_CONCURRENCY', value);
-        const { getParallelSceneConcurrency } = await import('@/lib/server/provider-config');
         expect(getParallelSceneConcurrency(), `value=${value}`).toBe(0);
       }
     });
   });
 
   describe('resolveBaseUrl', () => {
-    it('returns client URL for an unmanaged provider', async () => {
-      const { resolveBaseUrl } = await import('@/lib/server/provider-config');
+    it('returns client URL for an unmanaged provider', () => {
       expect(resolveBaseUrl('openai', 'https://custom.api.com')).toBe('https://custom.api.com');
     });
 
-    it('ignores client URL for a server-managed provider', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-server');
-      vi.stubEnv('OPENAI_BASE_URL', 'https://proxy.example.com/v1');
-      const { resolveBaseUrl } = await import('@/lib/server/provider-config');
-      // Managed ⇒ server URL wins, client override is dropped.
+    it('ignores client URL for a server-managed provider', () => {
+      useProviders({
+        providers: { openai: { apiKey: 'sk-server', baseUrl: 'https://proxy.example.com/v1' } },
+      });
       expect(resolveBaseUrl('openai', 'https://client.example.com')).toBe(
         'https://proxy.example.com/v1',
       );
     });
 
-    it('returns server URL from env when no client URL', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-test');
-      vi.stubEnv('OPENAI_BASE_URL', 'https://proxy.example.com/v1');
-      const { resolveBaseUrl } = await import('@/lib/server/provider-config');
+    it('returns the server URL when no client URL', () => {
+      useProviders({
+        providers: { openai: { apiKey: 'sk-test', baseUrl: 'https://proxy.example.com/v1' } },
+      });
       expect(resolveBaseUrl('openai')).toBe('https://proxy.example.com/v1');
     });
 
-    it('returns undefined when neither client nor server URL exists', async () => {
-      const { resolveBaseUrl } = await import('@/lib/server/provider-config');
+    it('returns undefined when neither client nor server URL exists', () => {
       expect(resolveBaseUrl('openai')).toBeUndefined();
+    });
+
+    it('does not fall back to the client URL when a managed provider has no URL', () => {
+      useProviders({ providers: { openai: { apiKey: 'sk-server' } } });
+      expect(resolveBaseUrl('openai', 'https://client.example.com')).toBeUndefined();
     });
   });
 
   describe('resolveProxy', () => {
-    it('returns undefined when no proxy configured', async () => {
-      const { resolveProxy } = await import('@/lib/server/provider-config');
+    it('returns undefined when no proxy configured', () => {
       expect(resolveProxy('openai')).toBeUndefined();
     });
 
-    it('returns proxy URL from YAML config', async () => {
-      yamlOverride = `
-providers:
-  openai:
-    apiKey: sk-yaml
-    proxy: http://proxy.internal:8080
-`;
-      const { resolveProxy } = await import('@/lib/server/provider-config');
+    it('returns the proxy URL of a managed provider', () => {
+      useProviders({
+        providers: { openai: { apiKey: 'sk-x', proxy: 'http://proxy.internal:8080' } },
+      });
       expect(resolveProxy('openai')).toBe('http://proxy.internal:8080');
     });
   });
 
   describe('getServerProviders', () => {
-    it('returns empty object when no providers configured', async () => {
-      const { getServerProviders } = await import('@/lib/server/provider-config');
+    it('returns empty object when no providers configured', () => {
       expect(getServerProviders()).toEqual({});
     });
 
-    it('returns allowed models but never the API key or base URL', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-secret');
-      vi.stubEnv('OPENAI_BASE_URL', 'https://proxy.com/v1');
-      vi.stubEnv('OPENAI_MODELS', 'gpt-4o,gpt-4o-mini');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
+    it('returns allowed models but never the API key, base URL or proxy', () => {
+      useProviders({
+        providers: {
+          openai: {
+            apiKey: 'sk-secret',
+            baseUrl: 'https://proxy.com/v1',
+            proxy: 'http://proxy.internal:8080',
+            models: ['gpt-4o', 'gpt-4o-mini'],
+          },
+        },
+      });
       const providers = getServerProviders();
 
-      expect(providers.openai).toBeDefined();
-      expect(providers.openai.models).toEqual(['gpt-4o', 'gpt-4o-mini']);
-      // Neither the API key nor the base URL may leak to the client.
-      expect((providers.openai as Record<string, unknown>).apiKey).toBeUndefined();
-      expect((providers.openai as Record<string, unknown>).baseUrl).toBeUndefined();
+      expect(providers.openai).toEqual({ models: ['gpt-4o', 'gpt-4o-mini'] });
     });
 
-    it('lists multiple providers', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-openai');
-      vi.stubEnv('ANTHROPIC_API_KEY', 'sk-anthropic');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(Object.keys(providers)).toContain('openai');
-      expect(Object.keys(providers)).toContain('anthropic');
+    it('lists a managed provider without models as an empty entry', () => {
+      useProviders({ providers: { openai: { apiKey: 'sk-secret', models: [] } } });
+      expect(getServerProviders()).toEqual({ openai: {} });
     });
 
-    it('maps OpenRouter env prefix to provider ID', async () => {
-      vi.stubEnv('OPENROUTER_API_KEY', 'sk-openrouter');
-      vi.stubEnv('OPENROUTER_MODELS', 'deepseek/deepseek-v4-pro,deepseek/deepseek-v4-flash');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers.openrouter.models).toEqual([
-        'deepseek/deepseek-v4-pro',
-        'deepseek/deepseek-v4-flash',
-      ]);
+    it('lists multiple providers', () => {
+      useProviders({
+        providers: { openai: { apiKey: 'sk-openai' }, anthropic: { apiKey: 'sk-anthropic' } },
+      });
+      expect(Object.keys(getServerProviders())).toEqual(['openai', 'anthropic']);
     });
 
-    it('maps Azure deployment names to the built-in provider', async () => {
-      vi.stubEnv('AZURE_OPENAI_API_KEY', 'azure-key');
-      vi.stubEnv('AZURE_OPENAI_BASE_URL', 'https://test-resource.openai.azure.com/openai');
-      vi.stubEnv('AZURE_OPENAI_MODELS', 'course-gpt-4o,course-gpt-5');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
+    it('keeps provider ids (openrouter, azure, atlascloud, tencent-hunyuan, xiaomi) as given', () => {
+      useProviders({
+        providers: {
+          openrouter: { apiKey: 'k', models: ['deepseek/deepseek-v4-pro'] },
+          azure: {
+            apiKey: 'k',
+            baseUrl: 'https://test-resource.openai.azure.com/openai',
+            models: ['course-gpt-4o', 'course-gpt-5'],
+          },
+          atlascloud: {
+            apiKey: 'k',
+            baseUrl: 'https://api.atlascloud.ai/v1',
+            models: ['qwen/qwen3.5-flash'],
+          },
+          'tencent-hunyuan': { apiKey: 'k', models: ['hy3-preview'] },
+          xiaomi: { apiKey: 'k', models: ['mimo-v2.5-pro'] },
+        },
+      });
       const providers = getServerProviders();
 
+      expect(providers.openrouter.models).toEqual(['deepseek/deepseek-v4-pro']);
       expect(providers.azure.models).toEqual(['course-gpt-4o', 'course-gpt-5']);
-    });
-
-    it('maps Atlas Cloud env vars to the built-in OpenAI-compatible provider', async () => {
-      vi.stubEnv('ATLASCLOUD_API_KEY', 'sk-atlas');
-      vi.stubEnv('ATLASCLOUD_BASE_URL', 'https://api.atlascloud.ai/v1');
-      vi.stubEnv('ATLASCLOUD_MODELS', 'qwen/qwen3.5-flash,deepseek-ai/deepseek-v4-pro');
-      const { getServerProviders, resolveBaseUrl } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers.atlascloud.models).toEqual([
-        'qwen/qwen3.5-flash',
-        'deepseek-ai/deepseek-v4-pro',
-      ]);
+      expect(providers.atlascloud.models).toEqual(['qwen/qwen3.5-flash']);
       expect(resolveBaseUrl('atlascloud')).toBe('https://api.atlascloud.ai/v1');
+      expect(providers['tencent-hunyuan'].models).toEqual(['hy3-preview']);
+      expect(providers.xiaomi.models).toEqual(['mimo-v2.5-pro']);
       expect((providers.atlascloud as Record<string, unknown>).apiKey).toBeUndefined();
       expect((providers.atlascloud as Record<string, unknown>).baseUrl).toBeUndefined();
     });
 
-    it('maps Tencent Hunyuan and Xiaomi MiMo env prefixes to provider IDs', async () => {
-      vi.stubEnv('TENCENT_HUNYUAN_API_KEY', 'sk-tencent');
-      vi.stubEnv('TENCENT_HUNYUAN_MODELS', 'hy3-preview,hunyuan-2.0-instruct-20251111');
-      vi.stubEnv('MIMO_API_KEY', 'sk-mimo');
-      vi.stubEnv('MIMO_MODELS', 'mimo-v2.5-pro');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers['tencent-hunyuan'].models).toEqual([
-        'hy3-preview',
-        'hunyuan-2.0-instruct-20251111',
-      ]);
-      expect(providers.xiaomi.models).toEqual(['mimo-v2.5-pro']);
+    it('omits providers that are not in the snapshot', () => {
+      useProviders({ providers: { anthropic: { apiKey: 'sk-a' } } });
+      expect(getServerProviders().openai).toBeUndefined();
+      expect(isServerConfiguredProvider('providers', 'openai')).toBe(false);
     });
 
-    it('does not treat HY3 as an env prefix', async () => {
-      vi.stubEnv('HY3_API_KEY', 'sk-hy3');
-      vi.stubEnv('HY3_MODELS', 'hy3-preview');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers['tencent-hunyuan']).toBeUndefined();
-    });
-
-    it('omits providers without API key', async () => {
-      vi.stubEnv('OPENAI_BASE_URL', 'https://proxy.com/v1');
-      // No OPENAI_API_KEY set
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers.openai).toBeUndefined();
-    });
-
-    it('includes Bedrock from env without an API key', async () => {
-      vi.stubEnv('BEDROCK_REGION', 'us-east-1');
-      vi.stubEnv('BEDROCK_MODELS', ' us.anthropic.claude-sonnet-5 , us.anthropic.claude-opus-4-8 ');
-      const { getServerProviders, resolveApiKey, resolveBaseUrl } =
-        await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers.bedrock).toEqual({
-        models: ['us.anthropic.claude-sonnet-5', 'us.anthropic.claude-opus-4-8'],
+    it('includes a keyless provider (Bedrock) with models and no API key', () => {
+      useProviders({
+        providers: { bedrock: { models: ['us.anthropic.claude-sonnet-5'] } },
       });
+
+      expect(getServerProviders().bedrock).toEqual({ models: ['us.anthropic.claude-sonnet-5'] });
       expect(resolveApiKey('bedrock')).toBe('');
       expect(resolveBaseUrl('bedrock')).toBeUndefined();
-    });
-
-    it('does not enable Bedrock for whitespace-only region and models', async () => {
-      vi.stubEnv('BEDROCK_REGION', '   ');
-      vi.stubEnv('BEDROCK_MODELS', ' , ');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-
-      expect(getServerProviders().bedrock).toBeUndefined();
-    });
-
-    it('includes Bedrock from YAML with only models configured', async () => {
-      yamlOverride = `
-providers:
-  bedrock:
-    models:
-      - us.anthropic.claude-sonnet-5
-      - us.anthropic.claude-opus-4-8
-`;
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers.bedrock.models).toEqual([
-        'us.anthropic.claude-sonnet-5',
-        'us.anthropic.claude-opus-4-8',
-      ]);
-    });
-  });
-
-  describe('env var model parsing', () => {
-    it('splits comma-separated models and trims whitespace', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-test');
-      vi.stubEnv('OPENAI_MODELS', ' gpt-4o , gpt-4o-mini , ');
-      const { getServerProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerProviders();
-
-      expect(providers.openai.models).toEqual(['gpt-4o', 'gpt-4o-mini']);
     });
   });
 
   describe('resolveWebSearchApiKey', () => {
-    it('returns client key first', async () => {
-      const { resolveWebSearchApiKey } = await import('@/lib/server/provider-config');
+    it('returns client key first', () => {
       expect(resolveWebSearchApiKey('client-key')).toBe('client-key');
     });
 
-    it('falls back to TAVILY_API_KEY env var', async () => {
-      vi.stubEnv('TAVILY_API_KEY', 'tvly-bare-env');
-      const { resolveWebSearchApiKey } = await import('@/lib/server/provider-config');
-      expect(resolveWebSearchApiKey()).toBe('tvly-bare-env');
+    it('resolves the managed Tavily key for the bare call shape', () => {
+      useProviders({ webSearch: { tavily: { apiKey: 'tvly-managed' } } });
+      expect(resolveWebSearchApiKey()).toBe('tvly-managed');
     });
 
-    it('resolves Bocha API key and base URL from env vars (managed flag only, no URL exposed)', async () => {
-      vi.stubEnv('BOCHA_API_KEY', 'bocha-env-key');
-      vi.stubEnv('BOCHA_BASE_URL', 'https://proxy.example.com/bocha');
-      const { getServerWebSearchProviders, resolveWebSearchApiKey, resolveWebSearchBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('resolves Bocha API key and base URL (managed flag only, no URL exposed)', () => {
+      useProviders({
+        webSearch: { bocha: { apiKey: 'bocha-key', baseUrl: 'https://proxy.example.com/bocha' } },
+      });
 
-      expect(resolveWebSearchApiKey('bocha', undefined)).toBe('bocha-env-key');
+      expect(resolveWebSearchApiKey('bocha', undefined)).toBe('bocha-key');
       expect(resolveWebSearchBaseUrl('bocha')).toBe('https://proxy.example.com/bocha');
-      // The map exposes only the managed flag (presence) — not the base URL.
       expect(getServerWebSearchProviders().bocha).toEqual({});
     });
 
-    it('resolves Exa API key and base URL from env vars', async () => {
-      vi.stubEnv('EXA_API_KEY', 'exa-env-key');
-      vi.stubEnv('EXA_BASE_URL', 'https://proxy.example.com/exa');
-      const { getServerWebSearchProviders, resolveWebSearchApiKey, resolveWebSearchBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('resolves Exa API key and base URL', () => {
+      useProviders({
+        webSearch: { exa: { apiKey: 'exa-key', baseUrl: 'https://proxy.example.com/exa' } },
+      });
 
-      expect(resolveWebSearchApiKey('exa', undefined)).toBe('exa-env-key');
+      expect(resolveWebSearchApiKey('exa', undefined)).toBe('exa-key');
       expect(resolveWebSearchBaseUrl('exa')).toBe('https://proxy.example.com/exa');
       expect(getServerWebSearchProviders().exa).toEqual({});
     });
 
-    it('ignores client key and base URL for a server-managed Bocha provider', async () => {
-      vi.stubEnv('BOCHA_API_KEY', 'bocha-env-key');
-      vi.stubEnv('BOCHA_BASE_URL', 'https://proxy.example.com/bocha');
-      const { resolveWebSearchApiKey, resolveWebSearchBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('ignores client key and base URL for a server-managed Bocha provider', () => {
+      useProviders({
+        webSearch: { bocha: { apiKey: 'bocha-key', baseUrl: 'https://proxy.example.com/bocha' } },
+      });
 
-      // Managed ⇒ server config is authoritative, client overrides dropped.
-      expect(resolveWebSearchApiKey('bocha', 'bocha-client-key')).toBe('bocha-env-key');
+      expect(resolveWebSearchApiKey('bocha', 'bocha-client-key')).toBe('bocha-key');
       expect(resolveWebSearchBaseUrl('bocha', 'https://client.example.com')).toBe(
         'https://proxy.example.com/bocha',
       );
     });
 
-    it('resolves MiniMax web search API key and base URL from dedicated env vars', async () => {
-      vi.stubEnv('WEB_SEARCH_MINIMAX_API_KEY', 'minimax-env-key');
-      vi.stubEnv('WEB_SEARCH_MINIMAX_BASE_URL', 'https://proxy.example.com/minimax');
-      const { getServerWebSearchProviders, resolveWebSearchApiKey, resolveWebSearchBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('uses the client key and base URL for an unmanaged provider', () => {
+      expect(resolveWebSearchApiKey('bocha', 'bocha-client-key')).toBe('bocha-client-key');
+      expect(resolveWebSearchBaseUrl('bocha', 'https://client.example.com')).toBe(
+        'https://client.example.com',
+      );
+    });
 
-      expect(resolveWebSearchApiKey('minimax', undefined)).toBe('minimax-env-key');
+    it('resolves MiniMax web search API key and base URL', () => {
+      useProviders({
+        webSearch: {
+          minimax: { apiKey: 'minimax-key', baseUrl: 'https://proxy.example.com/minimax' },
+        },
+      });
+
+      expect(resolveWebSearchApiKey('minimax', undefined)).toBe('minimax-key');
       expect(resolveWebSearchBaseUrl('minimax')).toBe('https://proxy.example.com/minimax');
       expect(getServerWebSearchProviders().minimax).toEqual({});
     });
 
-    it('resolves Claude web search key, base URL, and pinned model from dedicated env vars', async () => {
-      vi.stubEnv('WEB_SEARCH_CLAUDE_API_KEY', 'claude-env-key');
-      vi.stubEnv('WEB_SEARCH_CLAUDE_BASE_URL', 'https://proxy.example.com/anthropic');
-      vi.stubEnv('WEB_SEARCH_CLAUDE_MODELS', 'claude-sonnet-5,claude-opus-5');
-      const {
-        getServerWebSearchProviders,
-        resolveWebSearchApiKey,
-        resolveWebSearchBaseUrl,
-        resolveWebSearchModel,
-      } = await import('@/lib/server/provider-config');
+    it('resolves Claude web search key, base URL, and pinned model', () => {
+      useProviders({
+        webSearch: {
+          claude: {
+            apiKey: 'claude-key',
+            baseUrl: 'https://proxy.example.com/anthropic',
+            models: ['claude-sonnet-5', 'claude-opus-5'],
+          },
+        },
+      });
 
-      expect(resolveWebSearchApiKey('claude', undefined)).toBe('claude-env-key');
+      expect(resolveWebSearchApiKey('claude', undefined)).toBe('claude-key');
       expect(resolveWebSearchBaseUrl('claude')).toBe('https://proxy.example.com/anthropic');
       // Server-pinned model (first entry) is authoritative over the client model.
       expect(resolveWebSearchModel('claude', 'claude-haiku-4-5')).toBe('claude-sonnet-5');
       expect(getServerWebSearchProviders().claude).toEqual({});
     });
 
-    it('lets the client model win when no Claude model is pinned server-side', async () => {
-      const { resolveWebSearchModel } = await import('@/lib/server/provider-config');
-
+    it('lets the client model win when no Claude model is pinned server-side', () => {
       expect(resolveWebSearchModel('claude', 'claude-opus-5')).toBe('claude-opus-5');
       expect(resolveWebSearchModel('claude')).toBeUndefined();
+
+      useProviders({ webSearch: { claude: { apiKey: 'claude-key' } } });
+      expect(resolveWebSearchModel('claude', 'claude-opus-5')).toBe('claude-opus-5');
     });
   });
 
-  describe('baseUrl-only providers (e.g. mineru)', () => {
-    it('includes PDF provider from YAML when only baseUrl is configured (no apiKey)', async () => {
-      yamlOverride = `
-pdf:
-  mineru:
-    baseUrl: http://localhost:8888
-`;
-      const { getServerPDFProviders, resolvePDFBaseUrl } =
-        await import('@/lib/server/provider-config');
-      const providers = getServerPDFProviders();
+  describe('PDF providers', () => {
+    it('lists a managed PDF provider that has only a baseUrl (e.g. mineru)', () => {
+      useProviders({ pdf: { mineru: { baseUrl: 'http://localhost:8888' } } });
 
-      expect(providers.mineru).toBeDefined();
+      expect(getServerPDFProviders().mineru).toEqual({});
       expect(resolvePDFBaseUrl('mineru')).toBe('http://localhost:8888');
+      expect(resolvePDFApiKey('mineru')).toBe('');
     });
 
-    it('includes provider from env when only BASE_URL is set (no API_KEY)', async () => {
-      vi.stubEnv('PDF_MINERU_BASE_URL', 'http://localhost:8888');
-      const { getServerPDFProviders, resolvePDFBaseUrl } =
-        await import('@/lib/server/provider-config');
-      const providers = getServerPDFProviders();
+    it('lists MinerU Cloud with only an API key and no base URL', () => {
+      useProviders({ pdf: { 'mineru-cloud': { apiKey: 'mineru-cloud-key' } } });
 
-      expect(providers.mineru).toBeDefined();
-      expect(resolvePDFBaseUrl('mineru')).toBe('http://localhost:8888');
-    });
-
-    it('excludes PDF provider when only apiKey is configured (no baseUrl)', async () => {
-      yamlOverride = `
-pdf:
-  mineru:
-    apiKey: sk-fake
-`;
-      const { getServerPDFProviders } = await import('@/lib/server/provider-config');
-      const providers = getServerPDFProviders();
-
-      expect(providers.mineru).toBeUndefined();
-    });
-
-    it('includes MinerU Cloud from env when only API key is configured', async () => {
-      vi.stubEnv('PDF_MINERU_CLOUD_API_KEY', 'mineru-cloud-key');
-      const { getServerPDFProviders, resolvePDFApiKey, resolvePDFBaseUrl } =
-        await import('@/lib/server/provider-config');
-      const providers = getServerPDFProviders();
-
-      expect(providers['mineru-cloud']).toBeDefined();
+      expect(getServerPDFProviders()['mineru-cloud']).toEqual({});
       expect(resolvePDFApiKey('mineru-cloud')).toBe('mineru-cloud-key');
       expect(resolvePDFBaseUrl('mineru-cloud')).toBeUndefined();
     });
 
-    it('includes MinerU Cloud from YAML when only API key is configured', async () => {
-      yamlOverride = `
-pdf:
-  mineru-cloud:
-    apiKey: mineru-cloud-yaml-key
-`;
-      const { getServerPDFProviders, resolvePDFApiKey, resolvePDFBaseUrl } =
-        await import('@/lib/server/provider-config');
-      const providers = getServerPDFProviders();
+    it('ignores client credentials for a managed PDF provider and uses them otherwise', () => {
+      useProviders({ pdf: { mineru: { baseUrl: 'http://localhost:8888' } } });
 
-      expect(providers['mineru-cloud']).toBeDefined();
-      expect(resolvePDFApiKey('mineru-cloud')).toBe('mineru-cloud-yaml-key');
-      expect(resolvePDFBaseUrl('mineru-cloud')).toBeUndefined();
+      expect(resolvePDFBaseUrl('mineru', 'http://client:1')).toBe('http://localhost:8888');
+      expect(resolvePDFApiKey('mineru', 'client-key')).toBe('');
+      expect(resolvePDFBaseUrl('unpdf', 'http://client:1')).toBe('http://client:1');
+      expect(resolvePDFApiKey('unpdf', 'client-key')).toBe('client-key');
     });
   });
 
   describe('image and video provider metadata', () => {
-    it('uses standard OpenAI env vars for OpenAI image generation fallback', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-openai');
-      vi.stubEnv('OPENAI_BASE_URL', 'https://proxy.example.com/v1');
-      const { getServerImageProviders, resolveImageApiKey, resolveImageBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('exposes the image base URL server-side but not in the listing', () => {
+      useProviders({
+        image: { 'openai-image': { apiKey: 'sk-img', baseUrl: 'https://proxy.example.com/v1' } },
+      });
 
-      const providers = getServerImageProviders();
-      // No base URL exposed; resolution still works server-side.
-      expect(providers['openai-image']).toEqual({});
-      expect(resolveImageApiKey('openai-image')).toBe('sk-openai');
+      expect(getServerImageProviders()['openai-image']).toEqual({});
+      expect(resolveImageApiKey('openai-image')).toBe('sk-img');
       expect(resolveImageBaseUrl('openai-image')).toBe('https://proxy.example.com/v1');
     });
 
-    it('maps IMAGE_OPENAI and exposes image baseUrl', async () => {
-      vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-openai-image');
-      vi.stubEnv('IMAGE_OPENAI_BASE_URL', 'https://proxy.example.com/v1');
-      const { getServerImageProviders, resolveImageBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('exposes the video base URL server-side but not in the listing', () => {
+      useProviders({
+        video: {
+          'grok-video': { apiKey: 'xai-secret', baseUrl: 'https://proxy.example.com/video' },
+        },
+      });
 
-      const providers = getServerImageProviders();
-      expect(providers['openai-image']).toEqual({});
-      expect(resolveImageBaseUrl('openai-image')).toBe('https://proxy.example.com/v1');
-    });
-
-    it('exposes video provider baseUrl', async () => {
-      vi.stubEnv('VIDEO_GROK_API_KEY', 'xai-secret');
-      vi.stubEnv('VIDEO_GROK_BASE_URL', 'https://proxy.example.com/video');
-      const { getServerVideoProviders, resolveVideoBaseUrl } =
-        await import('@/lib/server/provider-config');
-
-      const providers = getServerVideoProviders();
-      expect(providers['grok-video']).toEqual({});
+      expect(getServerVideoProviders()['grok-video']).toEqual({});
       expect(resolveVideoBaseUrl('grok-video')).toBe('https://proxy.example.com/video');
     });
 
-    it('exposes server-pinned image models in getServerImageProviders', async () => {
-      vi.stubEnv('IMAGE_SEEDREAM_API_KEY', 'sk-seedream');
-      vi.stubEnv('IMAGE_SEEDREAM_MODELS', 'doubao-seedream-5.0-lite,doubao-seedream-5.0-pro');
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
+    it('exposes server-pinned image models in getServerImageProviders', () => {
+      useProviders({
+        image: {
+          seedream: {
+            apiKey: 'sk-seedream',
+            models: ['doubao-seedream-5.0-lite', 'doubao-seedream-5.0-pro'],
+          },
+        },
+      });
 
-      const providers = getServerImageProviders();
-      expect(providers.seedream).toEqual({
+      expect(getServerImageProviders().seedream).toEqual({
         models: ['doubao-seedream-5.0-lite', 'doubao-seedream-5.0-pro'],
       });
     });
 
-    it('exposes server-pinned video models in getServerVideoProviders', async () => {
-      vi.stubEnv('VIDEO_SEEDANCE_API_KEY', 'sk-seedance');
-      vi.stubEnv('VIDEO_SEEDANCE_MODELS', 'doubao-seedance-2-0,doubao-seedance-3-0');
-      const { getServerVideoProviders } = await import('@/lib/server/provider-config');
+    it('exposes server-pinned video models in getServerVideoProviders', () => {
+      useProviders({
+        video: {
+          seedance: {
+            apiKey: 'sk-seedance',
+            models: ['doubao-seedance-2-0', 'doubao-seedance-3-0'],
+          },
+        },
+      });
 
-      const providers = getServerVideoProviders();
-      expect(providers.seedance).toEqual({
+      expect(getServerVideoProviders().seedance).toEqual({
         models: ['doubao-seedance-2-0', 'doubao-seedance-3-0'],
       });
     });
 
-    it('activates keyless image providers (lemonade) from a base URL alone', async () => {
-      vi.stubEnv('IMAGE_LEMONADE_BASE_URL', 'http://localhost:13305/v1');
-      const { getServerImageProviders, resolveImageApiKey, isServerConfiguredProvider } =
-        await import('@/lib/server/provider-config');
+    it('serves a keyless image provider (lemonade) from a base URL alone', () => {
+      useProviders({ image: { lemonade: { baseUrl: 'http://localhost:13305/v1' } } });
 
       expect(isServerConfiguredProvider('image', 'lemonade')).toBe(true);
       expect(getServerImageProviders().lemonade).toBeDefined();
@@ -603,10 +436,10 @@ pdf:
   });
 
   describe('media model resolution', () => {
-    it('allowlists the client image model against IMAGE_<PREFIX>_MODELS', async () => {
-      vi.stubEnv('IMAGE_SEEDREAM_API_KEY', 'sk-seedream');
-      vi.stubEnv('IMAGE_SEEDREAM_MODELS', 'model-a,model-b');
-      const { resolveImageModel } = await import('@/lib/server/provider-config');
+    it('allowlists the client image model against the pinned models', () => {
+      useProviders({
+        image: { seedream: { apiKey: 'sk-seedream', models: ['model-a', 'model-b'] } },
+      });
       // Allowlisted client choice wins over the managed default.
       expect(resolveImageModel('seedream', 'model-b')).toBe('model-b');
       // Non-allowlisted client choice falls back to the managed default.
@@ -614,32 +447,30 @@ pdf:
       expect(resolveImageModel('seedream')).toBe('model-a');
     });
 
-    it('lets the client image model win when nothing is pinned server-side', async () => {
-      const { resolveImageModel } = await import('@/lib/server/provider-config');
+    it('lets the client image model win when nothing is pinned server-side', () => {
+      expect(resolveImageModel('seedream', 'client-model')).toBe('client-model');
+
+      useProviders({ image: { seedream: { apiKey: 'sk-seedream' } } });
       expect(resolveImageModel('seedream', 'client-model')).toBe('client-model');
     });
 
-    it('returns undefined for the image model when neither client nor server provides one', async () => {
-      const { resolveImageModel } = await import('@/lib/server/provider-config');
+    it('returns undefined for the image model when neither client nor server provides one', () => {
       expect(resolveImageModel('seedream')).toBeUndefined();
     });
 
-    it('resolves the default image provider as the first server-configured one', async () => {
-      vi.stubEnv('IMAGE_SEEDREAM_API_KEY', 'sk-seedream');
-      vi.stubEnv('IMAGE_GROK_API_KEY', 'sk-grok');
-      const { resolveServerImageProviderId } = await import('@/lib/server/provider-config');
+    it('resolves the default image provider as the first server-configured one', () => {
+      useProviders({
+        image: { seedream: { apiKey: 'sk-seedream' }, 'grok-image': { apiKey: 'g' } },
+      });
       expect(resolveServerImageProviderId()).toBe('seedream');
     });
 
-    it('returns undefined for the default image provider when none is configured', async () => {
-      const { resolveServerImageProviderId } = await import('@/lib/server/provider-config');
+    it('returns undefined for the default image provider when none is configured', () => {
       expect(resolveServerImageProviderId()).toBeUndefined();
     });
 
-    it('pins the video model from server config and allowlists the client choice', async () => {
-      vi.stubEnv('VIDEO_SEEDANCE_API_KEY', 'sk-seedance');
-      vi.stubEnv('VIDEO_SEEDANCE_MODELS', 'v1,v2');
-      const { resolveVideoModel } = await import('@/lib/server/provider-config');
+    it('pins the video model from server config and allowlists the client choice', () => {
+      useProviders({ video: { seedance: { apiKey: 'sk-seedance', models: ['v1', 'v2'] } } });
       // Allowlisted client choice wins over the managed default.
       expect(resolveVideoModel('seedance', 'v2')).toBe('v2');
       // Non-allowlisted client choice falls back to the managed default.
@@ -647,59 +478,27 @@ pdf:
       expect(resolveVideoModel('seedance')).toBe('v1');
     });
 
-    it('lets the client video model win when nothing is pinned server-side', async () => {
-      const { resolveVideoModel } = await import('@/lib/server/provider-config');
+    it('lets the client video model win when nothing is pinned server-side', () => {
       expect(resolveVideoModel('seedance', 'client-model')).toBe('client-model');
     });
 
-    it('returns undefined for the video model when neither client nor server provides one', async () => {
-      const { resolveVideoModel } = await import('@/lib/server/provider-config');
+    it('returns undefined for the video model when neither client nor server provides one', () => {
       expect(resolveVideoModel('seedance')).toBeUndefined();
     });
 
-    it('normalizes YAML model lists like env (trim + drop empties, never a garbage pin)', async () => {
-      yamlOverride = `
-video:
-  seedance:
-    apiKey: sk-yaml-seedance
-    models:
-      - " doubao-seedance-2-0-260128 "
-      - ""
-      - "   "
-  kling:
-    apiKey: sk-yaml-kling
-    models:
-      - ""
-`;
-      const { resolveVideoModel } = await import('@/lib/server/provider-config');
-
-      // Whitespace-trimmed real entries survive; empty entries are dropped.
-      expect(resolveVideoModel('seedance')).toBe('doubao-seedance-2-0-260128');
-      // The stored list is trimmed, so an exact-match client choice is allowlisted.
-      expect(resolveVideoModel('seedance', 'doubao-seedance-2-0-260128')).toBe(
-        'doubao-seedance-2-0-260128',
-      );
-      // A garbage-only `models: [""]` list normalizes to no pin at all — it must
-      // never become a truthy pin of "" (the YAML path used to copy it verbatim).
-      expect(resolveVideoModel('kling')).toBeUndefined();
-    });
-
-    it('resolves the default video provider as the first server-configured one', async () => {
-      vi.stubEnv('VIDEO_SEEDANCE_API_KEY', 'sk-seedance');
-      vi.stubEnv('VIDEO_VEO_API_KEY', 'sk-veo');
-      const { resolveServerVideoProviderId } = await import('@/lib/server/provider-config');
+    it('resolves the default video provider as the first server-configured one', () => {
+      useProviders({ video: { seedance: { apiKey: 'sk-seedance' }, veo: { apiKey: 'sk-veo' } } });
       expect(resolveServerVideoProviderId()).toBe('seedance');
     });
 
-    it('returns undefined for the default video provider when none is configured', async () => {
-      const { resolveServerVideoProviderId } = await import('@/lib/server/provider-config');
+    it('returns undefined for the default video provider when none is configured', () => {
       expect(resolveServerVideoProviderId()).toBeUndefined();
     });
 
-    it('allowlists the client ASR model against ASR_<PREFIX>_MODELS', async () => {
-      vi.stubEnv('ASR_OPENAI_API_KEY', 'sk-asr');
-      vi.stubEnv('ASR_OPENAI_MODELS', 'whisper-x,whisper-y');
-      const { resolveASRModel } = await import('@/lib/server/provider-config');
+    it('allowlists the client ASR model against the pinned models', () => {
+      useProviders({
+        asr: { 'openai-whisper': { apiKey: 'sk-asr', models: ['whisper-x', 'whisper-y'] } },
+      });
       // Allowlisted client choice wins over the managed default.
       expect(resolveASRModel('openai-whisper', 'whisper-y')).toBe('whisper-y');
       // Non-allowlisted client choice falls back to the managed default.
@@ -707,22 +506,21 @@ video:
       expect(resolveASRModel('openai-whisper')).toBe('whisper-x');
     });
 
-    it('lets the client ASR model win when nothing is pinned server-side', async () => {
-      const { resolveASRModel } = await import('@/lib/server/provider-config');
+    it('lets the client ASR model win when nothing is pinned server-side', () => {
       expect(resolveASRModel('openai-whisper', 'client-model')).toBe('client-model');
     });
 
-    it('returns undefined for the ASR model when neither client nor server provides one', async () => {
-      const { resolveASRModel } = await import('@/lib/server/provider-config');
+    it('returns undefined for the ASR model when neither client nor server provides one', () => {
       expect(resolveASRModel('openai-whisper')).toBeUndefined();
     });
   });
 
   describe('isServerConfiguredProvider', () => {
-    it('is true only for operator-configured providers, per section', async () => {
-      vi.stubEnv('OPENAI_API_KEY', 'sk-openai');
-      vi.stubEnv('VIDEO_GROK_API_KEY', 'xai-secret');
-      const { isServerConfiguredProvider } = await import('@/lib/server/provider-config');
+    it('is true only for operator-configured providers, per section', () => {
+      useProviders({
+        providers: { openai: { apiKey: 'sk-openai' } },
+        video: { 'grok-video': { apiKey: 'xai-secret' } },
+      });
 
       expect(isServerConfiguredProvider('providers', 'openai')).toBe(true);
       expect(isServerConfiguredProvider('providers', 'anthropic')).toBe(false);
@@ -733,169 +531,118 @@ video:
   });
 
   describe('getServerTTSProviders force-disable (#665)', () => {
-    it('reports nothing when no TTS provider is configured or disabled', async () => {
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
+    it('reports nothing when no TTS provider is configured or disabled', () => {
       expect(getServerTTSProviders()).toEqual({});
     });
 
-    it('marks an env-configured TTS provider as managed (no disabled flag)', async () => {
-      vi.stubEnv('TTS_OPENAI_API_KEY', 'sk-tts');
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
+    it('marks a configured TTS provider as managed (no disabled flag)', () => {
+      useProviders({ tts: { 'openai-tts': { apiKey: 'sk-tts' } } });
       expect(getServerTTSProviders()['openai-tts']).toEqual({});
     });
 
-    it('force-disables a provider via TTS_<P>_ENABLED=false even when it has a key', async () => {
-      vi.stubEnv('TTS_OPENAI_API_KEY', 'sk-tts');
-      vi.stubEnv('TTS_OPENAI_ENABLED', 'false');
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
+    it('reports a disabled provider as disabled even when it has a key', () => {
+      useProviders({
+        tts: { 'openai-tts': { apiKey: 'sk-tts' } },
+        disabled: { tts: ['openai-tts'] },
+      });
       expect(getServerTTSProviders()['openai-tts']).toEqual({ disabled: true });
     });
 
-    it('force-disables browser-native via env (it is client-only, has no key)', async () => {
-      vi.stubEnv('TTS_BROWSER_NATIVE_ENABLED', 'false');
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
+    it('reports a disabled provider that has no entry (browser-native, client-only)', () => {
+      useProviders({ disabled: { tts: ['browser-native-tts'] } });
       expect(getServerTTSProviders()['browser-native-tts']).toEqual({ disabled: true });
     });
 
-    it('force-disables a provider via YAML tts.<id>.enabled: false', async () => {
-      yamlOverride = 'tts:\n  voxcpm-tts:\n    enabled: false\n';
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
-      expect(getServerTTSProviders()['voxcpm-tts']).toEqual({ disabled: true });
-    });
-
-    it('env ENABLED=true overrides a YAML disable', async () => {
-      yamlOverride = 'tts:\n  openai-tts:\n    enabled: false\n    apiKey: sk-yaml\n';
-      vi.stubEnv('TTS_OPENAI_ENABLED', 'true');
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
-      // Re-enabled by env, and configured via YAML key ⇒ managed, not disabled.
-      expect(getServerTTSProviders()['openai-tts']).toEqual({});
-    });
-
-    it('an empty TTS_<P>_ENABLED does NOT override a YAML disable', async () => {
-      yamlOverride = 'tts:\n  openai-tts:\n    enabled: false\n    apiKey: sk-yaml\n';
-      vi.stubEnv('TTS_OPENAI_ENABLED', '');
-      const { getServerTTSProviders } = await import('@/lib/server/provider-config');
-      expect(getServerTTSProviders()['openai-tts']).toEqual({ disabled: true });
-    });
-
-    it('isServerTTSProviderDisabled reflects the force-disable set', async () => {
-      vi.stubEnv('TTS_OPENAI_API_KEY', 'sk-tts');
-      vi.stubEnv('TTS_OPENAI_ENABLED', 'false');
-      const { isServerTTSProviderDisabled } = await import('@/lib/server/provider-config');
+    it('isServerTTSProviderDisabled reflects the force-disable set', () => {
+      useProviders({
+        tts: { 'openai-tts': { apiKey: 'sk-tts' } },
+        disabled: { tts: ['openai-tts'] },
+      });
       expect(isServerTTSProviderDisabled('openai-tts')).toBe(true);
       expect(isServerTTSProviderDisabled('qwen-tts')).toBe(false);
+    });
+
+    it('enabledServerTTSProviderIds drops disabled providers and browser-native', () => {
+      useProviders({
+        tts: {
+          'openai-tts': { apiKey: 'a' },
+          'qwen-tts': { apiKey: 'b' },
+          'glm-tts': { apiKey: 'c' },
+        },
+        disabled: { tts: ['openai-tts', 'browser-native-tts'] },
+      });
+      expect(enabledServerTTSProviderIds()).toEqual(['qwen-tts', 'glm-tts']);
     });
   });
 
   describe('per-capability force-disable (#665)', () => {
-    it('image: marks an env-configured provider as managed (no disabled flag)', async () => {
-      vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-img');
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
+    it('image: a configured provider is managed (no disabled flag)', () => {
+      useProviders({ image: { 'openai-image': { apiKey: 'sk-img' } } });
       expect(getServerImageProviders()['openai-image']).toEqual({});
     });
 
-    it('image: force-disables via IMAGE_<P>_ENABLED=false even when it has a key', async () => {
-      vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-img');
-      vi.stubEnv('IMAGE_OPENAI_ENABLED', 'false');
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
+    it('image: disabled wins even when the provider has a key', () => {
+      useProviders({
+        image: { 'openai-image': { apiKey: 'sk-img', models: ['gpt-image-1'] } },
+        disabled: { image: ['openai-image'] },
+      });
       expect(getServerImageProviders()['openai-image']).toEqual({ disabled: true });
     });
 
-    it('image: force-disables the keyless client-only ComfyUI provider via env', async () => {
-      vi.stubEnv('IMAGE_COMFYUI_ENABLED', 'false');
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
+    it('image: a disabled provider with no entry (client-only ComfyUI) is listed as disabled', () => {
+      useProviders({ disabled: { image: ['comfyui-image'] } });
       expect(getServerImageProviders()['comfyui-image']).toEqual({ disabled: true });
     });
 
-    it('image: an _ENABLED=true value does NOT force-enable an unconfigured keyless provider', async () => {
-      vi.stubEnv('IMAGE_COMFYUI_ENABLED', 'true');
-      const { getServerImageProviders, resolveServerImageProviderId } =
-        await import('@/lib/server/provider-config');
-      // ComfyUI has no credential env, so a truthy _ENABLED must not conjure a
-      // configured/enabled entry out of thin air — it can only disable (#665).
-      expect(getServerImageProviders()['comfyui-image']).toBeUndefined();
-      expect(resolveServerImageProviderId()).toBeUndefined();
-    });
-
-    it('image: force-disables via YAML image.<id>.enabled: false', async () => {
-      yamlOverride = 'image:\n  seedream:\n    enabled: false\n';
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
-      expect(getServerImageProviders()['seedream']).toEqual({ disabled: true });
-    });
-
-    it('image: env ENABLED=true overrides a YAML disable', async () => {
-      yamlOverride = 'image:\n  openai-image:\n    enabled: false\n    apiKey: sk-yaml\n';
-      vi.stubEnv('IMAGE_OPENAI_ENABLED', 'true');
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
-      expect(getServerImageProviders()['openai-image']).toEqual({});
-    });
-
-    it('image: an empty IMAGE_<P>_ENABLED does NOT override a YAML disable', async () => {
-      yamlOverride = 'image:\n  openai-image:\n    enabled: false\n    apiKey: sk-yaml\n';
-      vi.stubEnv('IMAGE_OPENAI_ENABLED', '');
-      const { getServerImageProviders } = await import('@/lib/server/provider-config');
-      expect(getServerImageProviders()['openai-image']).toEqual({ disabled: true });
-    });
-
-    it('asr: force-disables a keyed provider via ASR_<P>_ENABLED=false even when it has a key', async () => {
-      vi.stubEnv('ASR_OPENAI_API_KEY', 'sk-asr');
-      vi.stubEnv('ASR_OPENAI_ENABLED', 'false');
-      const { getServerASRProviders } = await import('@/lib/server/provider-config');
+    it('asr: disabled wins even when the provider has a key', () => {
+      useProviders({
+        asr: { 'openai-whisper': { apiKey: 'sk-asr' } },
+        disabled: { asr: ['openai-whisper'] },
+      });
       expect(getServerASRProviders()['openai-whisper']).toEqual({ disabled: true });
     });
 
-    it('asr: force-disables the client-only browser-native provider via env', async () => {
-      vi.stubEnv('ASR_BROWSER_NATIVE_ENABLED', 'false');
-      const { getServerASRProviders } = await import('@/lib/server/provider-config');
+    it('asr: a disabled client-only provider (browser-native) is listed as disabled', () => {
+      useProviders({ disabled: { asr: ['browser-native'] } });
       expect(getServerASRProviders()['browser-native']).toEqual({ disabled: true });
     });
 
-    it('video: force-disables via VIDEO_<P>_ENABLED=false even when it has a key', async () => {
-      vi.stubEnv('VIDEO_GROK_API_KEY', 'xai-video');
-      vi.stubEnv('VIDEO_GROK_ENABLED', 'false');
-      const { getServerVideoProviders } = await import('@/lib/server/provider-config');
+    it('video: disabled wins even when the provider has a key', () => {
+      useProviders({
+        video: { 'grok-video': { apiKey: 'xai-video' } },
+        disabled: { video: ['grok-video'] },
+      });
       expect(getServerVideoProviders()['grok-video']).toEqual({ disabled: true });
     });
 
-    it('video: force-disables via YAML video.<id>.enabled: false', async () => {
-      yamlOverride = 'video:\n  kling:\n    enabled: false\n    apiKey: sk-yaml\n';
-      const { getServerVideoProviders } = await import('@/lib/server/provider-config');
-      expect(getServerVideoProviders()['kling']).toEqual({ disabled: true });
+    it('web-search: disabled wins even when the provider has a key', () => {
+      useProviders({
+        webSearch: { tavily: { apiKey: 'tvly-key' }, exa: { apiKey: 'exa-key' } },
+        disabled: { webSearch: ['tavily', 'exa'] },
+      });
+      const listing = getServerWebSearchProviders();
+      expect(listing.tavily).toEqual({ disabled: true });
+      expect(listing.exa).toEqual({ disabled: true });
     });
 
-    it('web-search: force-disables a keyed provider via <P>_ENABLED=false even when it has a key', async () => {
-      vi.stubEnv('TAVILY_API_KEY', 'tvly-key');
-      vi.stubEnv('TAVILY_ENABLED', 'false');
-      const { getServerWebSearchProviders } = await import('@/lib/server/provider-config');
-      expect(getServerWebSearchProviders()['tavily']).toEqual({ disabled: true });
+    it('web-search: a keyless provider (SearXNG) can be disabled', () => {
+      useProviders({
+        webSearch: { searxng: { baseUrl: 'http://searxng.internal' } },
+        disabled: { webSearch: ['searxng'] },
+      });
+      expect(getServerWebSearchProviders().searxng).toEqual({ disabled: true });
     });
 
-    it('web-search: force-disables Exa through EXA_ENABLED=false', async () => {
-      vi.stubEnv('EXA_API_KEY', 'exa-key');
-      vi.stubEnv('EXA_ENABLED', 'false');
-      const { getServerWebSearchProviders } = await import('@/lib/server/provider-config');
-      expect(getServerWebSearchProviders().exa).toEqual({ disabled: true });
-    });
-
-    it('web-search: force-disables the keyless SearXNG provider via env', async () => {
-      vi.stubEnv('SEARXNG_BASE_URL', 'http://searxng.internal');
-      vi.stubEnv('SEARXNG_ENABLED', 'false');
-      const { getServerWebSearchProviders } = await import('@/lib/server/provider-config');
-      expect(getServerWebSearchProviders()['searxng']).toEqual({ disabled: true });
-    });
-
-    it('web-search: force-disables the built-in Doubao provider via its dedicated env', async () => {
-      vi.stubEnv('WEB_SEARCH_DOUBAO_ENABLED', 'false');
-      const { getServerWebSearchProviders } = await import('@/lib/server/provider-config');
+    it('web-search: a built-in provider with no entry (Doubao) can be disabled', () => {
+      useProviders({ disabled: { webSearch: ['doubao'] } });
       expect(getServerWebSearchProviders().doubao).toEqual({ disabled: true });
     });
 
-    it('isServerProviderDisabled reflects the per-section force-disable set', async () => {
-      vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-img');
-      vi.stubEnv('IMAGE_OPENAI_ENABLED', 'false');
-      vi.stubEnv('VIDEO_GROK_ENABLED', 'false');
-      vi.stubEnv('ASR_OPENAI_ENABLED', 'false');
-      const { isServerProviderDisabled } = await import('@/lib/server/provider-config');
+    it('isServerProviderDisabled reflects the per-section force-disable set', () => {
+      useProviders({
+        image: { 'openai-image': { apiKey: 'sk-img' } },
+        disabled: { image: ['openai-image'], video: ['grok-video'], asr: ['openai-whisper'] },
+      });
       expect(isServerProviderDisabled('image', 'openai-image')).toBe(true);
       expect(isServerProviderDisabled('image', 'seedream')).toBe(false);
       expect(isServerProviderDisabled('video', 'grok-video')).toBe(true);
@@ -905,72 +652,81 @@ video:
   });
 
   describe('server defaults skip force-disabled providers (#665)', () => {
-    it('resolveServerImageProviderId skips a disabled provider', async () => {
-      vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-1');
-      vi.stubEnv('IMAGE_GROK_API_KEY', 'sk-2');
-      vi.stubEnv('IMAGE_OPENAI_ENABLED', 'false');
-      const { resolveServerImageProviderId } = await import('@/lib/server/provider-config');
+    it('resolveServerImageProviderId skips a disabled provider', () => {
+      useProviders({
+        image: { 'openai-image': { apiKey: 'sk-1' }, 'grok-image': { apiKey: 'sk-2' } },
+        disabled: { image: ['openai-image'] },
+      });
       expect(resolveServerImageProviderId()).toBe('grok-image');
     });
 
-    it('resolveServerImageProviderId returns undefined when every configured provider is disabled', async () => {
-      vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-1');
-      vi.stubEnv('IMAGE_OPENAI_ENABLED', 'false');
-      const { resolveServerImageProviderId } = await import('@/lib/server/provider-config');
+    it('resolveServerImageProviderId returns undefined when every configured provider is disabled', () => {
+      useProviders({
+        image: { 'openai-image': { apiKey: 'sk-1' } },
+        disabled: { image: ['openai-image'] },
+      });
       expect(resolveServerImageProviderId()).toBeUndefined();
     });
 
-    it('resolveServerVideoProviderId skips a disabled provider', async () => {
-      vi.stubEnv('VIDEO_GROK_API_KEY', 'sk-1');
-      vi.stubEnv('VIDEO_KLING_API_KEY', 'sk-2');
-      vi.stubEnv('VIDEO_GROK_ENABLED', 'false');
-      const { resolveServerVideoProviderId } = await import('@/lib/server/provider-config');
+    it('resolveServerImageProviderId ignores a disabled provider that has no entry', () => {
+      useProviders({ disabled: { image: ['comfyui-image'] } });
+      expect(resolveServerImageProviderId()).toBeUndefined();
+    });
+
+    it('resolveServerVideoProviderId skips a disabled provider', () => {
+      useProviders({
+        video: { 'grok-video': { apiKey: 'sk-1' }, kling: { apiKey: 'sk-2' } },
+        disabled: { video: ['grok-video'] },
+      });
       expect(resolveServerVideoProviderId()).toBe('kling');
     });
 
-    it('resolveServerASRProviderId skips a disabled provider', async () => {
-      vi.stubEnv('ASR_OPENAI_API_KEY', 'sk-1');
-      vi.stubEnv('ASR_QWEN_API_KEY', 'sk-2');
-      vi.stubEnv('ASR_OPENAI_ENABLED', 'false');
-      const { resolveServerASRProviderId } = await import('@/lib/server/provider-config');
+    it('resolveServerASRProviderId skips a disabled provider', () => {
+      useProviders({
+        asr: { 'openai-whisper': { apiKey: 'sk-1' }, 'qwen-asr': { apiKey: 'sk-2' } },
+        disabled: { asr: ['openai-whisper'] },
+      });
       expect(resolveServerASRProviderId()).toBe('qwen-asr');
     });
 
-    it('web-search preference chain skips disabled providers', async () => {
-      vi.stubEnv('TAVILY_API_KEY', 'tvly');
-      vi.stubEnv('BOCHA_API_KEY', 'bocha');
-      vi.stubEnv('TAVILY_ENABLED', 'false');
-      const { resolveServerWebSearchProviderId } = await import('@/lib/server/provider-config');
-      // Tavily is the preferred default but disabled ⇒ bocha is chosen.
+    it('web-search preference chain skips disabled providers', () => {
+      useProviders({
+        webSearch: { tavily: { apiKey: 'tvly' }, bocha: { apiKey: 'bocha' } },
+        disabled: { webSearch: ['tavily'] },
+      });
+      // Tavily is the preferred default but disabled => bocha is chosen.
       expect(resolveServerWebSearchProviderId()).toBe('bocha');
     });
 
-    it('web-search preference chain honors an enabled preferred provider', async () => {
-      vi.stubEnv('TAVILY_API_KEY', 'tvly');
-      vi.stubEnv('BOCHA_API_KEY', 'bocha');
-      const { resolveServerWebSearchProviderId } = await import('@/lib/server/provider-config');
+    it('web-search preference chain honors an enabled preferred provider', () => {
+      useProviders({ webSearch: { tavily: { apiKey: 'tvly' }, bocha: { apiKey: 'bocha' } } });
       expect(resolveServerWebSearchProviderId()).toBe('tavily');
     });
 
-    it('web-search preference chain skips a disabled client-preferred provider', async () => {
-      vi.stubEnv('TAVILY_API_KEY', 'tvly');
-      vi.stubEnv('BOCHA_API_KEY', 'bocha');
-      vi.stubEnv('TAVILY_ENABLED', 'false');
-      const { resolveServerWebSearchProviderId } = await import('@/lib/server/provider-config');
+    it('web-search preference chain honors a client-preferred provider when it is enabled', () => {
+      useProviders({ webSearch: { tavily: { apiKey: 'tvly' }, bocha: { apiKey: 'bocha' } } });
+      expect(resolveServerWebSearchProviderId('bocha')).toBe('bocha');
+    });
+
+    it('web-search preference chain skips a disabled client-preferred provider', () => {
+      useProviders({
+        webSearch: { tavily: { apiKey: 'tvly' }, bocha: { apiKey: 'bocha' } },
+        disabled: { webSearch: ['tavily'] },
+      });
       expect(resolveServerWebSearchProviderId('tavily')).toBe('bocha');
     });
 
-    it('web-search preference chain returns undefined when every configured provider is disabled', async () => {
-      vi.stubEnv('TAVILY_API_KEY', 'tvly');
-      vi.stubEnv('TAVILY_ENABLED', 'false');
-      const { resolveServerWebSearchProviderId } = await import('@/lib/server/provider-config');
+    it('web-search preference chain returns undefined when every configured provider is disabled', () => {
+      useProviders({
+        webSearch: { tavily: { apiKey: 'tvly' } },
+        disabled: { webSearch: ['tavily'] },
+      });
       expect(resolveServerWebSearchProviderId()).toBeUndefined();
     });
   });
 
   describe('enabledProviderIds resolver (#665)', () => {
-    it('returns only non-disabled entries of a capability listing', async () => {
-      const { enabledProviderIds } = await import('@/lib/server/provider-config');
+    it('returns only non-disabled entries of a capability listing', () => {
       expect(
         enabledProviderIds({
           'openai-image': { models: ['gpt-image-1'] },
@@ -980,8 +736,7 @@ video:
       ).toEqual(['openai-image', 'grok-image']);
     });
 
-    it('keeps object-key order and drops nothing when nothing is disabled', async () => {
-      const { enabledProviderIds } = await import('@/lib/server/provider-config');
+    it('keeps object-key order and drops nothing when nothing is disabled', () => {
       expect(enabledProviderIds({ a: {}, b: { models: [] }, c: { disabled: false } })).toEqual([
         'a',
         'b',
@@ -989,23 +744,49 @@ video:
       ]);
     });
 
-    it('returns an empty list when every entry is force-disabled', async () => {
-      const { enabledProviderIds } = await import('@/lib/server/provider-config');
+    it('returns an empty list when every entry is force-disabled', () => {
       expect(enabledProviderIds({ a: { disabled: true }, b: { disabled: true } })).toEqual([]);
     });
   });
 
+  describe('TTS resolution', () => {
+    it('resolves a managed TTS key and ignores the client key', () => {
+      useProviders({ tts: { 'openai-tts': { apiKey: 'sk-tts' } } });
+      expect(resolveTTSApiKey('openai-tts', 'sk-client')).toBe('sk-tts');
+      expect(resolveTTSApiKey('qwen-tts', 'sk-client')).toBe('sk-client');
+    });
+
+    it('pins the TTS model of a managed provider and ignores the client model', () => {
+      useProviders({ tts: { 'openai-tts': { apiKey: 'sk-tts', models: ['tts-1', 'tts-1-hd'] } } });
+      expect(resolveTTSModel('openai-tts', 'gpt-4o-mini-tts')).toBe('tts-1');
+      expect(resolveTTSModel('openai-tts')).toBe('tts-1');
+    });
+
+    it('lets the client TTS model win when nothing is pinned', () => {
+      useProviders({ tts: { 'openai-tts': { apiKey: 'sk-tts' } } });
+      expect(resolveTTSModel('openai-tts', 'tts-1-hd')).toBe('tts-1-hd');
+      expect(resolveTTSModel('openai-tts')).toBeUndefined();
+    });
+
+    it('prefers a managed base URL over the provider default', () => {
+      useProviders({
+        tts: { 'openai-tts': { apiKey: 'k', baseUrl: 'https://proxy.example.com/v1' } },
+      });
+      expect(resolveTTSBaseUrl('openai-tts', 'https://client.example.com')).toBe(
+        'https://proxy.example.com/v1',
+      );
+    });
+  });
+
   describe('Qwen TTS resolution', () => {
-    it('uses the provider default base URL when none is configured or supplied', async () => {
-      const { resolveTTSBaseUrl } = await import('@/lib/server/provider-config');
+    it('uses the provider default base URL when none is configured or supplied', () => {
       expect(resolveTTSBaseUrl('qwen-tts')).toBe('https://dashscope.aliyuncs.com/api/v1');
     });
 
-    it('maps VC sentinels to the resolved model and rejects pin bypasses', async () => {
-      vi.stubEnv('TTS_QWEN_API_KEY', 'key');
-      vi.stubEnv('TTS_QWEN_MODELS', 'qwen3-tts-flash');
+    it('maps VC sentinels to the resolved model and rejects pin bypasses', () => {
+      useProviders({ tts: { 'qwen-tts': { apiKey: 'key', models: ['qwen3-tts-flash'] } } });
       vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', 'operator-vc-model');
-      const { resolveTTSModel } = await import('@/lib/server/provider-config');
+
       expect(resolveTTSModel('qwen-tts', 'qwen3-tts-vc-custom', 'clone-1')).toBe(
         'operator-vc-model',
       );
@@ -1015,38 +796,41 @@ video:
       expect(resolveTTSModel('qwen-tts', 'operator-vc-model', 'Cherry')).toBe('qwen3-tts-flash');
     });
 
-    it('reads the VC override only from server-side resolution', async () => {
+    it('reads the VC override only from server-side resolution', () => {
       vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', 'operator-vc-model');
-      const { resolveQwenVoiceCloneModel } = await import('@/lib/server/provider-config');
       expect(resolveQwenVoiceCloneModel()).toBe('operator-vc-model');
     });
 
-    it('rejects catalog synthesis when the operator pins only the clone model', async () => {
-      vi.stubEnv('TTS_QWEN_API_KEY', 'key');
-      vi.stubEnv('TTS_QWEN_MODELS', 'operator-vc-model');
+    it('falls back to the default VC model when the override is unset', () => {
+      expect(resolveQwenVoiceCloneModel()).toBeTruthy();
+      expect(resolveQwenVoiceCloneModel()).not.toBe('operator-vc-model');
+    });
+
+    it('rejects catalog synthesis when the operator pins only the clone model', () => {
+      useProviders({ tts: { 'qwen-tts': { apiKey: 'key', models: ['operator-vc-model'] } } });
       vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', 'operator-vc-model');
-      const { resolveTTSModel } = await import('@/lib/server/provider-config');
+
       expect(() => resolveTTSModel('qwen-tts', undefined, 'Cherry')).toThrow('not allowed');
+    });
+
+    it('lets the client model through when nothing is pinned', () => {
+      useProviders({ tts: { 'qwen-tts': { apiKey: 'key' } } });
+      expect(resolveTTSModel('qwen-tts', 'qwen3-tts-flash')).toBe('qwen3-tts-flash');
     });
   });
 
   describe('FunASR server configuration', () => {
-    it('activates the keyless provider from an env base URL', async () => {
-      vi.stubEnv('ASR_FUNASR_BASE_URL', 'http://localhost:8000/v1');
-      const { getServerASRProviders, resolveASRApiKey, resolveASRBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('serves the keyless provider from a base URL', () => {
+      useProviders({ asr: { 'funasr-asr': { baseUrl: 'http://localhost:8000/v1' } } });
 
       expect(getServerASRProviders()['funasr-asr']).toEqual({});
       expect(resolveASRApiKey('funasr-asr')).toBe('');
       expect(resolveASRBaseUrl('funasr-asr')).toBe('http://localhost:8000/v1');
     });
 
-    it('activates the keyless provider from YAML and keeps server config authoritative', async () => {
-      yamlOverride = 'asr:\n  funasr-asr:\n    baseUrl: http://funasr.internal:8000/v1\n';
-      const { getServerASRProviders, resolveASRBaseUrl } =
-        await import('@/lib/server/provider-config');
+    it('keeps server config authoritative over a client base URL', () => {
+      useProviders({ asr: { 'funasr-asr': { baseUrl: 'http://funasr.internal:8000/v1' } } });
 
-      expect(getServerASRProviders()['funasr-asr']).toEqual({});
       expect(resolveASRBaseUrl('funasr-asr', 'https://client.example.com/v1')).toBe(
         'http://funasr.internal:8000/v1',
       );
@@ -1054,32 +838,30 @@ video:
   });
 
   describe('resolveManagedAliDocMindCredentials (AK/SK)', () => {
-    it('resolves YAML-managed AK/SK with NO ALIDOCMIND_* env vars', async () => {
-      // Regression: verification resolved YAML creds but extraction only had an
-      // env fallback, so a YAML-only deployment verified then failed to extract.
-      yamlOverride =
-        'pdf:\n  alidocmind:\n    accessKeyId: yaml-ak\n    accessKeySecret: yaml-sk\n';
-      const { resolveManagedAliDocMindCredentials, isServerConfiguredProvider } =
-        await import('@/lib/server/provider-config');
+    it('resolves managed AK/SK without a base URL', () => {
+      useProviders({
+        pdf: { alidocmind: { accessKeyId: 'managed-ak', accessKeySecret: 'managed-sk' } },
+      });
+
       expect(isServerConfiguredProvider('pdf', 'alidocmind')).toBe(true);
       expect(resolveManagedAliDocMindCredentials()).toEqual({
-        accessKeyId: 'yaml-ak',
-        accessKeySecret: 'yaml-sk',
+        accessKeyId: 'managed-ak',
+        accessKeySecret: 'managed-sk',
         baseUrl: undefined,
       });
     });
 
-    it('resolves YAML AK/SK even when the entry also has baseUrl', async () => {
-      // Regression: a YAML entry WITH baseUrl makes the generic loader create a
-      // pdf.alidocmind entry (copying only apiKey/baseUrl/models/proxy, never
-      // AK/SK). The fallback must merge AK/SK into that entry, not skip it.
-      yamlOverride =
-        'pdf:\n  alidocmind:\n' +
-        '    accessKeyId: review-ak\n' +
-        '    accessKeySecret: review-sk\n' +
-        '    baseUrl: https://docmind-api.cn-hangzhou.aliyuncs.com\n';
-      const { resolveManagedAliDocMindCredentials, isServerConfiguredProvider } =
-        await import('@/lib/server/provider-config');
+    it('resolves managed AK/SK together with the base URL', () => {
+      useProviders({
+        pdf: {
+          alidocmind: {
+            accessKeyId: 'review-ak',
+            accessKeySecret: 'review-sk',
+            baseUrl: 'https://docmind-api.cn-hangzhou.aliyuncs.com',
+          },
+        },
+      });
+
       expect(isServerConfiguredProvider('pdf', 'alidocmind')).toBe(true);
       expect(resolveManagedAliDocMindCredentials()).toEqual({
         accessKeyId: 'review-ak',
@@ -1088,35 +870,56 @@ video:
       });
     });
 
-    it('resolves AK/SK from env vars', async () => {
+    it('returns undefined when AliDocMind is not managed', () => {
+      expect(resolveManagedAliDocMindCredentials()).toBeUndefined();
+      expect(isServerConfiguredProvider('pdf', 'alidocmind')).toBe(false);
+    });
+
+    it('returns undefined when the managed entry lacks the AK/SK pair', () => {
+      useProviders({
+        pdf: {
+          alidocmind: { baseUrl: 'https://docmind-api.cn-beijing.aliyuncs.com' },
+        },
+      });
+      expect(resolveManagedAliDocMindCredentials()).toBeUndefined();
+
+      useProviders({ pdf: { alidocmind: { accessKeyId: 'only-ak' } } });
+      expect(resolveManagedAliDocMindCredentials()).toBeUndefined();
+    });
+
+    it('does not read ALIDOCMIND_* env vars', () => {
       vi.stubEnv('ALIDOCMIND_ACCESS_KEY_ID', 'env-ak');
       vi.stubEnv('ALIDOCMIND_ACCESS_KEY_SECRET', 'env-sk');
-      const { resolveManagedAliDocMindCredentials } = await import('@/lib/server/provider-config');
-      expect(resolveManagedAliDocMindCredentials()).toMatchObject({
-        accessKeyId: 'env-ak',
-        accessKeySecret: 'env-sk',
+      expect(resolveManagedAliDocMindCredentials()).toBeUndefined();
+    });
+  });
+
+  describe('resolveServerMediaExtractorConfig', () => {
+    it('carries the managed AK/SK and never allows the env fallback', () => {
+      useProviders({
+        pdf: {
+          alidocmind: {
+            accessKeyId: 'managed-ak',
+            accessKeySecret: 'managed-sk',
+            baseUrl: 'https://docmind-api.cn-hangzhou.aliyuncs.com',
+          },
+        },
+      });
+
+      expect(resolveServerMediaExtractorConfig()).toEqual({
+        providerId: '',
+        accessKeyId: 'managed-ak',
+        accessKeySecret: 'managed-sk',
+        baseUrl: 'https://docmind-api.cn-hangzhou.aliyuncs.com',
+        allowEnvFallback: false,
       });
     });
 
-    it('returns undefined when neither env nor YAML configures AliDocMind', async () => {
-      const { resolveManagedAliDocMindCredentials, isServerConfiguredProvider } =
-        await import('@/lib/server/provider-config');
-      expect(resolveManagedAliDocMindCredentials()).toBeUndefined();
-      expect(isServerConfiguredProvider('pdf', 'alidocmind')).toBe(false);
-    });
-
-    it('stays UNMANAGED when YAML sets baseUrl but no AK/SK (no lockout)', async () => {
-      // Regression: a baseUrl-only YAML entry made the generic loader create a
-      // pdf.alidocmind entry → isServerConfigured=true (managed) → but with no
-      // AK/SK the provider was locked out AND client-entered creds were dropped.
-      // With no usable server creds it must stay unmanaged so clients can supply
-      // their own.
-      yamlOverride =
-        'pdf:\n  alidocmind:\n    baseUrl: https://docmind-api.cn-beijing.aliyuncs.com\n';
-      const { resolveManagedAliDocMindCredentials, isServerConfiguredProvider } =
-        await import('@/lib/server/provider-config');
-      expect(isServerConfiguredProvider('pdf', 'alidocmind')).toBe(false);
-      expect(resolveManagedAliDocMindCredentials()).toBeUndefined();
+    it('carries no credentials when AliDocMind is not managed, and still disallows the env fallback', () => {
+      const config = resolveServerMediaExtractorConfig();
+      expect(config.accessKeyId).toBeUndefined();
+      expect(config.accessKeySecret).toBeUndefined();
+      expect(config.allowEnvFallback).toBe(false);
     });
   });
 });

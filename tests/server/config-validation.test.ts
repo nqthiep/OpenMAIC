@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BARE_MODEL_ID_DEPRECATION_MSG } from '@/lib/ai/providers';
+import { setProviderSnapshot } from '@/lib/server/provider-store/snapshot';
+import { emptySnapshot } from '@/lib/server/provider-store/types';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
-// config-validation reads env directly and imports provider-config, whose
-// module-level getConfig() cache must be reset between cases (mirrors the
-// model-routes / provider-config conventions). fs is mocked so a host-machine
-// server-providers.yml can never leak into tests.
+// config-validation reads env directly and the provider snapshot (installed per case with
+// useProviders). fs is mocked so a host-machine server-providers.yml can never leak into tests,
+// and so a case can pretend one is in the working directory.
 let yamlOverride: string | null = null;
 
 vi.mock('fs', async (importOriginal) => {
@@ -26,45 +28,22 @@ vi.mock('fs', async (importOriginal) => {
   };
 });
 
-/** LLM env prefixes that provider-config reads for the `providers` section. */
-const LLM_ENV_PREFIXES = [
-  'OPENAI',
-  'AZURE_OPENAI',
-  'ATLASCLOUD',
-  'ANTHROPIC',
-  'GOOGLE',
-  'DEEPSEEK',
-  'QWEN',
-  'KIMI',
-  'MINIMAX',
-  'GLM',
-  'SILICONFLOW',
-  'DOUBAO',
-  'OPENROUTER',
-  'GROK',
-  'TENCENT',
-  'TENCENT_HUNYUAN',
-  'XIAOMI',
-  'MIMO',
-  'OLLAMA',
-  'LEMONADE',
-  'BEDROCK',
-];
+/** Env names that config-validation reads or reports as ignored. */
+const IGNORED_ENV_NAME = /(_API_KEY|^DEFAULT_MODEL|^MODEL_ROUTES)$/;
+
+/** A valid master key for stored provider secrets (32 bytes, base64). */
+const MASTER_KEY = Buffer.alloc(32, 7).toString('base64');
 
 function clearConfigEnv() {
-  delete process.env.MODEL_ROUTES;
-  delete process.env.DEFAULT_MODEL;
+  for (const name of Object.keys(process.env)) {
+    if (IGNORED_ENV_NAME.test(name)) delete process.env[name];
+  }
   delete process.env.OPENMAIC_AGENT_RUNTIME_ENABLED;
   delete process.env.DATABASE_URL;
+  delete process.env.PROVIDER_SECRET_KEY;
   delete process.env.ACCESS_CODE;
   delete process.env.ACCESS_COOKIE_SECRET;
   delete process.env.PUBLIC_APP_ORIGIN;
-  for (const prefix of LLM_ENV_PREFIXES) {
-    delete process.env[`${prefix}_API_KEY`];
-    delete process.env[`${prefix}_BASE_URL`];
-    delete process.env[`${prefix}_MODELS`];
-  }
-  delete process.env.BEDROCK_REGION;
 }
 
 describe('validateServerConfig — warning matrix', () => {
@@ -74,6 +53,7 @@ describe('validateServerConfig — warning matrix', () => {
     vi.resetModules();
     vi.unstubAllEnvs();
     clearConfigEnv();
+    clearProviders();
     yamlOverride = null;
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -81,6 +61,7 @@ describe('validateServerConfig — warning matrix', () => {
   afterEach(() => {
     warnSpy.mockRestore();
     clearConfigEnv();
+    clearProviders();
   });
 
   it('emits no warnings when nothing is configured', async () => {
@@ -109,7 +90,7 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('warns that server keys are spendable without an access code, naming providers and not key values', async () => {
-    vi.stubEnv('OPENAI_API_KEY', 'sk-secret-value-123');
+    useProviders({ providers: { openai: { apiKey: 'sk-secret-value-123' } } });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     const messages = warnSpy.mock.calls.map((call: unknown[]) => String(call[0]));
@@ -120,7 +101,7 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('does not warn about server keys once an access code is set', async () => {
-    vi.stubEnv('OPENAI_API_KEY', 'sk-test');
+    useProviders({ providers: { openai: { apiKey: 'sk-test' } } });
     vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
     vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
@@ -149,34 +130,23 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('emits no warnings on a fully valid config', async () => {
-    vi.stubEnv('OPENAI_API_KEY', 'sk-test');
-    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-test');
-    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
-    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
-    vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.4-mini');
-    vi.stubEnv(
-      'MODEL_ROUTES',
-      JSON.stringify({
+    useProviders({
+      providers: { openai: { apiKey: 'sk-test' }, anthropic: { apiKey: 'sk-test' } },
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: {
         'scene-content': 'openai:gpt-5.4',
         'pbl-chat': { model: 'anthropic:claude-sonnet-4', thinking: { enabled: false } },
-      }),
-    );
+      },
+    });
+    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it('warns when MODEL_ROUTES is not valid JSON', async () => {
-    vi.stubEnv('MODEL_ROUTES', '{not valid json');
-    const { validateServerConfig } = await import('@/lib/server/config-validation');
-    validateServerConfig();
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    expect(String(warnSpy.mock.calls[0][0])).toContain('MODEL_ROUTES');
-    expect(String(warnSpy.mock.calls[0][0])).toContain('JSON');
-  });
-
   it('warns naming an unknown stage key (typo detection)', async () => {
-    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-contnet': 'openai:gpt-5.4' }));
+    useProviders({ routes: { 'scene-contnet': 'openai:gpt-5.4' } });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
@@ -184,7 +154,7 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('warns for an unknown provider prefix in a route', async () => {
-    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'anhtropic:claude-sonnet-4' }));
+    useProviders({ routes: { 'scene-content': 'anhtropic:claude-sonnet-4' } });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
@@ -192,7 +162,7 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('warns when a routed provider has no API key configured', async () => {
-    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' }));
+    useProviders({ routes: { 'scene-content': 'deepseek:deepseek-v4-pro' } });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
@@ -201,30 +171,30 @@ describe('validateServerConfig — warning matrix', () => {
   });
 
   it('does not warn about a keyless provider (ollama)', async () => {
-    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'ollama:llama3.3' }));
+    useProviders({ routes: { 'scene-content': 'ollama:llama3.3' } });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('emits the deprecation warning for a bare model id in a route', async () => {
-    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'gpt-5.4' }));
+    useProviders({ routes: { 'scene-content': 'gpt-5.4' } });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(String(warnSpy.mock.calls[0][0])).toContain(BARE_MODEL_ID_DEPRECATION_MSG);
   });
 
-  it('emits the deprecation warning for a bare DEFAULT_MODEL', async () => {
-    vi.stubEnv('DEFAULT_MODEL', 'gpt-5.4');
+  it('emits the deprecation warning for a bare default model', async () => {
+    useProviders({ defaultModel: 'gpt-5.4' });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(String(warnSpy.mock.calls[0][0])).toContain(BARE_MODEL_ID_DEPRECATION_MSG);
   });
 
-  it('warns softly when DEFAULT_MODEL points at a provider with no server key (client keys still work)', async () => {
-    vi.stubEnv('DEFAULT_MODEL', 'deepseek:deepseek-v4-pro');
+  it('warns softly when the default model points at a provider with no server key (client keys still work)', async () => {
+    useProviders({ defaultModel: 'deepseek:deepseek-v4-pro' });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(1);
@@ -233,71 +203,119 @@ describe('validateServerConfig — warning matrix', () => {
     expect(String(warnSpy.mock.calls[0][0])).toContain('client supplies its own key');
   });
 
-  it('warns when <PREFIX>_MODELS is set without the provider key env', async () => {
-    vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
-    const { validateServerConfig } = await import('@/lib/server/config-validation');
-    validateServerConfig();
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    expect(String(warnSpy.mock.calls[0][0])).toContain('DEEPSEEK_MODELS');
-    expect(String(warnSpy.mock.calls[0][0])).toContain('DEEPSEEK_API_KEY');
-  });
-
-  it('does not warn when <PREFIX>_MODELS is set with the key present', async () => {
-    vi.stubEnv('DEEPSEEK_API_KEY', 'sk-test');
-    vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
-    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
-    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
-    const { validateServerConfig } = await import('@/lib/server/config-validation');
-    validateServerConfig();
-    expect(warnSpy).not.toHaveBeenCalled();
-  });
-
-  it('does not warn when <PREFIX>_MODELS is set for a keyless provider with a base URL', async () => {
-    vi.stubEnv('OLLAMA_BASE_URL', 'http://localhost:11434/v1');
-    vi.stubEnv('OLLAMA_MODELS', 'llama3.3');
-    const { validateServerConfig } = await import('@/lib/server/config-validation');
-    validateServerConfig();
-    expect(warnSpy).not.toHaveBeenCalled();
-  });
-
-  it('warns when <PREFIX>_MODELS is set for a keyless provider without a base URL', async () => {
-    vi.stubEnv('OLLAMA_MODELS', 'llama3.3');
-    const { validateServerConfig } = await import('@/lib/server/config-validation');
-    validateServerConfig();
-    // Ollama ships a default base URL, so a bare _MODELS pin is functional — no warning.
-    expect(warnSpy).not.toHaveBeenCalled();
-  });
-
   it('does not throw on garbage config (warn-only)', async () => {
-    vi.stubEnv('MODEL_ROUTES', '{{{');
-    vi.stubEnv('DEFAULT_MODEL', ':::::');
+    useProviders({
+      routes: { 'scene-content': { model: 42 }, 'pbl-chat': ['x'] },
+      defaultModel: ':::::',
+    });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     expect(() => validateServerConfig()).not.toThrow();
   });
 
-  it('does not warn when a provider is configured via server-providers.yml', async () => {
+  it('warns that a leftover server-providers.yml is ignored', async () => {
     yamlOverride = 'providers:\n  deepseek:\n    apiKey: sk-yaml\n';
-    vi.stubEnv('MODEL_ROUTES', JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' }));
-    vi.stubEnv('DEEPSEEK_MODELS', 'deepseek-v4-pro');
-    vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
-    vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain('server-providers.yml is ignored');
+    expect(message).not.toContain('sk-yaml');
+  });
+
+  it('warns once naming leftover provider env vars, never their values', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'sk-leftover-value');
+    vi.stubEnv('TTS_OPENAI_API_KEY', 'sk-leftover-tts');
+    vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.4');
+    vi.stubEnv('MODEL_ROUTES', '{"scene-content":"openai:gpt-5.4"}');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain('are ignored');
+    for (const name of ['OPENAI_API_KEY', 'TTS_OPENAI_API_KEY', 'DEFAULT_MODEL', 'MODEL_ROUTES']) {
+      expect(message).toContain(name);
+    }
+    expect(message).not.toContain('sk-leftover');
+  });
+
+  it('does not let a leftover provider env var configure anything', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'sk-leftover-value');
+    vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.4');
+    const { validateServerConfig } = await import('@/lib/server/config-validation');
+    validateServerConfig();
+    const messages = warnSpy.mock.calls.map((call: unknown[]) => String(call[0]));
+    // Only the "ignored" note: no routes, no managed providers, so nothing else to warn about.
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toContain('are ignored');
   });
 
   it('warns once per distinct problem when a config has several', async () => {
-    vi.stubEnv(
-      'MODEL_ROUTES',
-      JSON.stringify({
+    useProviders({
+      routes: {
         'scene-contnet': 'openai:gpt-5.4', // unknown stage
         'scene-content': 'anhtropic:claude-sonnet-4', // unknown provider
         'pbl-chat': 'claude-sonnet-4', // bare id
-      }),
-    );
+      },
+    });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
     expect(warnSpy).toHaveBeenCalledTimes(3);
+  });
+
+  describe('stored provider secrets', () => {
+    it('warns when DATABASE_URL is set without PROVIDER_SECRET_KEY', async () => {
+      vi.stubEnv('DATABASE_URL', 'postgres://store');
+      const { validateServerConfig } = await import('@/lib/server/config-validation');
+      validateServerConfig();
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(String(warnSpy.mock.calls[0][0])).toContain('PROVIDER_SECRET_KEY is not set');
+    });
+
+    it('warns when PROVIDER_SECRET_KEY is malformed, without echoing it', async () => {
+      vi.stubEnv('DATABASE_URL', 'postgres://store');
+      vi.stubEnv('PROVIDER_SECRET_KEY', 'not-a-real-key');
+      const { validateServerConfig } = await import('@/lib/server/config-validation');
+      validateServerConfig();
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      const message = String(warnSpy.mock.calls[0][0]);
+      expect(message).toContain('PROVIDER_SECRET_KEY');
+      expect(message).not.toContain('not-a-real-key');
+    });
+
+    it('does not check the master key without a database', async () => {
+      const { validateServerConfig } = await import('@/lib/server/config-validation');
+      validateServerConfig();
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not warn with a database and a valid master key', async () => {
+      vi.stubEnv('DATABASE_URL', 'postgres://store');
+      vi.stubEnv('PROVIDER_SECRET_KEY', MASTER_KEY);
+      const { validateServerConfig } = await import('@/lib/server/config-validation');
+      validateServerConfig();
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('names the stored secrets that cannot be decrypted', async () => {
+      vi.stubEnv('DATABASE_URL', 'postgres://store');
+      vi.stubEnv('PROVIDER_SECRET_KEY', MASTER_KEY);
+      vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
+      vi.stubEnv('ACCESS_COOKIE_SECRET', 'x'.repeat(32));
+      setProviderSnapshot({
+        ...emptySnapshot(),
+        unreadable: [
+          { section: 'providers', providerId: 'openai' },
+          { section: 'tts', providerId: 'openai-tts' },
+        ],
+      });
+      const { validateServerConfig } = await import('@/lib/server/config-validation');
+      validateServerConfig();
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      const message = String(warnSpy.mock.calls[0][0]);
+      expect(message).toContain('2 stored provider secret(s) cannot be decrypted');
+      expect(message).toContain('providers/openai');
+      expect(message).toContain('tts/openai-tts');
+    });
   });
 
   describe('agent runtime configuration', () => {
@@ -323,6 +341,7 @@ describe('validateServerConfig — warning matrix', () => {
     it('does not warn when the runtime flag is set with DATABASE_URL present', async () => {
       vi.stubEnv('OPENMAIC_AGENT_RUNTIME_ENABLED', 'true');
       vi.stubEnv('DATABASE_URL', 'postgres://runtime');
+      vi.stubEnv('PROVIDER_SECRET_KEY', MASTER_KEY);
       const { validateServerConfig } = await import('@/lib/server/config-validation');
       validateServerConfig();
       expect(warnSpy).not.toHaveBeenCalled();

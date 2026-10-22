@@ -27,10 +27,9 @@ export interface AliDocMindCredentials {
   accessKeySecret: string;
   endpoint?: string;
   /**
-   * Allow falling back to ALIDOCMIND_ACCESS_KEY_ID/SECRET env vars when the
-   * caller supplies no AK/SK. Defaults to false so an unauthenticated client
-   * request cannot silently run on the server's Aliyun account. Set true only
-   * in a server-managed/trusted context (or local dev/tests via env).
+   * No longer reads the environment: the server's AccessKey pair comes from the provider
+   * settings (`provider_credentials`) and arrives as `accessKeyId`/`accessKeySecret`. The field
+   * stays so existing call sites keep compiling.
    */
   allowEnvFallback?: boolean;
 }
@@ -65,11 +64,7 @@ export interface AliDocMindResult {
 }
 
 function resolveCredentials(creds: Partial<AliDocMindCredentials>): AliDocMindCredentials {
-  const allowEnv = creds.allowEnvFallback ?? false;
-  const accessKeyId =
-    creds.accessKeyId || (allowEnv ? process.env.ALIDOCMIND_ACCESS_KEY_ID : undefined);
-  const accessKeySecret =
-    creds.accessKeySecret || (allowEnv ? process.env.ALIDOCMIND_ACCESS_KEY_SECRET : undefined);
+  const { accessKeyId, accessKeySecret } = creds;
   if (!accessKeyId || !accessKeySecret) {
     throw new Error('AliDocMind credentials missing: provide accessKeyId + accessKeySecret');
   }

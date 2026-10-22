@@ -3,6 +3,8 @@ import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
+
 const OWNER_COOKIE_ID = '11111111-1111-4111-8111-111111111111';
 const OTHER_COOKIE_ID = '22222222-2222-4222-8222-222222222222';
 const SIGNED_IN_ACCOUNT_ID = 'a-learner';
@@ -70,6 +72,8 @@ const SIGNED_IN = headers('session=token');
 
 beforeEach(() => {
   vi.stubEnv('DATABASE_URL', 'postgres://classroom-access-test');
+  // requireSpender answers 503 until the provider settings are loaded; here they are, and empty.
+  useProviders();
   records.clear();
   signedInRole = 'learner';
   learning.membership = { active: true, monthlyQuota: 1000 };
@@ -80,6 +84,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  clearProviders();
 });
 
 describe('canReadClassroom', () => {

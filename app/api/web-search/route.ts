@@ -106,14 +106,14 @@ export async function POST(req: NextRequest) {
     managed = isServerConfiguredProvider('webSearch', providerId);
     const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
     const clientApiKey = keysAllowed ? bodyApiKey : undefined;
-    // SearXNG base URLs are operator-managed only (SEARXNG_BASE_URL); never trust client input.
+    // SearXNG base URLs are operator-managed only (set in the Settings popup (top bar)); never trust client input.
     const clientBaseUrl = keysAllowed && providerId !== 'searxng' ? bodyBaseUrl : undefined;
     const apiKey = resolveWebSearchApiKey(providerId, clientApiKey);
     if (provider.requiresApiKey && !apiKey) {
       return apiError(
         'MISSING_API_KEY',
         400,
-        `${provider.name} API key is not configured. Set it in Settings -> Web Search or configure ${getWebSearchEnvKey(providerId)} on the server.`,
+        `${provider.name} API key is not configured. Set it in Settings -> Web Search (an administrator can also add a shared server key there).`,
       );
     }
     let baseUrl: string | undefined;
@@ -204,31 +204,7 @@ export async function POST(req: NextRequest) {
 
 function getMissingBaseUrlMessage(providerId: WebSearchProviderId, providerName: string): string {
   if (providerId === 'searxng') {
-    return `${providerName} base URL is not configured. Set SEARXNG_BASE_URL on the server.`;
+    return `${providerName} base URL is not configured. An administrator must add it as a shared server credential.`;
   }
-  return `${providerName} base URL is not configured. Set ${getWebSearchEnvKey(providerId)} on the server or configure the base URL in Settings -> Web Search.`;
-}
-
-function getWebSearchEnvKey(providerId: WebSearchProviderId): string {
-  switch (providerId) {
-    case 'exa':
-      return 'EXA_API_KEY';
-    case 'baidu':
-      return 'BAIDU_API_KEY';
-    case 'bocha':
-      return 'BOCHA_API_KEY';
-    case 'brave':
-      return 'BRAVE_API_KEY';
-    case 'claude':
-      return 'WEB_SEARCH_CLAUDE_API_KEY';
-    case 'minimax':
-      return 'WEB_SEARCH_MINIMAX_API_KEY';
-    case 'doubao':
-      return 'WEB_SEARCH_DOUBAO_API_KEY';
-    case 'searxng':
-      return 'SEARXNG_BASE_URL';
-    case 'tavily':
-    default:
-      return 'TAVILY_API_KEY';
-  }
+  return `${providerName} base URL is not configured. Configure the base URL in Settings -> Web Search (an administrator can also add a shared server credential there).`;
 }

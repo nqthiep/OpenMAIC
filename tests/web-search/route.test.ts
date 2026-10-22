@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 const mocks = vi.hoisted(() => ({
   searchWeb: vi.fn(),
@@ -47,30 +48,7 @@ describe('POST /api/web-search', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
-    delete process.env.TAVILY_API_KEY;
-    delete process.env.TAVILY_BASE_URL;
-    delete process.env.TAVILY_ENABLED;
-    delete process.env.EXA_API_KEY;
-    delete process.env.EXA_BASE_URL;
-    delete process.env.EXA_ENABLED;
-    delete process.env.BOCHA_API_KEY;
-    delete process.env.BOCHA_BASE_URL;
-    delete process.env.BOCHA_ENABLED;
-    delete process.env.BRAVE_API_KEY;
-    delete process.env.BRAVE_BASE_URL;
-    delete process.env.BRAVE_ENABLED;
-    delete process.env.BAIDU_API_KEY;
-    delete process.env.BAIDU_BASE_URL;
-    delete process.env.BAIDU_ENABLED;
-    delete process.env.WEB_SEARCH_MINIMAX_API_KEY;
-    delete process.env.WEB_SEARCH_MINIMAX_BASE_URL;
-    delete process.env.WEB_SEARCH_MINIMAX_ENABLED;
-    delete process.env.WEB_SEARCH_CLAUDE_API_KEY;
-    delete process.env.WEB_SEARCH_CLAUDE_BASE_URL;
-    delete process.env.WEB_SEARCH_CLAUDE_MODELS;
-    delete process.env.WEB_SEARCH_CLAUDE_ENABLED;
-    delete process.env.SEARXNG_BASE_URL;
-    delete process.env.SEARXNG_ENABLED;
+    clearProviders();
     mocks.searchWeb.mockReset();
     mocks.formatSearchResultsAsContext.mockClear();
     mocks.resolveModelFromRequest.mockReset();
@@ -103,7 +81,7 @@ describe('POST /api/web-search', () => {
   });
 
   it('ignores a client base URL for a managed (server-configured) provider', async () => {
-    vi.stubEnv('BOCHA_API_KEY', 'bocha-server-key');
+    useProviders({ webSearch: { bocha: { apiKey: 'bocha-server-key' } } });
 
     // A managed provider is admin-owned: the client base URL (even an invalid
     // one) is dropped rather than rejected, and the server config is used.
@@ -124,8 +102,11 @@ describe('POST /api/web-search', () => {
   });
 
   it('uses server-configured base URL when no client base URL is supplied', async () => {
-    vi.stubEnv('BOCHA_API_KEY', 'bocha-server-key');
-    vi.stubEnv('BOCHA_BASE_URL', 'http://internal-proxy.local/bocha');
+    useProviders({
+      webSearch: {
+        bocha: { apiKey: 'bocha-server-key', baseUrl: 'http://internal-proxy.local/bocha' },
+      },
+    });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -143,8 +124,9 @@ describe('POST /api/web-search', () => {
   });
 
   it('routes Exa web search with server-managed credentials', async () => {
-    vi.stubEnv('EXA_API_KEY', 'exa-server-key');
-    vi.stubEnv('EXA_BASE_URL', 'https://api.exa.ai');
+    useProviders({
+      webSearch: { exa: { apiKey: 'exa-server-key', baseUrl: 'https://api.exa.ai' } },
+    });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -161,12 +143,12 @@ describe('POST /api/web-search', () => {
     );
   });
 
-  it('names EXA_API_KEY when Exa credentials are missing', async () => {
+  it('points to Settings when Exa credentials are missing', async () => {
     const res = await postWebSearch({ query: 'test query', providerId: 'exa' });
     const json = await res.json();
 
     expect(res.status).toBe(400);
-    expect(json.error).toContain('EXA_API_KEY');
+    expect(json.error).toContain('Settings');
     expect(mocks.searchWeb).not.toHaveBeenCalled();
   });
 
@@ -186,7 +168,7 @@ describe('POST /api/web-search', () => {
   });
 
   it('passes Baidu sub-source toggles through to the dispatcher', async () => {
-    vi.stubEnv('BAIDU_API_KEY', 'baidu-server-key');
+    useProviders({ webSearch: { baidu: { apiKey: 'baidu-server-key' } } });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -213,8 +195,11 @@ describe('POST /api/web-search', () => {
   });
 
   it('routes MiniMax web search through the dispatcher with server config', async () => {
-    vi.stubEnv('WEB_SEARCH_MINIMAX_API_KEY', 'minimax-server-key');
-    vi.stubEnv('WEB_SEARCH_MINIMAX_BASE_URL', 'https://api.minimaxi.com');
+    useProviders({
+      webSearch: {
+        minimax: { apiKey: 'minimax-server-key', baseUrl: 'https://api.minimaxi.com' },
+      },
+    });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -249,9 +234,10 @@ describe('POST /api/web-search', () => {
     );
   });
 
-  it('pins the Claude model from server env over the client model', async () => {
-    vi.stubEnv('WEB_SEARCH_CLAUDE_API_KEY', 'claude-server-key');
-    vi.stubEnv('WEB_SEARCH_CLAUDE_MODELS', 'claude-sonnet-5');
+  it('pins the Claude model from the managed provider over the client model', async () => {
+    useProviders({
+      webSearch: { claude: { apiKey: 'claude-server-key', models: ['claude-sonnet-5'] } },
+    });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -269,7 +255,7 @@ describe('POST /api/web-search', () => {
     );
   });
 
-  it('rejects Claude requests without an API key, naming the env var', async () => {
+  it('rejects Claude requests without an API key, pointing to Settings', async () => {
     const res = await postWebSearch({
       query: 'test query',
       providerId: 'claude',
@@ -277,12 +263,12 @@ describe('POST /api/web-search', () => {
 
     expect(res.status).toBe(400);
     const data = await res.json();
-    expect(JSON.stringify(data)).toContain('WEB_SEARCH_CLAUDE_API_KEY');
+    expect(JSON.stringify(data)).toContain('Settings');
     expect(mocks.searchWeb).not.toHaveBeenCalled();
   });
 
   it('prefers server-configured SearXNG over client-selected Brave', async () => {
-    vi.stubEnv('SEARXNG_BASE_URL', 'http://192.168.161.100:6060');
+    useProviders({ webSearch: { searxng: { baseUrl: 'http://192.168.161.100:6060' } } });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -299,7 +285,7 @@ describe('POST /api/web-search', () => {
   });
 
   it('routes SearXNG web search through the dispatcher with server base URL', async () => {
-    vi.stubEnv('SEARXNG_BASE_URL', 'http://192.168.161.100:6060');
+    useProviders({ webSearch: { searxng: { baseUrl: 'http://192.168.161.100:6060' } } });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -327,7 +313,7 @@ describe('POST /api/web-search', () => {
       success: false,
       errorCode: 'MISSING_REQUIRED_FIELD',
     });
-    expect(json.error).toContain('SEARXNG_BASE_URL');
+    expect(json.error).toContain('shared server credential');
     expect(json.error).not.toContain('Settings');
     expect(mocks.searchWeb).not.toHaveBeenCalled();
   });
@@ -356,7 +342,7 @@ describe('POST /api/web-search', () => {
   ])(
     'uses operator-configured SearXNG URL and ignores client-supplied base URL (%s)',
     async (clientBaseUrl) => {
-      vi.stubEnv('SEARXNG_BASE_URL', 'http://192.168.161.100:6060');
+      useProviders({ webSearch: { searxng: { baseUrl: 'http://192.168.161.100:6060' } } });
 
       const res = await postWebSearch({
         query: 'test query',
@@ -375,8 +361,10 @@ describe('POST /api/web-search', () => {
   );
 
   it('rejects a force-disabled provider with 403 PROVIDER_DISABLED even when it has a key', async () => {
-    vi.stubEnv('TAVILY_API_KEY', 'tvly-server-key');
-    vi.stubEnv('TAVILY_ENABLED', 'false');
+    useProviders({
+      webSearch: { tavily: { apiKey: 'tvly-server-key' } },
+      disabled: { webSearch: ['tavily'] },
+    });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -393,7 +381,7 @@ describe('POST /api/web-search', () => {
   });
 
   it('force-off beats a client key: a disabled unmanaged provider still 403s', async () => {
-    vi.stubEnv('TAVILY_ENABLED', 'false');
+    useProviders({ disabled: { webSearch: ['tavily'] } });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -411,8 +399,10 @@ describe('POST /api/web-search', () => {
     // Server has Bocha (enabled); the client asks for Tavily which is
     // force-disabled and NOT server-configured. The server-preference override
     // points at the enabled backend instead of failing the request.
-    vi.stubEnv('BOCHA_API_KEY', 'bocha-server-key');
-    vi.stubEnv('TAVILY_ENABLED', 'false');
+    useProviders({
+      webSearch: { bocha: { apiKey: 'bocha-server-key' } },
+      disabled: { webSearch: ['tavily'] },
+    });
 
     const res = await postWebSearch({
       query: 'test query',
@@ -429,9 +419,13 @@ describe('POST /api/web-search', () => {
     // Tavily is server-configured (key present) but force-disabled, so the
     // server-preference override does NOT apply — the disabled provider itself
     // is rejected rather than silently swapped.
-    vi.stubEnv('BOCHA_API_KEY', 'bocha-server-key');
-    vi.stubEnv('TAVILY_API_KEY', 'tvly-server-key');
-    vi.stubEnv('TAVILY_ENABLED', 'false');
+    useProviders({
+      webSearch: {
+        bocha: { apiKey: 'bocha-server-key' },
+        tavily: { apiKey: 'tvly-server-key' },
+      },
+      disabled: { webSearch: ['tavily'] },
+    });
 
     const res = await postWebSearch({
       query: 'test query',

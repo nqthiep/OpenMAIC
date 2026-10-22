@@ -205,8 +205,7 @@ export async function parsePDF(
   // Validate API key if required
   if (provider.requiresApiKey && !config.apiKey) {
     // AliDocMind uses AK/SK instead of a single apiKey; check separately.
-    const envAvailable = config.allowEnvFallback && !!process.env.ALIDOCMIND_ACCESS_KEY_ID;
-    if (config.providerId !== 'alidocmind' || (!config.accessKeyId && !envAvailable)) {
+    if (config.providerId !== 'alidocmind' || !config.accessKeyId) {
       throw new Error(`API key required for PDF provider: ${config.providerId}`);
     }
   }

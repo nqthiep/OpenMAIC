@@ -20,6 +20,8 @@ const SECRET_ENV_EXACT = new Set([
   'AWS_BEARER_TOKEN_BEDROCK',
   'S3_CONTRACT_SECRET_KEY',
   'ALIDOCMIND_ACCESS_KEY_ID',
+  // The master key for stored provider secrets: its name ends in _KEY, which the suffix list misses.
+  'PROVIDER_SECRET_KEY',
 ]);
 
 const operatorSecrets = new Set<string>();

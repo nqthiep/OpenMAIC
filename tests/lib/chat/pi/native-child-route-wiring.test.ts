@@ -5,6 +5,7 @@ import { BrowserRuntimeStore } from '@openmaic/storage';
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb';
 
 import { APP_RUNTIME_PAYLOAD_VALIDATORS } from '@/lib/runtime/payload-validators';
+import { clearProviders, useProviders } from '../../../fixtures/provider-snapshot';
 
 const mocks = vi.hoisted(() => ({
   resolveModel: vi.fn(),
@@ -44,8 +45,6 @@ const envNames = [
   'NEXT_PUBLIC_PI_CHAT_ENABLED',
   'OPENMAIC_ENABLE_PI_NATIVE_CHILD_RUNTIME',
   'OPENMAIC_ENABLE_PI_NATIVE_CHILD_SPOTLIGHT',
-  'TAVILY_API_KEY',
-  'TAVILY_BASE_URL',
   'NEXT_PUBLIC_PERSISTENCE',
   'DATABASE_URL',
   'PERSISTENCE_DEV_TOKEN',
@@ -162,8 +161,8 @@ describe('PR2 Native Child route production wiring', () => {
     process.env.NEXT_PUBLIC_PI_CHAT_ENABLED = 'true';
     process.env.OPENMAIC_ENABLE_PI_NATIVE_CHILD_RUNTIME = 'true';
     process.env.OPENMAIC_ENABLE_PI_NATIVE_CHILD_SPOTLIGHT = 'true';
-    delete process.env.TAVILY_API_KEY;
-    delete process.env.TAVILY_BASE_URL;
+    // A loaded, empty snapshot: nothing managed, and no ProviderConfigNotReady when DATABASE_URL is set.
+    useProviders();
     mocks.resolveModel.mockReset();
     mocks.streamLLM.mockReset();
     mocks.searchWeb.mockReset();
@@ -190,6 +189,7 @@ describe('PR2 Native Child route production wiring', () => {
       else process.env[name] = value;
     }
     originalEnv.clear();
+    clearProviders();
     vi.unstubAllGlobals();
     vi.resetModules();
   });
@@ -799,8 +799,13 @@ describe('PR2 Native Child route production wiring', () => {
   ])(
     '$label through the real Native route and same-Child continuation',
     async (testCase) => {
-      if (testCase.serverApiKey) process.env.TAVILY_API_KEY = testCase.serverApiKey;
-      if (testCase.serverBaseUrl) process.env.TAVILY_BASE_URL = testCase.serverBaseUrl;
+      if (testCase.serverApiKey) {
+        useProviders({
+          webSearch: {
+            tavily: { apiKey: testCase.serverApiKey, baseUrl: testCase.serverBaseUrl },
+          },
+        });
+      }
       const directorResponses = [
         [
           toolCall('delegate-1', 'call_agent', {

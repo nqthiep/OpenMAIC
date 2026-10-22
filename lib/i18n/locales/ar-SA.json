@@ -2366,12 +2366,12 @@
         "classes": "الصفوف",
         "pendingAccessRequests": "طلبات الوصول المعلّقة"
       },
+      "deniedSignIn": "سجّل الدخول بحساب مشغّل أو مسؤول.",
       "providers": {
         "title": "مزوّدو الخادم",
-        "description": "للعرض فقط. يُضبط المزوّدون في إعدادات الخادم، لا هنا.",
+        "description": "Read-only. Shared provider keys are set in Settings (top bar) and stored on the server.",
         "empty": "لم يُضبط أي مزوّد على الخادم."
-      },
-      "deniedSignIn": "سجّل الدخول بحساب مشغّل أو مسؤول."
+      }
     },
     "membership": {
       "active": "العضوية حتى {{date}} · {{quota}} رمز شهريًا",
@@ -2804,6 +2804,79 @@
       "noTopics": "لا توجد قائمة مواضيع لهذه المادة بعد.",
       "pickSubject": "اختر المادة أولًا لاختيار المواضيع.",
       "suggested": "تمت التعبئة من عناوين الدورة، يُرجى المراجعة قبل الحفظ."
+    },
+    "providers": {
+      "masterKey": {
+        "missing": "PROVIDER_SECRET_KEY is not set on the server, so keys cannot be saved or read. Set it in the server environment and restart.",
+        "invalid": "PROVIDER_SECRET_KEY is not valid. It must be 32 bytes, base64 encoded. Fix it in the server environment and restart."
+      },
+      "status": {
+        "active": "In use",
+        "off": "Switched off",
+        "incomplete": "Missing details",
+        "unreadable": "Key cannot be read",
+        "unset": "Not configured"
+      },
+      "keyHint": "Key ending {{hint}}",
+      "actions": {
+        "save": "Save",
+        "saving": "Saving…",
+        "remove": "Remove",
+        "test": "Test connection",
+        "testing": "Testing…"
+      },
+      "form": {
+        "apiKey": "API key",
+        "apiKeyKeep": "Leave empty to keep the saved key",
+        "clearKey": "Remove the saved key",
+        "accessKeyId": "AccessKey ID",
+        "accessKeySecret": "AccessKey Secret",
+        "baseUrl": "Base URL",
+        "baseUrlRequired": "Required for this provider.",
+        "baseUrlDefault": "Default: {{url}}",
+        "models": "Allowed models",
+        "modelsHint": "Comma separated. Leave empty to allow any model. The first one is used when none is chosen.",
+        "proxy": "Proxy",
+        "proxyHint": "Optional, such as http://proxy.internal:8080.",
+        "enabled": "Use this provider",
+        "enabledHint": "Switch off to stop using it everywhere without deleting its key.",
+        "advanced": "Advanced",
+        "suggestions": "Known models"
+      },
+      "toast": {
+        "saved": "Saved.",
+        "removed": "Removed.",
+        "testOk": "The connection works.",
+        "testFailed": "The provider did not accept the request. Check the key and the base URL."
+      },
+      "errors": {
+        "conflict": "Someone else changed this just now. The latest values are loaded; check them and save again.",
+        "masterKey": "The server has no valid PROVIDER_SECRET_KEY, so the key cannot be stored.",
+        "invalid": "Some value is not accepted. Check the base URL, proxy and key.",
+        "generic": "Could not save. Try again.",
+        "unreadable": "The saved key for this provider cannot be read with the current PROVIDER_SECRET_KEY. Enter a new key, restore the previous master key, or remove the provider."
+      },
+      "confirmRemove": "Remove {{name}} and its saved key?",
+      "default": {
+        "title": "Default model",
+        "description": "Used when a step has no model of its own.",
+        "provider": "Provider",
+        "model": "Model",
+        "save": "Save",
+        "none": "No default model is set, so requests that name no model fail.",
+        "notServed": "This provider has no key yet, so it cannot be used."
+      },
+      "routes": {
+        "title": "Model for each step",
+        "description": "Optional. Give a step its own model as provider:model.",
+        "placeholder": "provider:model",
+        "kept": "Has advanced settings that are kept.",
+        "clear": "Clear"
+      },
+      "card": {
+        "title": "Shared server credential",
+        "description": "The key, base URL and models every learner’s AI request uses. Stored encrypted on the server and never shown again. The fields below are only your own key, kept in this browser."
+      }
     }
   },
   "learning": {

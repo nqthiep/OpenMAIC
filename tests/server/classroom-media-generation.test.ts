@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 import { replaceMediaPlaceholders } from '@/lib/server/classroom-media-generation';
 import type { Scene } from '@/lib/types/stage';
 import type { SceneOutline } from '@/lib/types/generation';
 
 // The media pipeline writes generated files to disk; intercept the writes so
-// the test never touches the worktree. Everything else (including the YAML
-// provider-config read) delegates to the real fs.
+// the test never touches the worktree. Everything else delegates to the real fs.
 vi.mock('fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
   return {
@@ -103,19 +103,17 @@ describe('classroom media placeholder replacement', () => {
 describe('generateMediaForClassroom model fallback', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+    clearProviders();
     vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
   test('gracefully skips media when every configured provider is force-disabled', async () => {
-    // The generic key enables OpenAI's image fallback. This test owns only the
-    // explicitly force-disabled providers below, so keep shell credentials out
-    // of its provider set (and out of fetch-mock failure output).
-    vi.stubEnv('OPENAI_API_KEY', '');
-    vi.stubEnv('IMAGE_SEEDREAM_API_KEY', 'sk-seedream');
-    vi.stubEnv('IMAGE_SEEDREAM_ENABLED', 'false');
-    vi.stubEnv('VIDEO_SEEDANCE_API_KEY', 'sk-seedance');
-    vi.stubEnv('VIDEO_SEEDANCE_ENABLED', 'false');
+    useProviders({
+      image: { seedream: { apiKey: 'sk-seedream' } },
+      video: { seedance: { apiKey: 'sk-seedance' } },
+      disabled: { image: ['seedream'], video: ['seedance'] },
+    });
     vi.resetModules();
 
     const fetchMock = vi.fn();
@@ -142,10 +140,10 @@ describe('generateMediaForClassroom model fallback', () => {
   });
 
   test('falls back to the first catalog image model when the server pins no models', async () => {
-    // Key-only managed provider (no IMAGE_SEEDREAM_MODELS pin): the resolver
+    // Key-only managed provider (no pinned models): the resolver
     // yields no model, so the classroom path must fall back to the first
     // catalog model instead of reaching the adapter with an undefined model.
-    vi.stubEnv('IMAGE_SEEDREAM_API_KEY', 'sk-seedream');
+    useProviders({ image: { seedream: { apiKey: 'sk-seedream' } } });
     vi.resetModules();
 
     const fetchMock = vi
@@ -183,9 +181,8 @@ describe('generateMediaForClassroom model fallback', () => {
     expect(genBody.model).toBe('doubao-seedream-5-0-260128');
   });
 
-  test('uses the server-pinned model when IMAGE_<PREFIX>_MODELS is set', async () => {
-    vi.stubEnv('IMAGE_SEEDREAM_API_KEY', 'sk-seedream');
-    vi.stubEnv('IMAGE_SEEDREAM_MODELS', 'pinned-a');
+  test('uses the server-pinned model when the managed image provider pins models', async () => {
+    useProviders({ image: { seedream: { apiKey: 'sk-seedream', models: ['pinned-a'] } } });
     vi.resetModules();
 
     const fetchMock = vi
@@ -221,8 +218,9 @@ describe('generateMediaForClassroom model fallback', () => {
   });
 
   test('normalizes GPT Image 2 classroom media to an accepted landscape size', async () => {
-    vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-openai');
-    vi.stubEnv('IMAGE_OPENAI_MODELS', 'gpt-image-2');
+    useProviders({
+      image: { 'openai-image': { apiKey: 'sk-openai', models: ['gpt-image-2'] } },
+    });
     vi.resetModules();
 
     const fetchMock = vi
@@ -257,10 +255,10 @@ describe('generateMediaForClassroom model fallback', () => {
   });
 
   test('falls back to the first catalog video model when the server pins no models', async () => {
-    // Key-only managed provider (no VIDEO_SEEDANCE_MODELS pin): the resolver
+    // Key-only managed provider (no pinned models): the resolver
     // yields no model, so the classroom path must fall back to the first
     // catalog model instead of reaching the adapter with an undefined model.
-    vi.stubEnv('VIDEO_SEEDANCE_API_KEY', 'sk-seedance');
+    useProviders({ video: { seedance: { apiKey: 'sk-seedance' } } });
     vi.useFakeTimers();
     vi.resetModules();
 
@@ -315,9 +313,10 @@ describe('generateMediaForClassroom model fallback', () => {
     expect(genBody.model).toBe('doubao-seedance-2-0-260128');
   });
 
-  test('uses the server-pinned video model when VIDEO_<PREFIX>_MODELS is set', async () => {
-    vi.stubEnv('VIDEO_SEEDANCE_API_KEY', 'sk-seedance');
-    vi.stubEnv('VIDEO_SEEDANCE_MODELS', 'pinned-video-a');
+  test('uses the server-pinned video model when the managed video provider pins models', async () => {
+    useProviders({
+      video: { seedance: { apiKey: 'sk-seedance', models: ['pinned-video-a'] } },
+    });
     vi.useFakeTimers();
     vi.resetModules();
 

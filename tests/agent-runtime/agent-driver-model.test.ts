@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 const mocks = vi.hoisted(() => ({ resolveModel: vi.fn(), streamLLM: vi.fn() }));
 
@@ -31,7 +32,7 @@ describe('agent driver model route', () => {
     vi.resetModules();
     mocks.resolveModel.mockReset();
     mocks.streamLLM.mockReset();
-    delete process.env.MODEL_ROUTES;
+    clearProviders();
   });
 
   it('fails loud when the dedicated route is missing', async () => {
@@ -42,11 +43,13 @@ describe('agent driver model route', () => {
   });
 
   it('fails loud when reasoning effort is configured for the tool-using driver', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        thinking: { effort: 'medium' },
-        api: 'openai-completions',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          thinking: { effort: 'medium' },
+          api: 'openai-completions',
+        },
       },
     });
     const { resolveAgentDriverModel } =
@@ -55,10 +58,12 @@ describe('agent driver model route', () => {
   });
 
   it('requires an explicit provider prefix', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'gpt-5.6-luna',
-        api: 'openai-completions',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'gpt-5.6-luna',
+          api: 'openai-completions',
+        },
       },
     });
     const { resolveAgentDriverModel } =
@@ -70,10 +75,12 @@ describe('agent driver model route', () => {
   it.each(['gpt-5.6-terra', 'gpt-5.6-luna'])(
     'accepts configured driver model %s and passes the explicit pi API dialect',
     async (modelId) => {
-      process.env.MODEL_ROUTES = JSON.stringify({
-        'maic-agent-driver': {
-          model: `openai:${modelId}`,
-          api: 'openai-completions',
+      useProviders({
+        routes: {
+          'maic-agent-driver': {
+            model: `openai:${modelId}`,
+            api: 'openai-completions',
+          },
         },
       });
       mocks.resolveModel.mockResolvedValue({
@@ -100,8 +107,10 @@ describe('agent driver model route', () => {
   );
 
   it('uses the provider catalog window when the model is known', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', api: 'openai-completions' },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', api: 'openai-completions' },
+      },
     });
     mocks.resolveModel.mockResolvedValue({
       model: {},
@@ -124,8 +133,10 @@ describe('agent driver model route', () => {
   });
 
   it('falls back to a conservative real window for an unknown model', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'custom:some-model', api: 'openai-completions' },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'custom:some-model', api: 'openai-completions' },
+      },
     });
     mocks.resolveModel.mockResolvedValue({
       model: {},
@@ -183,11 +194,13 @@ describe('agent driver model route', () => {
   });
 
   it('lets the route pin a contextWindow below the catalog value', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        api: 'openai-completions',
-        contextWindow: 32_000,
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          api: 'openai-completions',
+          contextWindow: 32_000,
+        },
       },
     });
     mocks.resolveModel.mockResolvedValue({
@@ -208,10 +221,12 @@ describe('agent driver model route', () => {
   });
 
   it('propagates an unresolvable provider failure', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'custom:gpt-5.6-luna',
-        api: 'openai-completions',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'custom:gpt-5.6-luna',
+          api: 'openai-completions',
+        },
       },
     });
     mocks.resolveModel.mockRejectedValue(new Error('Unknown provider: custom'));
@@ -221,10 +236,12 @@ describe('agent driver model route', () => {
   });
 
   it('fails loud for an incompatible pi API dialect', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        api: 'anthropic-messages',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          api: 'anthropic-messages',
+        },
       },
     });
     mocks.resolveModel.mockResolvedValue({
@@ -243,9 +260,11 @@ describe('agent driver model route', () => {
   });
 
   it('fails loud when api/dialect is omitted', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+        },
       },
     });
     mocks.resolveModel.mockResolvedValue({

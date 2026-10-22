@@ -24,6 +24,11 @@ import type { MediaArtifact } from '@/lib/document';
 const hasCreds =
   !!process.env.ALIDOCMIND_ACCESS_KEY_ID && !!process.env.ALIDOCMIND_ACCESS_KEY_SECRET;
 const describeIf = hasCreds ? describe : describe.skip;
+// The server reads its AccessKey pair from the provider settings; the smoke test passes its own.
+const envCredentials = {
+  accessKeyId: process.env.ALIDOCMIND_ACCESS_KEY_ID,
+  accessKeySecret: process.env.ALIDOCMIND_ACCESS_KEY_SECRET,
+};
 
 const SAMPLE_PDF_URL =
   'https://gw.alipayobjects.com/os/basement_prod/598b9edf-5287-4065-9e36-464305c60698.pdf';
@@ -41,7 +46,7 @@ describeIf('AliDocMind smoke', () => {
     async () => {
       const buffer = await fetchBuffer(SAMPLE_PDF_URL);
       const result: ParsedPdfContent = await parsePDF(
-        { providerId: 'alidocmind', allowEnvFallback: true },
+        { providerId: 'alidocmind', ...envCredentials },
         buffer,
         {
           fileName: 'sample.pdf',
@@ -62,7 +67,7 @@ describeIf('AliDocMind smoke', () => {
         buffer,
         fileName: 'sample.mp4',
         mimeType: 'video/mp4',
-        config: { providerId: 'alidocmind', allowEnvFallback: true },
+        config: { providerId: 'alidocmind', ...envCredentials },
       });
       const hasContent =
         (artifact.transcript && artifact.transcript.length > 0) ||

@@ -5,15 +5,16 @@
  * discovered only at request time — or worse, per-session. At boot we surface,
  * as `[config]` warnings:
  *
- *  - `MODEL_ROUTES` that does not parse as JSON;
  *  - a route key that is not a routable stage (typo detection);
- *  - a route / `DEFAULT_MODEL` whose provider prefix is not registered, or
+ *  - a route / the default model whose provider prefix is not registered, or
  *    whose provider requires an API key that is not configured (keyless
  *    providers like Ollama pass);
  *  - a bare model id (no `provider:` prefix) — it still defaults to `openai`
  *    for backward compatibility, but that fallback is deprecated;
- *  - a `<PREFIX>_MODELS` env set for a provider whose key env is absent
- *    (pinned models on an unconfigured provider — probably a typo);
+ *  - the master key for stored provider secrets (`PROVIDER_SECRET_KEY`) missing or
+ *    malformed, and stored secrets that this server cannot decrypt;
+ *  - environment variables and files that used to configure providers and are
+ *    now ignored (`*_API_KEY`, `DEFAULT_MODEL`, `MODEL_ROUTES`, `server-providers.yml`);
  *  - the agent runtime flag set without a `DATABASE_URL` — the runtime is
  *    enabled but unusable, so its probe reports disabled and its routes
  *    answer 404 while the runner never starts.
@@ -26,11 +27,12 @@ import { getProvider, warnBareModelIdDeprecation } from '@/lib/ai/providers';
 import { isAgentRuntimeEnabled } from '@/lib/config/feature-flags';
 import { LLM_STAGES } from '@/lib/server/model-routes';
 import { parsePublicAppOrigin } from '@/lib/server/public-origin';
-import {
-  isServerConfiguredProvider,
-  LLM_ENV_MAP,
-  resolveApiKey,
-} from '@/lib/server/provider-config';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { getServerProviders, resolveApiKey } from '@/lib/server/provider-config';
+import { loadKeyRing, ProviderKeyError } from '@/lib/server/provider-store/crypto';
+import { currentSnapshot, isProviderSnapshotLoaded } from '@/lib/server/provider-store/snapshot';
 import type { ProviderId } from '@/lib/types/provider';
 
 /** Consistent prefix for boot-time config warnings. */
@@ -40,7 +42,7 @@ function warn(message: string): void {
   console.warn(`${WARN_PREFIX} ${message}`);
 }
 
-/** Extract the model string from a MODEL_ROUTES route value (string or `{model}`). */
+/** Extract the model string from a stored route value (string or `{model}`). */
 function routeModel(value: unknown): string | undefined {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -60,8 +62,8 @@ function routeModel(value: unknown): string | undefined {
  * Check one model string the way parseModelString would resolve it: a bare id
  * gets the shared deprecation warning; a prefixed id is checked for a
  * registered provider and (for key-requiring providers) a configured key.
- * `routed` distinguishes MODEL_ROUTES entries — where the server key is the
- * only key that can be used — from unrouted sites like DEFAULT_MODEL, where a
+ * `routed` distinguishes stage routes — where the server key is the
+ * only key that can be used — from unrouted sites like the default model, where a
  * client-supplied key still works and a missing server key is only a note.
  */
 function checkModelString(model: string, where: string, routed: boolean): void {
@@ -79,7 +81,7 @@ function checkModelString(model: string, where: string, routed: boolean): void {
   if (provider.requiresApiKey && !resolveApiKey(providerId)) {
     if (routed) {
       warn(
-        `Provider "${providerId}" in ${where} has no API key configured — add a <PREFIX>_API_KEY env var (or server-providers.yml), or requests using it will fail.`,
+        `Provider "${providerId}" in ${where} has no API key configured — add it in Settings (top bar), or requests using it will fail.`,
       );
     } else {
       warn(
@@ -90,64 +92,70 @@ function checkModelString(model: string, where: string, routed: boolean): void {
 }
 
 function validateModelRoutes(): void {
-  const raw = process.env.MODEL_ROUTES?.trim();
-  if (!raw) return;
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    warn('MODEL_ROUTES is not valid JSON — check the value (configured routes are ignored).');
-    return;
-  }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    warn('MODEL_ROUTES must be a JSON object mapping stage -> model; ignoring it.');
-    return;
-  }
-
-  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+  for (const [key, value] of Object.entries(currentSnapshot().routing.routes)) {
     if (!(LLM_STAGES as readonly string[]).includes(key)) {
       warn(
-        `Unknown stage "${key}" in MODEL_ROUTES — not a routable stage (typo?). Valid stages: ${LLM_STAGES.join(', ')}`,
+        `Unknown stage "${key}" in the model routes — not a routable stage (typo?). Valid stages: ${LLM_STAGES.join(', ')}`,
       );
       continue;
     }
     const model = routeModel(value);
     if (!model) continue; // no model string; model-routes warns about bad values at request time
-    checkModelString(model, `MODEL_ROUTES stage "${key}"`, true);
+    checkModelString(model, `model route for stage "${key}"`, true);
   }
 }
 
 function validateDefaultModel(): void {
-  const model = process.env.DEFAULT_MODEL?.trim();
+  const model = currentSnapshot().routing.defaultModel;
   if (!model) return;
-  checkModelString(model, 'DEFAULT_MODEL', false);
+  checkModelString(model, 'the default model', false);
+}
+
+/** Names of environment variables that no longer configure anything, so a leftover is not a silent no-op. */
+const IGNORED_ENV_NAME = /(_API_KEY|^DEFAULT_MODEL|^MODEL_ROUTES)$/;
+
+/**
+ * Provider keys, base URLs, pinned models and the default model are stored in the database and set
+ * in the Settings popup. Environment values and `server-providers.yml` are not read, so say so once
+ * at boot when they are still there: the operator who left them believes they take effect.
+ */
+function validateLegacyProviderConfig(): void {
+  const names = Object.keys(process.env).filter(
+    (name) => IGNORED_ENV_NAME.test(name) && process.env[name]?.trim(),
+  );
+  if (names.length > 0) {
+    warn(
+      `These environment variables are ignored: ${names.sort().join(', ')}. AI provider keys, models and the default model are set by an administrator in Settings (top bar): enter them there, then remove these variables.`,
+    );
+  }
+  if (fs.existsSync(path.join(process.cwd(), 'server-providers.yml'))) {
+    warn(
+      'server-providers.yml is ignored. AI provider settings are stored in the database: an administrator enters them in Settings (top bar), then delete the file.',
+    );
+  }
 }
 
 /**
- * A `<PREFIX>_MODELS` pin only takes effect when the provider is actually
- * configured (its key env, or a base URL for keyless providers). A pin on an
- * unconfigured provider is dead config — usually a typo.
+ * Stored provider secrets are encrypted with PROVIDER_SECRET_KEY. Without it (or with a key that
+ * does not match what was stored) the providers cannot be served, so name the problem at boot.
  */
-function validateModelsEnvPins(): void {
-  for (const [prefix, providerId] of Object.entries(LLM_ENV_MAP)) {
-    if (!process.env[`${prefix}_MODELS`]) continue;
-    const provider = getProvider(providerId as ProviderId);
-    if (!provider) {
+function validateProviderStore(): void {
+  if (!process.env.DATABASE_URL?.trim()) return;
+  try {
+    if (!loadKeyRing()) {
       warn(
-        `${prefix}_MODELS is set for provider "${providerId}" — not a registered provider (typo?).`,
-      );
-      continue;
-    }
-    const configured = provider.requiresApiKey
-      ? !!resolveApiKey(providerId)
-      : isServerConfiguredProvider('providers', providerId) || !!provider.defaultBaseUrl;
-    if (!configured) {
-      const missing = provider.requiresApiKey ? `${prefix}_API_KEY` : `${prefix}_BASE_URL`;
-      warn(
-        `${prefix}_MODELS is set for provider "${providerId}" but ${missing} is not — pinned models on an unconfigured provider (probably a typo).`,
+        'PROVIDER_SECRET_KEY is not set: stored provider secrets cannot be read or saved. Generate one with `openssl rand -base64 32`.',
       );
     }
+  } catch (err) {
+    warn(err instanceof ProviderKeyError ? err.message : 'PROVIDER_SECRET_KEY is not valid.');
+  }
+  if (!isProviderSnapshotLoaded()) return;
+  const { unreadable } = currentSnapshot();
+  if (unreadable.length > 0) {
+    warn(
+      `${unreadable.length} stored provider secret(s) cannot be decrypted with PROVIDER_SECRET_KEY: ${unreadable.map((row) => `${row.section}/${row.providerId}`).join(', ')}.`,
+    );
   }
 }
 
@@ -196,7 +204,7 @@ function validateAccessGate(): void {
  */
 function validateManagedKeys(): void {
   if (process.env.ACCESS_CODE?.trim()) return;
-  const managed = [...new Set(Object.values(LLM_ENV_MAP))].filter((providerId) => {
+  const managed = Object.keys(getServerProviders()).filter((providerId) => {
     const provider = getProvider(providerId as ProviderId);
     return !!provider?.requiresApiKey && !!resolveApiKey(providerId);
   });
@@ -252,12 +260,17 @@ function validatePublicOrigin(): void {
  */
 export function validateServerConfig(): void {
   try {
-    validateModelRoutes();
-    validateDefaultModel();
-    validateModelsEnvPins();
+    validateLegacyProviderConfig();
+    validateProviderStore();
+    // The routes and the managed keys are read from the loaded settings. When a configured
+    // database could not be read at boot, the loader says so and keeps retrying.
+    if (isProviderSnapshotLoaded() || !process.env.DATABASE_URL?.trim()) {
+      validateModelRoutes();
+      validateDefaultModel();
+    }
     validateAgentRuntime();
     validateAccessGate();
-    validateManagedKeys();
+    if (isProviderSnapshotLoaded() || !process.env.DATABASE_URL?.trim()) validateManagedKeys();
     validatePublicOrigin();
   } catch (err) {
     // Boot-time validation must never take the server down.

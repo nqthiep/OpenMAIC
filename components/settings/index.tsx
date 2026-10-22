@@ -40,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { createCustomProviderSettings, getProviderTypeLabel, modelInfoFromId } from './utils';
 import { ProviderList } from './provider-list';
 import { ProviderConfigPanel } from './provider-config-panel';
+import { ServerCredentialCard } from './server-credential-card';
 import { PDFSettings } from './pdf-settings';
 import { PDF_PROVIDERS } from '@/lib/pdf/constants';
 import type { PDFProviderId } from '@/lib/pdf/types';
@@ -1106,6 +1107,19 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               {activeSection === 'skills' && <SkillSettings />}
 
               {activeSection === 'token-plan' && <TokenPlanSettings />}
+
+              <ServerCredentialCard
+                section={activeSection}
+                providerIds={{
+                  providers: selectedProviderId,
+                  pdf: selectedPdfProviderId,
+                  'web-search': selectedWebSearchProviderId,
+                  image: selectedImageProviderId,
+                  video: selectedVideoProviderId,
+                  tts: ttsProviderId,
+                  asr: asrProviderId,
+                }}
+              />
 
               {activeSection === 'providers' && selectedProvider && (
                 <ProviderConfigPanel

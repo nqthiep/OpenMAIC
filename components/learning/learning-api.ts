@@ -883,3 +883,145 @@ export async function fetchClassProgress(classId: string): Promise<ClassProgress
   );
   return body.progress;
 }
+
+// ---------------------------------------------------------------------------------------------
+// AI provider settings (admin). Keys go to the server and never come back: a row says only which
+// secret fields are set, and the last four characters of the key.
+// ---------------------------------------------------------------------------------------------
+
+export type MasterKeyStatus = 'ok' | 'missing' | 'invalid';
+
+export interface ProviderRow {
+  section: ProviderKind;
+  providerId: string;
+  enabled: boolean;
+  baseUrl?: string;
+  models?: string[];
+  has: { apiKey: boolean; accessKeyId: boolean; accessKeySecret: boolean; proxy: boolean };
+  keyHint?: string;
+  /** False when a key is stored but this server cannot decrypt it. */
+  readable: boolean;
+  /** Has what the provider needs to be served. */
+  complete: boolean;
+  version: number;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface ProviderCatalogEntry {
+  id: string;
+  name: string;
+  requiresApiKey: boolean;
+  keyless: boolean;
+  baseUrlRequired: boolean;
+  accessKeyPair: boolean;
+  defaultBaseUrl?: string;
+  models: { id: string; name: string }[];
+}
+
+export interface ModelRouteRow {
+  stage: string;
+  /** A `provider:model` string, or an object with `model` and more (api, contextWindow, thinking). */
+  value: unknown;
+  version: number;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface ProviderSettings {
+  canManage: boolean;
+  masterKey: MasterKeyStatus;
+  rows: ProviderRow[];
+  routing: ModelRouteRow[];
+  stages: string[];
+  catalog: Record<ProviderKind, ProviderCatalogEntry[]>;
+}
+
+export function fetchProviderSettings(): Promise<ProviderSettings> {
+  return call('GET', '/api/admin/providers');
+}
+
+/** What to change on one provider. A field left out keeps its stored value; `null` clears it. */
+export interface ProviderChange {
+  expectedVersion: number;
+  enabled?: boolean;
+  baseUrl?: string | null;
+  models?: string[] | null;
+  secret?: {
+    apiKey?: string | null;
+    accessKeyId?: string | null;
+    accessKeySecret?: string | null;
+    proxy?: string | null;
+  };
+}
+
+const providerUrl = (kind: ProviderKind, id: string) =>
+  `/api/admin/providers/${encodeURIComponent(kind)}/${encodeURIComponent(id)}`;
+
+export function saveProvider(
+  kind: ProviderKind,
+  id: string,
+  change: ProviderChange,
+): Promise<{ row: ProviderRow }> {
+  return call('PUT', providerUrl(kind, id), change);
+}
+
+export function removeProvider(kind: ProviderKind, id: string, version?: number): Promise<unknown> {
+  return call(
+    'DELETE',
+    `${providerUrl(kind, id)}${version === undefined ? '' : `?version=${version}`}`,
+  );
+}
+
+export function saveModelRoute(
+  stage: string,
+  value: unknown,
+  expectedVersion: number,
+): Promise<{ routing: ModelRouteRow[] }> {
+  return call('PUT', '/api/admin/model-routing', { stage, value, expectedVersion });
+}
+
+export function removeModelRoute(
+  stage: string,
+  expectedVersion?: number,
+): Promise<{ routing: ModelRouteRow[] }> {
+  return call('DELETE', '/api/admin/model-routing', { stage, expectedVersion });
+}
+
+/**
+ * Asks the server to use a saved provider once. Only the kinds that have a verify route can be
+ * tried: language models, image, video and PDF. Resolves to whether it worked.
+ */
+export async function verifyProvider(
+  kind: ProviderKind,
+  id: string,
+  model?: string,
+): Promise<boolean> {
+  const json = { 'Content-Type': 'application/json' };
+  let response: Response;
+  if (kind === 'providers') {
+    response = await fetch('/api/verify-model', {
+      method: 'POST',
+      headers: json,
+      body: JSON.stringify({ model: `${id}:${model ?? ''}` }),
+    });
+  } else if (kind === 'image' || kind === 'video') {
+    response = await fetch(`/api/verify-${kind}-provider`, {
+      method: 'POST',
+      headers: { [`x-${kind}-provider`]: id, ...(model ? { [`x-${kind}-model`]: model } : {}) },
+    });
+  } else if (kind === 'pdf') {
+    response = await fetch('/api/verify-pdf-provider', {
+      method: 'POST',
+      headers: json,
+      body: JSON.stringify({ providerId: id }),
+    });
+  } else {
+    throw new Error('This kind of provider has no connection test');
+  }
+  const body = (await response.json().catch(() => undefined)) as { success?: boolean } | undefined;
+  return response.ok && body?.success === true;
+}
+
+/** The kinds `verifyProvider` can try. */
+export const VERIFIABLE_KINDS: readonly ProviderKind[] = ['providers', 'image', 'video', 'pdf'];

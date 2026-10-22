@@ -2024,7 +2024,7 @@
     "claudeSearchModel": "Mô hình tìm kiếm",
     "claudeSearchModelHint": "Mô hình Claude dùng để tìm kiếm trên web và tóm tắt kết quả.",
     "webSearchApiKeyOptional": "Khóa API không bắt buộc. Không có khóa thì hệ thống sẽ đọc trang công khai để thay thế.",
-    "searxngServerOnlyNotice": "SearXNG phải được cấu hình trên máy chủ. Hãy đặt biến môi trường SEARXNG_BASE_URL (hoặc mục web-search trong server-providers.yml). Địa chỉ do phía người dùng gửi lên sẽ không được nhận.",
+    "searxngServerOnlyNotice": "SearXNG phải được cấu hình trên máy chủ. Quản trị viên thêm nó trong Cài đặt > Tìm kiếm web (mục máy chủ dùng chung). Địa chỉ do phía người dùng gửi lên sẽ không được nhận.",
     "baiduSubSources": "Nguồn tìm kiếm Baidu",
     "baiduSubSourcesDescription": "Hãy chọn ít nhất một nguồn Baidu để truy vấn.",
     "baiduSubSourceWeb": "Tìm trên web",
@@ -2366,12 +2366,12 @@
         "classes": "Lớp học",
         "pendingAccessRequests": "Yêu cầu xin quyền đang chờ"
       },
+      "deniedSignIn": "Hãy đăng nhập bằng tài khoản người vận hành hoặc quản trị viên.",
       "providers": {
         "title": "Nhà cung cấp trên máy chủ",
-        "description": "Chỉ xem. Nhà cung cấp được cấu hình trên máy chủ, không chỉnh ở đây.",
+        "description": "Chỉ đọc. Khoá dùng chung được đặt trong nút Cài đặt (Settings) trên thanh trên cùng và lưu ở máy chủ.",
         "empty": "Chưa có nhà cung cấp nào được cấu hình trên máy chủ."
-      },
-      "deniedSignIn": "Hãy đăng nhập bằng tài khoản người vận hành hoặc quản trị viên."
+      }
     },
     "membership": {
       "active": "Gói thành viên đến {{date}} · {{quota}} xu mỗi tháng",
@@ -2804,6 +2804,79 @@
       "noTopics": "Môn này chưa có danh sách chủ đề.",
       "pickSubject": "Chọn môn trước để chọn chủ đề.",
       "suggested": "Đã điền sẵn theo tên khoá, hãy kiểm tra trước khi lưu."
+    },
+    "providers": {
+      "masterKey": {
+        "missing": "Máy chủ chưa đặt PROVIDER_SECRET_KEY nên không thể lưu hay đọc khoá. Hãy đặt biến này trong môi trường máy chủ rồi khởi động lại.",
+        "invalid": "PROVIDER_SECRET_KEY không hợp lệ. Giá trị phải dài 32 byte, mã hoá base64. Hãy sửa trong môi trường máy chủ rồi khởi động lại."
+      },
+      "status": {
+        "active": "Đang dùng",
+        "off": "Đã tắt",
+        "incomplete": "Thiếu thông tin",
+        "unreadable": "Không đọc được khoá",
+        "unset": "Chưa cấu hình"
+      },
+      "keyHint": "Khoá kết thúc bằng {{hint}}",
+      "actions": {
+        "save": "Lưu",
+        "saving": "Đang lưu…",
+        "remove": "Xoá",
+        "test": "Kiểm tra kết nối",
+        "testing": "Đang kiểm tra…"
+      },
+      "form": {
+        "apiKey": "Khoá API",
+        "apiKeyKeep": "Để trống để giữ khoá đã lưu",
+        "clearKey": "Xoá khoá đã lưu",
+        "accessKeyId": "AccessKey ID",
+        "accessKeySecret": "AccessKey Secret",
+        "baseUrl": "Địa chỉ gốc (Base URL)",
+        "baseUrlRequired": "Nhà cung cấp này bắt buộc có.",
+        "baseUrlDefault": "Mặc định: {{url}}",
+        "models": "Mô hình được phép",
+        "modelsHint": "Cách nhau bằng dấu phẩy. Để trống để cho phép mọi mô hình. Mô hình đầu tiên được dùng khi không chọn gì.",
+        "proxy": "Proxy",
+        "proxyHint": "Không bắt buộc, ví dụ http://proxy.internal:8080.",
+        "enabled": "Dùng nhà cung cấp này",
+        "enabledHint": "Tắt để ngừng dùng ở mọi nơi mà không xoá khoá.",
+        "advanced": "Nâng cao",
+        "suggestions": "Mô hình đã biết"
+      },
+      "toast": {
+        "saved": "Đã lưu.",
+        "removed": "Đã xoá.",
+        "testOk": "Kết nối hoạt động.",
+        "testFailed": "Nhà cung cấp không chấp nhận yêu cầu. Hãy kiểm tra khoá và địa chỉ gốc."
+      },
+      "errors": {
+        "conflict": "Vừa có người khác sửa mục này. Đã tải giá trị mới nhất, hãy kiểm tra rồi lưu lại.",
+        "masterKey": "Máy chủ không có PROVIDER_SECRET_KEY hợp lệ nên không lưu được khoá.",
+        "invalid": "Có giá trị không được chấp nhận. Hãy kiểm tra địa chỉ gốc, proxy và khoá.",
+        "generic": "Chưa lưu được. Hãy thử lại.",
+        "unreadable": "Khoá đã lưu của mục này không đọc được bằng PROVIDER_SECRET_KEY hiện tại. Hãy nhập khoá mới, khôi phục khoá chủ cũ, hoặc xoá nhà cung cấp."
+      },
+      "confirmRemove": "Xoá {{name}} và khoá đã lưu?",
+      "default": {
+        "title": "Mô hình mặc định",
+        "description": "Dùng khi một bước không có mô hình riêng.",
+        "provider": "Nhà cung cấp",
+        "model": "Mô hình",
+        "save": "Lưu",
+        "none": "Chưa đặt mô hình mặc định, nên các yêu cầu không nêu mô hình sẽ lỗi.",
+        "notServed": "Nhà cung cấp này chưa có khoá nên chưa dùng được."
+      },
+      "routes": {
+        "title": "Mô hình cho từng bước",
+        "description": "Không bắt buộc. Gán cho một bước mô hình riêng theo dạng provider:model.",
+        "placeholder": "provider:model",
+        "kept": "Có thiết lập nâng cao được giữ nguyên.",
+        "clear": "Bỏ"
+      },
+      "card": {
+        "title": "Máy chủ dùng chung",
+        "description": "Khoá, địa chỉ gốc và mô hình mà mọi yêu cầu AI của học viên dùng. Lưu mã hoá trên máy chủ và không hiển thị lại. Các ô bên dưới chỉ là khoá riêng của bạn, nằm trong trình duyệt này."
+      }
     }
   },
   "learning": {

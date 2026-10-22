@@ -25,6 +25,7 @@ import {
   recordCourseRead,
 } from '@/lib/server/learning/store';
 import { readRemixSource } from '@/lib/server/learning/remix';
+import { providerConfigNotReadyResponse } from '@/lib/server/provider-store/not-ready';
 import { readSetting } from '@/lib/server/learning/settings';
 import { resolveStageAccess } from '@/lib/server/stage-access';
 import { monthlyLlmTokens } from '@/lib/server/usage-storage';
@@ -172,6 +173,10 @@ export async function requireSignedIn(headers: Headers): Promise<Response | unde
  */
 export async function requireSpender(headers: Headers): Promise<Response | undefined> {
   if (!accountsEnabled()) return undefined;
+  // Every AI route passes through here first: while the provider settings are not loaded, answer
+  // 503 with a retry hint rather than let a lookup see an empty (or half-built) provider config.
+  const notReady = providerConfigNotReadyResponse();
+  if (notReady) return notReady;
   const viewer = await resolveViewer(headers);
   if (!can(viewer, 'spend') || viewer.ownerId === undefined) {
     return apiError('LOGIN_REQUIRED', 401, 'Sign in to use AI generation.');

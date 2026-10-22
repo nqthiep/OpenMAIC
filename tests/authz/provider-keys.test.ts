@@ -3,6 +3,8 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { MembershipView } from '@/lib/server/learning/store';
 
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
+
 // Accounts are on. A `session=<id>` cookie names the signed-in account; its role and membership
 // come from this table. No database is involved.
 type Role = 'learner' | 'operator' | 'admin';
@@ -58,6 +60,8 @@ function request(
 
 beforeEach(() => {
   vi.stubEnv('DATABASE_URL', 'postgres://provider-keys-test');
+  // A configured database fails provider lookups closed until a snapshot is loaded.
+  useProviders({});
   accounts.clear();
   accounts.set('learner-member', { role: 'learner', membership: ACTIVE });
   accounts.set('operator-1', { role: 'operator' });
@@ -67,6 +71,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  clearProviders();
 });
 
 describe('clientKeysAllowed', () => {

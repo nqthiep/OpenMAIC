@@ -27,6 +27,7 @@ export type Action =
   | 'audit.read'
   | 'provider.view'
   | 'provider.personalKey'
+  | 'provider.manage'
   | 'dashboard.view'
   | 'support.open'
   | 'support.thread'
@@ -105,7 +106,9 @@ export function can(viewer: Viewer, action: Action, resource: Resource = {}): bo
     case 'accounts.role':
       return isAdmin;
     case 'settings.manage':
-      // Deployment settings, such as who pays for AI grading, are an administrator's call.
+    case 'provider.manage':
+      // Deployment settings, such as who pays for AI grading, and the AI providers' keys are an
+      // administrator's call.
       return isAdmin;
     case 'provider.personalKey':
       // Only an administrator enters an API key of their own. Everyone else uses the server's keys.

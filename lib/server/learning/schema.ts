@@ -6,6 +6,7 @@
  * account id, because only a signed-in account can hold one.
  */
 import type { AccountQueryable } from '@/lib/server/accounts/store';
+import { ensureProviderSchema } from '@/lib/server/provider-store/schema';
 
 export const LEARNING_SCHEMA = `
 CREATE TABLE IF NOT EXISTS memberships (
@@ -292,4 +293,5 @@ export async function ensureLearningSchema(queryable: AccountQueryable): Promise
     const statement = sql.trim();
     if (statement !== '') await queryable.query(statement);
   }
+  await ensureProviderSchema(queryable);
 }

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 const mocks = vi.hoisted(() => ({
   callLLM: vi.fn(),
@@ -36,7 +37,7 @@ describe('conversation title generator', () => {
     mocks.resolveAgentDriverModel.mockResolvedValue({
       connection: { model: DRIVER_MODEL, thinkingConfig: { enabled: true } },
     });
-    delete process.env.DEFAULT_MODEL;
+    clearProviders();
   });
 
   it('uses a dedicated conversation-title route and its configured thinking', async () => {
@@ -76,8 +77,8 @@ describe('conversation title generator', () => {
     );
   });
 
-  it('reuses the driver connection without consulting DEFAULT_MODEL and disables driver thinking', async () => {
-    process.env.DEFAULT_MODEL = 'unwanted:default-model';
+  it('reuses the driver connection without consulting the default model and disables driver thinking', async () => {
+    useProviders({ defaultModel: 'unwanted:default-model' });
     mocks.getStageRoute.mockReturnValue(undefined);
 
     await expect(generate('Plan a launch')).resolves.toBe('Project planning');

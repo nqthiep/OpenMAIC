@@ -17,7 +17,7 @@ import {
 } from '@/lib/server/provider-config';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { fetchWithRedirectValidation } from '@/lib/server/fetch-with-redirect-validation';
-import { getStageRoute, type LlmStage } from '@/lib/server/model-routes';
+import { getDefaultModel, getStageRoute, type LlmStage } from '@/lib/server/model-routes';
 
 export interface ResolvedModel extends ModelWithInfo {
   /** True when the operator's key is in use. Its upstream error text must not reach a visitor. */
@@ -45,9 +45,9 @@ export async function resolveModel(params: {
   modelString?: string;
   /**
    * Optional generation stage (a `callLLM` source label, e.g. 'scene-content').
-   * When set and a route is configured via `MODEL_ROUTES`, the route wins for
+   * When set and a route is configured in the model routing settings, the route wins for
    * this call — even over a client-sent `modelString` (x-model). Unrouted
-   * stages fall back to `modelString` then `DEFAULT_MODEL`. See
+   * stages fall back to `modelString` then the default model. See
    * lib/server/model-routes.ts.
    */
   stage?: LlmStage;
@@ -56,19 +56,19 @@ export async function resolveModel(params: {
   providerType?: string;
   thinkingConfig?: ThinkingConfig;
 }): Promise<ResolvedModel> {
-  // Resolution order: stage route > x-model > DEFAULT_MODEL.
+  // Resolution order: stage route > x-model > the default model.
   // A configured stage route is the operator's deliberate per-stage choice and
   // wins even over a client-sent x-model (otherwise the browser UI, which always
   // sends its saved model, would shadow every route). Unrouted stages fall back
-  // to the client x-model, then DEFAULT_MODEL. There is intentionally no hardcoded
+  // to the client x-model, then the default model. There is intentionally no hardcoded
   // model fallback — if nothing resolves we fail loud rather than silently pick a
   // vendor default.
   const stageRoute = getStageRoute(params.stage);
   const stageModel = stageRoute?.model;
-  const modelString = stageModel || params.modelString || process.env.DEFAULT_MODEL;
+  const modelString = stageModel || params.modelString || getDefaultModel();
   if (!modelString) {
     throw new Error(
-      'No model could be resolved. Configure DEFAULT_MODEL (and/or a MODEL_ROUTES entry for this stage), or send a model via x-model.',
+      'No model could be resolved. Set the default model (and/or a route for this stage) in the Settings popup (top bar), or send a model via x-model.',
     );
   }
   const { providerId, modelId } = parseModelString(modelString);

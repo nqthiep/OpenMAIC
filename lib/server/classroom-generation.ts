@@ -212,8 +212,7 @@ export async function generateClassroom(
   // Fail fast if the resolved provider has no API key configured
   if (isProviderKeyRequired(providerId) && !apiKey) {
     throw new Error(
-      `No API key configured for provider "${providerId}". ` +
-        `Set the appropriate key in .env.local or server-providers.yml (e.g. ${providerId.toUpperCase()}_API_KEY).`,
+      `No API key configured for provider "${providerId}". ` + `Add the key in Settings (top bar).`,
     );
   }
 

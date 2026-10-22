@@ -1,4 +1,5 @@
 import { apiSuccess } from '@/lib/server/api-response';
+import { providerConfigNotReadyResponse } from '@/lib/server/provider-store/not-ready';
 import {
   getServerWebSearchProviders,
   getServerImageProviders,
@@ -9,6 +10,10 @@ import {
 const version = process.env.npm_package_version || '0.1.0';
 
 export async function GET() {
+  // Still answers 200 (the process is up) but says the provider settings are not loaded yet.
+  if (providerConfigNotReadyResponse()) {
+    return apiSuccess({ status: 'ok', version, providerConfig: 'loading', capabilities: {} });
+  }
   return apiSuccess({
     status: 'ok',
     version,

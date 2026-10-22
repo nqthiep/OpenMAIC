@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 // Agent media-tool force-off defense in depth (#665): mirror the capability
 // route guards — a provider the operator force-disabled is rejected before any
@@ -19,44 +20,18 @@ vi.mock('@/lib/server/usage-storage', () => ({
 vi.mock('@/lib/server/ssrf-guard', () => ({ validateUrlForSSRF: async () => null }));
 vi.mock('@/lib/logger', () => ({ createLogger: () => mocks.log }));
 
-const CAP_ENV_PREFIXES = [
-  'IMAGE_OPENAI',
-  'IMAGE_SEEDREAM',
-  'IMAGE_QWEN_IMAGE',
-  'IMAGE_NANO_BANANA',
-  'IMAGE_MINIMAX',
-  'IMAGE_GROK',
-  'IMAGE_LEMONADE',
-  'IMAGE_COMFYUI',
-  'VIDEO_SEEDANCE',
-  'VIDEO_KLING',
-  'VIDEO_VEO',
-  'VIDEO_SORA',
-  'VIDEO_MINIMAX',
-  'VIDEO_GROK',
-  'VIDEO_HAPPYHORSE',
-];
-
-function clearCapabilityEnv() {
-  for (const prefix of CAP_ENV_PREFIXES) {
-    delete process.env[`${prefix}_API_KEY`];
-    delete process.env[`${prefix}_BASE_URL`];
-    delete process.env[`${prefix}_MODELS`];
-    delete process.env[`${prefix}_ENABLED`];
-  }
-}
-
 describe('agent media tool force-off defense in depth (#665)', () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.unstubAllEnvs();
-    clearCapabilityEnv();
+    clearProviders();
     vi.clearAllMocks();
   });
 
   it('image: rejects a force-disabled provider at the call boundary even when the listing omits the flag', async () => {
-    vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-img');
-    vi.stubEnv('IMAGE_OPENAI_ENABLED', 'false');
+    useProviders({
+      image: { 'openai-image': { apiKey: 'sk-img' } },
+      disabled: { image: ['openai-image'] },
+    });
     const { buildGenerateImageTool } = await import('@/lib/server/agent-runtime/generate-image');
 
     const tool = buildGenerateImageTool({
@@ -86,8 +61,10 @@ describe('agent media tool force-off defense in depth (#665)', () => {
   });
 
   it('image: the default selector never picks a force-disabled provider', async () => {
-    vi.stubEnv('IMAGE_OPENAI_API_KEY', 'sk-img');
-    vi.stubEnv('IMAGE_OPENAI_ENABLED', 'false');
+    useProviders({
+      image: { 'openai-image': { apiKey: 'sk-img' } },
+      disabled: { image: ['openai-image'] },
+    });
     const { buildGenerateImageTool } = await import('@/lib/server/agent-runtime/generate-image');
 
     const tool = buildGenerateImageTool({
@@ -106,8 +83,10 @@ describe('agent media tool force-off defense in depth (#665)', () => {
   });
 
   it('video: rejects a force-disabled provider at the call boundary even when the listing omits the flag', async () => {
-    vi.stubEnv('VIDEO_GROK_API_KEY', 'xai-video');
-    vi.stubEnv('VIDEO_GROK_ENABLED', 'false');
+    useProviders({
+      video: { 'grok-video': { apiKey: 'xai-video' } },
+      disabled: { video: ['grok-video'] },
+    });
     const { buildGenerateVideoTool } = await import('@/lib/server/agent-runtime/generate-video');
 
     const tool = buildGenerateVideoTool({
@@ -137,8 +116,10 @@ describe('agent media tool force-off defense in depth (#665)', () => {
   });
 
   it('video: the capability gate excludes a force-disabled provider from registration', async () => {
-    vi.stubEnv('VIDEO_GROK_API_KEY', 'xai-video');
-    vi.stubEnv('VIDEO_GROK_ENABLED', 'false');
+    useProviders({
+      video: { 'grok-video': { apiKey: 'xai-video' } },
+      disabled: { video: ['grok-video'] },
+    });
     const { hasConfiguredVideoGeneration } =
       await import('@/lib/server/agent-runtime/generate-video');
 

@@ -31,11 +31,18 @@ export async function register(): Promise<void> {
     await import('@/lib/persistence/asset-collector-schedule');
   const assetSchedule = startAssetCollectorSchedule();
 
-  // Warn-first boot-time validation of model routing config (MODEL_ROUTES,
-  // DEFAULT_MODEL, <PREFIX>_MODELS). Cheap and non-throwing: broken config
-  // surfaces here as [config] warnings instead of failing at request time.
-  // Imported dynamically so the Edge bundle never pulls in the fs/js-yaml
-  // backed provider config it reads.
+  // The AI provider settings live in the database. They are loaded here, bounded by a timeout, so
+  // the first request does not meet an unloaded config; a database that is down at boot is retried
+  // in the background and meanwhile provider lookups answer 503 (ProviderConfigNotReady). This is
+  // the one place `register` waits on I/O: without these settings no AI route can work. Imported
+  // dynamically so the Edge bundle never pulls in `pg`.
+  const { startProviderSnapshot } = await import('@/lib/server/provider-store/boot');
+  const stopProviderSnapshot = await startProviderSnapshot();
+
+  // Warn-first boot-time validation of the provider settings (default model, model
+  // routes, master key) and leftover environment config. Cheap and non-throwing:
+  // broken config surfaces here as [config] warnings instead of failing at request
+  // time. Imported dynamically so the Edge bundle never pulls in `fs`.
   const { validateServerConfig, checkClassroomStorage } =
     await import('@/lib/server/config-validation');
   validateServerConfig();
@@ -93,6 +100,7 @@ export async function register(): Promise<void> {
       } catch (error) {
         console.error('[instrumentation] Asset collector drain failed', error);
       }
+      stopProviderSnapshot();
       const connectionString = process.env.DATABASE_URL?.trim();
       if (connectionString) {
         try {

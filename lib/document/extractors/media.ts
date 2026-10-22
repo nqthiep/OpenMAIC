@@ -24,12 +24,7 @@ function createMediaBackedExtractor(id: MediaParseProviderId): MediaExtractorPro
     async availability(input) {
       const config = input.config;
       const hasExplicitCredentials = Boolean(config.accessKeyId && config.accessKeySecret);
-      const hasEnvironmentCredentials = Boolean(
-        config.allowEnvFallback &&
-        process.env.ALIDOCMIND_ACCESS_KEY_ID &&
-        process.env.ALIDOCMIND_ACCESS_KEY_SECRET,
-      );
-      return hasExplicitCredentials || hasEnvironmentCredentials
+      return hasExplicitCredentials
         ? { available: true }
         : {
             available: false,

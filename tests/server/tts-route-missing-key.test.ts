@@ -1,29 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-
-// Mock fs — only intercept server-providers.yml so a host-machine YAML config
-// can never leak into the route's provider-config (same pattern as
-// provider-config.test.ts).
-let yamlOverride: string | null = null;
-
-vi.mock('fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('fs')>();
-  const isYaml = (p: unknown) => typeof p === 'string' && p.endsWith('server-providers.yml');
-  return {
-    ...actual,
-    default: {
-      ...actual,
-      existsSync: (p: string) => (isYaml(p) ? yamlOverride !== null : actual.existsSync(p)),
-      readFileSync: (p: string, ...args: unknown[]) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        isYaml(p) ? (yamlOverride ?? '') : (actual.readFileSync as any)(p, ...args),
-    },
-    existsSync: (p: string) => (isYaml(p) ? yamlOverride !== null : actual.existsSync(p)),
-    readFileSync: (p: string, ...args: unknown[]) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      isYaml(p) ? (yamlOverride ?? '') : (actual.readFileSync as any)(p, ...args),
-  };
-});
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 const mocks = vi.hoisted(() => ({ generateTTS: vi.fn() }));
 
@@ -31,29 +8,6 @@ vi.mock('@/lib/audio/tts-providers', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/audio/tts-providers')>();
   return { ...actual, generateTTS: mocks.generateTTS };
 });
-
-const TTS_ENV_PREFIXES = [
-  'TTS_OPENAI',
-  'TTS_AZURE',
-  'TTS_GLM',
-  'TTS_QWEN',
-  'TTS_VOXCPM',
-  'TTS_DOUBAO',
-  'TTS_ELEVENLABS',
-  'TTS_MINIMAX',
-  'TTS_LEMONADE',
-  'TTS_BROWSER_NATIVE',
-];
-
-function clearTtsEnv() {
-  for (const prefix of TTS_ENV_PREFIXES) {
-    delete process.env[`${prefix}_API_KEY`];
-    delete process.env[`${prefix}_BASE_URL`];
-    delete process.env[`${prefix}_MODELS`];
-    delete process.env[`${prefix}_ENABLED`];
-  }
-  delete process.env.TTS_QWEN_VOICE_CLONE_MODEL;
-}
 
 function ttsRequest(body: Record<string, unknown>): NextRequest {
   return new NextRequest('http://localhost/api/generate/tts', {
@@ -71,8 +25,7 @@ describe('POST /api/generate/tts missing-key contract (#665)', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
-    clearTtsEnv();
-    yamlOverride = null;
+    clearProviders();
     mocks.generateTTS.mockReset().mockResolvedValue({ audio: new Uint8Array([1]), format: 'wav' });
   });
 
@@ -105,7 +58,7 @@ describe('POST /api/generate/tts missing-key contract (#665)', () => {
   });
 
   it('uses a server-configured key (managed provider) so no client key is needed', async () => {
-    yamlOverride = 'tts:\n  openai-tts:\n    apiKey: sk-server\n';
+    useProviders({ tts: { 'openai-tts': { apiKey: 'sk-server' } } });
     const { POST } = await import('@/app/api/generate/tts/route');
     const res = await POST(ttsRequest({ ttsProviderId: 'openai-tts', ttsVoice: 'alloy' }));
 

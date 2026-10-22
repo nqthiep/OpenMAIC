@@ -3,17 +3,20 @@
  *
  * Optional, config-only overrides that map a generation *stage* to a specific
  * model string. This module returns only configured routes; callers choose their
- * own fallback when a route is unset or invalid. Most use `DEFAULT_MODEL`, while
- * `conversation-title` reuses the agent-driver connection.
+ * own fallback when a route is unset or invalid. Most use the default model
+ * (`getDefaultModel`), while `conversation-title` reuses the agent-driver connection.
  *
- * Surface: a single JSON env var `MODEL_ROUTES`. Each value is a model string in
- * the canonical `provider:model` format (see parseModelString), OR an object
- * `{model, thinking}` where `thinking` is the full ThinkingConfig abstraction
+ * Surface: the `model_routing` table, edited in the Settings popup (top bar) (it replaces the
+ * `MODEL_ROUTES` and `DEFAULT_MODEL` environment variables). Each stage's value is a
+ * model string in the canonical `provider:model` format (see parseModelString), OR an
+ * object `{model, thinking}` where `thinking` is the full ThinkingConfig abstraction
  * (mode/effort/level/enabled/budgetTokens/excludeReasoningOutput) — normalized
  * per the model's capability by callLLM. e.g.
  *
- *   DEFAULT_MODEL=openai:gpt-5.4-mini
- *   MODEL_ROUTES='{"scene-content":"openai:gpt-5.4","pbl-chat":{"model":"anthropic:claude-sonnet-4","thinking":{"enabled":false}},"pbl-v2-runtime":"deepseek:deepseek-v4-pro"}'
+ *   default:        openai:gpt-5.4-mini
+ *   scene-content:  openai:gpt-5.4
+ *   pbl-chat:       {"model":"anthropic:claude-sonnet-4","thinking":{"enabled":false}}
+ *   pbl-v2-runtime: deepseek:deepseek-v4-pro
  *
  * Only the *routable* stages below are valid keys — each is backed by a real
  * `resolveModel` call site. Downstream sub-calls (e.g. `pbl-generate`,
@@ -21,6 +24,7 @@
  */
 
 import { createLogger } from '@/lib/logger';
+import { currentSnapshot } from '@/lib/server/provider-store/snapshot';
 import type {
   ThinkingConfig,
   ThinkingEffort,
@@ -75,7 +79,7 @@ export interface StageRoute {
 /** Validate/sanitize a route's `thinking` object into a ThinkingConfig (drops bad fields with a warn). */
 function parseThinking(key: string, raw: unknown): ThinkingConfig | undefined {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    log.warn(`"thinking" for stage "${key}" must be an object in MODEL_ROUTES; ignored.`);
+    log.warn(`"thinking" for stage "${key}" must be an object in the model routes; ignored.`);
     return undefined;
   }
   const o = raw as Record<string, unknown>;
@@ -155,11 +159,11 @@ export const LLM_STAGES = [
 
 export type LlmStage = (typeof LLM_STAGES)[number];
 
-/** Parsed once per process (env is read at startup; tests reset via vi.resetModules). */
-let _routes: Record<string, StageRoute> | null = null;
+/** Parsed once per loaded snapshot: a refresh that changes the routes yields a new object to parse. */
+let _routes: { source: unknown; routes: Record<string, StageRoute> } | null = null;
 
 /** Parse one MODEL_ROUTES value (string model, or {model, thinking}) into a StageRoute. */
-function parseRouteValue(key: string, value: unknown): StageRoute | undefined {
+export function parseRouteValue(key: string, value: unknown): StageRoute | undefined {
   if (typeof value === 'string') {
     return value.trim() ? { model: value.trim() } : undefined;
   }
@@ -167,7 +171,7 @@ function parseRouteValue(key: string, value: unknown): StageRoute | undefined {
     const obj = value as Record<string, unknown>;
     const model = typeof obj.model === 'string' ? obj.model.trim() : '';
     if (!model) {
-      log.warn(`Route for stage "${key}" has no model string in MODEL_ROUTES; ignored.`);
+      log.warn(`Route for stage "${key}" has no model string in the model routes; ignored.`);
       return undefined;
     }
     const route: StageRoute = { model };
@@ -177,15 +181,15 @@ function parseRouteValue(key: string, value: unknown): StageRoute | undefined {
     if (obj.api !== undefined && !api) {
       log.warn(
         dialect
-          ? `Invalid api for stage "${key}" in MODEL_ROUTES; using dialect "${dialect}" instead.`
-          : `Invalid api for stage "${key}" in MODEL_ROUTES; ignored.`,
+          ? `Invalid api for stage "${key}" in the model routes; using dialect "${dialect}" instead.`
+          : `Invalid api for stage "${key}" in the model routes; ignored.`,
       );
     }
     if (obj.dialect !== undefined && !dialect) {
       log.warn(
         api
-          ? `Invalid dialect for stage "${key}" in MODEL_ROUTES; using api "${api}" instead.`
-          : `Invalid dialect for stage "${key}" in MODEL_ROUTES; ignored.`,
+          ? `Invalid dialect for stage "${key}" in the model routes; using api "${api}" instead.`
+          : `Invalid dialect for stage "${key}" in the model routes; ignored.`,
       );
     }
     if (api && dialect && api !== dialect) {
@@ -204,44 +208,38 @@ function parseRouteValue(key: string, value: unknown): StageRoute | undefined {
       ) {
         route.contextWindow = Math.floor(contextWindow);
       } else {
-        log.warn(`Invalid contextWindow for stage "${key}" in MODEL_ROUTES; ignored.`);
+        log.warn(`Invalid contextWindow for stage "${key}" in the model routes; ignored.`);
       }
     }
     return route;
   }
-  log.warn(`Invalid route value for stage "${key}" in MODEL_ROUTES ignored.`);
+  log.warn(`Invalid route value for stage "${key}" in the model routes ignored.`);
   return undefined;
 }
 
 function loadRoutes(): Record<string, StageRoute> {
-  if (_routes) return _routes;
+  const stored = currentSnapshot().routing.routes;
+  if (_routes?.source === stored) return _routes.routes;
 
   const routes: Record<string, StageRoute> = {};
-  const raw = process.env.MODEL_ROUTES?.trim();
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as unknown;
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
-          if (!(LLM_STAGES as readonly string[]).includes(key)) {
-            log.warn(
-              `Unknown stage "${key}" in MODEL_ROUTES ignored. Valid stages: ${LLM_STAGES.join(', ')}`,
-            );
-            continue;
-          }
-          const route = parseRouteValue(key, value);
-          if (route) routes[key] = route;
-        }
-      } else {
-        log.error('MODEL_ROUTES must be a JSON object of stage -> model; ignoring.');
-      }
-    } catch (err) {
-      log.error('Invalid MODEL_ROUTES JSON, ignoring; callers apply their own fallback.', err);
+  for (const [key, value] of Object.entries(stored)) {
+    if (!(LLM_STAGES as readonly string[]).includes(key)) {
+      log.warn(
+        `Unknown stage "${key}" in the model routes ignored. Valid stages: ${LLM_STAGES.join(', ')}`,
+      );
+      continue;
     }
+    const route = parseRouteValue(key, value);
+    if (route) routes[key] = route;
   }
 
-  _routes = routes;
-  return _routes;
+  _routes = { source: stored, routes };
+  return routes;
+}
+
+/** The default model string (`provider:model`), or undefined when none is set. */
+export function getDefaultModel(): string | undefined {
+  return currentSnapshot().routing.defaultModel;
 }
 
 /**

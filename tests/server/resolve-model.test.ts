@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 // Mock the heavy downstream of resolveModel so the test isolates the model
-// string *resolution order*: stage route > x-model > DEFAULT_MODEL > builtin.
-// model-routes is left real (it just reads MODEL_ROUTES) so we exercise the
+// string *resolution order*: stage route > x-model > the default model > builtin.
+// model-routes is left real (it reads the provider snapshot) so we exercise the
 // real integration point.
 // Use the real parseModelString (canonical `provider:model` colon format) so
 // the test exercises actual separator handling; only stub getModel (recording
@@ -41,8 +42,7 @@ describe('resolveModel — per-stage resolution order', () => {
     vi.resetModules();
     mocks.getModelCalls.length = 0;
     mocks.serverManaged = false;
-    delete process.env.MODEL_ROUTES;
-    delete process.env.DEFAULT_MODEL;
+    clearProviders();
   });
 
   it('throws (no hardcoded fallback) when nothing is configured', async () => {
@@ -52,32 +52,38 @@ describe('resolveModel — per-stage resolution order', () => {
     );
   });
 
-  it('uses DEFAULT_MODEL when no stage route matches', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
+  it('uses the default model when no stage route matches', async () => {
+    useProviders({ defaultModel: 'openai:gpt-5.4-mini' });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'scene-content' });
     expect(r.modelString).toBe('openai:gpt-5.4-mini');
   });
 
-  it('uses the stage route over DEFAULT_MODEL', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+  it('uses the stage route over the default model', async () => {
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'scene-content': 'openai:gpt-5.4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'scene-content' });
     expect(r.modelString).toBe('openai:gpt-5.4');
   });
 
-  it('uses DEFAULT_MODEL for stages not listed in MODEL_ROUTES', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+  it('uses the default model for stages without a route', async () => {
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'scene-content': 'openai:gpt-5.4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'quiz-grade' });
     expect(r.modelString).toBe('openai:gpt-5.4-mini');
   });
 
   it('lets a configured stage route win over an explicit modelString (x-model)', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'scene-content': 'openai:gpt-5.4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({
       stage: 'scene-content',
@@ -87,15 +93,17 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('falls back to x-model for a stage that is not routed', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'scene-content': 'openai:gpt-5.4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'quiz-grade', modelString: 'anthropic:claude-sonnet-4' });
     expect(r.modelString).toBe('anthropic:claude-sonnet-4');
   });
 
   it('drops client apiKey/baseUrl/providerType when a stage route overrides the client model', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'pbl-chat': 'anthropic:claude-sonnet-4' });
+    useProviders({ routes: { 'pbl-chat': 'anthropic:claude-sonnet-4' } });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     await resolveModel({
       stage: 'pbl-chat',
@@ -115,7 +123,7 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('keeps client apiKey/baseUrl/providerType for an unrouted stage (x-model honored)', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({ routes: { 'scene-content': 'openai:gpt-5.4' } });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     await resolveModel({
       stage: 'quiz-grade',
@@ -169,10 +177,12 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('uses a scene-content:<type> route over the base route and x-model', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': 'openai:gpt-5.4-mini',
-      'scene-content:quiz': 'openai:gpt-5.4',
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: {
+        'scene-content': 'openai:gpt-5.4-mini',
+        'scene-content:quiz': 'openai:gpt-5.4',
+      },
     });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({
@@ -183,16 +193,20 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('falls back to the base scene-content route for an unrouted type', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'scene-content': 'openai:gpt-5.4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'scene-content:slide' });
     expect(r.modelString).toBe('openai:gpt-5.4');
   });
 
   it('resolves the stage route provider for cross-provider routing', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'pbl-chat': 'anthropic:claude-sonnet-4' });
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'pbl-chat': 'anthropic:claude-sonnet-4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'pbl-chat' });
     expect(r.modelString).toBe('anthropic:claude-sonnet-4');
@@ -201,8 +215,10 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('route thinking wins over client thinking when the stage is routed', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'pbl-chat': { model: 'anthropic:claude-sonnet-4', thinking: { effort: 'high' } },
+    useProviders({
+      routes: {
+        'pbl-chat': { model: 'anthropic:claude-sonnet-4', thinking: { effort: 'high' } },
+      },
     });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'pbl-chat', thinkingConfig: { effort: 'low' } });
@@ -210,10 +226,12 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('route can pass a full thinking config (enabled + budgetTokens)', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content:interactive': {
-        model: 'qwen:qwen3.7-plus',
-        thinking: { enabled: true, budgetTokens: 8000 },
+    useProviders({
+      routes: {
+        'scene-content:interactive': {
+          model: 'qwen:qwen3.7-plus',
+          thinking: { enabled: true, budgetTokens: 8000 },
+        },
       },
     });
     const { resolveModel } = await import('@/lib/server/resolve-model');
@@ -222,11 +240,13 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('carries the agent driver thinking toggle onto its resolved connection', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:deepseek-v4-flash-vision-exp',
-        api: 'openai-completions',
-        thinking: { enabled: true },
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:deepseek-v4-flash-vision-exp',
+          api: 'openai-completions',
+          thinking: { enabled: true },
+        },
       },
     });
     const { resolveModel } = await import('@/lib/server/resolve-model');
@@ -240,14 +260,14 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('routed-without-thinking drops client thinking (routed model uses its default)', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' });
+    useProviders({ routes: { 'scene-content': 'deepseek:deepseek-v4-pro' } });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({ stage: 'scene-content', thinkingConfig: { effort: 'high' } });
     expect(r.thinkingConfig).toBeUndefined();
   });
 
   it('unrouted stage keeps the client thinking config', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'deepseek:deepseek-v4-pro' });
+    useProviders({ routes: { 'scene-content': 'deepseek:deepseek-v4-pro' } });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({
       stage: 'quiz-grade',
@@ -258,8 +278,10 @@ describe('resolveModel — per-stage resolution order', () => {
   });
 
   it('ignores stage routing entirely when no stage is passed', async () => {
-    process.env.DEFAULT_MODEL = 'openai:gpt-5.4-mini';
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({
+      defaultModel: 'openai:gpt-5.4-mini',
+      routes: { 'scene-content': 'openai:gpt-5.4' },
+    });
     const { resolveModel } = await import('@/lib/server/resolve-model');
     const r = await resolveModel({});
     expect(r.modelString).toBe('openai:gpt-5.4-mini');

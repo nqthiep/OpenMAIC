@@ -1,36 +1,46 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
-// model-routes reads process.env.MODEL_ROUTES once and caches the parsed map.
-// Tests reset the module registry between cases via vi.resetModules() so each
-// case re-reads a fresh env, mirroring the provider-config test convention.
+// model-routes reads the routes from the provider snapshot and caches the parsed map per
+// snapshot object. Each case installs its own routes with useProviders and resets the module
+// registry so the parse (and its warnings) happens again.
 
 describe('model-routes', () => {
   beforeEach(() => {
     vi.resetModules();
-    delete process.env.MODEL_ROUTES;
+    clearProviders();
     vi.restoreAllMocks();
   });
 
   afterEach(() => {
-    delete process.env.MODEL_ROUTES;
+    clearProviders();
   });
 
-  it('returns undefined for any stage when MODEL_ROUTES is unset', async () => {
+  it('returns undefined for any stage when no routes are configured', async () => {
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content')).toBeUndefined();
     expect(getStageModel('pbl-chat')).toBeUndefined();
   });
 
+  it('returns the default model from the snapshot, or undefined when none is set', async () => {
+    const { getDefaultModel } = await import('@/lib/server/model-routes');
+    expect(getDefaultModel()).toBeUndefined();
+    useProviders({ defaultModel: 'openai:gpt-5.4-mini' });
+    expect(getDefaultModel()).toBe('openai:gpt-5.4-mini');
+  });
+
   it('returns undefined when no stage is provided', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({ routes: { 'scene-content': 'openai:gpt-5.4' } });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel(undefined)).toBeUndefined();
   });
 
   it('returns the mapped model for a configured routable stage', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': 'openai:gpt-5.4',
-      'pbl-chat': 'anthropic:claude-sonnet-4',
+    useProviders({
+      routes: {
+        'scene-content': 'openai:gpt-5.4',
+        'pbl-chat': 'anthropic:claude-sonnet-4',
+      },
     });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content')).toBe('openai:gpt-5.4');
@@ -38,13 +48,13 @@ describe('model-routes', () => {
   });
 
   it('routes the MAIC editor agent stage (maic-agent)', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'maic-agent': 'anthropic:claude-opus-4' });
+    useProviders({ routes: { 'maic-agent': 'anthropic:claude-opus-4' } });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('maic-agent')).toBe('anthropic:claude-opus-4');
   });
 
   it('returns undefined for a routable stage that is not listed', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4' });
+    useProviders({ routes: { 'scene-content': 'openai:gpt-5.4' } });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-actions')).toBeUndefined();
   });
@@ -54,9 +64,11 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'not-a-stage': 'openai:gpt-5.4',
-      'scene-content': 'openai:gpt-5.4',
+    useProviders({
+      routes: {
+        'not-a-stage': 'openai:gpt-5.4',
+        'scene-content': 'openai:gpt-5.4',
+      },
     });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('not-a-stage')).toBeUndefined();
@@ -64,23 +76,12 @@ describe('model-routes', () => {
     expect(warn).toHaveBeenCalled();
   });
 
-  it('returns undefined for everything when MODEL_ROUTES is invalid JSON (no throw)', async () => {
-    const error = vi.fn();
-    vi.doMock('@/lib/logger', () => ({
-      createLogger: () => ({ error, info: vi.fn(), warn: vi.fn(), debug: vi.fn() }),
-    }));
-    process.env.MODEL_ROUTES = '{not valid json';
-    const { getStageModel } = await import('@/lib/server/model-routes');
-    expect(getStageModel('scene-content')).toBeUndefined();
-    expect(error).toHaveBeenCalled();
-    expect(error.mock.calls[0]?.[0]).toContain('callers apply their own fallback');
-    expect(error.mock.calls[0]?.[0]).not.toContain('DEFAULT_MODEL');
-  });
-
   it('ignores non-string route values', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': 123,
-      'pbl-chat': 'anthropic:claude-sonnet-4',
+    useProviders({
+      routes: {
+        'scene-content': 123,
+        'pbl-chat': 'anthropic:claude-sonnet-4',
+      },
     });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content')).toBeUndefined();
@@ -88,21 +89,23 @@ describe('model-routes', () => {
   });
 
   it('resolves a composite scene-content:<type> key', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content:quiz': 'openai:gpt-5.4' });
+    useProviders({ routes: { 'scene-content:quiz': 'openai:gpt-5.4' } });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content:quiz')).toBe('openai:gpt-5.4');
   });
 
   it('falls back from a composite key to the base stage', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content': 'openai:gpt-5.4-mini' });
+    useProviders({ routes: { 'scene-content': 'openai:gpt-5.4-mini' } });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content:quiz')).toBe('openai:gpt-5.4-mini');
   });
 
   it('prefers the composite key over the base stage', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': 'openai:gpt-5.4-mini',
-      'scene-content:quiz': 'openai:gpt-5.4',
+    useProviders({
+      routes: {
+        'scene-content': 'openai:gpt-5.4-mini',
+        'scene-content:quiz': 'openai:gpt-5.4',
+      },
     });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content:quiz')).toBe('openai:gpt-5.4');
@@ -115,15 +118,17 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({ 'scene-content:bogus': 'openai:gpt-5.4' });
+    useProviders({ routes: { 'scene-content:bogus': 'openai:gpt-5.4' } });
     const { getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageModel('scene-content:bogus')).toBeUndefined();
     expect(warn).toHaveBeenCalled();
   });
 
   it('parses an object route value {model, thinking} via getStageRoute', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': { model: 'openai:gpt-5.4', thinking: { effort: 'high' } },
+    useProviders({
+      routes: {
+        'scene-content': { model: 'openai:gpt-5.4', thinking: { effort: 'high' } },
+      },
     });
     const { getStageRoute, getStageModel } = await import('@/lib/server/model-routes');
     expect(getStageRoute('scene-content')).toEqual({
@@ -134,11 +139,13 @@ describe('model-routes', () => {
   });
 
   it('parses an api and a contextWindow on an object route value', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        api: 'openai-completions',
-        contextWindow: 32_000,
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          api: 'openai-completions',
+          contextWindow: 32_000,
+        },
       },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
@@ -150,8 +157,10 @@ describe('model-routes', () => {
   });
 
   it('accepts dialect as an alias for api', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', dialect: 'openai-responses' },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', dialect: 'openai-responses' },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({
@@ -165,11 +174,13 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        api: 'openai-completions',
-        dialect: 'anthropic-messages',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          api: 'openai-completions',
+          dialect: 'anthropic-messages',
+        },
       },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
@@ -187,11 +198,13 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        api: 123,
-        dialect: 'openai-completions',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          api: 123,
+          dialect: 'openai-completions',
+        },
       },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
@@ -200,7 +213,7 @@ describe('model-routes', () => {
       api: 'openai-completions',
     });
     expect(warn).toHaveBeenCalledWith(
-      'Invalid api for stage "maic-agent-driver" in MODEL_ROUTES; using dialect "openai-completions" instead.',
+      'Invalid api for stage "maic-agent-driver" in the model routes; using dialect "openai-completions" instead.',
     );
   });
 
@@ -209,8 +222,10 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', api: 123 },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', api: 123 },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({ model: 'openai:gpt-5.6-luna' });
@@ -222,8 +237,10 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', dialect: ['openai-completions'] },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', dialect: ['openai-completions'] },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({ model: 'openai:gpt-5.6-luna' });
@@ -231,8 +248,10 @@ describe('model-routes', () => {
   });
 
   it('floors a fractional positive contextWindow', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: 32_000.9 },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: 32_000.9 },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({
@@ -246,8 +265,10 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: 0.5 },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: 0.5 },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({ model: 'openai:gpt-5.6-luna' });
@@ -259,8 +280,10 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: 0 },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: 0 },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({ model: 'openai:gpt-5.6-luna' });
@@ -272,8 +295,10 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: '32000' },
+    useProviders({
+      routes: {
+        'maic-agent-driver': { model: 'openai:gpt-5.6-luna', contextWindow: '32000' },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('maic-agent-driver')).toEqual({ model: 'openai:gpt-5.6-luna' });
@@ -281,10 +306,12 @@ describe('model-routes', () => {
   });
 
   it('routes the agent driver stage (maic-agent-driver)', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'maic-agent-driver': {
-        model: 'openai:gpt-5.6-luna',
-        api: 'openai-completions',
+    useProviders({
+      routes: {
+        'maic-agent-driver': {
+          model: 'openai:gpt-5.6-luna',
+          api: 'openai-completions',
+        },
       },
     });
     const { getStageModel } = await import('@/lib/server/model-routes');
@@ -292,15 +319,20 @@ describe('model-routes', () => {
   });
 
   it('supports the full thinking config (budgetTokens/enabled/level/mode)', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content:interactive': {
-        model: 'qwen:qwen3.7-plus',
-        thinking: { enabled: true, budgetTokens: 8000 },
-      },
-      'scene-content:slide': { model: 'google:gemini-3-flash-preview', thinking: { level: 'low' } },
-      'scene-content:quiz': {
-        model: 'deepseek:deepseek-v4-pro',
-        thinking: { mode: 'disabled', enabled: false },
+    useProviders({
+      routes: {
+        'scene-content:interactive': {
+          model: 'qwen:qwen3.7-plus',
+          thinking: { enabled: true, budgetTokens: 8000 },
+        },
+        'scene-content:slide': {
+          model: 'google:gemini-3-flash-preview',
+          thinking: { level: 'low' },
+        },
+        'scene-content:quiz': {
+          model: 'deepseek:deepseek-v4-pro',
+          thinking: { mode: 'disabled', enabled: false },
+        },
       },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
@@ -316,7 +348,7 @@ describe('model-routes', () => {
   });
 
   it('treats a string route value as a model with no thinking', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({ 'pbl-chat': 'anthropic:claude-sonnet-4' });
+    useProviders({ routes: { 'pbl-chat': 'anthropic:claude-sonnet-4' } });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('pbl-chat')).toEqual({ model: 'anthropic:claude-sonnet-4' });
   });
@@ -326,10 +358,12 @@ describe('model-routes', () => {
     vi.doMock('@/lib/logger', () => ({
       createLogger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
     }));
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': {
-        model: 'openai:gpt-5.4',
-        thinking: { effort: 'bogus', budgetTokens: 'x' },
+    useProviders({
+      routes: {
+        'scene-content': {
+          model: 'openai:gpt-5.4',
+          thinking: { effort: 'bogus', budgetTokens: 'x' },
+        },
       },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
@@ -338,17 +372,21 @@ describe('model-routes', () => {
   });
 
   it('ignores an object route value with no model string', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': { thinking: { effort: 'high' } },
+    useProviders({
+      routes: {
+        'scene-content': { thinking: { effort: 'high' } },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('scene-content')).toBeUndefined();
   });
 
   it('getStageRoute returns the matched composite entry (model+thinking) as a unit', async () => {
-    process.env.MODEL_ROUTES = JSON.stringify({
-      'scene-content': { model: 'openai:gpt-5.4-mini' },
-      'scene-content:quiz': { model: 'openai:gpt-5.4', thinking: { effort: 'high' } },
+    useProviders({
+      routes: {
+        'scene-content': { model: 'openai:gpt-5.4-mini' },
+        'scene-content:quiz': { model: 'openai:gpt-5.4', thinking: { effort: 'high' } },
+      },
     });
     const { getStageRoute } = await import('@/lib/server/model-routes');
     expect(getStageRoute('scene-content:quiz')).toEqual({

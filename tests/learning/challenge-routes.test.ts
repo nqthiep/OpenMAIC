@@ -4,6 +4,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
+import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
+
 const PASSWORD = 'correct horse battery staple';
 const ORIGIN = 'http://localhost';
 const THROTTLE_KEY = Symbol.for('openmaic.accounts.loginThrottle');
@@ -43,6 +45,8 @@ beforeAll(async () => {
 }, ROUTE_TIMEOUT_MS);
 
 beforeEach(async () => {
+  // The routes' AI calls pass requireSpender, which answers 503 until the settings are loaded.
+  useProviders();
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(START);
   vi.resetModules();
@@ -61,6 +65,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.useRealTimers();
+  clearProviders();
 });
 
 afterAll(async () => {
