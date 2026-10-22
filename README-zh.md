@@ -111,6 +111,8 @@ cp .env.example .env.local
 
 至少填写一个 LLM 服务商的 API Key：
 
+> **it-math 分支：服务商密钥存放在数据库。** 本分支从数据库读取 AI 服务商设置（密钥、Base URL、允许的模型、默认模型与按阶段路由），并在管理页面（运营 > 系统 > AI 服务商）编辑。下文的 `*_API_KEY` / `*_BASE_URL` / `*_MODELS` / `DEFAULT_MODEL` / `MODEL_ROUTES` 环境变量和 `server-providers.yml` 在本分支**不会被读取**。`.env.local` 只需要 `DATABASE_URL` 和 `PROVIDER_SECRET_KEY`（`openssl rand -base64 32`，用于加密已保存的密钥），详见 `.env.example`。
+
 ```env
 OPENAI_API_KEY=sk-...
 AZURE_OPENAI_API_KEY=...

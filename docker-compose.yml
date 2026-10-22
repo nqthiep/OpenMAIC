@@ -36,8 +36,8 @@ services:
       - default # outbound internet (LLM/media provider APIs, etc.)
       - render # reach the render service over the isolated network
     volumes:
-      # Optional: mount server-providers.yml for provider config
-      # - ./server-providers.yml:/app/server-providers.yml:ro
+      # AI provider keys are set in the Settings popup (top bar) and stored in the database; put
+      # PROVIDER_SECRET_KEY (encrypts them) in .env.local. server-providers.yml is not read.
       - openmaic-data:/app/data
     restart: unless-stopped
 

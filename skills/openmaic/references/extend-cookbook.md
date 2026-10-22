@@ -12,7 +12,7 @@ Entry points below are given as **file + symbol name** (not line numbers — the
 
 Two distinct cases:
 
-- **Use an already-supported provider** (it's in the union below): no source change. Configure keys/models in `.env.local` or `server-providers.yml` — follow [provider-keys.md](provider-keys.md). Mind the `DEFAULT_MODEL=provider:model` prefix (without a prefix, parsing defaults to OpenAI).
+- **Use an already-supported provider** (it's in the union below): no source change. Configure keys/models in `.env.local` or `server-providers.yml` (on the it-math branch: in the Settings popup (top bar), AI providers) — follow [provider-keys.md](provider-keys.md). Mind the `DEFAULT_MODEL=provider:model` prefix (without a prefix, parsing defaults to OpenAI).
 - **Register a NEW provider** (source change):
   1. Add the id to the `BuiltInProviderId` union in `lib/types/provider.ts`.
   2. Register its config + models in the `PROVIDERS` registry in `lib/ai/providers.ts`.

@@ -162,7 +162,7 @@ If the job fails, return the job ID plus the server error.
 
 If generation fails, surface the server error directly instead of paraphrasing it away.
 
-If the error suggests a provider or model configuration problem, explicitly tell the user to update `.env.local` or `server-providers.yml` instead of attempting a runtime override.
+If the error suggests a provider or model configuration problem, explicitly tell the user to update `.env.local` or `server-providers.yml` (on the it-math branch: the Settings popup) instead of attempting a runtime override.
 
 ## Confirmation Requirements
 

@@ -1,5 +1,11 @@
 # Provider Keys
 
+> **On the it-math branch** provider keys, base URLs, allowed models, the default model and stage
+> routes are stored in the database and edited in the Settings popup (top bar) (Operations > System > AI
+> providers). The environment variables and `server-providers.yml` described below are not read
+> there; the user needs `DATABASE_URL` and `PROVIDER_SECRET_KEY` in `.env.local`. Tell them to use
+> the Settings popup instead of editing files, and still never ask for the literal key in chat.
+
 ## Critical Boundary
 
 OpenMAIC generation does not automatically reuse the OpenClaw agent's current model or API key.

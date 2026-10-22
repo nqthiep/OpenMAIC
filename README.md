@@ -122,6 +122,14 @@ pnpm install
 cp .env.example .env.local
 ```
 
+> **it-math fork: provider keys live in the database.** On this branch the server reads AI provider
+> settings (keys, base URLs, allowed models, the default model and per-stage routes) from the
+> database, and you edit them in the Settings popup (top bar) (the Settings popup (top bar, administrator)). The
+> `*_API_KEY` / `*_BASE_URL` / `*_MODELS` / `DEFAULT_MODEL` / `MODEL_ROUTES` variables and
+> `server-providers.yml` shown below are **not read** here. What you need in `.env.local` is
+> `DATABASE_URL` and `PROVIDER_SECRET_KEY` (`openssl rand -base64 32`), which encrypts the stored
+> keys; see `.env.example`.
+
 Fill in at least one LLM provider key:
 
 ```env

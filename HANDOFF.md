@@ -5,8 +5,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 ## Assignment: AI provider settings in the database (admin page, one source of truth)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Trên trang admin đang thiếu page setting để config các mục sau: Mô hình ngôn ngữ (LLM), Giọng đọc (TTS), Nhận dạng giọng nói, Đọc tài liệu PDF, Tạo ảnh, Tạo video, Tìm kiếm web. Hãy brainstorming để thiết kế UI và chức năng cho page này." Then: "Tôi chọn phương án A, loại bỏ các khoá API trong server-providers.yml, để từ đó thống nhất trong toàn bộ source code là sử dụng LLM lưu trong bảng provider_credentials." Then, on the design: DEFAULT_MODEL/MODEL_ROUTES go into the database in the same series; drop `server-providers.yml` and every `*_ENV_MAP` (one source); `ProviderConfigNotReady` answers 503 with retry; "tôi đồng ý danh sách khoá" (master key ring with rotation); "thực hiện đi".
-- Assignment status: Done in code and tests, not committed, not deployed, UI not seen in a browser
-- Branch and commit: `it-math` @ `cb90b414` (no commits yet for this assignment), pushed: no (git writes only when the owner asks)
+- Assignment status: Done in code and tests, committed and pushed; not deployed; UI not seen in a browser (signed-out pane)
+- Branch and commit: `it-math` @ `ec73c888` (code, tests, strings) plus a docs/handoff commit on top, pushed: yes, to `origin` (the owner asked: "commit và push đi"). Left out on purpose: `.omo/`, `openmaic.local.yml`, `tests/security/*` (not mine).
 - Last updated: 2026-10-22 (UTC time not recorded)
 
 ### Design (agreed in chat)
@@ -15,6 +15,9 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - Public API of `lib/server/provider-config.ts` (sync, same signatures) stays; only the data source of `getConfig()` changes, to an in-memory snapshot on `globalThis` loaded from the database. New code lives in `lib/server/provider-store/`.
 - No `DATABASE_URL` means no managed providers (clients' own keys, as upstream). Database configured but snapshot not loaded: `ProviderConfigNotReady` -> 503 + `Retry-After`, never an empty config.
 - Removed: `server-providers.yml` loading, `*_ENV_MAP` env reads of keys/base URLs/models/enabled, `DEFAULT_MODEL`, `MODEL_ROUTES`. Kept in env: `PROVIDER_SECRET_KEY`, `PARALLEL_SCENE_CONCURRENCY`, `TTS_QWEN_VOICE_CLONE_MODEL`.
+
+### Change of direction (2026-10-22, owner)
+- Owner remembered the top-bar Settings popup already configures models, so the new System > AI providers page is NOT wanted. Chosen: remove that page, restore the read-only status panel, and let the Settings popup write the shared server credentials to `provider_credentials` (admin only). Backend, API, encryption and snapshot stay. Follow-up rows 9-12 below.
 
 ### Task table
 | # | Task | Status | Evidence / notes |
@@ -27,9 +30,13 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 6 | 503 + `Retry-After` while settings are not loaded | Done | `requireSpender` (called first by the 29 AI routes) returns `providerConfigNotReadyResponse()`; `tests/provider-store/not-ready.test.ts` |
 | 7 | Docs and skill text | Done | `.env.example` (provider sections replaced by a note + `PROVIDER_SECRET_KEY`; routing text kept), `README.md` / `README-zh.md` fork notes, `docker-compose.yml` comment, `skills/openmaic/references/{provider-keys,extend-cookbook,generate-flow}.md`, en-US `searxngServerOnlyNotice`. Not updated: the same SearXNG hint in the other 11 locales still names the env var |
 | 8 | Final checks | Done with known failures | `npx tsc --noEmit`: only errors outside this change (`.next/types` admin/summary, untracked `tests/security/*`). `pnpm lint`: 0 errors (18 warnings, none in these files). `node scripts/check-i18n-keys.mjs`: passed. `pnpm vitest run`: 805 files passed; failing: `tests/runtime/chat-storage.test.ts` and `tests/quiz/runtime.test.ts` (Node 24 exposes `navigator.locks`; pass with `NODE_OPTIONS=--no-experimental-global-navigator`, per the sub-agent), `tests/media/server-backed-media-orchestrator.test.ts` (2 failures, reproduced on a clean `HEAD` worktree: not from this change), `tests/security/*` (untracked, another session) |
+| 9 | Remove `ProviderSettingsPanel`; restore read-only `ProviderStatusPanel` + its strings in the System tab | Done | `components/learning/provider-settings-panel.tsx` and its test deleted; `admin-panels.tsx` and `app/admin/page.tsx` restored from `HEAD` (the diffs were only mine); `account.adminPage.providers.*` restored in 12 locales with a new description |
+| 10 | Popup Settings: admin-only "shared server credential" card for the selected provider of each section | Done | New `components/settings/server-credential-card.tsx`; one insertion (import + `<ServerCredentialCard .../>`, 14 lines) in `components/settings/index.tsx` before the per-section panels. Shows only when the admin API answers `canManage`, the provider is in the server catalog (custom providers get nothing) and the section has providers. After a save it re-runs the store's `fetchServerProviders` so the popup's "server-managed" notice follows |
+| 11 | Server default model and per-stage routes shown in the popup (LLM section) | Done | `DefaultModelCard` and `RoutesCard` render under the credential card in the language-model section only |
+| 12 | Tests, i18n, lint, full test run, look at it in the browser | In progress | `tests/settings/server-credential-card.test.ts` (6 tests, jsdom). Not yet seen in a browser: the dev server on :3002 is running but the pane is signed out and the agent does not enter the owner's password |
 
 ### Done so far
-- Everything in the table. Nothing is committed or pushed (the owner has not asked).
+- Everything in the table (rows 1-11 done, row 12 waits for a look in a signed-in browser).
 
 ### Review of the finished work (self-review + one independent read-only reviewer)
 Fixed after review (each has a test in `tests/provider-store/`):
