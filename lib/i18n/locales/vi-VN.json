@@ -2915,14 +2915,101 @@
       "card": {
         "title": "Máy chủ dùng chung",
         "description": "Khoá, địa chỉ gốc và mô hình mà mọi yêu cầu AI của học viên dùng. Lưu mã hoá trên máy chủ và không hiển thị lại. Các ô bên dưới chỉ là khoá riêng của bạn, nằm trong trình duyệt này."
+      }
+    },
+    "omniroute": {
+      "title": "OmniRoute",
+      "subtitle": "Cổng LLM tự host, khác OpenRouter",
+      "state": {
+        "ready": "Sẵn sàng",
+        "unconfigured": "Chưa thiết lập",
+        "unreachable": "Chưa liên lạc được",
+        "noProviders": "Chưa có nhà cung cấp",
+        "noKey": "Chưa kết nối"
       },
-      "omniroute": {
-        "title": "OmniRoute",
-        "description": "Mở bảng điều khiển OmniRoute trong một tab mới. Bạn được đăng nhập tự động ở đó khi còn đăng nhập ở đây với vai trò quản trị viên.",
-        "open": "Mở thiết lập OmniRoute",
-        "opening": "Đang mở…",
-        "notConfigured": "Máy chủ này chưa thiết lập OmniRoute (xem ops/omniroute/README.md).",
-        "openFailed": "Không mở được OmniRoute."
+      "loading": "Đang tải…",
+      "loadFailed": "Không đọc được trạng thái OmniRoute. Hãy thử lại.",
+      "retry": "Thử lại",
+      "unconfigured": {
+        "title": "Máy chủ này chưa thiết lập OmniRoute",
+        "body": "Thêm các giá trị sau vào file .env của máy chủ rồi khởi động lại ứng dụng:"
+      },
+      "unreachable": {
+        "title": "Ứng dụng chưa liên lạc được với OmniRoute",
+        "body": "Hãy kiểm tra container OmniRoute đang chạy và OMNIROUTE_ADMIN_PASSWORD khớp với mật khẩu của nó."
+      },
+      "step1": {
+        "title": "Nhà cung cấp trong OmniRoute",
+        "hint": "OpenMAIC chỉ dùng các kết nối bạn tích. Nhà cung cấp không cần khóa của OmniRoute không được dùng.",
+        "empty": "OmniRoute chưa có nhà cung cấp nào hoạt động. Hãy thêm ở đó rồi làm mới.",
+        "open": "Mở OmniRoute",
+        "refresh": "Làm mới"
+      },
+      "connection": {
+        "active": "Hoạt động",
+        "inactive": "Không hoạt động",
+        "subscription": "Gói thuê bao: xem điều khoản",
+        "apikey": "khóa API",
+        "oauth": "OAuth"
+      },
+      "step2": {
+        "title": "Kết nối",
+        "connect": "Kết nối",
+        "update": "Cập nhật quyền",
+        "rotate": "Cấp lại khóa",
+        "confirmRotate": "Cấp khóa mới? Khóa cũ sẽ ngừng hoạt động.",
+        "keyInfo": "Khóa …{{hint}}, tạo ngày {{date}}. Lưu mã hóa trên máy chủ, không hiện lại.",
+        "noLog": "Không lưu nội dung trò chuyện trong OmniRoute",
+        "dailyLimit": "Hạn mức chi tiêu mỗi ngày (USD, tùy chọn)",
+        "needConnection": "Hãy tích ít nhất một kết nối.",
+        "connected": "Đã kết nối.",
+        "disconnect": "Ngắt kết nối",
+        "confirmDisconnect": "Ngắt kết nối OmniRoute? Các route trỏ tới nó sẽ bị xóa.",
+        "disconnected": "Đã ngắt kết nối."
+      },
+      "step3": {
+        "title": "Model theo vai trò",
+        "locked": "Hãy kết nối trước để chọn model.",
+        "loading": "Đang tải danh sách model…",
+        "none": "Chọn model",
+        "preset": "Gợi ý",
+        "presetBalanced": "Cân bằng",
+        "presetEconomy": "Tiết kiệm",
+        "presetQuality": "Chất lượng cao",
+        "save": "Lưu model",
+        "saved": "Đã lưu.",
+        "advanced": "Tùy chỉnh từng bước (nâng cao)",
+        "defaultNote": "Model mặc định lấy theo vai trò trò chuyện."
+      },
+      "role": {
+        "generate": "Tạo nội dung bài",
+        "chat": "Trò chuyện, trợ giảng",
+        "grade": "Chấm bài, đánh giá",
+        "utility": "Việc phụ"
+      },
+      "group": {
+        "auto": "Tự động (auto/*)",
+        "combo": "Combo của bạn",
+        "model": "Model riêng lẻ"
+      },
+      "chip": {
+        "vision": "ảnh",
+        "tools": "công cụ",
+        "visionToggle": "Model này đọc được ảnh",
+        "toolsToggle": "Model này gọi được công cụ"
+      },
+      "test": {
+        "run": "Kiểm tra",
+        "running": "Đang kiểm tra…",
+        "ok": "Hoạt động ({{ms}} ms)",
+        "failed": "Kiểm tra thất bại. Hãy xem các nhà cung cấp trong OmniRoute."
+      },
+      "open": {
+        "failed": "Không mở được OmniRoute."
+      },
+      "error": {
+        "generic": "Có lỗi xảy ra. Hãy thử lại.",
+        "noConnections": "Hãy tích ít nhất một kết nối đang hoạt động."
       }
     }
   },

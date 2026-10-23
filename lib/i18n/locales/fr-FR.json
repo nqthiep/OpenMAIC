@@ -2915,14 +2915,101 @@
       "card": {
         "title": "Shared server credential",
         "description": "The key, base URL and models every learner’s AI request uses. Stored encrypted on the server and never shown again. The fields below are only your own key, kept in this browser."
+      }
+    },
+    "omniroute": {
+      "title": "OmniRoute",
+      "subtitle": "Self-hosted LLM gateway, not the same as OpenRouter",
+      "state": {
+        "ready": "Ready",
+        "unconfigured": "Not set up",
+        "unreachable": "Not reachable",
+        "noProviders": "No providers yet",
+        "noKey": "Not connected"
       },
-      "omniroute": {
-        "title": "OmniRoute",
-        "description": "Opens the OmniRoute dashboard in a new tab. You are signed in automatically while you are signed in here as an administrator.",
-        "open": "Open OmniRoute settings",
-        "opening": "Opening…",
-        "notConfigured": "OmniRoute is not set up on this server (see ops/omniroute/README.md).",
-        "openFailed": "Could not open OmniRoute."
+      "loading": "Loading…",
+      "loadFailed": "Could not read the OmniRoute status. Try again.",
+      "retry": "Try again",
+      "unconfigured": {
+        "title": "OmniRoute is not set up on this server",
+        "body": "Add these values to the server's .env file, then restart the app:"
+      },
+      "unreachable": {
+        "title": "The app cannot reach OmniRoute",
+        "body": "Check that the OmniRoute container is running and that OMNIROUTE_ADMIN_PASSWORD matches its password."
+      },
+      "step1": {
+        "title": "Providers in OmniRoute",
+        "hint": "OpenMAIC only uses the connections you tick. OmniRoute's providers that need no key are never used.",
+        "empty": "OmniRoute has no active provider yet. Add one there, then refresh.",
+        "open": "Open OmniRoute",
+        "refresh": "Refresh"
+      },
+      "connection": {
+        "active": "Active",
+        "inactive": "Not active",
+        "subscription": "Subscription plan: check its terms",
+        "apikey": "API key",
+        "oauth": "OAuth"
+      },
+      "step2": {
+        "title": "Connect",
+        "connect": "Connect",
+        "update": "Update access",
+        "rotate": "Issue a new key",
+        "confirmRotate": "Issue a new key? The old one stops working.",
+        "keyInfo": "Key …{{hint}}, created {{date}}. Stored encrypted on the server and never shown again.",
+        "noLog": "Do not keep chat content in OmniRoute",
+        "dailyLimit": "Daily spending limit (USD, optional)",
+        "needConnection": "Tick at least one connection first.",
+        "connected": "Connected.",
+        "disconnect": "Disconnect",
+        "confirmDisconnect": "Disconnect OmniRoute? The routes that point to it are cleared.",
+        "disconnected": "Disconnected."
+      },
+      "step3": {
+        "title": "Models by role",
+        "locked": "Connect first to choose models.",
+        "loading": "Loading models…",
+        "none": "Choose a model",
+        "preset": "Suggestion",
+        "presetBalanced": "Balanced",
+        "presetEconomy": "Economical",
+        "presetQuality": "High quality",
+        "save": "Save models",
+        "saved": "Saved.",
+        "advanced": "Customise each step (advanced)",
+        "defaultNote": "The default model follows the chat role."
+      },
+      "role": {
+        "generate": "Create lesson content",
+        "chat": "Chat and tutoring",
+        "grade": "Grading and evaluation",
+        "utility": "Small helper tasks"
+      },
+      "group": {
+        "auto": "Automatic (auto/*)",
+        "combo": "Your combos",
+        "model": "Single models"
+      },
+      "chip": {
+        "vision": "image",
+        "tools": "tools",
+        "visionToggle": "This model reads images",
+        "toolsToggle": "This model can call tools"
+      },
+      "test": {
+        "run": "Test",
+        "running": "Testing…",
+        "ok": "Works ({{ms}} ms)",
+        "failed": "The test failed. Check the providers in OmniRoute."
+      },
+      "open": {
+        "failed": "Could not open OmniRoute."
+      },
+      "error": {
+        "generic": "Something went wrong. Try again.",
+        "noConnections": "Tick at least one active connection."
       }
     }
   },
