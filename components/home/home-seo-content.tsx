@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { PRICING, formatDong } from '@/lib/brand/pricing';
+import { useBrand } from '@/lib/brand/brand-context';
 import { useI18n } from '@/lib/hooks/use-i18n';
 
 const INTENTS = ['i1', 'i2', 'i3'] as const;
 const FEATURES = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6'] as const;
 const TRUST = ['t1', 't2', 't3', 't4'] as const;
+const FAQ = ['1', '2', '3', '4', '5', '6'] as const;
 
 /**
  * The guest home as plain text, for what reads the server's HTML without running scripts: search
@@ -15,10 +18,11 @@ const TRUST = ['t1', 't2', 't3', 't4'] as const;
  * the same words, laid out. Keep the keys in step with `guest-home.tsx`.
  */
 export function HomeSeoContent() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { contactEmail } = useBrand();
   return (
     <div className="sr-only">
-      <h1>{t('home.slogan').replace(' · ', '. ')}</h1>
+      <h1>{t('home.guest.headline').replace(' · ', ': ')}</h1>
       <p>{t('home.guest.lead')}</p>
       <p>{t('home.guest.description')}</p>
       <h2>{t('home.guest.intents.title')}</h2>
@@ -41,6 +45,18 @@ export function HomeSeoContent() {
         <section key={key}>
           <h3>{t(`home.guest.trust.${key}.title`)}</h3>
           <p>{t(`home.guest.trust.${key}.body`)}</p>
+        </section>
+      ))}
+      <h2>{t('home.guest.faq.title')}</h2>
+      {FAQ.map((n) => (
+        <section key={n}>
+          <h3>{t(`home.guest.faq.q${n}`)}</h3>
+          <p>
+            {t(`home.guest.faq.a${n}`, {
+              price: formatDong(PRICING[0].price, locale),
+              email: contactEmail,
+            })}
+          </p>
         </section>
       ))}
       <nav>

@@ -13,7 +13,7 @@
     "slogan": "开启知识 · 创造未来",
     "greetingWithName": "嗨，{{name}}",
     "guest": {
-      "kicker": "面向五年级、九年级和十二年级的学习与复习",
+      "headline": "边学边懂 · 数学、信息技术、物理、化学 · 先从 5、9、12 年级开始",
       "description": "免费试看，无需账号。课程在 AI 的辅助下编写，并在分享前由真人审核。",
       "signIn": "登录",
       "browseCatalog": "浏览课程",
@@ -43,8 +43,6 @@
         "previews": "试看课程",
         "membership": "会员"
       },
-      "chip1": "从多个角度讲解",
-      "chip2": "课件与白板",
       "chip3": "测验与项目",
       "mock": {
         "title": "生活中的分数",
@@ -112,6 +110,21 @@
           "body": "免费试看对所有人开放，无需账号，也没有任何义务。"
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "用智慧理解世界",
         "p2": "用技术拓展能力",
@@ -135,27 +148,13 @@
             "title": "用心",
             "body": "为了人，为了社区。"
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "深刻",
-            "hint": "不张扬"
-          },
-          "k2": {
-            "name": "系统",
-            "hint": "不零散"
-          },
-          "k3": {
-            "name": "人文",
-            "hint": "不取代人"
-          }
         }
       },
       "lead": "数学、信息技术、物理、化学的每一节课都是互动的：有讲解的老师、幻灯片、白板，课中还有检查问题，让你在做题之前先真正理解。",
       "tryFree": "免费试学一节课",
       "intents": {
         "title": "为五年级、九年级和十二年级的同学",
-        "subtitle": "数学、信息技术、物理和化学：无论是学新内容，还是考前复习，都可以从一节短课开始。",
+        "subtitle": "数学、信息技术、物理和化学：无论是学新内容，还是考前复习，都可以从一节短课开始。其他年级和科目会陆续加入。",
         "i1": {
           "title": "弄懂今天的课",
           "body": "每个概念一步一步讲解，配有幻灯片和白板，让你看清做法。"

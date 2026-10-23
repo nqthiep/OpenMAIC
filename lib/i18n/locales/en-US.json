@@ -13,7 +13,7 @@
     "slogan": "Unlock knowledge · Build the future",
     "greetingWithName": "Hi, {{name}}",
     "guest": {
-      "kicker": "Study and revision for grades 5, 9 and 12",
+      "headline": "Understand it as you learn it · Maths, informatics, physics, chemistry · starting with grades 5, 9, 12",
       "description": "Try it free, no account needed. Lessons are written with the help of AI and reviewed by a person before they are shared.",
       "signIn": "Sign in",
       "browseCatalog": "Browse courses",
@@ -43,8 +43,6 @@
         "previews": "Previews",
         "membership": "Membership"
       },
-      "chip1": "Explained from several angles",
-      "chip2": "Slides & whiteboard",
       "chip3": "Quizzes & projects",
       "mock": {
         "title": "Fractions in daily life",
@@ -112,6 +110,21 @@
           "body": "Free previews are open to everyone, with no account and no obligation."
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "Intelligence to understand the world",
         "p2": "Technology to expand what people can do",
@@ -135,27 +148,13 @@
             "title": "Heart",
             "body": "For people, for the community."
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "Deep",
-            "hint": "Never showy"
-          },
-          "k2": {
-            "name": "Systematic",
-            "hint": "Never scattered"
-          },
-          "k3": {
-            "name": "Humane",
-            "hint": "Never replacing people"
-          }
         }
       },
       "lead": "Every lesson in maths, informatics, physics or chemistry is interactive: a teacher who explains, slides, a whiteboard and check questions right inside the lesson, so you understand it before you practise.",
       "tryFree": "Try a lesson free",
       "intents": {
         "title": "For students in grades 5, 9 and 12",
-        "subtitle": "Maths, informatics, physics and chemistry: learning something new or revising before a test, you can start with one short lesson.",
+        "subtitle": "Maths, informatics, physics and chemistry: learning something new or revising before a test, you can start with one short lesson. More grades and subjects will be added over time.",
         "i1": {
           "title": "Understand today’s lesson",
           "body": "Each idea is explained step by step, with slides and a whiteboard so you can see how it is done."

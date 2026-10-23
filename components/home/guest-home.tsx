@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
   BookOpen,
   BrainCircuit,
+  ChevronDown,
   Check,
   ClipboardCheck,
   Compass,
@@ -66,6 +67,9 @@ const TRUST = [
 
 const PERKS = ['p1', 'p2', 'p3', 'p4'] as const;
 
+/** The questions a hesitant visitor asks first. Each answer states what the service really does. */
+const FAQ = ['1', '2', '3', '4', '5', '6'] as const;
+
 /**
  * The four tints of the brand board's icon tiles: steel blue, gold, teal and peach. A grid of six
  * cycles through them so no two neighbours, across or down, share one. Whole class names, because
@@ -96,13 +100,6 @@ const VALUES = [
   { key: 'v1', icon: Sunrise, ring: 'border-brand-yellow/60 text-brand-yellow' },
   { key: 'v2', icon: BrainCircuit, ring: 'border-brand-mint/50 text-brand-mint' },
   { key: 'v3', icon: HeartHandshake, ring: 'border-brand-mint/50 text-brand-mint' },
-] as const;
-
-/** The brand's character: a trait, and what it is not. */
-const TRAITS = [
-  { key: 'k1', dot: 'bg-brand-yellow' },
-  { key: 'k2', dot: 'bg-brand-teal dark:bg-brand-mint' },
-  { key: 'k3', dot: 'bg-brand-teal dark:bg-brand-mint' },
 ] as const;
 
 /** A decorative classroom: slide, agents talking, playback bar. It is not a screenshot and not interactive. */
@@ -289,14 +286,24 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
       <section className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="flex flex-col gap-6">
           <Reveal>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-medium text-white">
-              <Sparkles className="size-3.5 text-brand-yellow" aria-hidden="true" />
-              {t('home.guest.kicker')}
+            <span className="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-sm font-medium text-white">
+              <Sparkles className="size-4 text-brand-yellow" aria-hidden="true" />
+              {t('home.slogan')
+                .split(' · ')
+                .map((half, index) => (
+                  <Fragment key={half}>
+                    {index > 0 ? (
+                      <span aria-hidden="true" className="size-1 rounded-full bg-brand-yellow" />
+                    ) : null}
+                    <span className={index > 0 ? 'text-brand-yellow' : undefined}>{half}</span>
+                  </Fragment>
+                ))}
             </span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h1 className="pb-1 text-4xl font-bold leading-[1.15] tracking-tight text-white md:text-5xl">
-              <Slogan text={t('home.slogan')} />
+            {/* The promise is the big line; the gold line under it names the subjects and where it starts (the grades grow), smaller so it fits one line. */}
+            <h1 className="pb-1 text-4xl font-bold leading-[1.15] tracking-tight text-white md:text-[2.75rem] [&>span]:text-2xl">
+              <Slogan text={t('home.guest.headline')} />
             </h1>
           </Reveal>
           <Reveal delay={0.08}>
@@ -328,21 +335,6 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
             >
               {t('home.guest.signIn')}
             </Button>
-          </Reveal>
-          <Reveal delay={0.2} className="flex flex-wrap gap-2">
-            {[
-              { icon: Users, label: t('home.guest.chip1') },
-              { icon: Presentation, label: t('home.guest.chip2') },
-              { icon: ListChecks, label: t('home.guest.chip3') },
-            ].map(({ icon: Icon, label }) => (
-              <span
-                key={label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white"
-              >
-                <Icon className="size-3.5 text-brand-yellow" aria-hidden="true" />
-                {label}
-              </span>
-            ))}
           </Reveal>
         </div>
         <Reveal delay={0.15}>
@@ -529,6 +521,33 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
         </div>
       </section>
 
+      <section id="faq" className="flex scroll-mt-24 flex-col gap-8">
+        <Reveal>
+          <SectionHeading title={t('home.guest.faq.title')} />
+        </Reveal>
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
+          {FAQ.map((n) => (
+            <Reveal key={n}>
+              <details className={cn('group rounded-2xl px-5 py-4', GLASS)}>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold [&::-webkit-details-marker]:hidden">
+                  {t(`home.guest.faq.q${n}`)}
+                  <ChevronDown
+                    className="size-4 shrink-0 transition-transform group-open:rotate-180"
+                    aria-hidden="true"
+                  />
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {t(`home.guest.faq.a${n}`, {
+                    price: formatDong(PRICING[0].price, locale),
+                    email: contactEmail,
+                  })}
+                </p>
+              </details>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       <section id="membership" className="scroll-mt-24">
         <Reveal>
           <div className="rounded-3xl bg-gradient-to-br from-brand-500/60 via-brand-yellow/40 to-transparent p-px">
@@ -672,28 +691,6 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
             </div>
           </div>
         </Reveal>
-        <ul className="grid gap-3 lg:grid-cols-3">
-          {TRAITS.map(({ key, dot }, index) => (
-            <li key={key}>
-              <Reveal delay={index * 0.06}>
-                <div
-                  className={cn(
-                    'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl px-5 py-3 text-sm',
-                    GLASS,
-                  )}
-                >
-                  <span aria-hidden="true" className={cn('size-2.5 shrink-0 rounded-full', dot)} />
-                  <span className="font-semibold whitespace-nowrap">
-                    {t(`home.guest.story.traits.${key}.name`)}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {t(`home.guest.story.traits.${key}.hint`)}
-                  </span>
-                </div>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section>

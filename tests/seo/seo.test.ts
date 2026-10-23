@@ -44,7 +44,7 @@ describe('home text for crawlers', () => {
     );
     const html = await new Response(prelude).text();
     expect(html.match(/<h1/g)).toHaveLength(1);
-    expect(html).toContain('Khai mở tri thức');
+    expect(html).toContain('Học đến đâu');
     expect(html).toContain('href="/catalog"');
   });
 });

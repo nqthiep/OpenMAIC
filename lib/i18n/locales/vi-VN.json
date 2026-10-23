@@ -13,7 +13,7 @@
     "slogan": "Khai mở tri thức · Kiến tạo tương lai",
     "greetingWithName": "Chào {{name}}",
     "guest": {
-      "kicker": "Học và ôn tập cho lớp 5, lớp 9 và lớp 12",
+      "headline": "Học đến đâu, hiểu đến\u00a0đó · Toán, Tin, Lí, Hoá · bắt đầu từ lớp\u00a05, 9, 12",
       "description": "Xem thử miễn phí, không cần tài khoản. Bài giảng được soạn với sự hỗ trợ của AI và được người thật xem lại trước khi chia sẻ.",
       "signIn": "Đăng nhập",
       "browseCatalog": "Xem danh mục khoá học",
@@ -43,8 +43,6 @@
         "previews": "Bài xem thử",
         "membership": "Thành viên"
       },
-      "chip1": "Giải thích từ nhiều góc nhìn",
-      "chip2": "Trình chiếu & bảng trắng",
       "chip3": "Bài kiểm tra & dự án",
       "mock": {
         "title": "Phân số trong đời sống",
@@ -112,6 +110,21 @@
           "body": "Bài xem thử mở cho mọi người, không cần tài khoản và không ràng buộc."
         }
       },
+      "faq": {
+        "title": "Câu hỏi thường gặp",
+        "q1": "KHAITAM dành cho lớp nào, môn nào?",
+        "a1": "Hiện bắt đầu với Toán, Tin học, Vật lí và Hoá học cho lớp 5, lớp 9 và lớp 12. Các lớp và môn khác sẽ được bổ sung dần.",
+        "q2": "Học thử có mất phí không?",
+        "a2": "Không. Bài xem thử mở cho mọi người, không cần tài khoản và không ràng buộc. Các bài xem thử đang được bổ sung.",
+        "q3": "Khác gì việc hỏi một ứng dụng chat thông thường?",
+        "a3": "Mỗi bài có sẵn cấu trúc: thầy giảng, slide, bảng trắng và câu hỏi kiểm tra ngay trong bài, nên bạn không phải tự nghĩ ra câu cần hỏi. Quản trị viên cũng xem lại khoá học trước khi các thành viên khác nhìn thấy.",
+        "q4": "Bài giảng có thể sai không?",
+        "a4": "Có thể. Với điều quan trọng, hãy đối chiếu với thầy cô hoặc sách giáo khoa.",
+        "q5": "Mình có cần tài khoản không?",
+        "a5": "Xem thử thì không. Để tạo khoá học theo chủ đề mình cần, tham gia lớp bằng mã mời và chia sẻ khoá học, bạn cần tài khoản và trở thành thành viên.",
+        "q6": "Trả phí thế nào?",
+        "a6": "Gói thành viên từ {{price}} một tháng, không tự gia hạn và không phụ thu. Hiện thanh toán bằng chuyển khoản: viết cho {{email}} để chọn gói."
+      },
       "pillars": {
         "p1": "Trí tuệ để hiểu thế giới",
         "p2": "Công nghệ để mở rộng năng lực",
@@ -135,27 +148,13 @@
             "title": "Cái tâm",
             "body": "Vì con người, vì cộng đồng."
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "Sâu sắc",
-            "hint": "Không phô trương"
-          },
-          "k2": {
-            "name": "Hệ thống",
-            "hint": "Không rời rạc"
-          },
-          "k3": {
-            "name": "Nhân văn",
-            "hint": "Không thay thế con người"
-          }
         }
       },
       "lead": "Mỗi bài về Toán, Tin học, Vật lí hoặc Hoá học là một buổi học tương tác: có thầy giảng, slide, bảng trắng và câu hỏi kiểm tra ngay trong bài, để bạn hiểu bài trước khi làm bài tập.",
       "tryFree": "Học thử miễn phí",
       "intents": {
         "title": "Dành cho học sinh lớp 5, lớp 9 và lớp 12",
-        "subtitle": "Các môn Toán, Tin học, Vật lí và Hoá học: học bài mới hay ôn lại trước kiểm tra, bạn đều có thể bắt đầu từ một bài học ngắn.",
+        "subtitle": "Các môn Toán, Tin học, Vật lí và Hoá học: học bài mới hay ôn lại trước kiểm tra, bạn đều có thể bắt đầu từ một bài học ngắn. Các lớp và môn khác sẽ được bổ sung dần.",
         "i1": {
           "title": "Hiểu bài đang học",
           "body": "Mỗi khái niệm được giải thích từng bước, có slide và bảng trắng để bạn nhìn thấy cách làm."

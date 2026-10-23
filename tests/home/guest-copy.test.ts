@@ -44,6 +44,10 @@ describe('the guest home copy', () => {
       const guest = load(code).home.guest;
       // Chinese writes the years with its own numerals.
       for (const grade of [/5|五/, /9|九/, /12|十二/]) expect(guest.intents.title).toMatch(grade);
+      // The first line promises what the learner gets, and names the grades, not the brand.
+      for (const grade of [/5|五/, /9|九/, /12|十二/]) expect(guest.headline).toMatch(grade);
+      expect(guest.headline).toContain(' · ');
+      expect(guest.headline).not.toBe(load(code).home.slogan);
       expect(guest.lead.length).toBeGreaterThan(40);
       expect(guest.tryFree.length).toBeGreaterThan(0);
     },
@@ -60,6 +64,18 @@ describe('the guest home copy', () => {
   it('names the four subjects in the lead of the languages written by hand', () => {
     expect(load('vi-VN').home.guest.lead).toMatch(/Toán.*Tin học.*Vật lí.*Hoá học/);
     expect(load('en-US').home.guest.lead).toMatch(/maths.*informatics.*physics.*chemistry/i);
+  });
+
+  it.each(Object.keys(AI_WORD))('has six questions with an answer (%s)', (code) => {
+    const faq = load(code).home.guest.faq;
+    expect(faq.title.length).toBeGreaterThan(0);
+    for (const n of [1, 2, 3, 4, 5, 6]) {
+      expect(faq[`q${n}`].length, `q${n}`).toBeGreaterThan(5);
+      expect(faq[`a${n}`].length, `a${n}`).toBeGreaterThan(5);
+    }
+    // The price and the address are filled in from the brand, not typed into the answer.
+    expect(faq.a6).toContain('{{price}}');
+    expect(faq.a6).toContain('{{email}}');
   });
 
   it('has a label for every section the top bar links to, in every language', () => {

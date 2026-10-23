@@ -13,7 +13,7 @@
     "slogan": "Abra o conhecimento · Construa o futuro",
     "greetingWithName": "Olá, {{name}}",
     "guest": {
-      "kicker": "Estudo e revisão para o 5º, 9º e 12º ano",
+      "headline": "Entenda enquanto aprende · Matemática, informática, física, química · começando pelo 5º, 9º e 12º ano",
       "description": "Experimente grátis, sem precisar de conta. As aulas são escritas com a ajuda de IA e revisadas por uma pessoa antes de serem compartilhadas.",
       "signIn": "Entrar",
       "browseCatalog": "Ver cursos",
@@ -43,8 +43,6 @@
         "previews": "Prévias",
         "membership": "Assinatura"
       },
-      "chip1": "Explicado de vários ângulos",
-      "chip2": "Slides e lousa",
       "chip3": "Quizzes e projetos",
       "mock": {
         "title": "Frações no dia a dia",
@@ -112,6 +110,21 @@
           "body": "As prévias gratuitas são abertas a todos, sem conta e sem compromisso."
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "Inteligência para entender o mundo",
         "p2": "Tecnologia para ampliar o que podemos fazer",
@@ -135,27 +148,13 @@
             "title": "Coração",
             "body": "Pelas pessoas, pela comunidade."
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "Profundo",
-            "hint": "Nunca ostentoso"
-          },
-          "k2": {
-            "name": "Sistemático",
-            "hint": "Nunca disperso"
-          },
-          "k3": {
-            "name": "Humano",
-            "hint": "Nunca substitui as pessoas"
-          }
         }
       },
       "lead": "Cada aula de matemática, informática, física ou química é interativa: um professor que explica, slides, um quadro branco e perguntas de verificação dentro da própria aula, para você entender antes de praticar.",
       "tryFree": "Experimentar uma aula grátis",
       "intents": {
         "title": "Para estudantes do 5º, 9º e 12º ano",
-        "subtitle": "Matemática, informática, física e química: seja para aprender algo novo ou revisar antes de uma prova, você pode começar por uma aula curta.",
+        "subtitle": "Matemática, informática, física e química: seja para aprender algo novo ou revisar antes de uma prova, você pode começar por uma aula curta. Mais anos e disciplinas serão adicionados aos poucos.",
         "i1": {
           "title": "Entender a aula de hoje",
           "body": "Cada ideia é explicada passo a passo, com slides e quadro branco para você ver como se faz."

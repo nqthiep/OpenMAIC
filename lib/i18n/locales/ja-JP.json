@@ -13,7 +13,7 @@
     "slogan": "知識をひらく · 未来をつくる",
     "greetingWithName": "こんにちは、{{name}}さん",
     "guest": {
-      "kicker": "5年生・9年生・12年生のための学習と復習",
+      "headline": "学びながら、きちんと理解 · 数学・情報・物理・化学 · まずは 5・9・12 年生から",
       "description": "無料でお試しください。アカウントは不要です。授業はAIの助けを借りて作られ、共有される前に人が確認します。",
       "signIn": "ログイン",
       "browseCatalog": "講座を探す",
@@ -43,8 +43,6 @@
         "previews": "試聴講座",
         "membership": "会員"
       },
-      "chip1": "いろいろな角度から説明",
-      "chip2": "スライドとホワイトボード",
       "chip3": "クイズとプロジェクト",
       "mock": {
         "title": "暮らしの中の分数",
@@ -112,6 +110,21 @@
           "body": "無料の試聴は誰でも利用でき、アカウントも義務も必要ありません。"
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "世界を理解するための知性",
         "p2": "できることを広げるテクノロジー",
@@ -135,27 +148,13 @@
             "title": "こころ",
             "body": "人のために、地域のために。"
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "深い",
-            "hint": "目立とうとしない"
-          },
-          "k2": {
-            "name": "体系的",
-            "hint": "ばらばらにしない"
-          },
-          "k3": {
-            "name": "人間的",
-            "hint": "人に取って代わらない"
-          }
         }
       },
       "lead": "数学・情報・物理・化学のどの授業も対話型です。解説する先生、スライド、ホワイトボード、確認問題が授業の中にそろっていて、問題演習の前にしっかり理解できます。",
       "tryFree": "無料で授業を試す",
       "intents": {
         "title": "5年生・9年生・12年生のみなさんへ",
-        "subtitle": "数学・情報・物理・化学。新しい内容を学ぶときも、テスト前に復習するときも、短い授業から始められます。",
+        "subtitle": "数学・情報・物理・化学。新しい内容を学ぶときも、テスト前に復習するときも、短い授業から始められます。ほかの学年や科目も順次追加していきます。",
         "i1": {
           "title": "今日の授業を理解する",
           "body": "一つひとつの考え方を順を追って説明し、スライドとホワイトボードでやり方が見えます。"

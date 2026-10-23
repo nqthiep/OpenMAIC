@@ -13,7 +13,7 @@
     "slogan": "開啟知識 · 創造未來",
     "greetingWithName": "嗨，{{name}}",
     "guest": {
-      "kicker": "給五年級、九年級與十二年級的學習與複習",
+      "headline": "邊學邊懂 · 數學、資訊、物理、化學 · 先從 5、9、12 年級開始",
       "description": "免費試看，不需要帳號。課程在 AI 的協助下撰寫，並在分享前由真人審閱。",
       "signIn": "登入",
       "browseCatalog": "瀏覽課程",
@@ -43,8 +43,6 @@
         "previews": "試看課程",
         "membership": "會員"
       },
-      "chip1": "從多個角度講解",
-      "chip2": "投影片與白板",
       "chip3": "測驗與專案",
       "mock": {
         "title": "生活中的分數",
@@ -112,6 +110,21 @@
           "body": "免費試看對所有人開放，無需帳號，也沒有任何義務。"
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "以智慧理解世界",
         "p2": "以科技擴展能力",
@@ -135,27 +148,13 @@
             "title": "用心",
             "body": "為了人，為了社群。"
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "深刻",
-            "hint": "不張揚"
-          },
-          "k2": {
-            "name": "系統",
-            "hint": "不零散"
-          },
-          "k3": {
-            "name": "人文",
-            "hint": "不取代人"
-          }
         }
       },
       "lead": "數學、資訊科技、物理、化學的每一堂課都是互動式的：有講解的老師、投影片、白板，課程中還有檢查問題，讓你在練習之前先真正理解。",
       "tryFree": "免費試上一堂課",
       "intents": {
         "title": "給五年級、九年級與十二年級的同學",
-        "subtitle": "數學、資訊科技、物理與化學：無論是學新內容，還是考前複習，都可以從一堂短課開始。",
+        "subtitle": "數學、資訊科技、物理與化學：無論是學新內容，還是考前複習，都可以從一堂短課開始。其他年級與科目也會陸續加入。",
         "i1": {
           "title": "弄懂今天的課",
           "body": "每個概念一步一步講解，搭配投影片和白板，讓你看清做法。"

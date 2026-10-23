@@ -13,7 +13,7 @@
     "slogan": "지식을 열고 · 미래를 만들다",
     "greetingWithName": "안녕하세요, {{name}}!",
     "guest": {
-      "kicker": "5학년·9학년·12학년을 위한 학습과 복습",
+      "headline": "배우는 만큼 이해하기 · 수학·정보·물리·화학 · 5·9·12학년부터 시작",
       "description": "무료로 체험해 보세요. 계정이 필요 없습니다. 수업은 AI의 도움으로 작성되며, 공유되기 전에 사람이 검토합니다.",
       "signIn": "로그인",
       "browseCatalog": "강좌 둘러보기",
@@ -43,8 +43,6 @@
         "previews": "미리보기",
         "membership": "회원"
       },
-      "chip1": "여러 관점에서 설명",
-      "chip2": "슬라이드와 화이트보드",
       "chip3": "퀴즈와 프로젝트",
       "mock": {
         "title": "일상 속 분수",
@@ -112,6 +110,21 @@
           "body": "무료 미리보기는 누구에게나 열려 있으며, 계정도 약정도 필요 없습니다."
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "세상을 이해하는 지성",
         "p2": "할 수 있는 일을 넓히는 기술",
@@ -135,27 +148,13 @@
             "title": "마음",
             "body": "사람을 위해, 공동체를 위해."
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "깊이 있는",
-            "hint": "과시하지 않음"
-          },
-          "k2": {
-            "name": "체계적인",
-            "hint": "흩어지지 않음"
-          },
-          "k3": {
-            "name": "인간적인",
-            "hint": "사람을 대신하지 않음"
-          }
         }
       },
       "lead": "수학, 정보, 물리, 화학 모든 수업이 상호작용형입니다. 설명해 주는 선생님, 슬라이드, 화이트보드, 수업 안의 확인 문제로 문제를 풀기 전에 충분히 이해할 수 있습니다.",
       "tryFree": "수업 무료 체험",
       "intents": {
         "title": "5학년·9학년·12학년 학생을 위해",
-        "subtitle": "수학, 정보, 물리, 화학. 새로 배우든 시험 전에 복습하든 짧은 수업 하나로 시작할 수 있습니다.",
+        "subtitle": "수학, 정보, 물리, 화학. 새로 배우든 시험 전에 복습하든 짧은 수업 하나로 시작할 수 있습니다. 다른 학년과 과목도 차례로 추가할 예정입니다.",
         "i1": {
           "title": "오늘 배우는 내용 이해하기",
           "body": "모든 개념을 단계별로 설명하고, 슬라이드와 화이트보드로 방법을 눈으로 확인합니다."

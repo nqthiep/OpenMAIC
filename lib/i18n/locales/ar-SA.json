@@ -13,7 +13,7 @@
     "slogan": "افتح آفاق المعرفة · وابنِ المستقبل",
     "greetingWithName": "مرحبًا، {{name}}",
     "guest": {
-      "kicker": "تعلّم ومراجعة للصفوف 5 و9 و12",
+      "headline": "افهم أثناء التعلّم · الرياضيات والمعلوماتية والفيزياء والكيمياء · نبدأ بالصفوف 5 و9 و12",
       "description": "جرّب مجانًا دون حاجة إلى حساب. تُكتب الدروس بمساعدة الذكاء الاصطناعي ويراجعها شخص حقيقي قبل مشاركتها.",
       "signIn": "تسجيل الدخول",
       "browseCatalog": "تصفح الدورات",
@@ -43,8 +43,6 @@
         "previews": "المعاينات",
         "membership": "العضوية"
       },
-      "chip1": "شرح من زوايا متعددة",
-      "chip2": "شرائح وسبورة",
       "chip3": "اختبارات ومشاريع",
       "mock": {
         "title": "الكسور في الحياة اليومية",
@@ -112,6 +110,21 @@
           "body": "المعاينات المجانية متاحة للجميع، دون حساب ودون أي التزام."
         }
       },
+      "faq": {
+        "title": "Frequently asked questions",
+        "q1": "Which grades and subjects does KHAITAM cover?",
+        "a1": "For now it starts with maths, informatics, physics and chemistry for grades 5, 9 and 12. More grades and subjects will be added over time.",
+        "q2": "Does trying a lesson cost anything?",
+        "a2": "No. Preview lessons are open to everyone, with no account and no strings attached. More previews are on the way.",
+        "q3": "How is this different from asking an ordinary chat app?",
+        "a3": "Every lesson comes with its structure: a teacher, slides, a whiteboard and check questions inside the lesson, so you do not have to think of what to ask. An administrator also reviews a course before other members see it.",
+        "q4": "Can a lesson be wrong?",
+        "a4": "It can. For anything important, check with your teacher or the textbook.",
+        "q5": "Do I need an account?",
+        "a5": "Not to try a preview. To create courses on the topics you need, join classes with an invite code and share courses, you need an account and a membership.",
+        "q6": "How do I pay?",
+        "a6": "Membership starts at {{price}} a month, does not renew by itself and has no extra charges. For now you pay by bank transfer: write to {{email}} to choose a plan."
+      },
       "pillars": {
         "p1": "ذكاء لفهم العالم",
         "p2": "تقنية لتوسيع ما نستطيع فعله",
@@ -135,27 +148,13 @@
             "title": "القلب",
             "body": "من أجل الناس ومن أجل المجتمع."
           }
-        },
-        "traits": {
-          "k1": {
-            "name": "عميق",
-            "hint": "دون استعراض"
-          },
-          "k2": {
-            "name": "منظَّم",
-            "hint": "دون تشتّت"
-          },
-          "k3": {
-            "name": "إنساني",
-            "hint": "لا يحلّ محلّ الناس"
-          }
         }
       },
       "lead": "كل درس في الرياضيات أو المعلوماتية أو الفيزياء أو الكيمياء تفاعلي: معلّم يشرح، وشرائح، وسبورة، وأسئلة تحقّق داخل الدرس نفسه، لتفهم قبل أن تتدرّب.",
       "tryFree": "جرّب درسًا مجانًا",
       "intents": {
         "title": "لطلاب الصفوف 5 و9 و12",
-        "subtitle": "الرياضيات والمعلوماتية والفيزياء والكيمياء: سواء كنت تتعلم شيئًا جديدًا أو تراجع قبل اختبار، يمكنك أن تبدأ بدرس قصير.",
+        "subtitle": "الرياضيات والمعلوماتية والفيزياء والكيمياء: سواء كنت تتعلم شيئًا جديدًا أو تراجع قبل اختبار، يمكنك أن تبدأ بدرس قصير. وسنضيف المزيد من الصفوف والمواد تدريجيًا.",
         "i1": {
           "title": "افهم درس اليوم",
           "body": "تُشرح كل فكرة خطوة بخطوة، مع شرائح وسبورة لترى كيف يتم الحل."

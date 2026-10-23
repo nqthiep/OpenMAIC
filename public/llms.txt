@@ -1,0 +1,15 @@
+# KHAITAM
+
+> Học Toán, Tin học, Vật lí và Hoá học lớp 5, lớp 9 và lớp 12 qua bài giảng tương tác: có thầy giảng, slide, bảng trắng và câu hỏi kiểm tra ngay trong bài. Xem thử miễn phí, không cần tài khoản. Trang web đang xây dựng: hiện bắt đầu với lớp 5, 9, 12 và sẽ bổ sung dần các lớp và môn khác.
+
+Bài giảng được soạn với sự hỗ trợ của AI và được quản trị viên xem lại trước khi chia sẻ. Bài giảng có thể chưa chính xác; với điều quan trọng, hãy đối chiếu với thầy cô hoặc sách giáo khoa.
+
+## Trang chính
+
+- [Trang chủ](https://khaitam.ai.vn/): Giới thiệu, cách hoạt động, bảng giá thành viên
+- [Danh mục khoá học](https://khaitam.ai.vn/catalog): Các bài xem thử miễn phí
+
+## Pháp lý
+
+- [Điều khoản sử dụng](https://khaitam.ai.vn/terms)
+- [Chính sách quyền riêng tư](https://khaitam.ai.vn/privacy)

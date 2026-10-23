@@ -38,7 +38,7 @@ import '@fontsource/be-vietnam-pro/500.css';
 import '@fontsource/be-vietnam-pro/600.css';
 import '@fontsource/be-vietnam-pro/700.css';
 
-const HOME_TITLE = `${DEFAULT_BRAND.productName} · Học Toán, Tin, Lí, Hoá lớp 5, 9, 12 với AI`;
+const HOME_TITLE = `${DEFAULT_BRAND.productName} · Học Toán, Tin, Lí, Hoá lớp 5, 9, 12, học đến đâu hiểu đến đó`;
 
 export const metadata: Metadata = {
   // Absolute URL of the share image (`opengraph-image.png`) and of any other metadata asset:
