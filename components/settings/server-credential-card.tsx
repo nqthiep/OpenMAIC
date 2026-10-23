@@ -19,7 +19,7 @@ import {
   type ProviderRow,
   type ProviderSettings,
 } from '@/components/learning/learning-api';
-import { OmniRouteLink } from '@/components/settings/omniroute-link';
+import { useOmniRouteMode } from '@/components/settings/omniroute-mode';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -146,6 +146,9 @@ export function ServerCredentialCard({
     () => (kind ? settings?.catalog[kind].find((item) => item.id === providerId) : undefined),
     [settings, kind, providerId],
   );
+  const omniMode = useOmniRouteMode();
+  // The OmniRoute panel owns that provider's page; on `generic` it hands the page back to this card.
+  if (section === 'providers' && providerId === 'omniroute' && omniMode !== 'generic') return null;
   if (!kind || !settings || !settings.canManage || !entry) return null;
   const row = settings.rows.find((item) => item.section === kind && item.providerId === entry.id);
 
@@ -159,13 +162,52 @@ export function ServerCredentialCard({
         row={row}
         onChanged={reload}
       />
-      {kind === 'providers' && entry.id === 'omniroute' ? <OmniRouteLink /> : null}
       {kind === 'providers' ? (
         <>
           <DefaultModelCard settings={settings} onChange={setSettings} onStale={reload} />
           <RoutesCard settings={settings} onChange={setSettings} onStale={reload} />
         </>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * The default-model and per-stage route cards on their own: the OmniRoute panel's advanced area
+ * shows them, because the shared credential card they belong to is hidden for that provider. Loads
+ * the settings the same way that card does, and renders nothing when they cannot be read or the
+ * account cannot manage them.
+ */
+export function StageRoutingCards() {
+  const [settings, setSettings] = useState<ProviderSettings | null>(null);
+  const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    loadSettings()
+      .then((next) => {
+        if (active) setSettings(next);
+      })
+      .catch(() => {
+        if (active) setSettings(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [version]);
+
+  const reload = useCallback(() => {
+    cached = null;
+    setVersion((n) => n + 1);
+    // The popup's own list of server-managed providers follows what was just saved.
+    void useSettingsStore.getState().fetchServerProviders();
+  }, []);
+
+  if (!settings || !settings.canManage) return null;
+  return (
+    <div className="flex flex-col gap-4">
+      <DefaultModelCard settings={settings} onChange={setSettings} onStale={reload} />
+      <RoutesCard settings={settings} onChange={setSettings} onStale={reload} />
     </div>
   );
 }

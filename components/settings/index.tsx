@@ -40,6 +40,8 @@ import { cn } from '@/lib/utils';
 import { createCustomProviderSettings, getProviderTypeLabel, modelInfoFromId } from './utils';
 import { ProviderList } from './provider-list';
 import { ProviderConfigPanel } from './provider-config-panel';
+import { OmniRoutePanel } from './omniroute-panel';
+import { useOmniRouteMode } from './omniroute-mode';
 import { ServerCredentialCard } from './server-credential-card';
 import { PDFSettings } from './pdf-settings';
 import { PDF_PROVIDERS } from '@/lib/pdf/constants';
@@ -235,6 +237,9 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   const [requestedSection, setActiveSection] = useState<SettingsSection>('providers');
   const activeSection: SettingsSection = canConfigure ? requestedSection : 'general';
   const [selectedProviderId, setSelectedProviderId] = useState<ProviderId>(providerId);
+  // OmniRoute's page belongs to its admin panel unless the panel hands it back (not an administrator).
+  const omniMode = useOmniRouteMode();
+  const showProviderPanel = selectedProviderId !== 'omniroute' || omniMode === 'generic';
   const [selectedPdfProviderId, setSelectedPdfProviderId] = useState<PDFProviderId>(pdfProviderId);
   const [selectedWebSearchProviderId, setSelectedWebSearchProviderId] =
     useState<WebSearchProviderId>(webSearchProviderId);
@@ -1108,6 +1113,10 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
 
               {activeSection === 'token-plan' && <TokenPlanSettings />}
 
+              {activeSection === 'providers' && selectedProviderId === 'omniroute' && (
+                <OmniRoutePanel />
+              )}
+
               <ServerCredentialCard
                 section={activeSection}
                 providerIds={{
@@ -1121,7 +1130,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
                 }}
               />
 
-              {activeSection === 'providers' && selectedProvider && (
+              {activeSection === 'providers' && selectedProvider && showProviderPanel && (
                 <ProviderConfigPanel
                   provider={selectedProvider}
                   initialApiKey={providersConfig[selectedProviderId]?.apiKey || ''}
