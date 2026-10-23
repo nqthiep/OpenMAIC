@@ -5,6 +5,8 @@ import {
   VersionConflictError,
 } from '@/lib/server/provider-store/store';
 
+import { ProviderConfigNotReady } from '@/lib/server/provider-store/snapshot';
+
 import { OmniRouteError } from './client';
 
 /** The answer for a failure of an OmniRoute route, or undefined when it is not one we know. */
@@ -20,6 +22,11 @@ export function failureResponse(error: unknown): Response | undefined {
       default:
         return apiError('UPSTREAM_ERROR', 502, error.message, error.failure);
     }
+  }
+  if (error instanceof ProviderConfigNotReady) {
+    const response = apiError('PROVIDER_CONFIG_NOT_READY', 503, error.message);
+    response.headers.set('Retry-After', String(error.retryAfterSeconds));
+    return response;
   }
   if (error instanceof VersionConflictError) {
     return apiError('VERSION_CONFLICT', 409, error.message);

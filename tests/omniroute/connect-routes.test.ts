@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { ensureAccountSchema } from '@/lib/server/accounts/store';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
-import { connection, startFakeOmniRoute, type FakeOmniRoute } from './fake-omniroute';
+import { connection, model, startFakeOmniRoute, type FakeOmniRoute } from './fake-omniroute';
 
 const PASSWORD = 'correct horse battery staple';
 const ORIGIN = 'http://localhost';
@@ -44,6 +44,8 @@ beforeEach(async () => {
   vi.stubEnv('OMNIROUTE_INTERNAL_URL', fake.url);
   vi.stubEnv('OMNIROUTE_API_URL', fake.url);
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
+  // The loaded provider settings live on globalThis; a test starts with none loaded.
+  (await import('@/lib/server/provider-store/snapshot')).resetProviderSnapshot();
   fake.connections = [];
   fake.keys = [];
   fake.models = [];
@@ -67,14 +69,17 @@ async function load() {
   vi.doMock('@/lib/persistence/server-provider', () => ({
     getServerPersistenceProvider: async () => ({ pool }),
   }));
-  const [register, overview, connect, test, snapshot, roles] = await Promise.all([
-    import('@/app/api/auth/register/route'),
-    import('@/app/api/admin/omniroute/overview/route'),
-    import('@/app/api/admin/omniroute/connect/route'),
-    import('@/app/api/admin/omniroute/test/route'),
-    import('@/lib/server/provider-store/snapshot'),
-    import('@/lib/server/omniroute/roles'),
-  ]);
+  const [register, overview, connect, test, snapshot, roles, models, rolesRoute] =
+    await Promise.all([
+      import('@/app/api/auth/register/route'),
+      import('@/app/api/admin/omniroute/overview/route'),
+      import('@/app/api/admin/omniroute/connect/route'),
+      import('@/app/api/admin/omniroute/test/route'),
+      import('@/lib/server/provider-store/snapshot'),
+      import('@/lib/server/omniroute/roles'),
+      import('@/app/api/admin/omniroute/models/route'),
+      import('@/app/api/admin/omniroute/roles/route'),
+    ]);
   return {
     register: register.POST,
     overview: overview.GET,
@@ -83,6 +88,8 @@ async function load() {
     test: test.POST,
     currentSnapshot: snapshot.currentSnapshot,
     roles,
+    models: models.GET,
+    putRoles: rolesRoute.PUT,
     pool,
   };
 }
@@ -502,5 +509,192 @@ describe('test', () => {
       status: 502,
       body: { details: 'model-failed' },
     });
+  });
+});
+
+const ROLES = {
+  generate: { model: 'auto/best-vision', vision: true, tools: true, contextWindow: 131072 },
+  chat: { model: 'auto/best-chat', vision: false, tools: true },
+  grade: { model: 'auto/best-reasoning', vision: false, tools: true },
+  utility: { model: 'auto/cheap', vision: false, tools: true },
+};
+
+function listedModels() {
+  return [
+    model('auto/best-vision'),
+    model('auto/best-chat'),
+    model('auto/best-reasoning'),
+    model('auto/cheap'),
+    model('premium', { owned_by: 'combo' }),
+    model('openai/gpt-5', {
+      capabilities: { vision: true, tool_calling: true },
+      context_length: 131072,
+    }),
+    model('glm/glm-5', { owned_by: 'glm' }),
+    model('dva/claude-x', { owned_by: 'devin-cli-agentic' }),
+  ];
+}
+
+describe('models', () => {
+  it('lists what the key may use, with suggestions, and asks OmniRoute with the stored key', async () => {
+    const { routes, root } = await arrange();
+    fake.connections = [
+      connection('c-1', { provider: 'openai' }),
+      connection('c-2', { provider: 'glm' }),
+    ];
+    fake.models = listedModels();
+    await routes.connect(
+      send('POST', { connectionIds: ['c-1'], noLog: true, dailyLimitUsd: null }, root),
+    );
+    const { status, body } = await json(await routes.models(get(root)));
+    expect(status).toBe(200);
+    expect(body.items.map((item: { id: string }) => item.id)).toEqual([
+      'auto/best-vision',
+      'auto/best-chat',
+      'auto/best-reasoning',
+      'auto/cheap',
+      'premium',
+      'openai/gpt-5',
+    ]);
+    expect(Object.keys(body.presets)).toEqual(
+      ['balanced', 'economy', 'quality'].filter((id) => body.presets[id]),
+    );
+    expect(body.presets.balanced.generate).toMatchObject({
+      model: 'auto/best-vision',
+      vision: true,
+    });
+    const listed = callsTo('GET', '/v1/models')[0];
+    expect(listed).toBeDefined();
+    expect(JSON.stringify(body)).not.toContain(fake.keys[0]!.key);
+  });
+
+  it('answers 503 while the provider settings are not loaded yet', async () => {
+    const { routes, root } = await arrange();
+    const response = await routes.models(get(root));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('retry-after')).toBeTruthy();
+  });
+
+  it('needs OmniRoute connected, and an administrator', async () => {
+    const { routes, root, alice } = await arrange();
+    const { refreshProviderSnapshot } = await import('@/lib/server/provider-store/snapshot');
+    await refreshProviderSnapshot(routes.pool as never);
+    expect(await json(await routes.models(get(root)))).toMatchObject({
+      status: 409,
+      body: { details: 'not-ready' },
+    });
+    expect((await routes.models(get(alice))).status).toBe(403);
+    expect((await routes.models(get())).status).toBe(401);
+  });
+});
+
+describe('roles', () => {
+  async function connected() {
+    const arranged = await arrange();
+    fake.connections = [connection('c-1')];
+    fake.models = listedModels();
+    await arranged.routes.connect(
+      send('POST', { connectionIds: ['c-1'], noLog: true, dailyLimitUsd: null }, arranged.root),
+    );
+    return arranged;
+  }
+
+  it('writes every stage of every role and the default, and reads them back', async () => {
+    const { routes, root, pool } = await connected();
+    const { status, body } = await json(await routes.putRoles(send('PUT', { roles: ROLES }, root)));
+    expect(status).toBe(200);
+    expect(body.roles).toEqual({
+      generate: { model: 'auto/best-vision', vision: true, tools: true, contextWindow: 131072 },
+      chat: { model: 'auto/best-chat', vision: false, tools: true },
+      grade: { model: 'auto/best-reasoning', vision: false, tools: true },
+      utility: { model: 'auto/cheap', vision: false, tools: true },
+    });
+    const stored = (await pool.query(`SELECT stage, value FROM model_routing ORDER BY stage`))
+      .rows as {
+      stage: string;
+      value: { model: string; vision: boolean };
+    }[];
+    const stages = stored.map((row) => row.stage);
+    expect(stages).toContain('default');
+    expect(stages).toContain('pbl-v2-runtime:evaluate');
+    expect(stages).not.toContain('scene-content:slide');
+    expect(stored.find((row) => row.stage === 'default')!.value.model).toBe(
+      'omniroute:auto/best-chat',
+    );
+    expect(stored.find((row) => row.stage === 'quiz-grade')!.value.model).toBe(
+      'omniroute:auto/best-reasoning',
+    );
+    expect((await json(await routes.overview(get(root)))).body.overview.roles.generate.model).toBe(
+      'auto/best-vision',
+    );
+  });
+
+  it('makes images work for a model the catalog does not list (resolveModel sees the flags)', async () => {
+    const { routes, root } = await connected();
+    await routes.putRoles(send('PUT', { roles: ROLES }, root));
+    const { resolveModel } = await import('@/lib/server/resolve-model');
+    const generate = await resolveModel({ stage: 'scene-content:quiz' });
+    expect(generate.modelString).toBe('omniroute:auto/best-vision');
+    expect(generate.modelInfo?.capabilities?.vision).toBe(true);
+    expect(generate.modelInfo?.contextWindow).toBe(131072);
+    const chat = await resolveModel({ stage: 'pbl-chat' });
+    expect(chat.modelInfo?.capabilities?.vision).toBe(false);
+    const byDefault = await resolveModel({});
+    expect(byDefault.modelString).toBe('omniroute:auto/best-chat');
+    expect(byDefault.managedKey).toBe(true);
+  });
+
+  it('saves a second time (versions move on) and keeps a route set in the advanced area', async () => {
+    const { routes, root, pool } = await connected();
+    await routes.putRoles(send('PUT', { roles: ROLES }, root));
+    await pool.query(
+      `INSERT INTO model_routing (stage, value, updated_by) VALUES ('scene-content:quiz', '"openai:gpt-5"'::jsonb, 'x')`,
+    );
+    const again = { ...ROLES, chat: { model: 'premium', vision: false, tools: false } };
+    expect((await routes.putRoles(send('PUT', { roles: again }, root))).status).toBe(200);
+    const quiz = await pool.query(
+      `SELECT value FROM model_routing WHERE stage = 'scene-content:quiz'`,
+    );
+    expect((quiz.rows[0] as { value: string }).value).toBe('openai:gpt-5');
+    expect((await json(await routes.overview(get(root)))).body.overview.roles.chat.model).toBe(
+      'premium',
+    );
+  });
+
+  it('refuses a missing role, bad fields and a body that is not roles, and writes nothing', async () => {
+    const { routes, root, pool } = await connected();
+    const attempt = async (roles: unknown) =>
+      (await routes.putRoles(send('PUT', { roles }, root))).status;
+    expect(await attempt({ ...ROLES, utility: undefined })).toBe(400);
+    expect(await attempt({ ...ROLES, chat: { model: '', vision: false, tools: true } })).toBe(400);
+    expect(await attempt({ ...ROLES, chat: { model: 'x', vision: 'no', tools: true } })).toBe(400);
+    expect(await attempt({ ...ROLES, chat: { model: 'x\ny', vision: false, tools: true } })).toBe(
+      400,
+    );
+    expect(
+      await attempt({
+        ...ROLES,
+        chat: { model: 'x', vision: false, tools: true, contextWindow: 0 },
+      }),
+    ).toBe(400);
+    expect(await attempt('everything')).toBe(400);
+    expect((await pool.query(`SELECT 1 FROM model_routing`)).rows).toHaveLength(0);
+  });
+
+  it('needs OmniRoute connected, an administrator and a request from this site', async () => {
+    const { routes, root, alice } = await arrange();
+    expect(await json(await routes.putRoles(send('PUT', { roles: ROLES }, root)))).toMatchObject({
+      status: 409,
+      body: { details: 'not-ready' },
+    });
+    expect((await routes.putRoles(send('PUT', { roles: ROLES }, alice))).status).toBe(403);
+    expect((await routes.putRoles(send('PUT', { roles: ROLES }))).status).toBe(401);
+    expect(
+      (
+        await routes.putRoles(
+          send('PUT', { roles: ROLES }, root, { 'sec-fetch-site': 'same-site' }),
+        )
+      ).status,
+    ).toBe(403);
   });
 });
