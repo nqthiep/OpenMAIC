@@ -163,6 +163,28 @@ export async function listConnections(
   });
 }
 
+/**
+ * Custom OpenAI-compatible providers ("nodes"): OmniRoute lists their models under the node's
+ * prefix, while their connections carry the node's id. Returns id → prefix; a failure gives an
+ * empty map, since only the single-model list suffers.
+ */
+export async function listNodePrefixes(session: Session): Promise<Map<string, string>> {
+  try {
+    const body = record(await manage(session, 'GET', '/api/provider-nodes'));
+    const nodes = Array.isArray(body.nodes) ? body.nodes : [];
+    return new Map(
+      nodes.flatMap((raw) => {
+        const node = record(raw);
+        const id = text(node.id);
+        const prefix = text(node.prefix);
+        return id && prefix ? [[id, prefix] as const] : [];
+      }),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
 export interface KeyRecord {
   id: string;
   name: string;

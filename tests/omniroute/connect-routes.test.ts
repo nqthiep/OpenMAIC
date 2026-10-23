@@ -49,6 +49,7 @@ beforeEach(async () => {
   fake.connections = [];
   fake.keys = [];
   fake.models = [];
+  fake.nodes = [];
   fake.calls = [];
   fake.failChat = false;
   fake.password = ADMIN_PASSWORD;
@@ -573,6 +574,31 @@ describe('models', () => {
     const response = await routes.models(get(root));
     expect(response.status).toBe(503);
     expect(response.headers.get('retry-after')).toBeTruthy();
+  });
+
+  it('lists the models of a custom OpenAI-compatible provider under its prefix', async () => {
+    const { routes, root } = await arrange();
+    fake.connections = [
+      connection('c-node', { provider: 'openai-compatible-chat-abc', name: 'Our server' }),
+      connection('c-other', { provider: 'openai-compatible-chat-xyz', name: 'Another' }),
+    ];
+    fake.nodes = [
+      { id: 'openai-compatible-chat-abc', prefix: 'ours' },
+      { id: 'openai-compatible-chat-xyz', prefix: 'theirs' },
+    ];
+    fake.models = [
+      model('auto/best-chat'),
+      model('ours/llama', { owned_by: 'ours' }),
+      model('theirs/other', { owned_by: 'theirs' }),
+    ];
+    await routes.connect(
+      send('POST', { connectionIds: ['c-node'], noLog: true, dailyLimitUsd: null }, root),
+    );
+    const { body } = await json(await routes.models(get(root)));
+    expect(body.items.map((item: { id: string }) => item.id)).toEqual([
+      'auto/best-chat',
+      'ours/llama',
+    ]);
   });
 
   it('needs OmniRoute connected, and an administrator', async () => {

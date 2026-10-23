@@ -38,6 +38,7 @@ export interface FakeOmniRoute {
   connections: FakeConnection[];
   keys: FakeKey[];
   models: Record<string, unknown>[];
+  nodes: { id: string; prefix: string }[];
   calls: FakeCall[];
   failChat: boolean;
   close: () => Promise<void>;
@@ -65,6 +66,7 @@ export async function startFakeOmniRoute(password: string): Promise<FakeOmniRout
     connections: [],
     keys: [],
     models: [],
+    nodes: [],
     calls: [],
     failChat: false,
     close: () => new Promise((resolve) => server.close(() => resolve())),
@@ -115,6 +117,7 @@ export async function startFakeOmniRoute(password: string): Promise<FakeOmniRout
     if (url.pathname === '/api/providers') {
       return send(200, { connections: fake.connections, total: fake.connections.length });
     }
+    if (url.pathname === '/api/provider-nodes') return send(200, { nodes: fake.nodes });
     if (url.pathname === '/api/keys' && method === 'GET') {
       const keys = fake.keys.map((key) => ({ ...key, key: `${key.key.slice(0, 6)}…` }));
       return send(200, { keys, total: keys.length, allowKeyReveal: false });

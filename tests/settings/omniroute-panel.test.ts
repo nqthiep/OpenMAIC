@@ -708,6 +708,31 @@ describe('the OmniRoute panel', () => {
     expect(mocks.success).toHaveBeenCalledWith('admin.omniroute.step3.saved');
   });
 
+  it('step 3: a combo shows only the images box, and is saved with tools assumed', async () => {
+    const { OmniRoutePanel } = await fresh();
+    installRoutes({
+      overview: () => ok({ overview: overview('ready', { key: KEY }) }),
+      models: () => ok(modelsAnswer()),
+      roles: () => ok({ success: true, roles: {} }),
+    });
+    await mountPanel(OmniRoutePanel);
+    for (const role of ['generate', 'chat', 'grade', 'utility']) {
+      choose(document.querySelector<HTMLSelectElement>(`#omni-role-${role}`)!, 'combo/premium');
+    }
+    expect(document.body.textContent).toContain('admin.omniroute.chip.visionToggle');
+    expect(document.body.textContent).not.toContain('toolsToggle');
+    await act(async () => {
+      buttonIn(document.body, 'admin.omniroute.step3.save')!.click();
+    });
+    await flush();
+    const call = mocks.fetch.mock.calls.find(([url]) => url === '/api/admin/omniroute/roles')!;
+    expect(JSON.parse(call[1].body as string).roles.chat).toEqual({
+      model: 'combo/premium',
+      vision: false,
+      tools: true,
+    });
+  });
+
   it('step 3: a saved row can be tested, showing the latency or the failure', async () => {
     const { OmniRoutePanel } = await fresh();
     let healthy = true;

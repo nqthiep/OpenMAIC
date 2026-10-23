@@ -2995,8 +2995,7 @@
       "chip": {
         "vision": "image",
         "tools": "tools",
-        "visionToggle": "This model reads images",
-        "toolsToggle": "This model can call tools"
+        "visionToggle": "This model reads images"
       },
       "test": {
         "run": "Test",

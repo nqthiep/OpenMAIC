@@ -4,6 +4,7 @@ import {
   findKey,
   listConnections,
   listModels,
+  listNodePrefixes,
   openSession,
   OmniRouteError,
 } from '@/lib/server/omniroute/client';
@@ -29,14 +30,18 @@ export async function GET(request: Request): Promise<Response> {
       const apiKey = resolveApiKey(PROVIDER_ID, '');
       if (!apiKey) throw new OmniRouteError('not-ready', 'Connect OmniRoute first');
       const session = await openSession(config);
-      const [connections, key, raw] = await Promise.all([
+      const [connections, key, raw, nodes] = await Promise.all([
         listConnections(session),
         findKey(session),
         listModels(config, apiKey),
+        listNodePrefixes(session),
       ]);
       const allowed = new Set(key?.connectionIds ?? []);
+      // The owner a model is listed under: the provider id, or the prefix of a custom provider.
       const providers = new Set(
-        connections.filter((c) => c.active && allowed.has(c.id)).map((c) => c.provider),
+        connections
+          .filter((c) => c.active && allowed.has(c.id))
+          .flatMap((c) => [c.provider, nodes.get(c.provider) ?? c.provider]),
       );
       const items = buildItems(raw, providers);
       return apiSuccess({ items, presets: buildPresets(items) });

@@ -2995,8 +2995,7 @@
       "chip": {
         "vision": "ảnh",
         "tools": "công cụ",
-        "visionToggle": "Model này đọc được ảnh",
-        "toolsToggle": "Model này gọi được công cụ"
+        "visionToggle": "Model này đọc được ảnh"
       },
       "test": {
         "run": "Kiểm tra",

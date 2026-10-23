@@ -135,12 +135,12 @@ function parseDailyLimit(text: string): number | null {
 /** One role's editable choice: the model id plus the two flags the app should assume. */
 type Draft = { model: string; vision: boolean; tools: boolean };
 
-/** A draft from a stored choice; a role never chosen starts empty with both flags off. */
+/** A draft from a stored choice; a role never chosen starts empty: no images, tools assumed. */
 function draftOf(choice: RoleChoice | undefined): Draft {
   return {
     model: choice?.model ?? '',
     vision: choice?.vision ?? false,
-    tools: choice?.tools ?? false,
+    tools: choice?.tools ?? true,
   };
 }
 
@@ -623,9 +623,9 @@ function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onRel
       ...previous,
       [role]: {
         model: id,
-        // A model OmniRoute says nothing about keeps the row's stored flags, false if there are none.
+        // A model OmniRoute says nothing about keeps the row's stored flags (no images, tools assumed).
         vision: item?.vision ?? stored?.vision ?? false,
-        tools: item?.tools ?? stored?.tools ?? false,
+        tools: item?.tools ?? stored?.tools ?? true,
       },
     }));
     setMissing((previous) => previous.filter((missingRole) => missingRole !== role));
@@ -713,7 +713,7 @@ function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onRel
         const { grouped, kept } = selectOptions(models, draft.model);
         // true → a chip, false → nothing, null → OmniRoute does not say: a box the admin ticks.
         const vision = item ? item.vision : draft.model ? null : undefined;
-        const tools = item ? item.tools : draft.model ? null : undefined;
+        const tools = item?.tools;
         const result = testResult[role];
         return (
           <div key={role} className="flex flex-col gap-2 rounded-lg border p-3">
@@ -723,7 +723,7 @@ function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onRel
               </Label>
               <select
                 id={`omni-role-${role}`}
-                className={cn(SELECT_CLASS, 'max-w-64 flex-1')}
+                className={cn(SELECT_CLASS, 'min-w-44 max-w-64 flex-1')}
                 value={draft.model}
                 onChange={(event) => pickModel(role, event.target.value)}
               >
@@ -762,21 +762,6 @@ function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onRel
                     }
                   />
                   {t('admin.omniroute.chip.visionToggle')}
-                </label>
-              ) : null}
-              {tools === null ? (
-                <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={draft.tools}
-                    onChange={(event) =>
-                      setChoices((previous) => ({
-                        ...previous,
-                        [role]: { ...previous[role], tools: event.target.checked },
-                      }))
-                    }
-                  />
-                  {t('admin.omniroute.chip.toolsToggle')}
                 </label>
               ) : null}
               {savedRoles[role] ? (
