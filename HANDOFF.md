@@ -57,6 +57,28 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - `docker compose up -d`, then sign in as an administrator and open the Settings popup, OmniRoute: expected the three steps, not the "not connected" card, with nothing about OmniRoute in `.env`.
 - `ops/omniroute/smoke.sh <dashboard url> --internal`: expected no FAIL.
 
+## Assignment: Commit, push and deploy the SEO and home-page work to the VPS
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "Commit và push và deploy trên vps của tôi"
+- Assignment status: Done
+- Branch and commit: `it-math` @ `c30caf76`, pushed: yes. VPS `~/OpenMAIC` is at the same commit.
+- Last updated: 2026-10-23 17:45 UTC (VPS clock)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Commit and push only the SEO and home-page changes | Done | `c30caf76` pushed (`9780caca..c30caf76`). Left out on purpose: `components/settings/omniroute-panel.tsx`, `server-credential-card.tsx`, `tests/settings/omniroute-panel.test.ts` and the `advanced` key removal in the locale files (another session's work in progress), `.omo/`, `openmaic.local.yml`, the two broken `tests/security/*` files. Staged tree tested in a copy: `check-i18n-keys` passed, `vitest tests/home tests/seo tests/i18n tests/lib/brand` 29 files / 266 tests passed |
+| 2 | Find the VPS | Done | `15.235.103.172` is the only host besides github.com in `~/.ssh/known_hosts`; key login as `ubuntu` worked and `~/OpenMAIC` there has origin `https://github.com/nqthiep/OpenMAIC.git`. The IP and user were not in this file (it uses placeholders) |
+| 3 | Backup before deploy | Done | `pg_dump` to `~/backups/pre-deploy-20261023T173443Z.sql.gz` on the VPS (7 KB, `gzip -t` ok, 44 `CREATE TABLE`). The 6-hourly backup job was not run by hand |
+| 4 | Update the VPS checkout | Done | `git merge --ff-only origin/it-math`: `98c9d148` -> `c30caf76` (12 commits: the SEO work, `9780caca` pending changes of several sessions, the OmniRoute three-step panel) |
+| 5 | Rebuild and restart only the app | Done | `docker compose --profile server-persistence up -d --build openmaic`. The new `docker-compose.yml` no longer keeps OmniRoute behind a profile, so a plain `up` would also start OmniRoute, its gate and a 1.95 GB image on a 3.7 GB / 9 GB-free machine; `--dry-run` showed only `openmaic` would be recreated (plus the empty volume `omniroute-secrets`). Build finished, exit 0 |
+| 6 | Verify | Done | `docker compose ps`: app Up, restarts 0; Postgres untouched (Up 6 h, healthy). `curl localhost:3000/api/health` and `https://khaitam.ai.vn/api/health`: `status ok`. Postgres has the new `accounts.terms_version`, `terms_accepted_at` and the table `membership_periods`; 1 account. App log: no error in the last 10 min. Public (Googlebot UA): `/`, `/catalog`, `/privacy`, `/terms`, `/robots.txt`, `/sitemap.xml`, `/llms.txt` 200; home has `lang="vi-VN"`, the new title, one h1, FAQ text, 2 JSON-LD blocks and the canonical `Link` header; OG image 200 (184782 bytes) |
+
+### Not done / to watch
+- OmniRoute is not running on the VPS (by design here). Its dashboard (`omniroute.khaitam.ai.vn`) needs a Cloudflare Tunnel hostname and the compose services; starting them needs about 450 MB more RAM [Inference from the earlier measurement in the OmniRoute assignment].
+- Disk on the VPS: 9.1 GB free after the build (76% used); every build leaves layers: `docker image prune` is the owner's call.
+- Not checked: signing in as the admin, the new terms/consent flow, and the OmniRoute panel in the browser on production.
+
 ## Assignment: Bring the good practices of astra-ai.co to khaitam.ai.vn (outcome promise first)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Hãy học những điều tốt của họ và mang sang khaitam.ai.vn. Tôi thấy Lời hứa chính “Ôn thi nhanh gấp 2 lần với AI” rất cụ thể, gây ấn tượng mạnh, người truy cập đọc được sẽ tò mò và muốn thử luôn. Còn khaitam mới chỉ có khẩu hiệu thương hiệu mà thôi. Của họ đúng là \"bán cái khách hàng cần, không bán cái mình có\", còn của mình là \"bán cái mình có\"."
