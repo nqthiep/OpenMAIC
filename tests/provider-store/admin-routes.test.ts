@@ -7,8 +7,8 @@ import { ensureAccountSchema } from '@/lib/server/accounts/store';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 const PASSWORD = 'correct horse battery staple';
-const ROOT = { username: 'root', password: PASSWORD };
-const ALICE = { username: 'alice', password: PASSWORD };
+const ROOT = { username: 'root', password: PASSWORD, acceptedTerms: true };
+const ALICE = { username: 'alice', password: PASSWORD, acceptedTerms: true };
 const ORIGIN = 'http://localhost';
 const THROTTLE_KEY = Symbol.for('openmaic.accounts.loginThrottle');
 const MASTER_KEY = randomBytes(32).toString('base64');
@@ -331,6 +331,38 @@ describe('provider admin routes: access and edge cases', () => {
       ),
     );
     expect(response).toMatchObject({ status: 409, body: { errorCode: 'SECRET_UNREADABLE' } });
+  });
+
+  it('keeps what is known about a route when a card saves the same model, and drops it for another', async () => {
+    const { routes, root } = await arrange();
+    const known = {
+      model: 'omniroute:auto/best-vision',
+      vision: true,
+      tools: true,
+      contextWindow: 131072,
+    };
+    await routes.routePut(
+      jsonRequest('PUT', { stage: 'scene-content', value: known, expectedVersion: 0 }, root),
+    );
+    expect(routes.currentSnapshot().routing.routes['scene-content']).toEqual(known);
+    await routes.routePut(
+      jsonRequest(
+        'PUT',
+        { stage: 'scene-content', value: 'omniroute:auto/best-vision', expectedVersion: 1 },
+        root,
+      ),
+    );
+    expect(routes.currentSnapshot().routing.routes['scene-content']).toEqual(known);
+    await routes.routePut(
+      jsonRequest(
+        'PUT',
+        { stage: 'scene-content', value: 'omniroute:auto/best-chat', expectedVersion: 2 },
+        root,
+      ),
+    );
+    expect(routes.currentSnapshot().routing.routes['scene-content']).toBe(
+      'omniroute:auto/best-chat',
+    );
   });
 
   it('refuses a stale route delete', async () => {

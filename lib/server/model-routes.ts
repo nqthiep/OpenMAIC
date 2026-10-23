@@ -69,6 +69,14 @@ export interface StageRoute {
    */
   contextWindow?: number;
   /**
+   * What the app should assume about a model that has no entry in its provider catalog (a gateway
+   * such as OmniRoute lists none): whether images may be sent to it and whether it can call
+   * tools. `resolveModel` turns these, with `contextWindow`, into the model info the routes read.
+   * Never applied to a model the catalog already describes.
+   */
+  vision?: boolean;
+  tools?: boolean;
+  /**
    * Full thinking config for this stage (the unified ThinkingConfig abstraction:
    * mode / effort / level / enabled / budgetTokens / excludeReasoningOutput).
    * Passed through to callLLM, which normalizes it against the model's capability.
@@ -211,6 +219,14 @@ export function parseRouteValue(key: string, value: unknown): StageRoute | undef
         log.warn(`Invalid contextWindow for stage "${key}" in the model routes; ignored.`);
       }
     }
+    for (const flag of ['vision', 'tools'] as const) {
+      if (obj[flag] === undefined) continue;
+      if (typeof obj[flag] === 'boolean') route[flag] = obj[flag];
+      else
+        log.warn(
+          `Invalid ${flag} for stage "${key}" in the model routes ignored (must be boolean).`,
+        );
+    }
     return route;
   }
   log.warn(`Invalid route value for stage "${key}" in the model routes ignored.`);
@@ -240,6 +256,13 @@ function loadRoutes(): Record<string, StageRoute> {
 /** The default model string (`provider:model`), or undefined when none is set. */
 export function getDefaultModel(): string | undefined {
   return currentSnapshot().routing.defaultModel;
+}
+
+/** The default model with what is known about it (`vision`, `tools`, `contextWindow`), or undefined. */
+export function getDefaultRoute(): StageRoute | undefined {
+  const { defaultModel, defaultValue } = currentSnapshot().routing;
+  if (!defaultModel) return undefined;
+  return parseRouteValue('default', defaultValue ?? defaultModel);
 }
 
 /**

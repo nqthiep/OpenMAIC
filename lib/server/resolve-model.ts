@@ -7,7 +7,7 @@
 
 import type { NextRequest } from 'next/server';
 import { getModel, getProvider, parseModelString, type ModelWithInfo } from '@/lib/ai/providers';
-import type { ProviderType, ThinkingConfig } from '@/lib/types/provider';
+import type { ModelInfo, ProviderType, ThinkingConfig } from '@/lib/types/provider';
 import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import {
   isServerConfiguredProvider,
@@ -17,7 +17,13 @@ import {
 } from '@/lib/server/provider-config';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { fetchWithRedirectValidation } from '@/lib/server/fetch-with-redirect-validation';
-import { getDefaultModel, getStageRoute, type LlmStage } from '@/lib/server/model-routes';
+import {
+  getDefaultModel,
+  getDefaultRoute,
+  getStageRoute,
+  type LlmStage,
+  type StageRoute,
+} from '@/lib/server/model-routes';
 
 export interface ResolvedModel extends ModelWithInfo {
   /** True when the operator's key is in use. Its upstream error text must not reach a visitor. */
@@ -34,6 +40,32 @@ export interface ResolvedModel extends ModelWithInfo {
   baseUrl?: string;
   /** Optional per-request thinking configuration from the client. */
   thinkingConfig?: ThinkingConfig;
+}
+
+/**
+ * Model info for a model the provider catalog does not describe (a gateway lists none), from what
+ * the route that picked it says. The catalog wins whenever it knows the model, and a route only
+ * speaks for its own model string.
+ */
+function modelInfoFromRoute(
+  route: StageRoute | undefined,
+  modelString: string,
+  modelId: string,
+): ModelInfo | null {
+  if (!route || route.model !== modelString) return null;
+  if (
+    route.vision === undefined &&
+    route.tools === undefined &&
+    route.contextWindow === undefined
+  ) {
+    return null;
+  }
+  return {
+    id: modelId,
+    name: modelId,
+    ...(route.contextWindow ? { contextWindow: route.contextWindow } : {}),
+    capabilities: { streaming: true, vision: route.vision ?? false, tools: route.tools ?? false },
+  };
 }
 
 /**
@@ -119,7 +151,7 @@ export async function resolveModel(params: {
   const apiKey = resolveApiKey(providerId, clientApiKey || '');
   const baseUrl = resolveBaseUrl(providerId, clientBaseUrl);
   const proxy = resolveProxy(providerId);
-  const { model, modelInfo } = getModel({
+  const { model, modelInfo: catalogInfo } = getModel({
     providerId,
     modelId,
     apiKey,
@@ -141,6 +173,10 @@ export async function resolveModel(params: {
   const thinkingConfig: ThinkingConfig | undefined = routed
     ? stageRoute?.thinking
     : params.thinkingConfig;
+
+  // The route that chose this model, if one did: the stage's, or the default model's.
+  const chosenBy = stageModel ? stageRoute : params.modelString ? undefined : getDefaultRoute();
+  const modelInfo = catalogInfo ?? modelInfoFromRoute(chosenBy, modelString, modelId);
 
   return {
     model,

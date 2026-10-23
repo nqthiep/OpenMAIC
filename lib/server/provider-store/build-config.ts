@@ -103,9 +103,12 @@ export function buildSnapshot(
 
   const routes: Record<string, unknown> = {};
   let defaultModel: string | undefined;
+  let defaultValue: unknown;
   for (const row of routing) {
-    if (row.stage === DEFAULT_MODEL_STAGE) defaultModel = defaultModelOf(row.value);
-    else routes[row.stage] = row.value;
+    if (row.stage === DEFAULT_MODEL_STAGE) {
+      defaultModel = defaultModelOf(row.value);
+      defaultValue = row.value;
+    } else routes[row.stage] = row.value;
   }
-  return { config, routing: { defaultModel, routes }, unreadable: [...unreadable] };
+  return { config, routing: { defaultModel, defaultValue, routes }, unreadable: [...unreadable] };
 }

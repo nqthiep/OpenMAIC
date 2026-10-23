@@ -23,6 +23,22 @@ function toStored(route: StageRoute): unknown {
   return Object.keys(rest).length === 0 ? model : route;
 }
 
+/**
+ * What to store for a model the administrator sets with just its name (the generic cards). When
+ * the stored route already names that model and carries more (`vision`, `tools`, `contextWindow`,
+ * `thinking`), the route is kept as it is; a different model starts clean, since those facts
+ * belonged to the old one.
+ */
+function keepWhatIsKnown(stored: unknown, current: unknown): unknown {
+  const name = typeof stored === 'string' ? stored : (stored as { model?: unknown })?.model;
+  const kept =
+    current && typeof current === 'object' && !Array.isArray(current)
+      ? (current as { model?: unknown })
+      : undefined;
+  const bare = typeof stored === 'string' || Object.keys(stored as object).length === 1;
+  return bare && kept && kept.model === name && Object.keys(kept).length > 1 ? kept : stored;
+}
+
 /** The reason a model string cannot be used, or undefined. It must be `provider:model` for a known provider. */
 function modelProblem(model: string): string | undefined {
   if (model.length > 200) return 'The model is too long';
@@ -65,6 +81,8 @@ export async function PUT(request: Request): Promise<Response> {
         if (problem) return invalid(problem);
         stored = toStored(route);
       }
+      const current = (await listRouting(ctx.db)).find((row) => row.stage === stage);
+      stored = keepWhatIsKnown(stored, current?.value);
       try {
         await saveRouting(ctx.db, {
           stage,

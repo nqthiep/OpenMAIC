@@ -26,6 +26,8 @@ export interface ProviderSpec {
   webSearch?: SectionSpec;
   disabled?: Partial<Record<CapabilitySection, string[]>>;
   defaultModel?: string;
+  /** The stored default as an object (`{ model, vision, ... }`); wins over `defaultModel` for flags. */
+  defaultValue?: unknown;
   routes?: Record<string, unknown>;
 }
 
@@ -53,7 +55,11 @@ export function useProviders(spec: ProviderSpec = {}): void {
   setProviderSnapshot({
     ...snapshot,
     config,
-    routing: { defaultModel: spec.defaultModel, routes: spec.routes ?? {} },
+    routing: {
+      defaultModel: spec.defaultModel,
+      defaultValue: spec.defaultValue ?? spec.defaultModel,
+      routes: spec.routes ?? {},
+    },
   });
 }
 

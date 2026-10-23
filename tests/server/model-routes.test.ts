@@ -397,6 +397,39 @@ describe('model-routes', () => {
     expect(getStageRoute('scene-content:slide')).toEqual({ model: 'openai:gpt-5.4-mini' });
   });
 
+  it('keeps vision and tools on an object route and ignores values that are not booleans', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    useProviders({
+      routes: {
+        'scene-content': { model: 'omniroute:auto/best-vision', vision: true, tools: false },
+        'pbl-chat': { model: 'omniroute:auto/best-chat', vision: 'yes', tools: 1 },
+      },
+    });
+    const { getStageRoute } = await import('@/lib/server/model-routes');
+    expect(getStageRoute('scene-content')).toEqual({
+      model: 'omniroute:auto/best-vision',
+      vision: true,
+      tools: false,
+    });
+    expect(getStageRoute('pbl-chat')).toEqual({ model: 'omniroute:auto/best-chat' });
+  });
+
+  it('getDefaultRoute returns the default model with what is known about it', async () => {
+    const { getDefaultRoute } = await import('@/lib/server/model-routes');
+    expect(getDefaultRoute()).toBeUndefined();
+    useProviders({ defaultModel: 'openai:gpt-5.4-mini' });
+    expect(getDefaultRoute()).toEqual({ model: 'openai:gpt-5.4-mini' });
+    useProviders({
+      defaultModel: 'omniroute:auto/best-chat',
+      defaultValue: { model: 'omniroute:auto/best-chat', tools: true, contextWindow: 65536 },
+    });
+    expect(getDefaultRoute()).toEqual({
+      model: 'omniroute:auto/best-chat',
+      tools: true,
+      contextWindow: 65536,
+    });
+  });
+
   it('exposes the routable stage registry', async () => {
     const { LLM_STAGES } = await import('@/lib/server/model-routes');
     expect(LLM_STAGES).toEqual(

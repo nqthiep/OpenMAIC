@@ -13,6 +13,7 @@ import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 const mocks = vi.hoisted(() => ({
   getModelCalls: [] as Array<Record<string, unknown>>,
   serverManaged: false,
+  catalogInfo: undefined as unknown,
 }));
 
 vi.mock('@/lib/ai/providers', async (importOriginal) => {
@@ -21,7 +22,7 @@ vi.mock('@/lib/ai/providers', async (importOriginal) => {
     ...actual,
     getModel: (args: Record<string, unknown>) => {
       mocks.getModelCalls.push(args);
-      return { model: { id: args.modelId }, modelInfo: undefined };
+      return { model: { id: args.modelId }, modelInfo: mocks.catalogInfo };
     },
   };
 });
@@ -42,6 +43,7 @@ describe('resolveModel — per-stage resolution order', () => {
     vi.resetModules();
     mocks.getModelCalls.length = 0;
     mocks.serverManaged = false;
+    mocks.catalogInfo = undefined;
     clearProviders();
   });
 
@@ -275,6 +277,56 @@ describe('resolveModel — per-stage resolution order', () => {
       thinkingConfig: { effort: 'medium' },
     });
     expect(r.thinkingConfig).toEqual({ effort: 'medium' });
+  });
+
+  describe('model info for a model the catalog does not describe', () => {
+    const route = {
+      model: 'omniroute:auto/best-vision',
+      vision: true,
+      tools: true,
+      contextWindow: 131072,
+    };
+
+    it('takes vision, tools and context window from the stage route', async () => {
+      useProviders({ routes: { 'scene-content': route } });
+      const { resolveModel } = await import('@/lib/server/resolve-model');
+      const r = await resolveModel({ stage: 'scene-content' });
+      expect(r.modelId).toBe('auto/best-vision');
+      expect(r.modelInfo).toMatchObject({
+        id: 'auto/best-vision',
+        contextWindow: 131072,
+        capabilities: { vision: true, tools: true, streaming: true },
+      });
+    });
+
+    it('has no info when the route says nothing, or says it only for another model', async () => {
+      useProviders({ routes: { 'scene-content': 'omniroute:auto/best-vision' } });
+      const { resolveModel } = await import('@/lib/server/resolve-model');
+      expect((await resolveModel({ stage: 'scene-content' })).modelInfo).toBeNull();
+    });
+
+    it('lets the catalog win when it knows the model', async () => {
+      mocks.catalogInfo = { id: 'gpt-5.4', name: 'GPT', capabilities: { vision: false } };
+      useProviders({ routes: { 'scene-content': { ...route, model: 'openai:gpt-5.4' } } });
+      const { resolveModel } = await import('@/lib/server/resolve-model');
+      const r = await resolveModel({ stage: 'scene-content' });
+      expect(r.modelInfo).toBe(mocks.catalogInfo);
+    });
+
+    it('uses the default model flags only when the default model is the one in use', async () => {
+      useProviders({
+        defaultModel: 'omniroute:auto/best-chat',
+        defaultValue: { model: 'omniroute:auto/best-chat', tools: true },
+      });
+      const { resolveModel } = await import('@/lib/server/resolve-model');
+      const byDefault = await resolveModel({ stage: 'quiz-grade' });
+      expect(byDefault.modelInfo?.capabilities).toMatchObject({ tools: true, vision: false });
+      const byClient = await resolveModel({
+        stage: 'quiz-grade',
+        modelString: 'omniroute:auto/best-chat',
+      });
+      expect(byClient.modelInfo).toBeNull();
+    });
   });
 
   it('ignores stage routing entirely when no stage is passed', async () => {

@@ -54,6 +54,8 @@ export interface ServerConfig {
 /** The model for each routable stage and the default model, as stored (parsed by model-routes). */
 export interface RoutingConfig {
   defaultModel?: string;
+  /** The stored value of the default model: a string, or an object that also carries `vision`, `tools`, `contextWindow`. */
+  defaultValue?: unknown;
   /** Stage -> the stored value: a model string, or `{ model, api, contextWindow, thinking }`. */
   routes: Record<string, unknown>;
 }
