@@ -160,7 +160,7 @@ function ClassroomMock() {
           <div className="flex flex-col gap-3 border-l border-border/50 bg-white/40 p-3 dark:bg-white/[0.02]">
             <div className="flex items-start gap-2">
               <img
-                src="/avatars/teacher.png"
+                src="/avatars/teacher-sm.png"
                 alt=""
                 className="size-7 shrink-0 rounded-full object-cover"
               />

@@ -45,6 +45,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Keep <html lang> on the language shown, for screen readers and translation prompts.
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const setLocale = (newLocale: Locale) => {
     i18n.changeLanguage(newLocale);
     try {

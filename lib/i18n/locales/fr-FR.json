@@ -77,7 +77,7 @@
         },
         "f6": {
           "title": "À emporter",
-          "body": "Exportez un cours en page web, en fichier PowerPoint ou en vidéo."
+          "body": "Exportez un cours en page web ou en fichier PowerPoint."
         }
       },
       "previewsSubtitle": "Ouvrez ces cours dès maintenant. Aucun compte requis.",
@@ -85,7 +85,7 @@
         "p1": "Un quota mensuel d'IA pour créer vos propres cours",
         "p2": "Rejoindre des classes avec un code d'invitation",
         "p3": "Partager vos cours avec d'autres membres",
-        "p4": "Exporter vos cours en page web, PowerPoint ou vidéo"
+        "p4": "Exporter vos cours en page web ou PowerPoint"
       },
       "cta": {
         "title": "Envie de voir par vous-même ?",

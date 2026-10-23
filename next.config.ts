@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { siteOrigin } from './lib/brand/site-origin';
 
 const nextConfig: NextConfig = {
   output: process.env.VERCEL ? undefined : 'standalone',
@@ -54,6 +55,13 @@ const nextConfig: NextConfig = {
     const frameAncestors = extraAncestors ? `'self' ${extraAncestors}` : "'self'";
 
     return [
+      // The home is a client component and cannot export `metadata`, so its canonical URL is sent
+      // as a header (Google reads `Link: rel="canonical"`). Query strings such as `?learn=1` fold
+      // into the same URL.
+      {
+        source: '/',
+        headers: [{ key: 'Link', value: `<${siteOrigin()}/>; rel="canonical"` }],
+      },
       {
         source: '/(.*)',
         headers: [

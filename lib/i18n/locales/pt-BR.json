@@ -77,7 +77,7 @@
         },
         "f6": {
           "title": "Leve com você",
-          "body": "Exporte um curso como página da web, arquivo do PowerPoint ou vídeo."
+          "body": "Exporte um curso como página da web ou arquivo do PowerPoint."
         }
       },
       "previewsSubtitle": "Abra estes cursos agora mesmo. Não precisa de conta.",
@@ -85,7 +85,7 @@
         "p1": "Um limite mensal de IA para criar seus próprios cursos",
         "p2": "Entrar em turmas com um código de convite",
         "p3": "Compartilhar seus cursos com outros membros",
-        "p4": "Exportar cursos como página da web, PowerPoint ou vídeo"
+        "p4": "Exportar cursos como página da web ou PowerPoint"
       },
       "cta": {
         "title": "Quer ver por conta própria?",
