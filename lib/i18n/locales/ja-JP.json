@@ -10,11 +10,10 @@
     "close": "閉じる"
   },
   "home": {
-    "slogan": "しっかり理解して・自信を持って試験へ",
+    "slogan": "知識をひらく · 未来をつくる",
     "greetingWithName": "こんにちは、{{name}}さん",
     "guest": {
       "kicker": "AI は、あなたの学びのパートナー",
-      "title": "自分のペースで学べる、AI のサポート付き",
       "description": "講義、スライド、議論は AI の助けを借りて用意し、共有する前に人が確認します。まずは無料でお試しください。アカウントは不要です。",
       "signIn": "ログイン",
       "browseCatalog": "講座を探す",
@@ -38,6 +37,7 @@
       "membershipTitle": "会員になる",
       "membershipBody": "会員には毎月の利用枠があり、AI で講座を作成し、招待コードでクラスに参加し、他の会員と講座を共有できます。",
       "nav": {
+        "story": "Our story",
         "features": "機能",
         "how": "使い方",
         "previews": "試聴講座",
@@ -91,7 +91,7 @@
         "title": "まずは自分の目で確かめませんか？",
         "body": "無料の試聴講座を先にご覧いただくか、準備ができたらログインしてください。"
       },
-      "footerTagline": "ÔN THI · オープンソースプロジェクト OpenMAIC をベースに構築",
+      "footerTagline": "KHAITAM · オープンソースプロジェクト OpenMAIC をベースに構築",
       "trust": {
         "title": "AI を、慎重に使う",
         "subtitle": "AI をまだ信頼できないという方も多いと理解しています。信頼していただくために、次のことを大切にしています。",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "見てから決める",
           "body": "無料の試聴は誰でも利用でき、アカウントも義務も必要ありません。"
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "インタラクティブ優先モードを有効にして、より実践的なコンテンツを生成",
     "interactiveModeLabel": "インタラクティブモード",
     "advanced": "詳細設定",
-    "advancedHint": "詳細設定：モデル、ウェブ検索、画像・動画、インタラクティブモード、エージェント。標準では ÔN THI が内容に合ったモデルを選び、図解とインタラクティブな活動を加えます。"
+    "advancedHint": "詳細設定：モデル、ウェブ検索、画像・動画、インタラクティブモード、エージェント。標準では KHAITAM が内容に合ったモデルを選び、図解とインタラクティブな活動を加えます。"
   },
   "export": {
     "pptx": "PPTXエクスポート",
@@ -2104,7 +2143,7 @@
       "download": "ダウンロード",
       "detailFailed": "スキル詳細を読み込めませんでした",
       "contentLabel": "内容",
-      "builtinDetailNote": "このスキルは ÔN THI に同梱されています。他のエージェントワークスペースにインポートするにはダウンロードしてください。",
+      "builtinDetailNote": "このスキルは KHAITAM に同梱されています。他のエージェントワークスペースにインポートするにはダウンロードしてください。",
       "upload": "アップロード",
       "uploading": "アップロード中…",
       "uploadFailed": "スキルをアップロードできませんでした。ファイルを確認して再試行してください。",

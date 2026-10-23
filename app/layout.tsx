@@ -28,7 +28,7 @@ import { ProSwapWatcher } from '@/components/workbench/ProSwapWatcher';
 // `--font-sans` moves to globals.css since the family no longer comes from
 // next/font's generated class.
 import '@fontsource-variable/inter';
-// Brand font (ÔN THI guidelines, section 6): titles 600 to 700, text 400 to 500,
+// Brand font: titles 600 to 700, text 400 to 500,
 // labels and buttons 500 to 600. Static weights, each with its own latin,
 // latin-ext and vietnamese subsets; Inter above stays as the named fallback.
 import '@fontsource/be-vietnam-pro/400.css';
@@ -37,8 +37,18 @@ import '@fontsource/be-vietnam-pro/600.css';
 import '@fontsource/be-vietnam-pro/700.css';
 
 export const metadata: Metadata = {
+  // Absolute URL of the share image (`opengraph-image.png`) and of any other metadata asset:
+  // the public origin of this deployment, the brand's domain when none is set.
+  metadataBase: new URL(process.env.PUBLIC_APP_ORIGIN || `https://${DEFAULT_BRAND.domain}`),
   title: DEFAULT_BRAND.productName,
   description: DEFAULT_BRAND.description,
+  openGraph: {
+    title: DEFAULT_BRAND.productName,
+    description: DEFAULT_BRAND.description,
+    siteName: DEFAULT_BRAND.productName,
+    type: 'website',
+    locale: 'vi_VN',
+  },
 };
 
 export const viewport: Viewport = {

@@ -10,11 +10,10 @@
     "close": "Закрыть"
   },
   "home": {
-    "slogan": "Понимать глубоко · Уверенно идти на экзамен",
+    "slogan": "Открывать знания · Создавать будущее",
     "greetingWithName": "Привет, {{name}}",
     "guest": {
       "kicker": "ИИ как партнёр по учёбе",
-      "title": "Учитесь в своём темпе, а ИИ поможет",
       "description": "Уроки, слайды и обсуждения готовятся с помощью ИИ, а перед публикацией их проверяют люди. Сначала посмотрите бесплатные курсы. Учётная запись не нужна.",
       "signIn": "Войти",
       "browseCatalog": "Смотреть курсы",
@@ -38,6 +37,7 @@
       "membershipTitle": "Стать участником",
       "membershipBody": "Участники получают ежемесячный лимит на создание курсов с ИИ, могут вступать в классы по коду и делиться курсами с другими участниками.",
       "nav": {
+        "story": "Our story",
         "features": "Возможности",
         "how": "Как это работает",
         "previews": "Просмотры",
@@ -91,7 +91,7 @@
         "title": "Хотите убедиться сами?",
         "body": "Сначала откройте бесплатный курс или войдите, когда будете готовы."
       },
-      "footerTagline": "ÔN THI · создано на основе проекта OpenMAIC с открытым исходным кодом",
+      "footerTagline": "KHAITAM · создано на основе проекта OpenMAIC с открытым исходным кодом",
       "trust": {
         "title": "Осторожное использование ИИ",
         "subtitle": "Мы понимаем, что не все пока доверяют ИИ. Вот как мы стараемся заслужить ваше доверие.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "Сначала посмотрите",
           "body": "Бесплатные курсы открыты для всех, без учётной записи и обязательств."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "Включить интерактивный режим для более практического контента",
     "interactiveModeLabel": "Интерактивный режим",
     "advanced": "Расширенные",
-    "advancedHint": "Расширенные настройки: модель, веб-поиск, изображения/видео, интерактивный режим, агенты. По умолчанию ÔN THI сам выбирает подходящую запросу модель и добавляет иллюстрации и интерактивные задания."
+    "advancedHint": "Расширенные настройки: модель, веб-поиск, изображения/видео, интерактивный режим, агенты. По умолчанию KHAITAM сам выбирает подходящую запросу модель и добавляет иллюстрации и интерактивные задания."
   },
   "export": {
     "pptx": "Экспорт PPTX",
@@ -2104,7 +2143,7 @@
       "download": "Скачать",
       "detailFailed": "Не удалось загрузить сведения о навыке",
       "contentLabel": "Содержимое",
-      "builtinDetailNote": "Этот навык поставляется с ÔN THI. Скачайте его, чтобы импортировать в другое рабочее пространство агента.",
+      "builtinDetailNote": "Этот навык поставляется с KHAITAM. Скачайте его, чтобы импортировать в другое рабочее пространство агента.",
       "upload": "Загрузить",
       "uploading": "Загрузка…",
       "uploadFailed": "Не удалось загрузить навык. Проверьте файл и повторите попытку.",

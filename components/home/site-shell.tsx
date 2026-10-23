@@ -11,6 +11,7 @@ import { ThemeToggle } from '@/components/home/theme-toggle';
 import { BrandBand } from '@/components/home/brand-band';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useBrand } from '@/lib/brand/brand-context';
+import { BrandImage } from '@/components/brand/brand-image';
 import { useAccountSession } from '@/lib/capabilities/use-capabilities';
 import { isActiveNavLink, siteHomeHref, siteNavLinks } from '@/lib/home/site-nav';
 import { useI18n } from '@/lib/hooks/use-i18n';
@@ -18,7 +19,7 @@ import { cn } from '@/lib/utils';
 
 /** Frosted card surface shared by every panel on the visitor-facing pages. */
 export const GLASS =
-  'border border-brand-100/80 bg-white shadow-lg shadow-brand-800/[0.08] dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30';
+  'border border-brand-900/10 bg-white shadow-lg shadow-brand-900/[0.06] dark:border-brand-teal/30 dark:bg-brand-900/60 dark:shadow-black/30 dark:backdrop-blur-sm';
 
 /** One gradient per course card, so a row of courses does not look like copies of one another. */
 export const THUMBNAILS = [
@@ -122,7 +123,7 @@ export function SiteHeader({
           aria-label={brand.productName}
           className="shrink-0"
         >
-          <img src={brand.logoSrc} alt={brand.productName} className="h-7 w-auto" />
+          <BrandImage kind="logo" alt={brand.productName} className="h-7 w-auto" />
         </a>
         <nav aria-label={t('nav.main')} className="hidden min-w-0 items-center gap-1 md:flex">
           {links.map((link) => {
@@ -189,7 +190,7 @@ export function SiteHeader({
 }
 
 /**
- * The frame of a visitor-facing page: an optional blue band behind the first block, a sticky header
+ * The frame of a visitor-facing page: an optional navy band behind the first block, a sticky header
  * with the logo, optional anchor links and the language, theme and account controls, and the
  * footer. The home and the catalog both use it, so they look and behave as one product.
  */
@@ -203,7 +204,7 @@ export function SiteShell({
   nav?: ShellNavItem[];
   logoHref?: string;
   mainClassName?: string;
-  /** Height class of the blue band behind the first block; the band is left out when absent. */
+  /** Height class of the navy band behind the first block; the band is left out when absent. */
   bandClassName?: string;
   children: ReactNode;
 }) {
@@ -226,9 +227,25 @@ export function SiteShell({
       </main>
 
       <footer className="relative border-t border-border/40 py-8">
+        <div className="mx-auto mb-6 flex w-full max-w-6xl flex-col items-center gap-2 px-5 md:px-8">
+          <p className="flex w-full items-center gap-4 text-xs font-medium tracking-[0.3em] text-foreground">
+            <span
+              aria-hidden="true"
+              className="h-px flex-1 bg-gradient-to-r from-transparent to-border"
+            />
+            {brand.domain.toUpperCase()}
+            <span
+              aria-hidden="true"
+              className="h-px flex-1 bg-gradient-to-l from-transparent to-border"
+            />
+          </p>
+          <p className="eyebrow text-center text-[0.6875rem] text-muted-foreground">
+            {t('home.slogan')}
+          </p>
+        </div>
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 text-xs text-muted-foreground md:flex-row md:px-8">
           <span className="flex items-center gap-2">
-            <img src={brand.markSrc} alt="" className="size-5" />
+            <BrandImage kind="mark" alt="" className="size-5" />
             {t('home.guest.footerTagline')}
           </span>
           <nav className="flex items-center gap-5">

@@ -890,7 +890,7 @@ function ModelSettingsPopover({
                 'inline-flex h-8 min-w-0 items-center gap-1.5 rounded-full border px-2 text-xs font-medium transition-all',
                 'border-violet-200/70 bg-violet-50 text-violet-700 hover:bg-violet-100 dark:border-violet-800/70 dark:bg-violet-950/30 dark:text-violet-300',
                 currentModelId &&
-                  'shadow-[0_0_0_1px_rgba(37,99,235,0.12)] dark:shadow-[0_0_0_1px_rgba(96,165,250,0.16)]',
+                  'shadow-[0_0_0_1px_rgba(66,114,171,0.12)] dark:shadow-[0_0_0_1px_rgba(122,159,203,0.16)]',
               )}
             >
               {currentProviderIcon ? (

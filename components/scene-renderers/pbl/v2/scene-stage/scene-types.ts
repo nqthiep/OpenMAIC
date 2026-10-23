@@ -26,7 +26,7 @@ export interface SanitizedSceneVisual {
 }
 
 /** Neutral fallback palette (used when sceneVisual is absent/invalid). */
-const FALLBACK = { bg1: '#26244a', bg2: '#1a1934', accent: '#60a5fa' } as const;
+const FALLBACK = { bg1: '#26244a', bg2: '#1a1934', accent: '#7a9fcb' } as const;
 
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 

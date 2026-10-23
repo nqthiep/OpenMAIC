@@ -1,44 +1,68 @@
 /*
- * ÔN THI brand tokens (guidelines v1.0, sections 5, 6 and 7).
+ * KHAITAM brand tokens (brand board of 2026-10-22).
  *
  * This is the one place that names the brand colors. `globals.css` maps the
  * shadcn semantic tokens (`--primary`, `--ring`, ...) onto them; components
- * should use those tokens or the named utilities below (`bg-brand-600`,
- * `text-brand-800`, `bg-brand-yellow`), not hex values.
+ * should use those tokens or the named utilities below (`bg-brand-900`,
+ * `text-brand-700`, `bg-brand-yellow`), not hex values.
  *
  * Imported from `globals.css` so Tailwind sees the `@theme` block.
  */
 
 @theme {
-  /* Blue ramp. 600 is "Xanh tri thức" (primary, main call to action) and 800 is
-     "Xanh đậm" (headings, navigation). The other steps are tints and shades of
-     the same hue [Inference]: the guidelines name only these two. */
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #0b44aa;
-  --color-brand-900: #0a3580;
-  --color-brand-950: #08275c;
+  /* The four colors the board names:
+       Xanh đêm      #102541  brand-900 (also brand-ink)
+       Vàng khai mở  #F4C66D  brand-yellow
+       Xanh ngọc     #2E8278  brand-teal
+       Trắng giấy    #F3F0E8  brand-page
+     Everything else is derived from them [Inference].
 
-  /* "Vàng thành công": accent, badges, achievements. Not for text on white
-     (contrast 1.6:1): put dark text on it. */
-  --color-brand-yellow: #fbbf24;
+     The ramp is static: it does not change with `.dark`, and a lot of markup
+     (`bg-violet-600 text-white`) has no `dark:` variant. So the middle steps
+     500 and 600 stay light enough to show on the dark page and card (600 is
+     3.6:1 on the page, 3.1:1 on a card, and takes a white label at 5:1), while
+     700 to 950 are the navy. Which step a button uses is decided per theme by
+     the semantic tokens, not here. One cost of a single static step: as small text on the paper
+     page, 600 reads 4.4:1 (the old blue read 4.9:1), a little under AA. That is the `text-violet-600`
+     and `text-blue-600` of upstream markup; new code takes `brand-700` (6.4:1) for text. */
+  --color-brand-50: #f2f6fa;
+  --color-brand-100: #e1eaf3;
+  --color-brand-200: #c5d5e8;
+  --color-brand-300: #9db8d6;
+  --color-brand-400: #7a9fcb;
+  --color-brand-500: #5a88ba;
+  --color-brand-600: #4272ab;
+  --color-brand-700: #2f5887;
+  --color-brand-800: #1f416c;
+  --color-brand-900: #102541;
+  --color-brand-950: #0a1a2f;
 
-  /* Neutrals: text, notes, borders, page. */
-  --color-brand-ink: #1f2937;
-  --color-brand-mute: #667085;
-  --color-brand-line: #e5e7eb;
-  --color-brand-page: #f8fafc;
+  /* "Vàng khai mở": fills, underlines, badges, the sun, and text on navy. Never
+     text on the light page (1.4:1): put navy text on it. The name stays
+     `yellow` so the places that already use it need no edit. */
+  --color-brand-yellow: #f4c66d;
+
+  /* "Xanh ngọc": progress and success. A fill takes a white label (4.6:1). As
+     text it is too light on paper (4.0:1), so text uses `teal-ink` on a light
+     page and `mint` on a dark one. */
+  --color-brand-teal: #2e8278;
+  --color-brand-teal-ink: #23695f;
+  --color-brand-mint: #76d5c1;
+
+  /* "Hồng đào": the fourth tint of the icon tiles (steel, gold, teal, peach), sampled from the
+     brand board. A fill that takes navy text. */
+  --color-brand-peach: #f4cab1;
+
+  /* Neutrals: text, notes, borders, page ("Trắng giấy"). */
+  --color-brand-ink: #102541;
+  --color-brand-mute: #586274;
+  --color-brand-line: #ddd8cb;
+  --color-brand-page: #f3f0e8;
 
   /* The product's accent used to be violet. About a thousand `violet-*`,
      `purple-*` and `indigo-*` utilities in the app (and the vendored upstream code we keep
      merging) express "the accent", so the three palettes follow the brand ramp
-     instead of every call site being edited. A `violet-500` in markup is brand blue. For new code use `brand-*`. */
+     instead of every call site being edited. A `violet-500` in markup is a brand step. For new code use `brand-*`. */
   --color-violet-50: var(--color-brand-50);
   --color-violet-100: var(--color-brand-100);
   --color-violet-200: var(--color-brand-200);
@@ -72,18 +96,93 @@
   --color-indigo-700: var(--color-brand-700);
   --color-indigo-800: var(--color-brand-800);
   --color-indigo-900: var(--color-brand-900);
+
+  /* The neutrals of the app (`gray-*`, about 800 uses, and `slate-*`, about 250) run from
+     "Trắng giấy" to "Xanh đêm" instead of Tailwind's cool grays, so a `dark:bg-gray-900` is the
+     brand's night and a `bg-gray-100` is warm paper. 400 matches Tailwind's gray-400 on white
+     (2.5:1, placeholders). 500 is the muted text of the whole app and now sits on paper, not on
+     white: it is set so that it reads 4.7:1 on paper (4.6 on gray-100, 5.3 on white), as against
+     4.6 for Tailwind's gray-500 on its own page. On the dark page it is 3.4:1, which is enough for
+     the decorative uses it has there; muted text on dark takes `--muted-foreground` or 400. */
+  --color-gray-50: #f8f6f1;
+  --color-gray-100: #f1eee6;
+  --color-gray-200: #e3dfd3;
+  --color-gray-300: #cdcabf;
+  --color-gray-400: #9aa3b2;
+  --color-gray-500: #5e6c81;
+  --color-gray-600: #4a586e;
+  --color-gray-700: #36455d;
+  --color-gray-800: #1f3350;
+  --color-gray-900: #102541;
+  --color-gray-950: #08162b;
+  --color-slate-50: var(--color-gray-50);
+  --color-slate-100: var(--color-gray-100);
+  --color-slate-200: var(--color-gray-200);
+  --color-slate-300: var(--color-gray-300);
+  --color-slate-400: var(--color-gray-400);
+  --color-slate-500: var(--color-gray-500);
+  --color-slate-600: var(--color-gray-600);
+  --color-slate-700: var(--color-gray-700);
+  --color-slate-800: var(--color-gray-800);
+  --color-slate-900: var(--color-gray-900);
+  --color-slate-950: var(--color-gray-950);
+
+  /* Plain `blue-*` is the same accent in the settings panels, the roundtable and the
+     slide editor chrome (22 of its 24 files are upstream's), so it follows the ramp too. */
+  --color-blue-50: var(--color-brand-50);
+  --color-blue-100: var(--color-brand-100);
+  --color-blue-200: var(--color-brand-200);
+  --color-blue-300: var(--color-brand-300);
+  --color-blue-400: var(--color-brand-400);
+  --color-blue-500: var(--color-brand-500);
+  --color-blue-600: var(--color-brand-600);
+  --color-blue-700: var(--color-brand-700);
+  --color-blue-800: var(--color-brand-800);
+  --color-blue-900: var(--color-brand-900);
+  --color-blue-950: var(--color-brand-950);
 }
 
-/* The logo as a one-colour white mark, for use on the blue band. */
-.logo-on-brand {
-  filter: brightness(0) invert(1);
+/* The small uppercase label above a heading on the brand board ("CÂU CHUYỆN THƯƠNG HIỆU").
+   The caller sets the color. */
+@utility eyebrow {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-/* The color logo and mark are navy on a transparent background, which disappears
-   on a dark surface. There they take the one-color white version the guidelines
-   allow (section 4). No white tile: its percentage padding resolved against the
-   parent's width and blew a 20px mark up to a 54px white square. */
-.dark img[src='/brand/logo-horizontal.png'],
-.dark img[src='/brand/mark.png'] {
-  filter: brightness(0) invert(1);
+/* The logo and the mark come as two files, one for light surfaces (navy and
+   gold) and one for dark ones (paper and gold): see `BrandImage`. A CSS filter
+   would flatten the logo to one color and lose the gold dot. */
+
+/* The Pro workspace has its own tokens (`--ws-*`) in `components/workbench/workspace-shell.css`,
+   cut from Tailwind's slate. They are overridden here, with a selector one element stronger than
+   upstream's `.ws-root` and `.dark .ws-root`, so that file keeps upstream's values for these
+   lines and merges cleanly. Paper and "Xanh đêm" in the light theme, the night navies in the dark. */
+html .ws-root {
+  --ws-canvas-top: #f6f3ec;
+  --ws-canvas-bottom: #f3f0e8;
+  --ws-ink: #102541;
+  --ws-ink-soft: #35496a;
+  --ws-ink-mute: #586274;
+  --ws-ink-faint: #8794a8;
+  --ws-line: rgba(16, 37, 65, 0.11);
+  --ws-line-soft: rgba(16, 37, 65, 0.065);
+  --ws-tint: rgba(16, 37, 65, 0.055);
+  --ws-tint-strong: rgba(16, 37, 65, 0.09);
+  --ws-live: #2e8278;
+}
+
+html.dark .ws-root {
+  --ws-canvas-top: #04101e;
+  --ws-canvas-bottom: #08162b;
+  --ws-rail: rgba(16, 37, 65, 0.62);
+  --ws-surface: rgba(16, 37, 65, 0.78);
+  --ws-ink: #f3f0e8;
+  --ws-ink-soft: #c5d5e8;
+  --ws-ink-mute: #a3b1c6;
+  --ws-ink-faint: #6b7d99;
+  --ws-raised: #102541;
+  --ws-live: #76d5c1;
 }

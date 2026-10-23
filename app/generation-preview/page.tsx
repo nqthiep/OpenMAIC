@@ -1215,7 +1215,7 @@ function GenerationPreviewContent() {
   // Still loading session from sessionStorage
   if (!sessionLoaded) {
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#08162b] dark:to-brand-950 flex items-center justify-center p-4">
         <div className="text-center text-muted-foreground">
           <div className="size-8 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
@@ -1226,7 +1226,7 @@ function GenerationPreviewContent() {
   // No session found
   if (!session) {
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#08162b] dark:to-brand-950 flex items-center justify-center p-4">
         <Card className="p-8 max-w-md w-full">
           <div className="text-center space-y-4">
             <AlertCircle className="size-12 text-muted-foreground mx-auto" />
@@ -1273,7 +1273,7 @@ function GenerationPreviewContent() {
     const editorOutlines = session.sceneOutlines ?? streamingOutlines ?? [];
 
     return (
-      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex flex-col items-center p-4 relative overflow-hidden">
+      <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#08162b] dark:to-brand-950 flex flex-col items-center p-4 relative overflow-hidden">
         <BrandBand className="inset-x-0 top-0 h-[17rem]" />
         {leaveDialog}
         <motion.div
@@ -1350,7 +1350,7 @@ function GenerationPreviewContent() {
   }
 
   return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
+    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#08162b] dark:to-brand-950 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
       {/* Background Decor */}
       <BrandBand className="inset-x-0 top-0 h-[44vh]" />
       {leaveDialog}
@@ -1495,9 +1495,9 @@ function GenerationPreviewContent() {
                             type="button"
                             animate={{
                               boxShadow: [
-                                '0 0 0 0 rgba(251, 191, 36, 0), 0 0 0 0 rgba(251, 191, 36, 0)',
-                                '0 0 16px 4px rgba(251, 191, 36, 0.12), 0 0 4px 1px rgba(251, 191, 36, 0.08)',
-                                '0 0 0 0 rgba(251, 191, 36, 0), 0 0 0 0 rgba(251, 191, 36, 0)',
+                                '0 0 0 0 rgba(244, 198, 109, 0), 0 0 0 0 rgba(244, 198, 109, 0)',
+                                '0 0 16px 4px rgba(244, 198, 109, 0.12), 0 0 4px 1px rgba(244, 198, 109, 0.08)',
+                                '0 0 0 0 rgba(244, 198, 109, 0), 0 0 0 0 rgba(244, 198, 109, 0)',
                               ],
                             }}
                             transition={{
@@ -1590,7 +1590,7 @@ export default function GenerationPreviewPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#0b1220] dark:to-brand-950 flex items-center justify-center">
+        <div className="min-h-[100dvh] w-full bg-gradient-to-b from-brand-50 to-white dark:from-[#08162b] dark:to-brand-950 flex items-center justify-center">
           <div className="animate-pulse space-y-4 text-center">
             <div className="h-8 w-48 bg-muted rounded mx-auto" />
             <div className="h-4 w-64 bg-muted rounded mx-auto" />

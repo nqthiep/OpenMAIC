@@ -307,7 +307,7 @@ export function PresentationBubbleCard({
         buttonState &&
         buttonState !== 'none' &&
         (() => {
-          const barsColor = bubble.role === 'agent' ? '#3b82f6' : '#fbbf24';
+          const barsColor = bubble.role === 'agent' ? '#5a88ba' : '#f4c66d';
 
           if (buttonState === 'play') {
             return (

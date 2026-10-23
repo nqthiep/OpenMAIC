@@ -25,7 +25,7 @@ const TABS: { id: CommunityTab; icon: typeof Trophy }[] = [
 /**
  * The community: questions members asked on the slides of open courses, and the weekly
  * challenges. Every signed-in account reads it; members ask, answer, submit and vote. It shares
- * the catalog's frame (blue band, glass panels, the same membership request), and keeps the tab in
+ * the catalog's frame (navy band, glass panels, the same membership request), and keeps the tab in
  * `?tab=` so a link can open the challenges.
  */
 export default function CommunityPage() {

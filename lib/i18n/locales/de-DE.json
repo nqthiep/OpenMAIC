@@ -10,11 +10,10 @@
     "close": "Schließen"
   },
   "home": {
-    "slogan": "Wissen sicher verstehen · Selbstbewusst in die Prüfung",
+    "slogan": "Wissen erschließen · Zukunft gestalten",
     "greetingWithName": "Hallo, {{name}}",
     "guest": {
       "kicker": "KI als Lernpartner",
-      "title": "In Ihrem Tempo lernen, mit KI als Unterstützung",
       "description": "Lektionen, Folien und Diskussionen entstehen mit Hilfe von KI und werden von Menschen geprüft, bevor sie geteilt werden. Sehen Sie sich zuerst die kostenlosen Vorschauen an. Kein Konto nötig.",
       "signIn": "Anmelden",
       "browseCatalog": "Kurse durchsuchen",
@@ -38,6 +37,7 @@
       "membershipTitle": "Mitglied werden",
       "membershipBody": "Mitglieder erhalten ein monatliches Kontingent, um Kurse mit KI zu erstellen, per Code Klassen beizutreten und Kurse mit anderen Mitgliedern zu teilen.",
       "nav": {
+        "story": "Our story",
         "features": "Funktionen",
         "how": "So funktioniert es",
         "previews": "Vorschauen",
@@ -91,7 +91,7 @@
         "title": "Möchten Sie es selbst sehen?",
         "body": "Öffnen Sie zuerst eine kostenlose Vorschau oder melden Sie sich an, wenn Sie bereit sind."
       },
-      "footerTagline": "ÔN THI · basiert auf dem Open-Source-Projekt OpenMAIC",
+      "footerTagline": "KHAITAM · basiert auf dem Open-Source-Projekt OpenMAIC",
       "trust": {
         "title": "KI mit Sorgfalt einsetzen",
         "subtitle": "Wir wissen, dass nicht jeder der KI schon vertraut. So versuchen wir, Ihr Vertrauen zu verdienen.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "Erst ansehen, dann entscheiden",
           "body": "Kostenlose Vorschauen stehen allen offen, ohne Konto und ohne Verpflichtung."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "Aktiviere den interaktiven Modus, damit bevorzugt interaktive Inhalte erzeugt werden",
     "interactiveModeLabel": "Interaktiver Modus",
     "advanced": "Erweitert",
-    "advancedHint": "Erweiterte Optionen: Modell, Websuche, Bilder/Video, interaktiver Modus, Agenten. Standardmäßig wählt ÔN THI ein zur Anfrage passendes Modell und ergänzt Illustrationen und interaktive Aktivitäten."
+    "advancedHint": "Erweiterte Optionen: Modell, Websuche, Bilder/Video, interaktiver Modus, Agenten. Standardmäßig wählt KHAITAM ein zur Anfrage passendes Modell und ergänzt Illustrationen und interaktive Aktivitäten."
   },
   "export": {
     "pptx": "PPTX exportieren",
@@ -2104,7 +2143,7 @@
       "download": "Herunterladen",
       "detailFailed": "Die Skill-Details konnten nicht geladen werden",
       "contentLabel": "Inhalt",
-      "builtinDetailNote": "Dieser Skill ist in ÔN THI enthalten. Lade ihn herunter, um ihn in einen anderen Agenten-Arbeitsbereich zu importieren.",
+      "builtinDetailNote": "Dieser Skill ist in KHAITAM enthalten. Lade ihn herunter, um ihn in einen anderen Agenten-Arbeitsbereich zu importieren.",
       "upload": "Hochladen",
       "uploading": "Wird hochgeladen…",
       "uploadFailed": "Der Skill konnte nicht hochgeladen werden. Prüfe die Datei und versuche es erneut.",

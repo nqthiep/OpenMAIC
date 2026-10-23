@@ -52,7 +52,7 @@ export function ProBadge({ active, onToggle, className, testId }: ProBadgeProps)
         active
           ? [
               'border-violet-500/70 bg-violet-600 text-white',
-              'shadow-[0_0_0_3px_rgba(59,130,246,0.14),0_1px_6px_rgba(29,78,216,0.35)]',
+              'shadow-[0_0_0_3px_rgba(90,136,186,0.14),0_1px_6px_rgba(47,88,135,0.35)]',
               'dark:border-violet-400/60 dark:bg-violet-500',
             ]
           : [

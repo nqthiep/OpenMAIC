@@ -82,7 +82,7 @@ export function WorkspaceHome({
       aria-label={t('workspace.homeAria')}
       className="ws-canvas relative isolate flex min-w-0 flex-1 flex-col overflow-y-auto"
     >
-      {/* The brand's blue band behind the lockup, ending just below the composer's top edge so the
+      {/* The brand's navy band behind the lockup, ending just below the composer's top edge so the
           composer rises off it, as on `/`. Sized in the viewport units the first screen is centred
           in (`.ws-home-first`). */}
       <BrandBand className="-z-10 inset-x-0 top-0 h-[calc(48vh+56px)]" />
@@ -90,7 +90,7 @@ export function WorkspaceHome({
           plain button, not a second ProBadge: two elements answering to
           `pro-mode-exit` would be one testid too many. */}
       <div className="flex h-12 shrink-0 items-center justify-between px-4 md:hidden">
-        <img src={brand.logoSrc} alt={brand.productName} className="h-5 w-auto" />
+        <img src={brand.logoSrcOnDark} alt={brand.productName} className="h-5 w-auto" />
         <button
           type="button"
           data-testid="pro-workspace-exit-compact"
@@ -136,7 +136,11 @@ export function WorkspaceHome({
                 // A brand whose mark carries no wordmark gets the product name
                 // beside it, exactly as the classic hero does.
                 <div className="flex items-center gap-3">
-                  <img src={brand.markSrc} alt={brand.productName} className="size-11 md:size-14" />
+                  <img
+                    src={brand.markSrcOnDark}
+                    alt={brand.productName}
+                    className="size-11 md:size-14"
+                  />
                   <span
                     className="text-xl font-semibold tracking-tight md:text-2xl"
                     style={{ color: brand.themeColor }}
@@ -146,10 +150,10 @@ export function WorkspaceHome({
                 </div>
               ) : (
                 <img
-                  src={brand.logoSrc}
+                  src={brand.logoSrcOnDark}
                   alt={brand.productName}
                   data-testid="pro-workspace-hero-logo"
-                  className="ws-hero-logo logo-on-brand"
+                  className="ws-hero-logo"
                 />
               )}
               {/* At the wordmark's cap height, where a trademark mark goes —

@@ -10,11 +10,10 @@
     "close": "關閉"
   },
   "home": {
-    "slogan": "把知識學紮實 · 穩步邁向考試",
+    "slogan": "開啟知識 · 創造未來",
     "greetingWithName": "嗨，{{name}}",
     "guest": {
       "kicker": "AI 是你的學習夥伴",
-      "title": "依自己的步調學習，有 AI 在旁協助",
       "description": "課程、投影片與討論在 AI 的協助下準備，並於分享前由人工審核。你可以先免費試看，無需帳號。",
       "signIn": "登入",
       "browseCatalog": "瀏覽課程",
@@ -38,6 +37,7 @@
       "membershipTitle": "成為會員",
       "membershipBody": "會員每月有一份額度，可用 AI 建立課程，憑邀請碼加入班級，並與其他會員分享課程。",
       "nav": {
+        "story": "Our story",
         "features": "功能",
         "how": "使用方式",
         "previews": "試看課程",
@@ -91,7 +91,7 @@
         "title": "想親自看看嗎？",
         "body": "可以先試看一堂免費課程，準備好了再登入。"
       },
-      "footerTagline": "ÔN THI · 基於開源專案 OpenMAIC 建構",
+      "footerTagline": "KHAITAM · 基於開源專案 OpenMAIC 建構",
       "trust": {
         "title": "謹慎地使用 AI",
         "subtitle": "我們知道並非每個人都對 AI 放心。以下是我們努力贏得你信任的方式。",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "先看再決定",
           "body": "免費試看對所有人開放，無需帳號，也沒有任何義務。"
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "啟用互動優先模式以獲得更多實作內容",
     "interactiveModeLabel": "互動模式",
     "advanced": "進階",
-    "advancedHint": "進階選項：模型、網路搜尋、圖片/影片、互動模式、智慧體。預設情況下，ÔN THI 會依問題自動選擇合適的模型，並配上插圖與互動活動。"
+    "advancedHint": "進階選項：模型、網路搜尋、圖片/影片、互動模式、智慧體。預設情況下，KHAITAM 會依問題自動選擇合適的模型，並配上插圖與互動活動。"
   },
   "export": {
     "pptx": "匯出 PPTX",
@@ -2089,7 +2128,7 @@
       "download": "下載",
       "detailFailed": "技能詳情載入失敗",
       "contentLabel": "正文",
-      "builtinDetailNote": "該技能隨 ÔN THI 提供。下載後可匯入其他智能體工作台。",
+      "builtinDetailNote": "該技能隨 KHAITAM 提供。下載後可匯入其他智能體工作台。",
       "upload": "上傳",
       "uploading": "正在上傳…",
       "uploadFailed": "技能上傳失敗。請檢查檔案後重試。",

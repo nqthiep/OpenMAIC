@@ -10,11 +10,10 @@
     "close": "Fechar"
   },
   "home": {
-    "slogan": "Entenda bem · Chegue à prova com segurança",
+    "slogan": "Abra o conhecimento · Construa o futuro",
     "greetingWithName": "Olá, {{name}}",
     "guest": {
       "kicker": "A IA como parceira de estudo",
-      "title": "Aprenda no seu ritmo, com a IA para ajudar",
       "description": "As lições, os slides e as discussões são preparados com a ajuda da IA e revisados por pessoas antes de serem compartilhados. Veja primeiro as prévias gratuitas. Não precisa de conta.",
       "signIn": "Entrar",
       "browseCatalog": "Ver cursos",
@@ -38,6 +37,7 @@
       "membershipTitle": "Torne-se membro",
       "membershipBody": "Os membros têm um limite mensal para criar cursos com IA, entrar em turmas com um código e compartilhar cursos com outros membros.",
       "nav": {
+        "story": "Our story",
         "features": "Recursos",
         "how": "Como funciona",
         "previews": "Prévias",
@@ -91,7 +91,7 @@
         "title": "Quer ver por conta própria?",
         "body": "Abra primeiro uma prévia gratuita ou entre quando estiver pronto."
       },
-      "footerTagline": "ÔN THI · criado a partir do projeto de código aberto OpenMAIC",
+      "footerTagline": "KHAITAM · criado a partir do projeto de código aberto OpenMAIC",
       "trust": {
         "title": "Usando a IA com cuidado",
         "subtitle": "Sabemos que nem todo mundo confia na IA ainda. É assim que tentamos merecer a sua confiança.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "Veja antes de se comprometer",
           "body": "As prévias gratuitas são abertas a todos, sem conta e sem compromisso."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "Ative o modo interativo para conteúdos mais práticos",
     "interactiveModeLabel": "Modo Interativo",
     "advanced": "Avançado",
-    "advancedHint": "Opções avançadas: modelo, busca na web, imagens/vídeo, modo interativo, agentes. Por padrão, o ÔN THI escolhe um modelo adequado ao seu pedido e acrescenta ilustrações e atividades interativas."
+    "advancedHint": "Opções avançadas: modelo, busca na web, imagens/vídeo, modo interativo, agentes. Por padrão, o KHAITAM escolhe um modelo adequado ao seu pedido e acrescenta ilustrações e atividades interativas."
   },
   "export": {
     "pptx": "Exportar PPTX",
@@ -2104,7 +2143,7 @@
       "download": "Baixar",
       "detailFailed": "Não foi possível carregar os detalhes do skill",
       "contentLabel": "Conteúdo",
-      "builtinDetailNote": "Este skill acompanha o ÔN THI. Baixe-o para importar em outro espaço de trabalho de agente.",
+      "builtinDetailNote": "Este skill acompanha o KHAITAM. Baixe-o para importar em outro espaço de trabalho de agente.",
       "upload": "Enviar",
       "uploading": "Enviando…",
       "uploadFailed": "Não foi possível enviar o skill. Verifique o arquivo e tente novamente.",

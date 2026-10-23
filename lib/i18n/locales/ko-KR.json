@@ -10,11 +10,10 @@
     "close": "닫기"
   },
   "home": {
-    "slogan": "확실히 이해하고 · 자신 있게 시험으로",
+    "slogan": "지식을 열고 · 미래를 만들다",
     "greetingWithName": "안녕하세요, {{name}}!",
     "guest": {
       "kicker": "AI는 당신의 학습 파트너",
-      "title": "내 속도대로 배우고, AI가 곁에서 돕습니다",
       "description": "강의, 슬라이드, 토론은 AI의 도움으로 준비하고, 공유하기 전에 사람이 확인합니다. 먼저 무료로 둘러보세요. 계정이 필요 없습니다.",
       "signIn": "로그인",
       "browseCatalog": "강좌 둘러보기",
@@ -38,6 +37,7 @@
       "membershipTitle": "회원 되기",
       "membershipBody": "회원에게는 매달 사용 한도가 주어져 AI로 강좌를 만들고, 초대 코드로 수업에 참여하고, 다른 회원과 강좌를 공유할 수 있습니다.",
       "nav": {
+        "story": "Our story",
         "features": "기능",
         "how": "이용 방법",
         "previews": "미리보기",
@@ -91,7 +91,7 @@
         "title": "직접 확인해 보시겠어요?",
         "body": "무료 미리보기를 먼저 열어 보거나, 준비되면 로그인하세요."
       },
-      "footerTagline": "ÔN THI · 오픈소스 프로젝트 OpenMAIC 기반",
+      "footerTagline": "KHAITAM · 오픈소스 프로젝트 OpenMAIC 기반",
       "trust": {
         "title": "AI를 신중하게 사용합니다",
         "subtitle": "아직 AI를 믿기 어렵다는 분이 많다는 것을 알고 있습니다. 신뢰를 얻기 위해 이렇게 노력합니다.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "보고 나서 결정",
           "body": "무료 미리보기는 누구에게나 열려 있으며, 계정도 약정도 필요 없습니다."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "체험 중심 콘텐츠를 위해 인터랙티브 우선 모드를 사용하세요",
     "interactiveModeLabel": "인터랙티브 모드",
     "advanced": "고급",
-    "advancedHint": "고급 옵션: 모델, 웹 검색, 이미지/동영상, 인터랙티브 모드, 에이전트. 기본값에서는 ÔN THI가 요청에 맞는 모델을 고르고 삽화와 인터랙티브 활동을 더합니다."
+    "advancedHint": "고급 옵션: 모델, 웹 검색, 이미지/동영상, 인터랙티브 모드, 에이전트. 기본값에서는 KHAITAM가 요청에 맞는 모델을 고르고 삽화와 인터랙티브 활동을 더합니다."
   },
   "export": {
     "pptx": "PPTX 내보내기",
@@ -2104,7 +2143,7 @@
       "download": "다운로드",
       "detailFailed": "스킬 상세를 불러오지 못했습니다",
       "contentLabel": "내용",
-      "builtinDetailNote": "이 스킬은 ÔN THI에 포함되어 있습니다. 다른 에이전트 작업공간으로 가져오려면 다운로드하세요.",
+      "builtinDetailNote": "이 스킬은 KHAITAM에 포함되어 있습니다. 다른 에이전트 작업공간으로 가져오려면 다운로드하세요.",
       "upload": "업로드",
       "uploading": "업로드 중…",
       "uploadFailed": "스킬을 업로드하지 못했습니다. 파일을 확인하고 다시 시도하세요.",

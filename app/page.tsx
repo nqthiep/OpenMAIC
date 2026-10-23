@@ -841,7 +841,7 @@ function HomePage() {
           {/* ── Logo ── */}
           <div className="relative" data-pro-morph="lockup">
             <motion.img
-              src={brand.logoSrc}
+              src={brand.logoSrcOnDark}
               alt={brand.productName}
               initial={heroEnter({ opacity: 0, scale: 0.9 })}
               animate={{ opacity: 1, scale: 1 }}
@@ -851,7 +851,7 @@ function HomePage() {
                 stiffness: 200,
                 damping: 20,
               }}
-              className="logo-on-brand h-14 md:h-[68px] mb-3 -ml-2 md:-ml-3"
+              className="h-14 md:h-[68px] mb-3 -ml-2 md:-ml-3"
             />
             {workbenchEntryEnabled ? (
               <div
@@ -883,7 +883,7 @@ function HomePage() {
             className="w-full"
           >
             {/* The one thing to do on this page: a bright ring and a glow set the composer apart. */}
-            <div className="w-full rounded-[1.9rem] bg-gradient-to-br from-brand-yellow via-brand-400 to-brand-600 p-[3px] shadow-[0_28px_70px_-18px_rgba(37,99,235,0.65)] transition-shadow focus-within:shadow-[0_32px_90px_-14px_rgba(251,191,36,0.55)]">
+            <div className="w-full rounded-[1.9rem] bg-gradient-to-br from-brand-yellow via-brand-400 to-brand-600 p-[3px] shadow-[0_28px_70px_-18px_rgba(66,114,171,0.65)] transition-shadow focus-within:shadow-[0_32px_90px_-14px_rgba(244,198,109,0.55)]">
               <div
                 data-pro-morph="composer"
                 className="w-full rounded-[1.75rem] bg-white dark:bg-slate-900"

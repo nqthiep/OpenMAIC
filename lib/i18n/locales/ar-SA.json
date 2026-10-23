@@ -10,11 +10,10 @@
     "close": "إغلاق"
   },
   "home": {
-    "slogan": "افهم جيدًا · وادخل الاختبار بثقة",
+    "slogan": "افتح آفاق المعرفة · وابنِ المستقبل",
     "greetingWithName": "مرحبًا، {{name}}",
     "guest": {
       "kicker": "الذكاء الاصطناعي رفيقك في التعلم",
-      "title": "تعلّم بإيقاعك، ومعك الذكاء الاصطناعي للمساعدة",
       "description": "تُعدّ الدروس والشرائح والنقاشات بمساعدة الذكاء الاصطناعي، ويراجعها أشخاص قبل مشاركتها. تصفّح المعاينات المجانية أولًا دون الحاجة إلى حساب.",
       "signIn": "تسجيل الدخول",
       "browseCatalog": "تصفح الدورات",
@@ -38,6 +37,7 @@
       "membershipTitle": "كن عضوًا",
       "membershipBody": "يحصل الأعضاء على حصة شهرية لإنشاء الدورات بالذكاء الاصطناعي، ويمكنهم الانضمام إلى الصفوف برمز دعوة ومشاركة الدورات مع الأعضاء الآخرين.",
       "nav": {
+        "story": "Our story",
         "features": "الميزات",
         "how": "كيف يعمل",
         "previews": "المعاينات",
@@ -91,7 +91,7 @@
         "title": "هل تريد أن ترى بنفسك؟",
         "body": "افتح معاينة مجانية أولًا، أو سجّل الدخول متى كنت جاهزًا."
       },
-      "footerTagline": "ÔN THI · مبني على مشروع OpenMAIC مفتوح المصدر",
+      "footerTagline": "KHAITAM · مبني على مشروع OpenMAIC مفتوح المصدر",
       "trust": {
         "title": "استخدام الذكاء الاصطناعي بحرص",
         "subtitle": "ندرك أن كثيرين لا يثقون بالذكاء الاصطناعي بعد. هكذا نحاول أن نكسب ثقتك.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "انظر قبل أن تلتزم",
           "body": "المعاينات المجانية متاحة للجميع، دون حساب ودون أي التزام."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "ttsPreview": "معاينة",
     "ttsPreviewing": "جارٍ التشغيل...",
     "advanced": "خيارات متقدمة",
-    "advancedHint": "خيارات متقدمة: النموذج، البحث على الويب، الصور/الفيديو، الوضع التفاعلي، الوكلاء. افتراضيًا يختار ÔN THI النموذج المناسب لطلبك ويضيف رسومًا توضيحية وأنشطة تفاعلية."
+    "advancedHint": "خيارات متقدمة: النموذج، البحث على الويب، الصور/الفيديو، الوضع التفاعلي، الوكلاء. افتراضيًا يختار KHAITAM النموذج المناسب لطلبك ويضيف رسومًا توضيحية وأنشطة تفاعلية."
   },
   "export": {
     "pptx": "تصدير PPTX",
@@ -2104,7 +2143,7 @@
       "download": "تنزيل",
       "detailFailed": "تعذّر تحميل تفاصيل المهارة",
       "contentLabel": "المحتوى",
-      "builtinDetailNote": "هذه المهارة مرفقة مع ÔN THI. نزّلها لاستيرادها إلى مساحة عمل وكيل أخرى.",
+      "builtinDetailNote": "هذه المهارة مرفقة مع KHAITAM. نزّلها لاستيرادها إلى مساحة عمل وكيل أخرى.",
       "upload": "رفع",
       "uploading": "جارٍ الرفع…",
       "uploadFailed": "تعذّر رفع المهارة. تحقّق من الملف وحاول مرة أخرى.",

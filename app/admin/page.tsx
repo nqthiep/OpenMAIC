@@ -145,7 +145,7 @@ export default function AdminPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 md:px-8">
       <header
         className={cn(
-          'relative overflow-hidden rounded-3xl px-8 py-8 text-white shadow-xl shadow-brand-800/20',
+          'relative overflow-hidden rounded-3xl border border-brand-teal/30 px-8 py-8 text-white shadow-xl shadow-brand-900/20',
           BRAND_GRADIENT,
         )}
       >

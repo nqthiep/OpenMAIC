@@ -10,11 +10,10 @@
     "close": "Đóng"
   },
   "home": {
-    "slogan": "Hiểu chắc kiến thức · Vững bước vào kỳ thi",
+    "slogan": "Khai mở tri thức · Kiến tạo tương lai",
     "greetingWithName": "Chào {{name}}",
     "guest": {
       "kicker": "AI đồng hành cùng việc học của bạn",
-      "title": "Học theo nhịp của bạn, có AI hỗ trợ bên cạnh",
       "description": "Bài giảng, trình chiếu và thảo luận được soạn với sự hỗ trợ của AI, và được người thật xem lại trước khi chia sẻ. Bạn có thể xem thử miễn phí trước, không cần tài khoản.",
       "signIn": "Đăng nhập",
       "browseCatalog": "Xem danh mục khoá học",
@@ -38,6 +37,7 @@
       "membershipTitle": "Trở thành thành viên",
       "membershipBody": "Thành viên có hạn mức hằng tháng để tạo khoá học bằng AI, tham gia lớp bằng mã mời và chia sẻ khoá học với các thành viên khác.",
       "nav": {
+        "story": "Câu chuyện",
         "features": "Tính năng",
         "how": "Cách hoạt động",
         "previews": "Bài xem thử",
@@ -91,7 +91,7 @@
         "title": "Muốn tự mình trải nghiệm?",
         "body": "Cứ xem thử một bài miễn phí trước, hoặc đăng nhập khi bạn sẵn sàng."
       },
-      "footerTagline": "ÔN THI · xây dựng trên dự án mã nguồn mở OpenMAIC",
+      "footerTagline": "KHAITAM · xây dựng trên dự án mã nguồn mở OpenMAIC",
       "trust": {
         "title": "Dùng AI một cách cẩn trọng",
         "subtitle": "Chúng tôi hiểu không phải ai cũng yên tâm về AI. Đây là cách chúng tôi cố gắng xứng đáng với sự tin tưởng của bạn.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "Xem trước rồi hãy quyết định",
           "body": "Bài xem thử mở cho mọi người, không cần tài khoản và không ràng buộc."
+        }
+      },
+      "pillars": {
+        "p1": "Trí tuệ để hiểu thế giới",
+        "p2": "Công nghệ để mở rộng năng lực",
+        "p3": "Con người để tạo ra giá trị"
+      },
+      "story": {
+        "eyebrow": "Câu chuyện thương hiệu",
+        "title": "Từ những câu hỏi lớn, · đến những giá trị thật.",
+        "body1": "KHAITAM ra đời từ sự kết hợp giữa tinh thần khai mở của KHAI và chiều sâu, nhân văn của TÂM.",
+        "body2": "Chúng tôi tin rằng, khi trí tuệ, công nghệ và con người cùng đồng hành, những câu hỏi hôm nay sẽ trở thành những giải pháp cho ngày mai.",
+        "values": {
+          "v1": {
+            "title": "Khai mở",
+            "body": "Nhìn xa, khám phá điều mới."
+          },
+          "v2": {
+            "title": "Trí tuệ",
+            "body": "Học hỏi, phân tích, tạo ra giá trị."
+          },
+          "v3": {
+            "title": "Cái tâm",
+            "body": "Vì con người, vì cộng đồng."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Sâu sắc",
+            "hint": "Không phô trương"
+          },
+          "k2": {
+            "name": "Hệ thống",
+            "hint": "Không rời rạc"
+          },
+          "k3": {
+            "name": "Nhân văn",
+            "hint": "Không thay thế con người"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "Bật chế độ ưu tiên tương tác để có nhiều nội dung thực hành hơn",
     "interactiveModeLabel": "Chế độ tương tác",
     "advanced": "Nâng cao",
-    "advancedHint": "Tuỳ chọn nâng cao: chọn model, tìm web, ảnh/video, chế độ tương tác, tác nhân. Mặc định, ÔN THI tự chọn model phù hợp với câu hỏi, kèm ảnh minh hoạ và hoạt động tương tác."
+    "advancedHint": "Tuỳ chọn nâng cao: chọn model, tìm web, ảnh/video, chế độ tương tác, tác nhân. Mặc định, KHAITAM tự chọn model phù hợp với câu hỏi, kèm ảnh minh hoạ và hoạt động tương tác."
   },
   "export": {
     "pptx": "Xuất PPTX",
@@ -2104,7 +2143,7 @@
       "download": "Tải xuống",
       "detailFailed": "Không thể tải chi tiết skill",
       "contentLabel": "Nội dung",
-      "builtinDetailNote": "Skill này đi kèm với ÔN THI. Tải xuống để nhập vào không gian làm việc của agent khác.",
+      "builtinDetailNote": "Skill này đi kèm với KHAITAM. Tải xuống để nhập vào không gian làm việc của agent khác.",
       "upload": "Tải lên",
       "uploading": "Đang tải lên…",
       "uploadFailed": "Không thể tải skill lên. Hãy kiểm tra tệp và thử lại.",

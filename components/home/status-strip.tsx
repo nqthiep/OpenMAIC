@@ -16,7 +16,7 @@ function allowanceResetDate(locale: string): string {
 
 const TONE: Record<MembershipNoticeKind, { icon: LucideIcon; box: string }> = {
   none: { icon: BadgeCheck, box: '' },
-  // The strip sits on the blue band of the home: the calm state is glass, the warnings are solid
+  // The strip sits on the navy band of the home: the calm state is glass, the warnings are solid
   // so they stay readable and stand out.
   ok: { icon: BadgeCheck, box: 'border-white/25 bg-white/15 text-white' },
   expiring: {

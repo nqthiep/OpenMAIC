@@ -13,29 +13,35 @@ export interface BrandConfig {
   productName: string;
   /** Short name for space-constrained spots. */
   shortName: string;
-  /** Public domain, written exactly like this (guidelines, section 4). */
+  /** Public domain, written exactly like this. */
   domain: string;
   /** One sentence for `<meta name="description">`. */
   description: string;
-  /** Horizontal logo asset under `public/`. */
+  /** Horizontal logo asset under `public/`, for light surfaces. */
   logoSrc: string;
+  /** The same logo for dark surfaces (the navy hero band, the dark theme). */
+  logoSrcOnDark: string;
   /** Whether `logoSrc` already carries the product wordmark. */
   logoHasWordmark: boolean;
-  /** Square brand mark under `public/` (favicon, workspace header). */
+  /** Square brand mark under `public/` (favicon, workspace header), for light surfaces. */
   markSrc: string;
+  /** The mark for dark surfaces. */
+  markSrcOnDark: string;
   /** Browser theme color (`<meta name="theme-color">` / PWA). */
   themeColor: string;
 }
 
-/** The default brand: ÔN THI (guidelines v1.0), with no vendor overrides. */
+/** The default brand: KHAITAM, with no vendor overrides. */
 export const DEFAULT_BRAND: BrandConfig = {
-  productName: 'ÔN THI',
-  shortName: 'ÔN THI',
-  domain: 'onthi.ap.vn',
+  productName: 'KHAITAM',
+  shortName: 'KHAITAM',
+  domain: 'khaitam.ai.vn',
   description:
-    'Nền tảng học tập và luyện thi trực tuyến: hiểu chắc kiến thức, vững bước vào kỳ thi.',
-  logoSrc: '/brand/logo-horizontal.png',
+    'Nền tảng học tập với AI: khai mở tri thức, kiến tạo tương lai. Học theo nhịp của bạn, có AI hỗ trợ bên cạnh.',
+  logoSrc: '/brand/logo-horizontal.svg',
+  logoSrcOnDark: '/brand/logo-horizontal-dark.svg',
   logoHasWordmark: true,
-  markSrc: '/brand/mark.png',
-  themeColor: '#2563EB',
+  markSrc: '/brand/mark.svg',
+  markSrcOnDark: '/brand/mark-dark.svg',
+  themeColor: '#102541',
 };

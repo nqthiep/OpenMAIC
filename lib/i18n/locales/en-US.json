@@ -10,11 +10,10 @@
     "close": "Close"
   },
   "home": {
-    "slogan": "Know it well · Step into the exam with confidence",
+    "slogan": "Unlock knowledge · Build the future",
     "greetingWithName": "Hi, {{name}}",
     "guest": {
       "kicker": "AI as your study partner",
-      "title": "Learn at your own pace, with AI to help",
       "description": "Lessons, slides and discussions are prepared with the help of AI, and checked by people before they are shared. Look around the free previews first. No account needed.",
       "signIn": "Sign in",
       "browseCatalog": "Browse courses",
@@ -38,6 +37,7 @@
       "membershipTitle": "Become a member",
       "membershipBody": "Members get a monthly allowance for creating courses with AI, can join classes with a code, and can share courses with other members.",
       "nav": {
+        "story": "Our story",
         "features": "Features",
         "how": "How it works",
         "previews": "Previews",
@@ -91,7 +91,7 @@
         "title": "Want to see for yourself?",
         "body": "Open a free preview first, or sign in whenever you are ready."
       },
-      "footerTagline": "ÔN THI · built on the open-source project OpenMAIC",
+      "footerTagline": "KHAITAM · built on the open-source project OpenMAIC",
       "trust": {
         "title": "Using AI with care",
         "subtitle": "We know not everyone trusts AI yet. Here is how we try to earn yours.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "Look before you commit",
           "body": "Free previews are open to everyone, with no account and no obligation."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "Enable interactive-first mode for more hands-on content",
     "interactiveModeLabel": "Interactive Mode",
     "advanced": "Advanced",
-    "advancedHint": "Advanced options: model, web search, images/video, interactive mode, agents. By default ÔN THI picks a model that fits your request and adds illustrations and interactive activities."
+    "advancedHint": "Advanced options: model, web search, images/video, interactive mode, agents. By default KHAITAM picks a model that fits your request and adds illustrations and interactive activities."
   },
   "export": {
     "pptx": "Export PPTX",
@@ -2104,7 +2143,7 @@
       "download": "Download",
       "detailFailed": "Could not load the skill details",
       "contentLabel": "Content",
-      "builtinDetailNote": "This skill ships with ÔN THI. Download it to import into another agent workspace.",
+      "builtinDetailNote": "This skill ships with KHAITAM. Download it to import into another agent workspace.",
       "upload": "Upload",
       "uploading": "Uploading…",
       "uploadFailed": "Could not upload the skill. Check the file and try again.",

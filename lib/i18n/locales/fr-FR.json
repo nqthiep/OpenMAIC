@@ -10,11 +10,10 @@
     "close": "Fermer"
   },
   "home": {
-    "slogan": "Bien comprendre · Aborder l’examen en confiance",
+    "slogan": "Ouvrir le savoir · Construire l’avenir",
     "greetingWithName": "Bonjour, {{name}}",
     "guest": {
       "kicker": "L'IA comme partenaire d'étude",
-      "title": "Apprenez à votre rythme, avec l'IA pour vous aider",
       "description": "Les leçons, les diapositives et les discussions sont préparées avec l'aide de l'IA, puis relues par des personnes avant d'être partagées. Parcourez d'abord les aperçus gratuits. Aucun compte requis.",
       "signIn": "Se connecter",
       "browseCatalog": "Parcourir les cours",
@@ -38,6 +37,7 @@
       "membershipTitle": "Devenir membre",
       "membershipBody": "Les membres disposent d'un quota mensuel pour créer des cours avec l'IA, rejoindre des classes avec un code et partager leurs cours avec d'autres membres.",
       "nav": {
+        "story": "Our story",
         "features": "Fonctionnalités",
         "how": "Comment ça marche",
         "previews": "Aperçus",
@@ -91,7 +91,7 @@
         "title": "Envie de voir par vous-même ?",
         "body": "Ouvrez d'abord un aperçu gratuit, ou connectez-vous quand vous serez prêt."
       },
-      "footerTagline": "ÔN THI · construit sur le projet open source OpenMAIC",
+      "footerTagline": "KHAITAM · construit sur le projet open source OpenMAIC",
       "trust": {
         "title": "Utiliser l'IA avec soin",
         "subtitle": "Nous savons que tout le monde ne fait pas encore confiance à l'IA. Voici comment nous essayons de mériter la vôtre.",
@@ -110,6 +110,45 @@
         "t4": {
           "title": "Regardez avant de vous engager",
           "body": "Les aperçus gratuits sont ouverts à tous, sans compte et sans engagement."
+        }
+      },
+      "pillars": {
+        "p1": "Intelligence to understand the world",
+        "p2": "Technology to expand what people can do",
+        "p3": "People to create value"
+      },
+      "story": {
+        "eyebrow": "Our story",
+        "title": "From big questions, · to real value.",
+        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
+        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "values": {
+          "v1": {
+            "title": "Openness",
+            "body": "Look far, discover what is new."
+          },
+          "v2": {
+            "title": "Intelligence",
+            "body": "Learn, analyse, create value."
+          },
+          "v3": {
+            "title": "Heart",
+            "body": "For people, for the community."
+          }
+        },
+        "traits": {
+          "k1": {
+            "name": "Deep",
+            "hint": "Never showy"
+          },
+          "k2": {
+            "name": "Systematic",
+            "hint": "Never scattered"
+          },
+          "k3": {
+            "name": "Humane",
+            "hint": "Never replacing people"
+          }
         }
       }
     },
@@ -238,7 +277,7 @@
     "interactiveModeHint": "Activez le mode interactif pour obtenir un contenu plus pratique",
     "interactiveModeLabel": "Mode interactif",
     "advanced": "Avancé",
-    "advancedHint": "Options avancées : modèle, recherche web, images/vidéo, mode interactif, agents. Par défaut, ÔN THI choisit un modèle adapté à votre demande et ajoute des illustrations et des activités interactives."
+    "advancedHint": "Options avancées : modèle, recherche web, images/vidéo, mode interactif, agents. Par défaut, KHAITAM choisit un modèle adapté à votre demande et ajoute des illustrations et des activités interactives."
   },
   "export": {
     "pptx": "Exporter en PPTX",
@@ -2104,7 +2143,7 @@
       "download": "Télécharger",
       "detailFailed": "Impossible de charger les détails du skill",
       "contentLabel": "Contenu",
-      "builtinDetailNote": "Ce skill est fourni avec ÔN THI. Téléchargez-le pour l’importer dans un autre espace de travail d’agent.",
+      "builtinDetailNote": "Ce skill est fourni avec KHAITAM. Téléchargez-le pour l’importer dans un autre espace de travail d’agent.",
       "upload": "Importer",
       "uploading": "Importation…",
       "uploadFailed": "Impossible d’importer le skill. Vérifiez le fichier et réessayez.",

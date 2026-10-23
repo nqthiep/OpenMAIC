@@ -6,22 +6,25 @@ import { motion, useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
   BookOpen,
+  BrainCircuit,
   Check,
   Compass,
   DoorOpen,
   Download,
   Eye,
   GraduationCap,
+  HeartHandshake,
   ListChecks,
   Mic,
   Play,
   Presentation,
   ShieldCheck,
   Sparkles,
+  Sunrise,
   Users,
 } from 'lucide-react';
 import { AccountDialog } from '@/components/account/account-dialog';
-import { BRAND_GRADIENT, BrandDecor } from '@/components/home/brand-band';
+import { BRAND_GRADIENT, BrandArch, BrandDecor, Slogan } from '@/components/home/brand-band';
 import { CourseCard } from '@/components/home/course-card';
 import { GLASS, Reveal, SectionHeading, SiteShell } from '@/components/home/site-shell';
 import { fetchCatalog, type CatalogEntry } from '@/components/learning/learning-api';
@@ -32,6 +35,7 @@ import { cn } from '@/lib/utils';
 const PREVIEW_LIMIT = 6;
 
 const NAV = [
+  { id: 'story', key: 'story' },
   { id: 'features', key: 'features' },
   { id: 'how', key: 'how' },
   { id: 'previews', key: 'previews' },
@@ -58,17 +62,42 @@ const TRUST = [
 const PERKS = ['p1', 'p2', 'p3', 'p4'] as const;
 
 /**
- * One soft tint per feature card, so a grid of six is not six copies of one card: the brand blue
- * leads, the accent yellow comes second, and three calm greens, pinks and teals follow. Whole class
- * names, because Tailwind reads them from the source.
+ * The four tints of the brand board's icon tiles: steel blue, gold, teal and peach. A grid of six
+ * cycles through them so no two neighbours, across or down, share one. Whole class names, because
+ * Tailwind reads them from the source. The gold and peach tiles take navy icons.
  */
-const TINTS = [
-  { card: 'from-brand-50 border-brand-100', tile: 'bg-brand-600 shadow-brand-600/30' },
-  { card: 'from-amber-50 border-amber-100', tile: 'bg-amber-500 shadow-amber-500/30' },
-  { card: 'from-emerald-50 border-emerald-100', tile: 'bg-emerald-600 shadow-emerald-600/30' },
-  { card: 'from-rose-50 border-rose-100', tile: 'bg-rose-500 shadow-rose-500/30' },
-  { card: 'from-sky-50 border-sky-100', tile: 'bg-sky-600 shadow-sky-600/30' },
-  { card: 'from-teal-50 border-teal-100', tile: 'bg-teal-600 shadow-teal-600/30' },
+const TINTS = {
+  steel: {
+    card: 'from-brand-50 border-brand-100 dark:from-brand-600/15',
+    tile: 'bg-brand-600 text-white shadow-brand-600/30',
+  },
+  gold: {
+    card: 'from-brand-yellow/20 border-brand-yellow/40 dark:from-brand-yellow/10',
+    tile: 'bg-brand-yellow text-brand-900 shadow-brand-yellow/40',
+  },
+  teal: {
+    card: 'from-brand-teal/10 border-brand-teal/25 dark:from-brand-teal/15',
+    tile: 'bg-brand-teal text-white shadow-brand-teal/30',
+  },
+  peach: {
+    card: 'from-brand-peach/30 border-brand-peach/60 dark:from-brand-peach/10',
+    tile: 'bg-brand-peach text-brand-900 shadow-brand-peach/50',
+  },
+} as const;
+const FEATURE_TINTS = [TINTS.steel, TINTS.gold, TINTS.teal, TINTS.peach, TINTS.steel, TINTS.gold];
+
+/** The three values of the brand board, with the ring color of each icon. */
+const VALUES = [
+  { key: 'v1', icon: Sunrise, ring: 'border-brand-yellow/60 text-brand-yellow' },
+  { key: 'v2', icon: BrainCircuit, ring: 'border-brand-mint/50 text-brand-mint' },
+  { key: 'v3', icon: HeartHandshake, ring: 'border-brand-mint/50 text-brand-mint' },
+] as const;
+
+/** The brand's character: a trait, and what it is not. */
+const TRAITS = [
+  { key: 'k1', dot: 'bg-brand-yellow' },
+  { key: 'k2', dot: 'bg-brand-teal dark:bg-brand-mint' },
+  { key: 'k3', dot: 'bg-brand-teal dark:bg-brand-mint' },
 ] as const;
 
 /** A decorative classroom: slide, agents talking, playback bar. It is not a screenshot and not interactive. */
@@ -94,8 +123,8 @@ function ClassroomMock() {
           <span className="ml-2 truncate text-xs text-muted-foreground">
             {t('home.guest.mock.title')}
           </span>
-          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="size-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-brand-teal/10 px-2 py-0.5 text-[10px] font-medium text-brand-teal-ink dark:text-brand-mint">
+            <span className="size-1.5 rounded-full bg-brand-teal motion-safe:animate-pulse" />
             {t('home.guest.mock.live')}
           </span>
         </div>
@@ -108,7 +137,7 @@ function ClassroomMock() {
                 className="relative size-24 shrink-0 rounded-full ring-4 ring-white/70 dark:ring-white/10"
                 style={{
                   background:
-                    'conic-gradient(#2563eb 0 25%, #60a5fa 25% 50%, #93c5fd 50% 75%, #bfdbfe 75% 100%)',
+                    'conic-gradient(#4272ab 0 25%, #7a9fcb 25% 50%, #9db8d6 50% 75%, #c5d5e8 75% 100%)',
                 }}
               >
                 <span className="absolute inset-0 grid place-items-center text-sm font-semibold text-white drop-shadow">
@@ -122,7 +151,7 @@ function ClassroomMock() {
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {['#2563eb', '#60a5fa', '#93c5fd', '#bfdbfe'].map((colour) => (
+              {['#4272ab', '#7a9fcb', '#9db8d6', '#c5d5e8'].map((colour) => (
                 <div key={colour} className="h-8 rounded-lg" style={{ background: colour }} />
               ))}
             </div>
@@ -247,11 +276,23 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
           </Reveal>
           <Reveal delay={0.05}>
             <h1 className="pb-1 text-4xl font-bold leading-[1.15] tracking-tight text-white md:text-5xl">
-              {t('home.guest.title')}
+              <Slogan text={t('home.slogan')} />
             </h1>
           </Reveal>
+          <Reveal delay={0.08}>
+            <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
+              {(['p1', 'p2', 'p3'] as const).map((key, index) => (
+                <li key={key} className="flex items-center gap-3">
+                  {t(`home.guest.pillars.${key}`)}
+                  {index < 2 ? (
+                    <span aria-hidden="true" className="size-1 rounded-full bg-brand-yellow" />
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
           <Reveal delay={0.1}>
-            <p className="max-w-xl text-base text-white/85 md:text-lg">
+            <p className="max-w-xl text-sm text-white/75 md:text-base">
               {t('home.guest.description')}
             </p>
           </Reveal>
@@ -294,6 +335,75 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
         </Reveal>
       </section>
 
+      <section id="story" className="flex scroll-mt-24 flex-col gap-5">
+        <Reveal>
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-3xl border border-brand-teal/30 p-8 text-white shadow-2xl shadow-brand-900/25 md:p-12',
+              BRAND_GRADIENT,
+            )}
+          >
+            <div className="relative grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="flex flex-col gap-5">
+                <p className="eyebrow text-brand-mint">{t('home.guest.story.eyebrow')}</p>
+                <h2 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl">
+                  <Slogan text={t('home.guest.story.title')} />
+                </h2>
+                <div className="flex max-w-xl flex-col gap-3 text-sm leading-relaxed text-white/80 md:text-base">
+                  <p>{t('home.guest.story.body1')}</p>
+                  <p>{t('home.guest.story.body2')}</p>
+                </div>
+                <ul className="mt-2 grid gap-6 border-t border-white/15 pt-6 sm:grid-cols-3">
+                  {VALUES.map(({ key, icon: Icon, ring }) => (
+                    <li key={key} className="flex flex-col items-center gap-2 text-center">
+                      <span
+                        className={cn(
+                          'grid size-14 place-items-center rounded-full border bg-white/5',
+                          ring,
+                        )}
+                      >
+                        <Icon className="size-6" aria-hidden="true" />
+                      </span>
+                      <h3 className="text-sm font-semibold">
+                        {t(`home.guest.story.values.${key}.title`)}
+                      </h3>
+                      <p className="text-xs text-white/70">
+                        {t(`home.guest.story.values.${key}.body`)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="hidden justify-center lg:flex">
+                <BrandArch className="h-72 w-auto" />
+              </div>
+            </div>
+          </div>
+        </Reveal>
+        <ul className="grid gap-3 lg:grid-cols-3">
+          {TRAITS.map(({ key, dot }, index) => (
+            <li key={key}>
+              <Reveal delay={index * 0.06}>
+                <div
+                  className={cn(
+                    'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl px-5 py-3 text-sm',
+                    GLASS,
+                  )}
+                >
+                  <span aria-hidden="true" className={cn('size-2.5 shrink-0 rounded-full', dot)} />
+                  <span className="font-semibold whitespace-nowrap">
+                    {t(`home.guest.story.traits.${key}.name`)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {t(`home.guest.story.traits.${key}.hint`)}
+                  </span>
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section id="trust" className="flex scroll-mt-24 flex-col gap-10">
         <Reveal>
           <SectionHeading
@@ -305,7 +415,7 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
           {TRUST.map(({ key, icon: Icon }, index) => (
             <Reveal key={key} delay={index * 0.06}>
               <article className={cn('flex h-full flex-col gap-3 rounded-2xl p-6', GLASS)}>
-                <span className="grid size-10 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <span className="grid size-10 place-items-center rounded-xl bg-brand-teal/10 text-brand-teal-ink dark:text-brand-mint">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
                 <h3 className="text-base font-semibold">{t(`home.guest.trust.${key}.title`)}</h3>
@@ -330,15 +440,15 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
             <Reveal key={key} delay={(index % 3) * 0.06}>
               <article
                 className={cn(
-                  'group h-full rounded-3xl bg-gradient-to-br to-white p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-800/15 dark:from-white/5 dark:to-transparent dark:border-white/10',
+                  'group h-full rounded-3xl bg-gradient-to-br to-white p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-900/15 dark:to-transparent',
                   GLASS,
-                  TINTS[index % TINTS.length].card,
+                  FEATURE_TINTS[index % FEATURE_TINTS.length].card,
                 )}
               >
                 <span
                   className={cn(
-                    'mb-4 grid size-12 place-items-center rounded-2xl text-white shadow-lg',
-                    TINTS[index % TINTS.length].tile,
+                    'mb-4 grid size-12 place-items-center rounded-2xl shadow-lg',
+                    FEATURE_TINTS[index % FEATURE_TINTS.length].tile,
                   )}
                 >
                   <Icon className="size-5" aria-hidden="true" />
@@ -454,7 +564,7 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
           <div className="rounded-3xl bg-gradient-to-br from-brand-500/60 via-brand-yellow/40 to-transparent p-px">
             <div className="grid gap-10 rounded-[calc(1.5rem-1px)] bg-white/90 p-8 backdrop-blur-xl md:grid-cols-[1.2fr_0.8fr] md:p-10 dark:bg-slate-900/90">
               <div className="flex flex-col gap-5">
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-700 dark:text-violet-300">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-yellow/25 px-3 py-1 text-xs font-medium text-brand-900 dark:bg-brand-yellow/15 dark:text-brand-yellow">
                   <Sparkles className="size-3.5" aria-hidden="true" />
                   {t('home.guest.nav.membership')}
                 </span>
@@ -467,7 +577,7 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
                 <ul className="flex flex-col gap-3">
                   {PERKS.map((perk) => (
                     <li key={perk} className="flex items-start gap-3 text-sm">
-                      <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                      <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-brand-teal/15 text-brand-teal-ink dark:text-brand-mint">
                         <Check className="size-3" aria-hidden="true" />
                       </span>
                       {t(`home.guest.perks.${perk}`)}

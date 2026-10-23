@@ -18,6 +18,7 @@ import { SlideThumbnail } from '@/components/slide-renderer/SlideThumbnail';
 import { ThumbnailInteractive } from '@/components/slide-renderer/components/ThumbnailInteractive';
 import { useStageStore, useCanvasStore } from '@/lib/store';
 import { useBrand } from '@/lib/brand/brand-context';
+import { BrandImage } from '@/components/brand/brand-image';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useNearViewport } from '@/lib/hooks/use-near-viewport';
 import type { SceneType, SlideContent, InteractiveContent } from '@/lib/types/stage';
@@ -113,7 +114,7 @@ export function SceneSidebar({
         width: displayWidth,
         transition: isDraggingRef.current ? 'none' : 'width 0.3s ease',
       }}
-      className="bg-white dark:bg-slate-900 border-r border-brand-100 dark:border-gray-800 shadow-[2px_0_24px_rgba(11,68,170,0.06)] flex flex-col shrink-0 z-20 relative overflow-visible"
+      className="bg-white dark:bg-slate-900 border-r border-brand-100 dark:border-gray-800 shadow-[2px_0_24px_rgba(31,65,108,0.06)] flex flex-col shrink-0 z-20 relative overflow-visible"
     >
       {/* Drag handle */}
       {!collapsed && (
@@ -133,7 +134,7 @@ export function SceneSidebar({
             className="flex items-center gap-2 cursor-pointer rounded-lg px-1.5 -mx-1.5 py-1 -my-1 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-[0.97] transition-all duration-150"
             title={t('generation.backToHome')}
           >
-            <img src={brand.logoSrc} alt={brand.productName} className="h-6" />
+            <BrandImage kind="logo" alt={brand.productName} className="h-6" />
           </button>
           <button
             onClick={() => onCollapseChange(true)}

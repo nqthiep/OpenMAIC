@@ -82,7 +82,7 @@ const PBL_WORKSPACE_THEME = {
   '--card-foreground': 'oklch(0.97 0.014 260)',
   '--popover': 'oklch(0.265 0.055 263)',
   '--popover-foreground': 'oklch(0.97 0.014 260)',
-  '--primary': '#60a5fa',
+  '--primary': '#7a9fcb',
   '--primary-foreground': 'oklch(0.99 0.005 260)',
   '--secondary': 'oklch(0.32 0.052 260)',
   '--secondary-foreground': 'oklch(0.95 0.016 260)',
@@ -342,7 +342,7 @@ export function PBLV2Workspace({
       className={cn(
         'grid h-full w-full overflow-hidden bg-background text-foreground ring-1 ring-indigo-100/[0.16]',
         'shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_24px_72px_rgba(42,50,95,0.20)]',
-        'bg-[radial-gradient(circle_at_18%_5%,rgba(119,102,255,0.20),transparent_31%),radial-gradient(circle_at_86%_10%,rgba(20,184,166,0.17),transparent_29%),radial-gradient(circle_at_52%_105%,rgba(96,165,250,0.10),transparent_34%),linear-gradient(180deg,#182542_0%,#111c34_48%,#162743_100%)]',
+        'bg-[radial-gradient(circle_at_18%_5%,rgba(122,159,203,0.20),transparent_31%),radial-gradient(circle_at_86%_10%,rgba(20,184,166,0.17),transparent_29%),radial-gradient(circle_at_52%_105%,rgba(122,159,203,0.10),transparent_34%),linear-gradient(180deg,#182542_0%,#111c34_48%,#162743_100%)]',
       )}
       data-pbl-workspace="true"
       style={{
@@ -440,9 +440,9 @@ function WorkspaceTopBar({
         gridTemplateColumns: `${panelWidths.sidebar}fr 6px ${panelWidths.chat}fr 6px ${panelWidths.submission}fr`,
       }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(96,165,250,0.20),transparent_30%),radial-gradient(circle_at_78%_0%,rgba(34,211,238,0.13),transparent_26%),linear-gradient(90deg,rgba(255,255,255,0.05),transparent_34%,rgba(255,255,255,0.035))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(122,159,203,0.20),transparent_30%),radial-gradient(circle_at_78%_0%,rgba(34,211,238,0.13),transparent_26%),linear-gradient(90deg,rgba(255,255,255,0.05),transparent_34%,rgba(255,255,255,0.035))]" />
       <div className="relative flex min-w-0 flex-1 items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-violet-200/25 bg-white shadow-[0_0_24px_rgba(96,165,250,0.18)]">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-violet-200/25 bg-white shadow-[0_0_24px_rgba(122,159,203,0.18)]">
           <Image
             src={brand.markSrc}
             alt={brand.productName}
@@ -500,13 +500,13 @@ function WorkspaceTopBar({
                   className={cn(
                     'h-1.5 min-w-4 flex-1 rounded-full transition-colors',
                     completed && 'bg-cyan-300/70 shadow-[0_0_12px_rgba(103,232,249,0.30)]',
-                    active && 'bg-violet-300 shadow-[0_0_16px_rgba(96,165,250,0.42)]',
+                    active && 'bg-violet-300 shadow-[0_0_16px_rgba(122,159,203,0.42)]',
                     !active && !completed && 'bg-slate-500/35',
                   )}
                 />
                 {active && (
                   <div
-                    className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-violet-300 shadow-[0_0_18px_rgba(96,165,250,0.58)] transition-[left] duration-500 ease-out"
+                    className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-violet-300 shadow-[0_0_18px_rgba(122,159,203,0.58)] transition-[left] duration-500 ease-out"
                     style={{ left: `${milestoneProgressFraction(milestone) * 100}%` }}
                   />
                 )}
@@ -593,7 +593,7 @@ function WorkspaceResizeHandle({
       />
       <div
         className={cn(
-          'absolute left-1/2 top-1/2 h-10 w-px -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/60 opacity-0 shadow-[0_0_14px_rgba(96,165,250,0.28)] transition-all',
+          'absolute left-1/2 top-1/2 h-10 w-px -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/60 opacity-0 shadow-[0_0_14px_rgba(122,159,203,0.28)] transition-all',
           'group-hover:h-14 group-hover:opacity-100',
           active && 'h-16 opacity-100',
         )}
@@ -610,7 +610,7 @@ function Panel({ slot, children }: { readonly slot: PanelSlot; readonly children
         slot === 'sidebar' &&
           'bg-[linear-gradient(180deg,rgba(28,39,71,0.96)_0%,rgba(22,34,62,0.94)_100%)] shadow-[inset_-18px_0_38px_rgba(5,12,28,0.10)]',
         slot === 'chat' &&
-          'bg-[radial-gradient(circle_at_50%_0%,rgba(37,99,235,0.10),transparent_34%),linear-gradient(180deg,rgba(15,27,51,0.78)_0%,rgba(11,23,43,0.82)_100%)]',
+          'bg-[radial-gradient(circle_at_50%_0%,rgba(66,114,171,0.10),transparent_34%),linear-gradient(180deg,rgba(15,27,51,0.78)_0%,rgba(11,23,43,0.82)_100%)]',
         slot === 'submission' &&
           'bg-[linear-gradient(180deg,rgba(18,43,65,0.94)_0%,rgba(18,32,58,0.94)_100%)] shadow-[inset_18px_0_38px_rgba(5,12,28,0.10)]',
       )}
