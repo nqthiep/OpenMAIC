@@ -1,5 +1,6 @@
 import { accountServiceDeps, accountsEnabled } from '@/lib/server/accounts/runtime';
 import { omnirouteConfig } from '@/lib/server/omniroute/config';
+import { allowedDeepLink } from '@/lib/server/omniroute/links';
 import { isActiveAdminSession, refusal, signInToOmniRoute } from '@/lib/server/omniroute/gate';
 import {
   GATE_TTL_MS,
@@ -48,7 +49,12 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const gate = mintToken('gate', claim.accountId, claim.sessionKey, GATE_TTL_MS, config.gateSecret);
-  const headers = new Headers({ location: `${config.publicUrl}/`, 'cache-control': 'no-store' });
+  // Only one of OmniRoute's own pages may be asked for; anything else lands on the front page.
+  const landing = allowedDeepLink(new URL(request.url).searchParams.get('to')) ?? '/';
+  const headers = new Headers({
+    location: `${config.publicUrl}${landing}`,
+    'cache-control': 'no-store',
+  });
   headers.append('set-cookie', gateCookieHeader(gate, config.publicUrl.startsWith('https:')));
   headers.append('set-cookie', omnirouteCookie);
   return new Response(null, { status: 302, headers });

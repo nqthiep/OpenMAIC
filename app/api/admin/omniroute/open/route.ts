@@ -1,7 +1,8 @@
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { hashSessionToken, readSessionCookie } from '@/lib/server/accounts/session';
-import { authorize, learningRoute } from '@/lib/server/learning/http';
+import { authorize, bodyOf, invalid, learningRoute } from '@/lib/server/learning/http';
 import { omnirouteConfig } from '@/lib/server/omniroute/config';
+import { allowedDeepLink } from '@/lib/server/omniroute/links';
 import { mintToken, TICKET_TTL_MS } from '@/lib/server/omniroute/token';
 
 export const runtime = 'nodejs';
@@ -18,6 +19,18 @@ export async function POST(request: Request): Promise<Response> {
     async (ctx) => {
       const refusal = authorize(ctx, 'provider.manage');
       if (refusal) return refusal;
+      // The body is optional: `{ path }` names one of OmniRoute's own pages to land on.
+      let path: string | undefined;
+      if (
+        (request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json')
+      ) {
+        const body = await bodyOf(request, 1024);
+        if (!body.ok) return body.response;
+        if (body.body.path !== undefined) {
+          path = allowedDeepLink(body.body.path);
+          if (!path) return invalid('path is not a page this panel can open');
+        }
+      }
       const config = omnirouteConfig();
       if (!config) return apiError('NOT_FOUND', 404, 'OmniRoute is not set up on this server.');
       const accountId = ctx.viewer.accountId!;
@@ -30,7 +43,8 @@ export async function POST(request: Request): Promise<Response> {
         [accountId, ctx.now.toISOString()],
       );
       const ticket = mintToken('ticket', accountId, sessionKey, TICKET_TTL_MS, config.gateSecret);
-      return apiSuccess({ url: `${config.publicUrl}/__enter?t=${ticket}` });
+      const target = path ? `&to=${encodeURIComponent(path)}` : '';
+      return apiSuccess({ url: `${config.publicUrl}/__enter?t=${ticket}${target}` });
     },
     { mutating: true },
   );

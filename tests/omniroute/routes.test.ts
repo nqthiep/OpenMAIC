@@ -57,9 +57,8 @@ async function load() {
   vi.doMock('@/lib/persistence/server-provider', () => ({
     getServerPersistenceProvider: async () => ({ pool }),
   }));
-  const [register, status, open, enter, check, token] = await Promise.all([
+  const [register, open, enter, check, token] = await Promise.all([
     import('@/app/api/auth/register/route'),
-    import('@/app/api/admin/omniroute/status/route'),
     import('@/app/api/admin/omniroute/open/route'),
     import('@/app/api/admin/omniroute/enter/route'),
     import('@/app/api/admin/omniroute/check/route'),
@@ -67,7 +66,6 @@ async function load() {
   ]);
   return {
     register: register.POST,
-    status: status.GET,
     open: open.POST,
     enter: enter.GET,
     check: check.GET,
@@ -82,7 +80,7 @@ async function signUp(routes: Routes, username: string): Promise<Who> {
     new Request(`${ORIGIN}/api/auth/register`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ username, password: PASSWORD }),
+      body: JSON.stringify({ username, password: PASSWORD, acceptedTerms: true }),
     }),
   );
   const cookie = response.headers
@@ -110,7 +108,6 @@ function mint(
   return mintToken(kind, who.id, who.sessionKey, ttl, options.secret ?? GATE_SECRET, options.now);
 }
 
-const withCookie = (cookie?: string): RequestInit => (cookie ? { headers: { cookie } } : {});
 const post = (cookie?: string, headers: Record<string, string> = {}) =>
   new Request(`${ORIGIN}/api/admin/omniroute/open`, {
     method: 'POST',
@@ -145,30 +142,6 @@ async function afterCheckMemory<T>(run: () => Promise<T>): Promise<T> {
     vi.useRealTimers();
   }
 }
-
-describe('status', () => {
-  it('answers only an administrator', async () => {
-    const routes = await load();
-    const root = await signUp(routes, 'root');
-    const alice = await signUp(routes, 'alice');
-    const url = `${ORIGIN}/api/admin/omniroute/status`;
-    expect((await routes.status(new Request(url))).status).toBe(401);
-    expect((await routes.status(new Request(url, withCookie(alice.cookie)))).status).toBe(403);
-    const ok = await routes.status(new Request(url, withCookie(root.cookie)));
-    expect(ok.status).toBe(200);
-    expect(await ok.json()).toMatchObject({ enabled: true });
-  });
-
-  it('says disabled when the environment is incomplete', async () => {
-    const routes = await load();
-    const root = await signUp(routes, 'root');
-    vi.stubEnv('OMNIROUTE_GATE_SECRET', 'short');
-    const response = await routes.status(
-      new Request(`${ORIGIN}/api/admin/omniroute/status`, withCookie(root.cookie)),
-    );
-    expect(await response.json()).toMatchObject({ enabled: false });
-  });
-});
 
 describe('open', () => {
   it('gives an administrator a ticket for the current session, and writes an audit row', async () => {
@@ -210,6 +183,31 @@ describe('open', () => {
     const root = await signUp(routes, 'root');
     vi.stubEnv('OMNIROUTE_PUBLIC_URL', '');
     expect((await routes.open(post(root.cookie))).status).toBe(404);
+  });
+
+  it("puts one of OmniRoute's own pages in the address, and refuses any other path", async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    const withBody = (body: unknown) =>
+      new Request(`${ORIGIN}/api/admin/omniroute/open`, {
+        method: 'POST',
+        headers: { cookie: root.cookie, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    const good = await routes.open(withBody({ path: '/dashboard/providers' }));
+    expect(good.status).toBe(200);
+    const { url } = (await good.json()) as { url: string };
+    expect(new URL(url).searchParams.get('to')).toBe('/dashboard/providers');
+    for (const path of [
+      '/dashboard/../api/keys',
+      'https://evil.test/',
+      '//evil.test',
+      '/api/keys',
+      7,
+    ]) {
+      expect((await routes.open(withBody({ path }))).status, String(path)).toBe(400);
+    }
+    expect((await routes.open(withBody({}))).status).toBe(200);
   });
 });
 
@@ -336,6 +334,23 @@ describe('enter', () => {
       sessionKey: root.sessionKey,
     });
     expect((await routes.check(checkRequest(gateValue))).status).toBe(204);
+  });
+
+  it('lands on the page asked for, or on the front page for anything else', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    stubOmniRoute(signedIn);
+    const landing = async (query: string) => {
+      const ticket = mint(routes, 'ticket', root);
+      const response = await routes.enter(
+        new Request(`${ORIGIN}/api/admin/omniroute/enter?t=${encodeURIComponent(ticket)}${query}`),
+      );
+      return response.headers.get('location');
+    };
+    expect(await landing('&to=%2Fdashboard%2Fcombos')).toBe(`${ORIGIN}/dashboard/combos`);
+    expect(await landing('&to=%2Fapi%2Fkeys')).toBe(`${ORIGIN}/`);
+    expect(await landing('&to=https%3A%2F%2Fevil.test%2F')).toBe(`${ORIGIN}/`);
+    expect(await landing('')).toBe(`${ORIGIN}/`);
   });
 
   it('accepts a ticket once', async () => {

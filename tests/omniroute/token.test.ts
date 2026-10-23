@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { omnirouteConfig } from '@/lib/server/omniroute/config';
+import { missingOmnirouteEnv, omnirouteConfig } from '@/lib/server/omniroute/config';
 import {
   gateCookieHeader,
   GATE_TTL_MS,
@@ -110,6 +110,7 @@ describe('omnirouteConfig', () => {
       gateSecret: SECRET,
       adminPassword: 'p'.repeat(24),
       internalUrl: 'http://omniroute:20128',
+      apiUrl: 'http://omniroute:20129',
     });
   });
 
@@ -121,11 +122,37 @@ describe('omnirouteConfig', () => {
     ['a short gate secret', { OMNIROUTE_GATE_SECRET: 'short' }],
     ['a short password', { OMNIROUTE_ADMIN_PASSWORD: 'short' }],
     ['an unusable internal URL', { OMNIROUTE_INTERNAL_URL: 'not a url' }],
+    ['an unusable API URL', { OMNIROUTE_API_URL: 'ftp://x' }],
   ])('is off with %s', (_name, override) => {
     expect(omnirouteConfig({ ...good, ...override })).toBeUndefined();
   });
 
   it('is off when nothing is set', () => {
     expect(omnirouteConfig({})).toBeUndefined();
+  });
+});
+
+describe('missingOmnirouteEnv', () => {
+  it('names what is missing or too short, and nothing when all is set', () => {
+    expect(missingOmnirouteEnv({})).toEqual([
+      'OMNIROUTE_PUBLIC_URL',
+      'OMNIROUTE_GATE_SECRET',
+      'OMNIROUTE_ADMIN_PASSWORD',
+    ]);
+    expect(
+      missingOmnirouteEnv({
+        OMNIROUTE_PUBLIC_URL: 'https://x.test/path',
+        OMNIROUTE_GATE_SECRET: 'short',
+        OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(20),
+        OMNIROUTE_INTERNAL_URL: 'nope',
+      }),
+    ).toEqual(['OMNIROUTE_PUBLIC_URL', 'OMNIROUTE_GATE_SECRET', 'OMNIROUTE_INTERNAL_URL']);
+    expect(
+      missingOmnirouteEnv({
+        OMNIROUTE_PUBLIC_URL: 'https://x.test',
+        OMNIROUTE_GATE_SECRET: 's'.repeat(40),
+        OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(20),
+      }),
+    ).toEqual([]);
   });
 });

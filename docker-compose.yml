@@ -39,6 +39,7 @@ services:
       - OMNIROUTE_GATE_SECRET=${OMNIROUTE_GATE_SECRET:-}
       - OMNIROUTE_ADMIN_PASSWORD=${OMNIROUTE_ADMIN_PASSWORD:-}
       - OMNIROUTE_INTERNAL_URL=${OMNIROUTE_INTERNAL_URL:-http://omniroute:20128}
+      - OMNIROUTE_API_URL=${OMNIROUTE_API_URL:-http://omniroute:20129}
     networks:
       - default # outbound internet (LLM/media provider APIs, etc.)
       - render # reach the render service over the isolated network
