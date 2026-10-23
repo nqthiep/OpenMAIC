@@ -2,6 +2,7 @@ import { apiSuccess } from '@/lib/server/api-response';
 import { runAccountRoute } from '@/lib/server/accounts/http';
 import {
   accountsEnabled,
+  membershipTrial,
   registrationOpen,
   resolveRequestAccount,
 } from '@/lib/server/accounts/runtime';
@@ -31,6 +32,8 @@ export async function GET(request: Request): Promise<Response> {
     return apiSuccess({
       enabled: true,
       registrationOpen: registrationOpen(),
+      // Days of free membership a new account gets; 0 when none. The sign-up text reads it.
+      trialDays: membershipTrial()?.days ?? 0,
       authenticated: Boolean(account),
       capabilities: capabilitiesFor(viewer),
       ...(account

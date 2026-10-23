@@ -8,12 +8,14 @@ import {
   BookOpen,
   BrainCircuit,
   Check,
+  ClipboardCheck,
   Compass,
   DoorOpen,
   Download,
   Eye,
   GraduationCap,
   HeartHandshake,
+  Lightbulb,
   ListChecks,
   Mic,
   Play,
@@ -21,6 +23,7 @@ import {
   ShieldCheck,
   Sparkles,
   Sunrise,
+  Target,
   Users,
 } from 'lucide-react';
 import { AccountDialog } from '@/components/account/account-dialog';
@@ -29,18 +32,13 @@ import { CourseCard } from '@/components/home/course-card';
 import { GLASS, Reveal, SectionHeading, SiteShell } from '@/components/home/site-shell';
 import { fetchCatalog, type CatalogEntry } from '@/components/learning/learning-api';
 import { Button } from '@/components/ui/button';
+import { useBrand } from '@/lib/brand/brand-context';
+import { PRICING, formatDong, savingPercent } from '@/lib/brand/pricing';
+import { useAccountSession } from '@/lib/capabilities/use-capabilities';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 
 const PREVIEW_LIMIT = 6;
-
-const NAV = [
-  { id: 'story', key: 'story' },
-  { id: 'features', key: 'features' },
-  { id: 'how', key: 'how' },
-  { id: 'previews', key: 'previews' },
-  { id: 'membership', key: 'membership' },
-] as const;
 
 const FEATURES = [
   { key: 'f1', icon: Users },
@@ -49,6 +47,13 @@ const FEATURES = [
   { key: 'f4', icon: Mic },
   { key: 'f5', icon: GraduationCap },
   { key: 'f6', icon: Download },
+] as const;
+
+/** What a student comes to do here: the three jobs the page answers right under its first screen. */
+const INTENTS = [
+  { key: 'i1', icon: Lightbulb },
+  { key: 'i2', icon: Target },
+  { key: 'i3', icon: ClipboardCheck },
 ] as const;
 
 /** What a hesitant visitor wants to know first. Each line states something the service really does. */
@@ -137,7 +142,7 @@ function ClassroomMock() {
                 className="relative size-24 shrink-0 rounded-full ring-4 ring-white/70 dark:ring-white/10"
                 style={{
                   background:
-                    'conic-gradient(#4272ab 0 25%, #7a9fcb 25% 50%, #9db8d6 50% 75%, #c5d5e8 75% 100%)',
+                    'conic-gradient(#426fab 0 25%, #7a9fcb 25% 50%, #9db8d6 50% 75%, #c5d5e8 75% 100%)',
                 }}
               >
                 <span className="absolute inset-0 grid place-items-center text-sm font-semibold text-white drop-shadow">
@@ -151,7 +156,7 @@ function ClassroomMock() {
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {['#4272ab', '#7a9fcb', '#9db8d6', '#c5d5e8'].map((colour) => (
+              {['#426fab', '#7a9fcb', '#9db8d6', '#c5d5e8'].map((colour) => (
                 <div key={colour} className="h-8 rounded-lg" style={{ background: colour }} />
               ))}
             </div>
@@ -222,8 +227,11 @@ function ClassroomMock() {
  * free previews, and what membership adds. Everything gated for a signed-in account stays off it.
  */
 export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { contactEmail } = useBrand();
+  const trialDays = useAccountSession()?.trialDays ?? 0;
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'signIn' | 'create'>('signIn');
   const [previews, setPreviews] = useState<CatalogEntry[] | null>(null);
   const returnFocusTo = useRef<HTMLElement | null>(null);
 
@@ -245,8 +253,21 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
     };
   }, []);
 
+  // "Try a lesson" opens the first free preview; with none yet, the catalog.
+  const tryHref = previews?.[0]
+    ? `/classroom/${encodeURIComponent(previews[0].courseId)}`
+    : '/catalog';
+
   const openSignIn = (event: React.MouseEvent<HTMLElement>) => {
     returnFocusTo.current = event.currentTarget;
+    setDialogMode('signIn');
+    setDialogOpen(true);
+  };
+
+  // The pricing card's button goes straight to the sign-up tab.
+  const openCreate = (event: React.MouseEvent<HTMLElement>) => {
+    returnFocusTo.current = event.currentTarget;
+    setDialogMode('create');
     setDialogOpen(true);
   };
 
@@ -262,7 +283,6 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
   return (
     <SiteShell
       logoHref="#top"
-      nav={NAV.map((item) => ({ href: `#${item.id}`, label: t(`home.guest.nav.${item.key}`) }))}
       mainClassName="gap-24 pb-24 pt-12 md:pt-20"
       bandClassName="h-[900px] lg:h-[640px]"
     >
@@ -280,16 +300,9 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
             </h1>
           </Reveal>
           <Reveal delay={0.08}>
-            <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
-              {(['p1', 'p2', 'p3'] as const).map((key, index) => (
-                <li key={key} className="flex items-center gap-3">
-                  {t(`home.guest.pillars.${key}`)}
-                  {index < 2 ? (
-                    <span aria-hidden="true" className="size-1 rounded-full bg-brand-yellow" />
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <p className="max-w-xl text-lg font-medium leading-relaxed text-white md:text-xl">
+              {t('home.guest.lead')}
+            </p>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="max-w-xl text-sm text-white/75 md:text-base">
@@ -298,20 +311,22 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
           </Reveal>
           <Reveal delay={0.15} className="flex flex-wrap gap-3">
             <Button
-              size="lg"
-              onClick={openSignIn}
-              className="cursor-pointer bg-white px-5 font-semibold text-brand-800 shadow-lg shadow-black/10 hover:bg-brand-50"
-            >
-              {t('home.guest.signIn')}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Button>
-            <Button
               asChild
               size="lg"
+              className="cursor-pointer bg-white px-5 font-semibold text-brand-800 shadow-lg shadow-black/10 hover:bg-brand-50"
+            >
+              <Link href={tryHref}>
+                {t('home.guest.tryFree')}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button
+              size="lg"
               variant="outline"
+              onClick={openSignIn}
               className="cursor-pointer border-white/40 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white dark:border-white/40 dark:bg-transparent dark:hover:bg-white/10"
             >
-              <Link href="/catalog">{t('home.guest.browseCatalog')}</Link>
+              {t('home.guest.signIn')}
             </Button>
           </Reveal>
           <Reveal delay={0.2} className="flex flex-wrap gap-2">
@@ -335,92 +350,23 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
         </Reveal>
       </section>
 
-      <section id="story" className="flex scroll-mt-24 flex-col gap-5">
-        <Reveal>
-          <div
-            className={cn(
-              'relative overflow-hidden rounded-3xl border border-brand-teal/30 p-8 text-white shadow-2xl shadow-brand-900/25 md:p-12',
-              BRAND_GRADIENT,
-            )}
-          >
-            <div className="relative grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="flex flex-col gap-5">
-                <p className="eyebrow text-brand-mint">{t('home.guest.story.eyebrow')}</p>
-                <h2 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl">
-                  <Slogan text={t('home.guest.story.title')} />
-                </h2>
-                <div className="flex max-w-xl flex-col gap-3 text-sm leading-relaxed text-white/80 md:text-base">
-                  <p>{t('home.guest.story.body1')}</p>
-                  <p>{t('home.guest.story.body2')}</p>
-                </div>
-                <ul className="mt-2 grid gap-6 border-t border-white/15 pt-6 sm:grid-cols-3">
-                  {VALUES.map(({ key, icon: Icon, ring }) => (
-                    <li key={key} className="flex flex-col items-center gap-2 text-center">
-                      <span
-                        className={cn(
-                          'grid size-14 place-items-center rounded-full border bg-white/5',
-                          ring,
-                        )}
-                      >
-                        <Icon className="size-6" aria-hidden="true" />
-                      </span>
-                      <h3 className="text-sm font-semibold">
-                        {t(`home.guest.story.values.${key}.title`)}
-                      </h3>
-                      <p className="text-xs text-white/70">
-                        {t(`home.guest.story.values.${key}.body`)}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="hidden justify-center lg:flex">
-                <BrandArch className="h-72 w-auto" />
-              </div>
-            </div>
-          </div>
-        </Reveal>
-        <ul className="grid gap-3 lg:grid-cols-3">
-          {TRAITS.map(({ key, dot }, index) => (
-            <li key={key}>
-              <Reveal delay={index * 0.06}>
-                <div
-                  className={cn(
-                    'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl px-5 py-3 text-sm',
-                    GLASS,
-                  )}
-                >
-                  <span aria-hidden="true" className={cn('size-2.5 shrink-0 rounded-full', dot)} />
-                  <span className="font-semibold whitespace-nowrap">
-                    {t(`home.guest.story.traits.${key}.name`)}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {t(`home.guest.story.traits.${key}.hint`)}
-                  </span>
-                </div>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section id="trust" className="flex scroll-mt-24 flex-col gap-10">
+      <section id="intents" className="flex scroll-mt-24 flex-col gap-10">
         <Reveal>
           <SectionHeading
-            title={t('home.guest.trust.title')}
-            subtitle={t('home.guest.trust.subtitle')}
+            title={t('home.guest.intents.title')}
+            subtitle={t('home.guest.intents.subtitle')}
           />
         </Reveal>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {TRUST.map(({ key, icon: Icon }, index) => (
+        <div className="grid gap-5 md:grid-cols-3">
+          {INTENTS.map(({ key, icon: Icon }, index) => (
             <Reveal key={key} delay={index * 0.06}>
               <article className={cn('flex h-full flex-col gap-3 rounded-2xl p-6', GLASS)}>
                 <span className="grid size-10 place-items-center rounded-xl bg-brand-teal/10 text-brand-teal-ink dark:text-brand-mint">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
-                <h3 className="text-base font-semibold">{t(`home.guest.trust.${key}.title`)}</h3>
+                <h3 className="text-base font-semibold">{t(`home.guest.intents.${key}.title`)}</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  {t(`home.guest.trust.${key}.body`)}
+                  {t(`home.guest.intents.${key}.body`)}
                 </p>
               </article>
             </Reveal>
@@ -559,6 +505,30 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
         )}
       </section>
 
+      <section id="trust" className="flex scroll-mt-24 flex-col gap-10">
+        <Reveal>
+          <SectionHeading
+            title={t('home.guest.trust.title')}
+            subtitle={t('home.guest.trust.subtitle')}
+          />
+        </Reveal>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {TRUST.map(({ key, icon: Icon }, index) => (
+            <Reveal key={key} delay={index * 0.06}>
+              <article className={cn('flex h-full flex-col gap-3 rounded-2xl p-6', GLASS)}>
+                <span className="grid size-10 place-items-center rounded-xl bg-brand-teal/10 text-brand-teal-ink dark:text-brand-mint">
+                  <Icon className="size-5" aria-hidden="true" />
+                </span>
+                <h3 className="text-base font-semibold">{t(`home.guest.trust.${key}.title`)}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {t(`home.guest.trust.${key}.body`)}
+                </p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       <section id="membership" className="scroll-mt-24">
         <Reveal>
           <div className="rounded-3xl bg-gradient-to-br from-brand-500/60 via-brand-yellow/40 to-transparent p-px">
@@ -585,23 +555,145 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
                   ))}
                 </ul>
               </div>
-              <div className="flex flex-col justify-center gap-6 rounded-2xl border border-violet-200/60 bg-violet-500/5 p-6 dark:border-violet-400/15">
+              <div className="flex flex-col justify-center gap-5 rounded-2xl border border-brand-teal/30 bg-brand-teal/5 p-6">
+                {trialDays > 0 ? (
+                  <div className="flex flex-col gap-1">
+                    <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-yellow px-3 py-1 text-xs font-semibold text-brand-900">
+                      <Sparkles className="size-3.5" aria-hidden="true" />
+                      {t('home.guest.pricing.trial', { days: trialDays })}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t('home.guest.pricing.trialBody')}
+                    </p>
+                  </div>
+                ) : null}
                 <div className="flex flex-col gap-2">
-                  <GraduationCap
-                    className="mb-1 size-7 text-violet-600 dark:text-violet-300"
-                    aria-hidden="true"
-                  />
-                  <p className="text-sm font-medium">{t('home.locked.membership')}</p>
-                  <p className="text-sm text-muted-foreground">{t('home.locked.contactAdmin')}</p>
+                  <p className="text-sm font-medium">
+                    {trialDays > 0 ? t('home.guest.pricing.then') : t('home.guest.pricing.price')}
+                  </p>
+                  <ul className="flex flex-col gap-1.5">
+                    {PRICING.map((plan) => (
+                      <li
+                        key={plan.id}
+                        className="flex items-baseline justify-between gap-3 rounded-lg bg-background/70 px-3 py-2 text-sm"
+                      >
+                        <span className="font-medium">
+                          {t(`home.guest.pricing.plan.${plan.id}`)}
+                        </span>
+                        <span className="text-right">
+                          <span className="font-semibold tabular-nums">
+                            {formatDong(plan.price, locale)}
+                          </span>
+                          {plan.months > 1 ? (
+                            <span className="ml-2 text-xs font-medium text-brand-teal-ink dark:text-brand-mint">
+                              {t('home.guest.pricing.save', { percent: savingPercent(plan) })}
+                            </span>
+                          ) : null}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {t('home.guest.pricing.note')}
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {t('home.guest.pricing.pay', { email: contactEmail })}
+                  </p>
                 </div>
-                <Button onClick={openSignIn} className="w-full cursor-pointer">
-                  {t('home.guest.signIn')}
+                <Button
+                  onClick={registrationOpen ? openCreate : openSignIn}
+                  className="w-full cursor-pointer"
+                >
+                  {registrationOpen
+                    ? trialDays > 0
+                      ? t('home.guest.pricing.cta')
+                      : t('account.submit.create')
+                    : t('home.guest.signIn')}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>
           </div>
         </Reveal>
+      </section>
+
+      <section id="story" className="flex scroll-mt-24 flex-col gap-5">
+        <Reveal>
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-3xl border border-brand-teal/30 p-8 text-white shadow-2xl shadow-brand-900/25 md:p-12',
+              BRAND_GRADIENT,
+            )}
+          >
+            <div className="relative grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="flex flex-col gap-5">
+                <p className="eyebrow text-brand-mint">{t('home.guest.story.eyebrow')}</p>
+                <h2 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl">
+                  <Slogan text={t('home.guest.story.title')} />
+                </h2>
+                <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/70">
+                  {(['p1', 'p2', 'p3'] as const).map((key, index) => (
+                    <li key={key} className="flex items-center gap-3">
+                      {t(`home.guest.pillars.${key}`)}
+                      {index < 2 ? (
+                        <span aria-hidden="true" className="size-1 rounded-full bg-brand-yellow" />
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex max-w-xl flex-col gap-3 text-sm leading-relaxed text-white/80 md:text-base">
+                  <p>{t('home.guest.story.body1')}</p>
+                  <p>{t('home.guest.story.body2')}</p>
+                </div>
+                <ul className="mt-2 grid gap-6 border-t border-white/15 pt-6 sm:grid-cols-3">
+                  {VALUES.map(({ key, icon: Icon, ring }) => (
+                    <li key={key} className="flex flex-col items-center gap-2 text-center">
+                      <span
+                        className={cn(
+                          'grid size-14 place-items-center rounded-full border bg-white/5',
+                          ring,
+                        )}
+                      >
+                        <Icon className="size-6" aria-hidden="true" />
+                      </span>
+                      <h3 className="text-sm font-semibold">
+                        {t(`home.guest.story.values.${key}.title`)}
+                      </h3>
+                      <p className="text-xs text-white/70">
+                        {t(`home.guest.story.values.${key}.body`)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="hidden justify-center lg:flex">
+                <BrandArch className="h-72 w-auto" />
+              </div>
+            </div>
+          </div>
+        </Reveal>
+        <ul className="grid gap-3 lg:grid-cols-3">
+          {TRAITS.map(({ key, dot }, index) => (
+            <li key={key}>
+              <Reveal delay={index * 0.06}>
+                <div
+                  className={cn(
+                    'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl px-5 py-3 text-sm',
+                    GLASS,
+                  )}
+                >
+                  <span aria-hidden="true" className={cn('size-2.5 shrink-0 rounded-full', dot)} />
+                  <span className="font-semibold whitespace-nowrap">
+                    {t(`home.guest.story.traits.${key}.name`)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {t(`home.guest.story.traits.${key}.hint`)}
+                  </span>
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section>
@@ -645,6 +737,8 @@ export function GuestHome({ registrationOpen }: { registrationOpen: boolean }) {
         </Reveal>
       </section>
       <AccountDialog
+        key={dialogMode}
+        initialMode={dialogMode}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         registrationOpen={registrationOpen}

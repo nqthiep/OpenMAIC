@@ -56,7 +56,7 @@ Contrast tính bằng công thức WCAG (script `node`, chạy trong phiên này
 | bạc hà `#76D5C1` trên navy | 8,85 | màu chữ teal cho nền tối |
 | `#667085` (mute cũ) trên trắng giấy | 4,37 | dưới 4,5, đổi sang `#586274` (5,40) |
 | bước 600 dải navy suy ra `#2C5688` trên nền tối `#08162B` | 2,41 | **dải tĩnh không được để bước giữa quá tối** |
-| bước 600 đề xuất `#4272AB` | trắng trên nó 4,97; trên nền tối 3,64; trên thẻ navy 3,10 | đạt cả hai chế độ |
+| bước 600 đề xuất `#426FAB` | trắng trên nó 5,13; trên giấy 4,50; trên nền tối 3,53; trên thẻ navy 3,00 | đạt cả hai chế độ |
 
 Hệ quả:
 
@@ -77,7 +77,7 @@ Hệ quả:
 **Logo đã vẽ** (`[Inference]` bản dựng lại theo ảnh, không trùng từng điểm ảnh với bản gốc của thương hiệu):
 
 - Dấu: thanh đứng cắt chéo ở đáy, chữ Λ (mái nhà) đỉnh bo tròn, chấm vàng. Chữ KHAITAM vẽ bằng đa giác, không dùng font: chữ A không có gạch ngang, chấm vàng nằm trong chữ A đầu. Dòng `.AI.VN` bên dưới.
-- Bản sáng: chữ và dấu `#102541`, chấm `#ECAC30` (màu mẫu từ ô logo nền sáng trong ảnh), dòng phụ `#4272AB`. Bản tối: `#F3F0E8`, chấm `#F4C66D`, dòng phụ `#9FC9D8` (màu mẫu từ ảnh, chỉ dùng trong logo).
+- Bản sáng: chữ và dấu `#102541`, chấm `#ECAC30` (màu mẫu từ ô logo nền sáng trong ảnh), dòng phụ `#426FAB`. Bản tối: `#F3F0E8`, chấm `#F4C66D`, dòng phụ `#9FC9D8` (màu mẫu từ ảnh, chỉ dùng trong logo).
 - Đã xem trong trình duyệt (`:3002`) ở cỡ lớn, cỡ ô app 72 px và 32 px, trên nền tối và nền giấy: chấm tròn, nét đọc được. Chưa xem trong tab thật, chưa xuất `favicon.ico`, `app/icon.png`, `app/apple-icon.png` (việc của P1).
 - Script sinh SVG chỉ nằm trong thư mục tạm của phiên, không lưu vào repo; chỉnh logo thì sửa trực tiếp SVG.
 - Chủ dự án có thể thay bằng file gốc bất kỳ lúc nào: giữ đúng 4 tên file thì không phải sửa mã.
@@ -88,7 +88,7 @@ Hệ quả:
 /* app/brand.css — một nơi duy nhất nêu tên màu */
 @theme {
   /* 500-600 phải thấy rõ trên cả nền giấy lẫn nền navy (bảng mục 4). Các bước còn lại nội suy cùng sắc độ ~212°, chốt bằng test ở pha 1. */
-  --color-brand-600: #4272ab;
+  --color-brand-600: #426fab;
   --color-brand-900: #102541;               /* Xanh đêm */
   --color-brand-yellow: #f4c66d;            /* Vàng khai mở; giữ tên để 30 chỗ dùng không phải sửa */
   --color-brand-teal: #2e8278;              /* chỉ làm nền; chữ dùng teal-ink / mint */
@@ -182,5 +182,29 @@ Việc có thể giao song song cho worker OpenCode: dịch 11 ngôn ngữ của
 
 Một người review độc lập (agent chỉ đọc, được đưa diff chứ không đưa kết luận) và tự review từng màn hình tìm ra 12 điểm; đã sửa, bằng chứng ở `HANDOFF.md` hàng 13 và 14. Hai điều đáng nhớ:
 
-- Phép thay hex hàng loạt của chính tôi đã làm hỏng 34 lớp Tailwind (`rgba(66, 114, 171,0.3)` có dấu cách), nên bóng và gradient của chúng không bao giờ được sinh ra. Test `tests/lib/brand/tailwind-classes.test.ts` chặn dạng này.
-- Giới hạn còn lại, đã biết: chữ nhỏ `text-violet-600` / `text-blue-600` trên nền giấy chỉ 4,4:1 (dưới AA 4,5); mã mới dùng `brand-700` (6,4:1). `gray-500` trên nền tối chỉ 3,4:1 (dùng cho chi tiết phụ). Mười ngôn ngữ không phải vi và en vẫn mang tiếng Anh ở mục "Câu chuyện". Slogan 11 ngôn ngữ ngoài tiếng Việt là bản nháp.
+- Phép thay hex hàng loạt của chính tôi đã làm hỏng 34 lớp Tailwind (`rgba(66, 111, 171,0.3)` có dấu cách), nên bóng và gradient của chúng không bao giờ được sinh ra. Test `tests/lib/brand/tailwind-classes.test.ts` chặn dạng này.
+- Giới hạn còn lại, đã biết: `gray-500` trên nền tối chỉ 3,4:1 (dùng cho chi tiết phụ). Mười ngôn ngữ không phải vi và en vẫn mang tiếng Anh ở mục "Câu chuyện". Slogan 11 ngôn ngữ ngoài tiếng Việt là bản nháp.
+
+### Ý kiến của chủ dự án sau khi xem bản mới (2026-10-23)
+
+Ba nhận xét, đã xử lý; bằng chứng ở `HANDOFF.md` hàng 15:
+
+1. Nhắc AI quá nhiều: từ 11 lần xuống 2 lần trong phần nội dung trang khách (vi và en), chỉ giữ chỗ cần nói thật: ai soạn bài, và giới hạn đi kèm.
+2. Mục đích chưa rõ: màn hình đầu nói thẳng đối tượng (học sinh THPT, lớp 10 đến 12) và bài học là gì; nút chính là "Học thử miễn phí"; thêm mục "Dành cho học sinh lớp 10, 11, 12"; phần "Câu chuyện thương hiệu" chuyển xuống sau phần sản phẩm. Cần chủ dự án xác nhận đối tượng và cách diễn đạt.
+3. Thanh trên cùng làm mất nút khi bấm "Danh mục": các liên kết mục nay có ở mọi trang khách, và nút "Đăng nhập" không còn nhấp nháy khi chuyển trang.
+
+### Đối tượng và các điểm còn lại (2026-10-23)
+
+Chủ dự án chốt đối tượng: **lớp 5, lớp 9 và lớp 12**, các môn **Toán, Tin học, Vật lí, Hoá học**. Đã áp dụng cho trang khách, mô tả meta, phân loại khối lớp của danh mục (thêm 5 và 9, giữ 10 đến 12), và bản dịch đủ 12 ngôn ngữ (bản dịch ngoài tiếng Việt và tiếng Anh chưa có người bản ngữ đọc `[Unverified wording]`). `brand-600` chuyển sang `#426fab` để chữ nhỏ trên nền giấy đạt 4,5:1. Lần tải đầu hiện khung thanh trên cùng và dải navy thay vì trang trắng.
+
+Còn cần dữ kiện từ chủ dự án: giá, liên hệ, chính sách quyền riêng tư và điều khoản, quy định cho học sinh nhỏ tuổi, bài xem thử thật (danh mục hiện chỉ có bài "QA"), và triển khai lên `khaitam.ai.vn`.
+
+## 11. Vòng 2: đối tượng, thành viên, giá, pháp lý (2026-10-23)
+
+- Đối tượng: học sinh lớp 5, lớp 9 và lớp 12; môn Toán, Tin học, Vật lí, Hoá học (`lib/learning/taxonomy.ts`, bản sao lời trên trang chủ ở 12 ngôn ngữ).
+- Thành viên trả phí, tháng đầu miễn phí: `MEMBERSHIP_TRIAL_DAYS` (30) và `MEMBERSHIP_TRIAL_QUOTA_TOKENS` (500.000). Giá và cách tính: `plans/khaitam-pricing.md`; giá nằm ở `lib/brand/pricing.ts`.
+- Đồng ý điều khoản khi đăng ký: ô đánh dấu bắt buộc, máy chủ lưu `terms_version` và `terms_accepted_at`; đổi `TERMS_VERSION` trong `lib/legal/versions.ts` mỗi khi điều khoản hoặc chính sách đổi về nội dung.
+- Trang `/terms` và `/privacy`: nội dung ở `lib/legal/content/{terms,privacy}.{vi,en}.ts`, viết theo đúng những gì mã nguồn lưu và gửi đi. Hai trang hiện thông báo bản nháp cho đến khi luật sư xem và `LEGAL_TEXT_REVIEWED` được đặt thành `true`.
+- Email liên hệ tạm: `contactEmail` trong `lib/brand/brand-config.ts` (`nqthiep@gmail.com`); đổi một chỗ khi có email theo tên miền.
+- Việc còn lại cần chủ dự án: xem danh sách ở cuối hàng 17 trong `HANDOFF.md`.
+- Hạn mức tính theo chu kỳ một tháng kể từ ngày giờ gói bắt đầu, mua khi gói còn hạn thì nối sau: xem mục 9 của `plans/khaitam-pricing.md`.

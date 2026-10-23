@@ -9,6 +9,7 @@ import {
   countDistinctReaders,
   createAccessRequest,
   createClass,
+  creditBonusTokens,
   decideAccessRequest,
   decideCourseShare,
   findClassByJoinCodeHash,
@@ -37,8 +38,10 @@ import {
   readMembership,
   recordCourseRead,
   requestCourseShare,
+  revokeMembership,
   setCoursePreview,
   setMembershipStatus,
+  updateMembership,
   withdrawCourseShare,
 } from '@/lib/server/learning/store';
 
@@ -88,7 +91,7 @@ afterAll(async () => {
 });
 
 describe('memberships', () => {
-  it('grants, reports as active, and extends a running membership from its expiry', async () => {
+  it('grants, reports as active, and stacks a second grant after the running period', async () => {
     await grantMembership(db, {
       actorId: 'op',
       targetId: 'alice',
@@ -112,7 +115,10 @@ describe('memberships', () => {
     });
     const extended = await readMembership(db, 'alice', NOW);
     expect(extended?.expiresAt).toBe(new Date(NOW.getTime() + 40 * DAY).toISOString());
-    expect(extended?.monthlyQuota).toBe(800);
+    // The cycle in force keeps its quota: the purchase counts from the next period.
+    expect(extended?.monthlyQuota).toBe(500);
+    const later = await readMembership(db, 'alice', new Date(NOW.getTime() + 31 * DAY));
+    expect(later?.monthlyQuota).toBe(800);
   });
 
   it('is inactive after expiry, and inactive while suspended', async () => {
@@ -176,6 +182,183 @@ describe('memberships', () => {
       targetId: 'alice',
       action: 'membership:grant',
       reason: 'trial',
+    });
+  });
+});
+
+describe('membership periods and cycles', () => {
+  const day = (n: number) => new Date(NOW.getTime() + n * DAY);
+  const grant = (days: number, monthlyQuota: number, at = NOW, who = 'alice') =>
+    grantMembership(db, {
+      actorId: 'op',
+      targetId: who,
+      days,
+      monthlyQuota,
+      reason: undefined,
+      now: at,
+    });
+  const periodCount = async (account = 'alice') =>
+    Number(
+      (
+        (await pg.query(`SELECT count(*) AS n FROM membership_periods WHERE account_id = $1`, [
+          account,
+        ])) as { rows: Array<{ n: number | string }> }
+      ).rows[0]!.n,
+    );
+
+  it('starts the first cycle at the grant and ends it a month later, at the same instant', async () => {
+    await grant(90, 1000);
+    const m = await readMembership(db, 'alice', day(3));
+    expect(m?.cycle?.start).toBe(NOW.toISOString());
+    // 12/10 17:00 in Vietnam, so 12/11 at the same time.
+    expect(m?.cycle?.end).toBe('2026-11-12T10:00:00.000Z');
+    expect((await readMembership(db, 'alice', day(31)))?.cycle?.start).toBe(
+      '2026-11-12T10:00:00.000Z',
+    );
+  });
+
+  it('leaves the running cycle alone when a plan is bought, and uses the new quota after it', async () => {
+    await grant(30, 500); // the free month
+    await grant(30, 1000, day(5)); // bought on day 5
+    const during = await readMembership(db, 'alice', day(6));
+    expect(during?.monthlyQuota).toBe(500);
+    expect(during?.cycle?.end).toBe(day(30).toISOString());
+    const after = await readMembership(db, 'alice', day(30));
+    expect(after?.monthlyQuota).toBe(1000);
+    expect(after?.cycle?.start).toBe(day(30).toISOString());
+    expect(after?.expiresAt).toBe(day(60).toISOString());
+    expect(await periodCount()).toBe(2);
+  });
+
+  it('has no allowance at all once the period ends and nothing was bought', async () => {
+    await grant(30, 500);
+    const over = await readMembership(db, 'alice', day(30));
+    expect(over?.active).toBe(false);
+    expect(over?.cycle).toBeUndefined();
+  });
+
+  it('starts a new period now when a lapsed member buys again', async () => {
+    await grant(30, 500);
+    await grant(30, 1000, day(60));
+    const m = await readMembership(db, 'alice', day(61));
+    expect(m?.active).toBe(true);
+    expect(m?.cycle?.start).toBe(day(60).toISOString());
+    expect(m?.monthlyQuota).toBe(1000);
+    expect((await readMembership(db, 'alice', day(45)))?.active).toBe(false);
+  });
+
+  it('reads a membership row from before periods as one period, and stacks the next purchase after it', async () => {
+    await pg.query(
+      `INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by, granted_at)
+       VALUES ('alice', 'active', $1, 700, 'op', $2)`,
+      [day(20).toISOString(), day(-10).toISOString()],
+    );
+    const old = await readMembership(db, 'alice', NOW);
+    expect(old).toMatchObject({ active: true, monthlyQuota: 700 });
+    expect(old?.cycle?.start).toBe(day(-10).toISOString());
+    expect(await periodCount()).toBe(0);
+
+    await grant(30, 1000);
+    expect(await periodCount()).toBe(2);
+    expect((await readMembership(db, 'alice', NOW))?.monthlyQuota).toBe(700);
+    const next = await readMembership(db, 'alice', day(21));
+    expect(next?.monthlyQuota).toBe(1000);
+    expect(next?.expiresAt).toBe(day(50).toISOString());
+  });
+
+  it('lists each account with the quota of its cycle in force', async () => {
+    await grant(30, 500);
+    await grant(30, 1000, day(5));
+    const rows = await listMemberships(db, undefined, 10, day(6));
+    expect(rows.find((r) => r.username === 'alice')?.membership?.monthlyQuota).toBe(500);
+    expect(rows.find((r) => r.username === 'bob')?.membership).toBeNull();
+  });
+
+  describe('an edit by staff', () => {
+    const edit = (expiresAt: Date, monthlyQuota: number, at = NOW) =>
+      updateMembership(db, {
+        actorId: 'op',
+        targetId: 'alice',
+        expiresAt,
+        monthlyQuota,
+        now: at,
+      });
+
+    it('sets the end and the quota of the running period, and drops what was queued after it', async () => {
+      await grant(30, 500);
+      await grant(30, 1000);
+      expect(await edit(day(45), 900)).toBe(true);
+      const m = await readMembership(db, 'alice', day(1));
+      expect(m).toMatchObject({ monthlyQuota: 900, expiresAt: day(45).toISOString() });
+      expect(await periodCount()).toBe(1);
+    });
+
+    it('starts a new period now for a lapsed member given a later expiry', async () => {
+      await grant(10, 500);
+      expect(await edit(day(70), 800, day(50))).toBe(true);
+      const m = await readMembership(db, 'alice', day(51));
+      expect(m?.active).toBe(true);
+      expect(m?.cycle?.start).toBe(day(50).toISOString());
+      expect(m?.monthlyQuota).toBe(800);
+    });
+
+    it('ends a running membership when the expiry is set to the past', async () => {
+      await grant(30, 500);
+      expect(await edit(day(-1), 500, day(1))).toBe(true);
+      expect((await readMembership(db, 'alice', day(1)))?.active).toBe(false);
+    });
+
+    it('reports false for an account without a membership', async () => {
+      expect(await edit(day(30), 500)).toBe(false);
+    });
+  });
+
+  it('removes the periods with the membership', async () => {
+    await grant(30, 500);
+    await grant(30, 1000);
+    expect(await revokeMembership(db, { actorId: 'op', targetId: 'alice', now: NOW })).toBe(true);
+    expect(await readMembership(db, 'alice', NOW)).toBeUndefined();
+    expect(await periodCount()).toBe(0);
+  });
+
+  it('stacks an approved access request after the running period too', async () => {
+    await grant(5, 500); // within 7 days of the end, so renewing is allowed
+    await createAccessRequest(db, { accountId: 'alice', note: undefined, now: NOW });
+    expect(
+      await decideAccessRequest(db, {
+        actorId: 'op',
+        accountId: 'alice',
+        decision: 'approve',
+        days: 30,
+        monthlyQuota: 1000,
+        reason: undefined,
+        now: NOW,
+      }),
+    ).toBe(true);
+    expect((await readMembership(db, 'alice', day(1)))?.monthlyQuota).toBe(500);
+    const after = await readMembership(db, 'alice', day(5));
+    expect(after).toMatchObject({ monthlyQuota: 1000, expiresAt: day(35).toISOString() });
+  });
+
+  describe('reward tokens', () => {
+    it('belong to one cycle: the next cycle starts with none and its own cap', async () => {
+      await grant(90, 500);
+      const first = (await readMembership(db, 'alice', NOW))!.cycle!.key;
+      expect(await creditBonusTokens(db, 'acct:alice', NOW, 1000)).toBe(1000);
+      const second = (await readMembership(db, 'alice', day(31)))!.cycle!.key;
+      expect(second).not.toBe(first);
+      expect(await readBonusTokens(db, 'acct:alice', second)).toBe(0);
+      expect(await creditBonusTokens(db, 'acct:alice', day(31), MONTHLY_REWARD_CAP_TOKENS)).toBe(
+        MONTHLY_REWARD_CAP_TOKENS,
+      );
+      expect(await readBonusTokens(db, 'acct:alice', first)).toBe(1000);
+    });
+
+    it('credit nothing to an owner with no plan running', async () => {
+      expect(await creditBonusTokens(db, 'acct:bob', NOW, 1000)).toBe(0);
+      expect(await creditBonusTokens(db, 'anon:someone', NOW, 1000)).toBe(0);
+      await grant(10, 500);
+      expect(await creditBonusTokens(db, 'acct:alice', day(11), 1000)).toBe(0);
     });
   });
 });
@@ -328,14 +511,26 @@ describe('classes and the catalog', () => {
 });
 
 describe('reader rewards and badges', () => {
-  it('credits the author once per reader, capped per month, and earns the first badge at ten readers', async () => {
-    const month = '2026-10';
+  /** A running plan for alice, which is what a reward needs to land on. Returns the key of her cycle. */
+  const planOfAlice = async () => {
+    await grantMembership(db, {
+      actorId: 'op',
+      targetId: 'alice',
+      days: 30,
+      monthlyQuota: 500,
+      reason: undefined,
+      now: NOW,
+    });
+    return (await readMembership(db, 'alice', NOW))!.cycle!.key;
+  };
+
+  it('credits the author once per reader, capped per cycle, and earns the first badge at ten readers', async () => {
+    const key = await planOfAlice();
     const author = 'acct:alice';
     const credited = await recordCourseRead(db, {
       courseId: 's1',
       readerId: 'bob',
       authorId: author,
-      month,
       now: NOW,
     });
     expect(credited).toBe(READER_REWARD_TOKENS);
@@ -345,11 +540,10 @@ describe('reader rewards and badges', () => {
         courseId: 's1',
         readerId: 'bob',
         authorId: author,
-        month,
         now: NOW,
       }),
     ).toBe(0);
-    expect(await readBonusTokens(db, author, month)).toBe(READER_REWARD_TOKENS);
+    expect(await readBonusTokens(db, author, key)).toBe(READER_REWARD_TOKENS);
 
     for (let i = 0; i < 9; i += 1) {
       await pg.query(`INSERT INTO accounts (id, username, password_hash) VALUES ($1, $2, 'x')`, [
@@ -360,14 +554,14 @@ describe('reader rewards and badges', () => {
         courseId: 's1',
         readerId: `r${i}`,
         authorId: author,
-        month,
         now: NOW,
       });
     }
     expect(await readBadges(db, author)).toEqual(['readers-10']);
   });
 
-  it('never credits more than the monthly cap', async () => {
+  it('never credits more than the cap of one cycle', async () => {
+    const key = await planOfAlice();
     const author = 'acct:alice';
     const perReader = READER_REWARD_TOKENS;
     const needed = Math.ceil(MONTHLY_REWARD_CAP_TOKENS / perReader) + 2;
@@ -381,12 +575,11 @@ describe('reader rewards and badges', () => {
         courseId: 's2',
         readerId: `m${i}`,
         authorId: author,
-        month: '2026-10',
         now: NOW,
       });
     }
     expect(total).toBe(MONTHLY_REWARD_CAP_TOKENS);
-    expect(await readBonusTokens(db, author, '2026-10')).toBe(MONTHLY_REWARD_CAP_TOKENS);
+    expect(await readBonusTokens(db, author, key)).toBe(MONTHLY_REWARD_CAP_TOKENS);
   });
 });
 
@@ -770,7 +963,6 @@ describe('contribution: own shares, readers and the next badge', () => {
         courseId: course,
         readerId: reader,
         authorId: author,
-        month: '2026-10',
         now: NOW,
       });
     }
@@ -793,7 +985,6 @@ describe('contribution: own shares, readers and the next badge', () => {
         courseId: course,
         readerId: reader,
         authorId: author,
-        month: '2026-10',
         now: NOW,
       });
     }

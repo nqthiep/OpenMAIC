@@ -338,10 +338,12 @@ export async function fetchServerProviders(): Promise<Record<ProviderKind, strin
   >;
 }
 
-/** This month's allowance. `active` is false for anyone without an active membership. */
+/** The allowance of the running cycle. `active` is false for anyone without an active membership. */
 export interface MembershipUsage {
   readonly active: boolean;
-  readonly month: string;
+  /** The cycle's start, and its end: when the allowance comes back. */
+  readonly cycleStart?: string;
+  readonly cycleEnd?: string;
   readonly quota?: number;
   readonly bonus?: number;
   readonly used?: number;
@@ -420,7 +422,12 @@ export interface Contribution {
   readonly shares: readonly OwnShareRow[];
   /** Distinct members who read any of their courses. */
   readonly readers: number;
-  readonly bonus: { readonly month: string; readonly tokens: number; readonly cap: number };
+  readonly bonus: {
+    /** When the running cycle began; null for a member with no plan running. */
+    readonly cycleStart: string | null;
+    readonly tokens: number;
+    readonly cap: number;
+  };
   /** Badge codes earned. */
   readonly badges: readonly string[];
   readonly next: { readonly code: string; readonly readersNeeded: number } | null;

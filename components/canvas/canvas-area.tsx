@@ -258,7 +258,7 @@ export function CanvasArea({
                         ease: 'easeInOut',
                       },
                     }}
-                    className="w-20 h-20 rounded-full bg-white/95 dark:bg-gray-800/95 flex items-center justify-center shadow-[0_4px_30px_rgba(66,114,171,0.15),inset_0_0_0_1px_rgba(197,213,232,0.5)] dark:shadow-[0_4px_30px_rgba(66,114,171,0.3),inset_0_0_0_1px_rgba(31,65,108,0.3)]"
+                    className="w-20 h-20 rounded-full bg-white/95 dark:bg-gray-800/95 flex items-center justify-center shadow-[0_4px_30px_rgba(66,111,171,0.15),inset_0_0_0_1px_rgba(197,213,232,0.5)] dark:shadow-[0_4px_30px_rgba(66,111,171,0.3),inset_0_0_0_1px_rgba(31,65,108,0.3)]"
                     style={{ willChange: 'transform' }}
                   >
                     <Play className="w-7 h-7 text-purple-600 dark:text-purple-400 fill-purple-600/90 dark:fill-purple-400/90 ml-0.5" />

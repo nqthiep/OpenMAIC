@@ -13,8 +13,8 @@
     "slogan": "知識をひらく · 未来をつくる",
     "greetingWithName": "こんにちは、{{name}}さん",
     "guest": {
-      "kicker": "AI は、あなたの学びのパートナー",
-      "description": "講義、スライド、議論は AI の助けを借りて用意し、共有する前に人が確認します。まずは無料でお試しください。アカウントは不要です。",
+      "kicker": "5年生・9年生・12年生のための学習と復習",
+      "description": "無料でお試しください。アカウントは不要です。授業はAIの助けを借りて作られ、共有される前に人が確認します。",
       "signIn": "ログイン",
       "browseCatalog": "講座を探す",
       "stepsTitle": "利用の流れ",
@@ -30,14 +30,14 @@
       },
       "step3": {
         "title": "会員になる",
-        "body": "会員は AI で講座を作成し、クラスに参加して、作ったものを共有できます。"
+        "body": "会員は必要なテーマで講座を作り、クラスに参加し、作ったものを共有できます。"
       },
       "previewsTitle": "無料試聴",
       "previewsEmpty": "試聴できる講座はまだありません。また後でご覧ください。",
       "membershipTitle": "会員になる",
-      "membershipBody": "会員には毎月の利用枠があり、AI で講座を作成し、招待コードでクラスに参加し、他の会員と講座を共有できます。",
+      "membershipBody": "会員は毎月の枠で講座を作成でき、コードでクラスに参加し、ほかの会員と講座を共有できます。",
       "nav": {
-        "story": "Our story",
+        "story": "私たちの物語",
         "features": "機能",
         "how": "使い方",
         "previews": "試聴講座",
@@ -54,10 +54,10 @@
       },
       "features": {
         "title": "理解を助けるために",
-        "subtitle": "AI が説明し、話し合い、理解度を確かめます。根気のある仲間と学ぶような感覚で、何を学ぶかは自分で決められます。",
+        "subtitle": "解説し、話し合い、理解度を確認します。辛抱強い学習グループのように。何を学ぶかは自分で決められます。",
         "f1": {
           "title": "どの授業にも学習グループ",
-          "body": "先生、クラスメート、アシスタントはすべて AI が務め、ひとつの考えをいろいろな角度から説明します。"
+          "body": "バーチャルの先生、バーチャルのクラスメイト、アシスタントが加わり、一つの考えを複数の側面から説明します。"
         },
         "f2": {
           "title": "スライドとホワイトボード",
@@ -82,7 +82,7 @@
       },
       "previewsSubtitle": "これらの講座は、アカウントなしですぐに開けます。",
       "perks": {
-        "p1": "AI で講座を作れる月間利用枠",
+        "p1": "自分の講座を作れる毎月の枠",
         "p2": "招待コードでクラスに参加",
         "p3": "講座を他の会員と共有",
         "p4": "講座を Web ページや PowerPoint で書き出し"
@@ -93,11 +93,11 @@
       },
       "footerTagline": "KHAITAM · オープンソースプロジェクト OpenMAIC をベースに構築",
       "trust": {
-        "title": "AI を、慎重に使う",
-        "subtitle": "AI をまだ信頼できないという方も多いと理解しています。信頼していただくために、次のことを大切にしています。",
+        "title": "安心して学ぶ",
+        "subtitle": "ここでの授業はAIの助けを借りて作られています。まだ不安に思う方もいることを私たちは知っています。信頼していただくための取り組みをご紹介します。",
         "t1": {
           "title": "主導権はあなたに",
-          "body": "AI は説明と練習をお手伝いするだけです。何を学ぶかは自分で選べ、いつでもやめられます。"
+          "body": "道具は説明と練習を助けるだけです。何を学ぶかは自分で選べ、いつでもやめられます。"
         },
         "t2": {
           "title": "共有の前に確認",
@@ -105,7 +105,7 @@
         },
         "t3": {
           "title": "限界も正直に",
-          "body": "AI は間違えることがあります。大切なことは、先生や信頼できる情報源で確かめてください。"
+          "body": "授業に誤りが含まれることがあります。大切なことは、先生や教科書で確かめてください。"
         },
         "t4": {
           "title": "見てから決める",
@@ -113,49 +113,87 @@
         }
       },
       "pillars": {
-        "p1": "Intelligence to understand the world",
-        "p2": "Technology to expand what people can do",
-        "p3": "People to create value"
+        "p1": "世界を理解するための知性",
+        "p2": "できることを広げるテクノロジー",
+        "p3": "価値を生み出す人"
       },
       "story": {
-        "eyebrow": "Our story",
-        "title": "From big questions, · to real value.",
-        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
-        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "eyebrow": "私たちの物語",
+        "title": "大きな問いから、 · 本当の価値へ。",
+        "body1": "KHAITAMは二つの思いを結びます。ひらき、探究するKHAIの精神と、TÂMの深さと人間らしさです。",
+        "body2": "知性、テクノロジー、人が一緒に歩むとき、今日の問いは明日の答えになると私たちは信じています。",
         "values": {
           "v1": {
-            "title": "Openness",
-            "body": "Look far, discover what is new."
+            "title": "ひらく",
+            "body": "遠くを見て、新しいものを見つける。"
           },
           "v2": {
-            "title": "Intelligence",
-            "body": "Learn, analyse, create value."
+            "title": "知性",
+            "body": "学び、考え、価値を生み出す。"
           },
           "v3": {
-            "title": "Heart",
-            "body": "For people, for the community."
+            "title": "こころ",
+            "body": "人のために、地域のために。"
           }
         },
         "traits": {
           "k1": {
-            "name": "Deep",
-            "hint": "Never showy"
+            "name": "深い",
+            "hint": "目立とうとしない"
           },
           "k2": {
-            "name": "Systematic",
-            "hint": "Never scattered"
+            "name": "体系的",
+            "hint": "ばらばらにしない"
           },
           "k3": {
-            "name": "Humane",
-            "hint": "Never replacing people"
+            "name": "人間的",
+            "hint": "人に取って代わらない"
           }
         }
+      },
+      "lead": "数学・情報・物理・化学のどの授業も対話型です。解説する先生、スライド、ホワイトボード、確認問題が授業の中にそろっていて、問題演習の前にしっかり理解できます。",
+      "tryFree": "無料で授業を試す",
+      "intents": {
+        "title": "5年生・9年生・12年生のみなさんへ",
+        "subtitle": "数学・情報・物理・化学。新しい内容を学ぶときも、テスト前に復習するときも、短い授業から始められます。",
+        "i1": {
+          "title": "今日の授業を理解する",
+          "body": "一つひとつの考え方を順を追って説明し、スライドとホワイトボードでやり方が見えます。"
+        },
+        "i2": {
+          "title": "テスト前に復習する",
+          "body": "必要な単元を選び、あやふやな部分を聞き直し、問題に答えてまだ弱いところを確かめます。"
+        },
+        "i3": {
+          "title": "もう少し練習する",
+          "body": "小テストや小さなプロジェクトで、学んだことを読むだけでなく使ってみます。"
+        }
+      },
+      "footerSource": "オープンソース",
+      "footerLegal": "法的情報とお問い合わせ",
+      "footerTerms": "利用規約",
+      "footerPrivacy": "プライバシー",
+      "footerContact": "お問い合わせ",
+      "pricing": {
+        "trial": "最初の{{days}}日間は無料",
+        "trialBody": "試用枠で会員向け機能をお試しいただけます。支払い情報は不要で、自動的に課金することはありません。",
+        "then": "無料期間のあと",
+        "price": "会員プランの料金",
+        "plan": {
+          "m1": "1か月",
+          "m6": "6か月",
+          "m12": "12か月"
+        },
+        "save": "{{percent}}%お得",
+        "note": "表示は最終価格で、追加料金はありません。毎月レッスン作成の枠があり、翌月には繰り越されません。プランは自動更新されません。",
+        "pay": "現在のお支払いは銀行振込です。{{email}}までご連絡のうえプランをお選びください。入金確認後に有効にします。",
+        "cta": "アカウントを作成して無料で試す"
       }
     },
     "locked": {
-      "membership": "AI での講座作成は会員向けの機能です。",
+      "membership": "講座の作成は会員向けです。",
       "classes": "クラスへの参加は会員向けの機能です。",
-      "contactAdmin": "会員への追加は管理者にご依頼ください。",
+      "contactAdmin": "会員に追加するには{{email}}までご連絡ください。",
       "quota": "今月の AI 利用枠を使い切りました。",
       "quotaReset": "講座の作成は {{date}} から再開できます。",
       "previews": "無料プレビューを見る"
@@ -169,11 +207,11 @@
     },
     "status": {
       "ok": "会員期限 {{date}} · 残り {{days}} 日",
-      "expiring": "会員資格は {{date}} に終了します（残り {{days}} 日）。更新は管理者にご依頼ください。",
+      "expiring": "会員資格は{{date}}に終了します（残り{{days}}日）。更新するには{{email}}までご連絡ください。",
       "quotaNear": "今月の AI 利用枠の {{percent}}% を使用しました。",
       "quotaOut": "今月の AI 利用枠を使い切りました。作成済みの講座は引き続き学習できます。",
-      "expired": "会員資格は {{date}} に終了しました。作成済みの講座は引き続き閲覧できます。新しい講座を作るには、管理者に更新をご依頼ください。",
-      "suspended": "会員資格は一時停止中です。作成済みの講座は引き続き閲覧できます。再開は管理者にご依頼ください。"
+      "expired": "会員資格は{{date}}に終了しました。コースは引き続き閲覧できます。更新して新しいコースを作成するには{{email}}までご連絡ください。",
+      "suspended": "会員資格は一時停止中です。コースは引き続き閲覧できます。再開するには{{email}}までご連絡ください。"
     },
     "continue": {
       "title": "学習を続ける",
@@ -2312,7 +2350,8 @@
     "hints": {
       "username": "3〜32文字：英字、数字、ピリオド、アンダースコア、ハイフンが使えます。英字または数字で始めてください。",
       "password": "8〜256文字。",
-      "forgot": "パスワードを忘れた場合は、管理者または先生にリセットを依頼してください。"
+      "forgot": "パスワードをお忘れですか？ユーザー名を添えて{{email}}までご連絡ください。再設定いたします。",
+      "trial": "新しいアカウントは支払い情報なしで{{days}}日間無料でお試しいただけます。"
     },
     "submit": {
       "signIn": "ログイン",
@@ -2332,7 +2371,8 @@
       "invalidRequest": "リクエストを処理できませんでした。もう一度お試しください。",
       "internal": "サーバーでこのリクエストを完了できませんでした。しばらくしてからもう一度お試しください。",
       "generic": "問題が発生しました。もう一度お試しください。",
-      "sessionEnded": "サインインの期限が切れました。続けるには再度サインインしてください。"
+      "sessionEnded": "サインインの期限が切れました。続けるには再度サインインしてください。",
+      "termsNotAccepted": "アカウントを作成するには、同意のチェックを入れてください。"
     },
     "admin": {
       "title": "Accounts",
@@ -2426,6 +2466,11 @@
       "changed": "パスワードを変更しました。他の端末はサインアウトされました。",
       "wrongCurrent": "現在のパスワードが正しくありません。",
       "mismatch": "新しいパスワードが一致しません。"
+    },
+    "consent": {
+      "label": "{{terms}}に同意し、{{privacy}}を読みました。私は16歳以上であるか、保護者がサービスの利用に同意しています。",
+      "terms": "利用規約",
+      "privacy": "プライバシーポリシー"
     }
   },
   "proMode": {
@@ -2931,12 +2976,13 @@
       "loadFailed": "Could not read the OmniRoute status. Try again.",
       "retry": "Try again",
       "unconfigured": {
-        "title": "OmniRoute is not set up on this server",
-        "body": "Add these values to the server's .env file, then restart the app:"
+        "title": "OmniRoute is not connected to this app",
+        "body": "OmniRoute runs as its own service beside the app and connects by itself when both run with Docker Compose. Run docker compose up -d in the install folder; if the app runs outside Docker, see ops/omniroute/README.md.",
+        "invalid": "These values are set but cannot be used:"
       },
       "unreachable": {
         "title": "The app cannot reach OmniRoute",
-        "body": "Check that the OmniRoute container is running and that OMNIROUTE_ADMIN_PASSWORD matches its password."
+        "body": "Check that the omniroute service is running (docker compose ps). If the omniroute-secrets volume was deleted while OmniRoute's data was kept, the two passwords differ: see ops/omniroute/README.md."
       },
       "step1": {
         "title": "Providers in OmniRoute",
@@ -3418,6 +3464,8 @@
       "other": "その他"
     },
     "grade": {
+      "5": "5年生",
+      "9": "9年生",
       "10": "10年生",
       "11": "11年生",
       "12": "12年生"

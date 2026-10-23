@@ -1,7 +1,7 @@
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { hashSessionToken, readSessionCookie } from '@/lib/server/accounts/session';
 import { authorize, bodyOf, invalid, learningRoute } from '@/lib/server/learning/http';
-import { omnirouteConfig } from '@/lib/server/omniroute/config';
+import { dashboardOrigin, omnirouteConfig } from '@/lib/server/omniroute/config';
 import { allowedDeepLink } from '@/lib/server/omniroute/links';
 import { mintToken, TICKET_TTL_MS } from '@/lib/server/omniroute/token';
 
@@ -33,6 +33,10 @@ export async function POST(request: Request): Promise<Response> {
       }
       const config = omnirouteConfig();
       if (!config) return apiError('NOT_FOUND', 404, 'OmniRoute is not set up on this server.');
+      const origin = dashboardOrigin(config, request.headers.get('origin'));
+      if (!origin) {
+        return invalid('The address of this page is unknown; set OMNIROUTE_PUBLIC_URL.');
+      }
       const accountId = ctx.viewer.accountId!;
       const sessionToken = readSessionCookie(request.headers);
       if (!sessionToken) return apiError('UNAUTHENTICATED', 401, 'Sign in to continue.');
@@ -44,7 +48,7 @@ export async function POST(request: Request): Promise<Response> {
       );
       const ticket = mintToken('ticket', accountId, sessionKey, TICKET_TTL_MS, config.gateSecret);
       const target = path ? `&to=${encodeURIComponent(path)}` : '';
-      return apiSuccess({ url: `${config.publicUrl}/__enter?t=${ticket}${target}` });
+      return apiSuccess({ url: `${origin}/__enter?t=${ticket}${target}` });
     },
     { mutating: true },
   );

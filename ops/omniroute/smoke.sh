@@ -17,16 +17,17 @@
 #
 # Two optional tests read the environment, never the command line, so nothing
 # secret shows in `ps` or in the output:
-#   OMNIROUTE_GATE_SECRET  (the value from .env) makes the script sign a gate
-#     cookie for an account that does not exist and expect exactly 403. That
-#     proves the Cookie header reaches the app, the secret matches and the
-#     database lookup ran (no cookie, or a wrong secret, would give 401).
+#   OMNIROUTE_GATE_SECRET  (only when you pinned one in .env; by default the app
+#     makes its own per process and nothing outside can sign) makes the script
+#     sign a gate cookie for an account that does not exist and expect exactly
+#     403. That proves the Cookie header reaches the app, the secret matches and
+#     the database lookup ran (no cookie, or a wrong secret, would give 401).
 #   OMNIROUTE_SMOKE_COOKIE (the omniroute_gate cookie of a signed-in admin,
 #     copied from the browser's developer tools) expects the dashboard to answer
 #     below 400 with Cache-Control containing no-store.
 #
 # --internal adds two tests inside the Docker network (they need the running
-# `docker compose --profile omniroute` stack; without the flag, or without
+# `docker compose` stack; without the flag, or without
 # docker compose, they print SKIP): the app container must reach OmniRoute's
 # API port (omniroute:20129), and the omniroute container must NOT reach
 # Postgres (postgres:5432).
@@ -111,9 +112,9 @@ PY
 }
 
 echo
-echo '# cookie forwarding (needs OMNIROUTE_GATE_SECRET in the environment)'
+echo '# cookie forwarding (needs OMNIROUTE_GATE_SECRET in the environment, only if one is pinned)'
 if [ -z "${OMNIROUTE_GATE_SECRET:-}" ] || ! command -v python3 >/dev/null 2>&1; then
-  echo 'SKIP signed cookie for a missing account — set OMNIROUTE_GATE_SECRET (and have python3)'
+  echo 'SKIP signed cookie for a missing account — needs OMNIROUTE_GATE_SECRET pinned in .env (and python3); the admitted-request test below proves the same without it'
 else
   forged="$(forge_gate_cookie)"
   status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 \

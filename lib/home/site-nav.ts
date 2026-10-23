@@ -33,6 +33,19 @@ export function siteNavLinks(session: AccountSession | null | undefined): SiteNa
   return [HOME, CATALOG, COMMUNITY];
 }
 
+/** The sections of the guest home, in the order of the page; the ids are the sections' anchors. */
+export const GUEST_SECTIONS = ['features', 'how', 'previews', 'membership', 'story'] as const;
+
+/**
+ * Links to the sections of the guest home. On the home itself they are anchors in the page; on any
+ * other page they lead back to the same section of the home, so the top bar holds the same links
+ * wherever a visitor who is not signed in stands.
+ */
+export function guestSectionLinks(pathname: string): SiteNavLink[] {
+  const base = pathname === '/' ? '' : '/';
+  return GUEST_SECTIONS.map((id) => ({ href: `${base}#${id}`, labelKey: `home.guest.nav.${id}` }));
+}
+
 /** Where the logo leads: the operations dashboard for staff, the home for everyone else. */
 export function siteHomeHref(session: AccountSession | null | undefined): string {
   return isStaff(session) ? '/admin' : '/';

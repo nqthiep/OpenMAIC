@@ -25,7 +25,7 @@ vi.mock('@/lib/server/resolve-model', () => ({
 }));
 vi.mock('@/lib/server/usage-storage', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/server/usage-storage')>()),
-  monthlyLlmTokens: async () => ai.usedTokens,
+  llmTokensBetween: async () => ai.usedTokens,
 }));
 
 class PGlitePool {
@@ -113,7 +113,9 @@ function getRequest(cookie?: string): Request {
 }
 
 async function signUp(routes: Routes, username: string, member = false): Promise<string> {
-  const response = await routes.register(jsonRequest('POST', { username, password: PASSWORD }));
+  const response = await routes.register(
+    jsonRequest('POST', { username, password: PASSWORD, acceptedTerms: true }),
+  );
   if (member) {
     await db!.query(
       `INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by)

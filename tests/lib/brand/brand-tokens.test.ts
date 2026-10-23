@@ -40,7 +40,7 @@ describe('brand tokens (KHAITAM, brand board of 2026-10-22)', () => {
     expect(token('brand-page')).toBe('#f3f0e8'); // Trắng giấy
     // Derived, not named by the board: the mid steps that must read on both themes,
     // the readable teals and the muted text.
-    expect(token('brand-600')).toBe('#4272ab');
+    expect(token('brand-600')).toBe('#426fab');
     expect(token('brand-teal-ink')).toBe('#23695f');
     expect(token('brand-mint')).toBe('#76d5c1');
     expect(token('brand-peach')).toBe('#f4cab1'); // the fourth icon tint, sampled from the board
@@ -106,6 +106,7 @@ describe('brand tokens (KHAITAM, brand board of 2026-10-22)', () => {
     // The ramp is static, so its middle step must be visible on both themes: 3:1 against the
     // dark page and the dark card (non-text), and a white label on it reads at 4.5:1.
     expect(contrast(white, token('brand-600'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(token('brand-600'), page)).toBeGreaterThanOrEqual(4.5); // small text on paper
     expect(contrast(token('brand-600'), darkBg)).toBeGreaterThanOrEqual(3);
     expect(contrast(token('brand-600'), navy)).toBeGreaterThanOrEqual(3);
   });

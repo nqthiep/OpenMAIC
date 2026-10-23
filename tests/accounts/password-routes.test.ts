@@ -85,7 +85,9 @@ function cookieFrom(response: Response): string {
 
 async function signUp(handlers: Handlers, username: string): Promise<string> {
   return cookieFrom(
-    await handlers.register(post('/api/auth/register', { username, password: PASSWORD })),
+    await handlers.register(
+      post('/api/auth/register', { username, password: PASSWORD, acceptedTerms: true }),
+    ),
   );
 }
 

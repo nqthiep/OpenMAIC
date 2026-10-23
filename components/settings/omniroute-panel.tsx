@@ -368,13 +368,20 @@ export function OmniRoutePanel() {
         <div className="flex flex-col gap-2 rounded-xl border p-4">
           <h4 className="text-sm font-semibold">{t('admin.omniroute.unconfigured.title')}</h4>
           <p className="text-sm text-muted-foreground">{t('admin.omniroute.unconfigured.body')}</p>
-          <ul className="flex flex-col gap-1">
-            {data.missingEnv.map((name) => (
-              <li key={name}>
-                <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{name}</code>
-              </li>
-            ))}
-          </ul>
+          {data.missingEnv.length > 0 ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                {t('admin.omniroute.unconfigured.invalid')}
+              </p>
+              <ul className="flex flex-col gap-1">
+                {data.missingEnv.map((name) => (
+                  <li key={name}>
+                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{name}</code>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
         </div>
       ) : null}
 

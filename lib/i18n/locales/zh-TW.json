@@ -13,8 +13,8 @@
     "slogan": "開啟知識 · 創造未來",
     "greetingWithName": "嗨，{{name}}",
     "guest": {
-      "kicker": "AI 是你的學習夥伴",
-      "description": "課程、投影片與討論在 AI 的協助下準備，並於分享前由人工審核。你可以先免費試看，無需帳號。",
+      "kicker": "給五年級、九年級與十二年級的學習與複習",
+      "description": "免費試看，不需要帳號。課程在 AI 的協助下撰寫，並在分享前由真人審閱。",
       "signIn": "登入",
       "browseCatalog": "瀏覽課程",
       "stepsTitle": "使用方式",
@@ -30,14 +30,14 @@
       },
       "step3": {
         "title": "成為會員",
-        "body": "會員可以用 AI 建立課程、加入班級，並分享自己的作品。"
+        "body": "會員可以依自己需要的主題建立課程、加入班級，並分享自己的作品。"
       },
       "previewsTitle": "免費試看",
       "previewsEmpty": "目前沒有試看課程，請稍後再來。",
       "membershipTitle": "成為會員",
-      "membershipBody": "會員每月有一份額度，可用 AI 建立課程，憑邀請碼加入班級，並與其他會員分享課程。",
+      "membershipBody": "會員每月有一定額度可建立課程，可以憑邀請碼加入班級，也能與其他會員分享課程。",
       "nav": {
-        "story": "Our story",
+        "story": "我們的故事",
         "features": "功能",
         "how": "使用方式",
         "previews": "試看課程",
@@ -54,10 +54,10 @@
       },
       "features": {
         "title": "為幫助你理解而設計",
-        "subtitle": "AI 負責講解、討論並檢查你的理解，就像和一群有耐心的同學一起學習，而學什麼由你決定。",
+        "subtitle": "像一個有耐心的學習小組那樣講解、討論並檢查你的理解，學什麼由你決定。",
         "f1": {
           "title": "每堂課都有學習小組",
-          "body": "老師、同學與助教都由 AI 扮演，一起參與，讓每個觀念從多個角度說清楚。"
+          "body": "虛擬老師、虛擬同學和助教一起參與，讓每個概念都能從多個角度講清楚。"
         },
         "f2": {
           "title": "投影片與白板",
@@ -82,7 +82,7 @@
       },
       "previewsSubtitle": "現在就能開啟這些課程，無需帳號。",
       "perks": {
-        "p1": "每月 AI 額度，可自行建立課程",
+        "p1": "每月可用來建立自己課程的額度",
         "p2": "憑邀請碼加入班級",
         "p3": "與其他會員分享你的課程",
         "p4": "將課程匯出為網頁或 PowerPoint"
@@ -93,11 +93,11 @@
       },
       "footerTagline": "KHAITAM · 基於開源專案 OpenMAIC 建構",
       "trust": {
-        "title": "謹慎地使用 AI",
-        "subtitle": "我們知道並非每個人都對 AI 放心。以下是我們努力贏得你信任的方式。",
+        "title": "安心學習",
+        "subtitle": "這裡的課程在 AI 的協助下撰寫。我們知道並非所有人都已經習慣，所以說明我們如何努力贏得你的信任。",
         "t1": {
           "title": "學什麼由你決定",
-          "body": "AI 只負責協助講解與練習。學什麼由你選擇，也可以隨時停下。"
+          "body": "這些工具只協助講解與練習。學什麼由你選擇，也可以隨時停下。"
         },
         "t2": {
           "title": "分享前先審核",
@@ -105,7 +105,7 @@
         },
         "t3": {
           "title": "坦誠說明限制",
-          "body": "AI 可能出錯。重要內容請向老師或可靠來源查證。"
+          "body": "課程可能有錯誤。重要的內容，請向老師或課本確認。"
         },
         "t4": {
           "title": "先看再決定",
@@ -113,49 +113,87 @@
         }
       },
       "pillars": {
-        "p1": "Intelligence to understand the world",
-        "p2": "Technology to expand what people can do",
-        "p3": "People to create value"
+        "p1": "以智慧理解世界",
+        "p2": "以科技擴展能力",
+        "p3": "讓人創造價值"
       },
       "story": {
-        "eyebrow": "Our story",
-        "title": "From big questions, · to real value.",
-        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
-        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "eyebrow": "我們的故事",
+        "title": "從大哉問出發， · 抵達真正的價值。",
+        "body1": "KHAITAM 結合了兩種理念：KHAI 開啟與探索的精神，以及 TÂM 的深度與人文關懷。",
+        "body2": "我們相信，當智慧、科技與人同行，今天的問題就會成為明天的答案。",
         "values": {
           "v1": {
-            "title": "Openness",
-            "body": "Look far, discover what is new."
+            "title": "開啟",
+            "body": "看得遠，發現新事物。"
           },
           "v2": {
-            "title": "Intelligence",
-            "body": "Learn, analyse, create value."
+            "title": "智慧",
+            "body": "學習、分析、創造價值。"
           },
           "v3": {
-            "title": "Heart",
-            "body": "For people, for the community."
+            "title": "用心",
+            "body": "為了人，為了社群。"
           }
         },
         "traits": {
           "k1": {
-            "name": "Deep",
-            "hint": "Never showy"
+            "name": "深刻",
+            "hint": "不張揚"
           },
           "k2": {
-            "name": "Systematic",
-            "hint": "Never scattered"
+            "name": "系統",
+            "hint": "不零散"
           },
           "k3": {
-            "name": "Humane",
-            "hint": "Never replacing people"
+            "name": "人文",
+            "hint": "不取代人"
           }
         }
+      },
+      "lead": "數學、資訊科技、物理、化學的每一堂課都是互動式的：有講解的老師、投影片、白板，課程中還有檢查問題，讓你在練習之前先真正理解。",
+      "tryFree": "免費試上一堂課",
+      "intents": {
+        "title": "給五年級、九年級與十二年級的同學",
+        "subtitle": "數學、資訊科技、物理與化學：無論是學新內容，還是考前複習，都可以從一堂短課開始。",
+        "i1": {
+          "title": "弄懂今天的課",
+          "body": "每個概念一步一步講解，搭配投影片和白板，讓你看清做法。"
+        },
+        "i2": {
+          "title": "考試前複習",
+          "body": "選擇需要的主題，重聽不熟的部分，並透過答題看出自己哪裡還弱。"
+        },
+        "i3": {
+          "title": "再多練習一點",
+          "body": "透過測驗與小專案運用剛學的內容，而不只是讀過去。"
+        }
+      },
+      "footerSource": "開源",
+      "footerLegal": "法律資訊與聯絡",
+      "footerTerms": "使用條款",
+      "footerPrivacy": "隱私權",
+      "footerContact": "聯絡我們",
+      "pricing": {
+        "trial": "前{{days}}天免費",
+        "trialBody": "以試用額度體驗會員功能。無需付款資訊，我們也絕不會自動扣款。",
+        "then": "免費期之後",
+        "price": "會員價格",
+        "plan": {
+          "m1": "1個月",
+          "m6": "6個月",
+          "m12": "12個月"
+        },
+        "save": "省下{{percent}}%",
+        "note": "價格為最終價格，沒有額外費用。每月有建立課程的額度，不會累計到下個月。方案不會自動續訂。",
+        "pay": "目前以銀行轉帳付款：寫信到 {{email}} 選擇方案，收到款項後我們為你開通。",
+        "cta": "建立帳號，免費試用"
       }
     },
     "locked": {
-      "membership": "以 AI 建立課程僅限會員。",
+      "membership": "建立課程僅限會員。",
       "classes": "加入班級僅限會員。",
-      "contactAdmin": "請讓管理員將你加為會員。",
+      "contactAdmin": "請寫信到 {{email}}，以便加入會員。",
       "quota": "本月 AI 額度已用完。",
       "quotaReset": "{{date}} 起可再次建立課程。",
       "previews": "試看免費預覽"
@@ -169,11 +207,11 @@
     },
     "status": {
       "ok": "會員有效期至 {{date}} · 剩餘 {{days}} 天",
-      "expiring": "你的會員將於 {{date}} 到期（剩餘 {{days}} 天）。請讓管理員為你續期。",
+      "expiring": "你的會員將於{{date}}到期（剩餘{{days}}天）。請寫信到 {{email}} 辦理續期。",
       "quotaNear": "本月 AI 額度已使用 {{percent}}%。",
       "quotaOut": "本月 AI 額度已用完。你的課程仍可繼續學習。",
-      "expired": "你的會員已於 {{date}} 到期。你的課程仍可閱讀。請讓管理員續期後再建立新課程。",
-      "suspended": "你的會員已暫停。你的課程仍可閱讀。請讓管理員恢復。"
+      "expired": "你的會員已於{{date}}到期。你的課程仍可閱讀。請寫信到 {{email}} 續期，以建立新課程。",
+      "suspended": "你的會員已暫停。你的課程仍可閱讀。請寫信到 {{email}} 恢復。"
     },
     "continue": {
       "title": "繼續學習",
@@ -2297,7 +2335,8 @@
     "hints": {
       "username": "3–32 個字元，可使用英文字母、數字、點、底線或連字號，且以英文字母或數字開頭。",
       "password": "8–256 個字元。",
-      "forgot": "忘記密碼？請讓管理員或老師為你重設密碼。"
+      "forgot": "忘記密碼？請附上使用者名稱寫信到 {{email}}，我們會為你重設。",
+      "trial": "新帳號可免費試用{{days}}天，無需填寫付款資訊。"
     },
     "submit": {
       "signIn": "登入",
@@ -2317,7 +2356,8 @@
       "invalidRequest": "無法處理此要求，請重試。",
       "internal": "伺服器無法完成此要求，請稍後重試。",
       "generic": "發生問題，請重試。",
-      "sessionEnded": "登入已結束，請重新登入後繼續。"
+      "sessionEnded": "登入已結束，請重新登入後繼續。",
+      "termsNotAccepted": "請勾選同意後再建立帳號。"
     },
     "admin": {
       "title": "Accounts",
@@ -2411,6 +2451,11 @@
       "changed": "密碼已變更，其他裝置已登出。",
       "wrongCurrent": "目前密碼不正確。",
       "mismatch": "兩次輸入的新密碼不一致。"
+    },
+    "consent": {
+      "label": "我已閱讀並同意{{terms}}，也已閱讀{{privacy}}。我已年滿16歲，或我的父母（監護人）已同意我使用本服務。",
+      "terms": "使用條款",
+      "privacy": "隱私權政策"
     }
   },
   "classroomComplete": {
@@ -2931,12 +2976,13 @@
       "loadFailed": "Could not read the OmniRoute status. Try again.",
       "retry": "Try again",
       "unconfigured": {
-        "title": "OmniRoute is not set up on this server",
-        "body": "Add these values to the server's .env file, then restart the app:"
+        "title": "OmniRoute is not connected to this app",
+        "body": "OmniRoute runs as its own service beside the app and connects by itself when both run with Docker Compose. Run docker compose up -d in the install folder; if the app runs outside Docker, see ops/omniroute/README.md.",
+        "invalid": "These values are set but cannot be used:"
       },
       "unreachable": {
         "title": "The app cannot reach OmniRoute",
-        "body": "Check that the OmniRoute container is running and that OMNIROUTE_ADMIN_PASSWORD matches its password."
+        "body": "Check that the omniroute service is running (docker compose ps). If the omniroute-secrets volume was deleted while OmniRoute's data was kept, the two passwords differ: see ops/omniroute/README.md."
       },
       "step1": {
         "title": "Providers in OmniRoute",
@@ -3418,6 +3464,8 @@
       "other": "其他"
     },
     "grade": {
+      "5": "5 年級",
+      "9": "9 年級",
       "10": "10 年級",
       "11": "11 年級",
       "12": "12 年級"

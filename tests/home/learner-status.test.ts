@@ -5,7 +5,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   membershipNotice,
-  nextMonthStart,
   pickContinue,
   type MembershipLike,
   type UsageLike,
@@ -113,16 +112,5 @@ describe('pickContinue', () => {
     expect(pickContinue([course('empty', 9000, 0), course('a', 100)], new Map())?.id).toBe('a');
     expect(pickContinue([course('a', 100), course('b', 100)], new Map())?.id).toBe('a');
     expect(pickContinue([course('empty', 9000, 0)], new Map())).toBeUndefined();
-  });
-});
-
-describe('nextMonthStart', () => {
-  it('is the first of next month in UTC, across a year end', () => {
-    expect(nextMonthStart(new Date('2026-10-17T12:00:00Z')).toISOString()).toBe(
-      '2026-11-01T00:00:00.000Z',
-    );
-    expect(nextMonthStart(new Date('2026-12-31T23:59:59Z')).toISOString()).toBe(
-      '2027-01-01T00:00:00.000Z',
-    );
   });
 });

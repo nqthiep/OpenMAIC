@@ -5,9 +5,9 @@ import { ensureAccountSchema } from '@/lib/server/accounts/store';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 const PASSWORD = 'correct horse battery staple';
-const ROOT = { username: 'root', password: PASSWORD };
-const ALICE = { username: 'alice', password: PASSWORD };
-const BOB = { username: 'bob', password: PASSWORD };
+const ROOT = { username: 'root', password: PASSWORD, acceptedTerms: true };
+const ALICE = { username: 'alice', password: PASSWORD, acceptedTerms: true };
+const BOB = { username: 'bob', password: PASSWORD, acceptedTerms: true };
 const DATABASE_URL = 'postgres://admin-route-test';
 const ORIGIN = 'http://localhost';
 const THROTTLE_KEY = Symbol.for('openmaic.accounts.loginThrottle');

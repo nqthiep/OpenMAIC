@@ -610,7 +610,7 @@ function Panel({ slot, children }: { readonly slot: PanelSlot; readonly children
         slot === 'sidebar' &&
           'bg-[linear-gradient(180deg,rgba(28,39,71,0.96)_0%,rgba(22,34,62,0.94)_100%)] shadow-[inset_-18px_0_38px_rgba(5,12,28,0.10)]',
         slot === 'chat' &&
-          'bg-[radial-gradient(circle_at_50%_0%,rgba(66,114,171,0.10),transparent_34%),linear-gradient(180deg,rgba(15,27,51,0.78)_0%,rgba(11,23,43,0.82)_100%)]',
+          'bg-[radial-gradient(circle_at_50%_0%,rgba(66,111,171,0.10),transparent_34%),linear-gradient(180deg,rgba(15,27,51,0.78)_0%,rgba(11,23,43,0.82)_100%)]',
         slot === 'submission' &&
           'bg-[linear-gradient(180deg,rgba(18,43,65,0.94)_0%,rgba(18,32,58,0.94)_100%)] shadow-[inset_18px_0_38px_rgba(5,12,28,0.10)]',
       )}

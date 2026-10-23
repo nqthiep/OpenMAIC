@@ -1,7 +1,6 @@
 import { accountOwnerId } from '@/lib/server/accounts/service';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { can } from '@/lib/server/authz/policy';
-import { currentMonth } from '@/lib/server/authz/viewer';
 import {
   ANSWER_BODY_MAX,
   BEST_ANSWER_REWARD_TOKENS,
@@ -141,7 +140,7 @@ export async function PATCH(request: Request, { params }: Params): Promise<Respo
           reward = await creditBonusTokens(
             ctx.db,
             accountOwnerId(marked.rewardAuthorId),
-            currentMonth(ctx.now),
+            ctx.now,
             BEST_ANSWER_REWARD_TOKENS,
           );
         }

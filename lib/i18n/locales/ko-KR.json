@@ -13,8 +13,8 @@
     "slogan": "지식을 열고 · 미래를 만들다",
     "greetingWithName": "안녕하세요, {{name}}!",
     "guest": {
-      "kicker": "AI는 당신의 학습 파트너",
-      "description": "강의, 슬라이드, 토론은 AI의 도움으로 준비하고, 공유하기 전에 사람이 확인합니다. 먼저 무료로 둘러보세요. 계정이 필요 없습니다.",
+      "kicker": "5학년·9학년·12학년을 위한 학습과 복습",
+      "description": "무료로 체험해 보세요. 계정이 필요 없습니다. 수업은 AI의 도움으로 작성되며, 공유되기 전에 사람이 검토합니다.",
       "signIn": "로그인",
       "browseCatalog": "강좌 둘러보기",
       "stepsTitle": "이용 방법",
@@ -30,14 +30,14 @@
       },
       "step3": {
         "title": "회원 되기",
-        "body": "회원은 AI로 강좌를 만들고, 수업에 참여하고, 만든 것을 공유할 수 있습니다."
+        "body": "회원은 필요한 주제로 강좌를 만들고, 클래스에 참여하고, 만든 것을 공유할 수 있습니다."
       },
       "previewsTitle": "무료 미리보기",
       "previewsEmpty": "아직 미리보기 강좌가 없습니다. 나중에 다시 확인해 주세요.",
       "membershipTitle": "회원 되기",
-      "membershipBody": "회원에게는 매달 사용 한도가 주어져 AI로 강좌를 만들고, 초대 코드로 수업에 참여하고, 다른 회원과 강좌를 공유할 수 있습니다.",
+      "membershipBody": "회원은 매달 정해진 한도 안에서 강좌를 만들고, 코드로 클래스에 참여하며, 다른 회원과 강좌를 공유할 수 있습니다.",
       "nav": {
-        "story": "Our story",
+        "story": "우리 이야기",
         "features": "기능",
         "how": "이용 방법",
         "previews": "미리보기",
@@ -54,10 +54,10 @@
       },
       "features": {
         "title": "이해를 돕기 위해 만들었습니다",
-        "subtitle": "AI가 설명하고, 토론하고, 이해도를 확인합니다. 인내심 있는 스터디 그룹처럼, 무엇을 배울지는 언제나 내가 정합니다.",
+        "subtitle": "인내심 있는 스터디 그룹처럼 설명하고, 토론하고, 이해도를 확인합니다. 무엇을 배울지는 스스로 정합니다.",
         "f1": {
           "title": "모든 수업에 스터디 그룹",
-          "body": "선생님, 반 친구, 조교는 모두 AI가 맡아 함께 참여하며, 하나의 개념을 여러 관점에서 설명합니다."
+          "body": "가상의 선생님, 가상의 반 친구들, 도우미가 함께하여 하나의 개념을 여러 방향에서 설명합니다."
         },
         "f2": {
           "title": "슬라이드와 화이트보드",
@@ -82,7 +82,7 @@
       },
       "previewsSubtitle": "지금 바로 열어 보세요. 계정이 필요 없습니다.",
       "perks": {
-        "p1": "직접 강좌를 만드는 월간 AI 한도",
+        "p1": "내 강좌를 만들 수 있는 월간 한도",
         "p2": "초대 코드로 수업 참여",
         "p3": "내 강좌를 다른 회원과 공유",
         "p4": "강좌를 웹페이지나 PowerPoint로 내보내기"
@@ -93,11 +93,11 @@
       },
       "footerTagline": "KHAITAM · 오픈소스 프로젝트 OpenMAIC 기반",
       "trust": {
-        "title": "AI를 신중하게 사용합니다",
-        "subtitle": "아직 AI를 믿기 어렵다는 분이 많다는 것을 알고 있습니다. 신뢰를 얻기 위해 이렇게 노력합니다.",
+        "title": "안심하고 배우기",
+        "subtitle": "이곳의 수업은 AI의 도움으로 작성됩니다. 아직 모두가 편하게 느끼지는 않는다는 것을 알기에, 신뢰를 얻기 위해 노력하는 방법을 말씀드립니다.",
         "t1": {
           "title": "주도권은 당신에게",
-          "body": "AI는 설명과 연습을 도울 뿐입니다. 무엇을 배울지는 직접 고르고, 언제든 멈출 수 있습니다."
+          "body": "도구는 설명과 연습만 돕습니다. 무엇을 배울지는 직접 고르고, 언제든 멈출 수 있습니다."
         },
         "t2": {
           "title": "공유 전에 확인",
@@ -105,7 +105,7 @@
         },
         "t3": {
           "title": "한계도 솔직하게",
-          "body": "AI는 틀릴 수 있습니다. 중요한 내용은 선생님이나 믿을 수 있는 자료로 확인하세요."
+          "body": "수업에 오류가 있을 수 있습니다. 중요한 내용은 선생님이나 교과서로 확인하세요."
         },
         "t4": {
           "title": "보고 나서 결정",
@@ -113,49 +113,87 @@
         }
       },
       "pillars": {
-        "p1": "Intelligence to understand the world",
-        "p2": "Technology to expand what people can do",
-        "p3": "People to create value"
+        "p1": "세상을 이해하는 지성",
+        "p2": "할 수 있는 일을 넓히는 기술",
+        "p3": "가치를 만드는 사람"
       },
       "story": {
-        "eyebrow": "Our story",
-        "title": "From big questions, · to real value.",
-        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
-        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "eyebrow": "우리 이야기",
+        "title": "큰 질문에서 · 진짜 가치로.",
+        "body1": "KHAITAM은 두 가지 생각을 잇습니다. 열고 탐구하는 KHAI의 정신, 그리고 TÂM의 깊이와 인간다움입니다.",
+        "body2": "지성, 기술, 사람이 함께 나아갈 때 오늘의 질문이 내일의 해답이 된다고 우리는 믿습니다.",
         "values": {
           "v1": {
-            "title": "Openness",
-            "body": "Look far, discover what is new."
+            "title": "열림",
+            "body": "멀리 보고 새로운 것을 발견합니다."
           },
           "v2": {
-            "title": "Intelligence",
-            "body": "Learn, analyse, create value."
+            "title": "지성",
+            "body": "배우고, 분석하고, 가치를 만듭니다."
           },
           "v3": {
-            "title": "Heart",
-            "body": "For people, for the community."
+            "title": "마음",
+            "body": "사람을 위해, 공동체를 위해."
           }
         },
         "traits": {
           "k1": {
-            "name": "Deep",
-            "hint": "Never showy"
+            "name": "깊이 있는",
+            "hint": "과시하지 않음"
           },
           "k2": {
-            "name": "Systematic",
-            "hint": "Never scattered"
+            "name": "체계적인",
+            "hint": "흩어지지 않음"
           },
           "k3": {
-            "name": "Humane",
-            "hint": "Never replacing people"
+            "name": "인간적인",
+            "hint": "사람을 대신하지 않음"
           }
         }
+      },
+      "lead": "수학, 정보, 물리, 화학 모든 수업이 상호작용형입니다. 설명해 주는 선생님, 슬라이드, 화이트보드, 수업 안의 확인 문제로 문제를 풀기 전에 충분히 이해할 수 있습니다.",
+      "tryFree": "수업 무료 체험",
+      "intents": {
+        "title": "5학년·9학년·12학년 학생을 위해",
+        "subtitle": "수학, 정보, 물리, 화학. 새로 배우든 시험 전에 복습하든 짧은 수업 하나로 시작할 수 있습니다.",
+        "i1": {
+          "title": "오늘 배우는 내용 이해하기",
+          "body": "모든 개념을 단계별로 설명하고, 슬라이드와 화이트보드로 방법을 눈으로 확인합니다."
+        },
+        "i2": {
+          "title": "시험 전에 복습하기",
+          "body": "필요한 주제를 고르고, 헷갈리는 부분을 다시 듣고, 문제를 풀어 아직 약한 곳을 확인합니다."
+        },
+        "i3": {
+          "title": "조금 더 연습하기",
+          "body": "퀴즈와 작은 프로젝트로 방금 배운 것을 읽기만 하지 않고 직접 써 봅니다."
+        }
+      },
+      "footerSource": "오픈 소스",
+      "footerLegal": "법적 고지 및 문의",
+      "footerTerms": "이용약관",
+      "footerPrivacy": "개인정보",
+      "footerContact": "문의",
+      "pricing": {
+        "trial": "처음 {{days}}일 무료",
+        "trialBody": "체험 한도로 회원 기능을 사용해 보세요. 결제 정보가 필요 없고 자동으로 결제하지 않습니다.",
+        "then": "무료 기간 이후",
+        "price": "멤버십 요금",
+        "plan": {
+          "m1": "1개월",
+          "m6": "6개월",
+          "m12": "12개월"
+        },
+        "save": "{{percent}}% 절약",
+        "note": "표시된 금액이 최종 가격이며 추가 요금은 없습니다. 매월 수업 만들기 한도가 있으며 다음 달로 이월되지 않습니다. 요금제는 자동으로 갱신되지 않습니다.",
+        "pay": "현재는 계좌 이체로 결제합니다. {{email}}로 문의해 요금제를 고르시면 입금 확인 후 활성화해 드립니다.",
+        "cta": "계정 만들고 무료로 체험하기"
       }
     },
     "locked": {
-      "membership": "AI로 강좌를 만드는 기능은 회원 전용입니다.",
+      "membership": "강좌 만들기는 회원 전용입니다.",
       "classes": "수업 참여는 회원 전용입니다.",
-      "contactAdmin": "관리자에게 회원 등록을 요청해 주세요.",
+      "contactAdmin": "회원으로 등록하려면 {{email}}로 문의해 주세요.",
       "quota": "이번 달 AI 사용량을 모두 사용했습니다.",
       "quotaReset": "{{date}}부터 강좌를 다시 만들 수 있습니다.",
       "previews": "무료 미리보기 보기"
@@ -169,11 +207,11 @@
     },
     "status": {
       "ok": "회원권 {{date}}까지 · 남은 일수: {{days}}",
-      "expiring": "회원권이 {{date}}에 종료됩니다(남은 일수: {{days}}). 관리자에게 연장을 요청해 주세요.",
+      "expiring": "멤버십이 {{date}}에 종료됩니다(남은 일수: {{days}}). 갱신하려면 {{email}}로 문의해 주세요.",
       "quotaNear": "이번 달 AI 사용량의 {{percent}}%를 사용했습니다.",
       "quotaOut": "이번 달 AI 사용량을 모두 사용했습니다. 만든 강좌는 계속 학습할 수 있습니다.",
-      "expired": "회원권이 {{date}}에 종료되었습니다. 만든 강좌는 계속 볼 수 있습니다. 새 강좌를 만들려면 관리자에게 연장을 요청해 주세요.",
-      "suspended": "회원권이 일시 중지되었습니다. 만든 강좌는 계속 볼 수 있습니다. 관리자에게 재개를 요청해 주세요."
+      "expired": "멤버십이 {{date}}에 종료되었습니다. 강좌는 계속 읽을 수 있습니다. 갱신하고 새 강좌를 만들려면 {{email}}로 문의해 주세요.",
+      "suspended": "멤버십이 일시 중지되었습니다. 강좌는 계속 읽을 수 있습니다. 다시 시작하려면 {{email}}로 문의해 주세요."
     },
     "continue": {
       "title": "이어서 학습하기",
@@ -2312,7 +2350,8 @@
     "hints": {
       "username": "3~32자: 영문자, 숫자, 마침표, 밑줄, 하이픈을 사용할 수 있습니다. 영문자 또는 숫자로 시작하세요.",
       "password": "8~256자.",
-      "forgot": "비밀번호를 잊으셨나요? 관리자나 선생님께 재설정을 요청하세요."
+      "forgot": "비밀번호를 잊으셨나요? 사용자 이름과 함께 {{email}}로 문의하시면 재설정해 드립니다.",
+      "trial": "새 계정은 결제 정보 없이 {{days}}일 동안 무료로 체험할 수 있습니다."
     },
     "submit": {
       "signIn": "로그인",
@@ -2332,7 +2371,8 @@
       "invalidRequest": "요청을 처리할 수 없습니다. 다시 시도하세요.",
       "internal": "서버가 이 요청을 완료하지 못했습니다. 나중에 다시 시도하세요.",
       "generic": "문제가 발생했습니다. 다시 시도하세요.",
-      "sessionEnded": "로그인이 종료되었습니다. 계속하려면 다시 로그인하세요."
+      "sessionEnded": "로그인이 종료되었습니다. 계속하려면 다시 로그인하세요.",
+      "termsNotAccepted": "계정을 만들려면 동의 칸에 체크해 주세요."
     },
     "admin": {
       "title": "Accounts",
@@ -2426,6 +2466,11 @@
       "changed": "비밀번호를 변경했습니다. 다른 기기는 로그아웃되었습니다.",
       "wrongCurrent": "현재 비밀번호가 올바르지 않습니다.",
       "mismatch": "새 비밀번호가 일치하지 않습니다."
+    },
+    "consent": {
+      "label": "{{terms}}을(를) 읽고 동의하며, {{privacy}}을(를) 읽었습니다. 저는 만 16세 이상이거나, 부모 또는 보호자가 서비스 이용에 동의했습니다.",
+      "terms": "이용약관",
+      "privacy": "개인정보 처리방침"
     }
   },
   "proMode": {
@@ -2931,12 +2976,13 @@
       "loadFailed": "Could not read the OmniRoute status. Try again.",
       "retry": "Try again",
       "unconfigured": {
-        "title": "OmniRoute is not set up on this server",
-        "body": "Add these values to the server's .env file, then restart the app:"
+        "title": "OmniRoute is not connected to this app",
+        "body": "OmniRoute runs as its own service beside the app and connects by itself when both run with Docker Compose. Run docker compose up -d in the install folder; if the app runs outside Docker, see ops/omniroute/README.md.",
+        "invalid": "These values are set but cannot be used:"
       },
       "unreachable": {
         "title": "The app cannot reach OmniRoute",
-        "body": "Check that the OmniRoute container is running and that OMNIROUTE_ADMIN_PASSWORD matches its password."
+        "body": "Check that the omniroute service is running (docker compose ps). If the omniroute-secrets volume was deleted while OmniRoute's data was kept, the two passwords differ: see ops/omniroute/README.md."
       },
       "step1": {
         "title": "Providers in OmniRoute",
@@ -3418,6 +3464,8 @@
       "other": "기타"
     },
     "grade": {
+      "5": "5학년",
+      "9": "9학년",
       "10": "10학년",
       "11": "11학년",
       "12": "12학년"

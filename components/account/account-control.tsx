@@ -25,6 +25,7 @@ import { AccountDialog } from './account-dialog';
 import { ChangePasswordDialog } from './change-password-dialog';
 import {
   fetchAccountSession,
+  peekSharedSession,
   sessionChanged,
   signOut,
   signOutOtherSessions,
@@ -39,11 +40,14 @@ const TRIGGER_CLASS =
 /**
  * Account entry for the header. It renders nothing unless browser persistence is
  * built in and the server reports accounts enabled. A failed session check also
- * renders nothing: the control is never offered on a guess.
+ * renders nothing: the control is never offered on a guess. While the first answer is on its
+ * way it holds the button's place, so the bar does not jump when the button arrives; a page
+ * reached by a link starts from the last answer and has no wait at all.
  */
 export function AccountControl() {
   const { t } = useI18n();
-  const [session, setSession] = useState<AccountSession | null>(null);
+  // Undefined: no answer yet. Null: no control (persistence off, or the check failed).
+  const [session, setSession] = useState<AccountSession | null | undefined>(peekSharedSession);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const signingOutRef = useRef(false);
@@ -68,13 +72,18 @@ export function AccountControl() {
   }, [learnerSignedIn]);
 
   useEffect(() => {
-    if (!isBrowserPersistenceEnabled()) return;
+    if (!isBrowserPersistenceEnabled()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- no control to wait for
+      setSession(null);
+      return;
+    }
     let active = true;
     fetchAccountSession()
       .then((next) => {
         if (active) setSession(next);
       })
       .catch((error: unknown) => {
+        if (active) setSession(null);
         log.warn(
           'Account session check failed',
           error instanceof Error ? error.name : 'unknown error',
@@ -104,6 +113,14 @@ export function AccountControl() {
     return () => window.removeEventListener(SESSION_ENDED_EVENT, onSessionEnded);
   }, [t]);
 
+  if (session === undefined) {
+    return (
+      <span
+        aria-hidden="true"
+        className="h-9 w-9 shrink-0 rounded-full bg-gray-100/60 sm:w-24 dark:bg-gray-700/40"
+      />
+    );
+  }
   if (!session?.enabled) return null;
 
   if (!session.authenticated) {

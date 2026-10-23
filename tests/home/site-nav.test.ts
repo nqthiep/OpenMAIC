@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { AccountSession } from '@/components/account/account-api';
-import { isActiveNavLink, siteHomeHref, siteNavLinks } from '@/lib/home/site-nav';
+import {
+  GUEST_SECTIONS,
+  guestSectionLinks,
+  isActiveNavLink,
+  siteHomeHref,
+  siteNavLinks,
+} from '@/lib/home/site-nav';
 
 const session = (extra: Partial<AccountSession>): AccountSession => ({
   enabled: true,
@@ -51,5 +57,25 @@ describe('isActiveNavLink', () => {
     expect(isActiveNavLink('/catalog', '/catalog')).toBe(true);
     expect(isActiveNavLink('/admin', '/admin/x')).toBe(true);
     expect(isActiveNavLink('/admin', '/administer')).toBe(false);
+  });
+});
+
+describe('guestSectionLinks', () => {
+  it('are anchors in the page on the home', () => {
+    expect(guestSectionLinks('/').map((l) => l.href)).toEqual(GUEST_SECTIONS.map((id) => `#${id}`));
+  });
+
+  it('lead back to the same sections of the home from any other page, so the bar keeps its links', () => {
+    for (const path of ['/catalog', '/community', '/classroom/x']) {
+      expect(guestSectionLinks(path).map((l) => l.href)).toEqual(
+        GUEST_SECTIONS.map((id) => `/#${id}`),
+      );
+    }
+  });
+
+  it('use the labels of the home sections', () => {
+    expect(guestSectionLinks('/').map((l) => l.labelKey)).toEqual(
+      GUEST_SECTIONS.map((id) => `home.guest.nav.${id}`),
+    );
   });
 });

@@ -372,7 +372,7 @@ describe('the OmniRoute panel', () => {
     expect(callsTo('/api/admin/omniroute/overview')).toBe(1);
   });
 
-  it('lists the missing environment names when OmniRoute is not set up, and no steps', async () => {
+  it('lists the environment values that are set wrong when OmniRoute is not connected, and no steps', async () => {
     const { OmniRoutePanel } = await fresh();
     installRoutes({
       overview: () =>
@@ -386,11 +386,23 @@ describe('the OmniRoute panel', () => {
     expect(document.body.textContent).toContain('admin.omniroute.title');
     expect(document.body.textContent).toContain('admin.omniroute.state.unconfigured');
     expect(document.body.textContent).toContain('admin.omniroute.unconfigured.title');
+    expect(document.body.textContent).toContain('admin.omniroute.unconfigured.invalid');
     expect([...document.querySelectorAll('code')].map((code) => code.textContent)).toEqual([
       'OMNIROUTE_ADMIN_PASSWORD',
       'OMNIROUTE_PUBLIC_URL',
     ]);
     expect(document.body.textContent).not.toContain('admin.omniroute.step1.title');
+  });
+
+  it('shows no list of values when none is set wrong, only the way to connect', async () => {
+    const { OmniRoutePanel } = await fresh();
+    installRoutes({
+      overview: () => ok({ overview: overview('unconfigured', { missingEnv: [] }) }),
+    });
+    await mountPanel(OmniRoutePanel);
+    expect(document.body.textContent).toContain('admin.omniroute.unconfigured.body');
+    expect(document.body.textContent).not.toContain('admin.omniroute.unconfigured.invalid');
+    expect(document.querySelectorAll('code')).toHaveLength(0);
   });
 
   it('shows the unreachable card and asks the overview again on retry', async () => {

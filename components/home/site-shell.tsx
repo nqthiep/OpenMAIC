@@ -9,17 +9,23 @@ import { AccountControl } from '@/components/account/account-control';
 import { SettingsDialog } from '@/components/settings';
 import { ThemeToggle } from '@/components/home/theme-toggle';
 import { BrandBand } from '@/components/home/brand-band';
+import { LegalLinks } from '@/components/legal/legal-links';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useBrand } from '@/lib/brand/brand-context';
 import { BrandImage } from '@/components/brand/brand-image';
 import { useAccountSession } from '@/lib/capabilities/use-capabilities';
-import { isActiveNavLink, siteHomeHref, siteNavLinks } from '@/lib/home/site-nav';
+import {
+  guestSectionLinks,
+  isActiveNavLink,
+  siteHomeHref,
+  siteNavLinks,
+} from '@/lib/home/site-nav';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 
 /** Frosted card surface shared by every panel on the visitor-facing pages. */
 export const GLASS =
-  'border border-brand-900/10 bg-white shadow-lg shadow-brand-900/[0.06] dark:border-brand-teal/30 dark:bg-brand-900/60 dark:shadow-black/30 dark:backdrop-blur-sm';
+  'border border-brand-900/10 bg-white shadow-lg shadow-brand-900/[0.06] dark:border-brand-teal/30 dark:bg-brand-900/75 dark:shadow-black/30 dark:backdrop-blur-sm';
 
 /** One gradient per course card, so a row of courses does not look like copies of one another. */
 export const THUMBNAILS = [
@@ -96,7 +102,11 @@ export function SiteHeader({
   logoHref,
   className,
 }: {
-  /** Links to sections of this page, after the main links on wide screens. */
+  /**
+   * Links to sections of this page, after the main links on wide screens. Left out, a visitor who
+   * is not signed in gets the sections of the home, on every page, so the bar does not change
+   * from one page to the next.
+   */
   nav?: ShellNavItem[];
   logoHref?: string;
   className?: string;
@@ -106,6 +116,13 @@ export function SiteHeader({
   const pathname = usePathname();
   const session = useAccountSession();
   const links = siteNavLinks(session);
+  const isGuest = session?.enabled === true && !session.authenticated;
+  const sections: ShellNavItem[] =
+    nav.length > 0
+      ? nav
+      : isGuest
+        ? guestSectionLinks(pathname).map((link) => ({ href: link.href, label: t(link.labelKey) }))
+        : [];
   // Settings configures providers: staff only (and single-user mode). Learners never see it.
   const canOpenSettings = session?.capabilities?.viewProviders === true;
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -126,6 +143,21 @@ export function SiteHeader({
           <BrandImage kind="logo" alt={brand.productName} className="h-7 w-auto" />
         </a>
         <nav aria-label={t('nav.main')} className="hidden min-w-0 items-center gap-1 md:flex">
+          {session === undefined ? (
+            // The first answer of the server is on its way (a first load; a page reached by a link
+            // starts from the last answer). Hold the links' places, so the bar does not grow.
+            <span aria-hidden="true" className="flex items-center gap-2 motion-safe:animate-pulse">
+              <span className="h-6 w-20 rounded-full bg-black/5 dark:bg-white/10" />
+              <span className="mx-1 hidden h-4 w-px bg-border lg:block" />
+              {[16, 24, 20, 20, 20].map((width, index) => (
+                <span
+                  key={index}
+                  style={{ width: `${width * 4}px` }}
+                  className="hidden h-6 rounded-full bg-black/5 lg:block dark:bg-white/10"
+                />
+              ))}
+            </span>
+          ) : null}
           {links.map((link) => {
             const active = isActiveNavLink(link.href, pathname);
             return (
@@ -144,23 +176,26 @@ export function SiteHeader({
               </Link>
             );
           })}
-          {nav.length > 0 ? (
+          {sections.length > 0 ? (
             <span className="hidden items-center gap-1 lg:flex">
               {links.length > 0 ? (
                 <span aria-hidden="true" className="mx-1 h-4 w-px bg-border" />
               ) : null}
-              {nav.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    NAV_LINK,
-                    'text-muted-foreground hover:bg-black/5 hover:text-foreground dark:hover:bg-white/10',
-                  )}
-                >
-                  {item.label}
-                </a>
-              ))}
+              {sections.map((item) => {
+                const className = cn(
+                  NAV_LINK,
+                  'text-muted-foreground hover:bg-black/5 hover:text-foreground dark:hover:bg-white/10',
+                );
+                return item.href.startsWith('#') ? (
+                  <a key={item.href} href={item.href} className={className}>
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link key={item.href} href={item.href} className={className}>
+                    {item.label}
+                  </Link>
+                );
+              })}
             </span>
           ) : null}
         </nav>
@@ -242,6 +277,7 @@ export function SiteShell({
           <p className="eyebrow text-center text-[0.6875rem] text-muted-foreground">
             {t('home.slogan')}
           </p>
+          <LegalLinks className="mt-2 text-xs text-muted-foreground" />
         </div>
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 text-xs text-muted-foreground md:flex-row md:px-8">
           <span className="flex items-center gap-2">
@@ -261,7 +297,7 @@ export function SiteShell({
               rel="noopener noreferrer"
               className="transition-colors hover:text-foreground"
             >
-              GitHub
+              {t('home.guest.footerSource')}
             </a>
           </nav>
         </div>

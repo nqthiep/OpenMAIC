@@ -11,6 +11,11 @@ const ACTIVE: MembershipView = {
   active: true,
   expiresAt: '2100-01-01T00:00:00.000Z',
   monthlyQuota: 1000,
+  cycle: {
+    start: '2026-10-01T00:00:00.000Z',
+    end: '2100-01-01T00:00:00.000Z',
+    key: '2026-10-01T00:00:00.000Z',
+  },
 };
 const accounts = new Map<string, { role: Role; membership?: MembershipView }>();
 const jobOwners = new Map<string, string>();

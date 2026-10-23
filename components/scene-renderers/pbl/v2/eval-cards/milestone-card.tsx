@@ -149,7 +149,7 @@ export function MilestoneCard({ evaluation, handover, onContinue, className }: P
                 'inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all',
                 consumed
                   ? 'cursor-default border border-slate-300 bg-slate-100 text-slate-500 shadow-none'
-                  : 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-[0_12px_28px_rgba(66,114,171,0.30),0_0_22px_rgba(34,211,238,0.18)] hover:from-violet-500 hover:to-cyan-400 hover:shadow-[0_16px_34px_rgba(66,114,171,0.38),0_0_28px_rgba(34,211,238,0.24)]',
+                  : 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-[0_12px_28px_rgba(66,111,171,0.30),0_0_22px_rgba(34,211,238,0.18)] hover:from-violet-500 hover:to-cyan-400 hover:shadow-[0_16px_34px_rgba(66,111,171,0.38),0_0_28px_rgba(34,211,238,0.24)]',
               )}
             >
               {consumed ? (

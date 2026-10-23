@@ -123,7 +123,7 @@ export function UsageDashboard() {
     if (!chart) return;
     const axis = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
     const split = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const accent = isDark ? '#7a9fcb' : '#4272ab'; // brand steel blue: ramp 400 on dark, 600 on light
+    const accent = isDark ? '#7a9fcb' : '#426fab'; // brand steel blue: ramp 400 on dark, 600 on light
 
     chart.setOption({
       tooltip: { trigger: 'axis' },
@@ -161,11 +161,11 @@ export function UsageDashboard() {
               colorStops: [
                 {
                   offset: 0,
-                  color: isDark ? 'rgba(122, 159, 203,0.35)' : 'rgba(66, 114, 171,0.25)',
+                  color: isDark ? 'rgba(122, 159, 203,0.35)' : 'rgba(66, 111, 171,0.25)',
                 },
                 {
                   offset: 1,
-                  color: isDark ? 'rgba(122, 159, 203,0.02)' : 'rgba(66, 114, 171,0.02)',
+                  color: isDark ? 'rgba(122, 159, 203,0.02)' : 'rgba(66, 111, 171,0.02)',
                 },
               ],
             },

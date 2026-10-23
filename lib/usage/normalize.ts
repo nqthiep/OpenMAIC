@@ -64,3 +64,13 @@ export function hasBillableTokens(usage: NormalizedUsage): boolean {
     usage.cacheCreationTokens > 0
   );
 }
+
+/**
+ * The tokens a call counts against a monthly quota: the input and the output. Reasoning tokens are
+ * already part of the output tokens (see `NormalizedUsage`), so adding them again counts a
+ * reasoning model's thinking twice. On the logged runs that made a course cost about a third more
+ * of the quota than it used.
+ */
+export function quotaTokens(record: { inputTokens: number; outputTokens: number }): number {
+  return record.inputTokens + record.outputTokens;
+}

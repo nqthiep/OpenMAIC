@@ -57,15 +57,23 @@ beforeAll(async () => {
     `INSERT INTO accounts (id, username, password_hash, role) VALUES ('op', 'op', 'x', 'operator')`,
   );
   await pg.query(`UPDATE accounts SET disabled_at = $1 WHERE id = 'gone'`, [at(-1)]);
-  const grant = `INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by)
-                 VALUES ($1, $2, $3, $4, 'op')`;
-  await pg.query(grant, ['full', 'active', at(30), 1000]);
-  await pg.query(grant, ['near', 'active', at(30), 1000]);
-  await pg.query(grant, ['soon', 'active', at(2), 1000]);
-  await pg.query(grant, ['old', 'active', at(-3), 1000]);
-  await pg.query(grant, ['paused', 'suspended', at(30), 1000]);
+  // Every plan began five days before NOW, so the running cycle is 7/10 to 7/11 (a plan from before
+  // periods existed is read as one period from its grant to its expiry).
+  const grant = `INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by, granted_at)
+                 VALUES ($1, $2, $3, $4, 'op', $5)`;
+  await pg.query(grant, ['full', 'active', at(30), 1000, at(-5)]);
+  await pg.query(grant, ['near', 'active', at(30), 1000, at(-5)]);
+  await pg.query(grant, ['soon', 'active', at(2), 1000, at(-5)]);
+  await pg.query(grant, ['old', 'active', at(-3), 1000, at(-8)]);
+  await pg.query(grant, ['paused', 'suspended', at(30), 1000, at(-5)]);
+  // Rewards are kept per cycle, under the instant the cycle began. One under a calendar month, as
+  // older rows are, belongs to no cycle and counts for nothing.
   await pg.query(
-    `INSERT INTO quota_bonus (owner_id, month, tokens) VALUES ('acct:near', '2026-10', 100)`,
+    `INSERT INTO quota_bonus (owner_id, month, tokens) VALUES ('acct:near', $1, 100)`,
+    [at(-5)],
+  );
+  await pg.query(
+    `INSERT INTO quota_bonus (owner_id, month, tokens) VALUES ('acct:full', '2026-10', 5000)`,
   );
   await pg.query(
     `INSERT INTO access_requests (account_id, state, requested_at) VALUES ('fresh', 'pending', $1)`,
@@ -79,7 +87,7 @@ afterAll(async () => {
 
 describe('operations health', () => {
   it('reads memberships, quota use, waiting requests and daily activity', async () => {
-    const facts = await readOpsHealthFacts(db, NOW, '2026-10');
+    const facts = await readOpsHealthFacts(db, NOW);
     expect(facts.memberships).toEqual({
       active: 2,
       expiringSoon: 1,
@@ -97,7 +105,7 @@ describe('operations health', () => {
       llm('acct:near', 935), // 85% of 1000 + 100 bonus
       llm('acct:soon', 100),
       llm('acct:op', 99_999),
-      llm('acct:full', 5, NOW.getTime() - 20 * DAY), // September: outside the month and the chart
+      llm('acct:full', 5, NOW.getTime() - 20 * DAY), // before the cycle began and outside the chart
     ];
     const health = buildOpsHealth(
       await readDashboardCounts(db, NOW),

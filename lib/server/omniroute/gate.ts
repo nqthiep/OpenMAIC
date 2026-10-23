@@ -64,6 +64,7 @@ export async function isActiveAdminSessionCached(
  */
 export async function signInToOmniRoute(
   config: OmniRouteConfig,
+  secure: boolean,
   fetchImpl: typeof fetch = fetch,
 ): Promise<string | undefined> {
   try {
@@ -78,9 +79,7 @@ export async function signInToOmniRoute(
     const cookie = response.headers.getSetCookie().find((c) => c.startsWith('auth_token='));
     if (!cookie) return undefined;
     // The browser reaches the dashboard over https even though OmniRoute answered over http.
-    return config.publicUrl.startsWith('https:') && !/;\s*secure/i.test(cookie)
-      ? `${cookie}; Secure`
-      : cookie;
+    return secure && !/;\s*secure/i.test(cookie) ? `${cookie}; Secure` : cookie;
   } catch {
     return undefined;
   }

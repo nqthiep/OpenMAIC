@@ -78,7 +78,9 @@ function getRequest(path: string, cookie?: string): NextRequest {
 }
 
 async function signUp(routes: Routes, username: string): Promise<string> {
-  const response = await routes.register(jsonRequest('POST', { username, password: PASSWORD }));
+  const response = await routes.register(
+    jsonRequest('POST', { username, password: PASSWORD, acceptedTerms: true }),
+  );
   const setCookie = response.headers
     .getSetCookie()
     .find((value) => value.startsWith('openmaic_session='));

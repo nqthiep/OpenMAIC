@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import {
   ACCOUNT_SESSION_CHANGED_EVENT,
   loadSharedSession,
+  peekSharedSession,
   type AccountSession,
 } from '@/components/account/account-api';
 import { createLogger } from '@/lib/logger';
@@ -16,7 +17,7 @@ const log = createLogger('Capabilities');
  * page can still show with nothing gated open. Refreshes after sign-in and sign-out.
  */
 export function useAccountSession(): AccountSession | null | undefined {
-  const [session, setSession] = useState<AccountSession | null | undefined>(undefined);
+  const [session, setSession] = useState<AccountSession | null | undefined>(peekSharedSession);
   const [generation, setGeneration] = useState(0);
 
   useEffect(() => {

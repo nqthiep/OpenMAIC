@@ -10,6 +10,11 @@ const ACTIVE: MembershipView = {
   active: true,
   expiresAt: '2100-01-01T00:00:00.000Z',
   monthlyQuota: 1_000_000,
+  cycle: {
+    start: '2026-10-01T00:00:00.000Z',
+    end: '2100-01-01T00:00:00.000Z',
+    key: '2026-10-01T00:00:00.000Z',
+  },
 };
 const accounts = new Map<string, { role: Role; membership?: MembershipView }>();
 
@@ -67,7 +72,7 @@ vi.mock('@/lib/server/learning/community', () => ({
 }));
 
 vi.mock('@/lib/server/usage-storage', () => ({
-  monthlyLlmTokens: async () => 1234,
+  llmTokensBetween: async () => 1234,
   readUsageRecords: async () => [],
 }));
 
@@ -122,11 +127,17 @@ describe('GET /api/admin/health', () => {
 });
 
 describe('GET /api/membership/usage', () => {
-  it('gives an active member the quota, the reader bonus and this month’s use', async () => {
+  it('gives an active member the quota, the reader bonus, the use and the end of the cycle', async () => {
     const { GET } = await import('@/app/api/membership/usage/route');
     const body = await (await GET(request('session=learner-member'))).json();
-    expect(body).toMatchObject({ active: true, quota: 1_000_000, bonus: 20_000, used: 1234 });
-    expect(body.month).toMatch(/^\d{4}-\d{2}$/);
+    expect(body).toMatchObject({
+      active: true,
+      quota: 1_000_000,
+      bonus: 20_000,
+      used: 1234,
+      cycleStart: ACTIVE.cycle!.start,
+      cycleEnd: ACTIVE.cycle!.end,
+    });
   });
 
   it('tells a learner without a membership that there is no allowance', async () => {

@@ -20,18 +20,19 @@
      The ramp is static: it does not change with `.dark`, and a lot of markup
      (`bg-violet-600 text-white`) has no `dark:` variant. So the middle steps
      500 and 600 stay light enough to show on the dark page and card (600 is
-     3.6:1 on the page, 3.1:1 on a card, and takes a white label at 5:1), while
+     3.5:1 on the page, 3.0:1 on a card, and takes a white label at 5.1:1), while
      700 to 950 are the navy. Which step a button uses is decided per theme by
-     the semantic tokens, not here. One cost of a single static step: as small text on the paper
-     page, 600 reads 4.4:1 (the old blue read 4.9:1), a little under AA. That is the `text-violet-600`
-     and `text-blue-600` of upstream markup; new code takes `brand-700` (6.4:1) for text. */
+     the semantic tokens, not here. 600 is also picked inside a narrow window: dark enough to read
+     as small text on the paper page (4.5:1, the `text-violet-600` and `text-blue-600` of upstream
+     markup) and light enough to stay 3:1 on the navy card, and it still takes a white label
+     (5.1:1). New code takes `brand-700` for text (6.4:1). */
   --color-brand-50: #f2f6fa;
   --color-brand-100: #e1eaf3;
   --color-brand-200: #c5d5e8;
   --color-brand-300: #9db8d6;
   --color-brand-400: #7a9fcb;
   --color-brand-500: #5a88ba;
-  --color-brand-600: #4272ab;
+  --color-brand-600: #426fab;
   --color-brand-700: #2f5887;
   --color-brand-800: #1f416c;
   --color-brand-900: #102541;

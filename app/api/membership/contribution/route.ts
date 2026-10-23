@@ -1,5 +1,4 @@
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { currentMonth } from '@/lib/server/authz/viewer';
 import { learningRoute } from '@/lib/server/learning/http';
 import {
   countDistinctReaders,
@@ -15,7 +14,7 @@ export const runtime = 'nodejs';
 
 /**
  * What the signed-in learner has given and earned: their shared courses with readers, the reward
- * tokens of this month against the monthly cap, their badges, and how far the next badge is. It
+ * tokens of the running cycle against the cap, their badges, and how far the next badge is. It
  * is the learner's own data, so no membership is needed: a lapsed member still sees their badges.
  */
 export async function GET(request: Request): Promise<Response> {
@@ -24,11 +23,12 @@ export async function GET(request: Request): Promise<Response> {
     if (viewer.accountId === undefined || viewer.ownerId === undefined) {
       return apiError('UNAUTHENTICATED', 401, 'Sign in to continue.');
     }
-    const month = currentMonth(ctx.now);
+    // Rewards belong to a cycle of a plan, so a lapsed member has none to show.
+    const cycleKey = viewer.membership?.cycle?.key;
     const [shares, readers, bonus, badges] = await Promise.all([
       listSharesByOwner(ctx.db, viewer.ownerId),
       countDistinctReaders(ctx.db, viewer.ownerId),
-      readBonusTokens(ctx.db, viewer.ownerId, month),
+      cycleKey === undefined ? 0 : readBonusTokens(ctx.db, viewer.ownerId, cycleKey),
       readBadges(ctx.db, viewer.ownerId),
     ]);
     // The tags staff gave the courses, so the owner sees where each one is filed.
@@ -42,7 +42,11 @@ export async function GET(request: Request): Promise<Response> {
         return own ? { ...share, tags: own } : share;
       }),
       readers,
-      bonus: { month, tokens: bonus, cap: MONTHLY_REWARD_CAP_TOKENS },
+      bonus: {
+        cycleStart: viewer.membership?.cycle?.start ?? null,
+        tokens: bonus,
+        cap: MONTHLY_REWARD_CAP_TOKENS,
+      },
       badges,
       next: nextBadge(readers),
     });

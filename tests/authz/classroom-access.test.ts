@@ -39,9 +39,12 @@ vi.mock('@/lib/server/accounts/runtime', () => ({
 // Membership, sharing, previews and classes have their own tests (tests/learning). Here they are
 // set per test: an active membership with a 1000-token allowance, nothing shared or previewed.
 const learning = {
-  membership: undefined as undefined | { active: boolean; monthlyQuota: number },
+  membership: undefined as undefined | { active: boolean; monthlyQuota: number; noCycle?: boolean },
   usedTokens: 0,
   bonusTokens: 0,
+  /** What the gate asked for: the window it counted the use in and the key it read rewards under. */
+  askedWindow: undefined as undefined | { from: string; to: string },
+  askedKey: undefined as undefined | string,
   shared: false,
 };
 vi.mock('@/lib/server/learning/store', () => ({
@@ -50,16 +53,31 @@ vi.mock('@/lib/server/learning/store', () => ({
       status: learning.membership.active ? 'active' : 'suspended',
       ...learning.membership,
       expiresAt: '2100-01-01T00:00:00.000Z',
+      ...(learning.membership.active && !learning.membership.noCycle
+        ? {
+            cycle: {
+              start: '2026-10-01T00:00:00.000Z',
+              end: '2100-01-01T00:00:00.000Z',
+              key: '2026-10-01T00:00:00.000Z',
+            },
+          }
+        : {}),
     },
   readCourseShare: async () =>
     learning.shared ? { ownerId: OTHER_OWNER_ID, title: 'Shared', state: 'shared' } : undefined,
   isCoursePreview: async () => false,
   isCourseInClassOf: async () => false,
-  readBonusTokens: async () => learning.bonusTokens,
+  readBonusTokens: async (_db: unknown, _owner: string, key: string) => {
+    learning.askedKey = key;
+    return learning.bonusTokens;
+  },
   recordCourseRead: async () => 0,
 }));
 vi.mock('@/lib/server/usage-storage', () => ({
-  monthlyLlmTokens: async () => learning.usedTokens,
+  llmTokensBetween: async (_owner: string, from: Date, to: Date) => {
+    learning.askedWindow = { from: from.toISOString(), to: to.toISOString() };
+    return learning.usedTokens;
+  },
 }));
 
 function headers(cookie?: string): Headers {
@@ -153,7 +171,7 @@ describe('requireSpender', () => {
     expect(await refusal?.json()).toMatchObject({ errorCode: 'MEMBERSHIP_REQUIRED' });
   });
 
-  it('refuses a learner whose monthly allowance, with reader rewards, is used up', async () => {
+  it('refuses a learner whose allowance for the cycle, with reader rewards, is used up', async () => {
     const { requireSpender } = await import('@/lib/server/authz/viewer');
     learning.usedTokens = 1000;
     learning.bonusTokens = 0;
@@ -163,6 +181,24 @@ describe('requireSpender', () => {
 
     learning.bonusTokens = 500;
     expect(await requireSpender(SIGNED_IN)).toBeUndefined();
+  });
+
+  it('counts the use and the rewards of the running cycle, not of the calendar month', async () => {
+    const { requireSpender } = await import('@/lib/server/authz/viewer');
+    expect(await requireSpender(SIGNED_IN)).toBeUndefined();
+    expect(learning.askedWindow).toEqual({
+      from: '2026-10-01T00:00:00.000Z',
+      to: '2100-01-01T00:00:00.000Z',
+    });
+    expect(learning.askedKey).toBe('2026-10-01T00:00:00.000Z');
+  });
+
+  it('refuses an active membership that has no cycle, as it has no allowance to count', async () => {
+    const { requireSpender } = await import('@/lib/server/authz/viewer');
+    learning.membership = { active: true, monthlyQuota: 1000, noCycle: true };
+    const refusal = await requireSpender(SIGNED_IN);
+    expect(refusal?.status).toBe(403);
+    expect(await refusal?.json()).toMatchObject({ errorCode: 'MEMBERSHIP_REQUIRED' });
   });
 
   it('does not meter an operator', async () => {

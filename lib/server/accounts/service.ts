@@ -6,6 +6,8 @@
  */
 import { randomUUID } from 'node:crypto';
 
+import { createLogger } from '@/lib/logger';
+import { grantMembership } from '@/lib/server/learning/store';
 import { effectiveRole } from '@/lib/server/authz/roles';
 
 import type { LoginThrottle } from './login-throttle';
@@ -30,12 +32,18 @@ import {
 } from './password';
 import { isAcceptablePassword, normalizeUsername } from './validation';
 
+const log = createLogger('AccountService');
+
+/** The actor recorded in the audit log for the free first month. */
+const TRIAL_ACTOR = 'system:trial';
+
 export type AccountErrorCode =
   | 'ACCOUNTS_NOT_CONFIGURED'
   | 'REGISTRATION_DISABLED'
   | 'USERNAME_INVALID'
   | 'PASSWORD_INVALID'
   | 'USERNAME_TAKEN'
+  | 'TERMS_NOT_ACCEPTED'
   | 'INVALID_CREDENTIALS'
   | 'RATE_LIMITED';
 
@@ -59,6 +67,8 @@ export interface AccountServiceDeps {
   db: AccountQueryable;
   throttle: LoginThrottle;
   registrationOpen: boolean;
+  /** A free membership given to every new account: how long, and its monthly token quota. */
+  trial?: { days: number; monthlyQuota: number };
   now?: () => Date;
 }
 
@@ -72,6 +82,11 @@ export interface IssuedSession {
 export interface CredentialsInput {
   username: unknown;
   password: unknown;
+}
+
+/** What a sign-up adds to the credentials: the version of the terms it agreed to. */
+export interface RegistrationInput extends CredentialsInput {
+  termsVersion?: string;
 }
 
 /**
@@ -111,7 +126,7 @@ async function issueSession(
 
 export async function registerAccount(
   deps: AccountServiceDeps,
-  input: CredentialsInput,
+  input: RegistrationInput,
 ): Promise<IssuedSession> {
   if (!deps.registrationOpen) {
     throw new AccountError('REGISTRATION_DISABLED', 'New account registration is disabled.');
@@ -138,9 +153,25 @@ export async function registerAccount(
     username,
     passwordHash,
     createdAt: now,
+    termsVersion: input.termsVersion,
   });
   if (!inserted) {
     throw new AccountError('USERNAME_TAKEN', 'That username is already taken.');
+  }
+  if (deps.trial && deps.trial.days > 0) {
+    // A failed gift must not undo the sign-up: the account stands, and staff can grant later.
+    try {
+      await grantMembership(deps.db, {
+        actorId: TRIAL_ACTOR,
+        targetId: accountId,
+        days: deps.trial.days,
+        monthlyQuota: deps.trial.monthlyQuota,
+        reason: 'free first month',
+        now,
+      });
+    } catch (error) {
+      log.warn('Free first month was not granted', error instanceof Error ? error.name : 'unknown');
+    }
   }
   return issueSession(deps, accountId, username, now);
 }

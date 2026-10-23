@@ -402,7 +402,7 @@ function AccountsChart({ health, onOpen }: { health: OpsHealth; onOpen: OpenDeta
   );
 }
 
-/** Who is closest to being blocked by this month's allowance. */
+/** Who is closest to being blocked by the allowance of their running cycle. */
 function QuotaChart({
   health,
   onOpen,

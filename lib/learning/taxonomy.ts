@@ -20,7 +20,8 @@ export const SUBJECTS = [
 ] as const;
 export type Subject = (typeof SUBJECTS)[number];
 
-export const GRADES = ['10', '11', '12'] as const;
+/** The years the site is for: 5 (end of primary), 9 (end of lower secondary), and 10 to 12. */
+export const GRADES = ['5', '9', '10', '11', '12'] as const;
 export type Grade = (typeof GRADES)[number];
 
 /** A course has at most one subject, this many grades and this many topics. */

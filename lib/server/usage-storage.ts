@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { createLogger } from '@/lib/logger';
-import { hasBillableTokens, type NormalizedUsage } from '@/lib/usage/normalize';
+import { hasBillableTokens, quotaTokens, type NormalizedUsage } from '@/lib/usage/normalize';
 import { currentSpendOwner } from '@/lib/server/authz/spend-context';
 
 const log = createLogger('UsageStorage');
@@ -216,15 +216,29 @@ export async function readUsageRecords(opts: ReadOptions = {}): Promise<UsageRec
 }
 
 /**
- * Tokens one owner spent on text generation in one month (`YYYY-MM`, UTC), read from the usage
- * log. Reads the month's file on every call, which is fine at this scale; see plans/access-control.md.
+ * Tokens one owner spent on text generation from `from` up to (not including) `to`, read from the
+ * usage log: what one cycle of a plan has used. The log is kept in one file per UTC month, so this
+ * reads the months the range touches and keeps the records inside it. Reads on every call, which is
+ * fine at this scale; see plans/access-control.md.
  */
-export async function monthlyLlmTokens(ownerId: string, month: string): Promise<number> {
-  const records = await readUsageRecords({ months: [month] });
+export async function llmTokensBetween(
+  ownerId: string,
+  from: Date,
+  to: Date,
+  opts: { baseDir?: string } = {},
+): Promise<number> {
+  const months = new Set<string>();
+  // A cycle is at most about a month long, so stepping by a day reaches every month it touches.
+  for (let t = from.getTime(); t < to.getTime(); t += 86_400_000) {
+    months.add(new Date(t).toISOString().slice(0, 7));
+  }
+  months.add(new Date(Math.max(from.getTime(), to.getTime() - 1)).toISOString().slice(0, 7));
+  const records = await readUsageRecords({ baseDir: opts.baseDir, months: [...months] });
   let total = 0;
   for (const record of records) {
     if (record.kind !== 'llm' || record.ownerId !== ownerId) continue;
-    total += record.inputTokens + record.outputTokens + record.reasoningTokens;
+    const at = new Date(record.createdAt).getTime();
+    if (at >= from.getTime() && at < to.getTime()) total += quotaTokens(record);
   }
   return total;
 }

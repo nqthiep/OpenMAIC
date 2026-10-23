@@ -93,3 +93,6 @@ e2e/__screenshots-619/
 
 # opencode-lead task board and per-task files
 .tasks/
+
+# OmniRoute dashboard password for an app running on the host (ops/omniroute/host-dev.yml)
+.omniroute/

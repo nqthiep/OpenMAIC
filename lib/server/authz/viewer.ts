@@ -28,19 +28,19 @@ import { readRemixSource } from '@/lib/server/learning/remix';
 import { providerConfigNotReadyResponse } from '@/lib/server/provider-store/not-ready';
 import { readSetting } from '@/lib/server/learning/settings';
 import { resolveStageAccess } from '@/lib/server/stage-access';
-import { monthlyLlmTokens } from '@/lib/server/usage-storage';
+import { llmTokensBetween } from '@/lib/server/usage-storage';
 
 import { enterSpendOwner } from './spend-context';
 import { can, type Viewer } from './policy';
 
 export interface ResolvedViewer extends Viewer {
-  /** The monthly token allowance of the signed-in account's membership, when it has one. */
+  /** The token allowance of the cycle in force for the signed-in account's membership, when it has one. */
   monthlyQuota?: number;
   /** The membership record, when the account has one. Returned only to the account's own session. */
   membership?: MembershipView | null;
 }
 
-/** The UTC month a usage record and a quota belong to, as `YYYY-MM`. */
+/** The UTC month, as `YYYY-MM`: what the monthly challenge leaderboard counts in. Quotas count in cycles (`cycle.ts`). */
 export function currentMonth(now: Date = new Date()): string {
   return now.toISOString().slice(0, 7);
 }
@@ -138,7 +138,6 @@ export async function rewardReaderIfEligible(headers: Headers, classroomId: stri
       courseId: classroomId,
       readerId: viewer.accountId,
       authorId: access.ownerId,
-      month: currentMonth(),
       now: new Date(),
       ...(source?.sourceOwnerId && source.sourceOwnerId !== viewer.ownerId
         ? {
@@ -189,12 +188,15 @@ export async function requireSpender(headers: Headers): Promise<Response | undef
         'An active membership is needed to create courses with AI.',
       );
     }
-    const month = currentMonth();
+    const cycle = viewer.membership?.cycle;
+    if (!cycle) {
+      return apiError('MEMBERSHIP_REQUIRED', 403, 'No membership period is running.');
+    }
     const deps = await accountServiceDeps();
-    const used = await monthlyLlmTokens(viewer.ownerId, month);
-    const bonus = await readBonusTokens(deps.db, viewer.ownerId, month);
+    const used = await llmTokensBetween(viewer.ownerId, new Date(cycle.start), new Date(cycle.end));
+    const bonus = await readBonusTokens(deps.db, viewer.ownerId, cycle.key);
     if (used >= (viewer.monthlyQuota ?? 0) + bonus) {
-      return apiError('QUOTA_EXCEEDED', 403, 'This month’s AI allowance is used up.');
+      return apiError('QUOTA_EXCEEDED', 403, 'The AI allowance of this period is used up.');
     }
   }
   enterSpendOwner(viewer.ownerId);

@@ -13,8 +13,8 @@
     "slogan": "Ouvrir le savoir · Construire l’avenir",
     "greetingWithName": "Bonjour, {{name}}",
     "guest": {
-      "kicker": "L'IA comme partenaire d'étude",
-      "description": "Les leçons, les diapositives et les discussions sont préparées avec l'aide de l'IA, puis relues par des personnes avant d'être partagées. Parcourez d'abord les aperçus gratuits. Aucun compte requis.",
+      "kicker": "Apprendre et réviser : niveaux 5, 9 et 12",
+      "description": "À essayer gratuitement, sans compte. Les leçons sont rédigées avec l’aide de l’IA et relues par une personne avant d’être partagées.",
       "signIn": "Se connecter",
       "browseCatalog": "Parcourir les cours",
       "stepsTitle": "Comment ça marche",
@@ -30,14 +30,14 @@
       },
       "step3": {
         "title": "Devenir membre",
-        "body": "Les membres peuvent créer des cours avec l'IA, rejoindre des classes et partager leurs créations."
+        "body": "Les abonnés peuvent créer des cours sur les sujets dont ils ont besoin, rejoindre des classes et partager ce qu’ils font."
       },
       "previewsTitle": "Aperçus gratuits",
       "previewsEmpty": "Aucun aperçu pour le moment. Revenez bientôt.",
       "membershipTitle": "Devenir membre",
-      "membershipBody": "Les membres disposent d'un quota mensuel pour créer des cours avec l'IA, rejoindre des classes avec un code et partager leurs cours avec d'autres membres.",
+      "membershipBody": "Les abonnés disposent d’un quota mensuel pour créer des cours, peuvent rejoindre des classes avec un code et partager des cours avec d’autres abonnés.",
       "nav": {
-        "story": "Our story",
+        "story": "Notre histoire",
         "features": "Fonctionnalités",
         "how": "Comment ça marche",
         "previews": "Aperçus",
@@ -54,10 +54,10 @@
       },
       "features": {
         "title": "Conçu pour vous aider à comprendre",
-        "subtitle": "L'IA explique, discute et vérifie votre compréhension, comme un groupe d'étude patient, et c'est vous qui décidez de ce que vous apprenez.",
+        "subtitle": "Explique, discute et vérifie votre compréhension comme un groupe d’étude patient, et c’est vous qui décidez quoi apprendre.",
         "f1": {
           "title": "Un groupe d'étude dans chaque leçon",
-          "body": "Un enseignant, des camarades et un assistant, tous joués par l'IA, participent pour expliquer chaque idée sous plusieurs angles."
+          "body": "Un enseignant virtuel, des camarades virtuels et un assistant participent pour que chaque idée soit expliquée sous plusieurs angles."
         },
         "f2": {
           "title": "Diapositives et tableau blanc",
@@ -82,7 +82,7 @@
       },
       "previewsSubtitle": "Ouvrez ces cours dès maintenant. Aucun compte requis.",
       "perks": {
-        "p1": "Un quota mensuel d'IA pour créer vos propres cours",
+        "p1": "Un quota mensuel pour créer vos propres cours",
         "p2": "Rejoindre des classes avec un code d'invitation",
         "p3": "Partager vos cours avec d'autres membres",
         "p4": "Exporter vos cours en page web ou PowerPoint"
@@ -93,11 +93,11 @@
       },
       "footerTagline": "KHAITAM · construit sur le projet open source OpenMAIC",
       "trust": {
-        "title": "Utiliser l'IA avec soin",
-        "subtitle": "Nous savons que tout le monde ne fait pas encore confiance à l'IA. Voici comment nous essayons de mériter la vôtre.",
+        "title": "Apprendre en confiance",
+        "subtitle": "Les leçons d’ici sont rédigées avec l’aide de l’IA. Nous savons que tout le monde n’y est pas encore à l’aise ; voici comment nous essayons de mériter votre confiance.",
         "t1": {
           "title": "Vous gardez la main",
-          "body": "L'IA aide seulement à expliquer et à s'entraîner. Vous choisissez ce que vous apprenez et pouvez vous arrêter à tout moment."
+          "body": "Les outils aident seulement à expliquer et à s’exercer. Vous choisissez ce que vous apprenez et pouvez arrêter à tout moment."
         },
         "t2": {
           "title": "Relu avant d'être partagé",
@@ -105,7 +105,7 @@
         },
         "t3": {
           "title": "Honnête sur les limites",
-          "body": "L'IA peut se tromper. Pour tout ce qui compte, vérifiez auprès de votre enseignant ou d'une source fiable."
+          "body": "Une leçon peut contenir des erreurs. Pour tout ce qui compte, vérifiez auprès de votre enseignant ou dans votre manuel."
         },
         "t4": {
           "title": "Regardez avant de vous engager",
@@ -113,49 +113,87 @@
         }
       },
       "pillars": {
-        "p1": "Intelligence to understand the world",
-        "p2": "Technology to expand what people can do",
-        "p3": "People to create value"
+        "p1": "L’intelligence pour comprendre le monde",
+        "p2": "La technologie pour élargir nos possibilités",
+        "p3": "Les personnes pour créer de la valeur"
       },
       "story": {
-        "eyebrow": "Our story",
-        "title": "From big questions, · to real value.",
-        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
-        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "eyebrow": "Notre histoire",
+        "title": "Des grandes questions, · à une valeur réelle.",
+        "body1": "KHAITAM réunit deux idées : l’esprit de KHAI, qui ouvre et explore, et la profondeur et l’humanité de TÂM.",
+        "body2": "Nous croyons que lorsque l’intelligence, la technologie et les personnes avancent ensemble, les questions d’aujourd’hui deviennent les solutions de demain.",
         "values": {
           "v1": {
-            "title": "Openness",
-            "body": "Look far, discover what is new."
+            "title": "Ouverture",
+            "body": "Voir loin, découvrir du nouveau."
           },
           "v2": {
             "title": "Intelligence",
-            "body": "Learn, analyse, create value."
+            "body": "Apprendre, analyser, créer de la valeur."
           },
           "v3": {
-            "title": "Heart",
-            "body": "For people, for the community."
+            "title": "Cœur",
+            "body": "Pour les personnes, pour la communauté."
           }
         },
         "traits": {
           "k1": {
-            "name": "Deep",
-            "hint": "Never showy"
+            "name": "Profond",
+            "hint": "Jamais ostentatoire"
           },
           "k2": {
-            "name": "Systematic",
-            "hint": "Never scattered"
+            "name": "Cohérent",
+            "hint": "Jamais dispersé"
           },
           "k3": {
-            "name": "Humane",
-            "hint": "Never replacing people"
+            "name": "Humain",
+            "hint": "Ne remplace jamais les personnes"
           }
         }
+      },
+      "lead": "Chaque leçon de mathématiques, d’informatique, de physique ou de chimie est interactive : un enseignant qui explique, des diapositives, un tableau blanc et des questions de contrôle dans la leçon même, pour comprendre avant de s’exercer.",
+      "tryFree": "Essayer une leçon gratuitement",
+      "intents": {
+        "title": "Pour les élèves des niveaux 5, 9 et 12",
+        "subtitle": "Mathématiques, informatique, physique et chimie : que vous découvriez une notion ou révisiez avant un contrôle, vous pouvez commencer par une courte leçon.",
+        "i1": {
+          "title": "Comprendre la leçon du jour",
+          "body": "Chaque idée est expliquée pas à pas, avec des diapositives et un tableau blanc pour voir comment faire."
+        },
+        "i2": {
+          "title": "Réviser avant un contrôle",
+          "body": "Choisissez le sujet à revoir, réécoutez ce qui est fragile et répondez à des questions pour voir où sont vos points faibles."
+        },
+        "i3": {
+          "title": "S’exercer un peu plus",
+          "body": "Faites des quiz et de petits projets pour utiliser ce que vous venez d’apprendre, pas seulement le lire."
+        }
+      },
+      "footerSource": "Open source",
+      "footerLegal": "Mentions légales et contact",
+      "footerTerms": "Conditions d’utilisation",
+      "footerPrivacy": "Confidentialité",
+      "footerContact": "Contact",
+      "pricing": {
+        "trial": "Gratuit les {{days}} premiers jours",
+        "trialBody": "Essayez les fonctions réservées aux membres avec un quota d’essai. Aucune information de paiement, et nous ne prélevons jamais automatiquement.",
+        "then": "Après la période gratuite",
+        "price": "Tarifs de l’abonnement",
+        "plan": {
+          "m1": "1 mois",
+          "m6": "6 mois",
+          "m12": "12 mois"
+        },
+        "save": "Économisez {{percent}} %",
+        "note": "Prix définitifs, sans frais supplémentaires. Chaque mois, un quota permet de créer des leçons ; il ne se reporte pas. Les formules ne se renouvellent pas toutes seules.",
+        "pay": "Pour l’instant, le paiement se fait par virement : écrivez à {{email}} pour choisir une formule ; nous l’activons dès réception des fonds.",
+        "cta": "Créer un compte et essayer gratuitement"
       }
     },
     "locked": {
-      "membership": "Créer des cours avec l'IA est réservé aux membres.",
+      "membership": "La création de cours est réservée aux abonnés.",
       "classes": "Rejoindre une classe est réservé aux membres.",
-      "contactAdmin": "Demandez à un administrateur de vous ajouter comme membre.",
+      "contactAdmin": "Écrivez à {{email}} pour être ajouté comme membre.",
       "quota": "Le quota d'IA de ce mois est épuisé.",
       "quotaReset": "La création de cours sera de nouveau possible à partir du {{date}}.",
       "previews": "Voir les aperçus gratuits"
@@ -169,11 +207,11 @@
     },
     "status": {
       "ok": "Abonnement jusqu'au {{date}} · jours restants : {{days}}",
-      "expiring": "Votre abonnement se termine le {{date}} (jours restants : {{days}}). Demandez à un administrateur de le renouveler.",
+      "expiring": "Votre abonnement se termine le {{date}} (jours restants : {{days}}). Écrivez à {{email}} pour le renouveler.",
       "quotaNear": "Vous avez utilisé {{percent}} % du quota d'IA de ce mois.",
       "quotaOut": "Le quota d'IA de ce mois est épuisé. Vos cours restent ouverts pour étudier.",
-      "expired": "Votre abonnement s'est terminé le {{date}}. Vos cours restent consultables. Demandez à un administrateur de le renouveler pour en créer de nouveaux.",
-      "suspended": "Votre abonnement est suspendu. Vos cours restent consultables. Demandez à un administrateur de le rétablir."
+      "expired": "Votre abonnement a pris fin le {{date}}. Vos cours restent lisibles. Écrivez à {{email}} pour le renouveler et créer de nouveaux cours.",
+      "suspended": "Votre abonnement est suspendu. Vos cours restent lisibles. Écrivez à {{email}} pour le réactiver."
     },
     "continue": {
       "title": "Continuer à apprendre",
@@ -2312,7 +2350,8 @@
     "hints": {
       "username": "3 à 32 caractères : lettres latines, chiffres, points, tirets bas ou tirets. Commence par une lettre ou un chiffre.",
       "password": "8 à 256 caractères.",
-      "forgot": "Mot de passe oublié ? Demandez à un administrateur ou à votre enseignant de le réinitialiser."
+      "forgot": "Mot de passe oublié ? Écrivez à {{email}} avec votre nom d’utilisateur et nous le réinitialiserons.",
+      "trial": "Les nouveaux comptes essaient le service gratuitement pendant {{days}} jours, sans informations de paiement."
     },
     "submit": {
       "signIn": "Se connecter",
@@ -2332,7 +2371,8 @@
       "invalidRequest": "La demande n’a pas pu être traitée. Veuillez réessayer.",
       "internal": "Le serveur n’a pas pu terminer cette demande. Veuillez réessayer plus tard.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
-      "sessionEnded": "Votre session a pris fin. Reconnectez-vous pour continuer."
+      "sessionEnded": "Votre session a pris fin. Reconnectez-vous pour continuer.",
+      "termsNotAccepted": "Cochez la case d’acceptation pour créer un compte."
     },
     "admin": {
       "title": "Accounts",
@@ -2426,6 +2466,11 @@
       "changed": "Mot de passe changé. Les autres appareils ont été déconnectés.",
       "wrongCurrent": "Le mot de passe actuel est incorrect.",
       "mismatch": "Les deux nouveaux mots de passe ne correspondent pas."
+    },
+    "consent": {
+      "label": "J’ai lu et j’accepte les {{terms}}, et j’ai lu la {{privacy}}. J’ai 16 ans ou plus, ou mon parent ou tuteur a accepté que j’utilise le service.",
+      "terms": "Conditions d’utilisation",
+      "privacy": "Politique de confidentialité"
     }
   },
   "proMode": {
@@ -2931,12 +2976,13 @@
       "loadFailed": "Could not read the OmniRoute status. Try again.",
       "retry": "Try again",
       "unconfigured": {
-        "title": "OmniRoute is not set up on this server",
-        "body": "Add these values to the server's .env file, then restart the app:"
+        "title": "OmniRoute is not connected to this app",
+        "body": "OmniRoute runs as its own service beside the app and connects by itself when both run with Docker Compose. Run docker compose up -d in the install folder; if the app runs outside Docker, see ops/omniroute/README.md.",
+        "invalid": "These values are set but cannot be used:"
       },
       "unreachable": {
         "title": "The app cannot reach OmniRoute",
-        "body": "Check that the OmniRoute container is running and that OMNIROUTE_ADMIN_PASSWORD matches its password."
+        "body": "Check that the omniroute service is running (docker compose ps). If the omniroute-secrets volume was deleted while OmniRoute's data was kept, the two passwords differ: see ops/omniroute/README.md."
       },
       "step1": {
         "title": "Providers in OmniRoute",
@@ -3418,6 +3464,8 @@
       "other": "Autres"
     },
     "grade": {
+      "5": "Niveau 5",
+      "9": "Niveau 9",
       "10": "Niveau 10",
       "11": "Niveau 11",
       "12": "Niveau 12"

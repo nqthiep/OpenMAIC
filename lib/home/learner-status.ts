@@ -31,7 +31,7 @@ export interface MembershipNotice {
   readonly kind: MembershipNoticeKind;
   /** Whole days until the membership ends, rounded up. Set only for an active membership. */
   readonly daysLeft?: number;
-  /** Share of this month's allowance used, 0 to 100. Set only when the usage is known. */
+  /** Share of the running cycle's allowance used, 0 to 100. Set only when the usage is known. */
   readonly percentUsed?: number;
 }
 
@@ -71,11 +71,6 @@ export function membershipNotice(
     return { kind: 'quotaNear', daysLeft, percentUsed };
   }
   return { kind: 'ok', daysLeft, percentUsed };
-}
-
-/** First instant of next month in UTC, when the monthly allowance starts again (the server counts by UTC month). */
-export function nextMonthStart(now: Date): Date {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
 }
 
 export interface ContinueCandidate {

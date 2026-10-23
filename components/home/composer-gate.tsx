@@ -10,7 +10,7 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 
 /**
  * The AI composer, or the lock in its place: the access request for a learner without a
- * membership, the allowance notice once this month's quota is used up. Shared by `/` and
+ * membership, the allowance notice once the quota of the running cycle is used up. Shared by `/` and
  * `/workspace`, so a learner who types the workspace URL meets the same lock as on the home.
  */
 export function ComposerGate({
@@ -36,7 +36,11 @@ export function ComposerGate({
           </Link>
         </div>
       }
-      blocked={status.notice.kind === 'quotaOut' ? <QuotaLock /> : undefined}
+      blocked={
+        status.notice.kind === 'quotaOut' ? (
+          <QuotaLock resetAt={status.usage?.cycleEnd} />
+        ) : undefined
+      }
     >
       {children}
     </Gate>

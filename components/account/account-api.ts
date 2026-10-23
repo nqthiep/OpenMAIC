@@ -8,6 +8,8 @@ import type { Capabilities } from '@/lib/server/authz/capabilities';
 export interface AccountSession {
   readonly enabled: boolean;
   readonly registrationOpen: boolean;
+  /** Days of free membership a new account gets; 0 or missing when none. */
+  readonly trialDays?: number;
   readonly authenticated: boolean;
   readonly account?: { readonly username: string };
   /** The effective role of the signed-in account. */
@@ -115,6 +117,7 @@ export async function fetchAccountSession(): Promise<AccountSession> {
   return {
     enabled: body.enabled === true,
     registrationOpen: body.registrationOpen === true,
+    trialDays: typeof body.trialDays === 'number' && body.trialDays > 0 ? body.trialDays : 0,
     authenticated: body.authenticated === true,
     account,
     role: isAccountRole(body.role) ? body.role : undefined,
@@ -135,19 +138,36 @@ export async function fetchAccountSession(): Promise<AccountSession> {
 export const ACCOUNT_SESSION_CHANGED_EVENT = 'openmaic:account-session-changed';
 
 let sharedSession: Promise<AccountSession> | undefined;
+let resolvedSession: AccountSession | undefined;
 
 /** The session, fetched once and shared by every reader until it changes. */
 export function loadSharedSession(): Promise<AccountSession> {
-  sharedSession ??= fetchAccountSession().catch((error: unknown) => {
-    sharedSession = undefined;
-    throw error;
-  });
+  sharedSession ??= fetchAccountSession()
+    .then((session) => {
+      resolvedSession = session;
+      return session;
+    })
+    .catch((error: unknown) => {
+      sharedSession = undefined;
+      throw error;
+    });
   return sharedSession;
+}
+
+/**
+ * The last session the server answered, or undefined before the first answer. Every page builds its
+ * own top bar, so a page reached by a link starts from this instead of from nothing, and its
+ * links and buttons do not drop out and come back. Only the browser fills it: on the server, and
+ * on a first load, it is undefined, so the first render matches the server's.
+ */
+export function peekSharedSession(): AccountSession | undefined {
+  return resolvedSession;
 }
 
 /** Forgets the shared session and tells every mounted reader to ask again. */
 export function sessionChanged(): void {
   sharedSession = undefined;
+  resolvedSession = undefined;
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event(ACCOUNT_SESSION_CHANGED_EVENT));
   }
@@ -156,11 +176,16 @@ export function sessionChanged(): void {
 async function postCredentials(
   path: '/api/auth/login' | '/api/auth/register',
   credentials: AccountCredentials,
+  extra: { acceptedTerms?: boolean } = {},
 ): Promise<{ username: string }> {
   const response = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ username: credentials.username, password: credentials.password }),
+    body: JSON.stringify({
+      username: credentials.username,
+      password: credentials.password,
+      ...extra,
+    }),
   });
   const body = await readJson(response);
   if (
@@ -181,10 +206,15 @@ export async function signIn(credentials: AccountCredentials): Promise<{ usernam
   return account;
 }
 
+/**
+ * Creates the account. `acceptedTerms` is what the person ticked: that they read the terms of
+ * use and the privacy policy, and are old enough or have a parent's or guardian's agreement.
+ */
 export async function createAccount(
   credentials: AccountCredentials,
+  acceptedTerms: boolean,
 ): Promise<{ username: string }> {
-  const account = await postCredentials('/api/auth/register', credentials);
+  const account = await postCredentials('/api/auth/register', credentials, { acceptedTerms });
   sessionChanged();
   return account;
 }

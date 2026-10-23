@@ -4,14 +4,16 @@ import { BadgeCheck, CirclePause, TriangleAlert, type LucideIcon } from 'lucide-
 import { LockedNotice } from '@/components/capability/locked-notice';
 import { ContactAdminButton } from '@/components/support/support-inbox';
 import { RenewButton } from '@/components/home/renew-button';
-import { nextMonthStart, type MembershipNoticeKind } from '@/lib/home/learner-status';
+import type { MembershipNoticeKind } from '@/lib/home/learner-status';
 import type { MembershipStatus } from '@/lib/home/use-membership-status';
+import { useBrand } from '@/lib/brand/brand-context';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 
-/** When the monthly allowance starts again, written for the reader's locale (the server counts by UTC month). */
-function allowanceResetDate(locale: string): string {
-  return nextMonthStart(new Date()).toLocaleDateString(locale, { timeZone: 'UTC' });
+/** When the allowance starts again (the end of the running cycle), written for the reader's locale and clock. */
+function allowanceResetDate(locale: string, resetAt: string | undefined): string {
+  if (!resetAt) return '';
+  return new Date(resetAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 const TONE: Record<MembershipNoticeKind, { icon: LucideIcon; box: string }> = {
@@ -42,13 +44,14 @@ const TONE: Record<MembershipNoticeKind, { icon: LucideIcon; box: string }> = {
 };
 
 /**
- * One line above the composer about the membership: until when, how much of this month's AI
+ * One line above the composer about the membership: until when, how much of the running cycle's AI
  * allowance is used, and a warning when the end date is near, the allowance is almost gone or
  * used up, or the membership has ended or is paused. Renders nothing for someone without a
  * membership, because the locked composer already says what to do.
  */
 export function StatusStrip({ status }: { status: MembershipStatus }) {
   const { t, locale } = useI18n();
+  const { contactEmail: email } = useBrand();
   const { membership, usage, notice } = status;
   if (notice.kind === 'none' || !membership) return null;
 
@@ -59,14 +62,14 @@ export function StatusStrip({ status }: { status: MembershipStatus }) {
     notice.kind === 'ok'
       ? t('home.status.ok', { date, days })
       : notice.kind === 'expiring'
-        ? t('home.status.expiring', { date, days })
+        ? t('home.status.expiring', { date, days, email })
         : notice.kind === 'quotaNear'
           ? t('home.status.quotaNear', { percent: notice.percentUsed ?? 0 })
           : notice.kind === 'quotaOut'
             ? t('home.status.quotaOut')
             : notice.kind === 'expired'
-              ? t('home.status.expired', { date })
-              : t('home.status.suspended');
+              ? t('home.status.expired', { date, email })
+              : t('home.status.suspended', { email });
 
   // The warnings that tell the learner to ask an administrator get a button to do it here.
   const contactSubject =
@@ -131,13 +134,13 @@ export function StatusStrip({ status }: { status: MembershipStatus }) {
   );
 }
 
-/** Shown in place of the composer when this month's AI allowance is used up. */
-export function QuotaLock() {
+/** Shown in place of the composer when the allowance of the running cycle is used up. */
+export function QuotaLock({ resetAt }: { resetAt?: string }) {
   const { t, locale } = useI18n();
   return (
     <LockedNotice
       reason={t('home.locked.quota')}
-      hint={t('home.locked.quotaReset', { date: allowanceResetDate(locale) })}
+      hint={t('home.locked.quotaReset', { date: allowanceResetDate(locale, resetAt) })}
     />
   );
 }

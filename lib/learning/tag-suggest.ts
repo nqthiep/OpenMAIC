@@ -154,7 +154,7 @@ function mentionsMath(texts: readonly string[]): boolean {
 /** Grades named as "lớp 12", "khối 11" or "grade 10". */
 function gradesIn(folded: string): Grade[] {
   const found = new Set<Grade>();
-  for (const match of folded.matchAll(/(?:lop|khoi|grade)\s*(10|11|12)(?![0-9])/g)) {
+  for (const match of folded.matchAll(/(?:lop|khoi|grade)\s*(10|11|12|5|9)(?![0-9])/g)) {
     found.add(match[1] as Grade);
   }
   return GRADES.filter((grade) => found.has(grade)).slice(0, MAX_GRADES);

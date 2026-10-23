@@ -43,7 +43,7 @@ async function render(): Promise<HTMLElement> {
 const EMPTY: Contribution = {
   shares: [],
   readers: 0,
-  bonus: { month: '2026-10', tokens: 0, cap: 200_000 },
+  bonus: { cycleStart: '2026-10-20T14:15:00.000Z', tokens: 0, cap: 200_000 },
   badges: [],
   next: { code: 'readers-10', readersNeeded: 10 },
 };
@@ -85,7 +85,7 @@ describe('ContributionBlock', () => {
         { courseId: 'c2', title: 'Fractions', state: 'pending', readers: 0 },
       ],
       readers: 11,
-      bonus: { month: '2026-10', tokens: 220_000, cap: 200_000 },
+      bonus: { cycleStart: '2026-10-20T14:15:00.000Z', tokens: 220_000, cap: 200_000 },
       badges: ['readers-10'],
       next: { code: 'readers-100', readersNeeded: 89 },
     } satisfies Contribution);

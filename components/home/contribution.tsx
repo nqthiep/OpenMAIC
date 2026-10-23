@@ -21,7 +21,7 @@ const SHARES_SHOWN = 5;
 
 /**
  * What the learner has given and earned by sharing courses: how many are shared or waiting,
- * how many members read them, the reward tokens of this month, the badges, and how far the next
+ * how many members read them, the reward tokens of the running cycle, the badges, and how far the next
  * badge is. Renders nothing for a learner who has shared nothing and earned nothing, and when
  * the figures cannot be read.
  */

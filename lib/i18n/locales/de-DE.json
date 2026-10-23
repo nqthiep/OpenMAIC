@@ -13,8 +13,8 @@
     "slogan": "Wissen erschließen · Zukunft gestalten",
     "greetingWithName": "Hallo, {{name}}",
     "guest": {
-      "kicker": "KI als Lernpartner",
-      "description": "Lektionen, Folien und Diskussionen entstehen mit Hilfe von KI und werden von Menschen geprüft, bevor sie geteilt werden. Sehen Sie sich zuerst die kostenlosen Vorschauen an. Kein Konto nötig.",
+      "kicker": "Lernen und Wiederholen für die Klassen 5, 9 und 12",
+      "description": "Kostenlos ausprobieren, ohne Konto. Die Lektionen entstehen mit Hilfe von KI und werden von Menschen geprüft, bevor sie geteilt werden.",
       "signIn": "Anmelden",
       "browseCatalog": "Kurse durchsuchen",
       "stepsTitle": "So funktioniert es",
@@ -30,14 +30,14 @@
       },
       "step3": {
         "title": "Mitglied werden",
-        "body": "Mitglieder können Kurse mit KI erstellen, Klassen beitreten und Eigenes teilen."
+        "body": "Mitglieder können Kurse zu den Themen erstellen, die sie brauchen, Klassen beitreten und teilen, was sie gemacht haben."
       },
       "previewsTitle": "Kostenlose Vorschauen",
       "previewsEmpty": "Noch keine Vorschauen. Schauen Sie bald wieder vorbei.",
       "membershipTitle": "Mitglied werden",
-      "membershipBody": "Mitglieder erhalten ein monatliches Kontingent, um Kurse mit KI zu erstellen, per Code Klassen beizutreten und Kurse mit anderen Mitgliedern zu teilen.",
+      "membershipBody": "Mitglieder erhalten ein monatliches Kontingent zum Erstellen von Kursen, können Klassen per Code beitreten und Kurse mit anderen Mitgliedern teilen.",
       "nav": {
-        "story": "Our story",
+        "story": "Unsere Geschichte",
         "features": "Funktionen",
         "how": "So funktioniert es",
         "previews": "Vorschauen",
@@ -54,10 +54,10 @@
       },
       "features": {
         "title": "Gemacht, damit Sie verstehen",
-        "subtitle": "Die KI erklärt, diskutiert und prüft Ihr Verständnis, wie in einer geduldigen Lerngruppe. Was Sie lernen, entscheiden Sie.",
+        "subtitle": "Erklärt, diskutiert und prüft dein Verständnis wie eine geduldige Lerngruppe, und du entscheidest, was du lernst.",
         "f1": {
           "title": "Eine Lerngruppe in jeder Lektion",
-          "body": "Lehrkraft, Mitschüler und Assistent, alle von der KI gespielt, machen mit, sodass jede Idee aus mehreren Blickwinkeln erklärt wird."
+          "body": "Eine virtuelle Lehrkraft, virtuelle Mitschüler und ein Assistent machen mit, damit jede Idee von mehreren Seiten erklärt wird."
         },
         "f2": {
           "title": "Folien und Whiteboard",
@@ -82,7 +82,7 @@
       },
       "previewsSubtitle": "Öffnen Sie diese Kurse sofort. Kein Konto nötig.",
       "perks": {
-        "p1": "Ein monatliches KI-Kontingent für eigene Kurse",
+        "p1": "Monatliches Kontingent, um eigene Kurse zu erstellen",
         "p2": "Klassen per Einladungscode beitreten",
         "p3": "Eigene Kurse mit anderen Mitgliedern teilen",
         "p4": "Kurse als Webseite oder PowerPoint exportieren"
@@ -93,11 +93,11 @@
       },
       "footerTagline": "KHAITAM · basiert auf dem Open-Source-Projekt OpenMAIC",
       "trust": {
-        "title": "KI mit Sorgfalt einsetzen",
-        "subtitle": "Wir wissen, dass nicht jeder der KI schon vertraut. So versuchen wir, Ihr Vertrauen zu verdienen.",
+        "title": "Mit gutem Gefühl lernen",
+        "subtitle": "Die Lektionen hier entstehen mit Hilfe von KI. Wir wissen, dass sich noch nicht alle damit wohlfühlen, und zeigen deshalb, wie wir uns dein Vertrauen verdienen wollen.",
         "t1": {
           "title": "Sie behalten die Führung",
-          "body": "Die KI hilft nur beim Erklären und Üben. Sie wählen, was Sie lernen, und können jederzeit aufhören."
+          "body": "Die Werkzeuge helfen nur beim Erklären und Üben. Du wählst, was du lernst, und kannst jederzeit aufhören."
         },
         "t2": {
           "title": "Geprüft, bevor es geteilt wird",
@@ -105,7 +105,7 @@
         },
         "t3": {
           "title": "Ehrlich über Grenzen",
-          "body": "KI kann Fehler machen. Prüfen Sie Wichtiges bei Ihrer Lehrkraft oder einer vertrauenswürdigen Quelle."
+          "body": "Eine Lektion kann Fehler enthalten. Prüfe Wichtiges mit deiner Lehrkraft oder deinem Schulbuch nach."
         },
         "t4": {
           "title": "Erst ansehen, dann entscheiden",
@@ -113,49 +113,87 @@
         }
       },
       "pillars": {
-        "p1": "Intelligence to understand the world",
-        "p2": "Technology to expand what people can do",
-        "p3": "People to create value"
+        "p1": "Intelligenz, um die Welt zu verstehen",
+        "p2": "Technologie, um Möglichkeiten zu erweitern",
+        "p3": "Menschen, die Werte schaffen"
       },
       "story": {
-        "eyebrow": "Our story",
-        "title": "From big questions, · to real value.",
-        "body1": "KHAITAM joins two ideas: the spirit of KHAI, which opens and explores, and the depth and humanity of TÂM.",
-        "body2": "We believe that when intelligence, technology and people move together, today’s questions become tomorrow’s solutions.",
+        "eyebrow": "Unsere Geschichte",
+        "title": "Aus großen Fragen, · werden echte Werte.",
+        "body1": "KHAITAM verbindet zwei Gedanken: den Geist von KHAI, der öffnet und erkundet, und die Tiefe und Menschlichkeit von TÂM.",
+        "body2": "Wir glauben: Wenn Intelligenz, Technologie und Menschen gemeinsam gehen, werden die Fragen von heute zu den Lösungen von morgen.",
         "values": {
           "v1": {
-            "title": "Openness",
-            "body": "Look far, discover what is new."
+            "title": "Offenheit",
+            "body": "Weit blicken, Neues entdecken."
           },
           "v2": {
-            "title": "Intelligence",
-            "body": "Learn, analyse, create value."
+            "title": "Intelligenz",
+            "body": "Lernen, analysieren, Werte schaffen."
           },
           "v3": {
-            "title": "Heart",
-            "body": "For people, for the community."
+            "title": "Herz",
+            "body": "Für die Menschen, für die Gemeinschaft."
           }
         },
         "traits": {
           "k1": {
-            "name": "Deep",
-            "hint": "Never showy"
+            "name": "Tiefgründig",
+            "hint": "Nie aufdringlich"
           },
           "k2": {
-            "name": "Systematic",
-            "hint": "Never scattered"
+            "name": "Systematisch",
+            "hint": "Nie zerstückelt"
           },
           "k3": {
-            "name": "Humane",
-            "hint": "Never replacing people"
+            "name": "Menschlich",
+            "hint": "Ersetzt nie Menschen"
           }
         }
+      },
+      "lead": "Jede Lektion in Mathematik, Informatik, Physik oder Chemie ist interaktiv: eine Lehrkraft erklärt, dazu Folien, ein Whiteboard und Prüffragen direkt in der Lektion, damit du den Stoff verstehst, bevor du übst.",
+      "tryFree": "Lektion kostenlos testen",
+      "intents": {
+        "title": "Für Schülerinnen und Schüler der Klassen 5, 9 und 12",
+        "subtitle": "Mathematik, Informatik, Physik und Chemie: ob neuer Stoff oder Wiederholung vor einer Prüfung, du kannst mit einer kurzen Lektion beginnen.",
+        "i1": {
+          "title": "Den aktuellen Stoff verstehen",
+          "body": "Jeder Gedanke wird Schritt für Schritt erklärt, mit Folien und Whiteboard, damit du siehst, wie es geht."
+        },
+        "i2": {
+          "title": "Vor der Klassenarbeit wiederholen",
+          "body": "Wähle das Thema, das du brauchst, höre Unsicheres noch einmal und beantworte Fragen, um zu sehen, wo noch Lücken sind."
+        },
+        "i3": {
+          "title": "Noch etwas üben",
+          "body": "Löse Tests und kleine Projekte, um das Gelernte anzuwenden, statt es nur zu lesen."
+        }
+      },
+      "footerSource": "Open Source",
+      "footerLegal": "Rechtliches und Kontakt",
+      "footerTerms": "Nutzungsbedingungen",
+      "footerPrivacy": "Datenschutz",
+      "footerContact": "Kontakt",
+      "pricing": {
+        "trial": "Die ersten {{days}} Tage kostenlos",
+        "trialBody": "Teste die Mitgliederfunktionen mit einem Testkontingent. Keine Zahlungsdaten, und wir buchen nie automatisch ab.",
+        "then": "Nach der kostenlosen Zeit",
+        "price": "Preise der Mitgliedschaft",
+        "plan": {
+          "m1": "1 Monat",
+          "m6": "6 Monate",
+          "m12": "12 Monate"
+        },
+        "save": "{{percent}} % sparen",
+        "note": "Endpreise ohne Zusatzkosten. Jeden Monat gibt es ein Kontingent zum Erstellen von Lektionen; es wird nicht übertragen. Pakete verlängern sich nicht von selbst.",
+        "pay": "Derzeit bezahlst du per Überweisung: Schreibe an {{email}}, um ein Paket zu wählen; wir schalten es frei, sobald das Geld eingegangen ist.",
+        "cta": "Konto erstellen und kostenlos testen"
       }
     },
     "locked": {
-      "membership": "Kurse mit KI zu erstellen ist Mitgliedern vorbehalten.",
+      "membership": "Kurse zu erstellen ist Mitgliedern vorbehalten.",
       "classes": "Klassen beizutreten ist Mitgliedern vorbehalten.",
-      "contactAdmin": "Bitten Sie einen Administrator, Sie als Mitglied hinzuzufügen.",
+      "contactAdmin": "Schreiben Sie an {{email}}, um als Mitglied hinzugefügt zu werden.",
       "quota": "Das KI-Kontingent dieses Monats ist aufgebraucht.",
       "quotaReset": "Neue Kurse können ab {{date}} wieder erstellt werden.",
       "previews": "Kostenlose Vorschauen ansehen"
@@ -169,11 +207,11 @@
     },
     "status": {
       "ok": "Mitgliedschaft bis {{date}} · verbleibende Tage: {{days}}",
-      "expiring": "Ihre Mitgliedschaft endet am {{date}} (verbleibende Tage: {{days}}). Bitten Sie einen Administrator um die Verlängerung.",
+      "expiring": "Ihre Mitgliedschaft endet am {{date}} (verbleibende Tage: {{days}}). Schreiben Sie an {{email}}, um sie zu verlängern.",
       "quotaNear": "Sie haben {{percent}} % des KI-Kontingents dieses Monats verbraucht.",
       "quotaOut": "Das KI-Kontingent dieses Monats ist aufgebraucht. Ihre Kurse bleiben zum Lernen offen.",
-      "expired": "Ihre Mitgliedschaft ist am {{date}} abgelaufen. Ihre Kurse bleiben lesbar. Bitten Sie einen Administrator um die Verlängerung, um neue Kurse zu erstellen.",
-      "suspended": "Ihre Mitgliedschaft ist pausiert. Ihre Kurse bleiben lesbar. Bitten Sie einen Administrator, sie wieder zu aktivieren."
+      "expired": "Ihre Mitgliedschaft ist am {{date}} abgelaufen. Ihre Kurse bleiben lesbar. Schreiben Sie an {{email}}, um sie zu verlängern und neue Kurse zu erstellen.",
+      "suspended": "Ihre Mitgliedschaft ist pausiert. Ihre Kurse bleiben lesbar. Schreiben Sie an {{email}}, um sie wieder zu aktivieren."
     },
     "continue": {
       "title": "Weiterlernen",
@@ -2312,7 +2350,8 @@
     "hints": {
       "username": "3–32 Zeichen: lateinische Buchstaben, Ziffern, Punkte, Unterstriche oder Bindestriche. Beginne mit einem Buchstaben oder einer Ziffer.",
       "password": "8–256 Zeichen.",
-      "forgot": "Passwort vergessen? Bitte den Administrator oder deine Lehrkraft, es zurückzusetzen."
+      "forgot": "Passwort vergessen? Schreibe an {{email}} und nenne deinen Benutzernamen, dann setzen wir es für dich zurück.",
+      "trial": "Neue Konten testen den Dienst {{days}} Tage kostenlos, ohne Zahlungsdaten."
     },
     "submit": {
       "signIn": "Anmelden",
@@ -2332,7 +2371,8 @@
       "invalidRequest": "Diese Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
       "internal": "Der Server konnte diese Anfrage nicht abschließen. Bitte versuche es später erneut.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-      "sessionEnded": "Ihre Anmeldung ist beendet. Melden Sie sich erneut an, um fortzufahren."
+      "sessionEnded": "Ihre Anmeldung ist beendet. Melden Sie sich erneut an, um fortzufahren.",
+      "termsNotAccepted": "Setze den Haken zur Zustimmung, bevor du ein Konto erstellst."
     },
     "admin": {
       "title": "Accounts",
@@ -2426,6 +2466,11 @@
       "changed": "Passwort geändert. Andere Geräte wurden abgemeldet.",
       "wrongCurrent": "Das aktuelle Passwort ist falsch.",
       "mismatch": "Die beiden neuen Passwörter stimmen nicht überein."
+    },
+    "consent": {
+      "label": "Ich habe die {{terms}} gelesen und stimme zu, und ich habe die {{privacy}} gelesen. Ich bin mindestens 16 Jahre alt, oder meine Eltern bzw. mein Vormund haben der Nutzung zugestimmt.",
+      "terms": "Nutzungsbedingungen",
+      "privacy": "Datenschutzerklärung"
     }
   },
   "proMode": {
@@ -2931,12 +2976,13 @@
       "loadFailed": "Could not read the OmniRoute status. Try again.",
       "retry": "Try again",
       "unconfigured": {
-        "title": "OmniRoute is not set up on this server",
-        "body": "Add these values to the server's .env file, then restart the app:"
+        "title": "OmniRoute is not connected to this app",
+        "body": "OmniRoute runs as its own service beside the app and connects by itself when both run with Docker Compose. Run docker compose up -d in the install folder; if the app runs outside Docker, see ops/omniroute/README.md.",
+        "invalid": "These values are set but cannot be used:"
       },
       "unreachable": {
         "title": "The app cannot reach OmniRoute",
-        "body": "Check that the OmniRoute container is running and that OMNIROUTE_ADMIN_PASSWORD matches its password."
+        "body": "Check that the omniroute service is running (docker compose ps). If the omniroute-secrets volume was deleted while OmniRoute's data was kept, the two passwords differ: see ops/omniroute/README.md."
       },
       "step1": {
         "title": "Providers in OmniRoute",
@@ -3418,6 +3464,8 @@
       "other": "Sonstiges"
     },
     "grade": {
+      "5": "Klasse 5",
+      "9": "Klasse 9",
       "10": "Klasse 10",
       "11": "Klasse 11",
       "12": "Klasse 12"

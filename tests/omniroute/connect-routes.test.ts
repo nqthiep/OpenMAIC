@@ -41,6 +41,8 @@ beforeEach(async () => {
   vi.stubEnv('OMNIROUTE_PUBLIC_URL', 'https://omniroute.example.test');
   vi.stubEnv('OMNIROUTE_GATE_SECRET', 'g'.repeat(48));
   vi.stubEnv('OMNIROUTE_ADMIN_PASSWORD', ADMIN_PASSWORD);
+  // Never read the machine's own password file: "not set up" cases clear the variable above.
+  vi.stubEnv('OMNIROUTE_SECRETS_DIR', '/nonexistent/omniroute-secrets');
   vi.stubEnv('OMNIROUTE_INTERNAL_URL', fake.url);
   vi.stubEnv('OMNIROUTE_API_URL', fake.url);
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
@@ -153,7 +155,7 @@ describe('overview', () => {
     const { body } = await json(await routes.overview(get(root)));
     expect(body.overview).toMatchObject({
       state: 'unconfigured',
-      missingEnv: ['OMNIROUTE_GATE_SECRET', 'OMNIROUTE_ADMIN_PASSWORD'],
+      missingEnv: ['OMNIROUTE_GATE_SECRET'],
       key: null,
     });
     expect(JSON.stringify(body)).not.toContain('short');

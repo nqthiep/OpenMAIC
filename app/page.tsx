@@ -29,11 +29,13 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { useBrand } from '@/lib/brand/brand-context';
-import { HomeHero, Slogan } from '@/components/home/brand-band';
+import { BrandBand, HomeHero, Slogan } from '@/components/home/brand-band';
 import { SiteHeader } from '@/components/home/site-shell';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { Gate } from '@/components/capability/gate';
 import { GuestHome } from '@/components/home/guest-home';
+import { HomeSeoContent } from '@/components/home/home-seo-content';
+import { LegalLinks } from '@/components/legal/legal-links';
 import { ComposerGate } from '@/components/home/composer-gate';
 import { ContinueCard } from '@/components/home/continue-card';
 import { ContributionBlock } from '@/components/home/contribution';
@@ -883,7 +885,7 @@ function HomePage() {
             className="w-full"
           >
             {/* The one thing to do on this page: a bright ring and a glow set the composer apart. */}
-            <div className="w-full rounded-[1.9rem] bg-gradient-to-br from-brand-yellow via-brand-400 to-brand-600 p-[3px] shadow-[0_28px_70px_-18px_rgba(66,114,171,0.65)] transition-shadow focus-within:shadow-[0_32px_90px_-14px_rgba(244,198,109,0.55)]">
+            <div className="w-full rounded-[1.9rem] bg-gradient-to-br from-brand-yellow via-brand-400 to-brand-600 p-[3px] shadow-[0_28px_70px_-18px_rgba(66,111,171,0.65)] transition-shadow focus-within:shadow-[0_32px_90px_-14px_rgba(244,198,109,0.55)]">
               <div
                 data-pro-morph="composer"
                 className="w-full rounded-[1.75rem] bg-white dark:bg-slate-900"
@@ -1508,8 +1510,9 @@ function HomePage() {
       />
 
       {/* Footer — flows with content, at the very end */}
-      <div className="mt-auto pt-12 pb-4 text-center text-xs text-muted-foreground/40">
-        {t('home.guest.footerTagline')}
+      <div className="mt-auto flex flex-col items-center gap-2 pt-12 pb-4 text-center text-xs text-muted-foreground">
+        <span className="text-muted-foreground/60">{t('home.guest.footerTagline')}</span>
+        <LegalLinks />
       </div>
     </div>
   );
@@ -2056,17 +2059,28 @@ function ClassroomCard({
 
 export default function Page() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<HomeSkeleton />}>
       <HomeRouter />
     </Suspense>
+  );
+}
+
+/** What a first load shows while the session is on its way: the bar with its places held, over the band. */
+function HomeSkeleton() {
+  return (
+    <div className="relative min-h-dvh w-full overflow-x-hidden bg-background">
+      <BrandBand className="inset-x-0 top-14 h-[640px]" />
+      <SiteHeader />
+      <HomeSeoContent />
+    </div>
   );
 }
 
 /**
  * Chooses the home. A visitor who is not signed in gets the guest page. An operator or administrator
  * goes to the operations dashboard unless `?learn=1` asks for the learning home, a choice kept for
- * the tab (`staff-learning.ts`). Everyone else gets the learning home. Renders nothing until the
- * session is known.
+ * the tab (`staff-learning.ts`). Everyone else gets the learning home. Until the session is known it
+ * shows the bar with its places held, over the navy band, not an empty page.
  */
 function HomeRouter() {
   const router = useRouter();
@@ -2085,7 +2099,8 @@ function HomeRouter() {
     if (toDashboard) router.replace('/admin');
   }, [toDashboard, router]);
 
-  if (session === undefined || toDashboard) return null;
+  if (session === undefined) return <HomeSkeleton />;
+  if (toDashboard) return null;
   if (session?.enabled === true && !session.authenticated) {
     return <GuestHome registrationOpen={session.registrationOpen} />;
   }

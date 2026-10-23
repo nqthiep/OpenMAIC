@@ -11,6 +11,8 @@ import {
   type PersistencePoolFactory,
 } from '@/lib/persistence/server-provider';
 
+import { DEFAULT_MONTHLY_QUOTA_TOKENS } from '@/lib/server/learning/store';
+
 import { DEFAULT_LOGIN_THROTTLE, LoginThrottle } from './login-throttle';
 import { accountOwnerId, resolveAccountSession, type AccountServiceDeps } from './service';
 import { readSessionCookie } from './session';
@@ -29,6 +31,24 @@ export function accountsEnabled(): boolean {
  */
 export function registrationOpen(): boolean {
   return process.env.ACCOUNT_REGISTRATION?.trim().toLowerCase() === 'open';
+}
+
+/** Half the paid monthly quota: the trial is for trying, and an abused account costs half as much. */
+export const DEFAULT_TRIAL_QUOTA_TOKENS = DEFAULT_MONTHLY_QUOTA_TOKENS / 2;
+
+/**
+ * The free first month every new account gets: `MEMBERSHIP_TRIAL_DAYS` days (30 when unset, 0 turns
+ * it off) with `MEMBERSHIP_TRIAL_QUOTA_TOKENS` tokens (`DEFAULT_TRIAL_QUOTA_TOKENS` when unset).
+ */
+export function membershipTrial(): { days: number; monthlyQuota: number } | undefined {
+  const raw = process.env.MEMBERSHIP_TRIAL_DAYS?.trim();
+  const days = raw === undefined || raw === '' ? 30 : Number(raw);
+  if (!Number.isInteger(days) || days <= 0 || days > 366) return undefined;
+  const quota = Number(process.env.MEMBERSHIP_TRIAL_QUOTA_TOKENS?.trim());
+  return {
+    days,
+    monthlyQuota: Number.isInteger(quota) && quota > 0 ? quota : DEFAULT_TRIAL_QUOTA_TOKENS,
+  };
 }
 
 /** One throttle per process, kept on globalThis so dev-mode module reloads do not reset it. */
@@ -50,6 +70,7 @@ export async function accountServiceDeps(
     db: pool as unknown as AccountServiceDeps['db'],
     throttle: loginThrottle(),
     registrationOpen: registrationOpen(),
+    trial: membershipTrial(),
   };
 }
 

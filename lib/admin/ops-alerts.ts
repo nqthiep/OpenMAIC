@@ -49,7 +49,7 @@ export interface OpsHealth {
   readonly oldestPendingAccessRequest: string | null;
   readonly oldestPendingShare: string | null;
   readonly expiring: readonly { username: string; expiresAt: string }[];
-  /** Learners at QUOTA_SHOWN or more of this month's allowance, most used first. */
+  /** Learners at QUOTA_SHOWN or more of the allowance of their running cycle, most used first. */
   readonly quota: readonly { username: string; used: number; limit: number }[];
   /** Requests per UTC day, oldest first, zero-filled. */
   readonly dailyRequests: readonly { day: string; requests: number }[];

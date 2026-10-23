@@ -1,0 +1,23 @@
+# For an app that runs on the host (`pnpm dev`) instead of in the openmaic container:
+#
+#   docker compose -f docker-compose.yml -f ops/omniroute/host-dev.yml up -d omniroute omniroute-gate
+#
+# Publishes OmniRoute on the host loopback and keeps the dashboard password in ./.omniroute/secrets,
+# where the app looks under `next dev` when nothing else is set, so no value goes in .env. The gate
+# asks the app on the host (default port 3000; set OMNIROUTE_APP_UPSTREAM=host.docker.internal:3002
+# for another one). Only for a developer's own machine: the ports skip the gate.
+services:
+  omniroute-init:
+    volumes:
+      - ./.omniroute/secrets:/secrets
+  omniroute:
+    volumes:
+      - ./.omniroute/secrets:/run/omniroute:ro
+    ports:
+      - '127.0.0.1:20128:20128'
+      - '127.0.0.1:20129:20129'
+  omniroute-gate:
+    environment:
+      - OMNIROUTE_APP_UPSTREAM=${OMNIROUTE_APP_UPSTREAM:-host.docker.internal:3000}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'

@@ -13,14 +13,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { BrandImage } from '@/components/brand/brand-image';
+import { useBrand } from '@/lib/brand/brand-context';
+import { useAccountSession } from '@/lib/capabilities/use-capabilities';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 import { AccountRequestError, createAccount, signIn, type AccountCredentials } from './account-api';
 
 type Mode = 'signIn' | 'create';
-type Field = 'username' | 'password';
+type Field = 'username' | 'password' | 'consent';
 
 interface Failure {
   readonly message: string;
@@ -33,6 +36,8 @@ interface AccountDialogProps {
   readonly onOpenChange: (open: boolean) => void;
   /** Whether the server accepts new accounts. When false only sign-in is offered. */
   readonly registrationOpen: boolean;
+  /** The tab the dialog opens on. Change the component's `key` to apply a new value. */
+  readonly initialMode?: Mode;
   /**
    * Element that receives focus when the dialog closes. Set explicitly because
    * focus is not always on the trigger when it opens (Safari does not focus a
@@ -43,6 +48,10 @@ interface AccountDialogProps {
 
 const MODES: readonly Mode[] = ['signIn', 'create'];
 
+/** Stand-ins for the two links inside the consent sentence, which each language orders its own way. */
+const TERMS_TOKEN = '⟦terms⟧';
+const PRIVACY_TOKEN = '⟦privacy⟧';
+
 function joinIds(...ids: Array<string | false | undefined>): string | undefined {
   return ids.filter(Boolean).join(' ') || undefined;
 }
@@ -51,19 +60,24 @@ export function AccountDialog({
   open,
   onOpenChange,
   registrationOpen,
+  initialMode = 'signIn',
   returnFocusTo,
 }: AccountDialogProps) {
   const { t } = useI18n();
+  const trialDays = useAccountSession()?.trialDays ?? 0;
+  const { contactEmail } = useBrand();
   const idBase = useId();
   const usernameId = `${idBase}-username`;
   const passwordId = `${idBase}-password`;
   const usernameHintId = `${idBase}-username-hint`;
   const passwordHintId = `${idBase}-password-hint`;
   const errorId = `${idBase}-error`;
+  const consentId = `${idBase}-consent`;
 
-  const [mode, setMode] = useState<Mode>('signIn');
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [accepted, setAccepted] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [pending, setPending] = useState(false);
   // State updates land after the event, so a second activation can slip past
@@ -71,12 +85,14 @@ export function AccountDialog({
   const pendingRef = useRef(false);
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const consentRef = useRef<HTMLButtonElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
   const activeMode: Mode = registrationOpen ? mode : 'signIn';
   const creating = activeMode === 'create';
   const usernameInvalid = failure?.field === 'username';
   const passwordInvalid = failure?.field === 'password';
+  const consentInvalid = failure?.field === 'consent';
 
   function describeFailure(caught: unknown): Failure {
     if (!(caught instanceof AccountRequestError)) {
@@ -89,6 +105,8 @@ export function AccountDialog({
         return { field: 'username', message: t('account.errors.usernameTaken') };
       case 'PASSWORD_INVALID':
         return { field: 'password', message: t('account.errors.passwordInvalid') };
+      case 'TERMS_NOT_ACCEPTED':
+        return { field: 'consent', message: t('account.errors.termsNotAccepted') };
       case 'INVALID_CREDENTIALS':
         return { message: t('account.errors.invalidCredentials') };
       case 'RATE_LIMITED': {
@@ -114,6 +132,12 @@ export function AccountDialog({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pendingRef.current) return;
+    if (creating && !accepted) {
+      // Checked here as well as on the server, so the answer comes before a password is hashed.
+      setFailure({ field: 'consent', message: t('account.errors.termsNotAccepted') });
+      consentRef.current?.focus();
+      return;
+    }
     pendingRef.current = true;
     // The submit button is about to become disabled. Moving focus first stops
     // it from landing on <body>, which is outside the dialog's focus trap.
@@ -122,7 +146,7 @@ export function AccountDialog({
     setPending(true);
     const credentials: AccountCredentials = { username: username.trim(), password };
     try {
-      if (creating) await createAccount(credentials);
+      if (creating) await createAccount(credentials, accepted);
       else await signIn(credentials);
       // The page's learner identity is fixed for its lifetime, so the reload is
       // where the account's partition takes effect. `pending` stays set until
@@ -133,7 +157,13 @@ export function AccountDialog({
       pendingRef.current = false;
       setPending(false);
       setFailure(next);
-      (next.field === 'username' ? usernameRef : passwordRef).current?.focus();
+      const target =
+        next.field === 'username'
+          ? usernameRef
+          : next.field === 'consent'
+            ? consentRef
+            : passwordRef;
+      target.current?.focus();
     }
   }
 
@@ -156,6 +186,7 @@ export function AccountDialog({
     if (!next && pendingRef.current) return;
     if (!next) {
       setPassword('');
+      setAccepted(false);
       setFailure(null);
       setMode('signIn');
     }
@@ -281,10 +312,57 @@ export function AccountDialog({
                 aria-describedby={joinIds(passwordHintId, passwordInvalid && errorId)}
               />
               <p id={passwordHintId} className="text-xs text-muted-foreground">
-                {creating ? t('account.hints.password') : t('account.hints.forgot')}
+                {creating
+                  ? t('account.hints.password')
+                  : t('account.hints.forgot', { email: contactEmail })}
               </p>
             </div>
           </div>
+
+          {creating ? (
+            <div className="mt-4 flex flex-col gap-2">
+              <div className="flex items-start gap-2.5">
+                <Checkbox
+                  ref={consentRef}
+                  id={consentId}
+                  checked={accepted}
+                  onCheckedChange={(value) => {
+                    setAccepted(value === true);
+                    setFailure((current) => (current?.field === 'consent' ? null : current));
+                  }}
+                  aria-invalid={consentInvalid || undefined}
+                  aria-describedby={consentInvalid ? errorId : undefined}
+                  className="mt-0.5"
+                />
+                <Label htmlFor={consentId} className="block text-xs font-normal leading-relaxed">
+                  {t('account.consent.label', { terms: TERMS_TOKEN, privacy: PRIVACY_TOKEN })
+                    .split(/(⟦terms⟧|⟦privacy⟧)/)
+                    .map((part, index) =>
+                      part === TERMS_TOKEN || part === PRIVACY_TOKEN ? (
+                        <a
+                          key={index}
+                          href={part === TERMS_TOKEN ? '/terms' : '/privacy'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-brand-700 underline underline-offset-2 dark:text-brand-300"
+                        >
+                          {part === TERMS_TOKEN
+                            ? t('account.consent.terms')
+                            : t('account.consent.privacy')}
+                        </a>
+                      ) : (
+                        <span key={index}>{part}</span>
+                      ),
+                    )}
+                </Label>
+              </div>
+              {trialDays > 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  {t('account.hints.trial', { days: trialDays })}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           {/* Always mounted so that screen readers announce messages added to it. */}
           <p id={errorId} role="alert" className="mt-3 text-sm text-destructive empty:mt-0">

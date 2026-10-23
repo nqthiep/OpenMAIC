@@ -324,8 +324,9 @@ describe('the address', () => {
     expect(parseView('topic=math.derivative').topic).toEqual([]);
     expect(parseView('subject=math,physics&topic=math.derivative').topic).toEqual([]);
     expect(parseView('subject=physics&topic=math.derivative').topic).toEqual([]);
-    expect(parseView('subject=art&grade=9').subject).toEqual([]);
-    expect(parseView('subject=art&grade=9').grade).toEqual([]);
+    expect(parseView('subject=art&grade=8').subject).toEqual([]);
+    expect(parseView('subject=art&grade=8').grade).toEqual([]);
+    expect(parseView('grade=5,9,12').grade).toEqual(['5', '9', '12']);
     expect(cleanViewSearch('subject=math&grade=12&topic=math.limits,math.limits&x=1')).toBe(
       'subject=math&grade=12&topic=math.limits',
     );

@@ -1,6 +1,5 @@
-import { buildOpsHealth, chartMonths } from '@/lib/admin/ops-health';
+import { buildOpsHealth, usageMonths } from '@/lib/admin/ops-health';
 import { apiSuccess } from '@/lib/server/api-response';
-import { currentMonth } from '@/lib/server/authz/viewer';
 import { authorize, learningRoute } from '@/lib/server/learning/http';
 import {
   listAllClasses,
@@ -24,9 +23,9 @@ export async function GET(request: Request): Promise<Response> {
     if (refusal) return refusal;
     const [counts, facts, classes, records, supportWaiting, openReports] = await Promise.all([
       readDashboardCounts(ctx.db, ctx.now),
-      readOpsHealthFacts(ctx.db, ctx.now, currentMonth(ctx.now)),
+      readOpsHealthFacts(ctx.db, ctx.now),
       listAllClasses(ctx.db),
-      readUsageRecords({ months: chartMonths(ctx.now) }),
+      readUsageRecords({ months: usageMonths(ctx.now) }),
       countWaitingSupportThreads(ctx.db),
       countOpenReports(ctx.db),
     ]);

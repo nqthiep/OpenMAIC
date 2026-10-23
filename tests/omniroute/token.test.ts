@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { missingOmnirouteEnv, omnirouteConfig } from '@/lib/server/omniroute/config';
+import {
+  dashboardIsSecure,
+  dashboardOrigin,
+  missingOmnirouteEnv,
+  omnirouteConfig,
+} from '@/lib/server/omniroute/config';
 import {
   gateCookieHeader,
   GATE_TTL_MS,
@@ -103,9 +108,10 @@ describe('omnirouteConfig', () => {
     OMNIROUTE_GATE_SECRET: SECRET,
     OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(24),
   };
+  const noFiles = () => undefined;
 
   it('is on with three good values, and defaults the internal address', () => {
-    expect(omnirouteConfig(good)).toEqual({
+    expect(omnirouteConfig(good, noFiles)).toEqual({
       publicUrl: 'https://omniroute.example.test',
       gateSecret: SECRET,
       adminPassword: 'p'.repeat(24),
@@ -114,8 +120,55 @@ describe('omnirouteConfig', () => {
     });
   });
 
+  it('is on with nothing in the environment once the password file is there', () => {
+    const read = (path: string) =>
+      path === '/run/omniroute/admin_password' ? ` ${'f'.repeat(48)}\n`.trim() : undefined;
+    const config = omnirouteConfig({}, read)!;
+    expect(config).toMatchObject({
+      adminPassword: 'f'.repeat(48),
+      internalUrl: 'http://omniroute:20128',
+      apiUrl: 'http://omniroute:20129',
+    });
+    expect(config.publicUrl).toBeUndefined();
+    expect(config.gateSecret.length).toBeGreaterThanOrEqual(32);
+  });
+
+  it('keeps one gate secret for the life of the process, and a variable overrides it', () => {
+    const read = () => 'f'.repeat(48);
+    const first = omnirouteConfig({}, read)!.gateSecret;
+    expect(omnirouteConfig({}, read)!.gateSecret).toBe(first);
+    expect(omnirouteConfig({ OMNIROUTE_GATE_SECRET: SECRET }, read)!.gateSecret).toBe(SECRET);
+  });
+
+  it('prefers the password variable over the file, and ignores a file that is too short', () => {
+    const read = () => 'f'.repeat(48);
+    expect(omnirouteConfig({ OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(24) }, read)!.adminPassword).toBe(
+      'p'.repeat(24),
+    );
+    expect(omnirouteConfig({}, () => 'short')).toBeUndefined();
+  });
+
+  it('looks only in the folder OMNIROUTE_SECRETS_DIR names', () => {
+    const asked: string[] = [];
+    omnirouteConfig({ OMNIROUTE_SECRETS_DIR: '/somewhere' }, (path) => {
+      asked.push(path);
+      return undefined;
+    });
+    expect(asked).toEqual(['/somewhere/admin_password']);
+  });
+
+  it('looks in the host folder only under `next dev`, and then uses the published loopback ports', () => {
+    const read = (path: string) =>
+      path.endsWith('.omniroute/secrets/admin_password') ? 'h'.repeat(40) : undefined;
+    expect(omnirouteConfig({ NODE_ENV: 'production' }, read)).toBeUndefined();
+    expect(omnirouteConfig({ NODE_ENV: 'development' }, read)).toMatchObject({
+      adminPassword: 'h'.repeat(40),
+      internalUrl: 'http://127.0.0.1:20128',
+      apiUrl: 'http://127.0.0.1:20129',
+    });
+  });
+
   it.each([
-    ['no public URL', { OMNIROUTE_PUBLIC_URL: '' }],
     ['a public URL with a path', { OMNIROUTE_PUBLIC_URL: 'https://x.test/omniroute' }],
     ['a public URL that is not http(s)', { OMNIROUTE_PUBLIC_URL: 'ftp://x.test' }],
     ['a public URL with credentials', { OMNIROUTE_PUBLIC_URL: 'https://a:b@x.test' }],
@@ -123,36 +176,80 @@ describe('omnirouteConfig', () => {
     ['a short password', { OMNIROUTE_ADMIN_PASSWORD: 'short' }],
     ['an unusable internal URL', { OMNIROUTE_INTERNAL_URL: 'not a url' }],
     ['an unusable API URL', { OMNIROUTE_API_URL: 'ftp://x' }],
-  ])('is off with %s', (_name, override) => {
-    expect(omnirouteConfig({ ...good, ...override })).toBeUndefined();
+  ])('is off with %s, even when the password file is there', (_name, override) => {
+    expect(omnirouteConfig({ ...good, ...override }, () => 'f'.repeat(48))).toBeUndefined();
   });
 
-  it('is off when nothing is set', () => {
-    expect(omnirouteConfig({})).toBeUndefined();
+  it('is on without a public URL, and off when nothing at all is there', () => {
+    expect(omnirouteConfig({ ...good, OMNIROUTE_PUBLIC_URL: '' }, noFiles)).toBeDefined();
+    expect(omnirouteConfig({}, noFiles)).toBeUndefined();
   });
 });
 
 describe('missingOmnirouteEnv', () => {
-  it('names what is missing or too short, and nothing when all is set', () => {
-    expect(missingOmnirouteEnv({})).toEqual([
-      'OMNIROUTE_PUBLIC_URL',
-      'OMNIROUTE_GATE_SECRET',
-      'OMNIROUTE_ADMIN_PASSWORD',
-    ]);
+  const noFiles = () => undefined;
+
+  it('names values that are set but wrong, never values that are simply absent', () => {
+    expect(missingOmnirouteEnv({}, noFiles)).toEqual([]);
     expect(
-      missingOmnirouteEnv({
-        OMNIROUTE_PUBLIC_URL: 'https://x.test/path',
-        OMNIROUTE_GATE_SECRET: 'short',
-        OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(20),
-        OMNIROUTE_INTERNAL_URL: 'nope',
-      }),
+      missingOmnirouteEnv(
+        {
+          OMNIROUTE_PUBLIC_URL: 'https://x.test/path',
+          OMNIROUTE_GATE_SECRET: 'short',
+          OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(20),
+          OMNIROUTE_INTERNAL_URL: 'nope',
+        },
+        noFiles,
+      ),
     ).toEqual(['OMNIROUTE_PUBLIC_URL', 'OMNIROUTE_GATE_SECRET', 'OMNIROUTE_INTERNAL_URL']);
     expect(
-      missingOmnirouteEnv({
-        OMNIROUTE_PUBLIC_URL: 'https://x.test',
-        OMNIROUTE_GATE_SECRET: 's'.repeat(40),
-        OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(20),
-      }),
+      missingOmnirouteEnv(
+        {
+          OMNIROUTE_PUBLIC_URL: 'https://x.test',
+          OMNIROUTE_GATE_SECRET: 's'.repeat(40),
+          OMNIROUTE_ADMIN_PASSWORD: 'p'.repeat(20),
+        },
+        noFiles,
+      ),
     ).toEqual([]);
+  });
+});
+
+describe('dashboardOrigin and dashboardIsSecure', () => {
+  it('follows the page: omniroute. in front of the host, localhost to the published gate port', () => {
+    const from = (origin: string | null, env = {}) => dashboardOrigin({}, origin, env);
+    expect(from('https://khaitam.ai.vn')).toBe('https://omniroute.khaitam.ai.vn');
+    expect(from('https://www.khaitam.ai.vn')).toBe('https://omniroute.khaitam.ai.vn');
+    expect(from('https://khaitam.ai.vn:8443')).toBe('https://omniroute.khaitam.ai.vn:8443');
+    expect(from('http://localhost:3000')).toBe('http://omniroute.localhost:8081');
+    expect(from('http://[::1]:3000')).toBe('http://omniroute.localhost:8081');
+    expect(from('http://localhost:3000', { OMNIROUTE_GATE_PORT: '9090' })).toBe(
+      'http://omniroute.localhost:9090',
+    );
+    expect(from('http://localhost:3000', { OMNIROUTE_GATE_PORT: 'x; evil' })).toBe(
+      'http://omniroute.localhost:8081',
+    );
+    expect(from(null)).toBeUndefined();
+    expect(from('null')).toBeUndefined();
+    expect(from('javascript:alert(1)')).toBeUndefined();
+    expect(from('https://khaitam.ai.vn/some/path')).toBeUndefined();
+  });
+
+  it('lets OMNIROUTE_PUBLIC_URL win', () => {
+    expect(dashboardOrigin({ publicUrl: 'https://gw.test' }, 'https://khaitam.ai.vn')).toBe(
+      'https://gw.test',
+    );
+    expect(dashboardIsSecure({ publicUrl: 'https://gw.test' }, 'localhost')).toBe(true);
+    expect(dashboardIsSecure({ publicUrl: 'http://gw.test' }, 'omniroute.khaitam.ai.vn')).toBe(
+      false,
+    );
+  });
+
+  it('is Secure for any host but localhost', () => {
+    expect(dashboardIsSecure({}, 'omniroute.khaitam.ai.vn')).toBe(true);
+    expect(dashboardIsSecure({}, 'omniroute.localhost:8081')).toBe(false);
+    expect(dashboardIsSecure({}, '127.0.0.1:8081')).toBe(false);
+    expect(dashboardIsSecure({}, '[::1]:8081')).toBe(false);
+    expect(dashboardIsSecure({}, null)).toBe(false);
   });
 });

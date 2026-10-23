@@ -13,8 +13,8 @@
     "slogan": "Khai mở tri thức · Kiến tạo tương lai",
     "greetingWithName": "Chào {{name}}",
     "guest": {
-      "kicker": "AI đồng hành cùng việc học của bạn",
-      "description": "Bài giảng, trình chiếu và thảo luận được soạn với sự hỗ trợ của AI, và được người thật xem lại trước khi chia sẻ. Bạn có thể xem thử miễn phí trước, không cần tài khoản.",
+      "kicker": "Học và ôn tập cho lớp 5, lớp 9 và lớp 12",
+      "description": "Xem thử miễn phí, không cần tài khoản. Bài giảng được soạn với sự hỗ trợ của AI và được người thật xem lại trước khi chia sẻ.",
       "signIn": "Đăng nhập",
       "browseCatalog": "Xem danh mục khoá học",
       "stepsTitle": "Cách hoạt động",
@@ -30,12 +30,12 @@
       },
       "step3": {
         "title": "Trở thành thành viên",
-        "body": "Thành viên có thể tạo khoá học bằng AI, tham gia lớp và chia sẻ những gì mình làm."
+        "body": "Thành viên có thể tạo khoá học theo chủ đề mình cần, tham gia lớp và chia sẻ những gì mình làm."
       },
       "previewsTitle": "Bài xem thử",
       "previewsEmpty": "Chưa có bài xem thử. Quay lại sau nhé.",
       "membershipTitle": "Trở thành thành viên",
-      "membershipBody": "Thành viên có hạn mức hằng tháng để tạo khoá học bằng AI, tham gia lớp bằng mã mời và chia sẻ khoá học với các thành viên khác.",
+      "membershipBody": "Thành viên có hạn mức hằng tháng để tạo khoá học, tham gia lớp bằng mã mời và chia sẻ khoá học với các thành viên khác.",
       "nav": {
         "story": "Câu chuyện",
         "features": "Tính năng",
@@ -54,10 +54,10 @@
       },
       "features": {
         "title": "Thiết kế để bạn hiểu bài",
-        "subtitle": "AI giải thích, thảo luận và kiểm tra mức hiểu của bạn như một nhóm học kiên nhẫn, còn bạn luôn chủ động trong việc học.",
+        "subtitle": "Giải thích, thảo luận và kiểm tra mức hiểu của bạn như một nhóm học kiên nhẫn, còn bạn luôn chủ động trong việc học.",
         "f1": {
           "title": "Một nhóm học trong mỗi bài",
-          "body": "Giảng viên, bạn học và trợ giảng, tất cả do AI đảm nhận, cùng tham gia để mỗi ý được giải thích từ nhiều phía."
+          "body": "Giảng viên ảo, bạn học ảo và trợ giảng cùng tham gia để mỗi ý được giải thích từ nhiều phía."
         },
         "f2": {
           "title": "Trình chiếu và bảng trắng",
@@ -82,7 +82,7 @@
       },
       "previewsSubtitle": "Mở ngay các bài này, không cần tài khoản.",
       "perks": {
-        "p1": "Hạn mức AI hằng tháng để tự tạo khoá học",
+        "p1": "Hạn mức hằng tháng để tự tạo khoá học",
         "p2": "Tham gia lớp bằng mã mời",
         "p3": "Chia sẻ khoá học với các thành viên khác",
         "p4": "Xuất khoá học thành trang web hoặc PowerPoint"
@@ -93,11 +93,11 @@
       },
       "footerTagline": "KHAITAM · xây dựng trên dự án mã nguồn mở OpenMAIC",
       "trust": {
-        "title": "Dùng AI một cách cẩn trọng",
-        "subtitle": "Chúng tôi hiểu không phải ai cũng yên tâm về AI. Đây là cách chúng tôi cố gắng xứng đáng với sự tin tưởng của bạn.",
+        "title": "Học yên tâm, học chủ động",
+        "subtitle": "Bài giảng ở đây được soạn với sự hỗ trợ của AI. Chúng tôi hiểu không phải ai cũng yên tâm, nên đây là cách chúng tôi cố gắng xứng đáng với sự tin tưởng của bạn.",
         "t1": {
           "title": "Bạn luôn chủ động",
-          "body": "AI chỉ hỗ trợ giải thích và luyện tập. Bạn chọn học gì và có thể dừng bất cứ lúc nào."
+          "body": "Công cụ chỉ hỗ trợ giải thích và luyện tập. Bạn chọn học gì và có thể dừng bất cứ lúc nào."
         },
         "t2": {
           "title": "Được xem lại trước khi chia sẻ",
@@ -105,7 +105,7 @@
         },
         "t3": {
           "title": "Nói thật về giới hạn",
-          "body": "AI có thể nhầm. Với điều quan trọng, hãy đối chiếu với thầy cô hoặc nguồn đáng tin cậy."
+          "body": "Bài giảng có thể chưa chính xác. Với điều quan trọng, hãy đối chiếu với thầy cô hoặc sách giáo khoa."
         },
         "t4": {
           "title": "Xem trước rồi hãy quyết định",
@@ -150,12 +150,50 @@
             "hint": "Không thay thế con người"
           }
         }
+      },
+      "lead": "Mỗi bài về Toán, Tin học, Vật lí hoặc Hoá học là một buổi học tương tác: có thầy giảng, slide, bảng trắng và câu hỏi kiểm tra ngay trong bài, để bạn hiểu bài trước khi làm bài tập.",
+      "tryFree": "Học thử miễn phí",
+      "intents": {
+        "title": "Dành cho học sinh lớp 5, lớp 9 và lớp 12",
+        "subtitle": "Các môn Toán, Tin học, Vật lí và Hoá học: học bài mới hay ôn lại trước kiểm tra, bạn đều có thể bắt đầu từ một bài học ngắn.",
+        "i1": {
+          "title": "Hiểu bài đang học",
+          "body": "Mỗi khái niệm được giải thích từng bước, có slide và bảng trắng để bạn nhìn thấy cách làm."
+        },
+        "i2": {
+          "title": "Ôn lại trước kiểm tra",
+          "body": "Chọn đúng chủ đề cần ôn, nghe lại phần chưa vững và làm câu hỏi để biết mình còn yếu ở đâu."
+        },
+        "i3": {
+          "title": "Luyện thêm cho chắc",
+          "body": "Làm bài kiểm tra và dự án nhỏ để vận dụng điều vừa học, không chỉ đọc cho qua."
+        }
+      },
+      "footerSource": "Mã nguồn mở",
+      "footerLegal": "Pháp lý và liên hệ",
+      "footerTerms": "Điều khoản sử dụng",
+      "footerPrivacy": "Quyền riêng tư",
+      "footerContact": "Liên hệ",
+      "pricing": {
+        "trial": "Miễn phí {{days}} ngày đầu",
+        "trialBody": "Dùng thử các chức năng dành cho thành viên với một hạn mức dùng thử. Không cần thông tin thanh toán và không tự động trừ tiền.",
+        "then": "Sau thời gian dùng thử",
+        "price": "Giá gói thành viên",
+        "plan": {
+          "m1": "1 tháng",
+          "m6": "6 tháng",
+          "m12": "12 tháng"
+        },
+        "save": "Tiết kiệm {{percent}}%",
+        "note": "Giá cuối cùng, không phụ thu. Mỗi tháng có một hạn mức tạo bài; hạn mức không cộng dồn. Gói không tự gia hạn.",
+        "pay": "Hiện thanh toán bằng chuyển khoản: viết cho {{email}} để chọn gói, chúng tôi kích hoạt khi nhận được tiền.",
+        "cta": "Tạo tài khoản và dùng thử miễn phí"
       }
     },
     "locked": {
-      "membership": "Tạo khoá học bằng AI dành cho thành viên.",
+      "membership": "Tạo khoá học dành cho thành viên.",
       "classes": "Tham gia lớp dành cho thành viên.",
-      "contactAdmin": "Hãy nhờ quản trị viên thêm bạn vào danh sách thành viên.",
+      "contactAdmin": "Hãy viết cho {{email}} để được thêm vào danh sách thành viên.",
       "quota": "Hạn mức AI tháng này đã dùng hết.",
       "quotaReset": "Tạo bài mới sẽ mở lại từ {{date}}.",
       "previews": "Xem thử các bài học miễn phí"
@@ -169,11 +207,11 @@
     },
     "status": {
       "ok": "Gói thành viên đến {{date}} · còn {{days}} ngày",
-      "expiring": "Gói thành viên của bạn hết hạn ngày {{date}} (còn {{days}} ngày). Hãy nhờ quản trị viên gia hạn.",
+      "expiring": "Gói thành viên của bạn hết hạn ngày {{date}} (còn {{days}} ngày). Hãy viết cho {{email}} để gia hạn.",
       "quotaNear": "Bạn đã dùng {{percent}}% hạn mức AI của tháng này.",
       "quotaOut": "Hạn mức AI tháng này đã dùng hết. Các khoá học của bạn vẫn mở để học.",
-      "expired": "Gói thành viên của bạn đã hết hạn từ {{date}}. Các khoá học của bạn vẫn đọc được. Hãy nhờ quản trị viên gia hạn để tạo khoá học mới.",
-      "suspended": "Gói thành viên của bạn đang tạm dừng. Các khoá học của bạn vẫn đọc được. Hãy nhờ quản trị viên mở lại."
+      "expired": "Gói thành viên của bạn đã hết hạn từ {{date}}. Các khoá học của bạn vẫn đọc được. Hãy viết cho {{email}} để gia hạn và tạo khoá học mới.",
+      "suspended": "Gói thành viên của bạn đang tạm dừng. Các khoá học của bạn vẫn đọc được. Hãy viết cho {{email}} để mở lại."
     },
     "continue": {
       "title": "Tiếp tục học",
@@ -2312,7 +2350,8 @@
     "hints": {
       "username": "Từ 3 đến 32 ký tự: chữ cái Latinh, chữ số, dấu chấm, gạch dưới hoặc gạch nối. Bắt đầu bằng chữ cái hoặc chữ số.",
       "password": "Từ 8 đến 256 ký tự.",
-      "forgot": "Quên mật khẩu? Nhờ quản trị viên hoặc thầy cô đặt lại mật khẩu cho bạn."
+      "forgot": "Quên mật khẩu? Viết cho {{email}} kèm tên đăng nhập, chúng tôi sẽ đặt lại mật khẩu cho bạn.",
+      "trial": "Tài khoản mới được dùng thử miễn phí {{days}} ngày, không cần thông tin thanh toán."
     },
     "submit": {
       "signIn": "Đăng nhập",
@@ -2332,7 +2371,8 @@
       "invalidRequest": "Không thể xử lý yêu cầu. Vui lòng thử lại.",
       "internal": "Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại sau.",
       "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
-      "sessionEnded": "Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại để tiếp tục."
+      "sessionEnded": "Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại để tiếp tục.",
+      "termsNotAccepted": "Hãy đánh dấu vào ô đồng ý để tạo tài khoản."
     },
     "admin": {
       "title": "Tài khoản",
@@ -2426,6 +2466,11 @@
       "changed": "Đã đổi mật khẩu. Các thiết bị khác đã bị đăng xuất.",
       "wrongCurrent": "Mật khẩu hiện tại không đúng.",
       "mismatch": "Hai mật khẩu mới không khớp."
+    },
+    "consent": {
+      "label": "Tôi đã đọc và đồng ý với {{terms}}, và đã đọc {{privacy}}. Tôi từ đủ 16 tuổi, hoặc cha mẹ, người giám hộ của tôi đã đồng ý cho tôi dùng dịch vụ.",
+      "terms": "Điều khoản sử dụng",
+      "privacy": "Chính sách quyền riêng tư"
     }
   },
   "proMode": {
@@ -2931,12 +2976,13 @@
       "loadFailed": "Không đọc được trạng thái OmniRoute. Hãy thử lại.",
       "retry": "Thử lại",
       "unconfigured": {
-        "title": "Máy chủ này chưa thiết lập OmniRoute",
-        "body": "Thêm các giá trị sau vào file .env của máy chủ rồi khởi động lại ứng dụng:"
+        "title": "OmniRoute chưa nối với ứng dụng này",
+        "body": "OmniRoute chạy như một service riêng cạnh ứng dụng và tự nối khi cả hai chạy bằng Docker Compose. Hãy chạy docker compose up -d trong thư mục cài đặt; nếu ứng dụng chạy ngoài Docker, xem ops/omniroute/README.md.",
+        "invalid": "Các giá trị này đã được đặt nhưng không dùng được:"
       },
       "unreachable": {
         "title": "Ứng dụng chưa liên lạc được với OmniRoute",
-        "body": "Hãy kiểm tra container OmniRoute đang chạy và OMNIROUTE_ADMIN_PASSWORD khớp với mật khẩu của nó."
+        "body": "Hãy kiểm tra service omniroute đang chạy (docker compose ps). Nếu volume omniroute-secrets bị xóa mà dữ liệu của OmniRoute còn, mật khẩu hai bên sẽ lệch nhau: xem ops/omniroute/README.md."
       },
       "step1": {
         "title": "Nhà cung cấp trong OmniRoute",
@@ -3418,6 +3464,8 @@
       "other": "Khác"
     },
     "grade": {
+      "5": "Khối 5",
+      "9": "Khối 9",
       "10": "Khối 10",
       "11": "Khối 11",
       "12": "Khối 12"

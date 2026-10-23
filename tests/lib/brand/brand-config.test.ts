@@ -6,7 +6,14 @@ describe('DEFAULT_BRAND (single-brand build)', () => {
     expect(DEFAULT_BRAND.productName).toBe('KHAITAM');
     expect(DEFAULT_BRAND.shortName).toBe('KHAITAM');
     expect(DEFAULT_BRAND.domain).toBe('khaitam.ai.vn');
+    expect(DEFAULT_BRAND.contactEmail).toMatch(/^[^@\s]+@[^@\s]+\.[^@\s]+$/);
     expect(DEFAULT_BRAND.themeColor).toBe('#102541');
+  });
+
+  it('says what the site is for and who it is for, without leaning on "AI"', () => {
+    expect(DEFAULT_BRAND.description).toMatch(/lớp 5, lớp 9 và lớp 12/);
+    expect(DEFAULT_BRAND.description).toMatch(/Toán.*Tin học.*Vật lí.*Hoá học/);
+    expect(DEFAULT_BRAND.description).not.toMatch(/\bAI\b/);
   });
 
   it('marks its horizontal logo as already containing the wordmark', () => {

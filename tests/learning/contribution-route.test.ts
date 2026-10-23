@@ -3,6 +3,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MembershipView } from '@/lib/server/learning/store';
 
 // Accounts are on. A `session=<id>` cookie names the signed-in account. The store is stubbed.
+const RUNNING: MembershipView = {
+  status: 'active',
+  active: true,
+  expiresAt: '2100-01-01T00:00:00.000Z',
+  monthlyQuota: 1_000_000,
+  cycle: {
+    start: '2026-10-20T14:15:00.000Z',
+    end: '2026-11-20T14:15:00.000Z',
+    key: '2026-10-20T14:15:00.000Z',
+  },
+};
 const accounts = new Map<string, { membership?: MembershipView }>();
 
 vi.mock('@/lib/server/accounts/runtime', () => ({
@@ -48,7 +59,7 @@ const call = (cookie?: string) =>
 beforeEach(() => {
   vi.stubEnv('DATABASE_URL', 'postgres://contribution-test');
   accounts.clear();
-  accounts.set('author', {});
+  accounts.set('author', { membership: RUNNING });
   accounts.set('newcomer', {});
 });
 
@@ -70,7 +81,7 @@ describe('GET /api/membership/contribution', () => {
       badges: ['readers-10'],
       next: { code: 'readers-100', readersNeeded: 89 },
     });
-    expect(body.bonus.month).toMatch(/^\d{4}-\d{2}$/);
+    expect(body.bonus.cycleStart).toBe(RUNNING.cycle!.start);
   });
 
   it('gives an account that never shared nothing, with the first badge as the next one', async () => {

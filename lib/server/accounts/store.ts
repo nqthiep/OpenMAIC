@@ -22,6 +22,12 @@ CREATE TABLE IF NOT EXISTS accounts (
 ALTER TABLE accounts
   ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'learner' CHECK (role IN ('learner', 'operator', 'admin'));
 
+-- The terms the owner of the account agreed to when signing up, and when. Null on accounts made
+-- before the terms existed.
+ALTER TABLE accounts
+  ADD COLUMN IF NOT EXISTS terms_version TEXT,
+  ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
+
 CREATE TABLE IF NOT EXISTS account_sessions (
   token_hash TEXT PRIMARY KEY,
   account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
@@ -84,14 +90,27 @@ interface SessionAccountRow {
  */
 export async function insertAccount(
   db: AccountQueryable,
-  account: { id: string; username: string; passwordHash: string; createdAt: Date },
+  account: {
+    id: string;
+    username: string;
+    passwordHash: string;
+    createdAt: Date;
+    /** The terms version the sign-up agreed to; stamped with `createdAt`. */
+    termsVersion?: string;
+  },
 ): Promise<boolean> {
   const result = await db.query(
-    `INSERT INTO accounts (id, username, password_hash, created_at)
-     VALUES ($1, $2, $3, $4::timestamptz)
+    `INSERT INTO accounts (id, username, password_hash, created_at, terms_version, terms_accepted_at)
+     VALUES ($1, $2, $3, $4::timestamptz, $5::text, CASE WHEN $5::text IS NULL THEN NULL ELSE $4::timestamptz END)
      ON CONFLICT (username) DO NOTHING
      RETURNING id`,
-    [account.id, account.username, account.passwordHash, account.createdAt.toISOString()],
+    [
+      account.id,
+      account.username,
+      account.passwordHash,
+      account.createdAt.toISOString(),
+      account.termsVersion ?? null,
+    ],
   );
   return result.rows.length === 1;
 }

@@ -2,7 +2,12 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
-import { recordUsage, readUsageRecords, type UsageRecordInput } from '@/lib/server/usage-storage';
+import {
+  llmTokensBetween,
+  recordUsage,
+  readUsageRecords,
+  type UsageRecordInput,
+} from '@/lib/server/usage-storage';
 
 let tmpDir: string;
 
@@ -170,5 +175,55 @@ describe('readUsageRecords', () => {
     const [r] = await readUsageRecords({ baseDir: dir });
     expect(r.kind).toBe('llm');
     expect(r.inputTokens).toBe(5);
+  });
+});
+
+describe('llmTokensBetween: what one cycle of a plan has used', () => {
+  const line = (at: string, ownerId: string, tokens: number, kind: 'llm' | 'tts' = 'llm'): string =>
+    JSON.stringify({
+      id: `${ownerId}-${at}`,
+      createdAt: Date.parse(at),
+      kind,
+      source: 't',
+      providerId: 'p',
+      modelId: 'm',
+      modelString: 'p:m',
+      inputTokens: tokens,
+      outputTokens: 0,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
+      reasoningTokens: 0,
+      ownerId,
+    });
+  const write = (month: string, lines: string[]) =>
+    fs.writeFile(path.join(tmpDir, `${month}.jsonl`), `${lines.join('\n')}\n`);
+  const FROM = new Date('2026-10-20T14:15:00.000Z');
+  const TO = new Date('2026-11-20T14:15:00.000Z');
+
+  it('adds the records of both months a cycle touches, and only those inside it', async () => {
+    await write('2026-10', [
+      line('2026-10-19T00:00:00.000Z', 'acct:a', 1000), // before the cycle
+      line('2026-10-20T14:15:00.000Z', 'acct:a', 10), // the first instant is in
+      line('2026-10-31T23:59:59.000Z', 'acct:a', 20),
+    ]);
+    await write('2026-11', [
+      line('2026-11-01T00:00:00.000Z', 'acct:a', 30), // the 1st of the month changes nothing
+      line('2026-11-20T14:14:59.000Z', 'acct:a', 40),
+      line('2026-11-20T14:15:00.000Z', 'acct:a', 5000), // the end is out: the next cycle
+    ]);
+    expect(await llmTokensBetween('acct:a', FROM, TO, { baseDir: tmpDir })).toBe(100);
+  });
+
+  it('counts the owner and the text generation only', async () => {
+    await write('2026-10', [
+      line('2026-10-25T00:00:00.000Z', 'acct:a', 7),
+      line('2026-10-25T00:00:00.000Z', 'acct:b', 900),
+      line('2026-10-25T00:00:01.000Z', 'acct:a', 800, 'tts'),
+    ]);
+    expect(await llmTokensBetween('acct:a', FROM, TO, { baseDir: tmpDir })).toBe(7);
+  });
+
+  it('is 0 when there is no log', async () => {
+    expect(await llmTokensBetween('acct:a', FROM, TO, { baseDir: tmpDir })).toBe(0);
   });
 });

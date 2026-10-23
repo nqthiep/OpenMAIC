@@ -393,12 +393,11 @@ export async function settleChallenge(
       LIMIT 3`,
     [input.id],
   );
-  const month = input.now.toISOString().slice(0, 7);
   const winners = top.rows as Array<{ id: number | string; account_id: string }>;
   for (const [index, winner] of winners.entries()) {
     const credited =
       rewards[index]! > 0
-        ? await creditBonusTokens(db, accountOwnerId(winner.account_id), month, rewards[index]!)
+        ? await creditBonusTokens(db, accountOwnerId(winner.account_id), input.now, rewards[index]!)
         : 0;
     await db.query(
       `UPDATE challenge_entries SET rank = $2::int, reward = $3::bigint WHERE id = $1::bigint`,

@@ -18,6 +18,19 @@ CREATE TABLE IF NOT EXISTS memberships (
   granted_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- A plan as periods, oldest first: each has its own start and quota, and a purchase made while one
+-- runs is stacked after it. memberships.expires_at stays the end of the last period.
+CREATE TABLE IF NOT EXISTS membership_periods (
+  id BIGSERIAL PRIMARY KEY,
+  account_id TEXT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+  starts_at TIMESTAMPTZ NOT NULL,
+  ends_at TIMESTAMPTZ NOT NULL,
+  monthly_quota BIGINT NOT NULL CHECK (monthly_quota >= 0),
+  granted_by TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS membership_periods_account_idx ON membership_periods (account_id, starts_at);
+
 CREATE TABLE IF NOT EXISTS course_shares (
   course_id TEXT PRIMARY KEY,
   owner_id TEXT NOT NULL,
@@ -69,6 +82,8 @@ CREATE TABLE IF NOT EXISTS course_reads (
 
 CREATE INDEX IF NOT EXISTS course_reads_author_idx ON course_reads (author_id);
 
+-- Reward tokens per cycle of a plan. The month column holds the key of the cycle (the instant it started, as
+-- an ISO string). The column kept its name from when cycles were calendar months.
 CREATE TABLE IF NOT EXISTS quota_bonus (
   owner_id TEXT NOT NULL,
   month TEXT NOT NULL,

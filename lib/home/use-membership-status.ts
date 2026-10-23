@@ -8,7 +8,7 @@ import { membershipNotice, type MembershipNotice } from '@/lib/home/learner-stat
 
 export interface MembershipStatus {
   readonly membership: AccountMembership | null;
-  /** This month's allowance. Null until the server answers, and for anyone without an active membership. */
+  /** The allowance of the running cycle. Null until the server answers, and for anyone without an active membership. */
   readonly usage: MembershipUsage | null;
   readonly notice: MembershipNotice;
 }

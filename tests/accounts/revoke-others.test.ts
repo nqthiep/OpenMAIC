@@ -5,7 +5,7 @@ import { ensureAccountSchema } from '@/lib/server/accounts/store';
 import { ensureLearningSchema } from '@/lib/server/learning/schema';
 
 const PASSWORD = 'correct horse battery staple';
-const ALICE = { username: 'alice', password: PASSWORD };
+const ALICE = { username: 'alice', password: PASSWORD, acceptedTerms: true };
 const DATABASE_URL = 'postgres://revoke-others-test';
 const ORIGIN = 'http://localhost';
 const THROTTLE_KEY = Symbol.for('openmaic.accounts.loginThrottle');

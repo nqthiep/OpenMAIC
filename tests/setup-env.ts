@@ -39,3 +39,8 @@ if (process.env.TEST_LOAD_LOCAL_ENV === '1') {
     // .env.local not found, skip
   }
 }
+
+// Every new account gets a free first month in production (`MEMBERSHIP_TRIAL_DAYS`, 30 when unset).
+// The suite starts every test without one, as it did before the trial existed; the tests of the
+// trial itself set the variable.
+process.env.MEMBERSHIP_TRIAL_DAYS = '0';

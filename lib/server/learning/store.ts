@@ -6,12 +6,13 @@
 import { readTags, tagsFor, validateTags } from '@/lib/learning/taxonomy';
 import type { AccountQueryable } from '@/lib/server/accounts/store';
 import { EXPIRING_WITHIN_DAYS } from '@/lib/home/learner-status';
+import { resolvePeriods, type QuotaPeriod } from './cycle';
 
 /** Defaults set by the product decisions in plans/access-control.md. Tune them there. */
 export const DEFAULT_MONTHLY_QUOTA_TOKENS = 1_000_000;
 /** Tokens credited to an author for each distinct member who reads a shared course. */
 export const READER_REWARD_TOKENS = 20_000;
-/** Most reward tokens one author can receive in one month. */
+/** Most reward tokens one author can receive in one cycle of their plan. */
 export const MONTHLY_REWARD_CAP_TOKENS = 200_000;
 /** Distinct readers across an author's shared courses that earn a badge. */
 export const BADGE_THRESHOLDS: readonly { readers: number; code: string }[] = [
@@ -22,22 +23,94 @@ export const BADGE_THRESHOLDS: readonly { readers: number; code: string }[] = [
 export type MembershipStatus = 'active' | 'suspended';
 export type ShareState = 'pending' | 'shared';
 
-export interface MembershipView {
-  status: MembershipStatus;
-  /** True when the membership is not suspended and has not expired. */
-  active: boolean;
-  expiresAt: string;
-  monthlyQuota: number;
+function toIso(value: Date | string): string {
+  return new Date(value).toISOString();
 }
 
-interface MembershipRow {
+export interface MembershipView {
+  status: MembershipStatus;
+  /** True when the membership is not suspended and a period of it is running. */
+  active: boolean;
+  /** The end of the last period. */
+  expiresAt: string;
+  /** The quota of the cycle in force; after the end, the quota of the last period. */
+  monthlyQuota: number;
+  /** The cycle in force, when a period is running: what the allowance and its reset are counted on. */
+  cycle?: { start: string; end: string; key: string };
+}
+
+interface PeriodRow {
+  account_id: string;
   status: MembershipStatus;
   expires_at: Date | string;
   monthly_token_quota: number | string;
+  granted_at: Date | string;
+  starts_at: Date | string | null;
+  ends_at: Date | string | null;
+  monthly_quota: number | string | null;
 }
 
-function toIso(value: Date | string): string {
-  return new Date(value).toISOString();
+/**
+ * The periods of each given account that has a membership, oldest first. A membership row from
+ * before periods existed has none, and reads as the one period it stood for: from the grant to the
+ * expiry, with its quota.
+ */
+async function loadPeriods(
+  db: AccountQueryable,
+  accountIds: readonly string[],
+): Promise<Map<string, { status: MembershipStatus; periods: QuotaPeriod[] }>> {
+  const byAccount = new Map<string, { status: MembershipStatus; periods: QuotaPeriod[] }>();
+  if (accountIds.length === 0) return byAccount;
+  const result = await db.query(
+    `SELECT m.account_id, m.status, m.expires_at, m.monthly_token_quota, m.granted_at,
+            p.starts_at, p.ends_at, p.monthly_quota
+       FROM memberships m
+       LEFT JOIN membership_periods p ON p.account_id = m.account_id
+      WHERE m.account_id = ANY($1::text[])
+      ORDER BY m.account_id, p.starts_at`,
+    [[...accountIds]],
+  );
+  for (const row of result.rows as PeriodRow[]) {
+    const entry = byAccount.get(row.account_id) ?? { status: row.status, periods: [] };
+    byAccount.set(row.account_id, entry);
+    if (row.starts_at !== null && row.ends_at !== null && row.monthly_quota !== null) {
+      entry.periods.push({
+        startsAt: new Date(row.starts_at),
+        endsAt: new Date(row.ends_at),
+        monthlyQuota: Number(row.monthly_quota),
+      });
+    } else {
+      const endsAt = new Date(row.expires_at);
+      entry.periods.push({
+        startsAt: new Date(Math.min(new Date(row.granted_at).getTime(), endsAt.getTime())),
+        endsAt,
+        monthlyQuota: Number(row.monthly_token_quota),
+      });
+    }
+  }
+  return byAccount;
+}
+
+function viewOf(
+  entry: { status: MembershipStatus; periods: readonly QuotaPeriod[] },
+  now: Date,
+): MembershipView {
+  const resolved = resolvePeriods(entry.periods, now);
+  return {
+    status: entry.status,
+    active: entry.status === 'active' && resolved.cycle !== undefined,
+    expiresAt: resolved.expiresAt.toISOString(),
+    monthlyQuota: resolved.monthlyQuota,
+    ...(resolved.cycle
+      ? {
+          cycle: {
+            start: resolved.cycle.start.toISOString(),
+            end: resolved.cycle.end.toISOString(),
+            key: resolved.cycle.key,
+          },
+        }
+      : {}),
+  };
 }
 
 /** The membership of one account, or undefined when it never had one. */
@@ -46,24 +119,65 @@ export async function readMembership(
   accountId: string,
   now: Date,
 ): Promise<MembershipView | undefined> {
-  const result = await db.query(
-    `SELECT status, expires_at, monthly_token_quota FROM memberships WHERE account_id = $1::text`,
-    [accountId],
-  );
-  const row = result.rows[0] as MembershipRow | undefined;
-  if (!row) return undefined;
-  const expiresAt = new Date(row.expires_at);
-  return {
-    status: row.status,
-    active: row.status === 'active' && expiresAt.getTime() > now.getTime(),
-    expiresAt: expiresAt.toISOString(),
-    monthlyQuota: Number(row.monthly_token_quota),
-  };
+  const entry = (await loadPeriods(db, [accountId])).get(accountId);
+  return entry ? viewOf(entry, now) : undefined;
 }
 
 /**
- * Grants a membership, or extends a running one by `days` from its current expiry. Sets the
- * monthly quota and makes the membership active. Returns false when the account does not exist.
+ * Writes the period that a membership row from before periods existed stood for, so that a new
+ * period can follow it. Safe to repeat: it does nothing once the account has a period.
+ */
+async function materializePeriod(db: AccountQueryable, accountId: string): Promise<void> {
+  await db.query(
+    `INSERT INTO membership_periods (account_id, starts_at, ends_at, monthly_quota, granted_by)
+     SELECT m.account_id, LEAST(m.granted_at, m.expires_at), m.expires_at, m.monthly_token_quota,
+            'system:migration'
+       FROM memberships m
+      WHERE m.account_id = $1::text
+        AND NOT EXISTS (SELECT 1 FROM membership_periods p WHERE p.account_id = m.account_id)`,
+    [accountId],
+  );
+}
+
+/**
+ * The statements that put a new period after the account's running one and refresh its
+ * membership row: the period starts when the last one ends (or now, when none is running), so a
+ * purchase made mid-cycle changes nothing until that cycle is over. `gate` names a CTE whose rows
+ * (column `account_id`) are the accounts to act on; the other arguments are `$n` placeholders.
+ */
+function stackPeriodCtes(p: {
+  gate: string;
+  now: string;
+  days: string;
+  quota: string;
+  actor: string;
+}): string {
+  const starts = `GREATEST(${p.now}::timestamptz, COALESCE(e.expires_at, ${p.now}::timestamptz))`;
+  return `period AS (
+       INSERT INTO membership_periods (account_id, starts_at, ends_at, monthly_quota, granted_by)
+       SELECT g.account_id, ${starts}, ${starts} + make_interval(days => ${p.days}::int),
+              ${p.quota}::bigint, ${p.actor}::text
+         FROM ${p.gate} g
+         LEFT JOIN memberships e ON e.account_id = g.account_id
+       RETURNING account_id, ends_at
+     ), member AS (
+       INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by, granted_at)
+       SELECT account_id, 'active', ends_at, ${p.quota}::bigint, ${p.actor}::text, ${p.now}::timestamptz
+         FROM period
+       ON CONFLICT (account_id) DO UPDATE SET
+         status = 'active',
+         expires_at = EXCLUDED.expires_at,
+         monthly_token_quota = EXCLUDED.monthly_token_quota,
+         granted_by = EXCLUDED.granted_by,
+         granted_at = EXCLUDED.granted_at
+       RETURNING account_id
+     )`;
+}
+
+/**
+ * Grants a membership as a new period of `days` days with the given monthly quota. It starts when
+ * the running period ends, or now when none is running, so it never changes the quota of the cycle
+ * in progress. Makes the membership active. Returns false when the account does not exist.
  */
 export async function grantMembership(
   db: AccountQueryable,
@@ -76,31 +190,19 @@ export async function grantMembership(
     now: Date;
   },
 ): Promise<boolean> {
-  const startsAt = new Date(input.now.getTime() + input.days * 86_400_000).toISOString();
+  await materializePeriod(db, input.targetId);
   const result = await db.query(
-    `WITH member AS (
-       INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by, granted_at)
-       VALUES ($1::text, 'active', $2::timestamptz, $3::bigint, $4::text, $5::timestamptz)
-       ON CONFLICT (account_id) DO UPDATE SET
-         status = 'active',
-         expires_at = CASE
-           WHEN memberships.expires_at > $5::timestamptz
-             THEN memberships.expires_at + make_interval(days => $6::int)
-           ELSE $2::timestamptz
-         END,
-         monthly_token_quota = $3::bigint,
-         granted_by = $4::text,
-         granted_at = $5::timestamptz
-       RETURNING account_id
-     ), audit AS (
+    `WITH target AS (
+       SELECT id AS account_id FROM accounts WHERE id = $1::text
+     ), ${stackPeriodCtes({ gate: 'target', now: '$4', days: '$5', quota: '$2', actor: '$3' })},
+     audit AS (
        INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
-       SELECT $4::text, account_id, 'membership:grant', $7::text, $5::timestamptz FROM member
+       SELECT $3::text, account_id, 'membership:grant', $6::text, $4::timestamptz FROM member
        RETURNING id
      )
      SELECT account_id FROM member`,
     [
       input.targetId,
-      startsAt,
       input.monthlyQuota,
       input.actorId,
       input.now.toISOString(),
@@ -140,7 +242,9 @@ export async function setMembershipStatus(
 
 /**
  * Sets a membership's expiry and monthly quota exactly (an edit, unlike `grantMembership`, which
- * extends). The audit row's reason records the new values. False when there is no membership.
+ * stacks a new period). The period running now gets the new end and quota, periods queued after
+ * it are dropped, and a lapsed membership given a later expiry starts a new period now. The audit
+ * row's reason records the new values. False when there is no membership.
  */
 export async function updateMembership(
   db: AccountQueryable,
@@ -152,9 +256,30 @@ export async function updateMembership(
     now: Date;
   },
 ): Promise<boolean> {
+  await materializePeriod(db, input.targetId);
   const expiresAt = input.expiresAt.toISOString();
   const result = await db.query(
-    `WITH member AS (
+    `WITH target AS (
+       SELECT account_id FROM memberships WHERE account_id = $2::text
+     ), cur AS (
+       SELECT id, ends_at FROM membership_periods
+        WHERE account_id = $2::text AND starts_at <= $5::timestamptz
+        ORDER BY starts_at DESC LIMIT 1
+     ), dropped AS (
+       DELETE FROM membership_periods
+        WHERE account_id = $2::text AND starts_at > $5::timestamptz
+        RETURNING id
+     ), changed AS (
+       UPDATE membership_periods SET ends_at = $3::timestamptz, monthly_quota = $4::bigint
+        WHERE id = (SELECT id FROM cur)
+          AND ((SELECT ends_at FROM cur) > $5::timestamptz OR $3::timestamptz <= $5::timestamptz)
+        RETURNING id
+     ), added AS (
+       INSERT INTO membership_periods (account_id, starts_at, ends_at, monthly_quota, granted_by)
+       SELECT account_id, $5::timestamptz, $3::timestamptz, $4::bigint, $1::text FROM target
+        WHERE $3::timestamptz > $5::timestamptz AND NOT EXISTS (SELECT 1 FROM changed)
+       RETURNING id
+     ), member AS (
        UPDATE memberships SET expires_at = $3::timestamptz, monthly_token_quota = $4::bigint
         WHERE account_id = $2::text
         RETURNING account_id
@@ -184,6 +309,8 @@ export async function revokeMembership(
   const result = await db.query(
     `WITH member AS (
        DELETE FROM memberships WHERE account_id = $2::text RETURNING account_id
+     ), periods AS (
+       DELETE FROM membership_periods WHERE account_id = $2::text RETURNING id
      ), audit AS (
        INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
        SELECT $1::text, account_id, 'membership:revoke', NULL, $3::timestamptz FROM member
@@ -209,36 +336,23 @@ export async function listMemberships(
   now: Date,
 ): Promise<MembershipListRow[]> {
   const result = await db.query(
-    `SELECT a.id, a.username, m.status, m.expires_at, m.monthly_token_quota
-       FROM accounts a
-       LEFT JOIN memberships m ON m.account_id = a.id
-      WHERE ($1::text IS NULL OR a.id > $1::text)
-      ORDER BY a.id
+    `SELECT id, username FROM accounts
+      WHERE ($1::text IS NULL OR id > $1::text)
+      ORDER BY id
       LIMIT $2::int`,
     [afterId ?? null, limit],
   );
-  return (
-    result.rows as Array<{
-      id: string;
-      username: string;
-      status: MembershipStatus | null;
-      expires_at: Date | string | null;
-      monthly_token_quota: number | string | null;
-    }>
-  ).map((row) => {
-    if (row.status === null || row.expires_at === null) {
-      return { id: row.id, username: row.username, membership: null };
-    }
-    const expiresAt = new Date(row.expires_at);
+  const accounts = result.rows as Array<{ id: string; username: string }>;
+  const periods = await loadPeriods(
+    db,
+    accounts.map((a) => a.id),
+  );
+  return accounts.map((account) => {
+    const entry = periods.get(account.id);
     return {
-      id: row.id,
-      username: row.username,
-      membership: {
-        status: row.status,
-        active: row.status === 'active' && expiresAt.getTime() > now.getTime(),
-        expiresAt: expiresAt.toISOString(),
-        monthlyQuota: Number(row.monthly_token_quota ?? 0),
-      },
+      id: account.id,
+      username: account.username,
+      membership: entry ? viewOf(entry, now) : null,
     };
   });
 }
@@ -434,7 +548,7 @@ export async function decideAccessRequest(
     );
     return result.rows.length > 0;
   }
-  const expiresAt = new Date(input.now.getTime() + input.days * 86_400_000).toISOString();
+  await materializePeriod(db, input.accountId);
   const result = await db.query(
     `WITH decided AS (
        UPDATE access_requests
@@ -445,35 +559,14 @@ export async function decideAccessRequest(
             SELECT 1 FROM memberships WHERE account_id = $1::text AND status = 'suspended'
           )
         RETURNING account_id
-     ), member AS (
-       INSERT INTO memberships (account_id, status, expires_at, monthly_token_quota, granted_by, granted_at)
-       SELECT account_id, 'active', $4::timestamptz, $5::bigint, $2::text, $3::timestamptz FROM decided
-       ON CONFLICT (account_id) DO UPDATE SET
-         status = 'active',
-         expires_at = CASE
-           WHEN memberships.expires_at > $3::timestamptz
-             THEN memberships.expires_at + make_interval(days => $6::int)
-           ELSE $4::timestamptz
-         END,
-         monthly_token_quota = $5::bigint,
-         granted_by = $2::text,
-         granted_at = $3::timestamptz
-       RETURNING account_id
-     ), audit AS (
+     ), ${stackPeriodCtes({ gate: 'decided', now: '$3', days: '$5', quota: '$4', actor: '$2' })},
+     audit AS (
        INSERT INTO account_admin_audit (actor_id, target_id, action, reason, created_at)
-       SELECT $2::text, account_id, 'access:approve', $7::text, $3::timestamptz FROM decided
+       SELECT $2::text, account_id, 'access:approve', $6::text, $3::timestamptz FROM decided
        RETURNING id
      )
      SELECT account_id FROM decided`,
-    [
-      input.accountId,
-      input.actorId,
-      now,
-      expiresAt,
-      input.monthlyQuota,
-      input.days,
-      input.reason ?? null,
-    ],
+    [input.accountId, input.actorId, now, input.monthlyQuota, input.days, input.reason ?? null],
   );
   return result.rows.length > 0;
 }
@@ -1032,7 +1125,7 @@ export async function isCourseInClassOf(
 
 /**
  * Records the first read of a shared course by a member, and credits the author. Each reader
- * counts once per course. The monthly credit stops at the cap. Returns the tokens credited (0
+ * counts once per course. The credit goes to the author's running cycle and stops at the cap. Returns the tokens credited (0
  * when the read was not new or the cap was already reached).
  */
 export async function recordCourseRead(
@@ -1041,7 +1134,6 @@ export async function recordCourseRead(
     courseId: string;
     readerId: string;
     authorId: string;
-    month: string;
     now: Date;
     /** For a remix: the author of the course it came from, and their tokens for this read. */
     royalty?: { ownerId: string; tokens: number };
@@ -1056,9 +1148,9 @@ export async function recordCourseRead(
   );
   if (inserted.rows.length === 0) return 0;
 
-  const credit = await creditBonusTokens(db, input.authorId, input.month, READER_REWARD_TOKENS);
+  const credit = await creditBonusTokens(db, input.authorId, input.now, READER_REWARD_TOKENS);
   if (input.royalty && input.royalty.tokens > 0) {
-    await creditBonusTokens(db, input.royalty.ownerId, input.month, input.royalty.tokens);
+    await creditBonusTokens(db, input.royalty.ownerId, input.now, input.royalty.tokens);
   }
 
   const readers = await db.query(
@@ -1078,24 +1170,44 @@ export async function recordCourseRead(
   return credit;
 }
 
+/** The prefix of an owner id that belongs to an account (the same as `accountOwnerId`; that module imports this one). */
+const ACCOUNT_OWNER_PREFIX = 'acct:';
+
 /**
- * Adds reward tokens to an owner's month, up to the monthly reward cap that every reward shares.
- * Returns the tokens actually credited.
+ * The key of the cycle an owner is in at `now`, which is what its reward tokens are kept under.
+ * Undefined for an owner with no plan running: a visitor, or a member whose plan has ended.
+ */
+export async function readCycleKey(
+  db: AccountQueryable,
+  ownerId: string,
+  now: Date,
+): Promise<string | undefined> {
+  if (!ownerId.startsWith(ACCOUNT_OWNER_PREFIX)) return undefined;
+  const membership = await readMembership(db, ownerId.slice(ACCOUNT_OWNER_PREFIX.length), now);
+  return membership?.cycle?.key;
+}
+
+/**
+ * Adds reward tokens to the cycle an owner is in at `now`, up to the cap that every reward in a
+ * cycle shares. Returns the tokens actually credited: 0 when the owner has no plan running, since
+ * a reward belongs to a cycle and would never be spent.
  */
 export async function creditBonusTokens(
   db: AccountQueryable,
   ownerId: string,
-  month: string,
+  now: Date,
   tokens: number,
 ): Promise<number> {
-  const before = await readBonusTokens(db, ownerId, month);
+  const key = await readCycleKey(db, ownerId, now);
+  if (key === undefined) return 0;
+  const before = await readBonusTokens(db, ownerId, key);
   const credit = Math.min(tokens, Math.max(0, MONTHLY_REWARD_CAP_TOKENS - before));
   if (credit > 0) {
     await db.query(
       `INSERT INTO quota_bonus (owner_id, month, tokens)
        VALUES ($1::text, $2::text, $3::bigint)
        ON CONFLICT (owner_id, month) DO UPDATE SET tokens = quota_bonus.tokens + $3::bigint`,
-      [ownerId, month, credit],
+      [ownerId, key, credit],
     );
   }
   return credit;
@@ -1174,15 +1286,15 @@ export async function listSharesByOwner(
   }));
 }
 
-/** Bonus tokens an owner has earned in a month, from reader rewards. */
+/** Bonus tokens an owner has earned in one cycle (`cycleKey`, see `readCycleKey`), from rewards. */
 export async function readBonusTokens(
   db: AccountQueryable,
   ownerId: string,
-  month: string,
+  cycleKey: string,
 ): Promise<number> {
   const result = await db.query(
     `SELECT tokens FROM quota_bonus WHERE owner_id = $1::text AND month = $2::text`,
-    [ownerId, month],
+    [ownerId, cycleKey],
   );
   const row = result.rows[0] as { tokens: number | string } | undefined;
   return row ? Number(row.tokens) : 0;
@@ -1551,17 +1663,19 @@ export interface OpsHealthFacts {
   readonly oldestPendingShare: string | null;
   /** Active memberships expiring within EXPIRING_SOON_DAYS, soonest first, at most 20. */
   readonly expiring: readonly { accountId: string; username: string; expiresAt: string }[];
-  /** Every active, unexpired membership with its monthly quota, for the quota check. */
-  readonly metered: readonly { accountId: string; username: string; monthlyQuota: number }[];
-  /** Reader-reward bonus tokens for `month`, by owner key. */
+  /** Every learner with a running plan: the quota and the cycle it is counted in, for the quota check. */
+  readonly metered: readonly {
+    accountId: string;
+    username: string;
+    monthlyQuota: number;
+    cycleStart: string;
+    cycleEnd: string;
+  }[];
+  /** Reader-reward bonus tokens of each metered learner's running cycle, by owner key. */
   readonly bonusByOwner: ReadonlyMap<string, number>;
 }
 
-export async function readOpsHealthFacts(
-  db: AccountQueryable,
-  now: Date,
-  month: string,
-): Promise<OpsHealthFacts> {
+export async function readOpsHealthFacts(db: AccountQueryable, now: Date): Promise<OpsHealthFacts> {
   const soon = new Date(now.getTime() + EXPIRING_SOON_DAYS * 86_400_000).toISOString();
   const at = now.toISOString();
   const counts = await db.query(
@@ -1597,15 +1711,36 @@ export async function readOpsHealthFacts(
       LIMIT 20`,
     [at, soon],
   );
-  const metered = await db.query(
-    `SELECT a.id, a.username, m.monthly_token_quota
+  const learners = await db.query(
+    `SELECT a.id, a.username
        FROM memberships m JOIN accounts a ON a.id = m.account_id
       WHERE m.status = 'active' AND m.expires_at > $1::timestamptz AND a.role = 'learner'`,
     [at],
   );
-  const bonus = await db.query(`SELECT owner_id, tokens FROM quota_bonus WHERE month = $1::text`, [
-    month,
-  ]);
+  const learnerRows = learners.rows as Array<{ id: string; username: string }>;
+  const periods = await loadPeriods(
+    db,
+    learnerRows.map((r) => r.id),
+  );
+  const metered: Array<OpsHealthFacts['metered'][number] & { key: string }> = [];
+  for (const r of learnerRows) {
+    const entry = periods.get(r.id);
+    const view = entry ? viewOf(entry, now) : undefined;
+    if (!view?.cycle) continue;
+    metered.push({
+      accountId: r.id,
+      username: r.username,
+      monthlyQuota: view.monthlyQuota,
+      cycleStart: view.cycle.start,
+      cycleEnd: view.cycle.end,
+      key: view.cycle.key,
+    });
+  }
+  const bonus = await db.query(
+    `SELECT owner_id, month, tokens FROM quota_bonus WHERE month = ANY($1::text[])`,
+    [metered.map((m) => m.key)],
+  );
+  const keyOfOwner = new Map(metered.map((m) => [`${ACCOUNT_OWNER_PREFIX}${m.accountId}`, m.key]));
 
   return {
     memberships: {
@@ -1637,18 +1772,11 @@ export async function readOpsHealthFacts(
       username: r.username,
       expiresAt: new Date(r.expires_at).toISOString(),
     })),
-    metered: (
-      metered.rows as Array<{ id: string; username: string; monthly_token_quota: number | string }>
-    ).map((r) => ({
-      accountId: r.id,
-      username: r.username,
-      monthlyQuota: Number(r.monthly_token_quota),
-    })),
+    metered: metered.map(({ key: _key, ...m }) => m),
     bonusByOwner: new Map(
-      (bonus.rows as Array<{ owner_id: string; tokens: number | string }>).map((r) => [
-        r.owner_id,
-        Number(r.tokens),
-      ]),
+      (bonus.rows as Array<{ owner_id: string; month: string; tokens: number | string }>)
+        .filter((r) => keyOfOwner.get(r.owner_id) === r.month)
+        .map((r) => [r.owner_id, Number(r.tokens)]),
     ),
   };
 }

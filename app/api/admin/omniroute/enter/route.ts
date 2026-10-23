@@ -1,5 +1,5 @@
 import { accountServiceDeps, accountsEnabled } from '@/lib/server/accounts/runtime';
-import { omnirouteConfig } from '@/lib/server/omniroute/config';
+import { dashboardIsSecure, omnirouteConfig } from '@/lib/server/omniroute/config';
 import { allowedDeepLink } from '@/lib/server/omniroute/links';
 import { isActiveAdminSession, refusal, signInToOmniRoute } from '@/lib/server/omniroute/gate';
 import {
@@ -43,7 +43,10 @@ export async function GET(request: Request): Promise<Response> {
     return refusal(503, 'Try again in a moment.');
   }
 
-  const omnirouteCookie = await signInToOmniRoute(config);
+  // The browser is on the dashboard's own host (the gate passes `Host` through), so that host says
+  // whether the cookies travel over https.
+  const secure = dashboardIsSecure(config, request.headers.get('host'));
+  const omnirouteCookie = await signInToOmniRoute(config, secure);
   if (!omnirouteCookie) {
     return refusal(502, 'OmniRoute did not accept the sign-in. See ops/omniroute/README.md.');
   }
@@ -52,10 +55,10 @@ export async function GET(request: Request): Promise<Response> {
   // Only one of OmniRoute's own pages may be asked for; anything else lands on the front page.
   const landing = allowedDeepLink(new URL(request.url).searchParams.get('to')) ?? '/';
   const headers = new Headers({
-    location: `${config.publicUrl}${landing}`,
+    location: landing, // relative: the browser stays on the dashboard's own origin
     'cache-control': 'no-store',
   });
-  headers.append('set-cookie', gateCookieHeader(gate, config.publicUrl.startsWith('https:')));
+  headers.append('set-cookie', gateCookieHeader(gate, secure));
   headers.append('set-cookie', omnirouteCookie);
   return new Response(null, { status: 302, headers });
 }

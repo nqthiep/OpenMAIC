@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LanguageModelUsage } from 'ai';
-import { normalizeUsage, hasBillableTokens } from '@/lib/usage/normalize';
+import { normalizeUsage, hasBillableTokens, quotaTokens } from '@/lib/usage/normalize';
 
 /**
  * Builds a minimal AI SDK v6 LanguageModelUsage object. Any field left
@@ -126,5 +126,17 @@ describe('hasBillableTokens', () => {
         reasoningTokens: 0,
       }),
     ).toBe(true);
+  });
+});
+
+describe('quotaTokens', () => {
+  it('counts the input and the output, and not the reasoning tokens a second time', () => {
+    // A logged `scene-content` call of a reasoning model: reasoning is a part of the output.
+    const call = { inputTokens: 9475, outputTokens: 8986, reasoningTokens: 7511 };
+    expect(quotaTokens(call)).toBe(9475 + 8986);
+  });
+
+  it('is the sum of the two for a model that does not report reasoning', () => {
+    expect(quotaTokens({ inputTokens: 100, outputTokens: 50 })).toBe(150);
   });
 });

@@ -37,7 +37,7 @@ interface AccountRoutes {
 
 const PASSWORD = 'Tangerine-Waffle-2026';
 const WRONG_PASSWORD = 'Tangerine-Waffle-2027';
-const ALICE = { username: 'alice', password: PASSWORD };
+const ALICE = { username: 'alice', password: PASSWORD, acceptedTerms: true };
 const DATABASE_URL = 'postgres://accounts-route-test';
 const ORIGIN = 'http://localhost';
 const THROTTLE_KEY = Symbol.for('openmaic.accounts.loginThrottle');
@@ -229,7 +229,11 @@ describe('account routes', () => {
     async () => {
       const { register } = await loadRoutes();
       const response = await register(
-        jsonRequest('/api/auth/register', { username: '  Alice.X ', password: PASSWORD }),
+        jsonRequest('/api/auth/register', {
+          username: '  Alice.X ',
+          password: PASSWORD,
+          acceptedTerms: true,
+        }),
       );
       expect(await summarize(response)).toEqual({
         status: 201,
@@ -254,8 +258,20 @@ describe('account routes', () => {
       await register(jsonRequest('/api/auth/register', ALICE));
       const attempts = [
         await register(jsonRequest('/api/auth/register', { ...ALICE, username: 'ALICE' })),
-        await register(jsonRequest('/api/auth/register', { username: 'a b', password: PASSWORD })),
-        await register(jsonRequest('/api/auth/register', { username: 'carol', password: 'short' })),
+        await register(
+          jsonRequest('/api/auth/register', {
+            username: 'a b',
+            password: PASSWORD,
+            acceptedTerms: true,
+          }),
+        ),
+        await register(
+          jsonRequest('/api/auth/register', {
+            username: 'carol',
+            password: 'short',
+            acceptedTerms: true,
+          }),
+        ),
       ];
       const results = (await Promise.all(attempts.map(summarize))).map(({ status, errorCode }) => [
         status,
@@ -350,7 +366,11 @@ describe('account routes', () => {
       const crossSite = { 'sec-fetch-site': 'cross-site' };
       const refused = [
         await register(
-          jsonRequest('/api/auth/register', { username: 'bob', password: PASSWORD }, crossSite),
+          jsonRequest(
+            '/api/auth/register',
+            { username: 'bob', password: PASSWORD, acceptedTerms: true },
+            crossSite,
+          ),
         ),
         await login(jsonRequest('/api/auth/login', ALICE, crossSite)),
         await logout(logoutRequest({ ...crossSite, cookie })),
@@ -490,7 +510,11 @@ describe('account routes', () => {
       vi.stubEnv('ACCOUNT_REGISTRATION', 'closed');
 
       const refused = await register(
-        jsonRequest('/api/auth/register', { username: 'bob', password: PASSWORD }),
+        jsonRequest('/api/auth/register', {
+          username: 'bob',
+          password: PASSWORD,
+          acceptedTerms: true,
+        }),
       );
       expect(await summarize(refused)).toEqual({
         status: 403,
@@ -546,6 +570,7 @@ describe('account routes', () => {
         success: true,
         enabled: true,
         registrationOpen: true,
+        trialDays: 0,
         authenticated: false,
         capabilities: GUEST_CAPABILITIES,
       });
@@ -569,6 +594,7 @@ describe('account routes', () => {
         success: true,
         enabled: true,
         registrationOpen: true,
+        trialDays: 0,
         authenticated: false,
         capabilities: GUEST_CAPABILITIES,
       });
@@ -604,4 +630,145 @@ describe('account routes', () => {
     },
     ROUTE_TIMEOUT_MS,
   );
+});
+
+describe('consent and the free first month', () => {
+  const TRIAL_DAYS = 30;
+
+  const rowsOf = async (sql: string, params: unknown[] = []) =>
+    (await db!.query(sql, params)).rows as Record<string, unknown>[];
+
+  it(
+    'refuses a sign-up that does not say the terms were accepted, and creates no account',
+    async () => {
+      const { register } = await loadRoutes();
+      for (const acceptedTerms of [undefined, false, 'true', 1, null]) {
+        const response = await register(
+          jsonRequest('/api/auth/register', { ...ALICE, acceptedTerms }),
+        );
+        expect(response.status).toBe(400);
+        expect(response.headers.get('set-cookie')).toBeNull();
+        await expect(response.json()).resolves.toMatchObject({
+          success: false,
+          errorCode: 'TERMS_NOT_ACCEPTED',
+        });
+      }
+      expect(await rowsOf('SELECT id FROM accounts')).toEqual([]);
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it(
+    'records the version of the terms and the time they were accepted with the account',
+    async () => {
+      const { TERMS_VERSION } = await import('@/lib/legal/versions');
+      const { register } = await loadRoutes();
+      const before = Date.now();
+      expect((await register(jsonRequest('/api/auth/register', ALICE))).status).toBe(201);
+      const [row] = await rowsOf(
+        'SELECT terms_version, terms_accepted_at FROM accounts WHERE username = $1',
+        ['alice'],
+      );
+      expect(row?.terms_version).toBe(TERMS_VERSION);
+      expect(new Date(String(row?.terms_accepted_at)).getTime()).toBeGreaterThanOrEqual(
+        before - 1000,
+      );
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it(
+    'gives a new account a free membership for the trial days, with the trial quota, and logs it',
+    async () => {
+      vi.stubEnv('MEMBERSHIP_TRIAL_DAYS', String(TRIAL_DAYS));
+      vi.stubEnv('MEMBERSHIP_TRIAL_QUOTA_TOKENS', '500000');
+      const { register } = await loadRoutes();
+      const before = Date.now();
+      expect((await register(jsonRequest('/api/auth/register', ALICE))).status).toBe(201);
+      const [member] = await rowsOf(
+        `SELECT m.status, m.expires_at, m.monthly_token_quota, m.granted_by
+           FROM memberships m JOIN accounts a ON a.id = m.account_id WHERE a.username = $1`,
+        ['alice'],
+      );
+      expect(member).toMatchObject({
+        status: 'active',
+        monthly_token_quota: 500000,
+        granted_by: 'system:trial',
+      });
+      const days = (new Date(String(member?.expires_at)).getTime() - before) / 86_400_000;
+      expect(days).toBeGreaterThan(TRIAL_DAYS - 0.01);
+      expect(days).toBeLessThan(TRIAL_DAYS + 0.01);
+      expect(
+        await rowsOf('SELECT action, reason FROM account_admin_audit WHERE actor_id = $1', [
+          'system:trial',
+        ]),
+      ).toEqual([{ action: 'membership:grant', reason: 'free first month' }]);
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it(
+    'tells the browser how long the free month is, so the sign-up dialog can promise it',
+    async () => {
+      vi.stubEnv('MEMBERSHIP_TRIAL_DAYS', String(TRIAL_DAYS));
+      const { session } = await loadRoutes();
+      await expect((await session(sessionRequest())).json()).resolves.toMatchObject({
+        trialDays: TRIAL_DAYS,
+      });
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it(
+    'gives no membership when the trial is off, which is how the rest of this suite runs',
+    async () => {
+      const { register } = await loadRoutes();
+      expect((await register(jsonRequest('/api/auth/register', ALICE))).status).toBe(201);
+      expect(await rowsOf('SELECT account_id FROM memberships')).toEqual([]);
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+
+  it(
+    'still signs the account up when the free month cannot be granted',
+    async () => {
+      vi.stubEnv('MEMBERSHIP_TRIAL_DAYS', String(TRIAL_DAYS));
+      const { register } = await loadRoutes();
+      await db!.exec('ALTER TABLE memberships RENAME TO memberships_away');
+      try {
+        const response = await register(jsonRequest('/api/auth/register', ALICE));
+        expect(response.status).toBe(201);
+        expect(response.headers.get('set-cookie')).toMatch(/^openmaic_session=/);
+        expect(await rowsOf('SELECT username FROM accounts')).toEqual([{ username: 'alice' }]);
+      } finally {
+        await db!.exec('ALTER TABLE memberships_away RENAME TO memberships');
+      }
+    },
+    ROUTE_TIMEOUT_MS,
+  );
+});
+
+describe('membershipTrial', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('is 30 days with half the paid quota when nothing is set', async () => {
+    vi.stubEnv('MEMBERSHIP_TRIAL_DAYS', '');
+    const { membershipTrial } = await import('@/lib/server/accounts/runtime');
+    expect(membershipTrial()).toEqual({ days: 30, monthlyQuota: 500_000 });
+  });
+
+  it('is off for 0 and for anything that is not a sensible number of days', async () => {
+    const { membershipTrial } = await import('@/lib/server/accounts/runtime');
+    for (const value of ['0', '-5', '1.5', 'abc', '400']) {
+      vi.stubEnv('MEMBERSHIP_TRIAL_DAYS', value);
+      expect(membershipTrial(), value).toBeUndefined();
+    }
+  });
+
+  it('takes the days and the quota from the environment', async () => {
+    vi.stubEnv('MEMBERSHIP_TRIAL_DAYS', '14');
+    vi.stubEnv('MEMBERSHIP_TRIAL_QUOTA_TOKENS', '250000');
+    const { membershipTrial } = await import('@/lib/server/accounts/runtime');
+    expect(membershipTrial()).toEqual({ days: 14, monthlyQuota: 250000 });
+  });
 });

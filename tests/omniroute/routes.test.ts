@@ -1,3 +1,7 @@
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,6 +17,7 @@ const ADMIN_PASSWORD = 'p'.repeat(24);
 const NO_SESSION = '0'.repeat(32);
 
 let db: PGlite | undefined;
+const emptySecrets = mkdtempSync(join(tmpdir(), 'omniroute-no-secrets-'));
 
 class PGlitePool {
   constructor(private readonly database: PGlite) {}
@@ -39,6 +44,7 @@ beforeEach(async () => {
   vi.stubEnv('OMNIROUTE_PUBLIC_URL', ORIGIN);
   vi.stubEnv('OMNIROUTE_GATE_SECRET', GATE_SECRET);
   vi.stubEnv('OMNIROUTE_ADMIN_PASSWORD', ADMIN_PASSWORD);
+  vi.stubEnv('OMNIROUTE_SECRETS_DIR', emptySecrets);
   delete (globalThis as unknown as Record<symbol, unknown>)[THROTTLE_KEY];
   await db!.exec(
     'TRUNCATE account_admin_audit, account_sessions, accounts RESTART IDENTITY CASCADE',
@@ -46,6 +52,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  rmSync(emptySecrets, { recursive: true, force: true });
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   await db?.close();
@@ -181,8 +188,44 @@ describe('open', () => {
   it('is 404 when OmniRoute is not set up', async () => {
     const routes = await load();
     const root = await signUp(routes, 'root');
-    vi.stubEnv('OMNIROUTE_PUBLIC_URL', '');
+    vi.stubEnv('OMNIROUTE_ADMIN_PASSWORD', '');
     expect((await routes.open(post(root.cookie))).status).toBe(404);
+  });
+
+  it('works out the dashboard address from the page when OMNIROUTE_PUBLIC_URL is not set', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    vi.stubEnv('OMNIROUTE_PUBLIC_URL', '');
+    const addressFor = async (origin?: string) => {
+      const response = await routes.open(post(root.cookie, origin ? { origin } : {}));
+      return response.status === 200
+        ? new URL(((await response.json()) as { url: string }).url)
+        : null;
+    };
+    expect((await addressFor('https://khaitam.ai.vn'))?.origin).toBe(
+      'https://omniroute.khaitam.ai.vn',
+    );
+    expect((await addressFor('https://www.khaitam.ai.vn'))?.origin).toBe(
+      'https://omniroute.khaitam.ai.vn',
+    );
+    expect((await addressFor('http://localhost:3000'))?.origin).toBe(
+      'http://omniroute.localhost:8081',
+    );
+    expect((await addressFor('http://127.0.0.1:3002'))?.origin).toBe(
+      'http://omniroute.localhost:8081',
+    );
+    vi.stubEnv('OMNIROUTE_GATE_PORT', '9090');
+    expect((await addressFor('http://localhost:3000'))?.origin).toBe(
+      'http://omniroute.localhost:9090',
+    );
+    // No Origin, or one that is no web address: nothing to build the address from.
+    expect(await addressFor()).toBeNull();
+    expect(await addressFor('null')).toBeNull();
+    // The variable wins over the page.
+    vi.stubEnv('OMNIROUTE_PUBLIC_URL', 'https://gateway.example.test');
+    expect((await addressFor('https://khaitam.ai.vn'))?.origin).toBe(
+      'https://gateway.example.test',
+    );
   });
 
   it("puts one of OmniRoute's own pages in the address, and refuses any other path", async () => {
@@ -247,7 +290,7 @@ describe('check', () => {
     const stranger = { id: 'no-such-account', sessionKey: NO_SESSION };
     expect((await routes.check(checkRequest(mint(routes, 'gate', stranger)))).status).toBe(403);
     const gate = mint(routes, 'gate', alice);
-    vi.stubEnv('OMNIROUTE_GATE_SECRET', '');
+    vi.stubEnv('OMNIROUTE_ADMIN_PASSWORD', '');
     expect((await routes.check(checkRequest(gate))).status).toBe(404);
   });
 
@@ -313,7 +356,7 @@ describe('enter', () => {
 
     const response = await routes.enter(enterRequest(ticket));
     expect(response.status).toBe(302);
-    expect(response.headers.get('location')).toBe(`${ORIGIN}/`);
+    expect(response.headers.get('location')).toBe('/');
     expect(response.headers.get('cache-control')).toBe('no-store');
     const cookies = response.headers.getSetCookie();
     const gate = cookies.find((c) => c.startsWith('omniroute_gate='))!;
@@ -336,6 +379,27 @@ describe('enter', () => {
     expect((await routes.check(checkRequest(gateValue))).status).toBe(204);
   });
 
+  it('marks the cookies Secure by the host the browser is on when no public URL is set', async () => {
+    const routes = await load();
+    const root = await signUp(routes, 'root');
+    vi.stubEnv('OMNIROUTE_PUBLIC_URL', '');
+    stubOmniRoute(signedIn);
+    const cookiesFor = async (host: string) => {
+      const ticket = mint(routes, 'ticket', root);
+      const response = await routes.enter(
+        new Request(`http://${host}/api/admin/omniroute/enter?t=${encodeURIComponent(ticket)}`, {
+          headers: { host },
+        }),
+      );
+      expect(response.status).toBe(302);
+      return response.headers.getSetCookie();
+    };
+    for (const cookie of await cookiesFor('omniroute.khaitam.ai.vn'))
+      expect(cookie).toContain('Secure');
+    for (const cookie of await cookiesFor('omniroute.localhost:8081'))
+      expect(cookie).not.toContain('Secure');
+  });
+
   it('lands on the page asked for, or on the front page for anything else', async () => {
     const routes = await load();
     const root = await signUp(routes, 'root');
@@ -347,10 +411,10 @@ describe('enter', () => {
       );
       return response.headers.get('location');
     };
-    expect(await landing('&to=%2Fdashboard%2Fcombos')).toBe(`${ORIGIN}/dashboard/combos`);
-    expect(await landing('&to=%2Fapi%2Fkeys')).toBe(`${ORIGIN}/`);
-    expect(await landing('&to=https%3A%2F%2Fevil.test%2F')).toBe(`${ORIGIN}/`);
-    expect(await landing('')).toBe(`${ORIGIN}/`);
+    expect(await landing('&to=%2Fdashboard%2Fcombos')).toBe('/dashboard/combos');
+    expect(await landing('&to=%2Fapi%2Fkeys')).toBe('/');
+    expect(await landing('&to=https%3A%2F%2Fevil.test%2F')).toBe('/');
+    expect(await landing('')).toBe('/');
   });
 
   it('accepts a ticket once', async () => {

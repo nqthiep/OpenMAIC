@@ -95,7 +95,9 @@ const get = (cookie?: string) =>
   new Request(`${ORIGIN}/api/x`, cookie ? { headers: { cookie } } : undefined);
 
 async function signUp(routes: Routes, username: string, member = false) {
-  const response = await routes.register(jsonRequest('POST', { username, password: PASSWORD }));
+  const response = await routes.register(
+    jsonRequest('POST', { username, password: PASSWORD, acceptedTerms: true }),
+  );
   const id = (
     await db!.query<{ id: string }>('SELECT id FROM accounts WHERE username = $1', [username])
   ).rows[0]!.id;

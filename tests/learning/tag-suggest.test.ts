@@ -21,6 +21,14 @@ describe('suggestTags', () => {
     ]);
   });
 
+  it('reads grades 5 and 9, and does not take a bigger number for them', () => {
+    expect(suggestTags(['Phân số lớp 5'])).toContain('grade:5');
+    expect(suggestTags(['Hệ phương trình lớp 9'])).toContain('grade:9');
+    expect(suggestTags(['Hệ phương trình lớp 90'])).not.toContain('grade:9');
+    expect(suggestTags(['Đạo hàm lớp 10'])).toContain('grade:10');
+    expect(suggestTags(['Đạo hàm lớp 10'])).not.toContain('grade:5');
+  });
+
   it('works on English titles and short whole-word keywords', () => {
     expect(suggestTags(['Introduction to Python programming'])).toEqual([
       'subject:informatics',

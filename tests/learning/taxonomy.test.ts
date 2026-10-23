@@ -60,7 +60,8 @@ describe('validateTags', () => {
 
   it('refuses tags that are not in the set, are not text, or repeat', () => {
     expect(validateTags(['subject:art'])).toMatchObject({ ok: false });
-    expect(validateTags(['grade:9'])).toMatchObject({ ok: false });
+    expect(validateTags(['grade:8'])).toMatchObject({ ok: false });
+    expect(validateTags(['grade:6'])).toMatchObject({ ok: false });
     expect(validateTags(['topic:math.nope'])).toMatchObject({ ok: false });
     expect(validateTags(['math'])).toMatchObject({ ok: false });
     expect(validateTags([7])).toMatchObject({ ok: false });
@@ -82,9 +83,28 @@ describe('validateTags', () => {
   });
 });
 
+describe('the years the site is for', () => {
+  it('are 5, 9, 10, 11 and 12, in that order', () => {
+    expect(GRADES).toEqual(['5', '9', '10', '11', '12']);
+  });
+
+  it('accept grade 5 and grade 9 with a subject', () => {
+    expect(validateTags(['subject:math', 'grade:5'])).toMatchObject({ ok: true });
+    expect(validateTags(['subject:informatics', 'grade:9'])).toMatchObject({ ok: true });
+  });
+
+  it('keep the order 5, 9, 10, 11, 12 when a course carries two of them', () => {
+    expect(tagsFor(readTags(['grade:12', 'grade:9', 'subject:math']))).toEqual([
+      'subject:math',
+      'grade:9',
+      'grade:12',
+    ]);
+  });
+});
+
 describe('readTags and tagsFor', () => {
   it('split a stored list and ignore what is not in the set', () => {
-    expect(readTags(['subject:math', 'grade:12', 'topic:math.limits', 'junk', 'grade:9'])).toEqual({
+    expect(readTags(['subject:math', 'grade:12', 'topic:math.limits', 'junk', 'grade:8'])).toEqual({
       subject: 'math',
       grades: ['12'],
       topics: ['math.limits'],
