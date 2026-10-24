@@ -158,7 +158,9 @@ export function AccountControl() {
     signingOutRef.current = true;
     setSigningOut(true);
     signOut()
-      .then(() => window.location.reload())
+      // To the home page, not a reload: a reload keeps the address, so signing out on /admin or
+      // the workspace left the person on a page that is closed to them.
+      .then(() => window.location.assign('/'))
       .catch((error: unknown) => {
         log.warn('Sign-out failed', error instanceof Error ? error.name : 'unknown error');
         signingOutRef.current = false;

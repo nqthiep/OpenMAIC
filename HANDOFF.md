@@ -2,6 +2,34 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: The account menu is missing from the top bar of the deployed site
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "Trên bản deploy này bị mất user menu trên topbar" (with a screenshot of `khaitam.ai.vn/admin`: language, theme and settings only)
+- Assignment status: Done on the VPS (the owner chose "Mình sửa luôn trên VPS"); the signed-in menu was not seen (no account used)
+- Branch and commit: VPS `~/OpenMAIC` @ `c30caf76`, unchanged. Repo: comment in `.env.example` only (uncommitted). Git writes: none.
+- Last updated: 2026-10-24 00:30 UTC (VPS clock)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Find the cause | Done | As a guest the deployed home had no "Đăng nhập" button either, and no placeholder. The browser asked `/api/auth/session` once (not by the account button). In the production chunk `/_next/static/chunks/1bc-koe2omse1.js`, `isBrowserPersistenceEnabled` was `function h(){return!1}`: `NEXT_PUBLIC_PERSISTENCE` was not `1` when the image was built. `AccountControl` returns early in that case (`components/account/account-control.tsx`). The deploy of the SEO work ran `docker compose --profile server-persistence up -d --build openmaic` and nothing supplied the flag: the VPS `.env` held only `PERSISTENCE_POSTGRES_PASSWORD` (names read over SSH, no values) |
+| 2 | Back up the database | Done | `~/backups/pre-persistence-flag-20261024T001306Z.sql.gz` on the VPS, 7650 bytes, `gzip -t` ok, 45 `CREATE TABLE` |
+| 3 | Make the flag permanent | Done | `NEXT_PUBLIC_PERSISTENCE=1` appended to `~/OpenMAIC/.env` (mode 600, keys now `PERSISTENCE_POSTGRES_PASSWORD`, `NEXT_PUBLIC_PERSISTENCE`). `docker compose --profile server-persistence config` shows `NEXT_PUBLIC_PERSISTENCE: "1"` and an empty token. No token is needed with accounts: `lib/persistence/server-auth.ts` says a signed-in request is identified by its session and never reaches the token check; the VPS has no `PERSISTENCE_DEV_TOKEN` |
+| 4 | Rebuild only the app | Done | `docker compose --profile server-persistence up -d --build openmaic` (build about 9 min; the `--dry-run` listed only `openmaic`). Postgres untouched (Up 13 h, healthy). Disk 7.9 GB free after the build (80% used) |
+| 5 | Verify | Done | `curl localhost:3000/api/health` on the VPS and `https://khaitam.ai.vn/api/health`: 200. No error lines in the app log of the last 3 min. In the browser pane (guest): header shows "Đăng nhập", `/api/auth/session` is asked by several components, no toast, no console error, no `/api/persistence` request failing. The new chunk has `!y()` as a real guard and the `x-learner-key` header code is live. Not seen: the account menu of a signed-in admin (no credentials used; an attempt to read the local review accounts was refused by the permission check and not repeated) |
+
+| 6 | Follow-up (owner): after "Đăng xuất" on `/admin` the person stayed on the page that says it is for operators | Done in the working tree, not deployed | Cause: `handleSignOut` in `components/account/account-control.tsx` ended with `window.location.reload()`, which keeps the address. Now `window.location.assign('/')`. New `tests/accounts/sign-out-destination.test.ts` (jsdom, opens the real menu): goes to `/`, no reload, and stays put when the server refuses; it fails with the old `reload()` (mutation check). eslint and `tsc` clean. Signing in still reloads the same page (`account-dialog.tsx`), on purpose |
+
+### Decisions and reasons
+- The flag goes in the VPS `.env` and not in the command line: compose reads build args from `.env`, so every later `--build` keeps it. Reason: the flag was lost because it lived only in somebody's command.
+
+### Next step (exact)
+- Owner: reload `https://khaitam.ai.vn/admin` signed in as the admin and confirm the user menu is back. If it is not, tell the agent what the header shows.
+- Any later deploy: keep `NEXT_PUBLIC_PERSISTENCE=1` in `~/OpenMAIC/.env`, and after the build look for the "Đăng nhập" button as a guest.
+
+### Open questions and blockers
+- [Inference] While the flag was off (about 7 hours, from the deploy of the SEO work at 17:45 UTC) browsers did not send courses to the server stores. Courses made in that time may exist only in the browser that made them. Not checked.
+
 ## Assignment: OmniRoute as a peer service that connects to the app by default (no manual .env)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Tôi muốn thiết kế OmniRouter là một microservice trong hệ thống này, nó ngang hàng với ứng dụng openmaic này. Và hai service này phải được thiết kế và triển khai liên thông mặc định với nhau. Chứ không phải là yêu cầu tôi phải config thử công như sau:" followed by the popup text "Máy chủ này chưa thiết lập OmniRoute. Thêm các giá trị sau vào file .env của máy chủ rồi khởi động lại ứng dụng: OMNIROUTE_PUBLIC_URL, OMNIROUTE_GATE_SECRET, OMNIROUTE_ADMIN_PASSWORD"
