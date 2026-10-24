@@ -13,6 +13,15 @@ export function enterSpendOwner(ownerId: string): void {
   spend.enterWith({ ownerId });
 }
 
+/**
+ * Runs `work` with `ownerId` as the spend owner, for it and what it starts, and for nothing else.
+ * Background work that serves several owners from one loop (the generation runs) uses this: with
+ * `enterSpendOwner` the owner would leak into the loop's next iteration.
+ */
+export function runWithSpendOwner<T>(ownerId: string, work: () => Promise<T>): Promise<T> {
+  return spend.run({ ownerId }, work);
+}
+
 export function currentSpendOwner(): string | undefined {
   return spend.getStore()?.ownerId;
 }

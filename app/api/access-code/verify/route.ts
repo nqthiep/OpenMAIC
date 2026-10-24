@@ -7,6 +7,7 @@ import { accessSigningKey } from '@/lib/server/access-token-policy';
 import { LoginThrottle } from '@/lib/server/accounts/login-throttle';
 import { warnIfAccessCodeIsShort } from '@/lib/server/access-code-warning';
 import { clientIdentity } from '@/lib/server/client-identity';
+import { cookiesAreSecure } from '@/lib/server/cookie-secure';
 
 /**
  * Failed guesses allowed per client identity inside the window. The access code
@@ -81,7 +82,9 @@ export async function POST(request: Request) {
     sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_TOKEN_MAX_AGE_SECONDS,
-    secure: process.env.NODE_ENV === 'production',
+    // The same rule as the owner cookie: without the COOKIE_SECURE=0 opt-out
+    // a plain-HTTP deployment's browser drops it and the gate never opens.
+    secure: cookiesAreSecure(),
   });
 
   return apiSuccess({ valid: true });

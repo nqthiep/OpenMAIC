@@ -316,16 +316,16 @@
     "advanced": "Avançado",
     "advancedHint": "Opções avançadas: modelo, busca na web, imagens/vídeo, modo interativo, agentes. Por padrão, o KHAITAM escolhe um modelo adequado ao seu pedido e acrescenta ilustrações e atividades interativas.",
     "modelChangeFailed": "Não foi possível trocar o modelo: {{message}}",
-    "modelLockedHint": "O modelo usado pelos cursos, definido por este servidor",
     "pickModel": "Escolha um modelo",
-    "defaultModel": "Padrão",
     "defaultModelNote": "Altera o modelo padrão; etapas configuradas separadamente mantêm o próprio.",
-    "stagesSetSeparately": "{{count}} etapas configuradas separadamente",
-    "stagesSetSeparately_one": "{{count}} etapa configurada separadamente",
-    "stagesSetSeparately_other": "{{count}} etapas configuradas separadamente",
-    "stagesSetSeparatelyHint": "Etapas com modelo próprio",
-    "perStageSetup": "Configuração por etapa",
-    "perStageSetupHint": "Cada etapa do curso tem seu próprio modelo"
+    "materialUploading": "Enviando {{percent}}%",
+    "materialParsing": "Analisando…",
+    "materialTranscribing": "Transcrevendo…",
+    "materialReady": "Pronto",
+    "materialFailed": "Falhou",
+    "materialRetry": "Tentar novamente",
+    "materialMediaLabel": "Áudio/vídeo",
+    "materialUnavailable": "Este material não está mais disponível. Remova-o e anexe o arquivo novamente."
   },
   "export": {
     "pptx": "Exportar PPTX",
@@ -955,6 +955,7 @@
     "generating": "Gerando...",
     "paused": "Pausado",
     "generationFailed": "Falha na geração",
+    "generationInterrupted": "A geração foi interrompida",
     "confirmSwitchTitle": "Trocar de Cena",
     "confirmSwitchMessage": "Há um tópico em andamento. Trocar de cena vai encerrá-lo. Tem certeza?",
     "generatingNextPage": "A cena está sendo gerada, aguarde...",
@@ -1338,6 +1339,10 @@
     "notFound": "Curso não encontrado",
     "notFoundDesc": "Este curso não existe, foi excluído ou você não tem permissão para vê-lo.",
     "backToHome": "Voltar ao início",
+    "runOutlining": "Criando o roteiro…",
+    "runAwaitingConfirmation": "Aguardando confirmação",
+    "runGenerating": "Gerando {{completed}}/{{total}}",
+    "runPaused": "Pausado",
     "loadFailed": "O armazenamento está indisponível. Não foi possível carregar as salas salvas.",
     "deleteFailed": "Falha ao excluir a sala de aula",
     "privateHint": "Os cursos que você cria são privados. Para outros membros verem um, abra-o e use \"Compartilhar com membros\".",
@@ -1353,14 +1358,16 @@
     "courseMaterialCountLimit": "Você pode enviar até 5 arquivos de material do curso",
     "courseMaterialTotalSizeLimit": "O tamanho total dos materiais deve ser menor que 150 MB",
     "unsupportedCourseMaterial": "{{parser}} não suporta este tipo de arquivo. Formatos suportados: {{formats}}",
+    "unsupportedMaterialFormat": "O extrator atual não suporta este formato. Troque o extrator ou escolha outro arquivo.",
+    "materialQuotaExceeded": "Seu armazenamento de materiais está cheio. Exclua alguns materiais e tente novamente.",
+    "materialUploadFailed": "Falha ao enviar {{name}}. Tente novamente.",
+    "materialTooLarge": "{{name}} é grande demais: um material pode ter no máximo {{size}}.",
     "courseMaterialFormats": "Suporta {{formats}} — até {{size}} MB por arquivo",
     "formatListSeparator": ", "
   },
   "generation": {
     "pdfLoadFailed": "Falha ao carregar o PDF, tente novamente",
     "pdfParseFailed": "Falha ao analisar o PDF",
-    "analyzingCourseMaterial": "Analisando documentos",
-    "analyzingCourseMaterialDesc": "Extraindo estrutura e conteúdo do documento...",
     "courseMaterialLoadFailed": "Falha ao carregar o material do curso, tente novamente",
     "courseMaterialParseFailed": "Falha ao analisar o material do curso",
     "streamNotReadable": "Não foi possível ler o fluxo de geração",
@@ -1390,6 +1397,7 @@
     "continue": "Continuar",
     "outlineRetrying": "Problema na geração do roteiro, tentando novamente...",
     "outlineEmptyResponse": "O modelo não retornou roteiros válidos. Verifique a configuração do modelo e tente novamente",
+    "customAgentsUnavailable": "Não foi possível carregar seus agentes personalizados. Tente novamente.",
     "outlineGenerateFailed": "Falha ao gerar roteiro, tente novamente mais tarde",
     "sceneGenerateFailed": "Falha ao gerar cena, tente novamente mais tarde",
     "sceneGenerateAuthFailed": "A geração da cena falhou porque o provedor do modelo rejeitou as credenciais. Verifique a configuração do modelo.",
@@ -1465,12 +1473,19 @@
     "webSearchFailed": "Falha na pesquisa na web",
     "outlinesReadyCount": "{{ready}} / {{total}} seções prontas",
     "jumpToBlankTitle": "Ir para uma seção que ainda precisa de título",
-    "analyzingMediaMaterial": "Analisando áudio/vídeo",
     "failedHint": "Não foi possível criar o curso desta vez. Volte e tente de novo. Se continuar falhando, avise um administrador.",
     "leaveTitle": "Parar a criação do curso?",
     "leaveBody": "Se voltar à página inicial agora, a criação para e você terá que recomeçar.",
     "leaveStay": "Ficar",
-    "modelSettingsUnavailable": "Não foi possível ler as configurações de modelos, então a geração parou. Tente novamente."
+    "modelSettingsUnavailable": "Não foi possível ler as configurações de modelos, então a geração parou. Tente novamente.",
+    "activeRunLimit": "Você já tem o número máximo de cursos sendo gerados. Aguarde um terminar e tente novamente.",
+    "outlineConfirmedElsewhere": "Este roteiro já foi confirmado em outro lugar; suas edições aqui não foram aplicadas.",
+    "outlineAlreadyContinued": "O curso já continuou sendo gerado, então o roteiro não pode mais ser alterado.",
+    "runChangedElsewhere": "A geração já avançou em outro lugar.",
+    "runLoadFailed": "Não foi possível carregar esta geração",
+    "runLoadRetrying": "Tentando novamente…",
+    "mediaGenerationFailed": "Falha ao gerar a mídia",
+    "mediaGenerationDisabled": "Geração desativada"
   },
   "settings": {
     "title": "Configurações",
@@ -2045,7 +2060,7 @@
     "selectAgents": "Selecionar Agentes",
     "noVisionWarning": "O modelo atual não suporta visão. As imagens ainda podem ser colocadas nos slides, mas o modelo não conseguirá entender o conteúdo das imagens para otimizar seleção e layout",
     "serverConfigured": "Servidor",
-    "serverConfiguredNotice": "Este provedor é gerenciado pelo servidor e não pode ser editado aqui. Para usar suas próprias credenciais, adicione um provedor separado.",
+    "serverConfiguredNotice": "Este provedor é gerenciado pelo servidor e não pode ser editado aqui.",
     "optionalOverride": "Opcional — deixe vazio para usar a configuração do servidor",
     "setupNeeded": "Configuração necessária",
     "modelNotConfigured": "Selecione um modelo para começar",
@@ -2128,7 +2143,7 @@
       "capabilities": "Recursos oferecidos",
       "offeredNote": "Modelos oferecidos por este plano. Escolha os que deseja na barra de geração — a disponibilidade depende do nível do seu plano, e modelos não compatíveis darão erro na geração.",
       "statusConnected": "Conectado",
-      "keyStorage": "A chave fica criptografada no servidor e não é exibida novamente. Ao conectar, os modelos recomendados deste plano são aplicados às etapas do curso; se isso substituir modelos que você escolheu, você será consultado antes.",
+      "keyStorage": "A chave fica criptografada no servidor e não é exibida novamente. Ao conectar, os modelos recomendados deste plano são aplicados às etapas do curso; se isso substituir o que uma etapa usa hoje (um modelo que você escolheu ou o padrão do servidor), você será consultado antes.",
       "saveKey": "Salvar e ativar",
       "cancelKeyUpdate": "Cancelar atualização",
       "manageAccount": "Gerenciar conta",
@@ -2150,7 +2165,7 @@
       "stageInteractive": "Interativo",
       "planNoteEditable": "Esta é a configuração padrão; o modelo de cada nó pode ser alterado na configuração de modelos do curso.",
       "applyTitle": "Usar a configuração recomendada deste plano?",
-      "applyBody": "{{name}} recomenda seus próprios modelos para estas etapas, que hoje usam modelos escolhidos por você:",
+      "applyBody": "{{name}} recomenda seus próprios modelos para estas etapas. Usá-los substitui o que cada uma usa hoje, incluindo os padrões do servidor:",
       "applyKeep": "Manter minha configuração",
       "applyRecommended": "Usar a configuração recomendada"
     },
@@ -2218,7 +2233,7 @@
       "unavailableTitle": "Os modelos são gerenciados pelo servidor",
       "unavailableBody": "Este servidor não guarda configurações de modelos por espaço de trabalho; ele usa os modelos configurados pelo administrador.",
       "conflict": "As configurações foram alteradas em outro lugar e recarregadas. Verifique-as e tente novamente.",
-      "lockedNow": "Agora o servidor define isto, então não foi alterado.",
+      "lockedNow": "O administrador fixou isto, então não foi alterado.",
       "unconfirmed": "A resposta do servidor se perdeu, então as configurações foram recarregadas. Verifique se a alteração foi aplicada.",
       "serverOnly": "Somente a configuração do servidor (openmaic.yml) pode configurar este serviço. Fale com o administrador do servidor.",
       "serverOnlyPolicy": "Este servidor não permite que espaços de trabalho adicionem seus próprios serviços. Fale com o administrador do servidor.",
@@ -2249,8 +2264,7 @@
         "off": "Desativado",
         "unassigned": "Não definido",
         "invalid": "Configuração inválida",
-        "locked": "Definido pelo servidor",
-        "lockedHint": "Definido pela configuração do servidor. Não pode ser alterado aqui.",
+        "lockedHint": "O administrador fixou isto para todos neste servidor; não pode ser alterado aqui.",
         "followers": "Etapas que o seguem: {{count}}",
         "childrenFollow": "Tipos de página · todos seguem",
         "childrenOwn": "Tipos de página · {{count}} próprios"
@@ -2259,7 +2273,7 @@
         "label": "Legenda",
         "follows": "Segue o superior",
         "own": "Configuração própria",
-        "locked": "Definido pelo servidor"
+        "locked": "Fixado pelo administrador"
       },
       "map": {
         "label": "Mapa de modelos do curso. Arraste ou use as setas para mover; use os botões de zoom para ampliar ou reduzir.",
@@ -2286,11 +2300,13 @@
         "noFallback": "Nenhum",
         "manageProviders": "Gerenciar em Serviços de modelos",
         "conflict": "As configurações mudaram em outro lugar e foram recarregadas. Confira e tente novamente.",
-        "lockedNow": "O servidor agora define isto, então nada foi alterado.",
+        "lockedNow": "O administrador fixou isto, então não foi alterado.",
         "clear": "Remover configuração própria",
-        "clearHint": "Usar a configuração do servidor, se houver",
+        "clearHint": "Deixa sem definir",
         "unconfirmed": "A resposta do servidor se perdeu, então as configurações foram recarregadas. Verifique se a alteração foi aplicada.",
-        "thinking": "Raciocínio"
+        "thinking": "Raciocínio",
+        "serverDefault": "Padrão do servidor",
+        "resetDefault": "Redefinir para o padrão do servidor"
       },
       "slots": {
         "llm": {
@@ -2368,8 +2384,8 @@
       },
       "source": {
         "inherited": "Segue {{name}}",
-        "deployment": "Servidor",
-        "default": "Padrão do servidor"
+        "default": "Padrão do servidor",
+        "locked": "Fixado pelo administrador"
       },
       "stations": {
         "research": "Pesquisa na web",
@@ -2385,7 +2401,8 @@
         "prompt": "Ainda não há modelo de linguagem. Configure um serviço em Serviços de modelos ou conecte um plano em Token Plan; os modelos dele preenchem as partes sem configuração.",
         "open": "Abrir Serviços de modelos",
         "askAdmin": "Nenhum modelo de linguagem está configurado. Peça ao administrador do servidor para configurar um."
-      }
+      },
+      "adminNotice": "O administrador definiu quais modelos este servidor usa."
     },
     "unimported": {
       "toast": "Algumas configurações de modelos deste navegador não puderam ser movidas para o servidor. Elas estão listadas em Configurações → Serviços de modelo.",
@@ -2407,7 +2424,8 @@
         "unsupported": "Este tipo de provedor personalizado não pode ser movido: adicione-o novamente como endpoint compatível com OpenAI.",
         "unconfirmed": "O servidor não confirmou a importação."
       }
-    }
+    },
+    "serverConfiguredAddOwn": "Para usar suas próprias credenciais, adicione um provedor separado."
   },
   "workspace": {
     "untitledCourse": "Curso sem título",
@@ -2477,6 +2495,13 @@
     "collapseClassroom": "Recolher sala de aula",
     "expandClassroom": "Sala de aula",
     "readOnlyBadge": "Somente leitura",
+    "courseGeneratingTitle": "Este curso ainda está sendo gerado",
+    "coursePausedTitle": "A geração deste curso está pausada",
+    "courseGeneratingDesc": "Ele abrirá aqui automaticamente quando a geração terminar, e então você poderá editá-lo.",
+    "coursePausedDesc": "Uma página não pôde ser gerada. Tente novamente na sala de aula; o curso abrirá aqui quando a geração terminar.",
+    "viewGenerationProgress": "Ver o progresso",
+    "openToRetry": "Abrir para tentar novamente",
+    "courseGeneratingRowHint": "Disponível quando a geração terminar",
     "noCourseTitle": "Nenhum curso aberto",
     "noCourseHint": "Abra por um link de curso na conversa, ou escolha um na lista à esquerda — a conversa fica onde está",
     "resizeChatAria": "Arraste para redimensionar o painel da conversa",

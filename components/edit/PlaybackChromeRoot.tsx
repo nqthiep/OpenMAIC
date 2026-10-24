@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -152,6 +153,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
     } = useStageStore();
     const failedOutlines = useStageStore.use.failedOutlines();
     const generationComplete = useStageStore.use.generationComplete();
+    const generationInterrupted = useStageStore.use.generationInterrupted();
 
     const currentScene = getCurrentScene();
     const piChatEnabled = isPiChatEnabled();
@@ -1431,6 +1433,17 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
       if (!canPickElement) setElementPickActive(false);
     }, [canPickElement, setElementPickActive, whiteboardOpen]);
 
+    // An armed picker belongs to the surface it was armed on. Opening or closing
+    // the whiteboard (student toggle, Teacher action, or runtime visibility) ends
+    // it instead of moving it to the other surface; a selected draft is kept.
+    // Layout timing keeps the destination picker from painting for a frame.
+    const previousWhiteboardOpenRef = useRef(whiteboardOpen);
+    useLayoutEffect(() => {
+      if (previousWhiteboardOpenRef.current === whiteboardOpen) return;
+      previousWhiteboardOpenRef.current = whiteboardOpen;
+      setElementPickActive(false);
+    }, [setElementPickActive, whiteboardOpen]);
+
     useEffect(() => {
       if (showElementReference) return;
       setElementPickActive(false);
@@ -1518,7 +1531,6 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
 
     // whiteboard toggle
     const handleWhiteboardToggle = () => {
-      if (!whiteboardOpen) setElementPickActive(false);
       setWhiteboardOpenManually(!whiteboardOpen);
     };
 
@@ -1777,6 +1789,7 @@ export const PlaybackChromeRoot = forwardRef<PlaybackChromeRootHandle, PlaybackC
               isGenerationFailed={
                 isPendingScene && failedOutlines.some((f) => f.id === generatingOutlines[0]?.id)
               }
+              isGenerationInterrupted={isPendingScene && generationInterrupted}
               onRetryGeneration={
                 onRetryOutline && generatingOutlines[0]
                   ? () => onRetryOutline(generatingOutlines[0].id)

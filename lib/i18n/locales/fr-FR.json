@@ -316,16 +316,16 @@
     "advanced": "Avancé",
     "advancedHint": "Options avancées : modèle, recherche web, images/vidéo, mode interactif, agents. Par défaut, KHAITAM choisit un modèle adapté à votre demande et ajoute des illustrations et des activités interactives.",
     "modelChangeFailed": "Impossible de changer de modèle : {{message}}",
-    "modelLockedHint": "Le modèle utilisé pour les cours, défini par ce serveur",
     "pickModel": "Choisir un modèle",
-    "defaultModel": "Par défaut",
     "defaultModelNote": "Modifie le modèle par défaut ; les étapes configurées séparément gardent le leur.",
-    "stagesSetSeparately": "{{count}} étapes configurées séparément",
-    "stagesSetSeparately_one": "{{count}} étape configurée séparément",
-    "stagesSetSeparately_other": "{{count}} étapes configurées séparément",
-    "stagesSetSeparatelyHint": "Étapes avec leur propre modèle",
-    "perStageSetup": "Configuration par étape",
-    "perStageSetupHint": "Chaque étape du cours a son propre modèle"
+    "materialUploading": "Envoi {{percent}} %",
+    "materialParsing": "Analyse…",
+    "materialTranscribing": "Transcription…",
+    "materialReady": "Prêt",
+    "materialFailed": "Échec",
+    "materialRetry": "Réessayer",
+    "materialMediaLabel": "Audio/vidéo",
+    "materialUnavailable": "Ce support n'est plus disponible. Retirez-le et joignez à nouveau le fichier."
   },
   "export": {
     "pptx": "Exporter en PPTX",
@@ -533,6 +533,7 @@
     "generating": "Génération…",
     "paused": "En pause",
     "generationFailed": "Échec de la génération",
+    "generationInterrupted": "La génération a été interrompue",
     "confirmSwitchTitle": "Changer de scène",
     "confirmSwitchMessage": "Un sujet est en cours. Changer de scène mettra fin au sujet actuel. Confirmez-vous ?",
     "generatingNextPage": "La scène est en cours de génération, veuillez patienter…",
@@ -1338,6 +1339,10 @@
     "notFound": "Cours introuvable",
     "notFoundDesc": "Ce cours n’existe pas, a été supprimé, ou vous n’avez pas l’autorisation de le voir.",
     "backToHome": "Retour à l’accueil",
+    "runOutlining": "Création du plan…",
+    "runAwaitingConfirmation": "En attente de confirmation",
+    "runGenerating": "Génération {{completed}}/{{total}}",
+    "runPaused": "En pause",
     "loadFailed": "Le stockage est indisponible. Impossible de charger les classes enregistrées.",
     "deleteFailed": "Échec de la suppression de la classe",
     "privateHint": "Les cours que vous créez sont privés. Pour qu'un autre membre en voie un, ouvrez-le et utilisez « Partager avec les membres ».",
@@ -1353,14 +1358,16 @@
     "courseMaterialCountLimit": "Vous pouvez envoyer jusqu’à 5 supports de cours",
     "courseMaterialTotalSizeLimit": "La taille totale des supports de cours doit rester sous 150 Mo",
     "unsupportedCourseMaterial": "{{parser}} ne prend pas en charge ce type de fichier. Formats pris en charge : {{formats}}",
+    "unsupportedMaterialFormat": "Ce format n’est pas pris en charge par l’extracteur actuel. Changez d’extracteur ou choisissez un autre fichier.",
+    "materialQuotaExceeded": "Votre espace de stockage des supports est plein. Supprimez des supports et réessayez.",
+    "materialUploadFailed": "Échec de l'envoi de {{name}}. Veuillez réessayer.",
+    "materialTooLarge": "{{name}} est trop volumineux : un support peut faire au plus {{size}}.",
     "courseMaterialFormats": "Formats pris en charge : {{formats}} — jusqu’à {{size}} Mo par fichier",
     "formatListSeparator": ", "
   },
   "generation": {
     "pdfLoadFailed": "Échec du chargement du fichier PDF, veuillez réessayer",
     "pdfParseFailed": "Échec de l’analyse du PDF",
-    "analyzingCourseMaterial": "Analyse des documents",
-    "analyzingCourseMaterialDesc": "Extraction de la structure et du contenu des documents…",
     "courseMaterialLoadFailed": "Échec du chargement du support de cours, veuillez réessayer",
     "courseMaterialParseFailed": "Échec de l’analyse du support de cours",
     "streamNotReadable": "Impossible de lire le flux de génération",
@@ -1390,6 +1397,7 @@
     "continue": "Continuer",
     "outlineRetrying": "Problème lors de la génération du plan, nouvelle tentative…",
     "outlineEmptyResponse": "Le modèle n’a renvoyé aucun plan valide. Vérifiez sa configuration et réessayez",
+    "customAgentsUnavailable": "Impossible de charger vos agents personnalisés. Veuillez réessayer.",
     "outlineGenerateFailed": "Échec de la génération du plan, veuillez réessayer plus tard",
     "sceneGenerateFailed": "Échec de la génération de la scène, veuillez réessayer plus tard",
     "sceneGenerateAuthFailed": "La génération de la scène a échoué : le fournisseur de modèle a rejeté les identifiants. Vérifiez la configuration de votre modèle.",
@@ -1465,12 +1473,19 @@
     "webSearchFailed": "Échec de la recherche web",
     "outlinesReadyCount": "{{ready}} / {{total}} sections prêtes",
     "jumpToBlankTitle": "Aller à une section dont le titre manque encore",
-    "analyzingMediaMaterial": "Analyse de l’audio et de la vidéo",
     "failedHint": "Le cours n'a pas pu être créé cette fois. Revenez en arrière et réessayez. Si l'échec persiste, prévenez un administrateur.",
     "leaveTitle": "Arrêter la création du cours ?",
     "leaveBody": "Si vous retournez à l'accueil maintenant, la création s'arrête et vous devrez recommencer.",
     "leaveStay": "Rester",
-    "modelSettingsUnavailable": "Les réglages des modèles n'ont pas pu être lus : la génération s'est arrêtée. Réessayez."
+    "modelSettingsUnavailable": "Les réglages des modèles n'ont pas pu être lus : la génération s'est arrêtée. Réessayez.",
+    "activeRunLimit": "Le nombre maximal de cours en cours de génération est atteint. Attendez qu'un cours se termine, puis réessayez.",
+    "outlineConfirmedElsewhere": "Ce plan a déjà été confirmé ailleurs ; vos modifications ici n'ont pas été appliquées.",
+    "outlineAlreadyContinued": "La génération du cours a déjà repris : le plan ne peut plus être modifié.",
+    "runChangedElsewhere": "La génération a déjà avancé ailleurs.",
+    "runLoadFailed": "Impossible de charger cette génération",
+    "runLoadRetrying": "Nouvelle tentative…",
+    "mediaGenerationFailed": "Échec de la génération du média",
+    "mediaGenerationDisabled": "Génération désactivée"
   },
   "settings": {
     "title": "Paramètres",
@@ -2045,7 +2060,7 @@
     "selectAgents": "Choisir les agents",
     "noVisionWarning": "Le modèle actuel ne prend pas en charge la vision. Les images peuvent toujours être placées dans les diapositives, mais le modèle ne peut pas en comprendre le contenu pour en optimiser le choix et la mise en page",
     "serverConfigured": "Serveur",
-    "serverConfiguredNotice": "Ce fournisseur est géré par le serveur et ne peut pas être modifié ici. Pour utiliser vos propres identifiants, ajoutez un fournisseur distinct.",
+    "serverConfiguredNotice": "Ce fournisseur est géré par le serveur et ne peut pas être modifié ici.",
     "optionalOverride": "Facultatif : laissez vide pour utiliser la configuration du serveur",
     "setupNeeded": "Configuration requise",
     "modelNotConfigured": "Veuillez choisir un modèle pour commencer",
@@ -2128,7 +2143,7 @@
       "capabilities": "Capacités proposées",
       "offeredNote": "Modèles proposés par ce forfait. Choisissez ceux que vous voulez voir dans la barre de génération : leur disponibilité dépend de votre niveau de forfait, et les modèles non pris en charge produiront une erreur au moment de la génération.",
       "statusConnected": "Connecté",
-      "keyStorage": "La clé est conservée chiffrée sur le serveur et n'est plus jamais affichée. La connexion applique aux étapes du cours les modèles recommandés par cette offre ; si cela remplace des modèles que vous avez choisis, une confirmation vous est demandée.",
+      "keyStorage": "La clé est conservée chiffrée sur le serveur et n'est plus jamais affichée. La connexion applique aux étapes du cours les modèles recommandés par cette offre ; si cela remplace ce qu’une étape utilise actuellement (un modèle que vous avez choisi ou le défaut du serveur), une confirmation vous est demandée.",
       "saveKey": "Enregistrer et activer",
       "cancelKeyUpdate": "Annuler la mise à jour",
       "manageAccount": "Gérer le compte",
@@ -2150,7 +2165,7 @@
       "stageInteractive": "Interactif",
       "planNoteEditable": "Ceci est la configuration par défaut ; le modèle de chaque nœud peut être modifié dans la configuration des modèles de cours.",
       "applyTitle": "Utiliser la configuration recommandée de cette offre ?",
-      "applyBody": "{{name}} recommande ses propres modèles pour ces étapes, qui utilisent actuellement des modèles que vous avez choisis :",
+      "applyBody": "{{name}} recommande ses propres modèles pour ces étapes. Les utiliser remplace ce que chacune utilise actuellement, défauts du serveur compris :",
       "applyKeep": "Garder ma configuration",
       "applyRecommended": "Utiliser la configuration recommandée"
     },
@@ -2218,7 +2233,7 @@
       "unavailableTitle": "Les modèles sont gérés par le serveur",
       "unavailableBody": "Ce serveur ne conserve pas de paramètres de modèles par espace de travail ; il utilise les modèles configurés par son administrateur.",
       "conflict": "Les paramètres ont été modifiés ailleurs et rechargés. Vérifiez-les puis réessayez.",
-      "lockedNow": "Ce réglage est désormais défini par le serveur ; il n'a pas été modifié.",
+      "lockedNow": "L’administrateur l’a fixé, il n’a donc pas été modifié.",
       "unconfirmed": "La réponse du serveur a été perdue ; les paramètres ont été rechargés. Vérifiez si la modification a été prise en compte.",
       "serverOnly": "Seule la configuration du serveur (openmaic.yml) peut configurer ce service. Contactez l'administrateur du serveur.",
       "serverOnlyPolicy": "Ce serveur ne permet pas aux espaces de travail d'ajouter leurs propres services. Contactez l'administrateur du serveur.",
@@ -2249,8 +2264,7 @@
         "off": "Désactivé",
         "unassigned": "Non défini",
         "invalid": "Réglage invalide",
-        "locked": "Défini par le serveur",
-        "lockedHint": "Défini par la configuration du serveur. Impossible de le modifier ici.",
+        "lockedHint": "L’administrateur l’a fixé pour tous sur ce serveur ; il ne peut pas être modifié ici.",
         "followers": "Étapes qui le suivent : {{count}}",
         "childrenFollow": "Types de page · tous suivent",
         "childrenOwn": "Types de page · {{count}} propres"
@@ -2259,7 +2273,7 @@
         "label": "Légende",
         "follows": "Suit le parent",
         "own": "Réglage propre",
-        "locked": "Défini par le serveur"
+        "locked": "Fixé par l’administrateur"
       },
       "map": {
         "label": "Carte des modèles du cours. Faites glisser ou utilisez les flèches pour vous déplacer, et les boutons de zoom pour zoomer.",
@@ -2286,11 +2300,13 @@
         "noFallback": "Aucun",
         "manageProviders": "Gérer dans les services de modèles",
         "conflict": "Les réglages ont été modifiés ailleurs et rechargés. Vérifiez-les puis réessayez.",
-        "lockedNow": "Le serveur définit désormais ce réglage ; rien n’a été modifié.",
+        "lockedNow": "L’administrateur l’a fixé, il n’a donc pas été modifié.",
         "clear": "Retirer le réglage propre",
-        "clearHint": "Utiliser le réglage du serveur, s’il en a un",
+        "clearHint": "Le laisse non défini",
         "unconfirmed": "La réponse du serveur a été perdue ; les réglages ont été rechargés. Vérifiez si la modification a été prise en compte.",
-        "thinking": "Réflexion"
+        "thinking": "Réflexion",
+        "serverDefault": "Défaut du serveur",
+        "resetDefault": "Rétablir le défaut du serveur"
       },
       "slots": {
         "llm": {
@@ -2368,8 +2384,8 @@
       },
       "source": {
         "inherited": "Suit {{name}}",
-        "deployment": "Serveur",
-        "default": "Défaut du serveur"
+        "default": "Défaut du serveur",
+        "locked": "Fixé par l’administrateur"
       },
       "stations": {
         "research": "Recherche web",
@@ -2385,7 +2401,8 @@
         "prompt": "Aucun modèle de langage pour l'instant. Configurez un service dans Services de modèles ou connectez une offre dans Token Plan ; ses modèles remplissent les parties non définies.",
         "open": "Ouvrir les services de modèles",
         "askAdmin": "Aucun modèle de langage n'est configuré. Demandez à l'administrateur du serveur d'en configurer un."
-      }
+      },
+      "adminNotice": "L’administrateur a choisi les modèles utilisés par ce serveur."
     },
     "unimported": {
       "toast": "Certains réglages de modèles de ce navigateur n'ont pas pu être transférés sur le serveur. Ils sont listés dans Paramètres → Services de modèles.",
@@ -2407,7 +2424,8 @@
         "unsupported": "Ce type de fournisseur personnalisé ne peut pas être transféré : ajoutez-le à nouveau comme point de terminaison compatible OpenAI.",
         "unconfirmed": "Le serveur n'a pas confirmé l'importation."
       }
-    }
+    },
+    "serverConfiguredAddOwn": "Pour utiliser vos propres identifiants, ajoutez un fournisseur distinct."
   },
   "workspace": {
     "untitledCourse": "Cours sans titre",
@@ -2477,6 +2495,13 @@
     "collapseClassroom": "Réduire la salle de classe",
     "expandClassroom": "Salle de classe",
     "readOnlyBadge": "Lecture seule",
+    "courseGeneratingTitle": "Ce cours est encore en cours de génération",
+    "coursePausedTitle": "La génération de ce cours est en pause",
+    "courseGeneratingDesc": "Il s'ouvrira ici automatiquement à la fin de la génération ; vous pourrez alors le modifier.",
+    "coursePausedDesc": "Une page n'a pas pu être générée. Relancez-la dans la classe ; le cours s'ouvrira ici à la fin de la génération.",
+    "viewGenerationProgress": "Voir la progression",
+    "openToRetry": "Ouvrir pour relancer",
+    "courseGeneratingRowHint": "Disponible à la fin de la génération",
     "noCourseTitle": "Aucun cours ouvert",
     "noCourseHint": "Ouvrez-en un depuis un lien de cours dans la conversation, ou choisissez-en un dans la liste à gauche — la conversation reste en place",
     "resizeChatAria": "Faites glisser pour redimensionner le panneau de conversation",

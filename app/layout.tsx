@@ -12,6 +12,7 @@ import { defaultLocale } from '@/lib/i18n/types';
 import { ThemeProvider } from '@/lib/hooks/use-theme';
 import { I18nProvider } from '@/lib/hooks/use-i18n';
 import { Toaster } from '@/components/ui/sonner';
+import { AgentRegistryInit } from '@/components/agent-registry-init';
 import { ModelSettingsInit } from '@/components/model-settings-init';
 import { StorageHealthNotice } from '@/components/storage-health-notice';
 import { AccessCodeGuard } from '@/components/access-code-guard';
@@ -82,6 +83,7 @@ export default function RootLayout({
         <ThemeProvider>
           <I18nProvider>
             <ModelSettingsInit />
+            <AgentRegistryInit />
             <ProSwapWatcher />
             <AccessCodeGuard>{children}</AccessCodeGuard>
             <Toaster position="top-center" />

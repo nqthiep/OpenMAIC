@@ -53,8 +53,6 @@ import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Voice Registration API');
 
-export const maxDuration = 30;
-
 /**
  * Largest voice-registration request body, refused before it is buffered. The
  * body may carry a reference audio clip as base64.

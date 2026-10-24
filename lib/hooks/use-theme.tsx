@@ -15,8 +15,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   // Dark unless the visitor chose otherwise (`THEME_INIT_SCRIPT` applies it before the first paint).
   const [theme, setThemeState] = useState<Theme>('dark');
-  const [hydrated, setHydrated] = useState(false);
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light');
+  // The document already carries the stored theme (the layout's pre-paint
+  // script); it is not touched until the stored theme has been read here, or
+  // the defaults above would flash a dark page light.
+  const [loaded, setLoaded] = useState(false);
 
   const resolvedTheme = theme === 'system' ? systemTheme : theme;
 
@@ -28,21 +31,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setThemeState(stored);
     }
     setSystemTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    setHydrated(true);
+    setLoaded(true);
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   // Apply theme to document
   // Not before the saved choice is read, or a visitor who chose light would see a dark flash.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!loaded) return;
     const root = document.documentElement;
     if (resolvedTheme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-  }, [resolvedTheme, hydrated]);
+  }, [loaded, resolvedTheme]);
 
   // Listen to system theme changes
   useEffect(() => {

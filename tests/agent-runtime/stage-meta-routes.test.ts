@@ -22,26 +22,30 @@ vi.mock('@/lib/server/identity/resolve', async () =>
 vi.mock('@/lib/server/authz/viewer', () => ({
   canReadStageDocument: mocks.canRead,
 }));
-vi.mock('@/lib/persistence/server-provider', () => ({
-  getServerPersistenceProvider: async () => ({
-    pool: {
-      query: vi.fn(async (text: string) => {
-        if (text.includes('UPDATE stage_meta')) {
-          return { rows: mocks.updatedRows };
-        }
-        if (text.includes('LEFT JOIN stage_meta')) {
-          if (!mocks.accessRow) return { rows: [] };
-          return { rows: [mocks.accessRow] };
-        }
-        return { rows: [] };
-      }),
-      connect: vi.fn(async () => ({
-        query: vi.fn(),
-        release: vi.fn(),
-      })),
-    },
-  }),
-}));
+vi.mock('@/lib/persistence/server-provider', () => {
+  const pool = {
+    query: vi.fn(async (text: string) => {
+      if (text.includes('UPDATE stage_meta')) {
+        return { rows: mocks.updatedRows };
+      }
+      if (text.includes('LEFT JOIN stage_meta')) {
+        if (!mocks.accessRow) return { rows: [] };
+        return { rows: [mocks.accessRow] };
+      }
+      return { rows: [] };
+    }),
+    connect: vi.fn(async () => ({
+      query: vi.fn(),
+      release: vi.fn(),
+    })),
+  };
+  return {
+    getServerPersistenceProvider: async () => ({
+      pool,
+      withTransaction: async (body: (queryable: typeof pool) => Promise<unknown>) => body(pool),
+    }),
+  };
+});
 
 import { GET as getStageMeta } from '@/app/api/stage-meta/[stageId]/route';
 import { GET as getStatus } from '@/app/api/stages/[id]/status/route';

@@ -56,8 +56,6 @@ import { readBoundedJson } from '@/lib/server/bounded-json';
 
 const log = createLogger('Pi Chat API');
 
-export const maxDuration = 300;
-
 /**
  * Largest chat request body, refused before it is buffered. The client sends
  * the message history, which may carry attached images as data URLs.

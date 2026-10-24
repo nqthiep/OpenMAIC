@@ -30,8 +30,6 @@ import { findUnsafeNetworkTargetError, validatePublicUrlForSSRF } from '@/lib/se
 const TRANSCRIPTION_FAILURE_TEXT = 'The transcription service could not complete this request.';
 const log = createLogger('Transcription');
 
-export const maxDuration = 60;
-
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;

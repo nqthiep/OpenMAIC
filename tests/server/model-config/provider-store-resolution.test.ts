@@ -210,7 +210,7 @@ describe('resolveModel over the provider store', () => {
       },
     });
     const { lookupSlot } = await import('@/lib/server/model-config/runtime');
-    const agent = (await lookupSlot('agent', 'user:alice')).configured;
+    const agent = await lookupSlot('agent', 'user:alice');
     expect(agent).toMatchObject({
       status: 'assigned',
       providerId: 'omniroute',
@@ -225,7 +225,6 @@ describe('resolveModel over the provider store', () => {
       routes: { 'scene-content': 'openai:gpt-5.4' },
     });
     // No driver route: the agent is off, not the default model.
-    expect((await lookupSlot('agent', 'user:alice')).configured.status).toBe('disabled');
-    expect((await lookupSlot('agent', 'user:alice')).defaults().status).not.toBe('assigned');
+    expect((await lookupSlot('agent', 'user:alice')).status).toBe('disabled');
   });
 });

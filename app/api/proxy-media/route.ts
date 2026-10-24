@@ -23,8 +23,6 @@ import { describeUnexpectedError } from '@/lib/server/error-summary';
 
 const log = createLogger('ProxyMedia');
 
-export const maxDuration = 60;
-
 export async function POST(request: NextRequest) {
   // An open fetch for any URL is for signed-in accounts only. The SSRF guard below still applies.
   const denied = await requireSignedIn(request.headers);

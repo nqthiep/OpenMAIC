@@ -118,20 +118,16 @@ describe('generate image — client-supplied base URL guard applies in every env
     );
   });
 
-  it("applies the request's model to the server's default provider, as before slots", async () => {
+  it("ignores the request's model: the server's saved configuration decides (decision D3)", async () => {
     useProviders({ image: { 'openai-image': { apiKey: 'server-key' } } });
     const { POST } = await import('@/app/api/generate/image/route');
 
     const res = await POST(imageRequest({ 'x-image-model': 'gpt-image-1' }));
     expect(res.status).toBe(200);
+    // The provider's first catalogue model, not the one the request named.
     expect(mocks.generateImage).toHaveBeenCalledWith(
-      expect.objectContaining({ providerId: 'openai-image', model: 'gpt-image-1' }),
+      expect.objectContaining({ providerId: 'openai-image', model: 'gpt-image-2' }),
       expect.anything(),
     );
-
-    // Without one, the default provider still needs a model.
-    const missing = await POST(imageRequest());
-    expect(missing.status).toBe(400);
-    expect(await missing.json()).toMatchObject({ errorCode: 'MISSING_MODEL' });
   });
 });

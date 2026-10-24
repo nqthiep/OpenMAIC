@@ -316,16 +316,16 @@
     "advanced": "Advanced",
     "advancedHint": "Advanced options: model, web search, images/video, interactive mode, agents. By default KHAITAM picks a model that fits your request and adds illustrations and interactive activities.",
     "modelChangeFailed": "Could not change the model: {{message}}",
-    "modelLockedHint": "The model courses use, set by this server",
     "pickModel": "Pick a model",
-    "defaultModel": "Default",
     "defaultModelNote": "Changes the default model; stages set separately keep their own.",
-    "stagesSetSeparately": "{{count}} stages set separately",
-    "stagesSetSeparately_one": "{{count}} stage set separately",
-    "stagesSetSeparately_other": "{{count}} stages set separately",
-    "stagesSetSeparatelyHint": "Stages with their own model",
-    "perStageSetup": "Per-stage setup",
-    "perStageSetupHint": "Every course stage has its own model"
+    "materialUploading": "Uploading {{percent}}%",
+    "materialParsing": "Parsing…",
+    "materialTranscribing": "Transcribing…",
+    "materialReady": "Ready",
+    "materialFailed": "Failed",
+    "materialRetry": "Retry",
+    "materialMediaLabel": "Audio/video",
+    "materialUnavailable": "This material is no longer available. Remove it and attach the file again."
   },
   "export": {
     "pptx": "Export PPTX",
@@ -533,6 +533,7 @@
     "generating": "Generating...",
     "paused": "Paused",
     "generationFailed": "Generation failed",
+    "generationInterrupted": "Generation was interrupted",
     "confirmSwitchTitle": "Switch Scene",
     "confirmSwitchMessage": "A topic is currently in progress. Switching scenes will end the current topic. Are you sure?",
     "generatingNextPage": "Scene is being generated, please wait...",
@@ -1338,6 +1339,10 @@
     "notFound": "Course not found",
     "notFoundDesc": "This course does not exist, has been deleted, or you do not have access to it.",
     "backToHome": "Back to home",
+    "runOutlining": "Outlining…",
+    "runAwaitingConfirmation": "Waiting for confirmation",
+    "runGenerating": "Generating {{completed}}/{{total}}",
+    "runPaused": "Paused",
     "loadFailed": "Persistence is unavailable. Saved classrooms could not be loaded.",
     "deleteFailed": "Failed to delete classroom",
     "privateHint": "The courses you create are private. To let other members see one, open it and use \"Share with members\".",
@@ -1353,14 +1358,16 @@
     "courseMaterialCountLimit": "You can upload up to 5 course material files",
     "courseMaterialTotalSizeLimit": "Total course material size must be under 150MB",
     "unsupportedCourseMaterial": "{{parser}} can't read this file type. Supported: {{formats}}",
+    "unsupportedMaterialFormat": "This format isn't supported by the current extractor. Switch the extractor or pick a different file.",
+    "materialQuotaExceeded": "Your material storage is full. Delete some materials and try again.",
+    "materialUploadFailed": "Uploading {{name}} failed. Please try again.",
+    "materialTooLarge": "{{name}} is too large: a material can be at most {{size}}.",
     "courseMaterialFormats": "Supports {{formats}} — up to {{size}}MB per file",
     "formatListSeparator": ", "
   },
   "generation": {
     "pdfLoadFailed": "Failed to load PDF file, please try again",
     "pdfParseFailed": "PDF parsing failed",
-    "analyzingCourseMaterial": "Analyzing documents",
-    "analyzingCourseMaterialDesc": "Extracting document structure and content...",
     "courseMaterialLoadFailed": "Failed to load course material, please try again",
     "courseMaterialParseFailed": "Course material parsing failed",
     "streamNotReadable": "Unable to read generation stream",
@@ -1390,6 +1397,7 @@
     "continue": "Continue",
     "outlineRetrying": "Outline generation issue, retrying...",
     "outlineEmptyResponse": "Model returned no valid outlines. Please check model configuration and try again",
+    "customAgentsUnavailable": "Your custom agents could not be loaded. Please try again.",
     "outlineGenerateFailed": "Outline generation failed, please try again later",
     "sceneGenerateFailed": "Scene generation failed, please try again later",
     "sceneGenerateAuthFailed": "Scene generation failed because the model provider rejected the credentials. Please check your model configuration.",
@@ -1465,12 +1473,19 @@
     "webSearchFailed": "Web search failed",
     "outlinesReadyCount": "{{ready}} / {{total}} sections ready",
     "jumpToBlankTitle": "Jump to a section that still needs a title",
-    "analyzingMediaMaterial": "Analyzing audio/video",
     "failedHint": "The course could not be created this time. Go back and try again. If it keeps failing, tell an administrator.",
     "leaveTitle": "Stop creating the course?",
     "leaveBody": "If you go to the home page now, creation stops and you will have to start again.",
     "leaveStay": "Stay",
-    "modelSettingsUnavailable": "The model settings could not be read, so generation stopped. Please try again."
+    "modelSettingsUnavailable": "The model settings could not be read, so generation stopped. Please try again.",
+    "activeRunLimit": "You already have the maximum number of courses generating. Wait for one to finish and try again.",
+    "outlineConfirmedElsewhere": "This outline was already confirmed elsewhere; your edits here were not applied.",
+    "outlineAlreadyContinued": "This course already continued generating, so the outline can no longer be changed.",
+    "runChangedElsewhere": "The generation already moved on elsewhere.",
+    "runLoadFailed": "Couldn't load this generation",
+    "runLoadRetrying": "Trying again…",
+    "mediaGenerationFailed": "Media generation failed",
+    "mediaGenerationDisabled": "Generation disabled"
   },
   "settings": {
     "title": "Settings",
@@ -2045,7 +2060,7 @@
     "selectAgents": "Select Agents",
     "noVisionWarning": "Current model does not support vision. Images can still be placed in slides, but the model cannot understand image content to optimize selection and layout",
     "serverConfigured": "Server",
-    "serverConfiguredNotice": "This provider is managed by the server and can't be edited here. To use your own credentials, add a separate provider.",
+    "serverConfiguredNotice": "This provider is managed by the server and can't be edited here.",
     "optionalOverride": "Optional — leave empty to use server config",
     "setupNeeded": "Setup required",
     "modelNotConfigured": "Please select a model to get started",
@@ -2128,7 +2143,7 @@
       "capabilities": "Capabilities offered",
       "offeredNote": "Models offered by this plan. Pick the ones you want on the generation bar — availability depends on your plan tier, and unsupported models will error at generation time.",
       "statusConnected": "Connected",
-      "keyStorage": "The key is kept on the server, encrypted, and never shown again. Connecting applies this plan’s recommended models to the course stages; if that would replace models you picked, you are asked first.",
+      "keyStorage": "The key is kept on the server, encrypted, and never shown again. Connecting applies this plan’s recommended models to the course stages; if that would replace what a stage uses now (a model you picked or the server’s default), you are asked first.",
       "saveKey": "Save & enable",
       "cancelKeyUpdate": "Cancel update",
       "manageAccount": "Manage account",
@@ -2150,7 +2165,7 @@
       "stageInteractive": "Interactive",
       "planNoteEditable": "This is the default setup; each node's model can be changed in Course Model Config.",
       "applyTitle": "Use this plan’s recommended setup?",
-      "applyBody": "{{name}} recommends its own models for these stages, which currently use models you picked:",
+      "applyBody": "{{name}} recommends its own models for these stages. Using them replaces what each one uses now, the server's defaults included:",
       "applyKeep": "Keep my current setup",
       "applyRecommended": "Use plan’s recommended setup"
     },
@@ -2218,7 +2233,7 @@
       "unavailableTitle": "Models are managed by the server",
       "unavailableBody": "This server does not keep model settings per workspace, so it uses the models its administrator configured.",
       "conflict": "The settings changed elsewhere and were reloaded. Check them and try again.",
-      "lockedNow": "The server now sets this, so it was not changed.",
+      "lockedNow": "The administrator has fixed this, so it was not changed.",
       "unconfirmed": "The server's answer was lost, so the settings were reloaded. Check whether the change took effect.",
       "serverOnly": "Only the server's configuration (openmaic.yml) can set up this service. Ask the server's administrator.",
       "serverOnlyPolicy": "This server does not let workspaces add their own services. Ask the server's administrator.",
@@ -2249,8 +2264,7 @@
         "off": "Off",
         "unassigned": "Not set",
         "invalid": "Invalid setting",
-        "locked": "Set by the server",
-        "lockedHint": "Set by the server's configuration. It cannot be changed here.",
+        "lockedHint": "The administrator fixed this for everyone on this server; it cannot be changed here.",
         "followers": "Parts following it: {{count}}",
         "childrenFollow": "Page types · all follow",
         "childrenOwn": "Page types · {{count}} own"
@@ -2259,7 +2273,7 @@
         "label": "Legend",
         "follows": "Follows parent",
         "own": "Own setting",
-        "locked": "Set by the server"
+        "locked": "Fixed by the administrator"
       },
       "map": {
         "label": "Course model map. Drag or use the arrow keys to pan; use the zoom controls to zoom.",
@@ -2286,11 +2300,13 @@
         "noFallback": "None",
         "manageProviders": "Manage in Model Services",
         "conflict": "The settings changed elsewhere and were reloaded. Check them and try again.",
-        "lockedNow": "The server now sets this, so it was not changed.",
+        "lockedNow": "The administrator has fixed this, so it was not changed.",
         "clear": "Clear own setting",
-        "clearHint": "Use the server's setting, if it has one",
+        "clearHint": "Leaves it not set",
         "unconfirmed": "The server's answer was lost, so the settings were reloaded. Check whether the change took effect.",
-        "thinking": "Thinking"
+        "thinking": "Thinking",
+        "serverDefault": "Server default",
+        "resetDefault": "Reset to server default"
       },
       "slots": {
         "llm": {
@@ -2368,8 +2384,8 @@
       },
       "source": {
         "inherited": "Follows {{name}}",
-        "deployment": "Server",
-        "default": "Server default"
+        "default": "Server default",
+        "locked": "Fixed by the administrator"
       },
       "stations": {
         "research": "Web research",
@@ -2385,7 +2401,8 @@
         "prompt": "No language model yet. Set up a service in Model Services or connect a plan in Token Plan; its models fill the parts that are not set.",
         "open": "Open Model Services",
         "askAdmin": "No language model is configured. Ask the server's administrator to set one up."
-      }
+      },
+      "adminNotice": "The administrator set up which models this server uses."
     },
     "unimported": {
       "toast": "Some model settings from this browser could not be moved to the server. They are listed in Settings → Model Services.",
@@ -2407,7 +2424,8 @@
         "unsupported": "This kind of custom provider cannot be moved: add it again as an OpenAI-compatible endpoint.",
         "unconfirmed": "The server did not confirm that it was imported."
       }
-    }
+    },
+    "serverConfiguredAddOwn": "To use your own credentials, add a separate provider."
   },
   "workspace": {
     "untitledCourse": "Untitled course",
@@ -2477,6 +2495,13 @@
     "collapseClassroom": "Collapse classroom",
     "expandClassroom": "Classroom",
     "readOnlyBadge": "Read-only",
+    "courseGeneratingTitle": "This course is still being generated",
+    "coursePausedTitle": "Generation of this course is paused",
+    "courseGeneratingDesc": "It opens here automatically when generation completes, and you can edit it then.",
+    "coursePausedDesc": "A page failed to generate. Retry it in the classroom; the course opens here once generation completes.",
+    "viewGenerationProgress": "View generation progress",
+    "openToRetry": "Open to retry",
+    "courseGeneratingRowHint": "Available once generation completes",
     "noCourseTitle": "No course open",
     "noCourseHint": "Open one from a course link in the conversation, or pick one from the list on the left — the conversation stays put",
     "resizeChatAria": "Drag to resize the conversation pane",

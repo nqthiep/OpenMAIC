@@ -32,12 +32,10 @@ afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-const POLICY = { allowWorkspaceProviders: false };
-
 describe('loadDeploymentLayer over the provider store', () => {
   it('has no layer when nothing is configured', () => {
     useProviders({});
-    expect(loadDeploymentLayer()).toEqual({ layer: null, defaults: null, notices: [] });
+    expect(loadDeploymentLayer()).toEqual({ layer: null, legacy: false, notices: [] });
   });
 
   it('answers "not ready" while a configured database has not been read', () => {
@@ -45,23 +43,22 @@ describe('loadDeploymentLayer over the provider store', () => {
     expect(() => loadDeploymentLayer()).toThrow(ProviderConfigNotReady);
   });
 
-  it('declares the saved providers, and the default model locks nothing', () => {
+  it('declares the saved providers, and the default model is a server default that locks nothing', () => {
     useProviders({
       providers: { openai: { apiKey: 'sk-openai' } },
       defaultModel: 'openai:gpt-5.6',
     });
-    const { layer, defaults, stageLayers } = loadDeploymentLayer();
+    const { layer, stageLayers } = loadDeploymentLayer();
+    // Only an administrator configures providers (D3): users may not add keys of their own.
     expect(layer).toEqual({
       source: 'deployment',
       config: {
         providers: { openai: { preset: 'openai', apiKey: 'sk-openai' } },
-        policy: POLICY,
+        slots: { llm: 'openai:gpt-5.6', agent: null },
+        allowUserKeys: false,
       },
     });
-    expect(defaults).toEqual({
-      source: 'default',
-      config: { slots: { llm: 'openai:gpt-5.6', agent: null } },
-    });
+    expect(layer?.config.lock).toBeUndefined();
     expect(stageLayers).toBeUndefined();
   });
 
@@ -69,9 +66,8 @@ describe('loadDeploymentLayer over the provider store', () => {
     useProviders({ providers: { openai: { apiKey: 'sk-openai' } } });
     vi.stubEnv('DEFAULT_MODEL', 'openai:gpt-5.6');
     vi.stubEnv('MODEL_ROUTES', '{"scene-content":{"model":"openai:gpt-5.6"}}');
-    const { layer, defaults } = loadDeploymentLayer();
+    const { layer } = loadDeploymentLayer();
     expect(layer?.config.slots).toBeUndefined();
-    expect(defaults).toBeNull();
   });
 
   it('turns each stage route into the assignment of its slot, in the deployment layer', () => {
@@ -81,15 +77,20 @@ describe('loadDeploymentLayer over the provider store', () => {
         'scene-content': { model: 'openai:gpt-5.4', thinking: { effort: 'high' } },
         'scene-content:quiz': 'openai:gpt-5.4-mini',
         'scene-outlines-stream': 'omniroute:auto/best-chat',
-        'generate-classroom': 'openai:gpt-5.6',
       },
     });
     const { layer } = loadDeploymentLayer();
+    // The routes are fixed for everyone; the default model is not.
+    expect([...(layer?.config.lock as string[])].sort()).toEqual([
+      'agent',
+      'course.content',
+      'course.content.quiz',
+      'course.outline',
+    ]);
     expect(layer?.config.slots).toEqual({
       'course.content': { model: 'openai:gpt-5.4', thinking: { effort: 'high' } },
       'course.content.quiz': 'openai:gpt-5.4-mini',
       'course.outline': 'omniroute:auto/best-chat',
-      llm: 'openai:gpt-5.6',
       // Without a route of its own the agent stays off, not the `llm` root's model.
       agent: null,
     });
@@ -204,7 +205,7 @@ describe('openmaic.yml over the provider store', () => {
     vi.stubEnv('OPENMAIC_CONFIG', 'custom.yml');
     expect(loadDeploymentLayer()).toEqual({
       layer: { source: 'deployment', config: { slots: { video: null } } },
-      defaults: null,
+      legacy: false,
       notices: [],
     });
   });

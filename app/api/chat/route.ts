@@ -33,9 +33,6 @@ import type { ThinkingConfig } from '@/lib/types/provider';
 import { readBoundedJson } from '@/lib/server/bounded-json';
 const log = createLogger('Chat API');
 
-// Allow streaming responses up to 60 seconds
-export const maxDuration = 60;
-
 /**
  * Largest chat request body, refused before it is buffered. The client sends
  * the message history, which may carry attached images as data URLs.

@@ -1,5 +1,3 @@
-import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
-import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Image Generation API
  *
@@ -17,8 +15,8 @@ import { requireSpender } from '@/lib/server/authz/viewer';
  */
 
 import { NextRequest } from 'next/server';
-import { recordGenerationUsage } from '@/lib/server/usage-storage';
-import { generateImage, IMAGE_PROVIDERS } from '@/lib/media/image-providers';
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
+import { requireSpender } from '@/lib/server/authz/viewer';
 import {
   isServerConfiguredProvider,
   isServerProviderDisabled,
@@ -36,29 +34,26 @@ import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 import type { ImageProviderId, ImageGenerationOptions } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
-import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { validateClientBaseUrl } from '@/lib/server/ssrf-guard';
-import { withMediaProviderFetch } from '@/lib/server/media-provider-fetch';
-import { resolveImageSize } from '@/lib/server/image-sizing';
+import { apiError, apiSuccess, type ApiErrorCode } from '@/lib/server/api-response';
 import { readBoundedJson } from '@/lib/server/bounded-json';
+import { validateClientBaseUrl } from '@/lib/server/ssrf-guard';
+import { StepRefusal } from '@/lib/server/generation/steps/context';
+import { generateImageStep, type ImageRefusal } from '@/lib/server/generation/steps/image';
 
 const log = createLogger('ImageGeneration API');
 
 /** Largest image-generation request body, refused before it is buffered. Prompt plus options. */
 const IMAGE_REQUEST_MAX_BYTES = 1024 * 1024;
 
-// The ComfyUI adapter polls up to GENERATION_TIMEOUT_MS (5 min) and real
-// workflows can take 3–5 min. 60s would let platforms that enforce maxDuration
-// (e.g. Vercel) kill the request ~4 min before the adapter finishes. 300s is
-// the practical ceiling on most managed platforms and matches the poll budget.
-// (Self-hosted Node servers ignore this value entirely.)
-export const maxDuration = 300;
+const REFUSAL_RESPONSES: Record<ImageRefusal, [ApiErrorCode, number]> = {
+  'missing-api-key': ['MISSING_API_KEY', 401],
+  'missing-model': ['MISSING_MODEL', 400],
+};
 
 export async function POST(request: NextRequest) {
   const denied = await requireSpender(request.headers);
   if (denied) return denied;
 
-  let managed = false;
   try {
     const read = await readBoundedJson(request, IMAGE_REQUEST_MAX_BYTES);
     if (!read.ok) {
@@ -89,56 +84,21 @@ export async function POST(request: NextRequest) {
       if (refused) return refused;
       throw error;
     }
-    const { providerId, apiKey, baseUrl } = connection as MediaConnection & {
-      providerId: ImageProviderId;
-    };
-    managed = connection.managed;
-    const provider = IMAGE_PROVIDERS[providerId];
-    if (provider?.requiresApiKey && !apiKey) {
-      return apiError(
-        'MISSING_API_KEY',
-        401,
-        `No API key configured for image provider: ${providerId}`,
+    let result;
+    try {
+      result = await generateImageStep(
+        {
+          options: body,
+          connection,
+          requestedModel: request.headers.get('x-image-model')?.trim() || undefined,
+        },
+        { log },
       );
+    } catch (error) {
+      if (!(error instanceof StepRefusal)) throw error;
+      const [code, status] = REFUSAL_RESPONSES[error.reason as ImageRefusal];
+      return apiError(code, status, error.message);
     }
-    // A configured slot without a model uses the provider's first catalogue
-    // model. On the legacy default provider the request's model still applies
-    // through its allowlist, as before slots.
-    const model =
-      connection.origin === 'configuration'
-        ? (connection.modelId ?? provider?.models?.[0]?.id)
-        : connection.origin === 'default'
-          ? resolveImageModel(providerId, request.headers.get('x-image-model')?.trim() || undefined)
-          : connection.modelId;
-    // Workflow-based providers (e.g. comfyui-image) have no model catalog and
-    // need no model; everyone else must resolve one.
-    if (!model && provider?.models && provider.models.length > 0) {
-      return apiError(
-        'MISSING_MODEL',
-        400,
-        `No model configured for image provider: ${providerId}`,
-      );
-    }
-
-    const sizedOptions = resolveImageSize(body, { providerId, modelId: model });
-
-    log.info(
-      `Generating image: provider=${providerId}, model=${model || 'default'}, ` +
-        `promptLength=${sizedOptions.prompt.length}, size=${sizedOptions.width ?? 'auto'}x${sizedOptions.height ?? 'auto'}`,
-    );
-
-    const result = await generateImage(
-      withMediaProviderFetch({ providerId, apiKey: apiKey ?? '', baseUrl, model }, managed),
-      sizedOptions,
-    );
-
-    void recordGenerationUsage({
-      kind: 'image',
-      unit: 'image',
-      providerId,
-      modelId: model,
-      quantity: 1,
-    });
 
     return apiSuccess({ result });
   } catch (error) {

@@ -316,16 +316,16 @@
     "advanced": "詳細設定",
     "advancedHint": "詳細設定：モデル、ウェブ検索、画像・動画、インタラクティブモード、エージェント。標準では KHAITAM が内容に合ったモデルを選び、図解とインタラクティブな活動を加えます。",
     "modelChangeFailed": "モデルを変更できませんでした: {{message}}",
-    "modelLockedHint": "コースで使用するモデル（このサーバーで設定）",
     "pickModel": "モデルを選択",
-    "defaultModel": "デフォルト",
     "defaultModelNote": "ここではデフォルトモデルを変更します。個別に設定した工程は影響を受けません",
-    "stagesSetSeparately": "{{count}} 工程を個別設定",
-    "stagesSetSeparately_one": "{{count}} 工程を個別設定",
-    "stagesSetSeparately_other": "{{count}} 工程を個別設定",
-    "stagesSetSeparatelyHint": "個別のモデルを使う工程",
-    "perStageSetup": "工程別に設定",
-    "perStageSetupHint": "コース生成のすべての工程に個別のモデルが設定されています"
+    "materialUploading": "アップロード中 {{percent}}%",
+    "materialParsing": "解析中…",
+    "materialTranscribing": "文字起こし中…",
+    "materialReady": "準備完了",
+    "materialFailed": "失敗",
+    "materialRetry": "再試行",
+    "materialMediaLabel": "音声/動画",
+    "materialUnavailable": "この資料は利用できなくなりました。削除してからファイルを追加し直してください。"
   },
   "export": {
     "pptx": "PPTXエクスポート",
@@ -533,6 +533,7 @@
     "generating": "生成中...",
     "paused": "一時停止中",
     "generationFailed": "生成に失敗しました",
+    "generationInterrupted": "生成は中断されました",
     "confirmSwitchTitle": "シーンの切り替え",
     "confirmSwitchMessage": "現在トピックが進行中です。シーンを切り替えると、現在のトピックが終了します。よろしいですか？",
     "generatingNextPage": "シーンを生成中です。お待ちください...",
@@ -1338,6 +1339,10 @@
     "notFound": "コースが見つかりません",
     "notFoundDesc": "このコースは存在しないか、削除されたか、閲覧する権限がありません。",
     "backToHome": "ホームに戻る",
+    "runOutlining": "アウトライン作成中…",
+    "runAwaitingConfirmation": "確認待ち",
+    "runGenerating": "生成中 {{completed}}/{{total}}",
+    "runPaused": "一時停止中",
     "loadFailed": "ストレージを利用できません。保存済みの教室を読み込めませんでした。",
     "deleteFailed": "教室を削除できませんでした",
     "privateHint": "作成したコースは自分だけが見られます。ほかのメンバーに見せるには、コースを開いて「メンバーと共有」を使ってください。",
@@ -1353,14 +1358,16 @@
     "courseMaterialCountLimit": "教材ファイルは最大5件までアップロードできます",
     "courseMaterialTotalSizeLimit": "教材の合計サイズは150MB未満にしてください",
     "unsupportedCourseMaterial": "{{parser}} はこのファイル形式に対応していません。対応形式：{{formats}}",
+    "unsupportedMaterialFormat": "現在の解析器はこの形式に対応していません。解析器を切り替えるか、別のファイルを選択してください。",
+    "materialQuotaExceeded": "資料の保存容量がいっぱいです。資料を削除してから再度お試しください。",
+    "materialUploadFailed": "{{name}} のアップロードに失敗しました。再度お試しください。",
+    "materialTooLarge": "{{name}} が大きすぎます。資料は最大 {{size}} までです。",
     "courseMaterialFormats": "対応形式：{{formats}}（1ファイル最大{{size}}MB）",
     "formatListSeparator": "、"
   },
   "generation": {
     "pdfLoadFailed": "PDFファイルの読み込みに失敗しました。もう一度お試しください",
     "pdfParseFailed": "PDFの解析に失敗しました",
-    "analyzingCourseMaterial": "ドキュメントを分析中",
-    "analyzingCourseMaterialDesc": "ドキュメントの構造と内容を抽出しています...",
     "courseMaterialLoadFailed": "教材の読み込みに失敗しました。もう一度お試しください",
     "courseMaterialParseFailed": "教材の解析に失敗しました",
     "streamNotReadable": "生成ストリームを読み取れません",
@@ -1390,6 +1397,7 @@
     "continue": "続ける",
     "outlineRetrying": "アウトライン生成に問題があります。リトライしています...",
     "outlineEmptyResponse": "モデルから有効なアウトラインが返されませんでした。モデルの設定を確認して再度お試しください",
+    "customAgentsUnavailable": "カスタムエージェントを読み込めませんでした。もう一度お試しください。",
     "outlineGenerateFailed": "アウトラインの生成に失敗しました。しばらくしてからお試しください",
     "sceneGenerateFailed": "シーンの生成に失敗しました。しばらくしてからお試しください",
     "sceneGenerateAuthFailed": "モデルプロバイダーが認証情報を拒否したため、シーン生成に失敗しました。モデル設定を確認してください。",
@@ -1465,12 +1473,19 @@
     "webSearchFailed": "ウェブ検索に失敗しました",
     "outlinesReadyCount": "{{ready}} / {{total}} セクション準備完了",
     "jumpToBlankTitle": "タイトルが未入力のセクションへ移動",
-    "analyzingMediaMaterial": "音声・動画を解析中",
     "failedHint": "今回はコースを作成できませんでした。戻ってもう一度お試しください。それでも失敗する場合は管理者にお知らせください。",
     "leaveTitle": "コースの作成を中止しますか？",
     "leaveBody": "今ホームに戻ると作成が止まり、最初からやり直しになります。",
     "leaveStay": "このまま続ける",
-    "modelSettingsUnavailable": "モデル設定を読み込めなかったため、生成を停止しました。もう一度お試しください。"
+    "modelSettingsUnavailable": "モデル設定を読み込めなかったため、生成を停止しました。もう一度お試しください。",
+    "activeRunLimit": "同時に生成できるコースの上限に達しています。いずれかが完了してから再度お試しください。",
+    "outlineConfirmedElsewhere": "このアウトラインは別の場所で確認済みです。ここでの編集は反映されていません。",
+    "outlineAlreadyContinued": "コースの生成はすでに続行されているため、アウトラインは変更できません。",
+    "runChangedElsewhere": "生成は別の場所で既に進んでいます。",
+    "runLoadFailed": "この生成を読み込めませんでした",
+    "runLoadRetrying": "再試行しています…",
+    "mediaGenerationFailed": "メディアの生成に失敗しました",
+    "mediaGenerationDisabled": "生成は無効です"
   },
   "settings": {
     "title": "設定",
@@ -2045,7 +2060,7 @@
     "selectAgents": "エージェントを選択",
     "noVisionWarning": "現在のモデルは画像認識に対応していません。スライドに画像を配置することは可能ですが、モデルは画像の内容を理解して選択やレイアウトを最適化することができません",
     "serverConfigured": "サーバー",
-    "serverConfiguredNotice": "このプロバイダーはサーバーで管理されており、ここでは編集できません。独自の認証情報を使うには、別のプロバイダーを追加してください。",
+    "serverConfiguredNotice": "このプロバイダーはサーバーで管理されており、ここでは編集できません。",
     "optionalOverride": "任意 — 空欄の場合はサーバー設定を使用",
     "setupNeeded": "設定が必要です",
     "modelNotConfigured": "モデルを選択して開始してください",
@@ -2128,7 +2143,7 @@
       "capabilities": "利用できる機能",
       "offeredNote": "このプランで提供されるモデルです。生成バーに表示したいものを選んでください。利用可否はプランのランクによって異なり、非対応のモデルは生成時にエラーになります。",
       "statusConnected": "接続済み",
-      "keyStorage": "キーはサーバーに暗号化して保存され、再表示されません。接続すると、このプランの推奨モデルがコース工程に適用されます。選択済みのモデルを置き換える場合は、事前に確認します。",
+      "keyStorage": "キーはサーバーに暗号化して保存され、再表示されません。接続すると、このプランの推奨モデルがコース工程に適用されます。工程が現在使っているモデル（選択したモデルやサーバー既定）を置き換える場合は、事前に確認します。",
       "saveKey": "保存して有効化",
       "cancelKeyUpdate": "更新をキャンセル",
       "manageAccount": "アカウント管理",
@@ -2150,7 +2165,7 @@
       "stageInteractive": "インタラクティブ",
       "planNoteEditable": "これはデフォルト設定です。各ノードのモデルは「コースモデル設定」で変更できます。",
       "applyTitle": "このプランの推奨構成を使いますか？",
-      "applyBody": "{{name}} は次の工程に独自のモデルを推奨しています。これらの工程は現在、あなたが選んだモデルを使っています：",
+      "applyBody": "{{name}} は次の工程に独自のモデルを推奨しています。使うと、サーバー既定を含め、各工程が現在使っているモデルが置き換わります：",
       "applyKeep": "現在の構成を維持",
       "applyRecommended": "プランの推奨構成を使う"
     },
@@ -2218,7 +2233,7 @@
       "unavailableTitle": "モデルはサーバーで管理されています",
       "unavailableBody": "このサーバーはワークスペースごとのモデル設定を保存しないため、管理者が設定したモデルを使用します。",
       "conflict": "設定が別の場所で変更されたため再読み込みしました。確認してもう一度お試しください。",
-      "lockedNow": "この項目はサーバーが設定するようになったため、変更されませんでした。",
+      "lockedNow": "管理者が固定したため、変更されませんでした。",
       "unconfirmed": "サーバーの応答が失われたため設定を再読み込みしました。変更が反映されたか確認してください。",
       "serverOnly": "このサービスはサーバーの設定（openmaic.yml）でのみ設定できます。サーバー管理者にお問い合わせください。",
       "serverOnlyPolicy": "このサーバーではワークスペースが独自のサービスを追加できません。サーバー管理者にお問い合わせください。",
@@ -2249,8 +2264,7 @@
         "off": "オフ",
         "unassigned": "未設定",
         "invalid": "無効な設定",
-        "locked": "サーバーで設定",
-        "lockedHint": "サーバーの設定で決まっています。ここでは変更できません。",
+        "lockedHint": "管理者がこのサーバーのすべてのユーザーに対して固定しています。ここでは変更できません。",
         "followers": "これに従う工程：{{count}}",
         "childrenFollow": "ページ種別 · すべて従う",
         "childrenOwn": "ページ種別 · 個別設定 {{count}} 件"
@@ -2259,7 +2273,7 @@
         "label": "凡例",
         "follows": "上位に従う",
         "own": "個別設定",
-        "locked": "サーバーで設定"
+        "locked": "管理者が固定"
       },
       "map": {
         "label": "コースモデルマップ。ドラッグまたは矢印キーで移動、ズームボタンで拡大縮小できます。",
@@ -2286,11 +2300,13 @@
         "noFallback": "なし",
         "manageProviders": "モデルサービスで管理",
         "conflict": "設定が別の場所で変更されたため再読み込みしました。確認してもう一度お試しください。",
-        "lockedNow": "サーバーがこの項目を設定したため、変更されませんでした。",
+        "lockedNow": "管理者が固定したため、変更されませんでした。",
         "clear": "個別設定を解除",
-        "clearHint": "サーバーの設定があればそれを使います",
+        "clearHint": "未設定のままにします",
         "unconfirmed": "サーバーの応答が失われたため、設定を再読み込みしました。変更が反映されたか確認してください。",
-        "thinking": "思考"
+        "thinking": "思考",
+        "serverDefault": "サーバー既定",
+        "resetDefault": "サーバー既定に戻す"
       },
       "slots": {
         "llm": {
@@ -2368,8 +2384,8 @@
       },
       "source": {
         "inherited": "{{name}}に従う",
-        "deployment": "サーバー",
-        "default": "サーバー既定"
+        "default": "サーバー既定",
+        "locked": "管理者が固定"
       },
       "stations": {
         "research": "Web 調査",
@@ -2385,7 +2401,8 @@
         "prompt": "まだ言語モデルがありません。モデルサービスでサービスを設定するか、Token Plan でプランを接続すると、未設定の部分にそのモデルが割り当てられます。",
         "open": "モデルサービスを開く",
         "askAdmin": "言語モデルが設定されていません。サーバー管理者に設定を依頼してください。"
-      }
+      },
+      "adminNotice": "このサーバーで使うモデルは管理者が設定しています。"
     },
     "unimported": {
       "toast": "このブラウザーの一部のモデル設定をサーバーに移行できませんでした。「設定 → モデルサービス」に一覧があります。",
@@ -2407,7 +2424,8 @@
         "unsupported": "この種類のカスタムプロバイダーは移行できません。OpenAI 互換エンドポイントとして追加し直してください。",
         "unconfirmed": "サーバーがインポートを確認しませんでした。"
       }
-    }
+    },
+    "serverConfiguredAddOwn": "独自の認証情報を使うには、別のプロバイダーを追加してください。"
   },
   "workspace": {
     "untitledCourse": "無題のコース",
@@ -2477,6 +2495,13 @@
     "collapseClassroom": "教室を折りたたむ",
     "expandClassroom": "教室",
     "readOnlyBadge": "閲覧のみ",
+    "courseGeneratingTitle": "コースを生成中です",
+    "coursePausedTitle": "コースの生成が一時停止しています",
+    "courseGeneratingDesc": "生成が完了すると自動的にここで開き、編集できるようになります。",
+    "coursePausedDesc": "生成に失敗したページがあります。教室で再試行してください。生成が完了するとここで開きます。",
+    "viewGenerationProgress": "生成の進捗を見る",
+    "openToRetry": "開いて再試行",
+    "courseGeneratingRowHint": "生成完了後に開けます",
     "noCourseTitle": "開いているコースはありません",
     "noCourseHint": "会話内のコースリンクから開くか、左のリストから選んでください。会話はそのまま残ります",
     "resizeChatAria": "ドラッグして会話パネルのサイズを変更",

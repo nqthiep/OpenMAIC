@@ -2,10 +2,11 @@
  * The deployment layer for slot resolution (RFC #1701, tracked in #1725).
  *
  * `openmaic.yml` (or the file named by OPENMAIC_CONFIG) is the deployment
- * layer when it exists. Otherwise providers, DEFAULT_MODEL and MODEL_FALLBACK
- * are translated into one (see legacy-config.ts). MODEL_ROUTES is not: a
- * deployment that sets it without openmaic.yml gets an error asking for the
- * file.
+ * layer when it exists. KHAITAM patch point: otherwise the layer is built from
+ * the provider store, which an administrator edits in the settings popup (see
+ * provider-store-layer.ts): the providers, the default model as a server
+ * default, and the stage routes as locked slots. The legacy provider variables,
+ * DEFAULT_MODEL and MODEL_ROUTES are not read.
  */
 import { translateProviderSnapshot } from '@/lib/server/model-config/provider-store-layer';
 import { currentSnapshot, isProviderSnapshotLoaded } from '@/lib/server/provider-store/snapshot';
@@ -14,20 +15,19 @@ import type { ModelConfigLayer } from '@/lib/server/model-config/resolve-slot';
 import type { LlmStage } from '@/lib/server/model-routes';
 
 export interface DeploymentLayer {
-  /** Providers and locked assignments: openmaic.yml, or the legacy providers. */
+  /** Providers, server defaults and locks: openmaic.yml, or the legacy configuration. */
   layer: ModelConfigLayer | null;
   /**
-   * Assignments translated from DEFAULT_MODEL and MODEL_FALLBACK. They lock
-   * nothing and rank below the workspace, as DEFAULT_MODEL used to rank below
-   * the model a user picked.
+   * The layer was translated from the legacy variables: media routes keep
+   * applying the legacy model pins to what it assigns.
    */
-  defaults: ModelConfigLayer | null;
+  legacy: boolean;
   /**
    * KHAITAM patch point: the deployment layer as one stage sees it, for a stage whose own route
    * differs from the route of another stage on the same slot (see provider-store-layer.ts).
    */
   stageLayers?: Partial<Record<LlmStage, ModelConfigLayer>>;
-  /** How the layers were built, and what did not carry over. */
+  /** How the layer was built, and what did not carry over. */
   notices: string[];
 }
 
@@ -71,7 +71,7 @@ export function loadDeploymentLayer(): DeploymentLayer {
   if (file) {
     return {
       layer: { source: 'deployment', config: file },
-      defaults: null,
+      legacy: false,
       notices:
         isProviderSnapshotLoaded() && storeHasConfiguration()
           ? [
@@ -80,20 +80,26 @@ export function loadDeploymentLayer(): DeploymentLayer {
           : [],
     };
   }
-  if (!storeHasConfiguration()) return { layer: null, defaults: null, notices: [] };
+  if (!storeHasConfiguration()) return { layer: null, legacy: false, notices: [] };
   const { config, routeSlots, stageOverrides, notices } =
     translateProviderSnapshot(currentSnapshot());
   const providers = config.providers;
   const hasRoutes = Object.keys(routeSlots).length > 0;
-  const layerWith = (slots: Record<string, SlotAssignment>): ModelConfigLayer => ({
-    source: 'deployment',
-    config: {
-      ...(providers ? { providers } : {}),
-      ...(Object.keys(slots).length ? { slots } : {}),
-      // Only an administrator configures providers (decision D3), in the settings popup.
-      policy: { allowWorkspaceProviders: false },
-    },
-  });
+  // The administrator's routes are fixed for everyone (`lock`); the default model and the first
+  // provider of each media capability are server defaults. Only an administrator configures
+  // providers (decision D3), in the settings popup, so users may not add keys of their own.
+  const layerWith = (routed: Record<string, SlotAssignment>): ModelConfigLayer => {
+    const slots = { ...config.slots, ...routed };
+    return {
+      source: 'deployment',
+      config: {
+        ...(providers ? { providers } : {}),
+        ...(Object.keys(slots).length ? { slots } : {}),
+        ...(Object.keys(routed).length ? { lock: Object.keys(routed) } : {}),
+        allowUserKeys: false,
+      },
+    };
+  };
   const layer = providers || hasRoutes ? layerWith(routeSlots) : null;
   const stageLayers: Partial<Record<LlmStage, ModelConfigLayer>> = {};
   for (const [stage, override] of Object.entries(stageOverrides)) {
@@ -104,8 +110,8 @@ export function loadDeploymentLayer(): DeploymentLayer {
   }
   return {
     layer,
+    legacy: false,
     ...(Object.keys(stageLayers).length ? { stageLayers } : {}),
-    defaults: config.slots ? { source: 'default', config: { slots: config.slots } } : null,
     notices,
   };
 }

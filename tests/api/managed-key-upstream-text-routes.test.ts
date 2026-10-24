@@ -289,52 +289,6 @@ describe('upstream provider text on the operator key', () => {
     });
   });
 
-  describe('POST /api/web-search', () => {
-    it('sends fixed text, and no upstream text, when the operator key is used', async () => {
-      mocks.isServerConfiguredProvider.mockReturnValue(true);
-      mocks.webSearchKey = OPERATOR_KEY;
-      mocks.searchWeb.mockRejectedValue(new Error(`Tavily API error (401): ${UPSTREAM_FRAGMENT}`));
-      const { POST } = await import('@/app/api/web-search/route');
-
-      const response = await POST(
-        jsonRequest('/api/web-search', {
-          query: 'photosynthesis lesson',
-          providerId: 'tavily',
-          apiKey: VISITOR_KEY,
-        }),
-      );
-      const text = await response.text();
-
-      expect(response.status).toBe(500);
-      expect(JSON.parse(text)).toMatchObject({
-        errorCode: 'INTERNAL_ERROR',
-        error: MODEL_FAILURE_TEXT,
-      });
-      expect(text).not.toContain(UPSTREAM_FRAGMENT);
-      expect(mocks.searchWeb.mock.calls[0][0]).toMatchObject({ apiKey: OPERATOR_KEY });
-    });
-
-    it('keeps the upstream text for a visitor who supplied their own key', async () => {
-      mocks.isServerConfiguredProvider.mockReturnValue(false);
-      mocks.webSearchKey = VISITOR_KEY;
-      mocks.searchWeb.mockRejectedValue(new Error(`Tavily API error (401): ${UPSTREAM_FRAGMENT}`));
-      const { POST } = await import('@/app/api/web-search/route');
-
-      const response = await POST(
-        jsonRequest('/api/web-search', {
-          query: 'photosynthesis lesson',
-          providerId: 'tavily',
-          apiKey: VISITOR_KEY,
-        }),
-      );
-      const text = await response.text();
-
-      expect(response.status).toBe(500);
-      expect(JSON.parse(text).error).toContain(UPSTREAM_FRAGMENT);
-      expect(mocks.searchWeb.mock.calls[0][0]).toMatchObject({ apiKey: VISITOR_KEY });
-    });
-  });
-
   describe('POST /api/verify-pdf-provider', () => {
     it('sends fixed text, and no upstream text, when the operator key is used', async () => {
       mocks.isServerConfiguredProvider.mockReturnValue(true);

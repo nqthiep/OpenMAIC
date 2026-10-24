@@ -115,6 +115,7 @@ Upstream xoá `/api/generate/{scene-outlines-stream,agent-profiles,scene-content
 - `data/classrooms` được nhập một lần vào DB; `lib/server/classroom-storage.ts`, `learning/course-exists.ts`, `learning/courses.ts` (`listAllCourses` đọc cả file lẫn DB) cần đọc theo nguồn mới.
 - Khoá học chỉ đọc khi đang sinh (`409 COURSE_GENERATING`): kiểm các luồng của ta (gắn vào lớp, chia sẻ, xem trước) có ghi vào khoá học đang sinh không.
 - `render-service`: ta đã sửa (`render-service/src/*`); upstream đổi nhiều ở rc.1/rc.2 và yêu cầu nâng cấp cùng lúc.
+**Kết quả S5 (2026-10-24):** đã áp theo hướng trên. Cổng chi tiêu (`requireSpender`) đặt ở `POST /api/generation-runs`, `confirm-outline`, `retry`, `POST /api/materials`, `POST /api/generate-classroom`; lượng dùng của run ghi theo chủ sở hữu run bằng `runWithSpendOwner` (worker phục vụ nhiều chủ trong một vòng lặp, nên không dùng `enterWith`); lỗi của run lưu câu cố định khi bật tài khoản. Đã chạy thật trên Postgres: khách bị 401, học viên tạo được run, run dừng ở bước dàn ý với câu cố định (không có model thật), chủ khác đọc run nhận 404, trang xem trước và trang chủ hiển thị đúng. Chưa thấy: một run chạy hết với model thật (ghi lượng dùng theo tài khoản, xếp khoá học vào thư mục, mở lớp học), `render-service`, nhập `data/classrooms` một lần.
 
 ## 6. Tính năng v1.2.1 chạy trên ứng dụng này: điều kiện và cách kiểm
 

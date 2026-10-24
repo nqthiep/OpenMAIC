@@ -20,13 +20,7 @@ export const PROVIDER_ID = 'omniroute';
 const PREFIX = `${PROVIDER_ID}:`;
 
 export const ROLE_STAGES: Record<RoleId, readonly LlmStage[]> = {
-  generate: [
-    'scene-outlines-stream',
-    'scene-content',
-    'scene-actions',
-    'generate-classroom',
-    'agent-profiles',
-  ],
+  generate: ['scene-outlines-stream', 'scene-content', 'scene-actions', 'agent-profiles'],
   chat: ['pbl-v2-runtime', 'chat-adapter', 'maic-agent-driver'],
   grade: ['quiz-grade', 'pbl-v2-runtime:evaluate'],
   utility: ['conversation-title', 'web-search-query-rewrite'],

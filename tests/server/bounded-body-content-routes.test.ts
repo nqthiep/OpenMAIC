@@ -1,4 +1,4 @@
-// The stage, chat, generate, generate-classroom and pbl routes read their JSON
+// The stage, chat, generate and pbl routes read their JSON
 // body through the shared bounded reader, so an oversized or endless body is
 // refused with 413 before it is buffered. A body that is not JSON keeps each
 // route's existing 400 answer.
@@ -50,13 +50,8 @@ import { PATCH as patchStage, PUT as putStage } from '@/app/api/stages/[id]/rout
 import { POST as postChat } from '@/app/api/chat/route';
 import { POST as postChatPi } from '@/app/api/chat/pi/route';
 import { POST as postWhiteboardVisibility } from '@/app/api/chat/pi/whiteboard-visibility/route';
-import { POST as postGenerateClassroom } from '@/app/api/generate-classroom/route';
-import { POST as postAgentProfiles } from '@/app/api/generate/agent-profiles/route';
 import { POST as postImage } from '@/app/api/generate/image/route';
 import { POST as postVideo } from '@/app/api/generate/video/route';
-import { POST as postSceneActions } from '@/app/api/generate/scene-actions/route';
-import { POST as postSceneContent } from '@/app/api/generate/scene-content/route';
-import { POST as postSceneOutlinesStream } from '@/app/api/generate/scene-outlines-stream/route';
 import { POST as postTts } from '@/app/api/generate/tts/route';
 import { POST as postVoice } from '@/app/api/generate/voice/route';
 import { POST as postPblEvaluate } from '@/app/api/pbl/v2/evaluate/route';
@@ -158,30 +153,6 @@ const BODY_ROUTES: BodyRoute[] = [
     },
   },
   {
-    name: 'POST /api/generate-classroom',
-    url: 'http://localhost/api/generate-classroom',
-    call: (request) => postGenerateClassroom(request),
-    maxBytes: TEN_MIB,
-    invalidJson: { errorCode: 'INVALID_REQUEST', error: 'request body must be valid JSON' },
-    validButRejected: {
-      body: {},
-      errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'Missing required field: requirement',
-    },
-  },
-  {
-    name: 'POST /api/generate/agent-profiles',
-    url: 'http://localhost/api/generate/agent-profiles',
-    call: (request) => postAgentProfiles(request),
-    maxBytes: MIB,
-    invalidJson: { errorCode: 'INVALID_REQUEST', error: 'request body must be valid JSON' },
-    validButRejected: {
-      body: {},
-      errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'stageInfo.name is required',
-    },
-  },
-  {
     name: 'POST /api/generate/image',
     url: 'http://localhost/api/generate/image',
     call: (request) => postImage(request),
@@ -203,42 +174,6 @@ const BODY_ROUTES: BodyRoute[] = [
       body: {},
       errorCode: 'MISSING_REQUIRED_FIELD',
       error: 'Missing prompt',
-    },
-  },
-  {
-    name: 'POST /api/generate/scene-actions',
-    url: 'http://localhost/api/generate/scene-actions',
-    call: (request) => postSceneActions(request),
-    maxBytes: MIB,
-    invalidJson: { errorCode: 'INVALID_REQUEST', error: 'request body must be valid JSON' },
-    validButRejected: {
-      body: {},
-      errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'outline is required',
-    },
-  },
-  {
-    name: 'POST /api/generate/scene-content',
-    url: 'http://localhost/api/generate/scene-content',
-    call: (request) => postSceneContent(request),
-    maxBytes: TEN_MIB,
-    invalidJson: { errorCode: 'INVALID_REQUEST', error: 'request body must be valid JSON' },
-    validButRejected: {
-      body: {},
-      errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'outline is required',
-    },
-  },
-  {
-    name: 'POST /api/generate/scene-outlines-stream',
-    url: 'http://localhost/api/generate/scene-outlines-stream',
-    call: (request) => postSceneOutlinesStream(request),
-    maxBytes: TEN_MIB,
-    invalidJson: { errorCode: 'INVALID_REQUEST', error: 'request body must be valid JSON' },
-    validButRejected: {
-      body: {},
-      errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'Requirements are required',
     },
   },
   {

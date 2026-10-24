@@ -396,6 +396,7 @@ async function parseWithAliDocMind(
       llmEnhancement: true,
       enhancementMode: 'VLM',
       outputHtmlTable: true,
+      signal: config.signal,
     },
   );
 
@@ -692,7 +693,7 @@ export async function parseWithMinerUDocument(
   try {
     response = await providerFetch(
       `${config.baseUrl}/file_parse`,
-      { method: 'POST', headers, body: formData },
+      { method: 'POST', headers, body: formData, signal: config.signal },
       selfHostedMinerUPolicy(config.managed),
     );
   } catch (error) {

@@ -69,12 +69,16 @@ vi.mock('@/lib/server/identity/resolve', async () =>
 vi.mock('@/lib/server/authz/viewer', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/server/authz/viewer')>()),
   canReadStageDocument: async () => true,
+  // KHAITAM: a signed-in spender (the spend gate has its own tests).
+  requireSpender: async () => undefined,
 }));
 vi.mock('@/lib/persistence/server-provider', () => ({
   getServerPersistenceProvider: async () => ({
     documentStore: mocks.fakeStore!.store,
     pool: mocks.queryPool,
     assetStore: mocks.assetStore,
+    withTransaction: async (body: (queryable: unknown) => Promise<unknown>) =>
+      body(mocks.queryPool),
   }),
 }));
 // The stage routes obtain their store through the owner-scoped seam (which

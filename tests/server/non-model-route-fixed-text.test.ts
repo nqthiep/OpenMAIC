@@ -99,24 +99,4 @@ describe('non-Error throws on non-model routes use route-specific fixed text', (
     expect(body.error).toBe('The PDF parser could not complete this request.');
     expect(body.error).not.toContain('model provider');
   });
-
-  it('POST /api/extract-document answers with extractor wording, not "model provider"', async () => {
-    mocks.parseWithMinerUCloud.mockRejectedValue('string failure, not an Error');
-    const { POST } = await import('@/app/api/extract-document/route');
-
-    const pdf = new File([new Uint8Array([1, 2, 3])], 'doc.pdf', { type: 'application/pdf' });
-    const response = await POST(
-      formRequest('/api/extract-document', {
-        file: pdf,
-        providerId: 'mineru-cloud',
-        apiKey: 'visitor-pdf-key',
-      }),
-    );
-    const body = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(body.errorCode).toBe('PARSE_FAILED');
-    expect(body.error).toBe('The document extractor could not complete this request.');
-    expect(body.error).not.toContain('model provider');
-  });
 });

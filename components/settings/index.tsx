@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { X, Settings, Boxes, CreditCard, GraduationCap, Sparkles } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useAgentRuntimeAvailable } from '@/lib/hooks/use-agent-runtime-available';
+import { settingsSections } from '@/lib/model-settings/shape';
+import { useModelSettingsView } from '@/lib/model-settings/use-model-settings';
 import { cn } from '@/lib/utils';
 import { useCapabilities } from '@/lib/capabilities/use-capabilities';
 import { GeneralSettings } from './general-settings';
@@ -16,6 +18,7 @@ import {
   ModelServicesPanel,
   SERVICE_TABS,
   SERVICE_TAB_DESCRIPTIONS,
+  TAB_CAPABILITY,
   type ServiceTab,
 } from './model-services';
 import { ServerSettingsGate } from './server-settings';
@@ -40,7 +43,9 @@ const NAV: { id: SettingsSection; icon: typeof Settings; label: string }[] = [
 /**
  * The settings dialog. Token Plan, Model Services and Course Model show the
  * workspace's model configuration: it lives on the server, and every change
- * is written there as it is made. Skills and General are the user's own.
+ * is written there as it is made. Token Plan and Model Services are listed
+ * only where they can change something (see `settingsSections`); Course
+ * Model always is. Skills and General are the user's own.
  */
 export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsDialogProps) {
   const { t } = useI18n();
@@ -52,21 +57,32 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   // available. Until then — and on a deployment without it — the item is
   // hidden, and a request to open it lands on the first section instead.
   const skillsAvailable = useAgentRuntimeAvailable();
+  // Until the model settings are read, every section is listed; each one
+  // shows its own loading state.
+  const modelView = useModelSettingsView();
+  const sections = modelView ? settingsSections(modelView) : null;
+  const serviceTabs = sections
+    ? SERVICE_TABS.filter((tab) => sections.modelServices.includes(TAB_CAPABILITY[tab]))
+    : SERVICE_TABS;
   // KHAITAM patch point: provider, model and key settings are the administrator's own (decision
   // D3); everyone else sees General only.
   const canConfigure = useCapabilities()?.personalProviderKey === true;
-  const nav = !canConfigure
-    ? NAV.filter(({ id }) => id === 'general')
-    : skillsAvailable
-      ? NAV
-      : NAV.filter(({ id }) => id !== 'skills');
-  const activeSection = !canConfigure
-    ? 'general'
-    : requestedSection === 'skills' && !skillsAvailable
-      ? nav[0].id
-      : requestedSection;
+  const listed = (id: SettingsSection) =>
+    !canConfigure
+      ? id === 'general'
+      : id === 'skills'
+        ? skillsAvailable
+        : id === 'token-plan'
+          ? !sections || sections.tokenPlan
+          : id === 'model-services'
+            ? serviceTabs.length > 0
+            : true;
+  const nav = NAV.filter(({ id }) => listed(id));
+  // A section that is not listed (asked for, or the default) lands on the first one.
+  const activeSection = listed(requestedSection) ? requestedSection : nav[0].id;
   // 「模型服务」分区内的服务 tab（沿用旧一级分区值）
-  const [serviceTab, setServiceTab] = useState<ServiceTab>('providers');
+  const [requestedTab, setServiceTab] = useState<ServiceTab>('providers');
+  const serviceTab = serviceTabs.includes(requestedTab) ? requestedTab : serviceTabs[0];
 
   // Navigate to initialSection when dialog opens
   useEffect(() => {
@@ -251,6 +267,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
                     <ModelServicesPanel
                       view={view}
                       apply={apply}
+                      tabs={serviceTabs}
                       tab={serviceTab}
                       onTabChange={setServiceTab}
                     />

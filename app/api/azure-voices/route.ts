@@ -5,6 +5,8 @@ import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { validateClientBaseUrl } from '@/lib/server/ssrf-guard';
 import { providerFetch, type ProviderFetchPolicy } from '@/lib/server/provider-fetch';
+import { requestProvidersAllowed } from '@/lib/server/model-config/runtime';
+import { REQUEST_PROVIDERS_REFUSED } from '@/lib/server/resolve-model';
 const log = createLogger('Azure Voices');
 
 // The caller-supplied base URL runs under the operator address policy (the one
@@ -17,8 +19,6 @@ const VOICES_POLICY: ProviderFetchPolicy = { allowLocalNetworks: undefined, reje
 // server-side only and never echoed back to the caller.
 const AUTH_FAILED_MESSAGE = 'Authentication failed, please check the API Key';
 const FETCH_FAILED_MESSAGE = 'Failed to fetch voices from Azure';
-
-export const maxDuration = 30;
 
 /**
  * Azure TTS Voice List API
@@ -34,6 +34,10 @@ export async function POST(req: NextRequest) {
     );
   }
   let baseUrl: string | undefined;
+  // A caller-supplied key and endpoint: not under `allowUserKeys: false`.
+  if (!requestProvidersAllowed()) {
+    return apiError('PROVIDER_DISABLED', 403, REQUEST_PROVIDERS_REFUSED);
+  }
   try {
     const body = await req.json();
     const { apiKey } = body;

@@ -39,7 +39,7 @@ export function ContinueCard({
   thumbnails,
 }: {
   classrooms: readonly StageListItem[];
-  thumbnails: Readonly<Record<string, Slide>>;
+  thumbnails: Readonly<Record<string, Slide | null>>;
 }) {
   const { t } = useI18n();
   const [positions, setPositions] = useState<Map<string, Position> | null>(null);
@@ -126,7 +126,7 @@ export function ContinueCard({
     : {
         id: pick!.id,
         name: pick!.name,
-        slide: thumbnails[pick!.id],
+        slide: thumbnails[pick!.id] ?? undefined,
         shown: progress?.id === pick!.id ? progress : null,
       };
   const { slide, shown } = target;

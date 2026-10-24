@@ -316,16 +316,16 @@
     "advanced": "進階",
     "advancedHint": "進階選項：模型、網路搜尋、圖片/影片、互動模式、智慧體。預設情況下，KHAITAM 會依問題自動選擇合適的模型，並配上插圖與互動活動。",
     "modelChangeFailed": "無法切換模型：{{message}}",
-    "modelLockedHint": "課程使用的模型，由此伺服器設定",
     "pickModel": "選擇模型",
-    "defaultModel": "預設",
     "defaultModelNote": "這裡修改預設模型，單獨設定的環節不受影響",
-    "stagesSetSeparately": "{{count}} 個環節單獨設定",
-    "stagesSetSeparately_one": "{{count}} 個環節單獨設定",
-    "stagesSetSeparately_other": "{{count}} 個環節單獨設定",
-    "stagesSetSeparatelyHint": "單獨設定模型的環節",
-    "perStageSetup": "按環節設定",
-    "perStageSetupHint": "課程生成的每個環節都已單獨設定模型"
+    "materialUploading": "上傳中 {{percent}}%",
+    "materialParsing": "解析中…",
+    "materialTranscribing": "轉寫中…",
+    "materialReady": "已就緒",
+    "materialFailed": "失敗",
+    "materialRetry": "重試",
+    "materialMediaLabel": "影音",
+    "materialUnavailable": "此素材已無法使用，請移除後重新加入檔案。"
   },
   "export": {
     "pptx": "匯出 PPTX",
@@ -533,6 +533,7 @@
     "generating": "生成中...",
     "paused": "已暫停",
     "generationFailed": "生成失敗",
+    "generationInterrupted": "生成已中斷",
     "confirmSwitchTitle": "切換頁面",
     "confirmSwitchMessage": "目前主題正在進行中，切換頁面將結束目前主題。確定要切換嗎？",
     "generatingNextPage": "場景正在生成，請稍候...",
@@ -1323,6 +1324,10 @@
     "notFound": "找不到這門課程",
     "notFoundDesc": "課程不存在、已被刪除，或你沒有檢視權限。",
     "backToHome": "返回首頁",
+    "runOutlining": "正在生成大綱…",
+    "runAwaitingConfirmation": "等待確認",
+    "runGenerating": "生成中 {{completed}}/{{total}}",
+    "runPaused": "已暫停",
     "loadFailed": "儲存空間無法使用，無法載入已儲存的課堂。",
     "deleteFailed": "刪除課堂失敗",
     "privateHint": "你建立的課程只有你看得到。想讓其他成員看到，請開啟課程並使用「與會員分享」。",
@@ -1338,14 +1343,16 @@
     "courseMaterialCountLimit": "最多可上傳 5 個課程材料檔案",
     "courseMaterialTotalSizeLimit": "課程材料總大小需小於 150MB",
     "unsupportedCourseMaterial": "{{parser}} 不支援此檔案類型，目前支援：{{formats}}",
+    "unsupportedMaterialFormat": "目前的解析器不支援此格式，請切換解析器或選擇其他檔案",
+    "materialQuotaExceeded": "素材儲存空間已滿，請刪除部分素材後重試。",
+    "materialUploadFailed": "上傳 {{name}} 失敗，請重試。",
+    "materialTooLarge": "{{name}} 過大：單個素材最大為 {{size}}。",
     "courseMaterialFormats": "支援 {{formats}}，單檔最大 {{size}}MB",
     "formatListSeparator": "、"
   },
   "generation": {
     "pdfLoadFailed": "無法載入 PDF 檔案，請重試",
     "pdfParseFailed": "PDF 解析失敗",
-    "analyzingCourseMaterial": "解析文件",
-    "analyzingCourseMaterialDesc": "正在擷取文件結構和內容...",
     "courseMaterialLoadFailed": "無法載入課程材料，請重試",
     "courseMaterialParseFailed": "課程材料解析失敗",
     "streamNotReadable": "無法讀取生成資料流",
@@ -1375,6 +1382,7 @@
     "continue": "繼續",
     "outlineRetrying": "大綱生成異常，正在重試...",
     "outlineEmptyResponse": "模型未傳回有效的大綱內容，請檢查模型設定後重試",
+    "customAgentsUnavailable": "無法載入你的自訂智慧體，請稍後再試。",
     "outlineGenerateFailed": "大綱生成失敗，請稍後重試",
     "sceneGenerateFailed": "場景生成失敗，請稍後重試",
     "sceneGenerateAuthFailed": "場景生成失敗：模型服務拒絕了目前憑證。請檢查模型設定。",
@@ -1450,12 +1458,19 @@
     "webSearchFailed": "網路搜尋失敗",
     "outlinesReadyCount": "{{ready}} / {{total}} 章節就緒",
     "jumpToBlankTitle": "跳至待補充標題的章節",
-    "analyzingMediaMaterial": "解析音影片內容",
     "failedHint": "這次未能建立課程。請返回重試；若仍然失敗，請聯絡管理員。",
     "leaveTitle": "停止建立課程？",
     "leaveBody": "現在返回首頁會中斷建立，需要重新開始。",
     "leaveStay": "留下",
-    "modelSettingsUnavailable": "無法讀取模型設定，已停止生成。請重試。"
+    "modelSettingsUnavailable": "無法讀取模型設定，已停止生成。請重試。",
+    "activeRunLimit": "同時生成的課程已達上限，請等待其中一門完成後再試。",
+    "outlineConfirmedElsewhere": "此大綱已在其他地方確認，此處的修改未生效。",
+    "outlineAlreadyContinued": "課程已繼續生成，大綱無法再修改。",
+    "runChangedElsewhere": "生成已在其他地方繼續。",
+    "runLoadFailed": "無法載入此次生成",
+    "runLoadRetrying": "正在重試…",
+    "mediaGenerationFailed": "媒體生成失敗",
+    "mediaGenerationDisabled": "生成已停用"
   },
   "settings": {
     "title": "設定",
@@ -2030,7 +2045,7 @@
     "selectAgents": "選擇智能體",
     "noVisionWarning": "目前模型不支援視覺能力，圖片仍可放入投影片，但模型無法理解圖片內容來優化選擇和排版",
     "serverConfigured": "服務端",
-    "serverConfiguredNotice": "此供應商由伺服器端管理，無法在此編輯。如需使用自己的憑證，請新增一個供應商。",
+    "serverConfiguredNotice": "此供應商由伺服器端管理，無法在此編輯。",
     "optionalOverride": "選填，留空則使用服務端設定",
     "setupNeeded": "請先完成設定",
     "modelNotConfigured": "請選擇一個模型以開始使用",
@@ -2113,7 +2128,7 @@
       "capabilities": "套餐提供的能力",
       "offeredNote": "此方案提供的模型清單。請在生成介面選擇需要使用的模型——是否可用取決於你的方案檔位，不支援的模型會在生成時報錯。",
       "statusConnected": "已連接",
-      "keyStorage": "金鑰加密保存在伺服器上，之後不再顯示。連接後會將此方案推薦的模型套用到課程環節；如果會取代你已選的模型，會先徵求你的確認。",
+      "keyStorage": "金鑰加密保存在伺服器上，之後不再顯示。連接後會將此方案推薦的模型套用到課程環節；如果會取代環節目前所用的模型（你選的模型或伺服器預設值），會先徵求你的確認。",
       "saveKey": "儲存並啟用",
       "cancelKeyUpdate": "取消更新",
       "manageAccount": "管理帳號",
@@ -2135,7 +2150,7 @@
       "stageInteractive": "互動頁面",
       "planNoteEditable": "此為預設配置，各節點對應模型可在「課程模型設定」中修改",
       "applyTitle": "使用此方案的推薦設定？",
-      "applyBody": "{{name}} 為以下環節推薦了自己的模型，這些環節目前使用的是你選的模型：",
+      "applyBody": "{{name}} 為以下環節推薦了自己的模型。使用它們會取代這些環節目前所用的模型，包括伺服器預設值：",
       "applyKeep": "保留目前設定",
       "applyRecommended": "使用方案推薦設定"
     },
@@ -2203,7 +2218,7 @@
       "unavailableTitle": "模型由伺服器統一管理",
       "unavailableBody": "此伺服器不保存工作區的模型設定，使用的是管理員設定的模型。",
       "conflict": "設定已在別處被修改並已重新載入，請檢查後重試。",
-      "lockedNow": "此項現由伺服器設定，未做修改。",
+      "lockedNow": "管理員已固定此項，因此未變更。",
       "unconfirmed": "伺服器的回應遺失，已重新載入設定，請確認修改是否生效。",
       "serverOnly": "此服務只能透過伺服器設定（openmaic.yml）設定，請聯絡伺服器管理員。",
       "serverOnlyPolicy": "此伺服器不允許工作區新增自己的服務，請聯絡伺服器管理員。",
@@ -2234,8 +2249,7 @@
         "off": "已關閉",
         "unassigned": "未設定",
         "invalid": "設定無效",
-        "locked": "由伺服器設定",
-        "lockedHint": "由伺服器設定，無法在此變更。",
+        "lockedHint": "管理員已為此伺服器上的所有人固定此項，無法在此變更。",
         "followers": "跟隨它的環節：{{count}}",
         "childrenFollow": "頁型 · 全部跟隨",
         "childrenOwn": "頁型 · {{count}} 個單獨設定"
@@ -2244,7 +2258,7 @@
         "label": "圖例",
         "follows": "跟隨上層",
         "own": "單獨設定",
-        "locked": "由伺服器設定"
+        "locked": "由管理員固定"
       },
       "map": {
         "label": "課程模型圖。拖曳或使用方向鍵平移，使用縮放按鈕縮放。",
@@ -2271,11 +2285,13 @@
         "noFallback": "無",
         "manageProviders": "在模型服務中管理",
         "conflict": "設定已在別處變更並已重新載入，請檢查後再試一次。",
-        "lockedNow": "伺服器現在設定了此項，因此未變更。",
+        "lockedNow": "管理員已固定此項，因此未變更。",
         "clear": "清除單獨設定",
-        "clearHint": "改用伺服器的設定（如有）",
+        "clearHint": "改為不設定",
         "unconfirmed": "伺服器的回應遺失，設定已重新載入。請檢查變更是否已生效。",
-        "thinking": "思考"
+        "thinking": "思考",
+        "serverDefault": "伺服器預設",
+        "resetDefault": "恢復伺服器預設"
       },
       "slots": {
         "llm": {
@@ -2353,8 +2369,8 @@
       },
       "source": {
         "inherited": "跟隨{{name}}",
-        "deployment": "伺服器",
-        "default": "伺服器預設"
+        "default": "伺服器預設",
+        "locked": "由管理員固定"
       },
       "stations": {
         "research": "網路研究",
@@ -2370,7 +2386,8 @@
         "prompt": "還沒有可用的語言模型。在「模型服務」中設定服務，或在「Token Plan」中連接方案，其模型會填入尚未設定的環節。",
         "open": "開啟模型服務",
         "askAdmin": "尚未設定語言模型，請聯絡伺服器管理員。"
-      }
+      },
+      "adminNotice": "管理員已設定此伺服器使用的模型。"
     },
     "unimported": {
       "toast": "此瀏覽器中的部分模型設定未能遷移到伺服器，已列在「設定 → 模型服務」中。",
@@ -2392,7 +2409,8 @@
         "unsupported": "此類自訂服務商無法遷移：請作為 OpenAI 相容端點重新新增。",
         "unconfirmed": "伺服器未確認已匯入。"
       }
-    }
+    },
+    "serverConfiguredAddOwn": "如需使用自己的憑證，請新增一個供應商。"
   },
   "workspace": {
     "untitledCourse": "未命名课堂",
@@ -2462,6 +2480,13 @@
     "collapseClassroom": "收合課堂",
     "expandClassroom": "課堂",
     "readOnlyBadge": "唯讀",
+    "courseGeneratingTitle": "課程生成中",
+    "coursePausedTitle": "課程生成已暫停",
+    "courseGeneratingDesc": "生成完成後會自動在這裡開啟，屆時即可編輯。",
+    "coursePausedDesc": "有一頁生成失敗。請在課堂中重試，生成完成後課程會在這裡開啟。",
+    "viewGenerationProgress": "查看生成進度",
+    "openToRetry": "前往重試",
+    "courseGeneratingRowHint": "生成完成後可開啟",
     "noCourseTitle": "還沒有開啟課堂",
     "noCourseHint": "點對話裡的課堂連結開啟，或在左側清單裡選一節；對話會一直在這兒",
     "resizeChatAria": "拖曳調整對話欄寬度",

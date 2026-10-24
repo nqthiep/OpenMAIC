@@ -133,16 +133,6 @@ describe('provider failure server logs carry a summary, not upstream text', () =
     expectSummaryOnly();
   });
 
-  it('POST /api/web-search logs a summary when the search provider throws', async () => {
-    mocks.searchWeb.mockRejectedValue(new Error(`search vendor 500: ${UPSTREAM_ECHO}`));
-    const { POST } = await import('@/app/api/web-search/route');
-
-    const response = await POST(jsonRequest('/api/web-search', { query: 'fractions' }));
-
-    expect(response.status).toBe(500);
-    expectSummaryOnly();
-  });
-
   it('POST /api/transcription logs a summary when the ASR provider throws', async () => {
     mocks.transcribeAudio.mockRejectedValue(new Error(`ASR vendor 500: ${UPSTREAM_ECHO}`));
     const { POST } = await import('@/app/api/transcription/route');

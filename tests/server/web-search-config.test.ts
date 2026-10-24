@@ -223,13 +223,15 @@ describe('server web search config', () => {
     });
   });
 
-  it("applies the request's Claude model to the server's default search provider", async () => {
+  it("ignores the request's Claude model: the server's saved configuration decides (D3)", async () => {
     useProviders({ webSearch: { claude: { apiKey: 'sk-server-key' } } });
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(
-      await resolveClassroomWebSearchConfig(null, { webSearchModelId: 'claude-opus-5' }),
-    ).toMatchObject({ providerId: 'claude', claudeModelId: 'claude-opus-5' });
+    const config = await resolveClassroomWebSearchConfig(null, {
+      webSearchModelId: 'claude-opus-5',
+    });
+    expect(config).toMatchObject({ providerId: 'claude' });
+    expect(config).not.toMatchObject({ claudeModelId: 'claude-opus-5' });
   });
 
   it('pins the Claude model of the provider the server configures over the client model', async () => {

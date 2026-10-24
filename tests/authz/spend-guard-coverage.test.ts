@@ -12,18 +12,13 @@ const API_ROOT = path.join(process.cwd(), 'app', 'api');
 const SPEND_SIGNALS = [
   /\bresolveModel\w*\(/,
   /\bisServerConfiguredProvider\(/,
-  /\bgenerateClassroom\(/,
-  /\brunClassroomGenerationJob\(/,
+  /\bstartGenerationRun\(/,
 ];
 
 const KNOWN_SPENDERS = [
   'app/api/chat/route.ts',
   'app/api/chat/pi/route.ts',
-  'app/api/generate/agent-profiles/route.ts',
   'app/api/generate/image/route.ts',
-  'app/api/generate/scene-actions/route.ts',
-  'app/api/generate/scene-content/route.ts',
-  'app/api/generate/scene-outlines-stream/route.ts',
   'app/api/generate/tts/route.ts',
   'app/api/generate/video/route.ts',
   'app/api/generate/voice/route.ts',
@@ -33,9 +28,7 @@ const KNOWN_SPENDERS = [
   'app/api/pbl/v2/simulator/route.ts',
   'app/api/quiz-grade/route.ts',
   'app/api/transcription/route.ts',
-  'app/api/web-search/route.ts',
   'app/api/parse-pdf/route.ts',
-  'app/api/extract-document/route.ts',
   'app/api/agent/sessions/route.ts',
   'app/api/agent/sessions/[id]/messages/route.ts',
   'app/api/verify-model/route.ts',
@@ -43,6 +36,10 @@ const KNOWN_SPENDERS = [
   'app/api/verify-video-provider/route.ts',
   'app/api/verify-pdf-provider/route.ts',
   'app/api/generate-classroom/route.ts',
+  'app/api/generation-runs/route.ts',
+  'app/api/generation-runs/[id]/confirm-outline/route.ts',
+  'app/api/generation-runs/[id]/retry/route.ts',
+  'app/api/materials/route.ts',
   'app/api/community/questions/[id]/ai/route.ts',
   'app/api/community/challenges/[id]/route.ts',
 ];

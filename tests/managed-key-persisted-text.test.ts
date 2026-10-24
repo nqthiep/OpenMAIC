@@ -5,8 +5,8 @@ import type { PgAgentSessionMaterialStore } from '@openmaic/storage/material/pg'
 
 import type { DocumentExtractorProvider } from '@/lib/document';
 import { redactProviderErrors, snapshotEventDataForLog } from '@/lib/server/agent-runtime/runner';
-import type { GenerateClassroomInput } from '@/lib/server/classroom-generation';
-import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
+import { storedFailureMessage } from '@/lib/server/generation/run/engine';
+import { StepRefusal } from '@/lib/server/generation/steps/context';
 import { MODEL_FAILURE_TEXT } from '@/lib/server/error-summary';
 import {
   EXTRACTION_FAILURE_TEXT,
@@ -15,99 +15,34 @@ import {
 import { runNextMaterialExtraction } from '@/lib/server/material-extraction/runner';
 
 const UPSTREAM_TEXT = 'upstream rejected the request with status 401';
-const BASE_URL = 'http://localhost:3000';
-const REQUEST: GenerateClassroomInput = { requirement: 'Teach fractions.' };
-
 const mocks = vi.hoisted(() => ({
-  generateClassroom: vi.fn(),
-  markRunning: vi.fn(),
-  updateProgress: vi.fn(),
-  markSucceeded: vi.fn(),
-  markFailed: vi.fn(),
-  resolveModel: vi.fn(),
-  isProviderKeyRequired: vi.fn(),
+  accountsEnabled: vi.fn(),
 }));
 
-vi.mock('@/lib/server/classroom-generation', () => ({
-  generateClassroom: mocks.generateClassroom,
-}));
-vi.mock('@/lib/server/classroom-job-store', () => ({
-  markClassroomGenerationJobRunning: mocks.markRunning,
-  updateClassroomGenerationJobProgress: mocks.updateProgress,
-  markClassroomGenerationJobSucceeded: mocks.markSucceeded,
-  markClassroomGenerationJobFailed: mocks.markFailed,
-}));
-vi.mock('@/lib/server/resolve-model', () => ({
-  resolveModel: mocks.resolveModel,
-}));
-vi.mock('@/lib/ai/providers', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/ai/providers')>()),
-  isProviderKeyRequired: mocks.isProviderKeyRequired,
+vi.mock('@/lib/server/accounts/runtime', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/accounts/runtime')>()),
+  accountsEnabled: mocks.accountsEnabled,
 }));
 
-describe('classroom job failure text', () => {
+describe('generation run failure text', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.markRunning.mockResolvedValue(undefined);
-    mocks.markFailed.mockResolvedValue(undefined);
   });
 
-  it("stores the fixed text when the operator's key runs the job", async () => {
-    mocks.generateClassroom.mockImplementation(async (_input, options) => {
-      options.onManagedKey(true);
-      throw new Error(UPSTREAM_TEXT);
-    });
-
-    await runClassroomGenerationJob('job-managed', REQUEST, BASE_URL, { ownerId: 'owner-1' });
-
-    expect(mocks.markFailed).toHaveBeenCalledWith('job-managed', MODEL_FAILURE_TEXT);
+  it("stores the fixed text when accounts are on, so the operator's key never shows a provider's words", () => {
+    mocks.accountsEnabled.mockReturnValue(true);
+    expect(storedFailureMessage(new Error(UPSTREAM_TEXT), UPSTREAM_TEXT)).toBe(MODEL_FAILURE_TEXT);
   });
 
-  it("stores the upstream text when a visitor's key runs the job", async () => {
-    mocks.generateClassroom.mockImplementation(async (_input, options) => {
-      options.onManagedKey(false);
-      throw new Error(UPSTREAM_TEXT);
-    });
-
-    await runClassroomGenerationJob('job-visitor', REQUEST, BASE_URL, { ownerId: 'owner-1' });
-
-    expect(mocks.markFailed).toHaveBeenCalledWith('job-visitor', UPSTREAM_TEXT);
+  it("keeps the step's own refusal text: it is ours and already fixed", () => {
+    mocks.accountsEnabled.mockReturnValue(true);
+    const refusal = new StepRefusal('missing-api-key', 'No API key configured for image provider');
+    expect(storedFailureMessage(refusal, refusal.message)).toBe(refusal.message);
   });
 
-  it('stores the fixed text when any model in the run uses the operator key', async () => {
-    mocks.generateClassroom.mockImplementation(async (_input, options) => {
-      options.onManagedKey(false);
-      options.onManagedKey(true);
-      throw new Error(UPSTREAM_TEXT);
-    });
-
-    await runClassroomGenerationJob('job-mixed', REQUEST, BASE_URL, { ownerId: 'owner-1' });
-
-    expect(mocks.markFailed).toHaveBeenCalledWith('job-mixed', MODEL_FAILURE_TEXT);
-  });
-});
-
-describe('generateClassroom managed-key report', () => {
-  it.each([true, false])('reports managedKey=%s before a later failure', async (managedKey) => {
-    const { generateClassroom } = await vi.importActual<
-      typeof import('@/lib/server/classroom-generation')
-    >('@/lib/server/classroom-generation');
-    mocks.resolveModel.mockResolvedValue({
-      managedKey,
-      model: {},
-      modelInfo: undefined,
-      modelString: 'stub',
-      providerId: 'stub',
-      apiKey: '',
-      thinkingConfig: undefined,
-    });
-    mocks.isProviderKeyRequired.mockReturnValue(true);
-    const onManagedKey = vi.fn();
-
-    await expect(
-      generateClassroom(REQUEST, { baseUrl: BASE_URL, ownerId: 'owner-1', onManagedKey }),
-    ).rejects.toThrow('No API key configured');
-    expect(onManagedKey).toHaveBeenCalledWith(managedKey);
+  it('keeps the upstream text when accounts are off (one person running their own keys)', () => {
+    mocks.accountsEnabled.mockReturnValue(false);
+    expect(storedFailureMessage(new Error(UPSTREAM_TEXT), UPSTREAM_TEXT)).toBe(UPSTREAM_TEXT);
   });
 });
 
