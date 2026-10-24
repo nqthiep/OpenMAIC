@@ -134,6 +134,10 @@ Cũng cần kiểm các tính năng 1.2.0 đi kèm (vì nhận đủ): chạy si
 - **D4 Danh tính.** Đề xuất 5.1 (tài khoản là host auth method, cookie ẩn danh vẫn là dự phòng cho khách).
 - **D5 Có đẩy nhánh `it-math-merge-1.2.1` lên `origin` sau mỗi giai đoạn để sao lưu?** Quy tắc dự án chỉ cho đẩy khi được yêu cầu. Đề xuất: có, chỉ nhánh này, không bao giờ `it-math` cho tới khi xong.
 
+### Đã quyết (chủ dự án, 2026-10-24)
+
+D1 đồng ý (giữ `vi-VN` khi không có cookie). D2 đồng ý (cầu nối (a), sau spike). D3 đồng ý (chỉ quản trị viên cấu hình model và khoá). D4 đồng ý (tài khoản là host auth method, cookie ẩn danh là dự phòng cho khách). D5 có: đẩy `it-math-merge-1.2.1` lên `origin` sau mỗi giai đoạn, chỉ nhánh này, không đẩy `it-math`. P0.1 xong: thay đổi dở đã commit (`70c600c4`, `efc8648b`); `openmaic.local.yml` và `.omo/` để ngoài.
+
 ## 8. Bộ hành trình để chạy thật (từ S2, và toàn bộ ở cuối)
 
 Chạy trong trình duyệt và bằng `curl`; ghi kết quả vào HANDOFF.
