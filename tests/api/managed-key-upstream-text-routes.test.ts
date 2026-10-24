@@ -109,6 +109,12 @@ vi.mock('@/lib/server/ssrf-guard', () => ({
   findUnsafeNetworkTargetError: () => undefined,
 }));
 
+// The routes reach providers through a pinned transport; here the stubbed global fetch stands in.
+vi.mock('@/lib/server/provider-fetch', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/provider-fetch')>()),
+  providerFetch: (url: string, init?: RequestInit) => globalThis.fetch(url, init),
+}));
+
 vi.mock('@/lib/logger', () => ({
   createLogger: () => ({
     info: () => undefined,
@@ -336,7 +342,7 @@ describe('upstream provider text on the operator key', () => {
       expect(response.status).toBe(500);
       expect(JSON.parse(text)).toMatchObject({
         errorCode: 'INTERNAL_ERROR',
-        error: MODEL_FAILURE_TEXT,
+        error: 'Authentication failed, please check the API Key',
       });
       expect(text).not.toContain(UPSTREAM_FRAGMENT);
       expect(fetchMock).toHaveBeenCalledWith(
@@ -347,7 +353,7 @@ describe('upstream provider text on the operator key', () => {
       );
     });
 
-    it('keeps the upstream text for a visitor who supplied their own key', async () => {
+    it('gives a visitor with their own key the same fixed text', async () => {
       mocks.isServerConfiguredProvider.mockReturnValue(false);
       vi.stubGlobal(
         'fetch',
@@ -370,7 +376,9 @@ describe('upstream provider text on the operator key', () => {
       const text = await response.text();
 
       expect(response.status).toBe(500);
-      expect(JSON.parse(text).error).toContain(UPSTREAM_FRAGMENT);
+      // Provider text is never returned, whoever's key it was.
+      expect(JSON.parse(text).error).toBe('Authentication failed, please check the API Key');
+      expect(text).not.toContain(UPSTREAM_FRAGMENT);
     });
   });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { groupBySubject, knownFolderId } from '@/lib/home/subject-groups';
-import type { FolderRecord } from '@/lib/utils/database';
+import type { FolderRecord } from '@/lib/types/folder';
 
 const folder = (id: string, order: number): FolderRecord => ({
   id,

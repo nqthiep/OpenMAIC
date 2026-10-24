@@ -28,7 +28,6 @@ import { Button } from '@/components/ui/button';
 import { DataTable, SELECT_CLASS, type Column } from '@/components/learning/data-table';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { createLogger } from '@/lib/logger';
-import { isBrowserPersistenceEnabled } from '@/lib/persistence/bootstrap';
 
 const log = createLogger('AccountAdminPanel');
 
@@ -129,7 +128,6 @@ export function AccountAdminPanel() {
   }, [reportListFailure]);
 
   useEffect(() => {
-    if (!isBrowserPersistenceEnabled()) return;
     let active = true;
     fetchAccountSession()
       .then((session) => {

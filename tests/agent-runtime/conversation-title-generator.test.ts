@@ -35,7 +35,7 @@ describe('conversation title generator', () => {
     vi.clearAllMocks();
     mocks.callLLM.mockResolvedValue({ text: 'Project planning' });
     mocks.resolveAgentDriverModel.mockResolvedValue({
-      connection: { model: DRIVER_MODEL, thinkingConfig: { enabled: true } },
+      connection: { model: DRIVER_MODEL, thinkingConfig: { enabled: true }, serverManaged: true },
     });
     clearProviders();
   });
@@ -48,6 +48,7 @@ describe('conversation title generator', () => {
     mocks.resolveModel.mockResolvedValue({
       model: TITLE_MODEL,
       thinkingConfig: { enabled: true, level: 'low' },
+      serverManaged: true,
     });
     mocks.callLLM.mockResolvedValue({ text: '中文项目计划' });
 
@@ -59,12 +60,13 @@ describe('conversation title generator', () => {
       'conversation-title',
       undefined,
       { enabled: true, level: 'low' },
+      { serverManaged: true },
     );
   });
 
   it('disables thinking when the dedicated conversation-title route omits it', async () => {
     mocks.getStageRoute.mockReturnValue({ model: 'google:gemini-title' });
-    mocks.resolveModel.mockResolvedValue({ model: TITLE_MODEL });
+    mocks.resolveModel.mockResolvedValue({ model: TITLE_MODEL, serverManaged: true });
 
     await expect(generate('Plan a launch')).resolves.toBe('Project planning');
     expect(mocks.resolveModel).toHaveBeenCalledWith({ stage: 'conversation-title' });
@@ -74,6 +76,7 @@ describe('conversation title generator', () => {
       'conversation-title',
       undefined,
       { mode: 'disabled' },
+      { serverManaged: true },
     );
   });
 
@@ -89,6 +92,7 @@ describe('conversation title generator', () => {
       'conversation-title',
       undefined,
       { mode: 'disabled' },
+      { serverManaged: true },
     );
   });
 
@@ -113,6 +117,7 @@ describe('conversation title generator', () => {
       'conversation-title',
       undefined,
       { mode: 'disabled' },
+      { serverManaged: true },
     );
     const system = mocks.callLLM.mock.calls[0]?.[0]?.system as string;
     expect(system).toMatch(/conversation title/i);

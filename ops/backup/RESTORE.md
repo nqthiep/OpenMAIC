@@ -24,16 +24,16 @@ cp -r source ~/OpenMAIC && cd ~/OpenMAIC
 age -d -i $KEY ../khaitam.ai.vn/secrets/env-and-config.tar.gz.age | tar -xz   # .env, .env.local, override
 
 # 2. database (start only postgres, then load the dump)
-docker compose --profile server-persistence up -d postgres
+docker compose up -d postgres
 age -d -i $KEY ../khaitam.ai.vn/db/openmaic.dump.age \
-  | docker compose --profile server-persistence exec -T postgres pg_restore -U openmaic -d openmaic --clean --if-exists
+  | docker compose exec -T postgres pg_restore -U openmaic -d openmaic --clean --if-exists
 
 # 3. app data volume (start the app once so the volume exists, then fill it)
-docker compose --profile server-persistence up -d --build openmaic
+docker compose up -d --build openmaic
 age -d -i $KEY ../khaitam.ai.vn/data/app-data.tar.gz.age \
   | docker compose exec -T -u root openmaic tar -C /app/data -xzf -
 docker compose exec -T -u root openmaic chown -R 1001:65533 /app/data
-docker compose --profile server-persistence up -d --force-recreate openmaic
+docker compose up -d --force-recreate openmaic
 ```
 
 The Cloudflare Tunnel token is not backed up. Create it again in the Cloudflare dashboard.

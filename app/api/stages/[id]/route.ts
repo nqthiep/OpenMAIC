@@ -14,14 +14,14 @@
  *          bumps `stage.updatedAt` so the freshness signal sees the change.
  * - DELETE removes the course and its cascading child rows.
  *
- * The configured runtime gates the family (see `app/api/stages/route.ts`):
- * off, or on without a DATABASE_URL, answers the same plain 404.
+ * Server persistence gates the family (see `app/api/stages/route.ts`): without
+ * a DATABASE_URL it answers a plain 404; the agent runtime is not required.
  */
 import type { NextRequest } from 'next/server';
 
 import { DocumentNotFoundError, DocumentVersionError, type MaicDocument } from '@openmaic/storage';
 
-import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
+import { isServerPersistenceConfigured } from '@/lib/config/feature-flags';
 import { apiError } from '@/lib/server/api-response';
 import { canReadStageById } from '@/lib/server/authz/viewer';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
@@ -73,7 +73,7 @@ function mapSaveError(error: unknown, headers: Headers) {
 
 // GET /api/stages/[id] — the full document.
 export async function GET(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // PATCH /api/stages/[id] — rename the course (owner-only).
 export async function PATCH(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const renameRead = await readBoundedJson(req, STAGE_RENAME_MAX_BYTES);
   if (!renameRead.ok) {
@@ -128,7 +128,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 // PUT /api/stages/[id] — save a whole document.
 export async function PUT(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const saveRead = await readBoundedJson(req, STAGE_SAVE_MAX_BYTES);
   if (!saveRead.ok) {
@@ -191,7 +191,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 // DELETE /api/stages/[id] — remove the course and its scenes/outline.
 export async function DELETE(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;

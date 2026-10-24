@@ -10,8 +10,6 @@ const sonner = vi.hoisted(() => ({ toast: { success: vi.fn(), error: vi.fn() } }
 
 vi.mock('sonner', () => sonner);
 
-vi.mock('@/lib/persistence/bootstrap', () => ({ isBrowserPersistenceEnabled: () => true }));
-
 // Resolves keys against the English catalogue, so a missing key renders as its own name.
 vi.mock('@/lib/hooks/use-i18n', async () => {
   const { default: en } = await import('@/lib/i18n/locales/en-US.json');

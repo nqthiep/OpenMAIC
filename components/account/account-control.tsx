@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { createLogger } from '@/lib/logger';
-import { isBrowserPersistenceEnabled } from '@/lib/persistence/bootstrap';
 import { SESSION_ENDED_EVENT } from '@/lib/persistence/session-end';
 import { cn } from '@/lib/utils';
 import {
@@ -72,11 +71,6 @@ export function AccountControl() {
   }, [learnerSignedIn]);
 
   useEffect(() => {
-    if (!isBrowserPersistenceEnabled()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- no control to wait for
-      setSession(null);
-      return;
-    }
     let active = true;
     fetchAccountSession()
       .then((next) => {
@@ -102,7 +96,6 @@ export function AccountControl() {
     signedInRef.current = session?.authenticated === true;
   }, [session]);
   useEffect(() => {
-    if (!isBrowserPersistenceEnabled()) return;
     const recheck = () => {
       if (document.visibilityState !== 'visible' || !signedInRef.current) return;
       fetchAccountSession()

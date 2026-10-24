@@ -48,7 +48,6 @@ import {
 import { useCanvasStore } from '@/lib/store/canvas';
 import { useSettingsStore } from '@/lib/store/settings';
 import { detectSpeechLanguage, pickBrowserVoice } from '@/lib/audio/browser-speech-language';
-import { isTTSProviderEnabled } from '@/lib/audio/provider-enablement';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('PlaybackEngine');

@@ -25,8 +25,12 @@ import {
   resolveServerAsset,
   type ServerAssetResolution,
 } from '@/lib/persistence/resolve-server-asset';
+import { attachOwnerCookies } from '@/lib/server/identity/with-owner';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import {
+  checkClientDocumentExtractorBaseUrl,
+  checkClientMediaExtractorBaseUrl,
+} from '@/lib/server/client-extractor-endpoint';
 import { MAX_EXTRACT_DOCUMENT_FILE_SIZE_BYTES } from '@/lib/constants/generation';
 
 // The asset-id path resolves bytes from the server asset store, which lives in
@@ -261,14 +265,15 @@ async function runExtraction(
     // a YAML-only deployment works — the client-level env fallback reads env
     // vars only. Client-entered creds are used only when unmanaged.
     const mediaManagedCreds = mediaManaged ? resolveManagedAliDocMindCredentials() : undefined;
-    const mediaClientBaseUrl = mediaManaged ? undefined : requestConfig.baseUrl || undefined;
-    // Same SSRF guard the document path applies: a client-supplied endpoint
-    // must not let the server connect to internal/metadata hosts.
+    let mediaClientBaseUrl = mediaManaged ? undefined : requestConfig.baseUrl || undefined;
+    // A client-supplied media extractor endpoint must pass the extractor's
+    // endpoint rule (see checkClientMediaExtractorBaseUrl).
     if (mediaClientBaseUrl) {
-      const ssrfError = await validateUrlForSSRF(mediaClientBaseUrl);
-      if (ssrfError) {
-        return apiError('INVALID_URL', 403, ssrfError);
+      const checked = checkClientMediaExtractorBaseUrl(mediaClientBaseUrl);
+      if (!checked.ok) {
+        return apiError('INVALID_URL', 403, checked.message);
       }
+      mediaClientBaseUrl = checked.baseUrl;
     }
     const mediaArtifact = await extractMedia({
       buffer,
@@ -393,10 +398,11 @@ async function runExtraction(
     }
   }
   if (clientBaseUrl) {
-    const ssrfError = await validateUrlForSSRF(clientBaseUrl);
-    if (ssrfError) {
-      return apiError('INVALID_URL', 403, ssrfError);
+    const checked = await checkClientDocumentExtractorBaseUrl(provider.id, clientBaseUrl);
+    if (!checked.ok) {
+      return apiError('INVALID_URL', 403, checked.message);
     }
+    clientBaseUrl = checked.baseUrl;
   }
 
   logState.managedKey = managed;
@@ -421,6 +427,7 @@ async function runExtraction(
     // Env fallback is a last resort for a managed provider (defensive; the
     // resolver already covers env+YAML).
     allowEnvFallback: managed,
+    managed,
   };
 
   const artifact = await provider.extract({
@@ -447,7 +454,20 @@ async function runExtraction(
   return apiSuccess({ data: resultWithMetadata });
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<Response> {
+  const ownerCookies: OwnerCookies = {};
+  // The asset-id form resolves the request owner: every answer after that,
+  // success or error, carries the resolution's cookies (the anonymous
+  // owner's renewal).
+  return attachOwnerCookies(await extract(req, ownerCookies), ownerCookies.setCookies);
+}
+
+/** Filled in once the asset-id form has resolved the request owner. */
+interface OwnerCookies {
+  setCookies?: readonly string[];
+}
+
+async function extract(req: NextRequest, ownerCookies: OwnerCookies): Promise<Response> {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
 
@@ -549,6 +569,7 @@ export async function POST(req: NextRequest) {
           req,
           MAX_EXTRACT_DOCUMENT_FILE_SIZE_BYTES,
         );
+        ownerCookies.setCookies = resolution.setCookies;
       } catch (error) {
         // A failure from the server asset store (DB outage, registry failure)
         // must not reach the client as raw `error.message`; log the real error

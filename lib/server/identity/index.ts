@@ -32,4 +32,7 @@ export { OWNER_ROLES, principalHasRole } from './types';
 export type { OwnerAuthenticationOptions } from './registry';
 export { configureOwnerAuthentication } from './registry';
 export { sharedTeamAuthMethod } from './shared-team';
+// KHAITAM: the anonymous owner a request's cookie names, read without minting (see authz/viewer.ts).
+export { readAnonymousOwnerId as peekAnonymousOwnerId } from './anonymous-cookie';
+export { singleUserAuthMethod } from './single-user';
 export { principalFromStoredOwner } from './stored-owner';

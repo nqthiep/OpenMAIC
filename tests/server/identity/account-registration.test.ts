@@ -23,6 +23,7 @@ describe('instrumentation register() and the account owner auth method', () => {
   it('registers the account session method ahead of the anonymous cookie', async () => {
     vi.stubEnv('NEXT_RUNTIME', 'nodejs');
     vi.stubEnv('ACCESS_CODE', 'demo-code-that-is-long-enough');
+    vi.stubEnv('DATABASE_URL', 'postgres://registration-test');
     resetOwnerAuthenticationForTests();
     const { register } = await import('@/instrumentation');
     const { ownerAuthConfigurationForResolution } = await import('@/lib/server/identity/registry');
@@ -37,6 +38,7 @@ describe('instrumentation register() and the account owner auth method', () => {
   it('keeps the shared-team method last when PERSISTENCE_SHARED_OWNER_ID is set', async () => {
     vi.stubEnv('NEXT_RUNTIME', 'nodejs');
     vi.stubEnv('ACCESS_CODE', 'demo-code-that-is-long-enough');
+    vi.stubEnv('DATABASE_URL', 'postgres://registration-test');
     vi.stubEnv('PERSISTENCE_SHARED_OWNER_ID', 'team-library');
     resetOwnerAuthenticationForTests();
     const { register } = await import('@/instrumentation');

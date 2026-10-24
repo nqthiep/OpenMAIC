@@ -16,6 +16,11 @@ import { requireSpender } from '@/lib/server/authz/viewer';
 
 import { NextRequest } from 'next/server';
 import { streamLLM } from '@/lib/ai/llm';
+import {
+  resolveFallbackModel,
+  shouldFallbackFor,
+  logFallbackFired,
+} from '@/lib/server/llm-fallback';
 import { buildPrompt, PROMPT_IDS } from '@/lib/prompts';
 import {
   formatImageDescription,
@@ -327,6 +332,7 @@ export async function POST(req: NextRequest) {
       modelString,
       thinkingConfig,
       managedKey: operatorKeyUsed,
+      serverManaged: serverManagedPrimary,
     } = await resolveModelFromRequest(req, body, 'scene-outlines-stream');
     managedKey = operatorKeyUsed;
     resolvedModelString = modelString;
@@ -517,47 +523,82 @@ export async function POST(req: NextRequest) {
         // generation and must not be allowed to grow the heap unbounded.
         const MAX_OUTLINE_STREAM_BYTES = 512 * 1024;
 
+        // Retryable-failure fallback: after the same-model retries are
+        // exhausted, retry once on the stage's configured fallback model.
+        let streamParams = visionImages?.length
+          ? {
+              model: languageModel,
+              system: prompts.system,
+              messages: [
+                {
+                  role: 'user' as const,
+                  content: buildVisionUserContent(prompts.user, visionImages),
+                },
+              ],
+              maxOutputTokens: modelInfo?.outputWindow,
+              // Tear down the upstream LLM request when the client disconnects,
+              // instead of letting it run to completion for a dead connection.
+              abortSignal: req.signal,
+            }
+          : {
+              model: languageModel,
+              system: prompts.system,
+              prompt: prompts.user,
+              maxOutputTokens: modelInfo?.outputWindow,
+              abortSignal: req.signal,
+            };
+        let fellBack = false;
+        // Shared decision (shared retryable-error + empty-output check) and the
+        // shared log line live in lib/server/llm-fallback.ts — one place, same
+        // semantics as the non-streaming callLLM path.
+        const maybeFallback = async (error: unknown, text?: string): Promise<boolean> => {
+          if (fellBack) return false;
+          // The fallback only protects primaries the SERVER resolved (routed
+          // stage or server-configured provider). A client-supplied x-model
+          // with a garbage key must never be allowed to burn the operator's
+          // fallback key by failing on purpose.
+          if (!serverManagedPrimary) return false;
+          if (!shouldFallbackFor(error, text)) return false;
+          let fallback: Awaited<ReturnType<typeof resolveFallbackModel>>;
+          try {
+            fallback = await resolveFallbackModel('scene-outlines-stream');
+          } catch {
+            // Misconfigured fallback provider — keep the real error instead of
+            // surfacing e.g. "API key required for provider: …" to the client.
+            return false;
+          }
+          if (!fallback) return false;
+          streamParams = { ...streamParams, model: fallback.model };
+          fellBack = true;
+          logFallbackFired(
+            'scene-outlines-stream',
+            error !== undefined ? 'retryable failure' : 'empty output',
+            resolvedModelString ?? '?',
+            fallback.modelString,
+          );
+          const retryEvent = JSON.stringify({
+            type: 'retry',
+            attempt: MAX_STREAM_RETRIES + 1,
+            maxAttempts: MAX_STREAM_RETRIES + 1,
+            fallback: fallback.modelString,
+          });
+          controller.enqueue(encoder.encode(`data: ${retryEvent}\n\n`));
+          return true;
+        };
+
         try {
           startHeartbeat();
-
-          // The SDK reports a provider refusal (such as HTTP 402) through onError and ends the
-          // text stream empty, so the status is kept here for the empty-result path below.
-          let providerStatus: number | undefined;
-          const onProviderError = ({ error }: { error: unknown }) => {
-            providerStatus = providerStatusOf(error) ?? providerStatus;
-          };
-
-          const streamParams = visionImages?.length
-            ? {
-                model: languageModel,
-                system: prompts.system,
-                messages: [
-                  {
-                    role: 'user' as const,
-                    content: buildVisionUserContent(prompts.user, visionImages),
-                  },
-                ],
-                maxOutputTokens: modelInfo?.outputWindow,
-                // Tear down the upstream LLM request when the client disconnects,
-                // instead of letting it run to completion for a dead connection.
-                abortSignal: req.signal,
-                onError: onProviderError,
-              }
-            : {
-                model: languageModel,
-                system: prompts.system,
-                prompt: prompts.user,
-                maxOutputTokens: modelInfo?.outputWindow,
-                abortSignal: req.signal,
-                onError: onProviderError,
-              };
 
           let parsedOutlines: SceneOutline[] = [];
           let languageDirective: string | null = null;
           let courseTitle: string | null = null;
           let lastError: string | undefined;
 
-          for (let attempt = 1; attempt <= MAX_STREAM_RETRIES + 1; attempt++) {
+          for (
+            let attempt = 1;
+            attempt <= MAX_STREAM_RETRIES + 1 && !(fellBack && attempt > 1);
+            attempt++
+          ) {
             try {
               let fullText = '';
               let scanFrom = 0;
@@ -565,19 +606,38 @@ export async function POST(req: NextRequest) {
               languageDirective = null;
               courseTitle = null;
               const usedOutlineIds = new Set<string>();
-              const textStream = streamLLM(
+              // Consume the FULL stream, not just textStream: errors that
+              // happen before the stream starts (a 401, an invalid key) and
+              // the finish reason (content-filter) are surfaced as stream
+              // parts, NOT as throws — with textStream alone they silently
+              // look like an empty response and would reach the empty-output
+              // fallback path.
+              let streamError: unknown = undefined;
+              let finishReason: string | undefined = undefined;
+              const fullStream = streamLLM(
                 streamParams,
                 'scene-outlines-stream',
                 thinkingConfig,
-              ).textStream;
+              ).fullStream;
 
-              for await (const chunk of textStream) {
+              for await (const part of fullStream) {
                 // Stop doing work the moment the client goes away — otherwise
                 // generation keeps running and buffering for a dead connection.
                 if (req.signal?.aborted) {
                   stopHeartbeat();
                   return;
                 }
+
+                if (part.type === 'error') {
+                  streamError = part.error;
+                  continue;
+                }
+                if (part.type === 'finish') {
+                  finishReason = part.finishReason;
+                  continue;
+                }
+                if (part.type !== 'text-delta') continue;
+                const chunk = part.text;
 
                 fullText += chunk;
 
@@ -651,30 +711,67 @@ export async function POST(req: NextRequest) {
                 break;
               }
 
-              // Empty result. A refusal the visitor can act on (balance, key) gets its own text
-              // and is not retried: a retry cannot succeed until someone fixes it.
-              const failureText = providerFailureText(providerStatus, managedKey);
-              lastError =
-                failureText ??
-                (fullText.trim()
-                  ? 'LLM response could not be parsed into outlines'
-                  : 'LLM returned empty response');
-              log.warn(
-                `Outlines attempt ${attempt} diagnostics: textLen=${fullText.length}, outlines=${parsedOutlines.length}, languageDirective=${languageDirective ? 'yes' : 'no'}, providerStatus=${providerStatus ?? 'none'}`,
-              );
-              if (failureText !== undefined) break;
-
-              if (attempt <= MAX_STREAM_RETRIES) {
+              // Classify before treating anything as an "empty output": a
+              // stream error (a 401 that failed before the stream started) is
+              // a real failure that must surface to the client, and a
+              // content-filter finish is a safety refusal — neither may reach
+              // the empty-output fallback path.
+              if (streamError !== undefined) {
+                lastError =
+                  streamError instanceof Error ? streamError.message : String(streamError);
                 log.warn(
-                  `Empty outlines (attempt ${attempt}/${MAX_STREAM_RETRIES + 1}), retrying...`,
+                  `Outlines attempt ${attempt} stream error: ${lastError}, finishReason=${finishReason ?? 'none'}`,
                 );
-                // Notify client a retry is happening
-                const retryEvent = JSON.stringify({
-                  type: 'retry',
-                  attempt,
-                  maxAttempts: MAX_STREAM_RETRIES + 1,
-                });
-                controller.enqueue(encoder.encode(`data: ${retryEvent}\n\n`));
+
+                if (attempt <= MAX_STREAM_RETRIES) {
+                  const retryEvent = JSON.stringify({
+                    type: 'retry',
+                    attempt,
+                    maxAttempts: MAX_STREAM_RETRIES + 1,
+                  });
+                  controller.enqueue(encoder.encode(`data: ${retryEvent}\n\n`));
+                  continue;
+                }
+
+                // Same-model retries exhausted: retry once on the fallback
+                // model when the failure is retryable.
+                if (await maybeFallback(streamError)) {
+                  attempt = 0;
+                  continue;
+                }
+              } else if (finishReason === 'content-filter') {
+                lastError = 'LLM response blocked by content filter';
+                log.warn(
+                  `Outlines attempt ${attempt}: content-filter finish — not retrying, not falling back`,
+                );
+                break;
+              } else {
+                // Empty result — retry if we have attempts left
+                lastError = fullText.trim()
+                  ? 'LLM response could not be parsed into outlines'
+                  : 'LLM returned empty response';
+                log.warn(
+                  `Outlines attempt ${attempt} diagnostics: textLen=${fullText.length}, outlines=${parsedOutlines.length}, languageDirective=${languageDirective ? 'yes' : 'no'}, preview=${JSON.stringify(fullText.slice(0, 240))}`,
+                );
+
+                if (attempt <= MAX_STREAM_RETRIES) {
+                  log.warn(
+                    `Empty outlines (attempt ${attempt}/${MAX_STREAM_RETRIES + 1}), retrying...`,
+                  );
+                  // Notify client a retry is happening
+                  const retryEvent = JSON.stringify({
+                    type: 'retry',
+                    attempt,
+                    maxAttempts: MAX_STREAM_RETRIES + 1,
+                  });
+                  controller.enqueue(encoder.encode(`data: ${retryEvent}\n\n`));
+                } else if (await maybeFallback(undefined, fullText)) {
+                  // Same-model retries exhausted and the response was empty:
+                  // retry once on the fallback model (loop is re-entered via
+                  // attempt reset below).
+                  attempt = 0;
+                  continue;
+                }
               }
             } catch (error) {
               // Client disconnected (AbortError from the now-propagated signal):
@@ -683,7 +780,7 @@ export async function POST(req: NextRequest) {
                 stopHeartbeat();
                 return;
               }
-              const thrownStatus = providerStatusOf(error) ?? providerStatus;
+              const thrownStatus = providerStatusOf(error);
               const failureText = providerFailureText(thrownStatus, managedKey);
               lastError = failureText ?? visitorErrorText(error, managedKey, MODEL_FAILURE_TEXT);
               log.warn(
@@ -702,6 +799,13 @@ export async function POST(req: NextRequest) {
                   maxAttempts: MAX_STREAM_RETRIES + 1,
                 });
                 controller.enqueue(encoder.encode(`data: ${retryEvent}\n\n`));
+                continue;
+              }
+
+              // Same-model retries exhausted: retry once on the fallback model
+              // when the failure is retryable.
+              if (await maybeFallback(error)) {
+                attempt = 0;
                 continue;
               }
             }

@@ -22,7 +22,7 @@ flock -n 9 || { log "another backup is running, skipping"; exit 0; }
 
 [ -s "$RECIPIENT_FILE" ] || { log "missing age public key: $RECIPIENT_FILE"; exit 1; }
 cd "$APP_DIR"
-COMPOSE="docker compose --profile server-persistence"
+COMPOSE="docker compose"
 enc() { age -R "$RECIPIENT_FILE" -o "$1.tmp" && mv "$1.tmp" "$1"; }
 
 if [ ! -d "$REPO_DIR/.git" ]; then

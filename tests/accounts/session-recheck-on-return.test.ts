@@ -19,7 +19,6 @@ vi.mock('sonner', () => ({
 vi.mock('@/lib/hooks/use-i18n', () => ({
   useI18n: () => ({ locale: 'vi-VN', t: (key: string) => key }),
 }));
-vi.mock('@/lib/persistence/bootstrap', () => ({ isBrowserPersistenceEnabled: () => true }));
 vi.mock('@/components/support/support-inbox', () => ({
   SUPPORT_OPEN_EVENT: 'support-open',
   SupportDialog: () => null,

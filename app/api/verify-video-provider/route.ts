@@ -30,7 +30,8 @@ import type { VideoProviderId } from '@/lib/media/types';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { MODEL_FAILURE_TEXT, describeUnexpectedError } from '@/lib/server/error-summary';
-import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { validateClientBaseUrl } from '@/lib/server/ssrf-guard';
+import { withMediaProviderFetch } from '@/lib/server/media-provider-fetch';
 
 const log = createLogger('VerifyVideoProvider');
 
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
     const clientBaseUrl = keysAllowed ? request.headers.get('x-base-url') || undefined : undefined;
 
     if (clientBaseUrl) {
-      const ssrfError = await validateUrlForSSRF(clientBaseUrl);
+      const ssrfError = await validateClientBaseUrl(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);
       }
@@ -80,12 +81,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await testVideoConnectivity({
-      providerId,
-      apiKey,
-      baseUrl,
-      model,
-    });
+    // Every probe request runs on the pinned provider transport; the adapters'
+    // result messages are fixed text (no provider body, no transport detail).
+    const result = await testVideoConnectivity(
+      withMediaProviderFetch({ providerId, apiKey, baseUrl, model }, managed),
+    );
 
     if (!result.success) {
       return apiError('UPSTREAM_ERROR', 500, managed ? MODEL_FAILURE_TEXT : result.message);
@@ -94,10 +94,6 @@ export async function POST(request: NextRequest) {
     return apiSuccess({ message: result.message });
   } catch (err) {
     log.error(`Video provider verification failed: ${describeUnexpectedError(err)}`);
-    return apiError(
-      'INTERNAL_ERROR',
-      500,
-      managed ? MODEL_FAILURE_TEXT : `Connectivity test error: ${err}`,
-    );
+    return apiError('INTERNAL_ERROR', 500, 'Connectivity test error');
   }
 }

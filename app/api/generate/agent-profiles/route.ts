@@ -189,6 +189,7 @@ export async function POST(req: NextRequest) {
       modelString: _modelString,
       thinkingConfig,
       managedKey: operatorKeyUsed,
+      serverManaged,
     } = await resolveModelFromRequest(req, body, 'agent-profiles');
     modelString = _modelString;
     managedKey = operatorKeyUsed;
@@ -294,6 +295,7 @@ Return a JSON object with this exact structure:
         'agent-profiles',
         undefined,
         thinkingConfig,
+        { serverManaged },
       )
     ).text;
 

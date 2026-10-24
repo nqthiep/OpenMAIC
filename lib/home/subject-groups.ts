@@ -1,4 +1,4 @@
-import type { FolderRecord } from '@/lib/utils/database';
+import type { FolderRecord } from '@/lib/types/folder';
 
 export interface SubjectGroup<T> {
   /** The folder that stands for the subject; absent for courses that are not filed. */

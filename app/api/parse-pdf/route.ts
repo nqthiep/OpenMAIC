@@ -7,12 +7,13 @@ import {
   resolvePDFBaseUrl,
 } from '@/lib/server/provider-config';
 import type { PDFProviderId } from '@/lib/pdf/types';
+import { isCuratedParseError } from '@/lib/pdf/pdf-providers';
 import type { ParsedPdfContent } from '@/lib/types/pdf';
 import { documentArtifactToParsedPdfContent, extractDocument } from '@/lib/document';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { checkClientDocumentExtractorBaseUrl } from '@/lib/server/client-extractor-endpoint';
 const log = createLogger('Parse PDF');
 
 /** B49: route-specific fixed text — "model provider" wording is inaccurate for PDF parsing. */
@@ -54,18 +55,20 @@ export async function POST(req: NextRequest) {
     // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
     managed = isServerConfiguredProvider('pdf', effectiveProviderId);
     const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
-    const clientBaseUrl = keysAllowed ? baseUrl || undefined : undefined;
+    let clientBaseUrl = keysAllowed ? baseUrl || undefined : undefined;
     if (clientBaseUrl) {
-      const ssrfError = await validateUrlForSSRF(clientBaseUrl);
-      if (ssrfError) {
-        return apiError('INVALID_URL', 403, ssrfError);
+      const checked = await checkClientDocumentExtractorBaseUrl(effectiveProviderId, clientBaseUrl);
+      if (!checked.ok) {
+        return apiError('INVALID_URL', 403, checked.message);
       }
+      clientBaseUrl = checked.baseUrl;
     }
 
     const config = {
       providerId: effectiveProviderId,
       apiKey: resolvePDFApiKey(effectiveProviderId, keysAllowed ? apiKey || undefined : undefined),
       baseUrl: resolvePDFBaseUrl(effectiveProviderId, clientBaseUrl),
+      managed,
     };
 
     // Convert PDF to buffer
@@ -98,6 +101,13 @@ export async function POST(req: NextRequest) {
     log.error(
       `PDF parsing failed [provider=${resolvedProviderId ?? 'unknown'}, file="${pdfFileName ?? 'unknown'}"]: ${describeUnexpectedError(error)}`,
     );
-    return apiError('PARSE_FAILED', 500, visitorErrorText(error, managed, PDF_PARSE_FAILURE_TEXT));
+    // The parser's own fixed messages carry no upstream text, so they are safe to show.
+    return apiError(
+      'PARSE_FAILED',
+      500,
+      isCuratedParseError(error)
+        ? error.message
+        : visitorErrorText(error, managed, PDF_PARSE_FAILURE_TEXT),
+    );
   }
 }

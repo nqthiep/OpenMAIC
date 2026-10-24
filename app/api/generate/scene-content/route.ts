@@ -134,6 +134,7 @@ export async function POST(req: NextRequest) {
       modelInfo,
       modelString,
       thinkingConfig,
+      serverManaged,
     } = await resolveModelFromRequest(req, body, stage);
     outlineTitle = rawOutline?.title;
     resolvedModelString = modelString;
@@ -177,6 +178,7 @@ export async function POST(req: NextRequest) {
           'scene-content',
           undefined,
           thinkingConfig,
+          { serverManaged },
         );
         return result.text;
       }
@@ -191,6 +193,7 @@ export async function POST(req: NextRequest) {
         'scene-content',
         undefined,
         thinkingConfig,
+        { serverManaged },
       );
       return result.text;
     };

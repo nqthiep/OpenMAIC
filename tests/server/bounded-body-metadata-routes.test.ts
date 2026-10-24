@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 import { createFakeDocumentStore } from '../agent-runtime/_fake-document-store';
+import { useProviders } from '../fixtures/provider-snapshot';
 
 const MAX_BYTES = 1024 * 1024;
 
@@ -24,9 +25,15 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
-  isServerPersistenceConfigured: () => false,
+  isServerPersistenceConfigured: () => true,
   isAgentRuntimeEnabled: () => true,
   isAgentRuntimeConfigured: () => true,
+}));
+// Persistence is configured here (the folder routes need it), so the provider settings count as loaded,
+// and a visitor may spend: these tests are about the body limit, not about access.
+vi.mock('@/lib/server/authz/viewer', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/authz/viewer')>()),
+  requireSpender: async () => undefined,
 }));
 vi.mock('@/lib/server/identity/resolve', async () =>
   (await import('../helpers/owner-resolution-mock')).ownerResolveModule(() => 'owner-1'),
@@ -211,6 +218,7 @@ function countedRequest(route: BodyRoute, declaredLength: number) {
 
 beforeEach(async () => {
   vi.clearAllMocks();
+  useProviders({});
   mocks.fakeStore = createFakeDocumentStore();
   await mocks.fakeStore.store.createFolder('folder-a', 'Math');
   mocks.getSession.mockResolvedValue({ id: 'session-1', ownerId: 'owner-1', status: 'succeeded' });

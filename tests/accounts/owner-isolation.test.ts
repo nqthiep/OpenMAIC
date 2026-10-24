@@ -361,8 +361,9 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
       expect(signedIn.status).toBe(200);
       expect(signedIn.headers.get('set-cookie')).toBeNull();
 
+      // An existing anonymous cookie is renewed by the seam (same id, fresh lifetime), not replaced.
       const anonymous = await stagesResponse(`anonymous_id=${VISITOR_A}`);
-      expect(anonymous.headers.get('set-cookie')).toBeNull();
+      expect(anonymous.headers.get('set-cookie')).toContain(`anonymous_id=${VISITOR_A}`);
 
       const bare = await stagesResponse();
       expect(bare.headers.get('set-cookie')).toContain('anonymous_id=');

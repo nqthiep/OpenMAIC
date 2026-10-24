@@ -523,6 +523,8 @@ describe('instrumentation registration', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
+    // register() refuses to boot without a database; these cases start past it.
+    vi.stubEnv('DATABASE_URL', 'postgres://collector-registration/openmaic');
   });
 
   it('starts the schedule on the Node.js server runtime', async () => {
@@ -545,12 +547,16 @@ describe('instrumentation registration', () => {
     }));
     vi.stubEnv('NEXT_RUNTIME', 'nodejs');
     vi.stubEnv('ASSET_PENDING_TTL_MS', '24h');
+    // A refused configuration exits the process; stubbed so the throw can be asserted.
+    const exitOnBootFailure = vi.fn(async () => {});
+    vi.doMock('@/lib/server/boot-failure', () => ({ exitOnBootFailure }));
 
     const { register } = await import('@/instrumentation');
 
     // `register` runs before the server is ready, so throwing here is what
     // makes a misconfigured deployment fail to start rather than fail to work.
     await expect(register()).rejects.toThrow(/ASSET_PENDING_TTL_MS/);
+    expect(exitOnBootFailure).toHaveBeenCalledOnce();
     expect(startAssetCollectorSchedule).not.toHaveBeenCalled();
   });
 

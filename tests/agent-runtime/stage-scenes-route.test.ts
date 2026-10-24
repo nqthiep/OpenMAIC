@@ -5,15 +5,14 @@ import { createFakeDocumentStore } from './_fake-document-store';
 import { makeDocument, makeSlideScene } from './_stage-fixtures';
 
 const mocks = vi.hoisted(() => ({
-  runtimeConfigured: true,
+  persistenceConfigured: true,
   resolveRequestOwnerId: vi.fn(),
   canRead: true,
   fakeStore: null as ReturnType<typeof createFakeDocumentStore> | null,
 }));
 
 vi.mock('@/lib/config/feature-flags', () => ({
-  isServerPersistenceConfigured: () => false,
-  isAgentRuntimeConfigured: () => mocks.runtimeConfigured,
+  isServerPersistenceConfigured: () => mocks.persistenceConfigured,
 }));
 vi.mock('@/lib/server/identity/resolve', async () =>
   (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
@@ -38,7 +37,7 @@ function call(query = '') {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.runtimeConfigured = true;
+  mocks.persistenceConfigured = true;
   mocks.resolveRequestOwnerId.mockReturnValue('owner-1');
   mocks.canRead = true;
   mocks.fakeStore = createFakeDocumentStore();
@@ -104,8 +103,8 @@ describe('GET /api/stages/[id]/scenes?ids=', () => {
     expect(response.status).toBe(404);
   });
 
-  it('answers 404 when the agent runtime is not configured', async () => {
-    mocks.runtimeConfigured = false;
+  it('answers 404 when server persistence is not configured', async () => {
+    mocks.persistenceConfigured = false;
     expect((await call('?ids=scene-1')).status).toBe(404);
   });
 });

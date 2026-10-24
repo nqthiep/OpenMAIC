@@ -288,7 +288,7 @@ describe('PPT element reference Route → Director → real call_agent L2', () =
     process.env[coursewareReferenceFlag] = 'true';
     delete process.env[nativeFlag];
     vi.resetModules();
-    vi.stubEnv('NEXT_PUBLIC_PERSISTENCE', '0');
+    vi.stubEnv('DATABASE_URL', '');
     mocks.persistenceProvider.mockReset().mockResolvedValue({ runtimeStore: {} });
     mocks.buildAgent.mockReset();
     mocks.streamLLM.mockReset();
@@ -886,8 +886,15 @@ describe('PPT element reference Route → Director → real call_agent L2', () =
     },
   );
 
-  it('resolves the request snapshot without accessing persistence even when enabled', async () => {
-    vi.stubEnv('NEXT_PUBLIC_PERSISTENCE', '1');
+  it('resolves the request snapshot without accessing persistence even with a database', async () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://element-reference-test/openmaic');
+    // KHAITAM keeps the provider settings in the database: with one configured, an empty snapshot stands in for it.
+    (await import('../../../fixtures/provider-snapshot')).useProviders({});
+    // ...and a visitor is not asked to sign in to spend here: this test is about persistence, not access.
+    vi.doMock('@/lib/server/authz/viewer', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('@/lib/server/authz/viewer')>()),
+      requireSpender: async () => undefined,
+    }));
     installAgentShell('Snapshot answer.');
     const { POST } = await import('@/app/api/chat/pi/route');
     const response = await POST(makeRequest(whiteboardBody()));

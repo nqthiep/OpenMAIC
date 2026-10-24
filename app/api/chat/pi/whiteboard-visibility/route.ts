@@ -4,7 +4,10 @@ import { settleWhiteboardVisibility } from '@/lib/chat/pi/whiteboard-visibility'
 import { apiError } from '@/lib/server/api-response';
 import { readBoundedJson } from '@/lib/server/bounded-json';
 import { resolveRequestOwner } from '@/lib/server/identity/resolve';
-import { invalidOwnerCredentialResponse } from '@/lib/server/identity/with-owner';
+import {
+  attachOwnerCookies,
+  invalidOwnerCredentialResponse,
+} from '@/lib/server/identity/with-owner';
 
 export const runtime = 'nodejs';
 
@@ -40,7 +43,12 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (!owner.ok) {
     return invalidOwnerCredentialResponse(owner);
   }
+  // Every answer carries the resolution's cookies (the anonymous owner's
+  // renewal), errors included.
+  return attachOwnerCookies(await settle(req, owner.principal.ownerId), owner.setCookies);
+}
 
+async function settle(req: NextRequest, learnerKey: string): Promise<Response> {
   const read = await readBoundedJson(req, VISIBILITY_REQUEST_MAX_BYTES);
   if (!read.ok) {
     return read.code === 'PAYLOAD_TOO_LARGE'
@@ -59,7 +67,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (
     !settleWhiteboardVisibility({
       ...body,
-      learnerKey: owner.principal.ownerId,
+      learnerKey,
     })
   ) {
     return apiError('INVALID_REQUEST', 404, 'Whiteboard visibility query is not pending here');

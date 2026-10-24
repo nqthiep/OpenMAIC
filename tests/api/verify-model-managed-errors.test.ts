@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { APICallError } from 'ai';
 import type { NextRequest } from 'next/server';
 
 // Upstream error text can echo request details. With the operator's key, that text must not reach
@@ -52,24 +53,33 @@ describe('POST /api/verify-model upstream error text', () => {
     const text = await response.text();
 
     expect(response.status).toBe(500);
-    expect(text).toContain('Connection failed');
+    expect(text).toContain('Cannot connect to API server');
     expect(text).not.toContain('sk-live-echoed');
     expect(text).not.toContain('Incorrect API key');
   });
 
-  it('keeps the upstream text for a visitor who supplied their own key', async () => {
+  // Upstream's rule, which KHAITAM follows: provider text is never returned, whoever's key it was.
+  it('sends the same fixed message to a visitor who supplied their own key', async () => {
     mocks.resolveModel.mockResolvedValue({ model: {}, managedKey: false });
 
     const response = await verify({ model: 'openai:gpt-x', apiKey: 'sk-visitor-own' });
     const text = await response.text();
 
     expect(response.status).toBe(500);
-    expect(text).toContain('Incorrect API key provided');
+    expect(text).toContain('Cannot connect to API server');
+    expect(text).not.toContain('Incorrect API key provided');
   });
 
   it('still maps a recognised upstream status to its fixed message with the operator key', async () => {
     mocks.resolveModel.mockResolvedValue({ model: {}, managedKey: true });
-    mocks.callLLM.mockRejectedValue(new Error('Request failed with status 401 Unauthorized'));
+    mocks.callLLM.mockRejectedValue(
+      new APICallError({
+        message: 'Unauthorized',
+        url: 'https://x',
+        requestBodyValues: {},
+        statusCode: 401,
+      }),
+    );
 
     const response = await verify({ model: 'openai:gpt-x', apiKey: '' });
     const body = (await response.json()) as { error: string };

@@ -87,6 +87,8 @@ export async function POST(req: NextRequest) {
       apiKey: resolveASRApiKey(effectiveProviderId, keysAllowed ? apiKey || undefined : undefined),
       baseUrl: resolveASRBaseUrl(effectiveProviderId, clientBaseUrl),
       publicOnly,
+      // A server-configured provider's endpoint may be on a local network.
+      managed,
     };
     // Reflect the resolved (possibly server-pinned) model in failure logs.
     resolvedModelId = config.modelId;

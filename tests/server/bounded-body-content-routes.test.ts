@@ -16,7 +16,7 @@ vi.mock('@/lib/config/feature-flags', async (importOriginal) => {
   return {
     ...actual,
     isAgentRuntimeConfigured: () => true,
-    isServerPersistenceConfigured: () => false,
+    isServerPersistenceConfigured: () => true,
     resolveVocationalActive: () => false,
     isPiChatEnabled: () => true,
   };

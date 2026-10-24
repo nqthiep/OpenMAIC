@@ -7,16 +7,16 @@
  * course ids are returned, so the caller can run its own cascade (the
  * workbench deletes the owner courses it captured).
  *
- * Every handler is owner-scoped exactly like the other workbench routes (see
- * `app/api/folders/route.ts`), and the whole family is gated on the
- * configured runtime.
+ * Every handler is owner-scoped exactly like the other folder routes (see
+ * `app/api/folders/route.ts`), and the whole family is gated on server
+ * persistence (a DATABASE_URL), not on the agent runtime.
  */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import type { DocumentFolder, DocumentFolderStore } from '@openmaic/storage';
 
-import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
+import { isServerPersistenceConfigured } from '@/lib/config/feature-flags';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
 import { readBoundedJson } from '@/lib/server/bounded-json';
@@ -44,7 +44,7 @@ function jsonError(status: number, code: string, message: string, headers?: Head
 
 // PATCH /api/folders/[id] — rename { name }.
 export async function PATCH(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const read = await readBoundedJson(req, FOLDER_RENAME_MAX_BYTES);
   if (!read.ok) {
@@ -111,7 +111,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 // DELETE /api/folders/[id]?mode=ungroup|remove
 export async function DELETE(req: NextRequest, { params }: Params) {
-  if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
+  if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
   const modeParam = req.nextUrl.searchParams.get('mode');
   const mode: 'ungroup' | 'remove' = modeParam === 'remove' ? 'remove' : 'ungroup';

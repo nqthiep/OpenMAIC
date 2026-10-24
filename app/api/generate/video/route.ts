@@ -31,14 +31,11 @@ import {
 } from '@/lib/server/provider-config';
 import type { VideoProviderId, VideoGenerationOptions } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
-import {
-  CONTENT_BLOCKED_TEXT,
-  MODEL_FAILURE_TEXT,
-  describeUnexpectedError,
-} from '@/lib/server/error-summary';
+import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { readBoundedJson } from '@/lib/server/bounded-json';
+import { validateClientBaseUrl } from '@/lib/server/ssrf-guard';
+import { withVideoProviderFetch } from '@/lib/server/media-provider-fetch';
 
 const log = createLogger('VideoGeneration API');
 
@@ -89,7 +86,7 @@ export async function POST(request: NextRequest) {
     const clientModel = request.headers.get('x-video-model')?.trim() || undefined;
 
     if (clientBaseUrl) {
-      const ssrfError = await validateUrlForSSRF(clientBaseUrl);
+      const ssrfError = await validateClientBaseUrl(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);
       }
@@ -128,7 +125,10 @@ export async function POST(request: NextRequest) {
         `aspect=${options.aspectRatio ?? 'auto'}, resolution=${options.resolution ?? 'auto'}`,
     );
 
-    const result = await generateVideo({ providerId, apiKey, baseUrl, model }, options);
+    const result = await generateVideo(
+      withVideoProviderFetch({ providerId, apiKey, baseUrl, model }, managed),
+      options,
+    );
 
     log.info(
       `Video generated: url=${result.url ? 'yes' : 'no'}, ${result.width}x${result.height}, ${result.duration}s`,
@@ -145,14 +145,20 @@ export async function POST(request: NextRequest) {
     return apiSuccess({ result });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    // The provider's error text is logged only; the caller gets a fixed message
+    // so an upstream body never reaches the response.
     // Detect content safety filter rejections (e.g. Seedance SensitiveContent errors)
     if (message.includes('SensitiveContent') || message.includes('sensitive information')) {
       log.warn(`Video blocked by content safety filter: ${message}`);
-      return apiError('CONTENT_SENSITIVE', 400, managed ? CONTENT_BLOCKED_TEXT : message);
+      return apiError(
+        'CONTENT_SENSITIVE',
+        400,
+        'The video provider rejected this prompt under its content safety policy',
+      );
     }
     // The provider's message may echo request details; the server log keeps a
     // summary (name/code/frame), not the raw upstream text.
     log.error(`Video generation failed: ${describeUnexpectedError(error)}`);
-    return apiError('INTERNAL_ERROR', 500, managed ? MODEL_FAILURE_TEXT : message);
+    return apiError('INTERNAL_ERROR', 500, 'Video generation failed');
   }
 }
