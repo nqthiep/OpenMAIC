@@ -178,7 +178,7 @@ export function ServerCredentialCard({
  * the settings the same way that card does, and renders nothing when they cannot be read or the
  * account cannot manage them.
  */
-export function StageRoutingCards() {
+export function StageRoutingCards({ onSaved }: { onSaved?: () => void } = {}) {
   const [settings, setSettings] = useState<ProviderSettings | null>(null);
   const [version, setVersion] = useState(0);
 
@@ -203,11 +203,16 @@ export function StageRoutingCards() {
     void useSettingsStore.getState().fetchServerProviders();
   }, []);
 
+  const saved = (next: ProviderSettings) => {
+    setSettings(next);
+    onSaved?.();
+  };
+
   if (!settings || !settings.canManage) return null;
   return (
     <div className="flex flex-col gap-4">
-      <DefaultModelCard settings={settings} onChange={setSettings} onStale={reload} />
-      <RoutesCard settings={settings} onChange={setSettings} onStale={reload} />
+      <DefaultModelCard settings={settings} onChange={saved} onStale={reload} />
+      <RoutesCard settings={settings} onChange={saved} onStale={reload} />
     </div>
   );
 }

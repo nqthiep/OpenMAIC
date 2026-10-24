@@ -331,6 +331,12 @@ const toggleOfRow = (role: string, key: string) => {
   return label.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
 };
 
+/** The card that says OmniRoute is not connected (the route cards below it have `code` elements too). */
+const unconfiguredCard = () =>
+  [...document.querySelectorAll('h4')].find(
+    (heading) => heading.textContent === 'admin.omniroute.unconfigured.title',
+  )!.parentElement!;
+
 function typeInto(element: HTMLInputElement, value: string): void {
   const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
   act(() => {
@@ -387,10 +393,9 @@ describe('the OmniRoute panel', () => {
     expect(document.body.textContent).toContain('admin.omniroute.state.unconfigured');
     expect(document.body.textContent).toContain('admin.omniroute.unconfigured.title');
     expect(document.body.textContent).toContain('admin.omniroute.unconfigured.invalid');
-    expect([...document.querySelectorAll('code')].map((code) => code.textContent)).toEqual([
-      'OMNIROUTE_ADMIN_PASSWORD',
-      'OMNIROUTE_PUBLIC_URL',
-    ]);
+    expect(
+      [...unconfiguredCard().querySelectorAll('code')].map((code) => code.textContent),
+    ).toEqual(['OMNIROUTE_ADMIN_PASSWORD', 'OMNIROUTE_PUBLIC_URL']);
     expect(document.body.textContent).not.toContain('admin.omniroute.step1.title');
   });
 
@@ -402,7 +407,7 @@ describe('the OmniRoute panel', () => {
     await mountPanel(OmniRoutePanel);
     expect(document.body.textContent).toContain('admin.omniroute.unconfigured.body');
     expect(document.body.textContent).not.toContain('admin.omniroute.unconfigured.invalid');
-    expect(document.querySelectorAll('code')).toHaveLength(0);
+    expect(unconfiguredCard().querySelectorAll('code')).toHaveLength(0);
   });
 
   it('shows the unreachable card and asks the overview again on retry', async () => {
@@ -875,30 +880,40 @@ describe('the OmniRoute panel', () => {
     expect(document.body.textContent).toContain('admin.providers.card.title');
   });
 
-  it('the advanced area loads the stage route cards on open and reloads the overview on close', async () => {
+  it.each(['ready', 'no-providers', 'unreachable'] as const)(
+    'shows the default model and the model of each step without opening anything (%s)',
+    async (state) => {
+      const { OmniRoutePanel } = await fresh();
+      installRoutes({
+        overview: () => ok({ overview: overview(state, state === 'ready' ? { key: KEY } : {}) }),
+        models: () => ok(modelsAnswer()),
+      });
+      await mountPanel(OmniRoutePanel);
+      expect(mocks.fetchSettings).toHaveBeenCalledTimes(1);
+      expect(document.body.textContent).toContain('admin.providers.default.title');
+      expect(document.body.textContent).toContain('admin.providers.routes.title');
+      expect(document.body.textContent).not.toContain('admin.omniroute.step3.advanced');
+    },
+  );
+
+  it('reads the overview again when a route is saved, so the role rows follow it', async () => {
     const { OmniRoutePanel } = await fresh();
     installRoutes({
       overview: () => ok({ overview: overview('ready', { key: KEY }) }),
       models: () => ok(modelsAnswer()),
     });
+    mocks.saveRoute.mockResolvedValue({ routing: [] });
     await mountPanel(OmniRoutePanel);
-    expect(mocks.fetchSettings).not.toHaveBeenCalled(); // closed by default: nothing is loaded
-
-    const advanced = buttonIn(document.body, 'admin.omniroute.step3.advanced')!;
-    await act(async () => {
-      advanced.click();
-    });
-    await flush();
-    expect(mocks.fetchSettings).toHaveBeenCalledTimes(1);
-    expect(document.body.textContent).toContain('admin.providers.default.title');
-    expect(document.body.textContent).toContain('admin.providers.routes.title');
     expect(callsTo('/api/admin/omniroute/overview')).toBe(1);
 
+    const stage = document.querySelector<HTMLInputElement>('input[aria-label="scene-content"]')!;
+    await act(async () => typeInto(stage, 'omniroute:auto/best-chat'));
+    const row = stage.closest('li')!;
     await act(async () => {
-      advanced.click(); // close
+      buttonIn(row, 'admin.providers.actions.save')!.click();
     });
     await flush();
+    expect(mocks.saveRoute).toHaveBeenCalledWith('scene-content', 'omniroute:auto/best-chat', 0);
     expect(callsTo('/api/admin/omniroute/overview')).toBe(2);
-    expect(mocks.fetchSettings).toHaveBeenCalledTimes(1);
   });
 });

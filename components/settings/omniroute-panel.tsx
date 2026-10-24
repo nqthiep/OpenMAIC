@@ -8,7 +8,6 @@ import { setOmniRouteMode, useOmniRouteMode } from '@/components/settings/omniro
 import { StageRoutingCards } from '@/components/settings/server-credential-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/lib/hooks/use-i18n';
@@ -526,7 +525,7 @@ export function OmniRoutePanel() {
 
       {reached('no-key') ? (
         data.state === 'ready' ? (
-          <Step3Roles key={version} overview={data} onReload={reload} />
+          <Step3Roles key={version} overview={data} />
         ) : (
           <div className="flex flex-col gap-2 rounded-xl border p-4">
             <h4 className="text-sm font-semibold">{t('admin.omniroute.step3.title')}</h4>
@@ -534,6 +533,10 @@ export function OmniRoutePanel() {
           </div>
         )
       ) : null}
+
+      {/* The default model and the model of each step: the same cards every provider page has,
+          always in view. A save reloads the overview so the role rows above follow it. */}
+      <StageRoutingCards onSaved={reload} />
     </div>
   );
 }
@@ -544,7 +547,7 @@ export function OmniRoutePanel() {
  * every overview reload); saving writes all four roles in one request, and a saved row can be
  * tested with a tiny request through its model.
  */
-function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onReload: () => void }) {
+function Step3Roles({ overview }: { overview: OmniRouteOverview }) {
   const { t } = useI18n();
   const [models, setModels] = useState<ModelsResponse | null>(null);
   const [modelsFailed, setModelsFailed] = useState(false);
@@ -565,7 +568,6 @@ function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onRel
   const [testResult, setTestResult] = useState<
     Partial<Record<RoleId, { ok: boolean; ms?: number }>>
   >({});
-  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -806,21 +808,6 @@ function Step3Roles({ overview, onReload }: { overview: OmniRouteOverview; onRel
           {t('admin.omniroute.step3.save')}
         </Button>
       </div>
-
-      <Collapsible
-        open={advancedOpen}
-        onOpenChange={(open) => {
-          setAdvancedOpen(open);
-          if (!open) onReload(); // the roles follow whatever the route cards just changed
-        }}
-      >
-        <CollapsibleTrigger className="text-xs font-medium text-muted-foreground underline underline-offset-4">
-          {t('admin.omniroute.step3.advanced')}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2 flex flex-col gap-4">
-          <StageRoutingCards />
-        </CollapsibleContent>
-      </Collapsible>
     </div>
   );
 }

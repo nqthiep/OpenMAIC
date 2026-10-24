@@ -3023,7 +3023,6 @@
         "presetQuality": "High quality",
         "save": "Save models",
         "saved": "Saved.",
-        "advanced": "Customise each step (advanced)",
         "defaultNote": "The default model follows the chat role."
       },
       "role": {
