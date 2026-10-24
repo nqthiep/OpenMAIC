@@ -1666,11 +1666,13 @@
       "ollama": "Ollama (로컬)",
       "tavily": "Tavily",
       "exa": "Exa",
+      "firecrawl": "Firecrawl",
       "bocha": "Bocha",
       "brave": "Brave Search",
       "baidu": "Baidu",
       "claude": "Claude",
-      "searxng": "SearXNG"
+      "searxng": "SearXNG",
+      "builtin": "내장 리더"
     },
     "modelCount": "개 모델",
     "modelSingular": "개 모델",
@@ -2244,6 +2246,7 @@
       "capVideo": "영상 생성",
       "capTts": "음성 합성",
       "capWebSearch": "웹 검색",
+      "capWebFetch": "웹 페이지 가져오기",
       "stageSlide": "슬라이드",
       "stageInteractive": "인터랙티브",
       "planNoteEditable": "기본 구성입니다. 각 노드의 모델은 '코스 모델 설정'에서 변경할 수 있습니다.",
@@ -2292,7 +2295,8 @@
         "tts": "음성 합성 서비스, 보이스, 모델을 설정합니다",
         "asr": "음성 인식 서비스와 기본 모델을 설정합니다",
         "pdf": "문서 파싱 서비스의 자격 증명을 설정합니다(내장 서비스는 설정이 필요 없습니다)",
-        "webSearch": "웹 검색 서비스와 검색 소스를 설정합니다"
+        "webSearch": "웹 검색 서비스와 검색 소스를 설정합니다",
+        "webFetch": "웹 페이지 추출 서비스 설정"
       },
       "configured": "구성됨",
       "notConfigured": "미구성",
@@ -2463,6 +2467,10 @@
         "document": {
           "name": "문서 분석",
           "desc": "업로드한 문서를 읽습니다."
+        },
+        "webFetch": {
+          "name": "웹 페이지 가져오기",
+          "desc": "에이전트가 세션에서 허용된 웹 페이지를 읽는 데 사용합니다."
         }
       },
       "source": {
@@ -2476,6 +2484,7 @@
         "lines": {
           "rewrite": "쿼리",
           "search": "검색",
+          "fetch": "가져오기",
           "image": "이미지",
           "video": "동영상"
         }
@@ -2508,7 +2517,11 @@
         "unconfirmed": "서버가 가져오기를 확인하지 않았습니다."
       }
     },
-    "serverConfiguredAddOwn": "본인 자격 증명을 사용하려면 별도의 제공업체를 추가하세요."
+    "serverConfiguredAddOwn": "본인 자격 증명을 사용하려면 별도의 제공업체를 추가하세요.",
+    "webFetchSettings": "웹 페이지 가져오기",
+    "webFetchHint": "웹 페이지를 읽는 방법을 선택하세요. 호스팅 서비스에는 세션에서 허용된 공개 URL만 전달됩니다. 결과는 신뢰할 수 없는 데이터로 취급하며, 실패해도 다른 서비스로 전환하지 않습니다.",
+    "webFetchApiKey": "API 키",
+    "webFetchSharedKeyHint": "이 키는 같은 제공업체와의 채팅에도 사용됩니다. 키를 변경하거나 삭제하면 채팅에도 영향을 줍니다."
   },
   "workspace": {
     "untitledCourse": "제목 없는 코스",

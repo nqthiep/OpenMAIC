@@ -1666,11 +1666,13 @@
       "ollama": "Ollama (Lokal)",
       "tavily": "Tavily",
       "exa": "Exa",
+      "firecrawl": "Firecrawl",
       "bocha": "Bocha",
       "brave": "Brave Search",
       "baidu": "Baidu",
       "claude": "Claude",
-      "searxng": "SearXNG"
+      "searxng": "SearXNG",
+      "builtin": "Integrierter Leser"
     },
     "modelCount": "Modelle",
     "modelSingular": "Modell",
@@ -2218,7 +2220,7 @@
     "tokenPlan": {
       "nav": "Token-Tarif",
       "title": "Token-Tarif einrichten",
-      "desc": "Wähle deinen Token-Tarifanbieter und gib den Schlüssel ein – damit werden alle angebundenen Modalitäten automatisch konfiguriert (LLM/Bild/Video/Sprachausgabe/Websuche).",
+      "desc": "Wähle deinen Token-Tarifanbieter und gib den Schlüssel ein – damit werden alle angebundenen Modalitäten automatisch konfiguriert (LLM/Bild/Video/Sprachausgabe/Websuche/Webseiten abrufen).",
       "selectPlan": "Anbieter auswählen",
       "apiKey": "API-Schlüssel",
       "updateKey": "Schlüssel aktualisieren",
@@ -2244,6 +2246,7 @@
       "capVideo": "Videogenerierung",
       "capTts": "Sprachsynthese",
       "capWebSearch": "Websuche",
+      "capWebFetch": "Webseiten abrufen",
       "stageSlide": "Kursfolien",
       "stageInteractive": "Interaktiv",
       "planNoteEditable": "Dies ist die Standardkonfiguration; das Modell jedes Knotens lässt sich in der Kursmodell-Konfiguration ändern.",
@@ -2292,7 +2295,8 @@
         "tts": "Sprachsynthese-Dienste, Stimmen und Modelle konfigurieren",
         "asr": "Spracherkennungs-Dienste und Standardmodell konfigurieren",
         "pdf": "Zugangsdaten des Dokument-Parsing-Dienstes konfigurieren (eingebaute Dienste brauchen keine Einrichtung)",
-        "webSearch": "Websuch-Dienste und Abrufquellen konfigurieren"
+        "webSearch": "Websuch-Dienste und Abrufquellen konfigurieren",
+        "webFetch": "Dienste zur Extraktion von Webseiten konfigurieren"
       },
       "configured": "Konfiguriert",
       "notConfigured": "Nicht konfiguriert",
@@ -2463,6 +2467,10 @@
         "document": {
           "name": "Dokumentanalyse",
           "desc": "Liest hochgeladene Dokumente."
+        },
+        "webFetch": {
+          "name": "Webseiten abrufen",
+          "desc": "Lässt den Agent in der Sitzung zugelassene Webseiten lesen."
         }
       },
       "source": {
@@ -2476,6 +2484,7 @@
         "lines": {
           "rewrite": "Anfrage",
           "search": "Suche",
+          "fetch": "Abruf",
           "image": "Bild",
           "video": "Video"
         }
@@ -2508,7 +2517,11 @@
         "unconfirmed": "Der Server hat den Import nicht bestätigt."
       }
     },
-    "serverConfiguredAddOwn": "Um eigene Zugangsdaten zu verwenden, füge einen separaten Anbieter hinzu."
+    "serverConfiguredAddOwn": "Um eigene Zugangsdaten zu verwenden, füge einen separaten Anbieter hinzu.",
+    "webFetchSettings": "Webseiten abrufen",
+    "webFetchHint": "Wählen Sie, wie Webseiten gelesen werden. Gehostete Dienste erhalten nur öffentliche URLs, die in der Sitzung zugelassen sind. Ergebnisse bleiben nicht vertrauenswürdig; bei Fehlern wird der Dienst nicht gewechselt.",
+    "webFetchApiKey": "API-Schlüssel",
+    "webFetchSharedKeyHint": "Dieser Schlüssel wird auch für den Chat mit diesem Anbieter verwendet. Änderungen oder das Entfernen wirken sich auf den Chat aus."
   },
   "workspace": {
     "untitledCourse": "Unbenannter Kurs",

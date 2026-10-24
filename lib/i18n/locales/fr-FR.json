@@ -1666,11 +1666,13 @@
       "ollama": "Ollama (local)",
       "tavily": "Tavily",
       "exa": "Exa",
+      "firecrawl": "Firecrawl",
       "bocha": "Bocha",
       "brave": "Brave Search",
       "baidu": "Baidu",
       "claude": "Claude",
-      "searxng": "SearXNG"
+      "searxng": "SearXNG",
+      "builtin": "Lecteur intégré"
     },
     "modelCount": "modèles",
     "modelSingular": "modèle",
@@ -2218,7 +2220,7 @@
     "tokenPlan": {
       "nav": "Forfait de jetons",
       "title": "Configuration du forfait de jetons",
-      "desc": "Choisissez votre fournisseur de forfait de jetons et saisissez la clé : toutes les modalités prises en charge sont configurées automatiquement (LLM, image, vidéo, parole, recherche web).",
+      "desc": "Choisissez votre fournisseur de forfait de jetons et saisissez la clé : toutes les modalités prises en charge sont configurées automatiquement (LLM, image, vidéo, parole, recherche web, récupération web).",
       "selectPlan": "Choisir un fournisseur",
       "apiKey": "Clé d’API",
       "updateKey": "Mettre à jour la clé",
@@ -2244,6 +2246,7 @@
       "capVideo": "Génération de vidéo",
       "capTts": "Synthèse vocale",
       "capWebSearch": "Recherche web",
+      "capWebFetch": "Récupération web",
       "stageSlide": "Diapositives",
       "stageInteractive": "Interactif",
       "planNoteEditable": "Ceci est la configuration par défaut ; le modèle de chaque nœud peut être modifié dans la configuration des modèles de cours.",
@@ -2292,7 +2295,8 @@
         "tts": "Configurer les services de synthèse vocale, les voix et les modèles",
         "asr": "Configurer les services de reconnaissance vocale et le modèle par défaut",
         "pdf": "Configurer les identifiants du service d'analyse de documents (les services intégrés ne nécessitent aucune configuration)",
-        "webSearch": "Configurer les services de recherche web et les sources de récupération"
+        "webSearch": "Configurer les services de recherche web et les sources de récupération",
+        "webFetch": "Configurer les services d’extraction de pages web"
       },
       "configured": "Configuré",
       "notConfigured": "Non configuré",
@@ -2463,6 +2467,10 @@
         "document": {
           "name": "Analyse de documents",
           "desc": "Lit les documents importés."
+        },
+        "webFetch": {
+          "name": "Récupération web",
+          "desc": "Permet à l’agent de lire les pages web autorisées dans la session."
         }
       },
       "source": {
@@ -2476,6 +2484,7 @@
         "lines": {
           "rewrite": "Requête",
           "search": "Recherche",
+          "fetch": "Lecture",
           "image": "Image",
           "video": "Vidéo"
         }
@@ -2508,7 +2517,11 @@
         "unconfirmed": "Le serveur n'a pas confirmé l'importation."
       }
     },
-    "serverConfiguredAddOwn": "Pour utiliser vos propres identifiants, ajoutez un fournisseur distinct."
+    "serverConfiguredAddOwn": "Pour utiliser vos propres identifiants, ajoutez un fournisseur distinct.",
+    "webFetchSettings": "Récupération web",
+    "webFetchHint": "Choisissez comment lire les pages web. Les services hébergés reçoivent les URL publiques autorisées dans la session. Les résultats restent non fiables et aucun autre lecteur n’est utilisé en cas d’échec.",
+    "webFetchApiKey": "Clé API",
+    "webFetchSharedKeyHint": "Cette clé sert aussi au chat avec ce fournisseur. La modifier ou la supprimer affecte le chat."
   },
   "workspace": {
     "untitledCourse": "Cours sans titre",

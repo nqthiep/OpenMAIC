@@ -78,6 +78,44 @@ describe('server web search config', () => {
     });
   });
 
+  it('allows official Firecrawl client base URLs and resolves client credentials', async () => {
+    const { resolveClassroomWebSearchConfig, resolveSafeClientWebSearchBaseUrl } =
+      await import('@/lib/server/web-search-config');
+
+    expect(
+      resolveSafeClientWebSearchBaseUrl('firecrawl', 'https://api.firecrawl.dev/v2/search'),
+    ).toBe('https://api.firecrawl.dev/v2/search');
+    expect(() => resolveSafeClientWebSearchBaseUrl('firecrawl', 'http://127.0.0.1:3002')).toThrow(
+      'Unsupported Firecrawl base URL',
+    );
+    expect(
+      await resolveClassroomWebSearchConfig(null, {
+        webSearchProviderId: 'firecrawl',
+        webSearchApiKey: 'fc-client-key',
+        webSearchBaseUrl: 'https://api.firecrawl.dev',
+      }),
+    ).toEqual({
+      providerId: 'firecrawl',
+      apiKey: 'fc-client-key',
+      baseUrl: 'https://api.firecrawl.dev',
+    });
+  });
+
+  it('resolves Firecrawl classroom config from the saved provider', async () => {
+    useProviders({
+      webSearch: { firecrawl: { apiKey: 'fc-server-key', baseUrl: 'https://firecrawl.internal' } },
+    });
+    const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
+
+    expect(
+      await resolveClassroomWebSearchConfig(null, { webSearchProviderId: 'firecrawl' }),
+    ).toEqual({
+      providerId: 'firecrawl',
+      apiKey: 'fc-server-key',
+      baseUrl: 'https://firecrawl.internal',
+    });
+  });
+
   it('allows official MiniMax client base URLs', async () => {
     const { resolveSafeClientWebSearchBaseUrl } = await import('@/lib/server/web-search-config');
 
@@ -315,5 +353,23 @@ describe('server web search config', () => {
       baseUrl: undefined,
       baiduSubSources: { webSearch: false, baike: true, scholar: false },
     });
+  });
+});
+
+describe('Kimi official search bases', () => {
+  it.each([
+    'https://api.moonshot.cn/v1',
+    'https://api.moonshot.ai/v1',
+    'https://api.kimi.com/coding/v1',
+    'https://api.kimi.ai/coding/v1',
+  ])('accepts %s', async (baseUrl) => {
+    const { resolveSafeClientWebSearchBaseUrl } = await import('@/lib/server/web-search-config');
+    expect(resolveSafeClientWebSearchBaseUrl('kimi', baseUrl)).toBe(baseUrl);
+  });
+  it('rejects lookalike endpoints', async () => {
+    const { resolveSafeClientWebSearchBaseUrl } = await import('@/lib/server/web-search-config');
+    expect(() =>
+      resolveSafeClientWebSearchBaseUrl('kimi', 'https://api.kimi.com.openmaic.test/coding/v1'),
+    ).toThrow('Unsupported Kimi base URL');
   });
 });

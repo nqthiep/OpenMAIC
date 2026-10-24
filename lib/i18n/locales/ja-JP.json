@@ -1666,11 +1666,13 @@
       "ollama": "Ollama（ローカルモデル）",
       "tavily": "Tavily",
       "exa": "Exa",
+      "firecrawl": "Firecrawl",
       "bocha": "Bocha",
       "brave": "Brave Search",
       "baidu": "Baidu",
       "claude": "Claude",
-      "searxng": "SearXNG"
+      "searxng": "SearXNG",
+      "builtin": "組み込みリーダー"
     },
     "modelCount": "モデル",
     "modelSingular": "モデル",
@@ -2244,6 +2246,7 @@
       "capVideo": "動画生成",
       "capTts": "音声合成",
       "capWebSearch": "ウェブ検索",
+      "capWebFetch": "Webページ取得",
       "stageSlide": "スライド",
       "stageInteractive": "インタラクティブ",
       "planNoteEditable": "これはデフォルト設定です。各ノードのモデルは「コースモデル設定」で変更できます。",
@@ -2292,7 +2295,8 @@
         "tts": "音声合成サービス・ボイス・モデルを設定します",
         "asr": "音声認識サービスと既定のモデルを設定します",
         "pdf": "ドキュメント解析サービスの認証情報を設定します（内蔵サービスの設定は不要）",
-        "webSearch": "ウェブ検索サービスと検索ソースを設定します"
+        "webSearch": "ウェブ検索サービスと検索ソースを設定します",
+        "webFetch": "Webページの抽出サービスを設定"
       },
       "configured": "設定済み",
       "notConfigured": "未設定",
@@ -2463,6 +2467,10 @@
         "document": {
           "name": "ドキュメント解析",
           "desc": "アップロードされたドキュメントを読み取ります。"
+        },
+        "webFetch": {
+          "name": "Webページ取得",
+          "desc": "エージェントがセッションで許可されたWebページを読み取るために使います。"
         }
       },
       "source": {
@@ -2476,6 +2484,7 @@
         "lines": {
           "rewrite": "クエリ",
           "search": "検索",
+          "fetch": "取得",
           "image": "画像",
           "video": "動画"
         }
@@ -2508,7 +2517,11 @@
         "unconfirmed": "サーバーがインポートを確認しませんでした。"
       }
     },
-    "serverConfiguredAddOwn": "独自の認証情報を使うには、別のプロバイダーを追加してください。"
+    "serverConfiguredAddOwn": "独自の認証情報を使うには、別のプロバイダーを追加してください。",
+    "webFetchSettings": "Webページ取得",
+    "webFetchHint": "Webページの読み取り方法を選択します。ホスト型サービスには、セッションで許可された公開URLのみが送信されます。結果は信頼できないデータとして扱い、失敗しても別のサービスには切り替えません。",
+    "webFetchApiKey": "APIキー",
+    "webFetchSharedKeyHint": "このキーは同じプロバイダーとのチャットにも使用されます。変更や削除はチャットにも影響します。"
   },
   "workspace": {
     "untitledCourse": "無題のコース",

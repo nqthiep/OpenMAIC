@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { cookies } from 'next/headers';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
@@ -17,6 +18,8 @@ import { ModelSettingsInit } from '@/components/model-settings-init';
 import { StorageHealthNotice } from '@/components/storage-health-notice';
 import { AccessCodeGuard } from '@/components/access-code-guard';
 import { ProSwapWatcher } from '@/components/workbench/ProSwapWatcher';
+import { loadLocaleResource } from '@/lib/i18n/load-resource';
+import { LOCALE_COOKIE, resolveRequestLocale } from '@/lib/i18n/resolve-locale';
 
 // The UI font is loaded from @fontsource's stylesheet rather than next/font,
 // because only the stylesheet carries the per-subset `unicode-range`
@@ -65,13 +68,22 @@ export const viewport: Viewport = {
   themeColor: DEFAULT_BRAND.themeColor,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The client hydrates with this same locale and bundle instead of detecting
+  // its own, so the first render matches the server's HTML.
+  // KHAITAM patch point (decision D1): the saved choice, else Vietnamese. The browser's own language
+  // (`Accept-Language`) is deliberately not consulted: the interface starts in Vietnamese for every
+  // visitor who has not chosen another language.
+  const cookieStore = await cookies();
+  const locale = resolveRequestLocale({ cookie: cookieStore.get(LOCALE_COOKIE)?.value });
+  const resources = await loadLocaleResource(locale);
+
   return (
-    <html lang={defaultLocale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
@@ -81,7 +93,7 @@ export default function RootLayout({
       >
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: siteJsonLd() }} />
         <ThemeProvider>
-          <I18nProvider>
+          <I18nProvider initialLocale={locale} initialResources={resources}>
             <ModelSettingsInit />
             <AgentRegistryInit />
             <ProSwapWatcher />

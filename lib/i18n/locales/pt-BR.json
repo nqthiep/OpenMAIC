@@ -1666,11 +1666,13 @@
       "ollama": "Ollama (Local)",
       "tavily": "Tavily",
       "exa": "Exa",
+      "firecrawl": "Firecrawl",
       "bocha": "Bocha",
       "brave": "Brave Search",
       "baidu": "Baidu",
       "claude": "Claude",
-      "searxng": "SearXNG"
+      "searxng": "SearXNG",
+      "builtin": "Leitor integrado"
     },
     "modelCount": "modelos",
     "modelSingular": "modelo",
@@ -2244,6 +2246,7 @@
       "capVideo": "Geração de vídeo",
       "capTts": "Síntese de voz",
       "capWebSearch": "Pesquisa na web",
+      "capWebFetch": "Buscar páginas web",
       "stageSlide": "Slides",
       "stageInteractive": "Interativo",
       "planNoteEditable": "Esta é a configuração padrão; o modelo de cada nó pode ser alterado na configuração de modelos do curso.",
@@ -2292,7 +2295,8 @@
         "tts": "Configure serviços de síntese de voz, vozes e modelos",
         "asr": "Configure serviços de reconhecimento de fala e o modelo padrão",
         "pdf": "Configure credenciais do serviço de análise de documentos (serviços integrados não precisam de configuração)",
-        "webSearch": "Configure serviços de busca na web e fontes de recuperação"
+        "webSearch": "Configure serviços de busca na web e fontes de recuperação",
+        "webFetch": "Configurar serviços de extração de páginas web"
       },
       "configured": "Configurado",
       "notConfigured": "Não configurado",
@@ -2463,6 +2467,10 @@
         "document": {
           "name": "Análise de documentos",
           "desc": "Lê os documentos enviados."
+        },
+        "webFetch": {
+          "name": "Buscar páginas web",
+          "desc": "Permite ao agente ler páginas web autorizadas na sessão."
         }
       },
       "source": {
@@ -2476,6 +2484,7 @@
         "lines": {
           "rewrite": "Consulta",
           "search": "Busca",
+          "fetch": "Leitura",
           "image": "Imagem",
           "video": "Vídeo"
         }
@@ -2508,7 +2517,11 @@
         "unconfirmed": "O servidor não confirmou a importação."
       }
     },
-    "serverConfiguredAddOwn": "Para usar suas próprias credenciais, adicione um provedor separado."
+    "serverConfiguredAddOwn": "Para usar suas próprias credenciais, adicione um provedor separado.",
+    "webFetchSettings": "Buscar páginas web",
+    "webFetchHint": "Escolha como ler as páginas web. Os serviços hospedados recebem URLs públicas autorizadas na sessão. Os resultados continuam sendo dados não confiáveis, e falhas não mudam o leitor.",
+    "webFetchApiKey": "Chave de API",
+    "webFetchSharedKeyHint": "Esta chave também é usada no chat com este provedor. Alterá-la ou removê-la afeta o chat."
   },
   "workspace": {
     "untitledCourse": "Curso sem título",

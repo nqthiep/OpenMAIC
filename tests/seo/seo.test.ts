@@ -6,6 +6,7 @@ import sitemap from '@/app/sitemap';
 import { HomeSeoContent } from '@/components/home/home-seo-content';
 import { siteJsonLd, siteOrigin } from '@/lib/brand/site-origin';
 import { I18nProvider } from '@/lib/hooks/use-i18n';
+import { loadLocaleResource } from '@/lib/i18n/load-resource';
 
 describe('crawler files', () => {
   it('robots blocks the API and the pages behind a sign-in, and names the sitemap', () => {
@@ -38,9 +39,15 @@ describe('structured data', () => {
 
 describe('home text for crawlers', () => {
   it('server HTML carries one h1 and the guest copy before any script runs', async () => {
-    // `prerender` waits for the translations to load, which `renderToString` cannot.
+    // The layout hands the provider the locale's bundle, so the first render translates like the
+    // server's HTML does; `prerender` also waits for anything still loading.
+    const initialResources = await loadLocaleResource('vi-VN');
     const { prelude } = await prerender(
-      createElement(I18nProvider, null, createElement(HomeSeoContent)),
+      createElement(I18nProvider, {
+        initialLocale: 'vi-VN',
+        initialResources,
+        children: createElement(HomeSeoContent),
+      }),
     );
     const html = await new Response(prelude).text();
     expect(html.match(/<h1/g)).toHaveLength(1);

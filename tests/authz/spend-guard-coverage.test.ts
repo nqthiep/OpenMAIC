@@ -16,7 +16,6 @@ const SPEND_SIGNALS = [
 ];
 
 const KNOWN_SPENDERS = [
-  'app/api/chat/route.ts',
   'app/api/chat/pi/route.ts',
   'app/api/generate/image/route.ts',
   'app/api/generate/tts/route.ts',

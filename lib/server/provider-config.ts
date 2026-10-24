@@ -1,4 +1,5 @@
 import { presetIdFor } from '@/lib/config/preset-ids';
+import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import {
   assertDeploymentModelAuthorized,
   selectsUpstreamModel,
@@ -548,6 +549,7 @@ export function resolveServerWebSearchProviderId(preferredProviderId?: string): 
   if (enabled('baidu') && webSearch.baidu?.apiKey) return 'baidu';
   if (enabled('minimax') && webSearch.minimax?.apiKey) return 'minimax';
   if (enabled('claude') && webSearch.claude?.apiKey) return 'claude';
+  if (enabled('firecrawl') && webSearch.firecrawl?.apiKey) return 'firecrawl';
   return Object.keys(webSearch).find(enabled);
 }
 

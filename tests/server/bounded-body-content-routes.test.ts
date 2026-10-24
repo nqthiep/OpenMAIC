@@ -47,7 +47,6 @@ vi.mock('@/lib/logger', () => ({
 
 import { POST as postStage } from '@/app/api/stages/route';
 import { PATCH as patchStage, PUT as putStage } from '@/app/api/stages/[id]/route';
-import { POST as postChat } from '@/app/api/chat/route';
 import { POST as postChatPi } from '@/app/api/chat/pi/route';
 import { POST as postWhiteboardVisibility } from '@/app/api/chat/pi/whiteboard-visibility/route';
 import { POST as postImage } from '@/app/api/generate/image/route';
@@ -114,18 +113,6 @@ const BODY_ROUTES: BodyRoute[] = [
       body: {},
       errorCode: 'INVALID_REQUEST',
       error: 'request body must be a stage document with `stage` and `scenes`',
-    },
-  },
-  {
-    name: 'POST /api/chat',
-    url: 'http://localhost/api/chat',
-    call: (request) => postChat(request),
-    maxBytes: TEN_MIB,
-    invalidJson: { errorCode: 'INVALID_REQUEST', error: 'request body must be valid JSON' },
-    validButRejected: {
-      body: {},
-      errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'Missing required field: messages',
     },
   },
   {

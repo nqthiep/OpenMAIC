@@ -4,9 +4,8 @@ import { attachInteractiveState } from '@/lib/chat/pi/interactive-state-evidence
 /**
  * Pi Director Chat API Endpoint
  *
- * POST /api/chat/pi - default path for running the in-class multi-agent chain
- * as a single server-side Pi agent loop. The build-time flag can disable this
- * route together with the corresponding client path for legacy rollback.
+ * POST /api/chat/pi - runs the in-class multi-agent chain as a single
+ * server-side Pi agent loop.
  */
 import { ModelAuthorizationError } from '@/lib/server/model-config/model-authorization';
 import { PiGeminiNativeRequiredError } from '@/lib/server/model-config/pi-gemini-route';
@@ -16,7 +15,6 @@ import { NextRequest } from 'next/server';
 import { isProviderKeyRequired } from '@/lib/ai/providers';
 import {
   isCoursewareReferenceEnabled,
-  isPiChatEnabled,
   isPiNativeChildRuntimeEnabled,
   isPiNativeChildSpotlightEnabled,
 } from '@/lib/config/feature-flags';
@@ -68,10 +66,6 @@ const PI_CHAT_REQUEST_MAX_BYTES = 10 * 1024 * 1024;
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
-
-  if (!isPiChatEnabled()) {
-    return apiError('INVALID_REQUEST', 404, 'Pi chat runtime is disabled');
-  }
 
   // Like every owner-resolving route, a request whose credential an owner
   // auth method refuses is refused here, before any model work. With the

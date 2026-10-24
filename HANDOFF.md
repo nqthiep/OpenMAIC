@@ -5,7 +5,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 ## Assignment: Merge upstream release v1.2.1 into `it-math` through branch `it-math-merge-1.2.1`
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "tôi muốn merge bản này https://github.com/THU-MAIC/OpenMAIC/releases/tag/v1.2.1 vào nhánh it-math trên repo của tôi. Bạn hãy brainstorming để lên kế hoạch merge."
-- Assignment status: In progress. S1 to S6 merged and pushed (S4 `9eb7439a`, S5 `687e0c15`, S6 `d196a68e`). S7 (`v1.2.0`) is being committed, S8 (`v1.2.1`) is next. The session was resumed by the owner on 2026-10-24.
+- Assignment status: In progress. S1 to S8 merged (S4 `9eb7439a`, S5 `687e0c15`, S6 `d196a68e`, S7 `4fa9f02d`, S8 see row 18c). What is left is the smoke run, the acceptance table, the VPS rehearsal and the deploy (row 18b). The session was resumed by the owner on 2026-10-24.
 - Branch and commit: `it-math-merge-1.2.1` (starts from `it-math` @ `a8a1a13b`; each stage is one two-parent commit, the log lists them), worktree `.claude/worktrees/it-math-merge-1.2.1`. Git writes: the owner allowed pushing this branch after each stage, never `it-math`.
 - Last updated: 2026-10-24 (UTC time not recorded)
 
@@ -54,7 +54,11 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 17 | S7: merge `v1.2.0` (base `v1.2.0-rc.2`, automatic) | Done in code and gates, committing (see 17c) | `git merge-tree --write-tree --name-only HEAD v1.2.0` -> 1 conflicted path (`lib/server/resolve-model.ts`, the Pi Gemini guard kept beside `uncatalogedModelInfo`). `pnpm install --frozen-lockfile` again (rebuilt packages: `parseBase64DataUrl`) |
 | 17a | Test changes | Done | `server-credential-card.tsx` renders `CredentialStorageHint` (new upstream test); the env-only case of `legacy-config.test.ts` removed |
 | 17b | Gates | Done | `tsc` only the known error; `eslint . --quiet` 0 errors; `check:i18n-keys` pass; `pnpm build` exit 0; `pnpm test`: 64 failed in 6 files, 4 baseline files (62) plus the two fixed above (`pnpm vitest run tests/settings tests/server/model-config`: 533 passed) |
-| 17c | Commit S7 and push | In progress | Table "Stage S7" in `docs/upstream-patch-points.md` |
+| 17c | Commit S7 and push | Done (`4fa9f02d`, pushed) | Table "Stage S7" in `docs/upstream-patch-points.md` |
+| 18 | S8: merge `v1.2.1` (base `v1.2.0`, automatic) | Done in code and gates, committing (see 18c) | 36 conflicted paths (12 locales by `merge_json.py`). Table "Stage S8" in `docs/upstream-patch-points.md`. D1 applied as: locale cookie, else Vietnamese, `Accept-Language` not consulted |
+| 18a | Gates | Done | `tsc` only the known error; `eslint . --quiet` 0 errors; `check:i18n-keys` pass; `pnpm build` exit 0; `pnpm test` (last full run): 70 failed in 8 files: baseline `chat-storage` 39, `provider-log-redaction` 11, `log-redaction` 10, `quiz/runtime` 4, plus `mineru-cloud`, `accounts/routes`, `settings-route`, `llm-transport` which all pass alone (`pnpm vitest run` on them: 70 passed, with `tests/seo`) |
+| 18b | Not yet seen | Todo | Live smoke of the merged stack (S5 to S8) on a throwaway Postgres, the v1.2.1 acceptance table (plan section 6: `webFetch` slot in the settings popup, `cue_user`, Pi chat with a model that has tools, Kimi/DeepSeek search), the real run with a model, VPS rehearsal and deploy, fast-forward of `it-math` |
+| 18c | Commit S8 and push | In progress | |
 
 ### Done so far (S4, all uncommitted in the working tree `.claude/worktrees/it-math-merge-1.2.1`)
 - Bridge: `lib/server/model-config/provider-store-layer.ts` (new), `deployment-layer.ts`, `runtime.ts` (snapshot-keyed cache, `lookupStage` overrides), `llm.ts` (`managedKey`, `uncatalogedModelInfo`), `instrumentation.ts` (boot check tolerates "settings not loaded", builds the layer once they load), `lib/server/omniroute/roles.ts` (retired stages removed), `lib/server/model-routes.ts` (header, dead route cache and `getDefaultModel/getDefaultRoute/getStageRoute` removed; `parseRouteValue` kept).
