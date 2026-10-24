@@ -2,6 +2,32 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Plan the merge of upstream release v1.2.1 into `it-math` (planning only, no merge done)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "tôi muốn merge bản này https://github.com/THU-MAIC/OpenMAIC/releases/tag/v1.2.1 vào nhánh it-math trên repo của tôi. Bạn hãy brainstorming để lên kế hoạch merge."
+- Assignment status: Approach A chosen; plan written in `plans/upstream-merge-v1.2.1.md`; waiting for the owner's answers to D1-D5. Nothing merged, nothing committed (git writes not requested).
+- Branch and commit: `it-math` @ `ae128e1b`, pushed: n/a. Working tree has another session's uncommitted OmniRoute-panel changes (left alone).
+- Last updated: 2026-10-24 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Fetch upstream and locate v1.2.1 | Done | `git fetch upstream --tags`: `v1.2.1` = `e19d0d4f` (2026-10-18), ancestor of `upstream/main`; `upstream/main` is already at `dff201b4` (v1.3.0-rc.1 tag exists) |
+| 2 | Measure the divergence | Done | Ancestry merge-base is `8c3a90d5` (2026-10-10): 40 upstream commits, 446 files. But the tree of `it-math` is that of `4bbcaaf` (fork point `ebf665f3`, 2026-09-11) since `31ef8eae` (`-s ours`, see the closed assignment below), so the real distance is 183 upstream commits; 1.2.0 server-first work is in history but not in the tree |
+| 3 | Dry-run merge in a throwaway worktree (removed afterwards) | Done | `git merge --no-commit --no-ff v1.2.1`: 233 conflicted files (124 content, 109 modify/delete; 103 are files we deleted that upstream modified: `lib/server/generation`, `lib/server/model-config`, `lib/model-settings`), 250 hunks |
+| 4 | Conflicts with the true base | Done | `git merge-tree --write-tree --name-only --merge-base=ebf665f3 it-math <tag>`: v1.1.1 51, v1.1.4 70, v1.2.0-rc.1 147, v1.2.0 151, v1.2.1 161 (135 content, 26 modify/delete: upstream removed files we modified, e.g. `app/api/chat/route.ts`, `app/api/generate/*`, `lib/server/classroom-*`, `lib/orchestration/director-*`) |
+| 5 | Choose the approach | Done | Owner chose A (full adopt in stages) on 2026-10-24 and named the branch `it-math-merge-1.2.1`. Requirement: all new features merged, the existing app keeps working, the v1.2.1 features work on it |
+| 6 | Plan for A | Done | `plans/upstream-merge-v1.2.1.md`: 8 stages on the true linear chain (S1 `v1.1.1` base `ebf665f3`; S2 `a686481e` identity seam; S3 `fa47efe1` persistence; S4 `5312c2b4` model-config; S5 `636fab0d` rc.1; S6 rc.2; S7 v1.2.0; S8 v1.2.1), gates, four integration designs, v1.2.1 feature acceptance table, decisions D1-D5, risks, task list |
+| 7 | Rehearse the merge recipe (throwaway worktree, removed) | Done | `git merge-tree --write-tree --name-only --merge-base=ebf665f3 HEAD v1.1.1` -> 51 conflicted files, 50 with markers; `git read-tree -u --reset <tree>` then `git commit-tree -p HEAD -p v1.1.1` gives a 2-parent commit. `git read-tree -m` + `git merge-index` was tried first and left 102 unmerged paths, so it is not used. After that commit `git merge-base HEAD v1.2.1` is still `8c3a90d5` (wrong) |
+| 8 | Execute the plan | Todo | Not started. Needs the owner's answers to D1-D5 and P0 (pending uncommitted changes from another session) |
+
+### Next step (exact)
+- Owner answers D1-D5 in `plans/upstream-merge-v1.2.1.md` section 7 and decides what to do with the uncommitted changes on `it-math` (section 3). Then: create branch `it-math-merge-1.2.1` from `it-math` in a separate worktree, record the baseline gates, and run S1 with the recipe in section 2.
+
+### Open questions and blockers
+- [Unverified] Whether our tutor/account/OmniRoute code can sit on upstream's 1.2.x server-first model-config and generation runs without redesign; not tried beyond textual conflicts.
+- [Unverified] Whether upstream's `@openmaic/storage` migrations (0.29.1 -> 0.37.3) collide with the 45 tables on the VPS.
+
 ## Assignment: Review of "Đăng xuất các thiết bị khác" (read-only review)
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Hãy review xem chức năng logout khỏi các thiết bị khác có hoạt động đúng không?"
