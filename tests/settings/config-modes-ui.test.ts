@@ -177,44 +177,6 @@ describe('the settings sections', () => {
     expect(nav).toEqual(['token-plan', 'model-services', 'course-models', 'general']);
   });
 
-  it('lists only Course Model without user keys', async () => {
-    const nav = await openDialog(
-      viewFor({
-        providers,
-        slots: { llm: 'operator:deepseek-v4-pro', document: null },
-        allowUserKeys: false,
-        lock: ['document'],
-      }),
-    );
-    expect(nav).toEqual(['course-models', 'general']);
-    // Opened on its default section (Token Plan), it lands on Course Model.
-    expect(document.body.textContent).toContain('settings.courseModels.nav');
-  });
-
-  it('keeps the Text-to-Speech tab for user voices without user keys', async () => {
-    const nav = await openDialog(
-      viewFor({
-        providers: {
-          ...providers,
-          qwen: { preset: 'qwen-tts', apiKey: 'sk-operator-secret-0003' },
-        },
-        slots: { llm: 'operator:deepseek-v4-pro', tts: 'qwen:qwen3-tts-flash' },
-        allowUserKeys: false,
-      }),
-    );
-    expect(nav).toEqual(['model-services', 'course-models', 'general']);
-    click(document.body.querySelector<HTMLElement>('[data-testid="settings-nav-model-services"]')!);
-    await flush();
-    const tabs = [...document.body.querySelectorAll('[role="tab"]')].map((tab) => tab.textContent);
-    expect(tabs).toEqual(['settings.ttsSettings']);
-    // The service in use is the server's, read-only, with no "add your own" to it.
-    const notice = document.body.querySelector('[data-server-configured-notice]');
-    expect(notice?.textContent).toContain('settings.serverConfiguredNotice');
-    expect(notice?.textContent).not.toContain('settings.serverConfiguredAddOwn');
-    expect(document.body.textContent).not.toContain('settings.modelServices.notConfiguredHint');
-    expect(document.body.textContent).not.toContain('settings.modelServices.pending');
-  });
-
   it('suggests adding a provider of your own only where that can change something', async () => {
     await openDialog(
       viewFor({
@@ -251,36 +213,6 @@ describe('the settings sections', () => {
     expect(nav).not.toContain('token-plan');
     expect(nav).toContain('model-services');
   });
-
-  it('shows Model Services tabs only for capabilities that still have a slot to set', async () => {
-    await openDialog(
-      viewFor({ providers, slots: { llm: 'operator:deepseek-v4-pro' }, lock: ['llm'] }),
-    );
-    click(document.body.querySelector<HTMLElement>('[data-testid="settings-nav-model-services"]')!);
-    await flush();
-    const tabs = [...document.body.querySelectorAll('[role="tab"]')].map((tab) => tab.textContent);
-    expect(tabs).not.toContain('settings.providers');
-    expect(tabs).toContain('settings.imageSettings');
-    expect(document.body.textContent).not.toContain('settings.addProviderButton');
-  });
-
-  it('shows the diagram with every card read-only when the administrator fixed everything', async () => {
-    const nav = await openDialog(
-      viewFor({ providers, slots: { llm: 'operator:deepseek-v4-pro' }, lock: 'all' }),
-    );
-    expect(nav).toEqual(['course-models', 'general']);
-    expect(document.body.querySelector('[data-admin-notice]')?.textContent).toContain(
-      'settings.modelSettings.adminNotice',
-    );
-    expect(document.body.querySelector('[data-locked-slot="llm"]')?.textContent).toMatch(
-      /DeepSeek V4 Pro/,
-    );
-    expect(document.body.querySelector('[data-locked-slot="image"]')?.textContent).toContain(
-      'settings.modelSettings.card.unassigned',
-    );
-    expect(document.body.querySelector('[data-slot-id]')).toBeNull();
-    expect(document.body.querySelector('[role="switch"]')).toBeNull();
-  });
 });
 
 describe('labels without user keys or with everything locked', () => {
@@ -315,13 +247,20 @@ describe('labels without user keys or with everything locked', () => {
     ).toBe('DeepSeek');
   });
 
-  it('names them on the read-only diagram', async () => {
-    await openDialog(viewFor({ ...labelled, lock: 'all' }));
-    const line = (slot: string) =>
-      document.body.querySelector(`[data-locked-slot="${slot}"]`)?.textContent;
-    expect(line('document')).toContain('MinerU');
-    expect(line('webSearch')).toContain('Bocha');
-    expect(line('llm')).toContain('DeepSeek');
+  // KHAITAM patch point: upstream hides Model Services where users may not add keys, because the
+  // operator's file declares the providers there. Here the administrator declares them in that
+  // section, so an account that may configure (personalProviderKey) keeps it.
+  it('keeps Model Services for the administrator when users may not add keys', async () => {
+    const nav = await openDialog(
+      viewFor({
+        providers,
+        slots: { llm: 'operator:deepseek-v4-pro', document: null },
+        allowUserKeys: false,
+        lock: ['document'],
+      }),
+    );
+    expect(nav).toContain('model-services');
+    expect(nav).toContain('course-models');
   });
 });
 

@@ -61,12 +61,16 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   // shows its own loading state.
   const modelView = useModelSettingsView();
   const sections = modelView ? settingsSections(modelView) : null;
-  const serviceTabs = sections
-    ? SERVICE_TABS.filter((tab) => sections.modelServices.includes(TAB_CAPABILITY[tab]))
-    : SERVICE_TABS;
   // KHAITAM patch point: provider, model and key settings are the administrator's own (decision
   // D3); everyone else sees General only.
   const canConfigure = useCapabilities()?.personalProviderKey === true;
+  // Upstream hides Model Services when the server does not let users add keys (`allowUserKeys:
+  // false`), because there it is the operator's file that declares providers. Here the administrator
+  // declares them in this very section (the shared credential cards), so it stays for them.
+  const serviceTabs =
+    canConfigure || !sections
+      ? SERVICE_TABS
+      : SERVICE_TABS.filter((tab) => sections.modelServices.includes(TAB_CAPABILITY[tab]));
   const listed = (id: SettingsSection) =>
     !canConfigure
       ? id === 'general'
