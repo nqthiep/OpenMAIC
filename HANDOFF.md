@@ -105,6 +105,21 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 - `docker compose up -d`, then sign in as an administrator and open the Settings popup, OmniRoute: expected the three steps, not the "not connected" card, with nothing about OmniRoute in `.env`.
 - `ops/omniroute/smoke.sh <dashboard url> --internal`: expected no FAIL.
 
+## Assignment: Dark theme as the default
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "chọn giao diện mặc định là giao diện dark"
+- Assignment status: Done in the working tree, not committed, not deployed.
+- Branch and commit: `it-math` @ `192a54b1`, pushed: no (nothing new committed).
+- Last updated: 2026-10-24 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Default theme is dark when the visitor has not chosen; saved choices (light, dark, system) still win | Done | `lib/hooks/use-theme.tsx`: initial state `dark`, the class is applied only after the saved choice is read (`hydrated`). Browser on the dev server: no saved choice -> `<html class="dark">`, body `rgb(8, 22, 43)`; `localStorage.theme=light` -> no `dark` class, body `rgb(243, 240, 232)` |
+| 2 | No light flash before hydration | Done | New `lib/theme-init-script.ts` run from `<head>` in `app/layout.tsx` before the first paint. Not measured: a real first-paint recording |
+| 3 | Test | Done | `tests/seo/theme-init.test.ts` (4): default dark, storage blocked, saved choice kept, "system" follows the system; mutation (default made light) failed 2 tests, then restored; eslint, tsc clean |
+| 4 | Not checked | Todo | Every page in dark (classroom, workspace, admin, settings dialogs) was not looked at one by one; visitors who never chose and used a light system now get dark |
+
 ## Assignment: Commit, push and deploy the SEO and home-page work to the VPS
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Commit và push và deploy trên vps của tôi"

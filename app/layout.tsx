@@ -7,6 +7,7 @@ import 'animate.css';
 import 'katex/dist/katex.min.css';
 import { DEFAULT_BRAND } from '@/lib/brand/brand-config';
 import { siteJsonLd, siteOrigin } from '@/lib/brand/site-origin';
+import { THEME_INIT_SCRIPT } from '@/lib/theme-init-script';
 import { defaultLocale } from '@/lib/i18n/types';
 import { ThemeProvider } from '@/lib/hooks/use-theme';
 import { I18nProvider } from '@/lib/hooks/use-i18n';
@@ -70,6 +71,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={defaultLocale} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
         suppressHydrationWarning
