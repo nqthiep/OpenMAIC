@@ -11,6 +11,9 @@
 import { translateProviderSnapshot } from '@/lib/server/model-config/provider-store-layer';
 import { currentSnapshot, isProviderSnapshotLoaded } from '@/lib/server/provider-store/snapshot';
 import { loadModelConfigFile, type SlotAssignment } from '@/lib/server/model-config/openmaic-yml';
+import { usesServerCredentials, selectsUpstreamModel } from './model-authorization';
+import { getProviderPreset } from '@/lib/config/provider-presets';
+import type { SlotCapability } from '@/lib/config/model-slots';
 import type { ModelConfigLayer } from '@/lib/server/model-config/resolve-slot';
 import type { LlmStage } from '@/lib/server/model-routes';
 
@@ -72,12 +75,26 @@ export function loadDeploymentLayer(): DeploymentLayer {
     return {
       layer: { source: 'deployment', config: file },
       legacy: false,
-      notices:
-        isProviderSnapshotLoaded() && storeHasConfiguration()
+      notices: [
+        ...(isProviderSnapshotLoaded() && storeHasConfiguration()
           ? [
               'openmaic.yml is present, so slot resolution uses it and not the providers and routes saved in the settings',
             ]
-          : [],
+          : []),
+        ...Object.entries(file.providers ?? {})
+          .filter(
+            ([, provider]) =>
+              usesServerCredentials(provider) &&
+              Object.keys(getProviderPreset(provider.preset)?.capabilities ?? {}).some(
+                (capability) => selectsUpstreamModel(provider.preset, capability as SlotCapability),
+              ) &&
+              !provider.models?.length,
+          )
+          .map(
+            ([id]) =>
+              `Server-managed provider "${id}" has no explicit model list. Set openmaic.yml providers.${id}.models; only default/fallback models are usable.`,
+          ),
+      ],
     };
   }
   if (!storeHasConfiguration()) return { layer: null, legacy: false, notices: [] };

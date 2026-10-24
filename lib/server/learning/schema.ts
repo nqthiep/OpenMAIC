@@ -257,12 +257,6 @@ CREATE TABLE IF NOT EXISTS course_remixes (
 CREATE INDEX IF NOT EXISTS course_remixes_source_idx ON course_remixes (source_id);
 CREATE INDEX IF NOT EXISTS course_remixes_remixer_idx ON course_remixes (remixer_id, created_at);
 
-CREATE TABLE IF NOT EXISTS render_jobs (
-  job_id TEXT PRIMARY KEY,
-  owner_id TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 -- The last refused share request of a course, so its owner learns it was refused and why.
 -- Cleared when the owner asks again.
 CREATE TABLE IF NOT EXISTS course_share_rejections (

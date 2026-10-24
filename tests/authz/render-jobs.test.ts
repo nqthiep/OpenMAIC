@@ -4,7 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MembershipView } from '@/lib/server/learning/store';
 
 // Accounts are on. A `session=<id>` cookie names the signed-in account; its role and membership
-// come from this table. Render jobs are kept in memory. No database is involved.
+// come from this table. The render service is a stub that records the owner header it is sent; it
+// is the render service (upstream's owner-bound endpoints) that keeps a job with its owner. No
+// database is involved.
 type Role = 'learner' | 'operator' | 'admin';
 const ACTIVE: MembershipView = {
   status: 'active',
@@ -18,14 +20,14 @@ const ACTIVE: MembershipView = {
   },
 };
 const accounts = new Map<string, { role: Role; membership?: MembershipView }>();
-const jobOwners = new Map<string, string>();
-const upstream = vi.fn(
-  async () =>
-    new Response(JSON.stringify({ jobId: 'job-1' }), {
-      status: 202,
-      headers: { 'content-type': 'application/json' },
-    }),
-);
+const sentOwners: Array<string | null> = [];
+const upstream = vi.fn(async (_url: string, init?: { headers?: Record<string, string> }) => {
+  sentOwners.push(init?.headers?.['x-openmaic-render-owner'] ?? null);
+  return new Response(JSON.stringify({ jobId: 'job-1' }), {
+    status: 202,
+    headers: { 'content-type': 'application/json', 'x-openmaic-render-owner-bound': '1' },
+  });
+});
 
 vi.mock('@/lib/server/accounts/runtime', () => ({
   accountsEnabled: () => process.env.DATABASE_URL !== '',
@@ -45,17 +47,29 @@ vi.mock('@/lib/server/learning/store', () => ({
   isCourseInClassOf: async () => false,
   readBonusTokens: async () => 0,
   recordCourseRead: async () => 0,
-  readRenderJobOwner: async (_db: unknown, jobId: string) => jobOwners.get(jobId),
-  recordRenderJob: async (_db: unknown, jobId: string, ownerId: string) => {
-    jobOwners.set(jobId, ownerId);
+}));
+
+// The owner of a request is what the account method resolves (tests/accounts cover it): here a
+// `session=<id>` cookie is the account `acct:<id>`, anything else an anonymous owner.
+vi.mock('@/lib/server/identity/with-owner', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/identity/with-owner')>()),
+  withRequestOwner: async (
+    req: Request,
+    run: (principal: { ownerId: string }, headers: Headers) => Promise<Response>,
+  ) => {
+    const id = /session=([^;]+)/.exec(req.headers.get('cookie') ?? '')?.[1];
+    return run({ ownerId: id ? `acct:${id}` : 'anon:visitor' }, new Headers());
   },
 }));
 
-vi.mock('@/lib/server/render-service', () => ({
+vi.mock('@/lib/server/render-service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/render-service')>()),
   resolveRenderServiceUrl: () => ({ url: 'http://render.test' }),
 }));
 
-vi.mock('@/lib/server/proxy-fetch', () => ({ proxyFetch: () => upstream() }));
+vi.mock('@/lib/server/proxy-fetch', () => ({
+  proxyFetch: (url: string, init?: { headers?: Record<string, string> }) => upstream(url, init),
+}));
 
 function submit(cookie?: string): NextRequest {
   return new NextRequest('http://localhost/api/export-video/render', {
@@ -100,7 +114,7 @@ beforeEach(() => {
   accounts.set('learner-other', { role: 'learner', membership: ACTIVE });
   accounts.set('learner-plain', { role: 'learner' });
   accounts.set('operator-1', { role: 'operator' });
-  jobOwners.clear();
+  sentOwners.length = 0;
   upstream.mockClear();
 });
 
@@ -108,11 +122,11 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 describe('submitting an export render', () => {
-  it('lets the signed-in member submit, and records the job under that member', async () => {
+  it('lets the signed-in member submit, and sends the render service that member as the owner', async () => {
     const { POST } = await import('@/app/api/export-video/render/route');
     const response = await POST(submit('session=learner-member'));
     expect(response.status).toBe(202);
-    expect(jobOwners.get('job-1')).toBe('acct:learner-member');
+    expect(sentOwners).toEqual(['acct:learner-member']);
   });
 
   it('refuses a visitor with no session before reaching the render service', async () => {
@@ -129,53 +143,30 @@ describe('submitting an export render', () => {
     expect(response.status).toBe(403);
     expect((await response.json()).errorCode).toBe('MEMBERSHIP_REQUIRED');
     expect(upstream).not.toHaveBeenCalled();
-    expect(jobOwners.size).toBe(0);
   });
 
   it('lets staff submit without a membership', async () => {
     const { POST } = await import('@/app/api/export-video/render/route');
     const response = await POST(submit('session=operator-1'));
     expect(response.status).toBe(202);
-    expect(jobOwners.get('job-1')).toBe('acct:operator-1');
+    expect(sentOwners).toEqual(['acct:operator-1']);
   });
 
-  it('needs no session and records nothing when accounts are off', async () => {
+  it('needs no session when accounts are off', async () => {
     vi.stubEnv('DATABASE_URL', '');
     const { POST } = await import('@/app/api/export-video/render/route');
     const response = await POST(submit());
     expect(response.status).toBe(202);
-    expect(jobOwners.size).toBe(0);
   });
 });
 
 describe('reading, cancelling and downloading a render job', () => {
   it.each(['GET', 'DELETE', 'DOWNLOAD'] as const)(
-    '%s: the submitter and staff pass, another member gets 404 without reaching the render service',
+    '%s: asks the render service on behalf of the caller as owner; the service binds the job to it',
     async (name) => {
-      jobOwners.set('job-1', 'acct:learner-member');
       const handler = (await jobHandlers())[name];
-
-      expect((await jobCall(handler, 'session=learner-member')).status).not.toBe(404);
-      expect((await jobCall(handler, 'session=operator-1')).status).not.toBe(404);
-
-      upstream.mockClear();
-      expect((await jobCall(handler, 'session=learner-other')).status).toBe(404);
-      expect(upstream).not.toHaveBeenCalled();
+      await jobCall(handler, 'session=learner-member');
+      expect(sentOwners).toEqual(['acct:learner-member']);
     },
   );
-
-  it('answers 404 to a visitor with no session, and to an unknown job', async () => {
-    const { GET } = await jobHandlers();
-    jobOwners.set('job-1', 'acct:learner-member');
-    expect((await jobCall(GET)).status).toBe(404);
-
-    jobOwners.clear();
-    expect((await jobCall(GET, 'session=learner-member')).status).toBe(404);
-  });
-
-  it('leaves job routes unchecked when accounts are off', async () => {
-    vi.stubEnv('DATABASE_URL', '');
-    const { GET } = await jobHandlers();
-    expect((await jobCall(GET)).status).not.toBe(404);
-  });
 });

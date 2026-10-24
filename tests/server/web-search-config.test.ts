@@ -247,17 +247,21 @@ describe('server web search config', () => {
 
     const { resolveClassroomWebSearchConfig } = await import('@/lib/server/web-search-config');
 
-    expect(
-      await resolveClassroomWebSearchConfig(null, {
-        webSearchProviderId: 'claude',
-        webSearchModelId: 'claude-haiku-4-5',
-      }),
-    ).toEqual({
-      providerId: 'claude',
-      apiKey: 'sk-server-key',
-      baseUrl: 'https://api.anthropic.com/v1',
-      claudeModelId: 'claude-sonnet-5',
-    });
+    // KHAITAM patch point: upstream refuses an unlisted model a request names. The saved
+    // configuration decides here (D3), so what the request names is ignored, listed or not.
+    for (const webSearchModelId of ['claude-haiku-4-5', 'claude-opus-5']) {
+      expect(
+        await resolveClassroomWebSearchConfig(null, {
+          webSearchProviderId: 'claude',
+          webSearchModelId,
+        }),
+      ).toEqual({
+        providerId: 'claude',
+        apiKey: 'sk-server-key',
+        baseUrl: 'https://api.anthropic.com/v1',
+        claudeModelId: 'claude-sonnet-5',
+      });
+    }
   });
 
   it.each([

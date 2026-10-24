@@ -11,6 +11,8 @@
  *     run waits for `confirm-outline`), `countdown` (the run confirms its
  *     outline itself after a short pause, unless `hold-outline` turned it
  *     into a `wait` run first) or `auto` (the outline is confirmed at once).
+ *     A host's `authorizeStart` hook may refuse the start last, with its own
+ *     status and code (`lib/server/generation-run-hooks`).
  *
  *   GET /api/generation-runs?active=1
  *     The owner's active runs (every state but completed and ended), for
@@ -44,7 +46,8 @@ export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
 
-  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
+  return withRequestOwner(req, async (principal, responseHeaders) => {
+    const { ownerId } = principal;
     const body = await readJsonBody(req, MAX_START_BODY_BYTES);
     if (!body.ok) {
       return ownerApiError('INVALID_REQUEST', body.status, body.message, responseHeaders);
@@ -53,12 +56,23 @@ export async function POST(req: NextRequest) {
     if (!parsed.ok) return ownerApiError('INVALID_REQUEST', 400, parsed.message, responseHeaders);
 
     try {
-      const run = await startGenerationRun(ownerId, parsed.value);
+      const run = await startGenerationRun(ownerId, parsed.value, {
+        principal,
+        request: req,
+        origin: 'generation-runs',
+      });
       return withOwnerResponseHeaders(apiSuccess({ run: runSnapshot(run) }, 202), responseHeaders);
     } catch (error) {
       const refusal = startRefusal(error);
       if (refusal) {
-        return ownerApiError(refusal.code, refusal.status, refusal.message, responseHeaders);
+        const response = ownerApiError(
+          refusal.code,
+          refusal.status,
+          refusal.message,
+          responseHeaders,
+        );
+        for (const [key, value] of refusal.headers ?? []) response.headers.append(key, value);
+        return response;
       }
       log.error('Generation run creation failed:', error);
       return ownerApiError(

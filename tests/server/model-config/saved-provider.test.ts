@@ -74,7 +74,9 @@ beforeEach(() => {
   runtime.setDeploymentConfigForTests({
     layer: {
       source: 'deployment',
-      config: { providers: { operator: { preset: 'openai', apiKey: 'sk-operator' } } },
+      config: {
+        providers: { operator: { preset: 'openai', apiKey: 'sk-operator', models: ['gpt-5'] } },
+      },
     },
     legacy: false,
     notices: [],

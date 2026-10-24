@@ -27,6 +27,7 @@ import {
   storeSessionMaterialRawAsset,
 } from '@/lib/server/agent-runtime/session-materials';
 
+import { ModelAuthorizationError } from '@/lib/server/model-config/model-authorization';
 import { isTransientExtractionError, MaterialExtractionError } from './errors';
 
 const log = createLogger('MaterialExtraction');
@@ -168,6 +169,7 @@ export async function extractMaterialSource(
         config: { ...mediaInput.config, providerId: selected.id },
       });
     } catch (error) {
+      if (error instanceof ModelAuthorizationError) throw error;
       // B48 (D-31 precedent): the adapter's message can carry vendor response
       // text, so the wrapped error keeps only our own fixed message. The
       // original error stays as `cause` for server-side diagnosis.

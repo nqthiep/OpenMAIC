@@ -21,6 +21,7 @@
  * new one; stored bytes are checkpointed in the transaction that allocates
  * them, so a takeover places them instead of paying for them again.
  */
+import { ModelAuthorizationError } from '@/lib/server/model-config/model-authorization';
 import { isAbortError } from '@openmaic/generation';
 import { toAssetId } from '@openmaic/storage';
 
@@ -30,6 +31,7 @@ import type { MediaGenerationRequest } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
 import { assetPrincipalForOwner } from '@/lib/persistence/owner-assets';
 import { getServerPersistenceProvider } from '@/lib/persistence/server-provider';
+import { classifyHostFailure } from '@/lib/server/generation-run-hooks/runtime';
 import { StepRefusal } from '@/lib/server/generation/steps/context';
 import { storeGeneratedAsset } from '@/lib/server/store-generated-asset';
 import type { Scene } from '@/lib/types/stage';
@@ -131,12 +133,24 @@ export function mayGenerate(
  * What a failed item is remembered by: the code and the fixed message the
  * browser's generation route answers with (a provider's own error text is
  * only logged), so the element shows the same state and the same Retry rule.
+ * A failure the host classified as its own keeps the host's code and message
+ * (and its Retry).
  */
 export function mediaFailure(
   error: unknown,
   mediaType: 'image' | 'video',
 ): { message: string; errorCode?: string } {
+  if (error instanceof ModelAuthorizationError)
+    return { message: error.message, errorCode: error.code };
   const label = mediaType === 'image' ? 'Image' : 'Video';
+  const host = classifyHostFailure(error);
+  if (host) {
+    return {
+      message:
+        error instanceof Error && error.message ? error.message : `${label} generation failed`,
+      errorCode: host.errorCode,
+    };
+  }
   if (error instanceof StepRefusal) {
     const codes: Record<string, string> = {
       'missing-api-key': 'MISSING_API_KEY',

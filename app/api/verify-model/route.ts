@@ -1,6 +1,11 @@
 import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
 import { requireSpender } from '@/lib/server/authz/viewer';
 import { NextRequest } from 'next/server';
+import { resolveRequestOwner } from '@/lib/server/identity/resolve';
+import {
+  attachOwnerCookies,
+  invalidOwnerCredentialResponse,
+} from '@/lib/server/identity/with-owner';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModel } from '@/lib/server/resolve-model';
@@ -18,6 +23,12 @@ export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
 
+  const owner = await resolveRequestOwner(req);
+  if (!owner.ok) return invalidOwnerCredentialResponse();
+  return attachOwnerCookies(await verify(req), owner.setCookies);
+}
+
+async function verify(req: NextRequest) {
   let model: string | undefined;
   // Set once the operator's key is chosen. Upstream text from that key is never sent to the visitor.
   let managedKey = false;
@@ -27,7 +38,7 @@ export async function POST(req: NextRequest) {
     model = body.model;
     const keysAllowed = await clientKeysAllowed(req.headers);
 
-    if (!model) {
+    if (typeof model !== 'string' || !model.trim()) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Model name is required');
     }
 
@@ -65,6 +76,8 @@ export async function POST(req: NextRequest) {
         languageModel = result.model;
         managedKey = result.managedKey;
       } catch (error) {
+        const refused = savedProviderResponse(error, 'language model');
+        if (refused) return refused;
         return apiError(
           'INVALID_REQUEST',
           401,

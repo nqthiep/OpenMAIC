@@ -20,7 +20,6 @@ import {
   readBonusTokens,
   readCourseShare,
   readMembership,
-  readRenderJobOwner,
   type MembershipView,
   recordCourseRead,
 } from '@/lib/server/learning/store';
@@ -229,23 +228,4 @@ export async function requireExporter(
     };
   }
   return { ownerId: viewer.ownerId };
-}
-
-/**
- * Gate for the status, cancel and download routes of a render job. Staff pass. Anyone else
- * passes only when they submitted the job. A job the caller may not see answers 404, the same as
- * a job that does not exist, so job ids cannot be probed. With accounts off nothing is checked.
- */
-export async function requireRenderJobOwner(
-  headers: Headers,
-  jobId: string,
-): Promise<Response | undefined> {
-  if (!accountsEnabled()) return undefined;
-  const viewer = await resolveViewer(headers);
-  const deps = await accountServiceDeps();
-  const ownerId = await readRenderJobOwner(deps.db, jobId);
-  if (ownerId === undefined || !can(viewer, 'job.read', { ownerId })) {
-    return apiError('NOT_FOUND', 404, 'Render job not found');
-  }
-  return undefined;
 }

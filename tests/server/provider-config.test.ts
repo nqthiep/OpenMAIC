@@ -50,6 +50,8 @@ import { clearProviders, useProviders } from '../fixtures/provider-snapshot';
 
 describe('provider-config', () => {
   beforeEach(() => {
+    delete (globalThis as Record<symbol, unknown>)[Symbol.for('openmaic.model-config.deployment')];
+    vi.resetModules();
     vi.unstubAllEnvs();
     // An empty DATABASE_URL reads as "no database", whatever the host environment holds.
     vi.stubEnv('DATABASE_URL', '');
@@ -113,6 +115,26 @@ describe('provider-config', () => {
     });
   });
 
+  describe('request-named models under server-managed credentials', () => {
+    // KHAITAM patch point: upstream's per-provider model pins and client allowlists applied to the
+    // configuration translated from environment variables. This server keeps its providers in the
+    // database, where a managed provider's model comes from the route or slot an administrator set
+    // (decision D3), so a request never selects one.
+    it("refuses a model a request names for a provider with the server's credentials", () => {
+      useProviders({
+        image: { 'openai-image': { apiKey: 'sk-server', models: ['gpt-image-1'] } },
+        tts: { 'openai-tts': { apiKey: 'sk-server', models: ['gpt-4o-mini-tts'] } },
+      });
+      expect(() => resolveImageModel('openai-image', 'gpt-image-1')).toThrow('not authorized');
+      expect(() => resolveTTSModel('openai-tts', 'gpt-4o-mini-tts')).toThrow('not authorized');
+    });
+
+    it('lets a request name its own model for a provider without server credentials', () => {
+      expect(resolveImageModel('openai-image', 'client-model')).toBe('client-model');
+      expect(resolveTTSModel('openai-tts', 'client-model')).toBe('client-model');
+    });
+  });
+
   describe('getParallelSceneConcurrency', () => {
     it('defaults to 0 (serial) when unset', () => {
       expect(getParallelSceneConcurrency()).toBe(0);
@@ -130,6 +152,10 @@ describe('provider-config', () => {
 
     it('treats zero, negative, and non-numeric values as off', () => {
       for (const value of ['0', '-2', 'abc']) {
+        delete (globalThis as Record<symbol, unknown>)[
+          Symbol.for('openmaic.model-config.deployment')
+        ];
+        vi.resetModules();
         vi.stubEnv('PARALLEL_SCENE_CONCURRENCY', value);
         expect(getParallelSceneConcurrency(), `value=${value}`).toBe(0);
       }
@@ -319,32 +345,6 @@ describe('provider-config', () => {
       expect(resolveWebSearchBaseUrl('minimax')).toBe('https://proxy.example.com/minimax');
       expect(getServerWebSearchProviders().minimax).toEqual({});
     });
-
-    it('resolves Claude web search key, base URL, and pinned model', () => {
-      useProviders({
-        webSearch: {
-          claude: {
-            apiKey: 'claude-key',
-            baseUrl: 'https://proxy.example.com/anthropic',
-            models: ['claude-sonnet-5', 'claude-opus-5'],
-          },
-        },
-      });
-
-      expect(resolveWebSearchApiKey('claude', undefined)).toBe('claude-key');
-      expect(resolveWebSearchBaseUrl('claude')).toBe('https://proxy.example.com/anthropic');
-      // Server-pinned model (first entry) is authoritative over the client model.
-      expect(resolveWebSearchModel('claude', 'claude-haiku-4-5')).toBe('claude-sonnet-5');
-      expect(getServerWebSearchProviders().claude).toEqual({});
-    });
-
-    it('lets the client model win when no Claude model is pinned server-side', () => {
-      expect(resolveWebSearchModel('claude', 'claude-opus-5')).toBe('claude-opus-5');
-      expect(resolveWebSearchModel('claude')).toBeUndefined();
-
-      useProviders({ webSearch: { claude: { apiKey: 'claude-key' } } });
-      expect(resolveWebSearchModel('claude', 'claude-opus-5')).toBe('claude-opus-5');
-    });
   });
 
   describe('PDF providers', () => {
@@ -436,24 +436,6 @@ describe('provider-config', () => {
   });
 
   describe('media model resolution', () => {
-    it('allowlists the client image model against the pinned models', () => {
-      useProviders({
-        image: { seedream: { apiKey: 'sk-seedream', models: ['model-a', 'model-b'] } },
-      });
-      // Allowlisted client choice wins over the managed default.
-      expect(resolveImageModel('seedream', 'model-b')).toBe('model-b');
-      // Non-allowlisted client choice falls back to the managed default.
-      expect(resolveImageModel('seedream', 'client-model')).toBe('model-a');
-      expect(resolveImageModel('seedream')).toBe('model-a');
-    });
-
-    it('lets the client image model win when nothing is pinned server-side', () => {
-      expect(resolveImageModel('seedream', 'client-model')).toBe('client-model');
-
-      useProviders({ image: { seedream: { apiKey: 'sk-seedream' } } });
-      expect(resolveImageModel('seedream', 'client-model')).toBe('client-model');
-    });
-
     it('returns undefined for the image model when neither client nor server provides one', () => {
       expect(resolveImageModel('seedream')).toBeUndefined();
     });
@@ -467,15 +449,6 @@ describe('provider-config', () => {
 
     it('returns undefined for the default image provider when none is configured', () => {
       expect(resolveServerImageProviderId()).toBeUndefined();
-    });
-
-    it('pins the video model from server config and allowlists the client choice', () => {
-      useProviders({ video: { seedance: { apiKey: 'sk-seedance', models: ['v1', 'v2'] } } });
-      // Allowlisted client choice wins over the managed default.
-      expect(resolveVideoModel('seedance', 'v2')).toBe('v2');
-      // Non-allowlisted client choice falls back to the managed default.
-      expect(resolveVideoModel('seedance', 'not-allowed')).toBe('v1');
-      expect(resolveVideoModel('seedance')).toBe('v1');
     });
 
     it('lets the client video model win when nothing is pinned server-side', () => {
@@ -493,17 +466,6 @@ describe('provider-config', () => {
 
     it('returns undefined for the default video provider when none is configured', () => {
       expect(resolveServerVideoProviderId()).toBeUndefined();
-    });
-
-    it('allowlists the client ASR model against the pinned models', () => {
-      useProviders({
-        asr: { 'openai-whisper': { apiKey: 'sk-asr', models: ['whisper-x', 'whisper-y'] } },
-      });
-      // Allowlisted client choice wins over the managed default.
-      expect(resolveASRModel('openai-whisper', 'whisper-y')).toBe('whisper-y');
-      // Non-allowlisted client choice falls back to the managed default.
-      expect(resolveASRModel('openai-whisper', 'client-model')).toBe('whisper-x');
-      expect(resolveASRModel('openai-whisper')).toBe('whisper-x');
     });
 
     it('lets the client ASR model win when nothing is pinned server-side', () => {
@@ -789,18 +751,6 @@ describe('provider-config', () => {
       expect(resolveTTSApiKey('qwen-tts', 'sk-client')).toBe('sk-client');
     });
 
-    it('pins the TTS model of a managed provider and ignores the client model', () => {
-      useProviders({ tts: { 'openai-tts': { apiKey: 'sk-tts', models: ['tts-1', 'tts-1-hd'] } } });
-      expect(resolveTTSModel('openai-tts', 'gpt-4o-mini-tts')).toBe('tts-1');
-      expect(resolveTTSModel('openai-tts')).toBe('tts-1');
-    });
-
-    it('lets the client TTS model win when nothing is pinned', () => {
-      useProviders({ tts: { 'openai-tts': { apiKey: 'sk-tts' } } });
-      expect(resolveTTSModel('openai-tts', 'tts-1-hd')).toBe('tts-1-hd');
-      expect(resolveTTSModel('openai-tts')).toBeUndefined();
-    });
-
     it('prefers a managed base URL over the provider default', () => {
       useProviders({
         tts: { 'openai-tts': { apiKey: 'k', baseUrl: 'https://proxy.example.com/v1' } },
@@ -816,19 +766,6 @@ describe('provider-config', () => {
       expect(resolveTTSBaseUrl('qwen-tts')).toBe('https://dashscope.aliyuncs.com/api/v1');
     });
 
-    it('maps VC sentinels to the resolved model and rejects pin bypasses', () => {
-      useProviders({ tts: { 'qwen-tts': { apiKey: 'key', models: ['qwen3-tts-flash'] } } });
-      vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', 'operator-vc-model');
-
-      expect(resolveTTSModel('qwen-tts', 'qwen3-tts-vc-custom', 'clone-1')).toBe(
-        'operator-vc-model',
-      );
-      expect(() => resolveTTSModel('qwen-tts', 'qwen3-tts-flash-other', 'Cherry')).toThrow(
-        'not allowed',
-      );
-      expect(resolveTTSModel('qwen-tts', 'operator-vc-model', 'Cherry')).toBe('qwen3-tts-flash');
-    });
-
     it('reads the VC override only from server-side resolution', () => {
       vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', 'operator-vc-model');
       expect(resolveQwenVoiceCloneModel()).toBe('operator-vc-model');
@@ -837,18 +774,6 @@ describe('provider-config', () => {
     it('falls back to the default VC model when the override is unset', () => {
       expect(resolveQwenVoiceCloneModel()).toBeTruthy();
       expect(resolveQwenVoiceCloneModel()).not.toBe('operator-vc-model');
-    });
-
-    it('rejects catalog synthesis when the operator pins only the clone model', () => {
-      useProviders({ tts: { 'qwen-tts': { apiKey: 'key', models: ['operator-vc-model'] } } });
-      vi.stubEnv('TTS_QWEN_VOICE_CLONE_MODEL', 'operator-vc-model');
-
-      expect(() => resolveTTSModel('qwen-tts', undefined, 'Cherry')).toThrow('not allowed');
-    });
-
-    it('lets the client model through when nothing is pinned', () => {
-      useProviders({ tts: { 'qwen-tts': { apiKey: 'key' } } });
-      expect(resolveTTSModel('qwen-tts', 'qwen3-tts-flash')).toBe('qwen3-tts-flash');
     });
   });
 

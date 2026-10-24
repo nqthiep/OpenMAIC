@@ -195,8 +195,10 @@ describe('openmaic.yml over the provider store', () => {
     expect(layer?.config.slots).toEqual({ llm: 'ds:deepseek-v4-pro' });
     expect(layer?.config.providers).toEqual({ ds: { preset: 'deepseek', apiKey: 'sk-ds' } });
     expect(stageLayers).toBeUndefined();
-    expect(notices).toHaveLength(1);
+    // The file's own notice, and one for the provider that declares a key but no model list.
+    expect(notices).toHaveLength(2);
     expect(notices[0]).toMatch(/^openmaic\.yml is present/);
+    expect(notices[1]).toMatch(/has no explicit model list/);
   });
 
   it('is read without the provider settings (a file validates before they load)', () => {
@@ -208,5 +210,30 @@ describe('openmaic.yml over the provider store', () => {
       legacy: false,
       notices: [],
     });
+  });
+
+  it('names the YAML models key for every credentialed provider without a list', () => {
+    fs.writeFileSync(
+      path.join(dir, 'openmaic.yml'),
+      `providers:
+  chat:
+    preset: openai
+    apiKey: operator-chat
+  speech:
+    preset: openai-tts
+    apiKey: operator-speech
+  listed:
+    preset: seedream
+    apiKey: operator-image
+    models: [listed-model]
+  keyless:
+    preset: ollama
+`,
+    );
+    const warnings = loadDeploymentLayer().notices;
+    expect(warnings).toHaveLength(2);
+    expect(warnings[0]).toContain('providers.chat.models');
+    expect(warnings[1]).toContain('providers.speech.models');
+    expect(warnings.join('\n')).not.toContain('operator-chat');
   });
 });

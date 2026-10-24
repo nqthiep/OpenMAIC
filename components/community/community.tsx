@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { createMathPlugin } from '@streamdown/math';
 import { Streamdown } from 'streamdown';
 import { useFailureToast } from '@/components/support/support-inbox';
 import { SectionTitle } from '@/components/home/section-title';
@@ -54,6 +53,7 @@ import {
   type ReportRow,
 } from '@/components/learning/learning-api';
 import { useAccountSession } from '@/lib/capabilities/use-capabilities';
+import { createSafeMathPlugin } from '@/lib/markdown/safe-math-plugin';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useStageStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -63,7 +63,8 @@ const TITLE_MAX = 160;
 const BODY_MAX = 4000;
 const REASON_MAX = 300;
 
-const MATH = { math: createMathPlugin({ singleDollarTextMath: true }) } as const;
+// Member-written formulas go through the hardened KaTeX options (a formula must not define macros).
+const MATH = { math: createSafeMathPlugin({ singleDollarTextMath: true }) } as const;
 // Member-written text: no images, so a post cannot load a tracking pixel for every reader.
 const TEXT_COMPONENTS = { img: () => null } as const;
 

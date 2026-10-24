@@ -1568,33 +1568,6 @@ export async function listAudit(
   }));
 }
 
-// ── Render jobs ──────────────────────────────────────────────────────────────
-
-/** Records which owner submitted a video render, so its status and download stay with that owner. */
-export async function recordRenderJob(
-  db: AccountQueryable,
-  jobId: string,
-  ownerId: string,
-): Promise<void> {
-  await db.query(
-    `INSERT INTO render_jobs (job_id, owner_id) VALUES ($1::text, $2::text)
-     ON CONFLICT (job_id) DO NOTHING`,
-    [jobId, ownerId],
-  );
-}
-
-/** The owner that submitted a render job, or undefined when no record exists. */
-export async function readRenderJobOwner(
-  db: AccountQueryable,
-  jobId: string,
-): Promise<string | undefined> {
-  const result = await db.query(`SELECT owner_id FROM render_jobs WHERE job_id = $1::text`, [
-    jobId,
-  ]);
-  const row = result.rows[0] as { owner_id: string } | undefined;
-  return row?.owner_id;
-}
-
 // ── Dashboard ────────────────────────────────────────────────────────────────
 
 export interface DashboardCounts {

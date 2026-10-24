@@ -21,6 +21,7 @@
  *   made under the same extraction services (a copy of its result) instead of
  *   extracting them again.
  */
+import { ModelAuthorizationError } from '@/lib/server/model-config/model-authorization';
 import { randomUUID } from 'node:crypto';
 
 import { buildDocumentBundle, type ParsedDocumentImage } from '@/lib/document/bundle';
@@ -47,6 +48,10 @@ import {
 import { getServerPersistenceProvider } from '@/lib/persistence/server-provider';
 import { ClassroomMaterialsUnavailableError } from '@/lib/server/classroom-materials';
 import { agentRuntimeConfig } from '@/lib/server/agent-runtime/config';
+import {
+  classifyHostFailure,
+  runGenerationExecution,
+} from '@/lib/server/generation-run-hooks/runtime';
 import { STEP_DEADLINES_MS } from '@/lib/server/generation/run/deadline';
 import { StepRefusal } from '@/lib/server/generation/steps/context';
 import { analyzeMaterial } from '@/lib/server/generation/steps/material-analysis';
@@ -348,8 +353,29 @@ export async function extractOwnerMaterial(
   };
 }
 
-/** The failed extraction a failure leaves: its message, kind and whether trying again may help. */
+/**
+ * The failed extraction a failure leaves: its message, kind and whether trying
+ * again may help. Authorization refusals retain their identity before host classification.
+ */
 export function failedExtraction(error: unknown): OwnerMaterialExtraction {
+  if (error instanceof ModelAuthorizationError) {
+    return {
+      status: 'failed',
+      error: error.message,
+      errorCode: error.code,
+      httpStatus: error.httpStatus,
+      retryable: false,
+    };
+  }
+  const host = classifyHostFailure(error);
+  if (host) {
+    return {
+      status: 'failed',
+      error: error instanceof Error ? error.message : String(error),
+      errorCode: host.errorCode,
+      retryable: host.retryable,
+    };
+  }
   return {
     status: 'failed',
     error: error instanceof Error ? error.message : String(error),
@@ -403,13 +429,26 @@ export async function runClaimedOwnerMaterialExtraction(
   };
   let extraction: OwnerMaterialExtraction;
   try {
-    extraction = await extractOwnerMaterial(material, attempt, signal, {
-      ...options,
-      byteStore,
-      onStored: (key) => {
-        stored = key;
+    // Inside the host's execution context; a host that refuses to run it
+    // fails the extraction with its classified failure.
+    const run = await runGenerationExecution(
+      {
+        kind: 'material-extraction',
+        materialId: material.id,
+        ownerId: material.ownerId,
+        currentOwnerId: material.ownerId,
       },
-    });
+      () =>
+        extractOwnerMaterial(material, attempt, signal, {
+          ...options,
+          byteStore,
+          onStored: (key) => {
+            stored = key;
+          },
+        }),
+    );
+    if (!run.ran) throw run.error;
+    extraction = run.value;
   } catch (error) {
     await dropOwnResult();
     if (lost.signal.aborted) {

@@ -18,6 +18,7 @@ import type {
 } from '@openmaic/storage';
 import { DocumentWriteRefusedError } from '@openmaic/storage';
 
+import type { EndedGenerationRun } from '@/lib/server/generation/run/store';
 import type { OwnerPrincipal } from '@/lib/server/identity/types';
 import { getPersistenceHooks } from '@/lib/server/persistence-hooks/registry';
 import type {
@@ -144,7 +145,7 @@ function sanitizedDocument<TScene extends SceneLike, TStage extends Stage>(
 }
 
 type OwnershipMode = 'create' | 'mutate' | 'read' | 'delete' | 'library';
-interface PendingOperation {
+export interface PendingOperation {
   stageId?: string;
   mode: OwnershipMode;
   /** A create that must insert: any existing course under the id refuses it. */
@@ -161,6 +162,34 @@ interface PendingOperation {
    * ownership row's mirror of that flag is set in the same transaction.
    */
   completesGeneration?: boolean;
+}
+
+/**
+ * The operation a store's transaction gates, carried in the caller's async
+ * context. One storage serves every store: a server builds a store per
+ * request, and each `AsyncLocalStorage` that has run stays registered with
+ * `async_hooks` for good, so one per store would make every later promise
+ * pay for every store ever built. A context holds an immutable snapshot of
+ * each store's current operation, so a store sees only its own, and a context
+ * keeps no operation a store has already replaced in it.
+ */
+const operationsByScope = new AsyncLocalStorage<ReadonlyMap<OperationScope, PendingOperation>>();
+const NO_OPERATIONS: ReadonlyMap<OperationScope, PendingOperation> = new Map();
+
+/**
+ * One store's view of {@link operationsByScope}.
+ * @internal Exported for tests.
+ */
+export class OperationScope {
+  run<T>(operation: PendingOperation, body: () => Promise<T>): Promise<T> {
+    // The copy holds one entry per store in this causal context (1-2 on a request path).
+    const operations = new Map(operationsByScope.getStore() ?? NO_OPERATIONS);
+    return operationsByScope.run(operations.set(this, operation), body);
+  }
+
+  current(): PendingOperation | undefined {
+    return operationsByScope.getStore()?.get(this);
+  }
 }
 
 /** Whether a document's outline records its generation as complete. */
@@ -262,7 +291,7 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
 {
   constructor(
     private readonly inner: PgDocumentStore<TScene, TStage>,
-    private readonly operations: AsyncLocalStorage<PendingOperation>,
+    private readonly operations: OperationScope,
     private readonly runTransaction: WithTransaction,
     private readonly ownerId: string,
     /** The same store, pinned to one already-open transaction. See its use. */
@@ -383,6 +412,8 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
    * live and still naming them; the rollback is what makes that unreachable.
    */
   async deleteDocument(stageId: string): Promise<void> {
+    // The runs the deletion ended, reported to the host once it committed.
+    let ended: EndedGenerationRun[] = [];
     await this.tagged({ stageId, mode: 'delete' }, () =>
       this.runTransaction(async (queryable) => {
         // By the time this body runs, `runTransaction` has already taken the
@@ -393,7 +424,7 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
         // transaction, whatever state its run is in.
         const { endGenerationRunsOfDeletedCourseIn } =
           await import('@/lib/server/generation/run/store');
-        await endGenerationRunsOfDeletedCourseIn(queryable, stageId);
+        ended = await endGenerationRunsOfDeletedCourseIn(queryable, stageId);
         await queryable.query('UPDATE document_stages SET folder_id = NULL WHERE id = $1', [
           stageId,
         ]);
@@ -432,6 +463,10 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
         }
       }),
     );
+    if (ended.length > 0) {
+      const { reportEndedGenerationRuns } = await import('@/lib/server/generation/run/store');
+      reportEndedGenerationRuns(ended);
+    }
   }
 
   async loadDocument(stageId: string): Promise<MaicDocument<TScene, TStage> | null> {
@@ -505,7 +540,7 @@ export function createOwnerBoundDocumentStore<
 >(
   options: OwnerBoundDocumentStoreOptions,
 ): DocumentStore<TScene, TStage> & DocumentFolderStore & CreateOnlyDocumentStore<TScene, TStage> {
-  const operations = new AsyncLocalStorage<PendingOperation>();
+  const operations = new OperationScope();
   if (options.principal && options.principal.ownerId !== options.ownerId) {
     throw new Error('createOwnerBoundDocumentStore: principal does not match ownerId');
   }
@@ -516,7 +551,7 @@ export function createOwnerBoundDocumentStore<
 
   const withTransaction: WithTransaction = async (body) => {
     // Read before the first await, from this call's own context (see `tagged`).
-    const operation = operations.getStore();
+    const operation = operations.current();
     const client = await options.pool.connect();
     try {
       await client.query('BEGIN ISOLATION LEVEL READ COMMITTED');

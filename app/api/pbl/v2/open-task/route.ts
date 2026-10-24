@@ -12,6 +12,7 @@ import { requireSpender } from '@/lib/server/authz/viewer';
  * just dispatches it differently (no learner message to record,
  * Instructor's reply is the only message that lands).
  */
+import { modelAuthorizationResponse } from '@/lib/server/api-response';
 
 import type { NextRequest } from 'next/server';
 
@@ -63,6 +64,8 @@ export async function POST(req: NextRequest) {
   try {
     resolved = await resolveModelFromRequest(req, body, 'pbl-v2-runtime:open-task');
   } catch (err) {
+    const authorization = modelAuthorizationResponse(err);
+    if (authorization) return authorization;
     log.error('Model resolution failed:', err);
     return apiError('INVALID_REQUEST', 400, err instanceof Error ? err.message : String(err));
   }
