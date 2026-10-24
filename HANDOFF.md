@@ -108,8 +108,8 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 ## Assignment: Dark theme as the default
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "chọn giao diện mặc định là giao diện dark"
-- Assignment status: Done in the working tree, not committed, not deployed.
-- Branch and commit: `it-math` @ `192a54b1`, pushed: no (nothing new committed).
+- Assignment status: Done, pushed and deployed to the VPS.
+- Branch and commit: `it-math` @ `3f130523`, pushed: yes.
 - Last updated: 2026-10-24 (UTC time not recorded)
 
 ### Task table
@@ -118,6 +118,7 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 1 | Default theme is dark when the visitor has not chosen; saved choices (light, dark, system) still win | Done | `lib/hooks/use-theme.tsx`: initial state `dark`, the class is applied only after the saved choice is read (`hydrated`). Browser on the dev server: no saved choice -> `<html class="dark">`, body `rgb(8, 22, 43)`; `localStorage.theme=light` -> no `dark` class, body `rgb(243, 240, 232)` |
 | 2 | No light flash before hydration | Done | New `lib/theme-init-script.ts` run from `<head>` in `app/layout.tsx` before the first paint. Not measured: a real first-paint recording |
 | 3 | Test | Done | `tests/seo/theme-init.test.ts` (4): default dark, storage blocked, saved choice kept, "system" follows the system; mutation (default made light) failed 2 tests, then restored; eslint, tsc clean |
+| 5 | Commit, push, deploy | Done | `3f130523` pushed (`a13b2182..3f130523`); only the theme files and HANDOFF staged (the `advanced` locale hunk and the OmniRoute settings files belong to another session and stayed out); staged tree tested in a copy (25 files / 247 tests, no tsc error in our files). VPS: DB dump `~/backups/pre-deploy-20261024T015413Z.sql.gz`, `git merge --ff-only` to `3f130523` (also carries the other session's sign-out fixes `33080f45` and `a13b2182`), `docker compose --profile server-persistence up -d --build openmaic` exit 0, app Up with 0 restarts, Postgres untouched, `/api/health` ok, no errors in the log. Production in the built-in browser with no saved choice: `class="dark"`, body `rgb(8, 22, 43)`, `lang=vi-VN` |
 | 4 | Not checked | Todo | Every page in dark (classroom, workspace, admin, settings dialogs) was not looked at one by one; visitors who never chose and used a light system now get dark |
 
 ## Assignment: Commit, push and deploy the SEO and home-page work to the VPS
