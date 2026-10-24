@@ -8,11 +8,9 @@ import { requireSpender } from '@/lib/server/authz/viewer';
  *
  * POST /api/generate/video
  *
- * Headers:
- *   x-video-provider: VideoProviderId (optional, server-configured default)
- *   x-video-model: string (optional model override)
- *   x-api-key: string (optional, server fallback)
- *   x-base-url: string (optional, server fallback)
+ * The provider comes from the video slot of the model configuration. The
+ * headers below are deprecated and count only while the slot is unassigned:
+ *   x-video-provider, x-video-model, x-api-key, x-base-url
  *
  * Body: { prompt, duration?, aspectRatio?, resolution? }
  * Response: { success: boolean, result?: VideoGenerationResult, error?: string }
@@ -20,14 +18,13 @@ import { requireSpender } from '@/lib/server/authz/viewer';
 
 import { NextRequest } from 'next/server';
 import { recordGenerationUsage } from '@/lib/server/usage-storage';
-import { generateVideo, normalizeVideoOptions } from '@/lib/media/video-providers';
+import { generateVideo, normalizeVideoOptions, VIDEO_PROVIDERS } from '@/lib/media/video-providers';
 import {
   isServerConfiguredProvider,
   isServerProviderDisabled,
   resolveVideoApiKey,
   resolveVideoBaseUrl,
   resolveVideoModel,
-  resolveServerVideoProviderId,
 } from '@/lib/server/provider-config';
 import type { VideoProviderId, VideoGenerationOptions } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
@@ -36,6 +33,13 @@ import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { readBoundedJson } from '@/lib/server/bounded-json';
 import { validateClientBaseUrl } from '@/lib/server/ssrf-guard';
 import { withVideoProviderFetch } from '@/lib/server/media-provider-fetch';
+import {
+  mediaResolutionResponse,
+  RequestedProviderRefusedError,
+  resolveMediaSlot,
+  type MediaConnection,
+} from '@/lib/server/model-config/media';
+import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 
 const log = createLogger('VideoGeneration API');
 
@@ -66,33 +70,22 @@ export async function POST(request: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing prompt');
     }
 
-    // The client may express no provider preference (empty header) — fall back
-    // to the first server-configured video provider, else fail loud.
-    const providerId = (request.headers.get('x-video-provider')?.trim() ||
-      resolveServerVideoProviderId()) as VideoProviderId;
-    if (!providerId) {
-      return apiError('MISSING_PROVIDER', 400, 'No video provider configured');
+    // The video slot decides; the provider a request names (x-video-provider
+    // with its key and base URL, deprecated) counts only when it is unassigned.
+    let connection: MediaConnection;
+    try {
+      connection = await resolveMediaSlot('video', {
+        workspaceId: await requestWorkspaceId(request),
+        legacyRequest: () => requestedVideoProvider(request),
+      });
+    } catch (error) {
+      const refused = mediaResolutionResponse(error, 'Video generation');
+      if (refused) return refused;
+      throw error;
     }
-    // Enforce server precedence: a force-disabled provider is off for everyone,
-    // regardless of any client key/selection — mirror the TTS contract (#665).
-    if (isServerProviderDisabled('video', providerId)) {
-      return apiError('PROVIDER_DISABLED', 403, 'This video provider is disabled by the server');
-    }
-    // Managed providers are admin-owned. Only an administrator's own key is used otherwise.
-    managed = isServerConfiguredProvider('video', providerId);
-    const keysAllowed = !managed && (await clientKeysAllowed(request.headers));
-    const clientApiKey = keysAllowed ? request.headers.get('x-api-key') || undefined : undefined;
-    const clientBaseUrl = keysAllowed ? request.headers.get('x-base-url') || undefined : undefined;
-    const clientModel = request.headers.get('x-video-model')?.trim() || undefined;
-
-    if (clientBaseUrl) {
-      const ssrfError = await validateClientBaseUrl(clientBaseUrl);
-      if (ssrfError) {
-        return apiError('INVALID_URL', 403, ssrfError);
-      }
-    }
-
-    const apiKey = resolveVideoApiKey(providerId, clientApiKey);
+    const providerId = connection.providerId as VideoProviderId;
+    const { apiKey, baseUrl } = connection;
+    managed = connection.managed;
     if (!apiKey) {
       return apiError(
         'MISSING_API_KEY',
@@ -100,14 +93,15 @@ export async function POST(request: NextRequest) {
         `No API key configured for video provider: ${providerId}`,
       );
     }
-
-    const baseUrl = resolveVideoBaseUrl(providerId, clientBaseUrl);
-
-    // A managed provider may pin its model list server-side
-    // (VIDEO_<PREFIX>_MODELS): an allowlisted client choice wins, otherwise the
-    // first pinned entry is the managed default; unmanaged providers use the
-    // client header directly.
-    const model = resolveVideoModel(providerId, clientModel);
+    // A configured slot without a model uses the provider's first catalogue
+    // model. On the legacy default provider the request's model still applies
+    // through its allowlist, as before slots.
+    const model =
+      connection.origin === 'configuration'
+        ? (connection.modelId ?? VIDEO_PROVIDERS[providerId]?.models?.[0]?.id)
+        : connection.origin === 'default'
+          ? resolveVideoModel(providerId, request.headers.get('x-video-model')?.trim() || undefined)
+          : connection.modelId;
     if (!model) {
       return apiError(
         'MISSING_MODEL',
@@ -161,4 +155,44 @@ export async function POST(request: NextRequest) {
     log.error(`Video generation failed: ${describeUnexpectedError(error)}`);
     return apiError('INTERNAL_ERROR', 500, 'Video generation failed');
   }
+}
+
+/**
+ * The provider the request names with x-video-provider (deprecated), with the
+ * key, base URL and model headers, or undefined when it names none.
+ */
+async function requestedVideoProvider(request: NextRequest): Promise<MediaConnection | undefined> {
+  const providerId = request.headers.get('x-video-provider')?.trim() as VideoProviderId | undefined;
+  if (!providerId) return undefined;
+  // A force-disabled provider is off for everyone (#665).
+  if (isServerProviderDisabled('video', providerId)) {
+    throw new RequestedProviderRefusedError(
+      apiError('PROVIDER_DISABLED', 403, 'This video provider is disabled by the server'),
+    );
+  }
+  // Managed providers are admin-owned. Only an administrator's own key is used otherwise.
+  const managed = isServerConfiguredProvider('video', providerId);
+  const keysAllowed = !managed && (await clientKeysAllowed(request.headers));
+  const clientApiKey = keysAllowed ? request.headers.get('x-api-key') || undefined : undefined;
+  const clientBaseUrl = keysAllowed ? request.headers.get('x-base-url') || undefined : undefined;
+  if (clientBaseUrl) {
+    const ssrfError = await validateClientBaseUrl(clientBaseUrl);
+    if (ssrfError) throw new RequestedProviderRefusedError(apiError('INVALID_URL', 403, ssrfError));
+  }
+  // A managed provider may pin its model list server-side
+  // (VIDEO_<PREFIX>_MODELS): an allowlisted client choice wins, otherwise the
+  // first pinned entry is the managed default.
+  const model = resolveVideoModel(
+    providerId,
+    request.headers.get('x-video-model')?.trim() || undefined,
+  );
+  return {
+    providerId,
+    apiKey: resolveVideoApiKey(providerId, clientApiKey),
+    ...(model ? { modelId: model } : {}),
+    baseUrl: resolveVideoBaseUrl(providerId, clientBaseUrl),
+    managed,
+    userEndpoint: Boolean(clientBaseUrl),
+    origin: 'request',
+  };
 }

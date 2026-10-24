@@ -2,7 +2,12 @@
 
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { answerIncludesOption } from '@/lib/quiz/grading';
+import {
+  answerIncludesOption,
+  gradeChoiceQuestions,
+  isShortAnswer,
+  type QuestionResult,
+} from '@/lib/quiz/grading';
 import {
   PieChart,
   CheckCircle2,
@@ -18,13 +23,11 @@ import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { requestNextScene } from '@/components/scene-renderers/next-scene-event';
 import { reportQuizScore } from '@/lib/hooks/use-course-progress';
-import { getCurrentModelConfig, getStageRoutesHeaderValue } from '@/lib/utils/model-config';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('QuizView');
 import type { QuizQuestion } from '@/lib/types/stage';
 import { SpeechButton } from '@/components/audio/speech-button';
-import { gradeChoiceQuestions, isShortAnswer, type QuestionResult } from '@/lib/quiz/grading';
 import { renderQuizMathText } from '@/lib/quiz/math-text';
 import { writeDraftRecovery } from '@/lib/quiz/persistence';
 import {
@@ -100,16 +103,8 @@ async function gradeShortAnswerQuestion(
 ): Promise<QuestionResult> {
   const pts = q.points ?? 1;
   try {
-    const modelConfig = getCurrentModelConfig();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'x-model': modelConfig.modelString,
-      'x-api-key': modelConfig.apiKey,
-    };
-    if (modelConfig.baseUrl) headers['x-base-url'] = modelConfig.baseUrl;
-    if (modelConfig.providerType) headers['x-provider-type'] = modelConfig.providerType;
-    const stageRoutesHeader = getStageRoutesHeaderValue();
-    if (stageRoutesHeader) headers['x-model-routes'] = stageRoutesHeader;
+    // The server grades with the workspace's classroom model.
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
     const res = await fetch('/api/quiz-grade', {
       method: 'POST',

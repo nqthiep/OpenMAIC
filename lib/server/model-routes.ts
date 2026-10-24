@@ -1,30 +1,26 @@
 /**
- * Per-stage LLM model routing (issue #745).
+ * LLM stage keys, and how one stored route value is read.
  *
- * Optional, config-only overrides that map a generation *stage* to a specific
- * model string. This module returns only configured routes; callers choose their
- * own fallback when a route is unset or invalid. Most use the default model
- * (`getDefaultModel`), while `conversation-title` reuses the agent-driver connection.
- *
- * Surface: the `model_routing` table, edited in the Settings popup (top bar) (it replaces the
- * `MODEL_ROUTES` and `DEFAULT_MODEL` environment variables). Each stage's value is a
- * model string in the canonical `provider:model` format (see parseModelString), OR an
- * object `{model, thinking}` where `thinking` is the full ThinkingConfig abstraction
- * (mode/effort/level/enabled/budgetTokens/excludeReasoningOutput) — normalized
- * per the model's capability by callLLM. e.g.
+ * KHAITAM keeps the per-stage routes in the `model_routing` table, edited in the Settings popup (it
+ * replaces the `MODEL_ROUTES` and `DEFAULT_MODEL` environment variables). They reach model
+ * resolution through `lib/server/model-config/provider-store-layer.ts`, which turns each route
+ * into the assignment of the slot its stage belongs to (`STAGE_SLOTS`). This module owns the
+ * stage keys and `parseRouteValue`. Each value is a model string in the canonical
+ * `provider:model` format (see parseModelString), OR an object `{model, thinking}` where
+ * `thinking` is the full ThinkingConfig abstraction
+ * (mode/effort/level/enabled/budgetTokens/excludeReasoningOutput), normalized per the model's
+ * capability by callLLM. e.g.
  *
  *   default:        openai:gpt-5.4-mini
  *   scene-content:  openai:gpt-5.4
- *   pbl-chat:       {"model":"anthropic:claude-sonnet-4","thinking":{"enabled":false}}
+ *   quiz-grade:     {"model":"anthropic:claude-sonnet-4","thinking":{"enabled":false}}
  *   pbl-v2-runtime: deepseek:deepseek-v4-pro
  *
- * Only the *routable* stages below are valid keys — each is backed by a real
- * `resolveModel` call site. Downstream sub-calls (e.g. `pbl-generate`,
+ * Only the *routable* stages below are valid keys. Downstream sub-calls (e.g. `pbl-generate`,
  * `chat-adapter-stream`) inherit their parent stage's resolved model.
  */
 
 import { createLogger } from '@/lib/logger';
-import { currentSnapshot } from '@/lib/server/provider-store/snapshot';
 import type {
   ThinkingConfig,
   ThinkingEffort,
@@ -34,8 +30,8 @@ import type {
 
 const log = createLogger('model-routes');
 
-const VALID_MODES: readonly ThinkingMode[] = ['default', 'disabled', 'enabled', 'auto'];
-const VALID_EFFORTS: readonly ThinkingEffort[] = [
+export const VALID_MODES: readonly ThinkingMode[] = ['default', 'disabled', 'enabled', 'auto'];
+export const VALID_EFFORTS: readonly ThinkingEffort[] = [
   'none',
   'minimal',
   'low',
@@ -44,15 +40,13 @@ const VALID_EFFORTS: readonly ThinkingEffort[] = [
   'xhigh',
   'max',
 ];
-const VALID_LEVELS: readonly ThinkingLevel[] = ['minimal', 'low', 'medium', 'high'];
+export const VALID_LEVELS: readonly ThinkingLevel[] = ['minimal', 'low', 'medium', 'high'];
 
 /**
- * A resolved route entry: the model string plus an optional full thinking config.
+ * A route entry: the model string plus an optional full thinking config.
  *
- * `api`/`dialect` and `contextWindow` are parsed for every routable stage but are
- * currently consumed only by the agent-driver stage (`maic-agent-driver`); on any
- * other stage they are inert (accepted silently, never applied). `thinking` is the
- * only field honored by the generic callLLM stages.
+ * `api`/`dialect`, `contextWindow` and `fallback` are parsed but not honored on
+ * a user route: only `model` and `thinking` reach a call.
  */
 export interface StageRoute {
   model: string;
@@ -82,11 +76,7 @@ export interface StageRoute {
    * Passed through to callLLM, which normalizes it against the model's capability.
    */
   thinking?: ThinkingConfig;
-  /**
-   * Operator-configured fallback model for this stage (set via MODEL_ROUTES
-   * only). Read exclusively by lib/server/llm-fallback.ts; user-supplied
-   * routes never carry it.
-   */
+  /** Parsed, and dropped from user routes: retries follow the slot's fallback. */
   fallback?: string;
 }
 
@@ -135,12 +125,12 @@ function parseThinking(key: string, raw: unknown): ThinkingConfig | undefined {
 }
 
 /**
- * Stages that can be independently routed to a model. Each value is a valid
- * `MODEL_ROUTES` key; the base entries also mirror a `callLLM` source label.
+ * The LLM stage keys. Each maps to one capability slot (STAGE_SLOTS in
+ * lib/config/model-slots.ts); the base entries also mirror a `callLLM` source
+ * label.
  *
  * `scene-content:<type>` are finer-grained composite keys: when a scene-content
- * request carries an `outline.type`, it routes via the composite key and falls
- * back to the base `scene-content` route (see getStageModel). Only the four
+ * request carries an `outline.type`, it resolves through that type's slot. Only the four
  * core scene types are routable; interactive widget sub-types are not split.
  *
  * `pbl-v2-runtime:<route>` keys follow the same composite fallback pattern:
@@ -157,7 +147,6 @@ export const LLM_STAGES = [
   'scene-actions',
   'agent-profiles',
   'quiz-grade',
-  'pbl-chat',
   'pbl-v2-runtime',
   'pbl-v2-runtime:instructor',
   'pbl-v2-runtime:open-task',
@@ -166,15 +155,11 @@ export const LLM_STAGES = [
   'chat-adapter',
   'generate-classroom',
   'web-search-query-rewrite',
-  'maic-agent',
   'maic-agent-driver',
   'conversation-title',
 ] as const;
 
 export type LlmStage = (typeof LLM_STAGES)[number];
-
-/** Parsed once per loaded snapshot: a refresh that changes the routes yields a new object to parse. */
-let _routes: { source: unknown; routes: Record<string, StageRoute> } | null = null;
 
 /** Parse one MODEL_ROUTES value (string model, or {model, thinking}) into a StageRoute. */
 export function parseRouteValue(key: string, value: unknown): StageRoute | undefined {
@@ -218,7 +203,7 @@ export function parseRouteValue(key: string, value: unknown): StageRoute | undef
       if (fallback) {
         route.fallback = fallback;
       } else {
-        log.warn(`Invalid fallback for stage "${key}" in MODEL_ROUTES; ignored.`);
+        log.warn(`Invalid fallback for stage "${key}" in x-model-routes; ignored.`);
       }
     }
     if (obj.contextWindow !== undefined) {
@@ -247,69 +232,9 @@ export function parseRouteValue(key: string, value: unknown): StageRoute | undef
   return undefined;
 }
 
-function loadRoutes(): Record<string, StageRoute> {
-  const stored = currentSnapshot().routing.routes;
-  if (_routes?.source === stored) return _routes.routes;
-
-  const routes: Record<string, StageRoute> = {};
-  for (const [key, value] of Object.entries(stored)) {
-    if (!(LLM_STAGES as readonly string[]).includes(key)) {
-      log.warn(
-        `Unknown stage "${key}" in the model routes ignored. Valid stages: ${LLM_STAGES.join(', ')}`,
-      );
-      continue;
-    }
-    const route = parseRouteValue(key, value);
-    if (route) routes[key] = route;
-  }
-
-  _routes = { source: stored, routes };
-  return routes;
-}
-
-/** The default model string (`provider:model`), or undefined when none is set. */
-export function getDefaultModel(): string | undefined {
-  return currentSnapshot().routing.defaultModel;
-}
-
-/** The default model with what is known about it (`vision`, `tools`, `contextWindow`), or undefined. */
-export function getDefaultRoute(): StageRoute | undefined {
-  const { defaultModel, defaultValue } = currentSnapshot().routing;
-  if (!defaultModel) return undefined;
-  return parseRouteValue('default', defaultValue ?? defaultModel);
-}
-
 /**
- * Resolve the configured model string for a stage, or `undefined` when the
- * stage is unset or unconfigured. Callers choose their fallback; notably,
- * `conversation-title` reuses the agent-driver connection.
- *
- * Composite `a:b` stages resolve most-specific-first: the full key is tried,
- * then successively shorter prefixes (e.g. `scene-content:quiz` →
- * `scene-content`). Plain stages (no colon) are a single exact lookup.
- */
-export function getStageRoute(stage?: string): StageRoute | undefined {
-  if (!stage) return undefined;
-  const routes = loadRoutes();
-  let key: string | undefined = stage;
-  while (key) {
-    const route = routes[key];
-    if (route) return route;
-    const lastColon = key.lastIndexOf(':');
-    key = lastColon > 0 ? key.slice(0, lastColon) : undefined;
-  }
-  return undefined;
-}
-
-/** Convenience: the resolved model string for a stage (route's `model`). */
-export function getStageModel(stage?: string): string | undefined {
-  return getStageRoute(stage)?.model;
-}
-
-/**
- * A user-level route entry (the `x-model-routes` header): everything an
- * operator route can carry, plus the client's own connection params for the
- * routed provider. Server-managed providers ignore the client credentials
+ * A user-level route entry (the `x-model-routes` header): a stage route plus
+ * the client's own connection params for the routed provider. Server-managed providers ignore the client credentials
  * (resolveApiKey/resolveBaseUrl stay authoritative).
  */
 export interface UserStageRoute extends StageRoute {
@@ -324,8 +249,8 @@ const MAX_USER_ROUTES_HEADER_BYTES = 16 * 1024;
  * Parse the user-level `x-model-routes` header: a JSON object of
  * stage → `"provider:model"` or `{model, apiKey?, baseUrl?, providerType?}`.
  * Only known stages are kept; malformed entries are dropped with a warning.
- * Precedence in resolveModel: operator MODEL_ROUTES > these user routes >
- * the client x-model > DEFAULT_MODEL.
+ * Consulted only for a slot the configuration leaves unassigned, before the
+ * client x-model (see resolveRequestedModel).
  */
 export function parseUserStageRoutes(
   raw: string | null | undefined,
@@ -350,7 +275,7 @@ export function parseUserStageRoutes(
       const route = parseRouteValue(key, value);
       if (!route) continue;
       const userRoute: UserStageRoute = { ...route };
-      // The fallback model is operator-only (MODEL_ROUTES / MODEL_FALLBACK, see
+      // The fallback model is the configuration's (the slot's fallback, see
       // lib/server/llm-fallback.ts); never accept it from the client header.
       delete userRoute.fallback;
       if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -369,8 +294,8 @@ export function parseUserStageRoutes(
 }
 
 /**
- * Resolve a user route for a stage with the same composite-key fallback as
- * operator routes (scene-content:quiz → scene-content).
+ * Resolve a user route for a stage, most specific key first
+ * (scene-content:quiz → scene-content).
  */
 export function getUserStageRoute(
   userRoutes: Record<string, UserStageRoute>,

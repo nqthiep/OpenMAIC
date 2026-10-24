@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PlaybackEngine } from '@/lib/playback/engine';
-import { useSettingsStore } from '@/lib/store/settings';
 import type { Action } from '@/lib/types/action';
 import type { Scene } from '@/lib/types/stage';
 import type { ActionEngine } from '@/lib/action/engine';
@@ -65,17 +64,16 @@ function stubSpeechSynthesis(voices = [{ voiceURI: 'v1', lang: 'en-US' }]) {
   return speak;
 }
 
-/** A cloud provider is selected and browser-native keeps its default (disabled) toggle. */
-function selectCloudTTS(ttsEnabled: boolean) {
-  const { ttsProvidersConfig } = useSettingsStore.getState();
-  useSettingsStore.setState({
-    ttsEnabled,
-    ttsProviderId: 'openai-tts',
-    ttsProvidersConfig: {
-      ...ttsProvidersConfig,
-      'browser-native-tts': { ...ttsProvidersConfig['browser-native-tts'], enabled: false },
-    },
-  });
+// The workspace's tts slot decides whether speech is on (lib/audio/tts-selection.ts).
+const ttsSlot = vi.hoisted(() => ({ on: true }));
+vi.mock('@/lib/audio/tts-selection', () => ({
+  ttsSelection: () =>
+    ttsSlot.on ? { providerId: 'openai-tts', voice: 'alloy', speed: 1, providersConfig: {} } : null,
+}));
+
+/** A cloud provider is the tts slot's, or the slot is off. */
+function selectCloudTTS(on: boolean) {
+  ttsSlot.on = on;
 }
 
 describe('lecture speech falls back to browser speech', () => {

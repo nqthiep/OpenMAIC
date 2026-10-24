@@ -368,18 +368,26 @@ describe('provider admin routes: access and edge cases', () => {
   it('refuses a stale route delete', async () => {
     const { routes, root } = await arrange();
     await routes.routePut(
-      jsonRequest('PUT', { stage: 'pbl-chat', value: 'openai:gpt-4o', expectedVersion: 0 }, root),
+      jsonRequest(
+        'PUT',
+        { stage: 'chat-adapter', value: 'openai:gpt-4o', expectedVersion: 0 },
+        root,
+      ),
     );
     await routes.routePut(
-      jsonRequest('PUT', { stage: 'pbl-chat', value: 'openai:gpt-5', expectedVersion: 1 }, root),
+      jsonRequest(
+        'PUT',
+        { stage: 'chat-adapter', value: 'openai:gpt-5', expectedVersion: 1 },
+        root,
+      ),
     );
     const stale = await json(
       await routes.routeDelete(
-        jsonRequest('DELETE', { stage: 'pbl-chat', expectedVersion: 1 }, root),
+        jsonRequest('DELETE', { stage: 'chat-adapter', expectedVersion: 1 }, root),
       ),
     );
     expect(stale.status).toBe(404);
-    expect(routes.currentSnapshot().routing.routes['pbl-chat']).toBe('openai:gpt-5');
+    expect(routes.currentSnapshot().routing.routes['chat-adapter']).toBe('openai:gpt-5');
   });
 });
 
@@ -427,7 +435,7 @@ describe('model routing routes', () => {
       { stage: 'default', value: 'gpt-4o', expectedVersion: 0 },
       { stage: 'default', value: 'nosuch:model', expectedVersion: 0 },
       { stage: 'not-a-stage', value: 'openai:gpt-4o', expectedVersion: 0 },
-      { stage: 'pbl-chat', value: 42, expectedVersion: 0 },
+      { stage: 'chat-adapter', value: 42, expectedVersion: 0 },
     ]) {
       expect(
         (await json(await routes.routePut(jsonRequest('PUT', body, root)))).status,

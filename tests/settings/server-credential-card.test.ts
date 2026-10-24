@@ -24,8 +24,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('sonner', () => ({ toast: { success: mocks.success, error: mocks.error } }));
 vi.mock('@/lib/hooks/use-i18n', () => ({ useI18n: () => ({ locale: 'en-US', t: mocks.t }) }));
-vi.mock('@/lib/store/settings', () => ({
-  useSettingsStore: { getState: () => ({ fetchServerProviders: mocks.refreshStore }) },
+vi.mock('@/lib/model-settings/client', () => ({
+  modelSettingsClient: { load: mocks.refreshStore },
 }));
 vi.mock('@/components/learning/learning-api', () => ({
   fetchProviderSettings: mocks.fetchSettings,
@@ -176,7 +176,7 @@ describe('shared server credential card', () => {
     expect(key.placeholder).toBe('admin.providers.form.apiKeyKeep');
   });
 
-  it('saves a key once, sends only what changed, and refreshes the popup’s provider list', async () => {
+  it('saves a key once, sends only what changed, and refreshes the popup’s model-settings view', async () => {
     await render('providers', { ...IDS, providers: 'openai' });
     expect(document.body.textContent).toContain('admin.providers.status.unset');
     const save = buttonIn(document.body, 'admin.providers.actions.save')!;

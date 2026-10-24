@@ -43,7 +43,8 @@ vi.mock('@/lib/server/usage-storage', () => ({
   recordGenerationUsage: async () => undefined,
 }));
 
-vi.mock('@/lib/media/video-providers', () => ({
+vi.mock('@/lib/media/video-providers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/media/video-providers')>()),
   generateVideo,
   normalizeVideoOptions: (options: unknown) => options,
 }));
@@ -105,6 +106,7 @@ describe('client keys on routes', () => {
         body: { prompt: 'a lesson' },
       }),
     );
+    // The learner's key is not used: the route reports the provider as missing its key.
     expect(response.status).toBe(401);
     expect((await response.json()).errorCode).toBe('MISSING_API_KEY');
     expect(generateVideo).not.toHaveBeenCalled();

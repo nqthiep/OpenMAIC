@@ -36,6 +36,8 @@ const mocks = vi.hoisted(() => {
     resolvePDFBaseUrl: vi.fn(),
     resolveTTSApiKey: vi.fn(),
     resolveWebSearchApiKey: vi.fn(),
+    // What the web search slot resolves to: the operator's or the visitor's key.
+    webSearchKey: 'unset',
   };
 });
 
@@ -81,6 +83,16 @@ vi.mock('@/lib/ai/llm', () => ({
 
 vi.mock('@/lib/server/web-search-config', () => ({
   resolveWebSearchRouteBaseUrl: () => undefined,
+  WebSearchConfigError: class WebSearchConfigError extends Error {},
+  resolveWebSearchConnection: async () => ({ providerId: 'tavily', apiKey: mocks.webSearchKey }),
+}));
+vi.mock('@/lib/server/model-config/media', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/model-config/media')>()),
+  mediaResolutionResponse: () => undefined,
+}));
+vi.mock('@/lib/server/model-config/runtime', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/model-config/runtime')>()),
+  requestWorkspaceId: async () => null,
 }));
 
 vi.mock('@/lib/server/provider-config', () => ({
@@ -280,6 +292,7 @@ describe('upstream provider text on the operator key', () => {
   describe('POST /api/web-search', () => {
     it('sends fixed text, and no upstream text, when the operator key is used', async () => {
       mocks.isServerConfiguredProvider.mockReturnValue(true);
+      mocks.webSearchKey = OPERATOR_KEY;
       mocks.searchWeb.mockRejectedValue(new Error(`Tavily API error (401): ${UPSTREAM_FRAGMENT}`));
       const { POST } = await import('@/app/api/web-search/route');
 
@@ -303,6 +316,7 @@ describe('upstream provider text on the operator key', () => {
 
     it('keeps the upstream text for a visitor who supplied their own key', async () => {
       mocks.isServerConfiguredProvider.mockReturnValue(false);
+      mocks.webSearchKey = VISITOR_KEY;
       mocks.searchWeb.mockRejectedValue(new Error(`Tavily API error (401): ${UPSTREAM_FRAGMENT}`));
       const { POST } = await import('@/app/api/web-search/route');
 

@@ -665,11 +665,9 @@ describe('roles', () => {
     expect(generate.modelString).toBe('omniroute:auto/best-vision');
     expect(generate.modelInfo?.capabilities?.vision).toBe(true);
     expect(generate.modelInfo?.contextWindow).toBe(131072);
-    const chat = await resolveModel({ stage: 'pbl-chat' });
+    const chat = await resolveModel({ stage: 'chat-adapter' });
     expect(chat.modelInfo?.capabilities?.vision).toBe(false);
-    const byDefault = await resolveModel({});
-    expect(byDefault.modelString).toBe('omniroute:auto/best-chat');
-    expect(byDefault.managedKey).toBe(true);
+    expect(chat.managedKey).toBe(true);
   });
 
   it('saves a second time (versions move on) and keeps a route set in the advanced area', async () => {

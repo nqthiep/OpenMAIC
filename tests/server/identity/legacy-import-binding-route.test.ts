@@ -15,6 +15,9 @@ import { LEGACY_IMPORT_HEADER } from '@/lib/persistence/legacy-import-bindings';
 import { createOwnerBoundDocumentStore } from '@/lib/persistence/owner-bound-document-store';
 import type { OwnerAuthMethod } from '@/lib/server/identity/types';
 
+// The model-config import route needs an administrator; this suite is about owners.
+vi.mock('@/lib/server/authz/provider-keys', () => ({ clientKeysAllowed: async () => true }));
+
 /**
  * The server side of the one-way legacy browser import, on the real routes
  * and an in-memory PostgreSQL: `POST /api/identity/legacy-import-binding`
@@ -356,6 +359,7 @@ describe('the legacy import binding and its fence', () => {
       'app/api/stages/route.ts': () => import('@/app/api/stages/route'),
       'app/api/folders/route.ts': () => import('@/app/api/folders/route'),
       'app/api/folders/members/route.ts': () => import('@/app/api/folders/members/route'),
+      'app/api/model-config/import/route.ts': () => import('@/app/api/model-config/import/route'),
     };
     const load = modules[endpoint.route];
     if (!load) throw new Error(`No handler table entry for ${endpoint.route}`);

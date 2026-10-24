@@ -20,7 +20,14 @@ vi.mock('@/lib/persistence/asset-collector-schedule', () => ({
   startAssetCollectorSchedule: vi.fn(),
 }));
 vi.mock('@/lib/server/config-validation', () => ({ validateServerConfig: vi.fn() }));
-vi.mock('@/lib/config/feature-flags', () => ({ isAgentRuntimeConfigured: () => false }));
+vi.mock('@/lib/config/feature-flags', () => ({
+  isAgentRuntimeConfigured: () => false,
+  isServerPersistenceConfigured: () => true,
+}));
+// The provider settings live in the database, which this test does not have.
+vi.mock('@/lib/server/provider-store/boot', () => ({
+  startProviderSnapshot: async () => () => {},
+}));
 // A refused configuration exits the process; stubbed so the throw can be asserted.
 const exitOnBootFailure = vi.hoisted(() => vi.fn(async () => {}));
 vi.mock('@/lib/server/boot-failure', () => ({ exitOnBootFailure }));

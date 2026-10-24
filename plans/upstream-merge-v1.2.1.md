@@ -103,6 +103,8 @@ Ba hướng, theo thứ tự khuyến nghị:
 - (b) Nhận `openmaic.yml`: sinh `openmaic.yml` lúc khởi động từ `omniroute-init` và `.env`; bỏ `provider-store`. Đơn giản nhưng admin không đổi được khi chạy, mất panel OmniRoute đang có.
 - (c) Giữ `provider-store` song song, chỉ dùng slot cho tính năng mới: hai nguồn sự thật, không nên.
 
+**Kết quả S4 (2026-10-24):** đã chọn và chạy hướng (a). `lib/server/model-config/provider-store-layer.ts` dịch snapshot + route thành lớp triển khai; `runtime.ts` giữ cache theo từng snapshot nên lưu của admin có hiệu lực không cần khởi động lại (đã thấy: lưu route `scene-content` xong, `GET /api/model-config` hiện `course.content` là slot khoá nguồn `deployment`). `quiz-grade` và `pbl-v2-runtime:evaluate` dùng chung slot `classroom` qua lớp ghi đè riêng từng stage (thêm slot `classroom.grade` làm hỏng hợp đồng `STATION_STAGE_KEYS` của upstream nên đã bỏ). Khi kho đã có cài đặt, `policy.allowWorkspaceProviders` là `false` (quyết định D3); học viên nhận 403 ở `PUT /api/model-config`. Bài học: không cần sửa slot hay hợp đồng nào của upstream.
+
 Việc phải làm dù chọn hướng nào: ánh xạ `ROLE_STAGES` sang slot; `model-authorization` (#1879, S6) phải cho phép đúng các model ta đã cấp qua OmniRoute; `lib/server/authz/provider-keys.ts` (chỉ hội viên được dùng khoá trả phí) vẫn đứng trước.
 
 ### 5.4 Sinh khoá học trên server (S5)

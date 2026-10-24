@@ -1,5 +1,6 @@
 import { after } from 'next/server';
 
+import { backgroundWorkspaceId } from '@/lib/server/model-config/runtime';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
 import { generateConversationTitle } from './conversation-title-generator';
@@ -21,7 +22,7 @@ async function runConversationTitleTask(sessionId: string, ownerId: string): Pro
 
   let title: string | null;
   try {
-    title = await generateConversationTitle(visibleUserText);
+    title = await generateConversationTitle(visibleUserText, await backgroundWorkspaceId(ownerId));
   } catch (error) {
     log.error(
       `session ${sessionId}: automatic title generation failed: ${describeUnexpectedError(error)}`,

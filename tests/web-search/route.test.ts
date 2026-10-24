@@ -143,7 +143,19 @@ describe('POST /api/web-search', () => {
     );
   });
 
-  it('points to Settings when Exa credentials are missing', async () => {
+  it("searches with the request's key when it names no provider, as before slots", async () => {
+    const res = await postWebSearch({ query: 'test query', apiKey: 'tvly-client' });
+    expect(res.status).toBe(200);
+    expect(mocks.searchWeb).toHaveBeenCalledWith(
+      expect.objectContaining({ providerId: 'tavily', apiKey: 'tvly-client' }),
+    );
+
+    const keyless = await postWebSearch({ query: 'test query' });
+    expect(keyless.status).toBe(400);
+    expect((await keyless.json()).errorCode).toBe('MISSING_API_KEY');
+  });
+
+  it('names EXA_API_KEY when Exa credentials are missing', async () => {
     const res = await postWebSearch({ query: 'test query', providerId: 'exa' });
     const json = await res.json();
 
@@ -415,10 +427,9 @@ describe('POST /api/web-search', () => {
     );
   });
 
-  it('403s a force-disabled server-configured provider even when the server has an enabled backend', async () => {
-    // Tavily is server-configured (key present) but force-disabled, so the
-    // server-preference override does NOT apply — the disabled provider itself
-    // is rejected rather than silently swapped.
+  it('never searches with a force-disabled provider: the server uses its enabled backend', async () => {
+    // Tavily is server-configured but force-disabled. Once the server configures providers a
+    // request cannot name its own (decision D3), so the enabled backend answers.
     useProviders({
       webSearch: {
         bocha: { apiKey: 'bocha-server-key' },
@@ -431,10 +442,10 @@ describe('POST /api/web-search', () => {
       query: 'test query',
       providerId: 'tavily',
     });
-    const json = await res.json();
 
-    expect(res.status).toBe(403);
-    expect(json).toMatchObject({ success: false, errorCode: 'PROVIDER_DISABLED' });
-    expect(mocks.searchWeb).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(mocks.searchWeb).toHaveBeenCalledWith(
+      expect.objectContaining({ providerId: 'bocha', apiKey: 'bocha-server-key' }),
+    );
   });
 });

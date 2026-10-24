@@ -5,6 +5,11 @@ import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModel } from '@/lib/server/resolve-model';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
+import {
+  savedLanguageModel,
+  savedProviderRef,
+  savedProviderResponse,
+} from '@/lib/server/model-config/saved-provider';
 import { callLLM } from '@/lib/ai/llm';
 import { upstreamHttpStatus } from '@/lib/server/llm-error-response';
 const log = createLogger('Verify Model');
@@ -26,24 +31,48 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Model name is required');
     }
 
-    // Parse model string and resolve server-side fallback
+    // The settings test a saved provider by its id (`provider`, with `model`
+    // its model id): the server's configuration supplies key and endpoint.
     let languageModel;
+    let savedRef: string | undefined;
     try {
-      const result = await resolveModel({
-        modelString: model,
-        apiKey: keysAllowed ? apiKey || '' : '',
-        baseUrl: keysAllowed ? baseUrl || undefined : undefined,
-        providerType,
-      });
-      languageModel = result.model;
-      managedKey = result.managedKey;
+      savedRef = savedProviderRef(body.provider, model);
+      if (savedRef) {
+        const saved = await savedLanguageModel(req, savedRef);
+        languageModel = saved.model;
+        managedKey = saved.managedKey;
+      }
     } catch (error) {
+      const refused = savedProviderResponse(error, 'language model');
+      if (refused) return refused;
       return apiError(
         'INVALID_REQUEST',
         401,
         error instanceof Error ? error.message : String(error),
       );
     }
+    if (savedRef) {
+      model = savedRef;
+    } else {
+      // Parse model string and resolve server-side fallback
+      try {
+        const result = await resolveModel({
+          modelString: model,
+          apiKey: keysAllowed ? apiKey || '' : '',
+          baseUrl: keysAllowed ? baseUrl || undefined : undefined,
+          providerType,
+        });
+        languageModel = result.model;
+        managedKey = result.managedKey;
+      } catch (error) {
+        return apiError(
+          'INVALID_REQUEST',
+          401,
+          error instanceof Error ? error.message : String(error),
+        );
+      }
+    }
+    if (!languageModel) return apiError('MISSING_MODEL', 400, 'Model name is required');
 
     // Send a minimal test message. Use the unified wrapper so compatible
     // providers can receive provider-specific request options.

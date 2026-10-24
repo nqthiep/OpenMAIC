@@ -41,19 +41,6 @@ vi.mock('@/lib/pdf/mineru-cloud', () => ({
   parseWithMinerUCloud: mocks.parseWithMinerUCloud,
 }));
 
-vi.mock('@/lib/server/provider-config', () => ({
-  isServerConfiguredProvider: () => false,
-  isServerTTSProviderDisabled: () => false,
-  isServerProviderDisabled: () => false,
-  resolveASRApiKey: () => 'visitor-asr-key',
-  resolveASRBaseUrl: () => undefined,
-  resolveASRModel: (_providerId: string, modelId?: string) => modelId ?? 'asr-model',
-  resolveServerASRProviderId: () => 'assemblyai',
-  resolvePDFApiKey: (_providerId: string, clientKey?: string) => clientKey ?? '',
-  resolvePDFBaseUrl: (_providerId: string, clientBaseUrl?: string) => clientBaseUrl,
-  resolveServerPDFProviderId: () => 'mineru-cloud',
-}));
-
 vi.mock('@/lib/server/ssrf-guard', () => ({
   validateUrlForSSRF: async () => null,
   findUnsafeNetworkTargetError: () => undefined,
@@ -83,7 +70,14 @@ describe('non-Error throws on non-model routes use route-specific fixed text', (
     const { POST } = await import('@/app/api/transcription/route');
 
     const audio = new File([new Uint8Array([1, 2, 3])], 'clip.webm', { type: 'audio/webm' });
-    const response = await POST(formRequest('/api/transcription', { audio }));
+    const response = await POST(
+      formRequest('/api/transcription', {
+        audio,
+        providerId: 'openai-whisper',
+        modelId: 'asr-model',
+        apiKey: 'visitor-asr-key',
+      }),
+    );
     const body = await response.json();
 
     expect(response.status).toBe(500);

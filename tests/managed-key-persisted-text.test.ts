@@ -58,7 +58,7 @@ describe('classroom job failure text', () => {
       throw new Error(UPSTREAM_TEXT);
     });
 
-    await runClassroomGenerationJob('job-managed', REQUEST, BASE_URL);
+    await runClassroomGenerationJob('job-managed', REQUEST, BASE_URL, { ownerId: 'owner-1' });
 
     expect(mocks.markFailed).toHaveBeenCalledWith('job-managed', MODEL_FAILURE_TEXT);
   });
@@ -69,7 +69,7 @@ describe('classroom job failure text', () => {
       throw new Error(UPSTREAM_TEXT);
     });
 
-    await runClassroomGenerationJob('job-visitor', REQUEST, BASE_URL);
+    await runClassroomGenerationJob('job-visitor', REQUEST, BASE_URL, { ownerId: 'owner-1' });
 
     expect(mocks.markFailed).toHaveBeenCalledWith('job-visitor', UPSTREAM_TEXT);
   });
@@ -81,7 +81,7 @@ describe('classroom job failure text', () => {
       throw new Error(UPSTREAM_TEXT);
     });
 
-    await runClassroomGenerationJob('job-mixed', REQUEST, BASE_URL);
+    await runClassroomGenerationJob('job-mixed', REQUEST, BASE_URL, { ownerId: 'owner-1' });
 
     expect(mocks.markFailed).toHaveBeenCalledWith('job-mixed', MODEL_FAILURE_TEXT);
   });
@@ -104,9 +104,9 @@ describe('generateClassroom managed-key report', () => {
     mocks.isProviderKeyRequired.mockReturnValue(true);
     const onManagedKey = vi.fn();
 
-    await expect(generateClassroom(REQUEST, { baseUrl: BASE_URL, onManagedKey })).rejects.toThrow(
-      'No API key configured',
-    );
+    await expect(
+      generateClassroom(REQUEST, { baseUrl: BASE_URL, ownerId: 'owner-1', onManagedKey }),
+    ).rejects.toThrow('No API key configured');
     expect(onManagedKey).toHaveBeenCalledWith(managedKey);
   });
 });

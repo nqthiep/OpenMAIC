@@ -250,7 +250,7 @@ const BODY_ROUTES: BodyRoute[] = [
     validButRejected: {
       body: {},
       errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'Missing required fields: text, audioId, ttsProviderId, ttsVoice',
+      error: 'Missing required fields: text, audioId (and a non-empty ttsVoice when sent)',
     },
   },
   {
@@ -262,7 +262,7 @@ const BODY_ROUTES: BodyRoute[] = [
     validButRejected: {
       body: {},
       errorCode: 'MISSING_REQUIRED_FIELD',
-      error: 'providerId is required',
+      error: 'voiceId is required',
     },
   },
   {

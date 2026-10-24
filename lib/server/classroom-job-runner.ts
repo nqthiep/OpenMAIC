@@ -16,7 +16,7 @@ export function runClassroomGenerationJob(
   jobId: string,
   input: GenerateClassroomInput,
   baseUrl: string,
-  ownerId?: string,
+  { ownerId }: { ownerId: string },
 ): Promise<void> {
   const existing = runningJobs.get(jobId);
   if (existing) {

@@ -9,6 +9,30 @@ vi.mock('@/lib/audio/tts-providers', async (importOriginal) => {
   return { ...actual, generateTTS: mocks.generateTTS };
 });
 
+const TTS_ENV_PREFIXES = [
+  'TTS_OPENAI',
+  'TTS_AZURE',
+  'TTS_GLM',
+  'TTS_QWEN',
+  'TTS_VOXCPM',
+  'TTS_DOUBAO',
+  'TTS_ELEVENLABS',
+  'TTS_GOOGLE',
+  'TTS_MINIMAX',
+  'TTS_LEMONADE',
+  'TTS_BROWSER_NATIVE',
+];
+
+function clearTtsEnv() {
+  for (const prefix of TTS_ENV_PREFIXES) {
+    delete process.env[`${prefix}_API_KEY`];
+    delete process.env[`${prefix}_BASE_URL`];
+    delete process.env[`${prefix}_MODELS`];
+    delete process.env[`${prefix}_ENABLED`];
+  }
+  delete process.env.TTS_QWEN_VOICE_CLONE_MODEL;
+}
+
 function ttsRequest(body: Record<string, unknown>): NextRequest {
   return new NextRequest('http://localhost/api/generate/tts', {
     method: 'POST',
@@ -65,6 +89,17 @@ describe('POST /api/generate/tts missing-key contract (#665)', () => {
     expect(res.status).toBe(200);
     expect(mocks.generateTTS).toHaveBeenCalledWith(
       expect.objectContaining({ providerId: 'openai-tts', apiKey: 'sk-server' }),
+      'Hello',
+    );
+  });
+
+  it("keeps the request's voice on the server's provider when it names no provider", async () => {
+    useProviders({ tts: { 'openai-tts': { apiKey: 'sk-server' } } });
+    const { POST } = await import('@/app/api/generate/tts/route');
+
+    expect((await POST(ttsRequest({ ttsVoice: 'nova' }))).status).toBe(200);
+    expect(mocks.generateTTS).toHaveBeenLastCalledWith(
+      expect.objectContaining({ providerId: 'openai-tts', voice: 'nova' }),
       'Hello',
     );
   });

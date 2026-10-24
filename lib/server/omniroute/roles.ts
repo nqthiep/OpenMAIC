@@ -27,7 +27,7 @@ export const ROLE_STAGES: Record<RoleId, readonly LlmStage[]> = {
     'generate-classroom',
     'agent-profiles',
   ],
-  chat: ['pbl-chat', 'pbl-v2-runtime', 'chat-adapter', 'maic-agent', 'maic-agent-driver'],
+  chat: ['pbl-v2-runtime', 'chat-adapter', 'maic-agent-driver'],
   grade: ['quiz-grade', 'pbl-v2-runtime:evaluate'],
   utility: ['conversation-title', 'web-search-query-rewrite'],
 };

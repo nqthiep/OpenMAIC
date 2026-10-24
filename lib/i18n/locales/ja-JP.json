@@ -314,7 +314,18 @@
     "interactiveModeHint": "インタラクティブ優先モードを有効にして、より実践的なコンテンツを生成",
     "interactiveModeLabel": "インタラクティブモード",
     "advanced": "詳細設定",
-    "advancedHint": "詳細設定：モデル、ウェブ検索、画像・動画、インタラクティブモード、エージェント。標準では KHAITAM が内容に合ったモデルを選び、図解とインタラクティブな活動を加えます。"
+    "advancedHint": "詳細設定：モデル、ウェブ検索、画像・動画、インタラクティブモード、エージェント。標準では KHAITAM が内容に合ったモデルを選び、図解とインタラクティブな活動を加えます。",
+    "modelChangeFailed": "モデルを変更できませんでした: {{message}}",
+    "modelLockedHint": "コースで使用するモデル（このサーバーで設定）",
+    "pickModel": "モデルを選択",
+    "defaultModel": "デフォルト",
+    "defaultModelNote": "ここではデフォルトモデルを変更します。個別に設定した工程は影響を受けません",
+    "stagesSetSeparately": "{{count}} 工程を個別設定",
+    "stagesSetSeparately_one": "{{count}} 工程を個別設定",
+    "stagesSetSeparately_other": "{{count}} 工程を個別設定",
+    "stagesSetSeparatelyHint": "個別のモデルを使う工程",
+    "perStageSetup": "工程別に設定",
+    "perStageSetupHint": "コース生成のすべての工程に個別のモデルが設定されています"
   },
   "export": {
     "pptx": "PPTXエクスポート",
@@ -1335,14 +1346,15 @@
   },
   "upload": {
     "pdfSizeLimit": "50MBまでのPDFファイルに対応しています",
-    "courseMaterialSizeLimit": "ドキュメント、スライド、表計算、画像、テキスト — 最大50MB（対応形式は選択したエクストラクタに依存）",
     "generateFailed": "教室の生成に失敗しました。もう一度お試しください",
     "requirementPlaceholder": "学びたいことを自由に入力してください。例えば：\n「Pythonをゼロから30分で教えて」\n「フーリエ変換をホワイトボードで解説して」\n「ボードゲーム『アバロン』の遊び方」",
     "requirementRequired": "コースの要件を入力してください",
     "fileTooLarge": "ファイルが大きすぎます。50MB以下のファイルを選択してください",
     "courseMaterialCountLimit": "教材ファイルは最大5件までアップロードできます",
     "courseMaterialTotalSizeLimit": "教材の合計サイズは150MB未満にしてください",
-    "unsupportedCourseMaterial": "現在の解析器はこの形式に対応していません。解析器を切り替えるか、別のファイルを選択してください。"
+    "unsupportedCourseMaterial": "{{parser}} はこのファイル形式に対応していません。対応形式：{{formats}}",
+    "courseMaterialFormats": "対応形式：{{formats}}（1ファイル最大{{size}}MB）",
+    "formatListSeparator": "、"
   },
   "generation": {
     "pdfLoadFailed": "PDFファイルの読み込みに失敗しました。もう一度お試しください",
@@ -1457,7 +1469,8 @@
     "failedHint": "今回はコースを作成できませんでした。戻ってもう一度お試しください。それでも失敗する場合は管理者にお知らせください。",
     "leaveTitle": "コースの作成を中止しますか？",
     "leaveBody": "今ホームに戻ると作成が止まり、最初からやり直しになります。",
-    "leaveStay": "このまま続ける"
+    "leaveStay": "このまま続ける",
+    "modelSettingsUnavailable": "モデル設定を読み込めなかったため、生成を停止しました。もう一度お試しください。"
   },
   "settings": {
     "title": "設定",
@@ -1476,7 +1489,6 @@
     "apiBaseUrl": "APIエンドポイントURL",
     "apiBaseUrlDesc": "APIエンドポイントURLの設定",
     "apiKeyRequired": "APIキーを入力してください",
-    "model": "モデル設定",
     "modelDesc": "AIモデルの設定",
     "modelPlaceholder": "モデル名を入力または選択",
     "ttsModel": "TTSモデル",
@@ -1533,7 +1545,6 @@
       "default-6": "じっくり考え、物事の本質を探求します"
     },
     "close": "閉じる",
-    "save": "保存",
     "providers": "LLM",
     "addProviderDescription": "カスタムモデルプロバイダーを追加して利用可能なAIモデルを拡張",
     "providerNames": {
@@ -1564,17 +1575,9 @@
       "claude": "Claude",
       "searxng": "SearXNG"
     },
-    "providerTypes": {
-      "openai": "OpenAIプロトコル",
-      "azure": "Azure OpenAI",
-      "anthropic": "Claudeプロトコル",
-      "google": "Geminiプロトコル",
-      "bedrock": "Amazon Bedrock"
-    },
     "modelCount": "モデル",
     "modelSingular": "モデル",
     "defaultModel": "デフォルトモデル",
-    "webSearch": "ウェブ検索",
     "mcp": "MCP",
     "knowledgeBase": "ナレッジベース",
     "documentParser": "ドキュメントパーサー",
@@ -1582,7 +1585,6 @@
     "keyboardShortcuts": "ショートカット",
     "generalSettings": "一般",
     "systemSettings": "システム",
-    "addProvider": "追加",
     "importFromClipboard": "クリップボードからインポート",
     "apiSecret": "APIキー",
     "apiHost": "ベースURL",
@@ -1605,9 +1607,7 @@
     "comfyuiFolderHintPrefix": "ワークフローのJSONファイルを",
     "comfyuiFolderHintMiddle": "フォルダに配置してください。ファイル名が表示名になります。例：",
     "comfyuiLoadError": "ワークフローの読み込みに失敗しました: {error}",
-    "addModel": "追加",
     "reset": "リセット",
-    "fetch": "取得",
     "connectionSuccess": "接続に成功しました",
     "connectionFailed": "接続に失敗しました",
     "capabilities": {
@@ -1615,47 +1615,25 @@
       "tools": "ツール",
       "streaming": "ストリーミング"
     },
-    "contextWindow": "コンテキスト",
     "contextShort": "ctx",
-    "outputWindow": "出力",
     "addProviderButton": "追加",
     "addProviderDialog": "モデルプロバイダーを追加",
     "providerName": "名前",
     "providerNamePlaceholder": "例：My OpenAI Proxy",
-    "providerNameRequired": "プロバイダー名を入力してください",
     "providerApiMode": "APIモード",
     "apiModeOpenAI": "OpenAIプロトコル",
     "apiModeAnthropic": "Claudeプロトコル",
     "apiModeGoogle": "Geminiプロトコル",
     "defaultBaseUrl": "デフォルトのベースURL",
-    "providerIcon": "プロバイダーのアイコンURL",
-    "requiresApiKey": "APIキーが必要",
     "deleteProvider": "プロバイダーを削除",
     "deleteProviderConfirm": "このプロバイダーを削除してもよろしいですか？",
-    "addCustomTTSProvider": "カスタムTTSプロバイダーを追加",
-    "addCustomASRProvider": "カスタムASRプロバイダーを追加",
-    "addCustomAudioProviderDescription": "OpenAI互換のオーディオプロバイダーを追加",
-    "customVoices": "音声リスト",
-    "voiceIdPlaceholder": "音声ID（例: alloy）",
-    "voiceNamePlaceholder": "表示名",
-    "addVoice": "追加",
-    "modelNamePlaceholder": "任意",
-    "defaultModelHint": "APIリクエストで送信されるモデル名（例: kokoro、tts-1）",
-    "noVoicesAdded": "音声がまだ追加されていません。エージェントごとの音声選択のために下で追加してください。",
-    "noModelsAdded": "モデルがまだ追加されていません。モデル選択のために下で追加してください。",
-    "noModelsWarning": "このプロバイダーを使用するには、まず下でモデルを追加してください。",
     "asrNoTranscription": "文字起こし結果がありません。もう少し大きな声で、長めに話してみてください。",
-    "cannotDeleteBuiltIn": "組み込みプロバイダーは削除できません",
     "resetToDefault": "デフォルトに戻す",
     "resetToDefaultDescription": "モデルリストをデフォルト設定に復元します（APIキーとベースURLは保持されます）",
     "resetConfirmDescription": "すべてのカスタムモデルが削除され、組み込みのデフォルトモデルリストに復元されます。APIキーとベースURLは保持されます。",
     "confirmReset": "リセットを確認",
-    "resetSuccess": "デフォルト設定に正常にリセットされました",
-    "saveSuccess": "設定を保存しました",
-    "saveFailed": "設定の保存に失敗しました。もう一度お試しください",
     "cannotDeleteBuiltInModel": "組み込みモデルは削除できません",
     "cannotEditBuiltInModel": "組み込みモデルは編集できません",
-    "modelIdRequired": "モデルIDを入力してください",
     "noModelsAvailable": "テスト可能なモデルがありません",
     "providerMetadata": "プロバイダーメタデータ",
     "editModel": "モデルを編集",
@@ -1665,13 +1643,6 @@
     "addNewModelDescription": "新しいモデル設定を追加",
     "modelId": "モデルID",
     "modelIdPlaceholder": "例：gpt-4o",
-    "modelName": "表示名",
-    "modelCapabilities": "機能",
-    "advancedSettings": "詳細設定",
-    "contextWindowLabel": "コンテキストウィンドウ",
-    "contextWindowPlaceholder": "例：128000",
-    "outputWindowLabel": "最大出力トークン数",
-    "outputWindowPlaceholder": "例：4096",
     "testModel": "モデルをテスト",
     "deleteModel": "削除",
     "cancelEdit": "キャンセル",
@@ -1712,7 +1683,6 @@
     "asrBaseUrl": "ベースURL",
     "asrApiKey": "APIキー",
     "enterApiKey": "APIキーを入力",
-    "enterCustomBaseUrl": "カスタムベースURLを入力",
     "browserNativeNote": "ブラウザネイティブASRは設定不要で完全無料です",
     "providerOpenAITTS": "OpenAI TTS (gpt-4o-mini-tts)",
     "providerAzureTTS": "Azure TTS",
@@ -1724,9 +1694,6 @@
     "providerMiniMaxTTS": "MiniMax TTS",
     "providerLemonadeTTS": "Lemonade TTS（ローカル）",
     "providerBrowserNativeTTS": "ブラウザネイティブTTS",
-    "voxcpmBackend": "バックエンド",
-    "voxcpmBaseUrlPending": "Base URL を入力するとリクエスト URL が生成されます",
-    "voxcpmAutoVoiceNoPreview": "自動音色は Agent のコンテキストから生成されるため、単独では試聴できません",
     "voxcpmVoicesTitle": "VoxCPM 音色",
     "voxcpmVoicesDescription": "このブラウザに保存され、Agent Bar の共通音色プールに追加されます。",
     "voxcpmAutoVoicePrivacyNote": "自動音色は Agent の persona を音色プロンプトとして、設定済みの VoxCPM バックエンドに送信します。",
@@ -1756,7 +1723,6 @@
     "voxcpmRecordedVoiceName": "録音した音色",
     "voxcpmRecordingFailed": "録音の変換に失敗しました",
     "voxcpmRecordingStartFailed": "録音を開始できません",
-    "voxcpmBaseUrlRequired": "先に VoxCPM Base URL を入力してください",
     "voxcpmPreviewFailed": "試聴に失敗しました",
     "voxcpmVoiceSaved": "VoxCPM 音色を保存しました",
     "voxcpmVoiceSaveFailed": "音色の保存に失敗しました",
@@ -1791,13 +1757,11 @@
     "testASR": "ASRをテスト",
     "testSuccess": "テスト成功",
     "testFailed": "テスト失敗",
-    "ttsTestText": "TTSテスト用テキスト",
     "ttsTestSuccess": "TTSテスト成功、音声が再生されました",
     "ttsTestFailed": "TTSテストに失敗しました",
     "asrTestSuccess": "音声認識に成功しました",
     "asrTestFailed": "音声認識に失敗しました",
     "asrProcessing": "処理中...",
-    "asrResult": "認識結果",
     "asrNotSupported": "お使いのブラウザは音声認識APIに対応していません",
     "browserTTSNotSupported": "お使いのブラウザは音声合成APIに対応していません",
     "browserTTSNoVoices": "お使いのブラウザに利用可能なTTSボイスがありません",
@@ -2107,18 +2071,14 @@
     "claudeSearchModelHint": "ウェブ検索を実行し、結果を要約する Claude モデル。",
     "webSearchApiKeyOptional": "APIキーは任意です。未設定の場合、公開ページのスクレイピングが使用されます。",
     "searxngServerOnlyNotice": "SearXNG はサーバー側で設定する必要があります。SEARXNG_BASE_URL 環境変数（または server-providers.yml の web-search セクション）を設定してください。クライアントからのインスタンス URL は受け付けません。",
-    "baiduSubSources": "Baidu検索ソース",
-    "baiduSubSourcesDescription": "少なくとも1つのBaiduソースを選択してください。",
     "baiduSubSourceWeb": "Web検索",
     "baiduSubSourceWebDescription": "Baidu AI Searchの一般Web検索結果。",
     "baiduSubSourceBaike": "Baidu Baike",
     "baiduSubSourceBaikeDescription": "Baidu Baikeの百科事典エントリ。",
     "baiduSubSourceScholar": "Baidu Scholar",
     "baiduSubSourceScholarDescription": "Baidu Scholarの学術論文。",
-    "viewDocs": "APIドキュメント",
     "webSearchBaseUrl": "ベースURL",
     "webSearchServerConfigured": "サーバー側で検索APIキーが設定済みです",
-    "optional": "任意",
     "selectProvider": "プロバイダーを選択",
     "customProvider": "カスタム",
     "presetPickHint": "プロバイダーを選ぶと Base URL とプロトコルが自動入力されます。キーを入力して「モデルを取得」をクリックしてください。一覧にない場合は「カスタム」を使用してください。",
@@ -2163,13 +2123,12 @@
       "desc": "トークンプランのプロバイダーを選んでキーを入力すると、対応するすべてのモダリティ（LLM/画像/動画/音声/ウェブ検索）が自動設定されます。",
       "selectPlan": "プロバイダーを選択",
       "apiKey": "API キー",
-      "enable": "有効にする",
       "updateKey": "キーを更新",
       "modelsCount": "{{n}} 個のモデル",
       "capabilities": "利用できる機能",
       "offeredNote": "このプランで提供されるモデルです。生成バーに表示したいものを選んでください。利用可否はプランのランクによって異なり、非対応のモデルは生成時にエラーになります。",
       "statusConnected": "接続済み",
-      "keyStorage": "キーはブラウザのローカル設定に保存され、このサービスへのリクエストにのみ使用されます。",
+      "keyStorage": "キーはサーバーに暗号化して保存され、再表示されません。接続すると、このプランの推奨モデルがコース工程に適用されます。選択済みのモデルを置き換える場合は、事前に確認します。",
       "saveKey": "保存して有効化",
       "cancelKeyUpdate": "更新をキャンセル",
       "manageAccount": "アカウント管理",
@@ -2190,9 +2149,10 @@
       "stageSlide": "スライド",
       "stageInteractive": "インタラクティブ",
       "planNoteEditable": "これはデフォルト設定です。各ノードのモデルは「コースモデル設定」で変更できます。",
-      "statusDisabled": "接続済み（無効）",
-      "enableThisPlan": "このプランを有効化",
-      "enableThisPlanHint": "オフにすると、このプランはコースモデル設定に表示されなくなります。"
+      "applyTitle": "このプランの推奨構成を使いますか？",
+      "applyBody": "{{name}} は次の工程に独自のモデルを推奨しています。これらの工程は現在、あなたが選んだモデルを使っています：",
+      "applyKeep": "現在の構成を維持",
+      "applyRecommended": "プランの推奨構成を使う"
     },
     "skills": {
       "nav": "スキル",
@@ -2222,63 +2182,8 @@
       "deleteFailed": "スキルを削除できませんでした。もう一度お試しください。"
     },
     "ttsBrowserNativeTimelineNotice": "ブラウザ内蔵 TTS はエディターのタイムライン音声機能（試聴・再生成・一括音声生成）に対応していません。マネージド TTS プロバイダーに切り替えると、行ごとの音声を生成・管理できます。",
-    "alidocmindAccessKeyId": "AccessKey ID",
-    "alidocmindAccessKeySecret": "AccessKey Secret",
     "courseModels": {
-      "nav": "コースモデル設定",
-      "mainModel": "メインモデル",
-      "mainModelHint": "メインに追従する段階はこのモデルを共有します。カードをクリックすると段階ごとに変更できます",
-      "mainModelTooltip": "メインに追従するすべての段階がこのモデルを使用します。パイプラインのカードをクリックすると、その段階に固有のモデルを固定できます（運用者の MODEL_ROUTES より優先度が低いユーザーレベルの段階ルート）。さらに細かいサブ段階はカードのインスペクタで設定します。",
-      "noProviderHint": "言語モデルが未設定です。「モデルサービス」で設定してください",
-      "followMainline": "メインに追従",
-      "followParent": "親に追従",
-      "restoreFollow": "メイン追従に戻す",
-      "stopped": "無効",
-      "loop": "ループ",
-      "parallel": "並列",
-      "visionSupported": "画像入力対応",
-      "modelSource": "モデルソース",
-      "mainlineUnset": "未指定",
-      "pickModel": "モデルを選択",
-      "pickProvider": "サービスを選択",
-      "optionInvalid": "利用不可",
-      "subStagesTitle": "サブ段階",
-      "subStages": {
-        "title": "タイトル生成",
-        "slide": "スライド",
-        "quiz": "クイズ",
-        "interactive": "インタラクティブ台本",
-        "pbl": "PBL シナリオ"
-      },
-      "servicesAndModels": "サービスとモデル",
-      "searchService": "検索サービス",
-      "parseService": "解析サービス",
-      "asrTranscribe": "音声書き起こし",
-      "aiIllustration": "AIイラスト",
-      "aiVideo": "AI動画",
-      "stations": {
-        "docParse": "ドキュメント解析",
-        "webResearch": "ウェブ調査",
-        "outline": "アウトライン設計",
-        "agents": "エージェントプロファイル",
-        "sceneContent": "シーンコンテンツ",
-        "sceneActions": "シーンアクション",
-        "tts": "音声合成",
-        "media": "メディア生成",
-        "interaction": "授業インタラクション",
-        "desc": {
-          "doc-parse": "アップロードされたコース素材（ドキュメント／スライド／音声・動画）をテキストに解析し、音声・動画は自動で文字起こしします。",
-          "web-research": "コース要件に応じてウェブから補足資料を検索します。検索クエリは軽量な LLM によって書き換えられます。",
-          "outline": "要件と資料を理解し、コースタイトルとシーンごとのアウトラインを生成します（人による確認可）。",
-          "agents": "教師・生徒エージェントのプロファイル（人格・アバター・声）を生成します。",
-          "scene-content": "シーンごとにスライド／クイズ／インタラクション／PBL のコンテンツを生成する、パイプラインで最も重い LLM ステージです。",
-          "scene-actions": "シーンごとにナレーションと授業アクションを補完し、音声合成と授業再生に渡します。",
-          "tts": "ナレーションを教師／生徒の音声に合成します（シーンごとに直列で実行）。",
-          "media": "生成コンテンツ内の画像・動画プレースホルダーを、シーンループと並行して埋めます。",
-          "interaction": "生成後の授業ランタイム：マルチエージェント対話、PBL 実行、クイズ採点。"
-        }
-      },
-      "mediaEnableNeedsSetup": "先に「モデルサービス」で API キーを設定するか、Token Plan を有効にしてからオンにしてください。"
+      "nav": "コースモデル設定"
     },
     "modelServices": {
       "nav": "モデルサービス",
@@ -2298,13 +2203,210 @@
       "configuredHint": "設定済みで、コース生成に利用できます",
       "notConfiguredHint": "未設定です。認証情報を入力すると利用できます"
     },
-    "enableThisProvider": "このプロバイダーを有効化",
-    "enableThisProviderHint": "オフにすると、このプロバイダーはコースモデル設定に表示されなくなります。",
     "more": "その他の操作",
     "providerLinks": {
       "getApiKey": "APIキーを取得",
       "domestic": "中国国内",
       "international": "海外"
+    },
+    "providerGoogleTTS": "Google Gemini TTS",
+    "ttsSpeedUnsupported": "This provider does not support speed adjustment.",
+    "serverConfig": {
+      "loading": "モデル設定を読み込み中…",
+      "loadFailed": "モデル設定を読み込めませんでした：{{message}}",
+      "retry": "再試行",
+      "unavailableTitle": "モデルはサーバーで管理されています",
+      "unavailableBody": "このサーバーはワークスペースごとのモデル設定を保存しないため、管理者が設定したモデルを使用します。",
+      "conflict": "設定が別の場所で変更されたため再読み込みしました。確認してもう一度お試しください。",
+      "lockedNow": "この項目はサーバーが設定するようになったため、変更されませんでした。",
+      "unconfirmed": "サーバーの応答が失われたため設定を再読み込みしました。変更が反映されたか確認してください。",
+      "serverOnly": "このサービスはサーバーの設定（openmaic.yml）でのみ設定できます。サーバー管理者にお問い合わせください。",
+      "serverOnlyPolicy": "このサーバーではワークスペースが独自のサービスを追加できません。サーバー管理者にお問い合わせください。",
+      "endpointServerOnly": "このサービスは公式のエンドポイントに接続します。別のエンドポイントはサーバーの設定でのみ指定できます。",
+      "endpointChatOnly": "独自のエンドポイントを使う場合、このサービスは言語モデルにのみ使われます。",
+      "keyStored": "サーバーにキーが保存されています（{{mask}}）。",
+      "keyStoredPlaceholder": "保存済みのキー {{mask}} — 新しいキーを入力すると置き換えます",
+      "keyUnreadable": "保存済みのキーを読み取れなくなりました。もう一度入力してください。",
+      "removeKey": "キーを削除",
+      "showKey": "キーを表示",
+      "hideKey": "キーを隠す",
+      "inUse": "使用中",
+      "modelFromCatalogue": "モデルの名前・機能・コンテキストウィンドウは内蔵カタログから取得します。",
+      "modelWhenInUse": "コースモデル設定でこのサービスを選ぶと使われます。",
+      "planServer": "サーバーで設定済み",
+      "providerIdHint": "「{{id}}」として保存",
+      "openaiCompatible": "OpenAI 互換",
+      "notNarration": "このサービスはワークスペースのナレーションではありません。",
+      "useForNarration": "ナレーションに使う",
+      "fetchNotSaved": "モデルは見つかりましたが保存できませんでした。もう一度お試しください。",
+      "regionalEndpointHint": "Azure Speech は、リソースのリージョンの公式エンドポイントのみ受け付けます：{{template}}。"
+    },
+    "modelSettings": {
+      "card": {
+        "edit": "{{name}}：{{value}}。変更する",
+        "toggle": "{{name}}のオン／オフ",
+        "providerDefault": "既定のモデル",
+        "off": "オフ",
+        "unassigned": "未設定",
+        "invalid": "無効な設定",
+        "locked": "サーバーで設定",
+        "lockedHint": "サーバーの設定で決まっています。ここでは変更できません。",
+        "followers": "これに従う工程：{{count}}",
+        "childrenFollow": "ページ種別 · すべて従う",
+        "childrenOwn": "ページ種別 · 個別設定 {{count}} 件"
+      },
+      "legend": {
+        "label": "凡例",
+        "follows": "上位に従う",
+        "own": "個別設定",
+        "locked": "サーバーで設定"
+      },
+      "map": {
+        "label": "コースモデルマップ。ドラッグまたは矢印キーで移動、ズームボタンで拡大縮小できます。",
+        "outside": "パイプライン外",
+        "standalone": "独立機能",
+        "perPage": "ページごとに生成",
+        "zoom": "ズーム",
+        "zoomIn": "拡大（+）",
+        "zoomOut": "縮小（-）",
+        "fit": "全体を表示（0）",
+        "reset": "100% に戻す",
+        "hint": "ドラッグで移動 · ⌘/Ctrl + スクロールでズーム · 空白をダブルクリックで全体表示"
+      },
+      "picker": {
+        "follow": "{{name}}に従う",
+        "providers": "プロバイダー",
+        "providerDefault": "既定のモデル",
+        "modelId": "モデル ID",
+        "use": "使用",
+        "off": "オフ",
+        "offHint": "この工程は実行されません",
+        "noProviders": "この機能を提供するサービスがまだありません。モデルサービスで設定してください。",
+        "fallback": "フォールバック",
+        "noFallback": "なし",
+        "manageProviders": "モデルサービスで管理",
+        "conflict": "設定が別の場所で変更されたため再読み込みしました。確認してもう一度お試しください。",
+        "lockedNow": "サーバーがこの項目を設定したため、変更されませんでした。",
+        "clear": "個別設定を解除",
+        "clearHint": "サーバーの設定があればそれを使います",
+        "unconfirmed": "サーバーの応答が失われたため、設定を再読み込みしました。変更が反映されたか確認してください。",
+        "thinking": "思考"
+      },
+      "slots": {
+        "llm": {
+          "name": "既定のモデル",
+          "desc": "個別に設定していない工程はすべてこの言語モデルを使います。"
+        },
+        "courseResearch": {
+          "name": "検索クエリ",
+          "desc": "コースのテーマを Web 検索クエリに書き換えます。"
+        },
+        "courseOutline": {
+          "name": "アウトライン",
+          "desc": "コースのページ構成を計画します。"
+        },
+        "courseAgents": {
+          "name": "ロール",
+          "desc": "教室の先生とクラスメートを作成します。"
+        },
+        "courseContent": {
+          "name": "ページ内容",
+          "desc": "各ページを作成します。個別に設定していないページ種別はこれに従います。"
+        },
+        "courseContentSlide": {
+          "name": "スライド",
+          "desc": "スライドページを作成します。"
+        },
+        "courseContentQuiz": {
+          "name": "クイズ",
+          "desc": "クイズページを作成します。"
+        },
+        "courseContentInteractive": {
+          "name": "インタラクティブ",
+          "desc": "インタラクティブページを作成します。"
+        },
+        "courseContentPbl": {
+          "name": "プロジェクト",
+          "desc": "プロジェクト型学習ページを作成します。"
+        },
+        "courseActions": {
+          "name": "講義アクション",
+          "desc": "各ページで先生が話す内容と動作を組み立てます。"
+        },
+        "classroom": {
+          "name": "教室",
+          "desc": "学習中のディスカッション、クイズ採点、プロジェクト。"
+        },
+        "agent": {
+          "name": "エージェント",
+          "desc": "一緒にコースを作成・編集します。ツール呼び出しに対応したモデルが必要です。"
+        },
+        "tts": {
+          "name": "ナレーション",
+          "desc": "講義を読み上げます。"
+        },
+        "asr": {
+          "name": "音声入力",
+          "desc": "教室で声で質問したとき、音声を文字に変換します。"
+        },
+        "image": {
+          "name": "画像",
+          "desc": "ページ用の画像を生成します。"
+        },
+        "video": {
+          "name": "動画",
+          "desc": "ページ用の動画クリップを生成します。"
+        },
+        "webSearch": {
+          "name": "Web 検索",
+          "desc": "コース生成中に Web を検索します。"
+        },
+        "document": {
+          "name": "ドキュメント解析",
+          "desc": "アップロードされたドキュメントを読み取ります。"
+        }
+      },
+      "source": {
+        "inherited": "{{name}}に従う",
+        "deployment": "サーバー",
+        "default": "サーバー既定"
+      },
+      "stations": {
+        "research": "Web 調査",
+        "media": "画像 / 動画",
+        "lines": {
+          "rewrite": "クエリ",
+          "search": "検索",
+          "image": "画像",
+          "video": "動画"
+        }
+      },
+      "empty": {
+        "prompt": "まだ言語モデルがありません。モデルサービスでサービスを設定するか、Token Plan でプランを接続すると、未設定の部分にそのモデルが割り当てられます。",
+        "open": "モデルサービスを開く",
+        "askAdmin": "言語モデルが設定されていません。サーバー管理者に設定を依頼してください。"
+      }
+    },
+    "unimported": {
+      "toast": "このブラウザーの一部のモデル設定をサーバーに移行できませんでした。「設定 → モデルサービス」に一覧があります。",
+      "title": "このブラウザーの一部の設定をサーバーに移行できませんでした",
+      "description": "これらはキーとともにこのブラウザーにのみ保存されています。ここ（またはサーバーの設定）で設定し直してから破棄してください。",
+      "modelChoice": "{{slot}} のモデル選択：{{assignment}}",
+      "copyKey": "キーをコピー",
+      "copyKeyPair": "キーペアをコピー",
+      "keyCopied": "コピーしました",
+      "copyFailed": "コピーできませんでした",
+      "dismiss": "破棄",
+      "dismissTitle": "これらの設定を破棄しますか？",
+      "dismissDescription": "キーはこのブラウザーから削除され、元に戻せません。",
+      "reason": {
+        "refused": "サーバーに受け付けられませんでした：{{detail}}",
+        "reserved": "サーバーが同じ名前のサービスをすでに設定しています。",
+        "customService": "カスタム音声サービスはサーバー（openmaic.yml）でのみ設定できます。",
+        "keyPair": "キーペアを使うサービスはサーバー（openmaic.yml）でのみ設定できます。",
+        "unsupported": "この種類のカスタムプロバイダーは移行できません。OpenAI 互換エンドポイントとして追加し直してください。",
+        "unconfirmed": "サーバーがインポートを確認しませんでした。"
+      }
     }
   },
   "workspace": {
@@ -2424,7 +2526,6 @@
     "asrCapability": "音声認識",
     "asrHint": "ディスカッションで音声入力",
     "provider": "プロバイダー",
-    "model": "モデル",
     "voice": "ボイス",
     "speed": "速度",
     "language": "言語"

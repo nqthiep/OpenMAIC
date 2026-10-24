@@ -5,7 +5,9 @@ import {
   getServerImageProviders,
   getServerVideoProviders,
   getServerTTSProviders,
+  getParallelSceneConcurrency,
 } from '@/lib/server/provider-config';
+import { resolveServerGenerationCapabilities } from '@/lib/server/generation-capabilities';
 
 const version = process.env.npm_package_version || '0.1.0';
 
@@ -18,13 +20,8 @@ export async function GET() {
     status: 'ok',
     version,
     accessCodeConfigured: Boolean(process.env.ACCESS_CODE),
-    capabilities: {
-      // A capability is available only when at least one provider is enabled —
-      // force-disabled providers (disabled: true) do not count (#665).
-      webSearch: Object.values(getServerWebSearchProviders()).some((info) => !info.disabled),
-      imageGeneration: Object.values(getServerImageProviders()).some((info) => !info.disabled),
-      videoGeneration: Object.values(getServerVideoProviders()).some((info) => !info.disabled),
-      tts: Object.values(getServerTTSProviders()).some((info) => !info.disabled),
-    },
+    capabilities: await resolveServerGenerationCapabilities(),
+    // How many scenes the browser may generate at once (PARALLEL_SCENE_CONCURRENCY).
+    generation: { parallelSceneConcurrency: getParallelSceneConcurrency() },
   });
 }

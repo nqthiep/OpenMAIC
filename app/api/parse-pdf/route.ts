@@ -13,7 +13,19 @@ import { documentArtifactToParsedPdfContent, extractDocument } from '@/lib/docum
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { isSelfContainedExtractor } from '@/lib/server/material-extraction/services';
 import { checkClientDocumentExtractorBaseUrl } from '@/lib/server/client-extractor-endpoint';
+import {
+  mediaResolutionResponse,
+  RequestedProviderRefusedError,
+  resolveMediaSlot,
+  type MediaConnection,
+} from '@/lib/server/model-config/media';
+import {
+  requestWorkspaceId,
+  SlotDisabledError,
+  SlotUnassignedError,
+} from '@/lib/server/model-config/runtime';
 const log = createLogger('Parse PDF');
 
 /** B49: route-specific fixed text — "model provider" wording is inaccurate for PDF parsing. */
@@ -47,28 +59,56 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'No PDF file provided');
     }
 
-    // providerId is required from the client — no server-side store to fall back to
-    const effectiveProviderId = providerId || ('unpdf' as PDFProviderId);
     pdfFileName = pdfFile?.name;
-    resolvedProviderId = effectiveProviderId;
-
-    // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
-    managed = isServerConfiguredProvider('pdf', effectiveProviderId);
-    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
-    let clientBaseUrl = keysAllowed ? baseUrl || undefined : undefined;
-    if (clientBaseUrl) {
-      const checked = await checkClientDocumentExtractorBaseUrl(effectiveProviderId, clientBaseUrl);
-      if (!checked.ok) {
-        return apiError('INVALID_URL', 403, checked.message);
+    // The document slot's service; the provider a request names (deprecated)
+    // only when it is unassigned; the local parser when there is none.
+    // An explicit self-contained extractor (local parsing) needs no service
+    // and sends the file nowhere, whatever the slot names.
+    const selfContained = providerId && isSelfContainedExtractor(providerId) ? providerId : null;
+    let service: MediaConnection | undefined;
+    try {
+      if (!selfContained)
+        service = await resolveMediaSlot('document', {
+          workspaceId: await requestWorkspaceId(req),
+          legacyRequest: async () =>
+            providerId
+              ? requestedDocumentProvider(
+                  providerId,
+                  await clientKeysAllowed(req.headers),
+                  apiKey,
+                  baseUrl,
+                )
+              : undefined,
+        });
+    } catch (error) {
+      if (!(error instanceof SlotDisabledError || error instanceof SlotUnassignedError)) {
+        const refused = mediaResolutionResponse(error, 'Document parsing');
+        if (refused) return refused;
+        throw error;
       }
-      clientBaseUrl = checked.baseUrl;
     }
-
+    if (service && !service.managed && service.baseUrl && service.origin === 'configuration') {
+      const checked = await checkClientDocumentExtractorBaseUrl(
+        service.providerId as PDFProviderId,
+        service.baseUrl,
+      );
+      if (!checked.ok) return apiError('INVALID_URL', 403, checked.message);
+      service = { ...service, baseUrl: checked.baseUrl };
+    }
+    resolvedProviderId = selfContained ?? service?.providerId ?? 'unpdf';
+    // The local parser sends the file nowhere and has no vendor text to hide.
+    managed = service ? service.managed : false;
     const config = {
-      providerId: effectiveProviderId,
-      apiKey: resolvePDFApiKey(effectiveProviderId, keysAllowed ? apiKey || undefined : undefined),
-      baseUrl: resolvePDFBaseUrl(effectiveProviderId, clientBaseUrl),
-      managed,
+      providerId: resolvedProviderId as PDFProviderId,
+      ...(service?.apiKey ? { apiKey: service.apiKey } : {}),
+      ...(service?.baseUrl ? { baseUrl: service.baseUrl } : {}),
+      ...(service?.credentials?.accessKeyId
+        ? {
+            accessKeyId: service.credentials.accessKeyId,
+            accessKeySecret: service.credentials.accessKeySecret,
+          }
+        : {}),
+      managed: service ? service.managed : true,
     };
 
     // Convert PDF to buffer
@@ -110,4 +150,36 @@ export async function POST(req: NextRequest) {
         : visitorErrorText(error, managed, PDF_PARSE_FAILURE_TEXT),
     );
   }
+}
+
+/** The document provider a request names in its form (deprecated). */
+async function requestedDocumentProvider(
+  providerId: PDFProviderId,
+  keysAllowed: boolean,
+  clientApiKey: string | null,
+  clientBaseUrl: string | null,
+): Promise<MediaConnection> {
+  // Managed providers are admin-owned: ignore any client-sent key/baseUrl.
+  const managed = isServerConfiguredProvider('pdf', providerId);
+  let baseUrlFromClient = managed || !keysAllowed ? undefined : clientBaseUrl || undefined;
+  if (baseUrlFromClient) {
+    const checked = await checkClientDocumentExtractorBaseUrl(providerId, baseUrlFromClient);
+    if (!checked.ok) {
+      throw new RequestedProviderRefusedError(apiError('INVALID_URL', 403, checked.message));
+    }
+    baseUrlFromClient = checked.baseUrl;
+  }
+  const apiKey = resolvePDFApiKey(
+    providerId,
+    managed || !keysAllowed ? undefined : clientApiKey || undefined,
+  );
+  const baseUrl = resolvePDFBaseUrl(providerId, baseUrlFromClient);
+  return {
+    providerId,
+    ...(apiKey ? { apiKey } : {}),
+    ...(baseUrl ? { baseUrl } : {}),
+    managed,
+    userEndpoint: Boolean(baseUrlFromClient),
+    origin: 'request',
+  };
 }

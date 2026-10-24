@@ -31,6 +31,17 @@ function getConfig(): ServerConfig {
   return currentSnapshot().config;
 }
 
+export type { ServerConfig, ServerProviderEntry };
+
+/**
+ * The provider configuration as the database holds it (with the operator's force-off switches),
+ * for translating it into the model configuration of RFC #1701. Read-only: callers must not
+ * mutate it.
+ */
+export function getServerProviderConfig(): Readonly<ServerConfig> {
+  return getConfig();
+}
+
 /**
  * The operator's entry for a provider, or undefined. Provider ids come from requests, so only the
  * section's own keys count: an id such as `constructor` or `__proto__` must not resolve to an
@@ -238,6 +249,20 @@ export class TTSModelNotAllowedError extends Error {
 }
 
 /**
+ * The TTS model of a configured slot: its own model, with only the voice
+ * compatibility rules of `resolveTTSModel` applied (a cloned voice speaks
+ * through the clone model, a catalog voice never does). Legacy server pins do
+ * not apply.
+ */
+export function slotTTSModel(
+  providerId: string,
+  modelId: string | undefined,
+  voiceId?: string,
+): string | undefined {
+  return ttsModelFor(providerId, [], modelId, voiceId);
+}
+
+/**
  * Resolve the TTS model. A managed provider may pin its model server-side
  * (`${PREFIX}_MODELS`, first entry) — authoritative like its key/baseUrl, since
  * the managed-provider UI does not expose a model field. Otherwise the client
@@ -248,9 +273,16 @@ export function resolveTTSModel(
   clientModel?: string,
   voiceId?: string,
 ): string | undefined {
-  const entry = serverEntry('tts', providerId);
-  const pinnedModels = entry?.models?.filter(Boolean) ?? [];
+  const pinnedModels = serverEntry('tts', providerId)?.models?.filter(Boolean) ?? [];
+  return ttsModelFor(providerId, pinnedModels, clientModel, voiceId);
+}
 
+function ttsModelFor(
+  providerId: string,
+  pinnedModels: string[],
+  clientModel?: string,
+  voiceId?: string,
+): string | undefined {
   if (providerId === 'qwen-tts') {
     const vcModel = resolveQwenVoiceCloneModel();
     const requestedIsVCSentinel = !!clientModel && isQwenVoiceCloneModel(clientModel, vcModel);

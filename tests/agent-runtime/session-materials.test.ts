@@ -9,6 +9,7 @@
  */
 import { PGlite } from '@electric-sql/pglite';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useProviders as installProviders } from '../fixtures/provider-snapshot';
 
 import { ensureAgentSessionSchema, PgAgentSessionStore } from '@openmaic/storage/agent-session/pg';
 import type { Queryable } from '@openmaic/storage/asset/pg';
@@ -69,6 +70,8 @@ async function makeHost() {
   mocks.getAgentSessionStore.mockResolvedValue(sessionStore);
   mocks.getServerPersistenceProvider.mockResolvedValue({ pool: db });
   vi.stubEnv('DATABASE_URL', connectionString);
+  // With a database configured the provider settings must be loaded before any lookup.
+  installProviders({});
   return { bytes, db, sessionStore };
 }
 

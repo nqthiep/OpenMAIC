@@ -1,5 +1,3 @@
-import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
-import { requireSpender } from '@/lib/server/authz/viewer';
 /**
  * Web Search API
  *
@@ -8,21 +6,17 @@ import { requireSpender } from '@/lib/server/authz/viewer';
  */
 
 import { NextRequest } from 'next/server';
+import { clientKeysAllowed } from '@/lib/server/authz/provider-keys';
+import { requireSpender } from '@/lib/server/authz/viewer';
 import { callLLM } from '@/lib/ai/llm';
 import { formatSearchResultsAsContext, searchWeb } from '@/lib/web-search';
-import {
-  isServerConfiguredProvider,
-  isServerProviderDisabled,
-  resolveServerWebSearchProviderId,
-  resolveWebSearchApiKey,
-  resolveWebSearchModel,
-} from '@/lib/server/provider-config';
 import { createLogger } from '@/lib/logger';
 import {
   MODEL_FAILURE_TEXT,
   describeUnexpectedError,
   visitorErrorText,
 } from '@/lib/server/error-summary';
+import { isServerConfiguredProvider } from '@/lib/server/provider-config';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import {
   buildSearchQuery,
@@ -30,9 +24,15 @@ import {
 } from '@/lib/server/search-query-builder';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
 import type { AICallFn } from '@openmaic/generation';
-import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
+import { DEFAULT_WEB_SEARCH_PROVIDER_ID, WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import type { BaiduSubSources, WebSearchProviderId } from '@/lib/web-search/types';
-import { resolveWebSearchRouteBaseUrl } from '@/lib/server/web-search-config';
+import {
+  resolveWebSearchConnection,
+  WebSearchConfigError,
+  type WebSearchConfig,
+} from '@/lib/server/web-search-config';
+import { mediaResolutionResponse } from '@/lib/server/model-config/media';
+import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 
 const log = createLogger('WebSearch');
 
@@ -67,69 +67,47 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'query is required');
     }
 
-    const serverProviderId = resolveServerWebSearchProviderId() as WebSearchProviderId | undefined;
-    let providerId: WebSearchProviderId =
-      requestProviderId && WEB_SEARCH_PROVIDERS[requestProviderId]
-        ? requestProviderId
-        : (serverProviderId ?? 'tavily');
-
-    // Prefer the operator's server-configured backend over stale client defaults
-    // (e.g. Tavily without a key, or Brave HTML scrape with empty results).
-    if (
-      serverProviderId &&
-      isServerConfiguredProvider('webSearch', serverProviderId) &&
-      providerId !== serverProviderId &&
-      !isServerConfiguredProvider('webSearch', providerId)
-    ) {
-      log.info(
-        `Using server-configured web search provider "${serverProviderId}" instead of "${providerId}"`,
-      );
-      providerId = serverProviderId;
-    }
-
-    // Enforce server precedence: a force-disabled provider is off for everyone,
-    // regardless of any client key/selection — mirror the TTS contract (#665).
-    // Checked after the server-preference override so a disabled client choice
-    // yields to the operator's enabled backend.
-    if (isServerProviderDisabled('webSearch', providerId)) {
-      return apiError(
-        'PROVIDER_DISABLED',
-        403,
-        'This web search provider is disabled by the server',
-      );
-    }
-
-    const provider = WEB_SEARCH_PROVIDERS[providerId];
-    // Managed providers are admin-owned: ignore (don't reject) any client-sent
-    // key/baseUrl. The server config is authoritative, so a stale client base
-    // URL is dropped rather than failing the request.
-    managed = isServerConfiguredProvider('webSearch', providerId);
-    const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
-    const clientApiKey = keysAllowed ? bodyApiKey : undefined;
-    // SearXNG base URLs are operator-managed only (set in the Settings popup (top bar)); never trust client input.
-    const clientBaseUrl = keysAllowed && providerId !== 'searxng' ? bodyBaseUrl : undefined;
-    const apiKey = resolveWebSearchApiKey(providerId, clientApiKey);
-    if (provider.requiresApiKey && !apiKey) {
-      return apiError(
-        'MISSING_API_KEY',
-        400,
-        `${provider.name} API key is not configured. Set it in Settings -> Web Search (an administrator can also add a shared server key there).`,
-      );
-    }
-    let baseUrl: string | undefined;
+    // The webSearch slot decides; the provider, key and base URL a request
+    // names (deprecated) count only when it is unassigned.
+    // A client-sent key or base URL counts only for an account allowed to bring its own.
+    const keysAllowed = await clientKeysAllowed(req.headers);
+    let config: WebSearchConfig;
     try {
-      baseUrl = resolveWebSearchRouteBaseUrl(providerId, clientBaseUrl);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Invalid web search base URL';
-      return apiError('INVALID_REQUEST', 400, message);
-    }
-    if (provider.requiresBaseUrl && !baseUrl) {
-      return apiError(
-        'MISSING_REQUIRED_FIELD',
-        400,
-        getMissingBaseUrlMessage(providerId, provider.name),
+      config = await resolveWebSearchConnection(
+        await requestWorkspaceId(req),
+        {
+          webSearchProviderId: requestProviderId,
+          webSearchApiKey: keysAllowed ? bodyApiKey : undefined,
+          webSearchBaseUrl: keysAllowed ? bodyBaseUrl : undefined,
+          webSearchModelId: claudeModelId,
+          baiduSubSources,
+        },
+        {
+          refuseDisabled: true,
+          preferServerProvider: true,
+          fallbackProviderId: DEFAULT_WEB_SEARCH_PROVIDER_ID,
+        },
       );
+    } catch (error) {
+      const refused = mediaResolutionResponse(error, 'Web search');
+      if (refused) return refused;
+      if (error instanceof WebSearchConfigError) {
+        const provider = error.providerId ? WEB_SEARCH_PROVIDERS[error.providerId] : undefined;
+        const message =
+          error.providerId && provider && error.code === 'MISSING_API_KEY'
+            ? `${provider.name} API key is not configured. Set it in Settings -> Web Search (an administrator can also add a shared server key there) or configure ${getWebSearchEnvKey(error.providerId)} on the server.`
+            : error.providerId && provider && error.code === 'MISSING_REQUIRED_FIELD'
+              ? getMissingBaseUrlMessage(error.providerId, provider.name)
+              : error.message;
+        return apiError(error.code, 400, message);
+      }
+      if (error instanceof Error && /base URL/.test(error.message)) {
+        return apiError('INVALID_REQUEST', 400, error.message);
+      }
+      throw error;
     }
+
+    managed = isServerConfiguredProvider('webSearch', config.providerId);
 
     // Clamp rewrite input at the route boundary; framework body limits still apply to total request size.
     const boundedPdfText = pdfText?.slice(0, SEARCH_QUERY_REWRITE_EXCERPT_LENGTH);
@@ -173,18 +151,7 @@ export async function POST(req: NextRequest) {
       finalQueryLength: searchQuery.finalQueryLength,
     });
 
-    const result = await searchWeb({
-      providerId,
-      query: searchQuery.query,
-      apiKey,
-      baseUrl,
-      ...(providerId === 'baidu' && baiduSubSources ? { baiduSubSources } : {}),
-      // A server-pinned model (WEB_SEARCH_CLAUDE_MODELS) is authoritative over
-      // the client-selected one, matching how managed keys/base URLs behave.
-      ...(providerId === 'claude'
-        ? { claudeModelId: resolveWebSearchModel('claude', claudeModelId) }
-        : {}),
-    });
+    const result = await searchWeb({ ...config, query: searchQuery.query });
     const context = formatSearchResultsAsContext(result);
 
     return apiSuccess({
@@ -208,4 +175,28 @@ function getMissingBaseUrlMessage(providerId: WebSearchProviderId, providerName:
     return `${providerName} base URL is not configured. An administrator must add it as a shared server credential.`;
   }
   return `${providerName} base URL is not configured. Configure the base URL in Settings -> Web Search (an administrator can also add a shared server credential there).`;
+}
+
+function getWebSearchEnvKey(providerId: WebSearchProviderId): string {
+  switch (providerId) {
+    case 'exa':
+      return 'EXA_API_KEY';
+    case 'baidu':
+      return 'BAIDU_API_KEY';
+    case 'bocha':
+      return 'BOCHA_API_KEY';
+    case 'brave':
+      return 'BRAVE_API_KEY';
+    case 'claude':
+      return 'WEB_SEARCH_CLAUDE_API_KEY';
+    case 'minimax':
+      return 'WEB_SEARCH_MINIMAX_API_KEY';
+    case 'doubao':
+      return 'WEB_SEARCH_DOUBAO_API_KEY';
+    case 'searxng':
+      return 'SEARXNG_BASE_URL';
+    case 'tavily':
+    default:
+      return 'TAVILY_API_KEY';
+  }
 }

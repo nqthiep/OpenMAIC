@@ -19,6 +19,7 @@
  */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { beforeEach } from 'vitest';
 
 if (process.env.TEST_LOAD_LOCAL_ENV === '1') {
   const envPath = resolve(__dirname, '..', '.env.local');
@@ -44,3 +45,10 @@ if (process.env.TEST_LOAD_LOCAL_ENV === '1') {
 // The suite starts every test without one, as it did before the trial existed; the tests of the
 // trial itself set the variable.
 process.env.MEMBERSHIP_TRIAL_DAYS = '0';
+
+// The deployment's model configuration is loaded once per process and kept on
+// globalThis (lib/server/model-config/runtime.ts), which vi.resetModules does
+// not clear. Each test starts without it, so it is read from that test's env.
+beforeEach(() => {
+  delete (globalThis as Record<symbol, unknown>)[Symbol.for('openmaic.model-config.deployment')];
+});

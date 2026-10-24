@@ -29,8 +29,11 @@ import { LLM_STAGES } from '@/lib/server/model-routes';
 import { parsePublicAppOrigin } from '@/lib/server/public-origin';
 import fs from 'node:fs';
 import path from 'node:path';
-
-import { getServerProviders, resolveApiKey } from '@/lib/server/provider-config';
+import {
+  getServerProviders,
+  resolveApiKey,
+  isServerConfiguredProvider,
+} from '@/lib/server/provider-config';
 import { loadKeyRing, ProviderKeyError } from '@/lib/server/provider-store/crypto';
 import { currentSnapshot, isProviderSnapshotLoaded } from '@/lib/server/provider-store/snapshot';
 import type { ProviderId } from '@/lib/types/provider';

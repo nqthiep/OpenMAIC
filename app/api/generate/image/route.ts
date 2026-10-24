@@ -8,10 +8,9 @@ import { requireSpender } from '@/lib/server/authz/viewer';
  *
  * POST /api/generate/image
  *
- * Headers:
- *   x-image-provider: ImageProviderId (optional, server-configured default)
- *   x-api-key: string (optional, server fallback)
- *   x-base-url: string (optional, server fallback)
+ * The provider comes from the image slot of the model configuration. The
+ * headers below are deprecated and count only while the slot is unassigned:
+ *   x-image-provider, x-image-model, x-api-key, x-base-url
  *
  * Body: { prompt, negativePrompt?, width?, height?, aspectRatio?, style? }
  * Response: { success: boolean, result?: ImageGenerationResult, error?: string }
@@ -26,8 +25,14 @@ import {
   resolveImageApiKey,
   resolveImageBaseUrl,
   resolveImageModel,
-  resolveServerImageProviderId,
 } from '@/lib/server/provider-config';
+import {
+  mediaResolutionResponse,
+  RequestedProviderRefusedError,
+  resolveMediaSlot,
+  type MediaConnection,
+} from '@/lib/server/model-config/media';
+import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 import type { ImageProviderId, ImageGenerationOptions } from '@/lib/media/types';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError } from '@/lib/server/error-summary';
@@ -71,33 +76,23 @@ export async function POST(request: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing prompt');
     }
 
-    // The client may express no provider preference (empty header) — fall back
-    // to the first server-configured image provider, else fail loud.
-    const providerId = (request.headers.get('x-image-provider')?.trim() ||
-      resolveServerImageProviderId()) as ImageProviderId;
-    if (!providerId) {
-      return apiError('MISSING_PROVIDER', 400, 'No image provider configured');
+    // The image slot decides; the provider a request names (x-image-provider
+    // with its key and base URL, deprecated) counts only when it is unassigned.
+    let connection: MediaConnection;
+    try {
+      connection = await resolveMediaSlot('image', {
+        workspaceId: await requestWorkspaceId(request),
+        legacyRequest: () => requestedImageProvider(request),
+      });
+    } catch (error) {
+      const refused = mediaResolutionResponse(error, 'Image generation');
+      if (refused) return refused;
+      throw error;
     }
-    // Enforce server precedence: a force-disabled provider is off for everyone,
-    // regardless of any client key/selection — mirror the TTS contract (#665).
-    if (isServerProviderDisabled('image', providerId)) {
-      return apiError('PROVIDER_DISABLED', 403, 'This image provider is disabled by the server');
-    }
-    // Managed providers are admin-owned. Only an administrator's own key is used otherwise.
-    managed = isServerConfiguredProvider('image', providerId);
-    const keysAllowed = !managed && (await clientKeysAllowed(request.headers));
-    const clientApiKey = keysAllowed ? request.headers.get('x-api-key') || undefined : undefined;
-    const clientBaseUrl = keysAllowed ? request.headers.get('x-base-url') || undefined : undefined;
-    const clientModel = request.headers.get('x-image-model')?.trim() || undefined;
-
-    if (clientBaseUrl) {
-      const ssrfError = await validateClientBaseUrl(clientBaseUrl);
-      if (ssrfError) {
-        return apiError('INVALID_URL', 403, ssrfError);
-      }
-    }
-
-    const apiKey = resolveImageApiKey(providerId, clientApiKey);
+    const { providerId, apiKey, baseUrl } = connection as MediaConnection & {
+      providerId: ImageProviderId;
+    };
+    managed = connection.managed;
     const provider = IMAGE_PROVIDERS[providerId];
     if (provider?.requiresApiKey && !apiKey) {
       return apiError(
@@ -106,14 +101,15 @@ export async function POST(request: NextRequest) {
         `No API key configured for image provider: ${providerId}`,
       );
     }
-
-    const baseUrl = resolveImageBaseUrl(providerId, clientBaseUrl);
-
-    // A managed provider may pin its model list server-side
-    // (IMAGE_<PREFIX>_MODELS): an allowlisted client choice wins, otherwise the
-    // first pinned entry is the managed default; unmanaged providers use the
-    // client header directly.
-    const model = resolveImageModel(providerId, clientModel);
+    // A configured slot without a model uses the provider's first catalogue
+    // model. On the legacy default provider the request's model still applies
+    // through its allowlist, as before slots.
+    const model =
+      connection.origin === 'configuration'
+        ? (connection.modelId ?? provider?.models?.[0]?.id)
+        : connection.origin === 'default'
+          ? resolveImageModel(providerId, request.headers.get('x-image-model')?.trim() || undefined)
+          : connection.modelId;
     // Workflow-based providers (e.g. comfyui-image) have no model catalog and
     // need no model; everyone else must resolve one.
     if (!model && provider?.models && provider.models.length > 0) {
@@ -132,7 +128,7 @@ export async function POST(request: NextRequest) {
     );
 
     const result = await generateImage(
-      withMediaProviderFetch({ providerId, apiKey, baseUrl, model }, managed),
+      withMediaProviderFetch({ providerId, apiKey: apiKey ?? '', baseUrl, model }, managed),
       sizedOptions,
     );
 
@@ -163,4 +159,44 @@ export async function POST(request: NextRequest) {
     log.error(`Image generation failed: ${describeUnexpectedError(error)}`);
     return apiError('INTERNAL_ERROR', 500, 'Image generation failed');
   }
+}
+
+/**
+ * The provider the request names with x-image-provider (deprecated), with the
+ * key, base URL and model headers, or undefined when it names none.
+ */
+async function requestedImageProvider(request: NextRequest): Promise<MediaConnection | undefined> {
+  const providerId = request.headers.get('x-image-provider')?.trim() as ImageProviderId | undefined;
+  if (!providerId) return undefined;
+  // A force-disabled provider is off for everyone (#665).
+  if (isServerProviderDisabled('image', providerId)) {
+    throw new RequestedProviderRefusedError(
+      apiError('PROVIDER_DISABLED', 403, 'This image provider is disabled by the server'),
+    );
+  }
+  // Managed providers are admin-owned. Only an administrator's own key is used otherwise.
+  const managed = isServerConfiguredProvider('image', providerId);
+  const keysAllowed = !managed && (await clientKeysAllowed(request.headers));
+  const clientApiKey = keysAllowed ? request.headers.get('x-api-key') || undefined : undefined;
+  const clientBaseUrl = keysAllowed ? request.headers.get('x-base-url') || undefined : undefined;
+  if (clientBaseUrl) {
+    const ssrfError = await validateClientBaseUrl(clientBaseUrl);
+    if (ssrfError) throw new RequestedProviderRefusedError(apiError('INVALID_URL', 403, ssrfError));
+  }
+  // A managed provider may pin its model list server-side
+  // (IMAGE_<PREFIX>_MODELS): an allowlisted client choice wins, otherwise the
+  // first pinned entry is the managed default.
+  const model = resolveImageModel(
+    providerId,
+    request.headers.get('x-image-model')?.trim() || undefined,
+  );
+  return {
+    providerId,
+    apiKey: resolveImageApiKey(providerId, clientApiKey),
+    ...(model ? { modelId: model } : {}),
+    baseUrl: resolveImageBaseUrl(providerId, clientBaseUrl),
+    managed,
+    userEndpoint: Boolean(clientBaseUrl),
+    origin: 'request',
+  };
 }

@@ -135,7 +135,7 @@ describe('validateServerConfig — warning matrix', () => {
       defaultModel: 'openai:gpt-5.4-mini',
       routes: {
         'scene-content': 'openai:gpt-5.4',
-        'pbl-chat': { model: 'anthropic:claude-sonnet-4', thinking: { enabled: false } },
+        'chat-adapter': { model: 'anthropic:claude-sonnet-4', thinking: { enabled: false } },
       },
     });
     vi.stubEnv('ACCESS_CODE', 'a-long-shared-code');
@@ -205,7 +205,7 @@ describe('validateServerConfig — warning matrix', () => {
 
   it('does not throw on garbage config (warn-only)', async () => {
     useProviders({
-      routes: { 'scene-content': { model: 42 }, 'pbl-chat': ['x'] },
+      routes: { 'scene-content': { model: 42 }, 'chat-adapter': ['x'] },
       defaultModel: ':::::',
     });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
@@ -254,12 +254,18 @@ describe('validateServerConfig — warning matrix', () => {
       routes: {
         'scene-contnet': 'openai:gpt-5.4', // unknown stage
         'scene-content': 'anhtropic:claude-sonnet-4', // unknown provider
-        'pbl-chat': 'claude-sonnet-4', // bare id
+        'chat-adapter': 'claude-sonnet-4', // bare id
       },
     });
     const { validateServerConfig } = await import('@/lib/server/config-validation');
     validateServerConfig();
-    expect(warnSpy).toHaveBeenCalledTimes(3);
+    const messages = warnSpy.mock.calls.map((call: unknown[]) => String(call[0]));
+    // One warning for each problem: the unknown stage, the unknown provider and the bare id.
+    expect(messages.filter((message: string) => message.includes('Unknown stage'))).toHaveLength(1);
+    expect(messages.filter((message: string) => message.includes('Unknown provider'))).toHaveLength(
+      1,
+    );
+    expect(messages).toHaveLength(3);
   });
 
   describe('stored provider secrets', () => {
@@ -388,7 +394,7 @@ describe('parseModelString — request-derived strings never warn', () => {
       expect(warnBareModelIdDeprecation('gpt-5.5', 'DEFAULT_MODEL')).toBe(false);
       expect(warnSpy).toHaveBeenCalledTimes(1);
 
-      expect(warnBareModelIdDeprecation('gpt-4.1', 'MODEL_ROUTES stage "pbl-chat"')).toBe(true);
+      expect(warnBareModelIdDeprecation('gpt-4.1', 'DEFAULT_MODEL')).toBe(true);
       expect(warnSpy).toHaveBeenCalledTimes(2);
     } finally {
       warnSpy.mockRestore();

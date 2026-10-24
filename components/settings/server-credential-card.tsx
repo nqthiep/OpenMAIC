@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useI18n } from '@/lib/hooks/use-i18n';
-import { useSettingsStore } from '@/lib/store/settings';
+import { modelSettingsClient } from '@/lib/model-settings/client';
 import { cn } from '@/lib/utils';
 
 /** The Settings popup's section ids, and the kind of provider each one lists. */
@@ -138,8 +138,8 @@ export function ServerCredentialCard({
   const reload = useCallback(() => {
     cached = null;
     setVersion((n) => n + 1);
-    // The popup's own list of server-managed providers follows what was just saved.
-    void useSettingsStore.getState().fetchServerProviders();
+    // The popup's model-settings view follows what was just saved.
+    void modelSettingsClient.load({ fresh: true });
   }, []);
 
   const entry = useMemo(
@@ -199,8 +199,8 @@ export function StageRoutingCards({ onSaved }: { onSaved?: () => void } = {}) {
   const reload = useCallback(() => {
     cached = null;
     setVersion((n) => n + 1);
-    // The popup's own list of server-managed providers follows what was just saved.
-    void useSettingsStore.getState().fetchServerProviders();
+    // The popup's model-settings view follows what was just saved.
+    void modelSettingsClient.load({ fresh: true });
   }, []);
 
   const saved = (next: ProviderSettings) => {

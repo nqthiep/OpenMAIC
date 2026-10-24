@@ -20,6 +20,7 @@ import { isProviderKeyRequired } from '@/lib/ai/providers';
 import type { StatelessChatRequest, StatelessEvent } from '@/lib/types/chat';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
+import { requestWorkspaceId } from '@/lib/server/model-config/runtime';
 import { resolveModel } from '@/lib/server/resolve-model';
 import {
   describeUnexpectedError,
@@ -101,6 +102,7 @@ export async function POST(req: NextRequest) {
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
+      workspaceId: await requestWorkspaceId(req),
       userRoutes: keysAllowed ? parseUserStageRoutes(req.headers.get('x-model-routes')) : undefined,
       apiKey: keysAllowed ? body.apiKey : undefined,
       baseUrl: keysAllowed ? body.baseUrl : undefined,

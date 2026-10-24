@@ -4,6 +4,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
+import { useProviders } from '../fixtures/provider-snapshot';
 
 const UPSTREAM_ECHO = 'SECRET-ECHO-9d2b';
 
@@ -35,12 +36,13 @@ vi.mock('@/lib/server/usage-storage', () => ({
   recordGenerationUsage: () => undefined,
 }));
 
-vi.mock('@/lib/media/image-providers', () => ({
+vi.mock('@/lib/media/image-providers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/media/image-providers')>()),
   generateImage: mocks.generateImage,
-  IMAGE_PROVIDERS: [],
 }));
 
-vi.mock('@/lib/media/video-providers', () => ({
+vi.mock('@/lib/media/video-providers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/media/video-providers')>()),
   generateVideo: mocks.generateVideo,
   normalizeVideoOptions: mocks.normalizeVideoOptions,
 }));
@@ -54,24 +56,9 @@ vi.mock('@/lib/audio/asr-providers', () => ({
   transcribeAudio: mocks.transcribeAudio,
 }));
 
-vi.mock('@/lib/server/provider-config', () => ({
-  isServerConfiguredProvider: () => false,
-  isServerProviderDisabled: () => false,
-  resolveImageApiKey: () => 'image-key',
-  resolveImageBaseUrl: () => undefined,
-  resolveImageModel: () => 'image-model',
-  resolveServerImageProviderId: () => 'openai-image',
-  resolveVideoApiKey: () => 'video-key',
-  resolveVideoBaseUrl: () => undefined,
-  resolveVideoModel: () => 'video-model',
-  resolveServerVideoProviderId: () => 'minimax-video',
-  resolveWebSearchApiKey: () => 'search-key',
-  resolveWebSearchModel: () => undefined,
-  resolveASRApiKey: () => 'asr-key',
-  resolveASRBaseUrl: () => undefined,
-  resolveASRModel: (_providerId: string, modelId?: string) => modelId ?? 'asr-model',
-  resolveServerASRProviderId: () => 'assemblyai',
-  resolveServerWebSearchProviderId: () => 'tavily',
+vi.mock('@/lib/server/model-config/runtime', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/model-config/runtime')>()),
+  requestWorkspaceId: async () => null,
 }));
 
 vi.mock('@/lib/server/image-sizing', () => ({
@@ -82,10 +69,6 @@ vi.mock('@/lib/server/ssrf-guard', () => ({
   validateUrlForSSRF: async () => null,
   findUnsafeNetworkTargetError: () => undefined,
   validatePublicUrlForSSRF: async () => null,
-}));
-
-vi.mock('@/lib/server/web-search-config', () => ({
-  resolveWebSearchRouteBaseUrl: () => undefined,
 }));
 
 function jsonRequest(path: string, body: Record<string, unknown>): NextRequest {
@@ -119,6 +102,13 @@ function expectSummaryOnly() {
 describe('provider failure server logs carry a summary, not upstream text', () => {
   beforeEach(() => {
     vi.resetModules();
+    // The server's own providers: the operator's keys serve the request.
+    useProviders({
+      image: { 'openai-image': { apiKey: 'image-key', models: ['image-model'] } },
+      video: { 'minimax-video': { apiKey: 'video-key', models: ['video-model'] } },
+      webSearch: { tavily: { apiKey: 'search-key' } },
+      asr: { 'openai-whisper': { apiKey: 'asr-key', models: ['asr-model'] } },
+    });
     logError.mockClear();
     for (const mock of Object.values(mocks)) mock.mockReset?.();
   });

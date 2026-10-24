@@ -69,8 +69,12 @@ import type {
   UserRequirements,
 } from '@/lib/types/generation';
 import { useSettingsStore } from '@/lib/store/settings';
-import type { ProviderId } from '@/lib/ai/providers';
-import { hasUsableLLMProvider } from '@/lib/store/settings-validation';
+import {
+  courseGenerationUsable,
+  requireModelCapabilities,
+} from '@/lib/model-settings/capabilities';
+import { withResearchDecision } from '@/lib/generation/research-decision';
+import { useModelCapabilities } from '@/lib/model-settings/use-model-settings';
 import { useUserProfileStore, AVATAR_OPTIONS } from '@/lib/store/user-profile';
 import {
   StageListItem,
@@ -109,14 +113,7 @@ import {
 import { useImportPptx } from '@/lib/import/use-import-pptx';
 import { InteractiveModeButton } from '@/components/generation/interactive-mode-button';
 import { ProBadge } from '@/components/workbench/ProBadge';
-import {
-  canChooseProvider,
-  estimateTier,
-  imageProviderWorks,
-  pickModel,
-  TEMPLATE_BLANK,
-  usableModels,
-} from '@/lib/home/simple-composer';
+import { canChooseProvider, TEMPLATE_BLANK } from '@/lib/home/simple-composer';
 import { arrivedByProSwap, startProSwap } from '@/lib/workbench/pro-swap';
 import {
   readLastWorkspaceSessionId,
@@ -207,11 +204,10 @@ function HomePage() {
   const { cachedValue: cachedRequirement, updateCache: updateRequirementCache } =
     useDraftCache<string>({ key: 'requirementDraft' });
 
-  // A usable LLM provider exists ⇒ a concrete model is always selected (#580
-  // invariant). Gate generation on this single condition (state A vs B)
-  // instead of inspecting modelId directly.
-  const providersConfig = useSettingsStore((s) => s.providersConfig);
-  const hasUsableProvider = hasUsableLLMProvider(providersConfig);
+  // Generation needs the course slots it resolves (outline, content, actions)
+  // to name a model, whether or not the llm root does (the server's view;
+  // while it cannot be read the server has the last word).
+  const hasUsableProvider = courseGenerationUsable(useModelCapabilities());
   const [recentOpen, setRecentOpen] = useState(true);
   const persistRecentOpen = (next: boolean) => {
     setRecentOpen(next);
@@ -654,50 +650,15 @@ function HomePage() {
 
     setError(null);
 
-    // The material list and the extractor provider config are frozen for the
-    // duration of prep: `preparingGenerate` makes add/remove inert and
-    // disables the toolbar affordances (including the extractor Select and the
-    // web-search toggle), so neither can change under the session build below.
-    // Capture both at click time and build the session from this snapshot,
-    // never from live form state or live store state.
+    // The material list is frozen for the duration of prep: `preparingGenerate`
+    // makes add/remove inert, so it cannot change under the session build
+    // below. Capture it at click time and build the session from this
+    // snapshot, never from live form state. (The extractor is the workspace's
+    // document slot, resolved on the server.)
     const frozenMaterials = [...form.courseMaterials].sort((a, b) => a.order - b.order);
-    const settingsSnapshot = useSettingsStore.getState();
-    const frozenPdfProviderId = settingsSnapshot.pdfProviderId;
-    const frozenPdfProviderConfig = settingsSnapshot.pdfProvidersConfig?.[
-      settingsSnapshot.pdfProviderId
-    ]
-      ? {
-          apiKey: settingsSnapshot.pdfProvidersConfig[settingsSnapshot.pdfProviderId].apiKey,
-          baseUrl: settingsSnapshot.pdfProvidersConfig[settingsSnapshot.pdfProviderId].baseUrl,
-          accessKeyId:
-            settingsSnapshot.pdfProvidersConfig[settingsSnapshot.pdfProviderId].accessKeyId,
-          accessKeySecret:
-            settingsSnapshot.pdfProvidersConfig[settingsSnapshot.pdfProviderId].accessKeySecret,
-        }
-      : undefined;
-
     // Flip the generating UI state before material bytes are copied locally.
     setPreparingGenerate(true);
     try {
-      // The plain composer makes the choices the learner no longer sees: a model sized to the
-      // request, and illustrations when the image provider works. (Interactive mode is forced on
-      // in the requirements below.)
-      if (!advanced) {
-        const store = useSettingsStore.getState();
-        const pick = pickModel(
-          estimateTier(form.requirement, form.courseMaterials.length > 0),
-          usableModels(store.providersConfig),
-          { providerId: store.providerId, modelId: store.modelId },
-        );
-        if (pick.providerId !== store.providerId || pick.modelId !== store.modelId) {
-          store.setModel(pick.providerId as ProviderId, pick.modelId);
-        }
-        const imageConfig = store.imageProvidersConfig?.[store.imageProviderId];
-        store.setImageGenerationEnabled(
-          await imageProviderWorks(store.imageProviderId, store.imageModelId, imageConfig),
-        );
-      }
-
       const userProfile = useUserProfileStore.getState();
       const requirements: UserRequirements = {
         requirement: form.requirement,
@@ -707,24 +668,23 @@ function HomePage() {
           userProfile.learningSubject,
           userProfile.learningLevel,
         ),
-        // Course-level web search lives in settings (课程模型配置 → 联网调研)
-        webSearch: useSettingsStore.getState().webSearchEnabled || undefined,
+        // Research follows the workspace's webSearch slot; decided below from
+        // a successful read (and again when generation starts).
         interactiveMode: form.vocationalTestMode || !advanced ? true : form.interactiveMode,
         ...(form.vocationalTestMode ? { taskEngineMode: true } : {}),
       };
 
+      // Nothing is saved from settings that could not be read.
+      const capabilities = await requireModelCapabilities();
+      if (!capabilities) throw new Error(t('generation.modelSettingsUnavailable'));
+      Object.assign(
+        requirements,
+        withResearchDecision({ requirements }, capabilities).requirements,
+      );
+
       let documentSources: SessionDocumentSource[] | undefined;
-      let pdfProviderId: string | undefined;
-      let pdfProviderConfig:
-        | { apiKey?: string; baseUrl?: string; accessKeyId?: string; accessKeySecret?: string }
-        | undefined;
 
       if (frozenMaterials.length > 0) {
-        // The session is built from the click-time snapshot (frozen above),
-        // never from live store state.
-        pdfProviderId = frozenPdfProviderId;
-        pdfProviderConfig = frozenPdfProviderConfig;
-
         const storedDocumentKeys: string[] = [];
         try {
           documentSources = [];
@@ -742,7 +702,6 @@ function HomePage() {
               }),
               order: index + 1,
               storageKey,
-              providerId: pdfProviderId,
             });
           }
         } catch (error) {
@@ -762,8 +721,6 @@ function HomePage() {
         pdfStorageKey: documentSources?.[0]?.storageKey,
         pdfFileName: documentSources?.[0]?.name,
         documentMimeType: documentSources?.[0]?.mimeType,
-        pdfProviderId,
-        pdfProviderConfig,
         sceneOutlines: null,
         currentStep: 'generating' as const,
         ...(subjectFolderId ? { folderId: subjectFolderId } : {}),

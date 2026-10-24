@@ -314,7 +314,18 @@
     "interactiveModeHint": "Ative o modo interativo para conteúdos mais práticos",
     "interactiveModeLabel": "Modo Interativo",
     "advanced": "Avançado",
-    "advancedHint": "Opções avançadas: modelo, busca na web, imagens/vídeo, modo interativo, agentes. Por padrão, o KHAITAM escolhe um modelo adequado ao seu pedido e acrescenta ilustrações e atividades interativas."
+    "advancedHint": "Opções avançadas: modelo, busca na web, imagens/vídeo, modo interativo, agentes. Por padrão, o KHAITAM escolhe um modelo adequado ao seu pedido e acrescenta ilustrações e atividades interativas.",
+    "modelChangeFailed": "Não foi possível trocar o modelo: {{message}}",
+    "modelLockedHint": "O modelo usado pelos cursos, definido por este servidor",
+    "pickModel": "Escolha um modelo",
+    "defaultModel": "Padrão",
+    "defaultModelNote": "Altera o modelo padrão; etapas configuradas separadamente mantêm o próprio.",
+    "stagesSetSeparately": "{{count}} etapas configuradas separadamente",
+    "stagesSetSeparately_one": "{{count}} etapa configurada separadamente",
+    "stagesSetSeparately_other": "{{count}} etapas configuradas separadamente",
+    "stagesSetSeparatelyHint": "Etapas com modelo próprio",
+    "perStageSetup": "Configuração por etapa",
+    "perStageSetupHint": "Cada etapa do curso tem seu próprio modelo"
   },
   "export": {
     "pptx": "Exportar PPTX",
@@ -1335,14 +1346,15 @@
   },
   "upload": {
     "pdfSizeLimit": "Suporta arquivos PDF de até 50 MB",
-    "courseMaterialSizeLimit": "Documentos, apresentações, planilhas, imagens e texto — até 50 MB (formatos aceitos dependem do extrator selecionado)",
     "generateFailed": "Falha ao gerar a sala, tente novamente",
     "requirementPlaceholder": "Conte-me o que você quer aprender, por exemplo:\n\"Me ensine Python do zero em 30 minutos\"\n\"Explique a Transformada de Fourier no quadro\"\n\"Como jogar o jogo de tabuleiro Avalon\"",
     "requirementRequired": "Por favor, descreva os objetivos do curso",
     "fileTooLarge": "Arquivo muito grande. Selecione um arquivo com menos de 50 MB",
     "courseMaterialCountLimit": "Você pode enviar até 5 arquivos de material do curso",
     "courseMaterialTotalSizeLimit": "O tamanho total dos materiais deve ser menor que 150 MB",
-    "unsupportedCourseMaterial": "O extrator atual não suporta este formato. Troque o extrator ou escolha outro arquivo."
+    "unsupportedCourseMaterial": "{{parser}} não suporta este tipo de arquivo. Formatos suportados: {{formats}}",
+    "courseMaterialFormats": "Suporta {{formats}} — até {{size}} MB por arquivo",
+    "formatListSeparator": ", "
   },
   "generation": {
     "pdfLoadFailed": "Falha ao carregar o PDF, tente novamente",
@@ -1457,7 +1469,8 @@
     "failedHint": "Não foi possível criar o curso desta vez. Volte e tente de novo. Se continuar falhando, avise um administrador.",
     "leaveTitle": "Parar a criação do curso?",
     "leaveBody": "Se voltar à página inicial agora, a criação para e você terá que recomeçar.",
-    "leaveStay": "Ficar"
+    "leaveStay": "Ficar",
+    "modelSettingsUnavailable": "Não foi possível ler as configurações de modelos, então a geração parou. Tente novamente."
   },
   "settings": {
     "title": "Configurações",
@@ -1476,7 +1489,6 @@
     "apiBaseUrl": "URL do Endpoint da API",
     "apiBaseUrlDesc": "Configure a URL do endpoint da sua API",
     "apiKeyRequired": "A chave de API não pode ficar vazia",
-    "model": "Configuração do Modelo",
     "modelDesc": "Configure os modelos de IA",
     "modelPlaceholder": "Digite ou selecione o nome do modelo",
     "ttsModel": "Modelo TTS",
@@ -1533,7 +1545,6 @@
       "default-6": "Pensa profundamente e explora a essência dos temas"
     },
     "close": "Fechar",
-    "save": "Salvar",
     "providers": "LLM",
     "addProviderDescription": "Adicione provedores de modelo personalizados para ampliar os modelos de IA disponíveis",
     "providerNames": {
@@ -1564,17 +1575,9 @@
       "claude": "Claude",
       "searxng": "SearXNG"
     },
-    "providerTypes": {
-      "openai": "Protocolo OpenAI",
-      "azure": "Azure OpenAI",
-      "anthropic": "Protocolo Claude",
-      "google": "Protocolo Gemini",
-      "bedrock": "Amazon Bedrock"
-    },
     "modelCount": "modelos",
     "modelSingular": "modelo",
     "defaultModel": "Modelo Padrão",
-    "webSearch": "Busca na Web",
     "mcp": "MCP",
     "knowledgeBase": "Base de Conhecimento",
     "documentParser": "Analisador de Documentos",
@@ -1582,7 +1585,6 @@
     "keyboardShortcuts": "Atalhos",
     "generalSettings": "Geral",
     "systemSettings": "Sistema",
-    "addProvider": "Adicionar",
     "importFromClipboard": "Importar da Área de Transferência",
     "apiSecret": "Chave de API",
     "apiHost": "URL Base",
@@ -1605,9 +1607,7 @@
     "comfyuiFolderHintPrefix": "Coloque os arquivos JSON de fluxo de trabalho na sua pasta",
     "comfyuiFolderHintMiddle": "O nome do arquivo se torna o nome exibido — ex.",
     "comfyuiLoadError": "Falha ao carregar fluxos de trabalho: {error}",
-    "addModel": "Adicionar",
     "reset": "Restaurar",
-    "fetch": "Buscar",
     "connectionSuccess": "Conexão bem-sucedida",
     "connectionFailed": "Falha na conexão",
     "capabilities": {
@@ -1615,47 +1615,25 @@
       "tools": "Ferramentas",
       "streaming": "Streaming"
     },
-    "contextWindow": "Contexto",
     "contextShort": "ctx",
-    "outputWindow": "Saída",
     "addProviderButton": "Adicionar",
     "addProviderDialog": "Adicionar Provedor de Modelo",
     "providerName": "Nome",
     "providerNamePlaceholder": "ex.: Meu Proxy OpenAI",
-    "providerNameRequired": "Digite o nome do provedor",
     "providerApiMode": "Modo da API",
     "apiModeOpenAI": "Protocolo OpenAI",
     "apiModeAnthropic": "Protocolo Claude",
     "apiModeGoogle": "Protocolo Gemini",
     "defaultBaseUrl": "URL Base Padrão",
-    "providerIcon": "URL do Ícone do Provedor",
-    "requiresApiKey": "Requer Chave de API",
     "deleteProvider": "Excluir Provedor",
     "deleteProviderConfirm": "Tem certeza que deseja excluir este provedor?",
-    "addCustomTTSProvider": "Adicionar Provedor TTS Personalizado",
-    "addCustomASRProvider": "Adicionar Provedor ASR Personalizado",
-    "addCustomAudioProviderDescription": "Adicione um provedor de áudio personalizado compatível com OpenAI",
-    "customVoices": "Vozes",
-    "voiceIdPlaceholder": "ID da Voz (ex.: alloy)",
-    "voiceNamePlaceholder": "Nome de Exibição",
-    "addVoice": "Adicionar",
-    "modelNamePlaceholder": "Opcional",
-    "defaultModelHint": "Nome do modelo enviado nas requisições à API (ex.: kokoro, tts-1)",
-    "noVoicesAdded": "Nenhuma voz adicionada ainda. Adicione vozes abaixo para seleção por agente.",
-    "noModelsAdded": "Nenhum modelo adicionado ainda. Adicione modelos abaixo para habilitar a seleção.",
-    "noModelsWarning": "Adicione pelo menos um modelo abaixo antes de usar este provedor.",
     "asrNoTranscription": "Nenhuma transcrição gerada. Tente falar mais alto ou por mais tempo.",
-    "cannotDeleteBuiltIn": "Não é possível excluir provedor nativo",
     "resetToDefault": "Restaurar Padrão",
     "resetToDefaultDescription": "Restaure a lista de modelos para a configuração padrão (chave de API e URL base serão preservadas)",
     "resetConfirmDescription": "Isto removerá todos os modelos personalizados e restaurará a lista padrão. Chave de API e URL base serão preservadas.",
     "confirmReset": "Confirmar Restauração",
-    "resetSuccess": "Restauração para padrão bem-sucedida",
-    "saveSuccess": "Configurações salvas",
-    "saveFailed": "Falha ao salvar configurações, tente novamente",
     "cannotDeleteBuiltInModel": "Não é possível excluir modelo nativo",
     "cannotEditBuiltInModel": "Não é possível editar modelo nativo",
-    "modelIdRequired": "Digite o ID do modelo",
     "noModelsAvailable": "Nenhum modelo disponível para teste",
     "providerMetadata": "Metadados do Provedor",
     "editModel": "Editar Modelo",
@@ -1665,13 +1643,6 @@
     "addNewModelDescription": "Adicionar uma nova configuração de modelo",
     "modelId": "ID do Modelo",
     "modelIdPlaceholder": "ex.: gpt-4o",
-    "modelName": "Nome de Exibição",
-    "modelCapabilities": "Capacidades",
-    "advancedSettings": "Configurações Avançadas",
-    "contextWindowLabel": "Janela de Contexto",
-    "contextWindowPlaceholder": "ex.: 128000",
-    "outputWindowLabel": "Tokens Máx. de Saída",
-    "outputWindowPlaceholder": "ex.: 4096",
     "testModel": "Testar Modelo",
     "deleteModel": "Excluir",
     "cancelEdit": "Cancelar",
@@ -1712,7 +1683,6 @@
     "asrBaseUrl": "URL Base",
     "asrApiKey": "Chave de API",
     "enterApiKey": "Digite a chave de API",
-    "enterCustomBaseUrl": "Digite uma URL base personalizada",
     "browserNativeNote": "O ASR nativo do navegador não exige configuração e é totalmente gratuito",
     "providerOpenAITTS": "OpenAI TTS (gpt-4o-mini-tts)",
     "providerAzureTTS": "Azure TTS",
@@ -1724,9 +1694,6 @@
     "providerMiniMaxTTS": "MiniMax TTS",
     "providerLemonadeTTS": "Lemonade TTS (Local)",
     "providerBrowserNativeTTS": "TTS Nativo do Navegador",
-    "voxcpmBackend": "Backend",
-    "voxcpmBaseUrlPending": "Digite uma URL base para gerar a URL da requisição",
-    "voxcpmAutoVoiceNoPreview": "A Voz Automática é gerada a partir do contexto do agente e não pode ser pré-visualizada diretamente",
     "voxcpmVoicesTitle": "Vozes VoxCPM",
     "voxcpmVoicesDescription": "Salvas neste navegador e adicionadas ao conjunto de vozes da Barra de Agentes.",
     "voxcpmAutoVoicePrivacyNote": "A Voz Automática envia a persona do agente ao seu backend VoxCPM configurado como prompt de voz.",
@@ -1756,7 +1723,6 @@
     "voxcpmRecordedVoiceName": "Voz Gravada",
     "voxcpmRecordingFailed": "Falha na conversão da gravação",
     "voxcpmRecordingStartFailed": "Não foi possível iniciar a gravação",
-    "voxcpmBaseUrlRequired": "Digite uma URL base do VoxCPM primeiro",
     "voxcpmPreviewFailed": "Falha na pré-visualização",
     "voxcpmVoiceSaved": "Voz VoxCPM salva",
     "voxcpmVoiceSaveFailed": "Falha ao salvar a voz",
@@ -1791,13 +1757,11 @@
     "testASR": "Testar ASR",
     "testSuccess": "Teste bem-sucedido",
     "testFailed": "Teste falhou",
-    "ttsTestText": "Texto de Teste TTS",
     "ttsTestSuccess": "Teste TTS bem-sucedido, áudio reproduzido",
     "ttsTestFailed": "Falha no teste TTS",
     "asrTestSuccess": "Reconhecimento de fala bem-sucedido",
     "asrTestFailed": "Falha no reconhecimento de fala",
     "asrProcessing": "Processando...",
-    "asrResult": "Resultado do Reconhecimento",
     "asrNotSupported": "O navegador não suporta a API de Reconhecimento de Fala",
     "browserTTSNotSupported": "O navegador não suporta a API de Síntese de Fala",
     "browserTTSNoVoices": "O navegador atual não tem vozes TTS disponíveis",
@@ -2107,18 +2071,14 @@
     "claudeSearchModelHint": "O modelo Claude que realiza as buscas na web e resume os resultados.",
     "webSearchApiKeyOptional": "A chave de API é opcional. Sem ela, será usada extração pública de páginas como alternativa.",
     "searxngServerOnlyNotice": "O SearXNG deve ser configurado no servidor. Defina a variável de ambiente SEARXNG_BASE_URL (ou a seção web-search em server-providers.yml). URLs de instância fornecidas pelo cliente não são aceitas.",
-    "baiduSubSources": "Fontes do Baidu",
-    "baiduSubSourcesDescription": "Escolha pelo menos uma fonte do Baidu para consultar.",
     "baiduSubSourceWeb": "Busca Web",
     "baiduSubSourceWebDescription": "Páginas web gerais do Baidu AI Search.",
     "baiduSubSourceBaike": "Baidu Baike",
     "baiduSubSourceBaikeDescription": "Verbetes de enciclopédia do Baidu Baike.",
     "baiduSubSourceScholar": "Baidu Scholar",
     "baiduSubSourceScholarDescription": "Artigos acadêmicos do Baidu Scholar.",
-    "viewDocs": "Documentação da API",
     "webSearchBaseUrl": "URL Base",
     "webSearchServerConfigured": "Chave de API de busca configurada no servidor",
-    "optional": "Opcional",
     "selectProvider": "Selecionar provedor",
     "customProvider": "Personalizado",
     "presetPickHint": "Escolher um provedor preenche automaticamente a URL base e o protocolo; insira sua chave e clique em \"Buscar modelos\". Não está na lista? Use \"Personalizado\".",
@@ -2163,13 +2123,12 @@
       "desc": "Escolha o provedor do plano de tokens e insira a chave — todas as modalidades compatíveis (LLM/imagem/vídeo/fala/pesquisa na web) são configuradas automaticamente.",
       "selectPlan": "Selecionar provedor",
       "apiKey": "Chave de API",
-      "enable": "Ativar",
       "updateKey": "Atualizar chave",
       "modelsCount": "{{n}} modelos",
       "capabilities": "Recursos oferecidos",
       "offeredNote": "Modelos oferecidos por este plano. Escolha os que deseja na barra de geração — a disponibilidade depende do nível do seu plano, e modelos não compatíveis darão erro na geração.",
       "statusConnected": "Conectado",
-      "keyStorage": "A chave é salva nas configurações locais do navegador e usada apenas para requisições a este serviço.",
+      "keyStorage": "A chave fica criptografada no servidor e não é exibida novamente. Ao conectar, os modelos recomendados deste plano são aplicados às etapas do curso; se isso substituir modelos que você escolheu, você será consultado antes.",
       "saveKey": "Salvar e ativar",
       "cancelKeyUpdate": "Cancelar atualização",
       "manageAccount": "Gerenciar conta",
@@ -2190,9 +2149,10 @@
       "stageSlide": "Slides",
       "stageInteractive": "Interativo",
       "planNoteEditable": "Esta é a configuração padrão; o modelo de cada nó pode ser alterado na configuração de modelos do curso.",
-      "statusDisabled": "Conectado (desligado)",
-      "enableThisPlan": "Habilitar este plano",
-      "enableThisPlanHint": "Desativado, este plano não aparece mais na configuração de modelos do curso."
+      "applyTitle": "Usar a configuração recomendada deste plano?",
+      "applyBody": "{{name}} recomenda seus próprios modelos para estas etapas, que hoje usam modelos escolhidos por você:",
+      "applyKeep": "Manter minha configuração",
+      "applyRecommended": "Usar a configuração recomendada"
     },
     "skills": {
       "nav": "Skills",
@@ -2222,63 +2182,8 @@
       "deleteFailed": "Não foi possível excluir o skill. Tente novamente."
     },
     "ttsBrowserNativeTimelineNotice": "O TTS nativo do navegador não suporta os recursos de áudio da linha do tempo do editor (pré-visualizar, regenerar e narração em lote). Mude para um provedor de TTS gerenciado para gerar e gerenciar o áudio de cada linha.",
-    "alidocmindAccessKeyId": "AccessKey ID",
-    "alidocmindAccessKeySecret": "AccessKey Secret",
     "courseModels": {
-      "nav": "Configuração de modelos do curso",
-      "mainModel": "Modelo principal",
-      "mainModelHint": "As etapas que seguem o modelo principal compartilham este modelo; clique em um cartão para personalizar uma etapa",
-      "mainModelTooltip": "Todas as etapas que seguem o modelo principal usam este modelo. Clique em um cartão do pipeline para fixar um modelo específico para aquela etapa (uma rota de etapa em nível de usuário, abaixo do MODEL_ROUTES do operador). Subetapas mais finas ficam no inspetor do cartão.",
-      "noProviderHint": "Nenhum modelo de linguagem configurado — configure um em Serviços de modelos",
-      "followMainline": "Seguir o principal",
-      "followParent": "Seguir o superior",
-      "restoreFollow": "Restaurar seguimento do principal",
-      "stopped": "Desativado",
-      "loop": "laço",
-      "parallel": "em paralelo",
-      "visionSupported": "Suporta visão",
-      "modelSource": "Origem do modelo",
-      "mainlineUnset": "Não especificado",
-      "pickModel": "Escolher modelo",
-      "pickProvider": "Escolher serviço",
-      "optionInvalid": "Indisponível",
-      "subStagesTitle": "Subetapas",
-      "subStages": {
-        "title": "Geração de título",
-        "slide": "Slides",
-        "quiz": "Quiz",
-        "interactive": "Roteiro interativo",
-        "pbl": "Cenário PBL"
-      },
-      "servicesAndModels": "Serviço e modelo",
-      "searchService": "Serviço de busca",
-      "parseService": "Serviço de análise",
-      "asrTranscribe": "Transcrição de fala",
-      "aiIllustration": "Ilustrações com IA",
-      "aiVideo": "Vídeo com IA",
-      "stations": {
-        "docParse": "Análise de documentos",
-        "webResearch": "Pesquisa na web",
-        "outline": "Planejamento do roteiro",
-        "agents": "Perfis de agentes",
-        "sceneContent": "Conteúdo da cena",
-        "sceneActions": "Ações da cena",
-        "tts": "Síntese de voz",
-        "media": "Geração de mídia",
-        "interaction": "Interação em sala",
-        "desc": {
-          "doc-parse": "Os materiais do curso enviados (documentos, slides, áudio/vídeo) são convertidos em texto; áudio e vídeo são transcritos automaticamente.",
-          "web-research": "Pesquisa na web por material complementar de acordo com a solicitação do curso; as consultas são reescritas por um LLM leve.",
-          "outline": "Entende a solicitação e os materiais para produzir o título do curso e o roteiro por cena (revisável por humanos).",
-          "agents": "Gera os perfis dos agentes professor e aluno (personalidade, avatar e voz).",
-          "scene-content": "Gera slides, quizzes, interações e conteúdo PBL por cena — a etapa LLM mais pesada do fluxo.",
-          "scene-actions": "Completa a narração e as ações didáticas de cada cena para alimentar a síntese de voz e a execução em sala.",
-          "tts": "Sintetiza a narração nas vozes do professor/aluno (por cena, em série).",
-          "media": "Preenche os placeholders de imagem/vídeo do conteúdo gerado, em paralelo com o laço por cena.",
-          "interaction": "O runtime da sala após a geração: chat multiagente, runtime de PBL e correção de quizzes."
-        }
-      },
-      "mediaEnableNeedsSetup": "Configure primeiro uma chave de API em Serviços de modelos ou ative um Token Plan."
+      "nav": "Configuração de modelos do curso"
     },
     "modelServices": {
       "nav": "Serviços de modelo",
@@ -2298,13 +2203,210 @@
       "configuredHint": "Configurado e disponível para a geração de cursos",
       "notConfiguredHint": "Ainda não configurado — preencha as credenciais para habilitar"
     },
-    "enableThisProvider": "Habilitar este provedor",
-    "enableThisProviderHint": "Desativado, este provedor não aparece mais na configuração de modelos do curso.",
     "more": "Mais ações",
     "providerLinks": {
       "getApiKey": "Obter chave de API",
       "domestic": "China continental",
       "international": "Internacional"
+    },
+    "providerGoogleTTS": "Google Gemini TTS",
+    "ttsSpeedUnsupported": "This provider does not support speed adjustment.",
+    "serverConfig": {
+      "loading": "Carregando as configurações de modelos…",
+      "loadFailed": "Não foi possível carregar as configurações de modelos: {{message}}",
+      "retry": "Tentar novamente",
+      "unavailableTitle": "Os modelos são gerenciados pelo servidor",
+      "unavailableBody": "Este servidor não guarda configurações de modelos por espaço de trabalho; ele usa os modelos configurados pelo administrador.",
+      "conflict": "As configurações foram alteradas em outro lugar e recarregadas. Verifique-as e tente novamente.",
+      "lockedNow": "Agora o servidor define isto, então não foi alterado.",
+      "unconfirmed": "A resposta do servidor se perdeu, então as configurações foram recarregadas. Verifique se a alteração foi aplicada.",
+      "serverOnly": "Somente a configuração do servidor (openmaic.yml) pode configurar este serviço. Fale com o administrador do servidor.",
+      "serverOnlyPolicy": "Este servidor não permite que espaços de trabalho adicionem seus próprios serviços. Fale com o administrador do servidor.",
+      "endpointServerOnly": "Este serviço é acessado no próprio endpoint; somente a configuração do servidor pode indicar outro.",
+      "endpointChatOnly": "Com endpoint próprio, este serviço é usado apenas para modelos de linguagem.",
+      "keyStored": "Há uma chave salva no servidor ({{mask}}).",
+      "keyStoredPlaceholder": "Chave salva {{mask}} — digite uma nova para substituí-la",
+      "keyUnreadable": "A chave salva não pode mais ser lida. Digite-a novamente.",
+      "removeKey": "Remover chave",
+      "showKey": "Mostrar chave",
+      "hideKey": "Ocultar chave",
+      "inUse": "Em uso",
+      "modelFromCatalogue": "O nome, as capacidades e a janela de contexto do modelo vêm do catálogo integrado.",
+      "modelWhenInUse": "Usado quando este serviço é selecionado na configuração de modelos do curso.",
+      "planServer": "Configurado pelo servidor",
+      "providerIdHint": "Salvo como \"{{id}}\"",
+      "openaiCompatible": "Compatível com OpenAI",
+      "notNarration": "Este serviço não é a narração do espaço de trabalho.",
+      "useForNarration": "Usar para a narração",
+      "fetchNotSaved": "Os modelos foram encontrados, mas não puderam ser salvos. Tente novamente.",
+      "regionalEndpointHint": "O Azure Speech aceita apenas o endpoint oficial da região do seu recurso: {{template}}."
+    },
+    "modelSettings": {
+      "card": {
+        "edit": "{{name}}: {{value}}. Alterar",
+        "toggle": "Ativar ou desativar {{name}}",
+        "providerDefault": "Modelo padrão",
+        "off": "Desativado",
+        "unassigned": "Não definido",
+        "invalid": "Configuração inválida",
+        "locked": "Definido pelo servidor",
+        "lockedHint": "Definido pela configuração do servidor. Não pode ser alterado aqui.",
+        "followers": "Etapas que o seguem: {{count}}",
+        "childrenFollow": "Tipos de página · todos seguem",
+        "childrenOwn": "Tipos de página · {{count}} próprios"
+      },
+      "legend": {
+        "label": "Legenda",
+        "follows": "Segue o superior",
+        "own": "Configuração própria",
+        "locked": "Definido pelo servidor"
+      },
+      "map": {
+        "label": "Mapa de modelos do curso. Arraste ou use as setas para mover; use os botões de zoom para ampliar ou reduzir.",
+        "outside": "Fora do fluxo",
+        "standalone": "Independente",
+        "perPage": "Página por página",
+        "zoom": "Zoom",
+        "zoomIn": "Ampliar (+)",
+        "zoomOut": "Reduzir (-)",
+        "fit": "Ajustar à tela (0)",
+        "reset": "Voltar a 100%",
+        "hint": "Arraste para mover · ⌘/Ctrl + rolagem para zoom · clique duplo no vazio para ajustar"
+      },
+      "picker": {
+        "follow": "Seguir {{name}}",
+        "providers": "Provedores",
+        "providerDefault": "Modelo padrão",
+        "modelId": "ID do modelo",
+        "use": "Usar",
+        "off": "Desativado",
+        "offHint": "Esta etapa não é executada",
+        "noProviders": "Nenhum serviço oferece isto ainda. Configure um em Serviços de modelos.",
+        "fallback": "Reserva",
+        "noFallback": "Nenhum",
+        "manageProviders": "Gerenciar em Serviços de modelos",
+        "conflict": "As configurações mudaram em outro lugar e foram recarregadas. Confira e tente novamente.",
+        "lockedNow": "O servidor agora define isto, então nada foi alterado.",
+        "clear": "Remover configuração própria",
+        "clearHint": "Usar a configuração do servidor, se houver",
+        "unconfirmed": "A resposta do servidor se perdeu, então as configurações foram recarregadas. Verifique se a alteração foi aplicada.",
+        "thinking": "Raciocínio"
+      },
+      "slots": {
+        "llm": {
+          "name": "Modelo padrão",
+          "desc": "O modelo de linguagem usado por toda etapa sem configuração própria."
+        },
+        "courseResearch": {
+          "name": "Consultas de busca",
+          "desc": "Transforma o tema do curso em consultas de busca na web."
+        },
+        "courseOutline": {
+          "name": "Roteiro",
+          "desc": "Planeja as páginas do curso."
+        },
+        "courseAgents": {
+          "name": "Papéis",
+          "desc": "Cria os professores e colegas da sala de aula."
+        },
+        "courseContent": {
+          "name": "Conteúdo das páginas",
+          "desc": "Escreve cada página. Tipos de página sem configuração própria o seguem."
+        },
+        "courseContentSlide": {
+          "name": "Slides",
+          "desc": "Escreve páginas de slides."
+        },
+        "courseContentQuiz": {
+          "name": "Quizzes",
+          "desc": "Escreve páginas de quiz."
+        },
+        "courseContentInteractive": {
+          "name": "Páginas interativas",
+          "desc": "Escreve páginas interativas."
+        },
+        "courseContentPbl": {
+          "name": "Projetos",
+          "desc": "Escreve páginas de aprendizagem baseada em projetos."
+        },
+        "courseActions": {
+          "name": "Ações da aula",
+          "desc": "Roteiriza o que os professores dizem e fazem em cada página."
+        },
+        "classroom": {
+          "name": "Sala de aula",
+          "desc": "Discussão, correção de quizzes e projetos durante o aprendizado."
+        },
+        "agent": {
+          "name": "Agente",
+          "desc": "Cria e edita cursos com você. Requer um modelo com suporte a chamadas de ferramentas."
+        },
+        "tts": {
+          "name": "Narração",
+          "desc": "Lê as aulas em voz alta."
+        },
+        "asr": {
+          "name": "Entrada de voz",
+          "desc": "Transforma em texto as perguntas faladas na sala de aula."
+        },
+        "image": {
+          "name": "Imagens",
+          "desc": "Gera imagens para as páginas."
+        },
+        "video": {
+          "name": "Vídeo",
+          "desc": "Gera clipes de vídeo para as páginas."
+        },
+        "webSearch": {
+          "name": "Busca na web",
+          "desc": "Pesquisa na web durante a geração do curso."
+        },
+        "document": {
+          "name": "Análise de documentos",
+          "desc": "Lê os documentos enviados."
+        }
+      },
+      "source": {
+        "inherited": "Segue {{name}}",
+        "deployment": "Servidor",
+        "default": "Padrão do servidor"
+      },
+      "stations": {
+        "research": "Pesquisa na web",
+        "media": "Imagens / vídeo",
+        "lines": {
+          "rewrite": "Consulta",
+          "search": "Busca",
+          "image": "Imagem",
+          "video": "Vídeo"
+        }
+      },
+      "empty": {
+        "prompt": "Ainda não há modelo de linguagem. Configure um serviço em Serviços de modelos ou conecte um plano em Token Plan; os modelos dele preenchem as partes sem configuração.",
+        "open": "Abrir Serviços de modelos",
+        "askAdmin": "Nenhum modelo de linguagem está configurado. Peça ao administrador do servidor para configurar um."
+      }
+    },
+    "unimported": {
+      "toast": "Algumas configurações de modelos deste navegador não puderam ser movidas para o servidor. Elas estão listadas em Configurações → Serviços de modelo.",
+      "title": "Algumas configurações deste navegador não puderam ser movidas para o servidor",
+      "description": "Elas ficam guardadas apenas neste navegador, com as chaves. Configure-as novamente aqui (ou na configuração do servidor) e depois descarte-as.",
+      "modelChoice": "Modelo escolhido para {{slot}}: {{assignment}}",
+      "copyKey": "Copiar chave",
+      "copyKeyPair": "Copiar par de chaves",
+      "keyCopied": "Copiado",
+      "copyFailed": "Não foi possível copiar",
+      "dismiss": "Descartar",
+      "dismissTitle": "Descartar estas configurações?",
+      "dismissDescription": "As chaves são apagadas deste navegador. Isso não pode ser desfeito.",
+      "reason": {
+        "refused": "O servidor não aceitou: {{detail}}",
+        "reserved": "O servidor já configura um serviço com este nome.",
+        "customService": "Um serviço de voz personalizado só pode ser configurado no servidor (openmaic.yml).",
+        "keyPair": "Um serviço que usa um par de chaves só pode ser configurado no servidor (openmaic.yml).",
+        "unsupported": "Este tipo de provedor personalizado não pode ser movido: adicione-o novamente como endpoint compatível com OpenAI.",
+        "unconfirmed": "O servidor não confirmou a importação."
+      }
     }
   },
   "workspace": {
@@ -2424,7 +2526,6 @@
     "asrCapability": "Reconhecimento de Fala",
     "asrHint": "Entrada por voz nas discussões",
     "provider": "Provedor",
-    "model": "Modelo",
     "voice": "Voz",
     "speed": "Velocidade",
     "language": "Idioma"
