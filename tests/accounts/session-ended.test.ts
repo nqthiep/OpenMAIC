@@ -4,19 +4,26 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // whether the presented session resolves. The cookie parsing and the owner rules are real.
 const account = vi.hoisted(() => ({
   enabled: true,
-  resolveOwner: vi.fn<(headers: Headers) => Promise<string | undefined>>(),
+  resolve:
+    vi.fn<
+      (
+        headers: Headers,
+      ) => Promise<{ accountId: string; username: string; role: string } | undefined>
+    >(),
 }));
 
 vi.mock('@/lib/server/accounts/runtime', () => ({
   accountsEnabled: () => account.enabled,
-  resolveAuthenticatedOwnerId: (headers: Headers) => account.resolveOwner(headers),
+  resolveRequestAccount: (headers: Headers) => account.resolve(headers),
 }));
 
 import {
-  resolveSignedInSession,
+  accountSessionAuthMethod,
   sessionEndedResponse,
-  withRequestOwnerId,
-} from '@/lib/server/agent-runtime/with-owner';
+} from '@/lib/server/identity/host/account-session';
+import { OWNER_ROLES } from '@/lib/server/identity';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
+import { useAccountOwnerAuthentication } from '../helpers/account-owner-auth';
 
 const TOKEN = 'a'.repeat(43);
 const ANONYMOUS_UUID = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
@@ -27,47 +34,75 @@ function headersWith(cookie: string | undefined): Headers {
   return headers;
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   account.enabled = true;
-  account.resolveOwner.mockReset();
-  account.resolveOwner.mockResolvedValue(undefined);
+  account.resolve.mockReset();
+  account.resolve.mockResolvedValue(undefined);
+  await useAccountOwnerAuthentication();
 });
 
-describe('resolveSignedInSession', () => {
-  it('reports the session as ended when a well-formed cookie no longer resolves while accounts are on', async () => {
-    const session = await resolveSignedInSession(headersWith(`openmaic_session=${TOKEN}`));
+describe('the account session owner auth method', () => {
+  it('refuses a well-formed cookie that no longer resolves while accounts are on', async () => {
+    const result = await accountSessionAuthMethod.authenticate({
+      headers: headersWith(`openmaic_session=${TOKEN}`),
+    });
 
-    expect(session).toEqual({ ownerId: undefined, ended: true });
+    expect(result.status).toBe('invalid');
   });
 
-  it('reports a live session with its owner', async () => {
-    account.resolveOwner.mockResolvedValue('acct:42');
+  it('authenticates a live session as the account owner, with the publish role', async () => {
+    account.resolve.mockResolvedValue({ accountId: '42', username: 'learner', role: 'learner' });
 
-    const session = await resolveSignedInSession(headersWith(`openmaic_session=${TOKEN}`));
+    const result = await accountSessionAuthMethod.authenticate({
+      headers: headersWith(`openmaic_session=${TOKEN}`),
+    });
 
-    expect(session).toEqual({ ownerId: 'acct:42', ended: false });
+    expect(result).toMatchObject({
+      status: 'authenticated',
+      principal: { ownerId: 'acct:42', kind: 'user', assurance: 'verified' },
+    });
+    if (result.status !== 'authenticated') throw new Error('unreachable');
+    expect(result.principal.roles.has(OWNER_ROLES.coursePublish)).toBe(true);
+    expect(result.principal.roles.has(OWNER_ROLES.admin)).toBe(false);
   });
 
-  it('keeps malformed, duplicated and absent cookies anonymous, without a lookup', async () => {
+  it('adds the admin role for an administrator', async () => {
+    account.resolve.mockResolvedValue({ accountId: '1', username: 'root', role: 'admin' });
+
+    const result = await accountSessionAuthMethod.authenticate({
+      headers: headersWith(`openmaic_session=${TOKEN}`),
+    });
+
+    if (result.status !== 'authenticated') throw new Error('expected authenticated');
+    expect(result.principal.roles.has(OWNER_ROLES.admin)).toBe(true);
+  });
+
+  it('leaves malformed, duplicated and absent cookies to the anonymous owner, without a lookup', async () => {
     for (const cookie of [
       'openmaic_session=too-short',
       `openmaic_session=${TOKEN}; openmaic_session=${TOKEN}`,
       undefined,
     ]) {
-      await expect(resolveSignedInSession(headersWith(cookie))).resolves.toEqual({
-        ownerId: undefined,
-        ended: false,
-      });
+      await expect(
+        accountSessionAuthMethod.authenticate({ headers: headersWith(cookie) }),
+      ).resolves.toEqual({ status: 'not-applicable' });
     }
-    expect(account.resolveOwner).not.toHaveBeenCalled();
+    expect(account.resolve).not.toHaveBeenCalled();
   });
 
-  it('keeps the anonymous identity when accounts are off, even with a cookie present', async () => {
+  it('is not applicable when accounts are off, even with a cookie present', async () => {
     account.enabled = false;
 
-    const session = await resolveSignedInSession(headersWith(`openmaic_session=${TOKEN}`));
+    await expect(
+      accountSessionAuthMethod.authenticate({ headers: headersWith(`openmaic_session=${TOKEN}`) }),
+    ).resolves.toEqual({ status: 'not-applicable' });
+  });
 
-    expect(session).toEqual({ ownerId: undefined, ended: false });
+  it('describes an account owner id as a user', () => {
+    expect(accountSessionAuthMethod.describeStoredOwner?.('acct:7')).toEqual({ kind: 'user' });
+    expect(
+      accountSessionAuthMethod.describeStoredOwner?.(`anon:${ANONYMOUS_UUID}`),
+    ).toBeUndefined();
   });
 });
 
@@ -87,16 +122,17 @@ describe('sessionEndedResponse', () => {
   });
 });
 
-describe('withRequestOwnerId for an ended session', () => {
-  it('answers 401 without running the handler or minting an anonymous cookie', async () => {
+describe('withRequestOwner for an ended session', () => {
+  it('answers SESSION_ENDED without running the handler or minting an anonymous cookie', async () => {
     const handler = vi.fn(async () => new Response('ran'));
 
-    const response = await withRequestOwnerId(
+    const response = await withRequestOwner(
       { headers: headersWith(`openmaic_session=${TOKEN}`) },
       handler,
     );
 
     expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({ errorCode: 'SESSION_ENDED' });
     expect(handler).not.toHaveBeenCalled();
     expect(response.headers.get('Set-Cookie')).not.toContain('anonymous_id');
   });
@@ -104,30 +140,35 @@ describe('withRequestOwnerId for an ended session', () => {
   it('runs the handler as the anonymous owner for a request with no session cookie', async () => {
     const handler = vi.fn(async () => new Response('ran'));
 
-    const response = await withRequestOwnerId({ headers: headersWith(undefined) }, handler);
+    const response = await withRequestOwner({ headers: headersWith(undefined) }, handler);
 
     expect(response.status).toBe(200);
     expect(handler).toHaveBeenCalledWith(
-      expect.stringMatching(/^anon:/),
+      expect.objectContaining({ ownerId: expect.stringMatching(/^anon:/), kind: 'anonymous' }),
       expect.any(Headers),
-      false,
     );
   });
 
   it('runs the handler as the signed-in owner for a live session', async () => {
-    account.resolveOwner.mockResolvedValue('acct:7');
+    account.resolve.mockResolvedValue({ accountId: '7', username: 'a', role: 'learner' });
     const handler = vi.fn(async () => new Response('ran'));
 
-    await withRequestOwnerId({ headers: headersWith(`openmaic_session=${TOKEN}`) }, handler);
+    await withRequestOwner({ headers: headersWith(`openmaic_session=${TOKEN}`) }, handler);
 
-    expect(handler).toHaveBeenCalledWith('acct:7', expect.any(Headers), true);
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ ownerId: 'acct:7', kind: 'user' }),
+      expect.any(Headers),
+    );
   });
 
   it('keeps an anonymous cookie as the owner, so a stale anonymous identity is not replaced', async () => {
     const handler = vi.fn(async () => new Response('ran'));
 
-    await withRequestOwnerId({ headers: headersWith(`anonymous_id=${ANONYMOUS_UUID}`) }, handler);
+    await withRequestOwner({ headers: headersWith(`anonymous_id=${ANONYMOUS_UUID}`) }, handler);
 
-    expect(handler).toHaveBeenCalledWith(`anon:${ANONYMOUS_UUID}`, expect.any(Headers), false);
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ ownerId: `anon:${ANONYMOUS_UUID}` }),
+      expect.any(Headers),
+    );
   });
 });

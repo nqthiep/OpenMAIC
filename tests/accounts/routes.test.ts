@@ -561,7 +561,7 @@ describe('account routes', () => {
   );
 
   it(
-    'GET session reports availability, and the account with its learnerKey only for a valid cookie',
+    'GET session reports availability, and the account only for a valid cookie',
     async () => {
       const { register, session } = await loadRoutes();
       const anonymous = await session(sessionRequest());
@@ -584,10 +584,7 @@ describe('account routes', () => {
         authenticated: true,
         account: { username: 'alice' },
       });
-      const row = await db!.query<{ id: string }>(
-        `SELECT id FROM accounts WHERE username = 'alice'`,
-      );
-      expect(signedIn.learnerKey).toBe(`acct:${row.rows[0]!.id}`);
+      expect(signedIn).not.toHaveProperty('learnerKey');
 
       const unknownToken = `openmaic_session=${'B'.repeat(43)}`;
       await expect((await session(sessionRequest(unknownToken))).json()).resolves.toEqual({

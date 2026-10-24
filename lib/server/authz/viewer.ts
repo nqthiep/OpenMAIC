@@ -3,7 +3,7 @@
  * cookie and the anonymous cookie. Never mints a cookie: a request that owns nothing yet
  * simply has no owner.
  */
-import { readAnonymousOwnerId } from '@/lib/server/agent-runtime/owner';
+import { authenticateRequestOwner } from '@/lib/server/identity/with-owner';
 import { accountOwnerId } from '@/lib/server/accounts/service';
 import {
   accountServiceDeps,
@@ -62,7 +62,16 @@ export async function resolveViewer(headers: Headers): Promise<ResolvedViewer> {
       membership: membership ?? null,
     };
   }
-  return { ownerId: readAnonymousOwnerId(headers) };
+  // A visitor who already holds an anonymous cookie owns what that cookie names; one without it
+  // owns nothing yet (resolution would mint an id, which nothing could ever have owned).
+  const owner = await authenticateRequestOwner({ headers });
+  const minted = owner.ok && owner.responseHeaders.has('set-cookie');
+  return {
+    ownerId:
+      owner.ok && owner.principal.kind === 'anonymous' && !minted
+        ? owner.principal.ownerId
+        : undefined,
+  };
 }
 
 /**

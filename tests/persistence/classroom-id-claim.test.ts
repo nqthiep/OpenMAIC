@@ -130,6 +130,7 @@ describe('first save of a classroom id', () => {
     vi.spyOn(process, 'cwd').mockReturnValue(workDir);
     vi.resetModules();
     vi.unstubAllEnvs();
+    await (await import('../helpers/account-owner-auth')).useAccountOwnerAuthentication();
     const connectionString = `postgres://classroom-claim-${randomUUID()}`;
     vi.stubEnv('DATABASE_URL', connectionString);
     vi.stubEnv('ASSET_S3_BUCKET', '');

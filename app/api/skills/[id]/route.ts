@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { findUserSkill } from '@/lib/server/agent-runtime/user-skills';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { apiError } from '@/lib/server/api-response';
 import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
 import {
   buildBuiltinSkillZip,
   buildOpenClawSkillZip,
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const builtin = await buildBuiltinSkillZip(id);
   if (builtin) return zipResponse(id, builtin);
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const skill = await findUserSkill(id, ownerId);
     if (!skill) return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
     return zipResponse(

@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 const mocks = vi.hoisted(() => ({
   runtimeEnabled: true,
   createSession: vi.fn(),
+  readRetirement: vi.fn(async (_ownerId: string): Promise<string | null> => null),
   postUserMessage: vi.fn(),
   softDeleteSession: vi.fn(),
   bindOwnerMaterialsToSession: vi.fn(),
@@ -21,10 +22,11 @@ vi.mock('@/lib/config/feature-flags', () => ({
   // No database in these tests, so the account spend guard passes through.
   isServerPersistenceConfigured: () => false,
 }));
-vi.mock('@/lib/server/agent-runtime/owner', () => ({
-  resolveRequestOwnerId: mocks.resolveRequestOwnerId,
-  readAnonymousOwnerId: () => undefined,
-}));
+vi.mock('@/lib/server/identity/resolve', async () =>
+  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
+    mocks.resolveRequestOwnerId,
+  ),
+);
 // The route reads skills off the explicit `skill` param AND the prompt; pin the
 // lookup to a fixed installed set so no user-skill store or skill directory is
 // touched. `findSkill` is the route's (and the runner's) id-or-name lookup.
@@ -40,6 +42,7 @@ vi.mock('@/lib/server/agent-runtime/store', () => ({
     postUserMessage: mocks.postUserMessage,
     softDeleteSession: mocks.softDeleteSession,
     listSessionsByOwner: mocks.listSessionsByOwner,
+    readRetirement: mocks.readRetirement,
   }),
 }));
 vi.mock('@/lib/server/agent-runtime/session-materials', () => ({

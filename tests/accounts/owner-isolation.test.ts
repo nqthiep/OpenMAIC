@@ -187,6 +187,7 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
     vi.stubEnv('PERSISTENCE_DEV_TOKEN', DEV_TOKEN);
     vi.stubEnv('ASSET_S3_BUCKET', '');
     vi.stubEnv('OPENMAIC_AGENT_RUNTIME_ENABLED', 'true');
+    await (await import('../helpers/account-owner-auth')).useAccountOwnerAuthentication();
     const db = new PGlite();
     await db.waitReady;
     pool = new PGlitePool(db);
@@ -438,29 +439,9 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
   );
 
   it(
-    'answers a signed-in request without the development token, and keeps the anonymous 503 gate',
+    'answers a signed-in request in production too, with no persistence credential of any kind',
     async () => {
-      vi.stubEnv('PERSISTENCE_DEV_TOKEN', '');
       const account = await signUp('no-dev-token');
-
-      const refused = await persistence(learnersPath(`anon:${VISITOR_A}`), {
-        cookie: `anonymous_id=${VISITOR_A}`,
-      });
-      expect(refused.status).toBe(503);
-      expect(refused.headers.get('set-cookie')).toBeNull();
-      await expect(refused.json()).resolves.toEqual({
-        error: {
-          code: 'PERSISTENCE_DEV_TOKEN_MISSING',
-          message: 'server persistence requires PERSISTENCE_DEV_TOKEN (development auth only)',
-        },
-      });
-
-      const documentRefused = await persistence('/documents/stage-no-token', {
-        method: 'PUT',
-        cookie: `anonymous_id=${VISITOR_A}`,
-        body: course('stage-no-token', 'Anonymous'),
-      });
-      expect(documentRefused.status).toBe(503);
 
       const runtime = await persistence(learnersPath(account.ownerId), { cookie: account.cookie });
       expect(runtime.status).toBe(200);
@@ -469,47 +450,15 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
       const written = await persistence('/documents/stage-no-token', {
         method: 'PUT',
         cookie: account.cookie,
-        body: course('stage-no-token', 'Written without the token'),
+        body: course('stage-no-token', 'Written without a token'),
       });
       expect(written.status).toBe(204);
 
-      // The same holds in production, where the development authenticator is otherwise refused.
       vi.stubEnv('NODE_ENV', 'production');
       const inProduction = await persistence(learnersPath(account.ownerId), {
         cookie: account.cookie,
       });
       expect(inProduction.status).toBe(200);
-    },
-    TIMEOUT,
-  );
-
-  it(
-    'keeps the anonymous 401 gates: a missing bearer token, and the production refusal',
-    async () => {
-      const learnerKey = 'anon:gate-check';
-      const learnerHeaders = { 'x-learner-key': learnerKey };
-
-      const missingBearer = await persistence(learnersPath(learnerKey), {
-        headers: learnerHeaders,
-      });
-      expect(missingBearer.status).toBe(401);
-      await expect(missingBearer.json()).resolves.toMatchObject({
-        error: { code: 'UNAUTHENTICATED' },
-      });
-
-      const withBearer = await persistence(learnersPath(learnerKey), {
-        headers: { ...learnerHeaders, authorization: `Bearer ${DEV_TOKEN}` },
-      });
-      expect(withBearer.status).toBe(200);
-
-      vi.stubEnv('NODE_ENV', 'production');
-      const inProduction = await persistence(learnersPath(learnerKey), {
-        headers: { ...learnerHeaders, authorization: `Bearer ${DEV_TOKEN}` },
-      });
-      expect(inProduction.status).toBe(401);
-      await expect(inProduction.json()).resolves.toMatchObject({
-        error: { code: 'UNAUTHENTICATED' },
-      });
     },
     TIMEOUT,
   );
@@ -607,15 +556,17 @@ describe('owner isolation between accounts, anonymous visitors and the persisten
 
       pool.failSessionLookups = true;
       try {
-        const write = await persistence(`/documents/${stageId}/stage`, {
-          method: 'PUT',
-          cookie: mixed,
-          body: course(stageId, 'Must not land').stage,
-        });
-        expect(write.status).toBe(500);
+        // The owner seam lets a method that cannot decide throw: the request is a server error
+        // (Next answers 500), and neither the anonymous owner nor a later method is asked.
+        await expect(
+          persistence(`/documents/${stageId}/stage`, {
+            method: 'PUT',
+            cookie: mixed,
+            body: course(stageId, 'Must not land').stage,
+          }),
+        ).rejects.toThrow('simulated database outage');
 
-        const list = await stagesResponse(mixed);
-        expect(list.status).toBe(500);
+        await expect(stagesResponse(mixed)).rejects.toThrow('simulated database outage');
       } finally {
         pool.failSessionLookups = false;
       }

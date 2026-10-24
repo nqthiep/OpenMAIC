@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { apiError } from '@/lib/server/api-response';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
 
 export const runtime = 'nodejs';
 
@@ -12,7 +12,7 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const store = await getAgentSessionStore();
     const sessions = await store.listSessionsByOwner(ownerId);
     const statuses = Object.fromEntries(sessions.map((session) => [session.id, session.status]));

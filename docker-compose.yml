@@ -12,7 +12,6 @@ services:
         # NEXT_PUBLIC_PI_CHAT_ENABLED=false docker compose up -d --build openmaic
         - ALLOWED_FRAME_ANCESTORS=${ALLOWED_FRAME_ANCESTORS:-}
         - NEXT_PUBLIC_PERSISTENCE=${NEXT_PUBLIC_PERSISTENCE:-}
-        - NEXT_PUBLIC_PERSISTENCE_TOKEN=${NEXT_PUBLIC_PERSISTENCE_TOKEN:-}
         - NEXT_PUBLIC_MAIC_EDITOR_ENABLED=${NEXT_PUBLIC_MAIC_EDITOR_ENABLED:-}
         - NEXT_PUBLIC_MAIC_EDITOR_RENDERER_ENABLED=${NEXT_PUBLIC_MAIC_EDITOR_RENDERER_ENABLED:-}
         - NEXT_PUBLIC_MAIC_PLAYBACK_RENDERER_ENABLED=${NEXT_PUBLIC_MAIC_PLAYBACK_RENDERER_ENABLED:-}
@@ -35,6 +34,10 @@ services:
       # MP4 export disabled and degrades to the ZIP-download path — this URL
       # being set does not, by itself, advertise a working render.
       - RENDER_SERVICE_URL=http://render-service:9000
+      # What a visitor made before signing in moves into the account on the first request after
+      # sign-in (the owner identity seam's automatic claim). "explicit" leaves it to
+      # POST /api/identity/claim, which KHAITAM's pages do not call.
+      - OWNER_CLAIM_TRIGGER=${OWNER_CLAIM_TRIGGER:-auto}
       # OmniRoute runs beside the app and connects by itself: the dashboard password sits in the
       # `omniroute-secrets` volume mounted below, and the addresses default to the service names.
       # Every value here is optional and only overrides (ops/omniroute/README.md); an empty value
@@ -58,8 +61,8 @@ services:
     restart: unless-stopped
 
   # Optional PostgreSQL backing for the app-embedded persistence API.
-  # The app reads DATABASE_URL and PERSISTENCE_DEV_TOKEN from .env.local; keeping
-  # those values there avoids changing the default browser-only deployment.
+  # The app reads DATABASE_URL from .env.local; keeping
+  # that value there avoids changing the default browser-only deployment.
   postgres:
     image: postgres:16
     profiles:

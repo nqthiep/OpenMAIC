@@ -1,11 +1,6 @@
-import {
-  BrowserKVStore,
-  HttpAssetStore,
-  HttpDocumentStore,
-  type HttpAssetHeadersHook,
-  type HttpDocumentHeadersHook,
-} from '@openmaic/storage';
-import { HttpRuntimeStore, type HttpRuntimeHeadersHook } from '@openmaic/storage/runtime/http';
+import { HttpAssetStore, HttpDocumentStore } from '@openmaic/storage';
+import { HttpRuntimeStore } from '@openmaic/storage/runtime/http';
+
 import { SESSION_ENDED_EVENT, watchForEndedSessions } from './session-end';
 
 import {
@@ -19,9 +14,18 @@ import {
   type AssetPoolStorageOptions,
 } from '@/lib/media/asset-pool-config';
 import { assertRuntimeStorageConfigurable, configureRuntimeStorage } from '@/lib/runtime/config';
-import { getLearnerKey } from '@/lib/runtime/learner-key';
 
-let deviceKv: BrowserKVStore | undefined;
+/**
+ * Where the browser learns its runtime learner key under server persistence.
+ *
+ * The server derives the key from the request owner (the owner identity seam),
+ * and the runtime contract names it in paths and bodies, so the browser has to
+ * use exactly that value: any other key is refused with 403
+ * FORBIDDEN_LEARNER. The browser therefore asks instead of minting one.
+ * Requests carry no credential of their own; the owner cookie rides them.
+ */
+export const PERSISTENCE_LEARNER_KEY_URL = '/api/persistence/learner-key';
+
 let learnerKeyPromise: Promise<string> | undefined;
 let learnerKeyReadAt = 0;
 
@@ -32,70 +36,35 @@ let learnerKeyReadAt = 0;
  */
 const LEARNER_KEY_MAX_AGE_MS = 5 * 60 * 1000;
 
-export function isBrowserPersistenceEnabled(): boolean {
-  return typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PERSISTENCE === '1';
-}
-
-/** Same-origin account session route (app/api/auth/session). */
-const ACCOUNT_SESSION_PATH = '/api/auth/session';
-
-interface AccountSessionBody {
-  readonly success: true;
-  readonly enabled: boolean;
-  readonly authenticated: boolean;
-  readonly learnerKey?: unknown;
-}
-
-function isAccountSessionBody(value: unknown): value is AccountSessionBody {
-  if (value === null || typeof value !== 'object') return false;
-  const body = value as Record<string, unknown>;
-  return (
-    body.success === true &&
-    typeof body.enabled === 'boolean' &&
-    typeof body.authenticated === 'boolean'
-  );
-}
-
-/**
- * Reads the account session. A transport failure, a non-2xx status or a
- * malformed body rejects: the caller must not guess which learner this is.
- */
-async function readAccountSession(): Promise<AccountSessionBody> {
-  const response = await fetch(ACCOUNT_SESSION_PATH, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error(`Account session request failed with HTTP ${response.status}`);
-  }
-  const body: unknown = await response.json();
-  if (!isAccountSessionBody(body)) {
-    throw new Error('Account session response is malformed');
-  }
-  return body;
-}
-
-/**
- * A signed-in account's partition key, otherwise the device key. A signed-in
- * learner never falls back to the device key: those writes would land in a
- * partition that the account cannot reach.
- */
-async function resolveLearnerKey(): Promise<string> {
-  const session = await readAccountSession();
-  if (session.enabled && session.authenticated) {
-    if (typeof session.learnerKey === 'string' && session.learnerKey.length > 0) {
-      return session.learnerKey;
-    }
-    throw new Error('Signed-in account session carries no learner key');
-  }
-  return getLearnerKey((deviceKv ??= new BrowserKVStore()));
-}
-
 function forgetLearnerKey(): void {
   learnerKeyPromise = undefined;
 }
 
+export function isBrowserPersistenceEnabled(): boolean {
+  return typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PERSISTENCE === '1';
+}
+
+async function fetchServerLearnerKey(): Promise<string> {
+  const response = await fetch(PERSISTENCE_LEARNER_KEY_URL, {
+    method: 'GET',
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    throw new Error(`Runtime learner key request failed: ${response.status}`);
+  }
+  const body = (await response.json()) as { learnerKey?: unknown } | null;
+  const learnerKey = body?.learnerKey;
+  if (typeof learnerKey !== 'string' || learnerKey === '') {
+    throw new Error('Runtime learner key response is malformed');
+  }
+  return learnerKey;
+}
+
+/**
+ * The server-derived runtime learner key, fetched once and kept until it goes stale. A failure
+ * is not cached, so a transient error does not pin every later call.
+ */
 export function getPersistenceLearnerKey(): Promise<string> {
   if (!isBrowserPersistenceEnabled()) {
     return Promise.reject(new Error('Browser persistence is not enabled'));
@@ -103,11 +72,9 @@ export function getPersistenceLearnerKey(): Promise<string> {
   if (learnerKeyPromise && Date.now() - learnerKeyReadAt > LEARNER_KEY_MAX_AGE_MS) {
     forgetLearnerKey();
   }
-  // Memoised until it goes stale. A rejection clears the memo so the next
-  // caller retries the session read rather than inheriting the failure.
   if (!learnerKeyPromise) {
     learnerKeyReadAt = Date.now();
-    learnerKeyPromise = resolveLearnerKey().catch((error) => {
+    learnerKeyPromise = fetchServerLearnerKey().catch((error) => {
       forgetLearnerKey();
       throw error;
     });
@@ -115,20 +82,7 @@ export function getPersistenceLearnerKey(): Promise<string> {
   return learnerKeyPromise;
 }
 
-export async function getPersistenceRequestHeaders(): Promise<Record<string, string>> {
-  if (!isBrowserPersistenceEnabled()) return {};
-  const resolvedLearnerKey = await getPersistenceLearnerKey();
-  const token = process.env.NEXT_PUBLIC_PERSISTENCE_TOKEN;
-  return {
-    'x-learner-key': resolvedLearnerKey,
-    ...(token ? { authorization: `Bearer ${token}` } : {}),
-  };
-}
-
 if (isBrowserPersistenceEnabled()) {
-  const learnerKey = getPersistenceLearnerKey;
-  const headers = getPersistenceRequestHeaders;
-
   // Returning to the page is when a sign-out made in another tab shows up, so the key is re-read then.
   if (typeof window !== 'undefined') {
     window.addEventListener?.('focus', forgetLearnerKey);
@@ -138,33 +92,24 @@ if (isBrowserPersistenceEnabled()) {
   }
 
   const runtimeOptions = {
-    store: () =>
-      new HttpRuntimeStore({
-        baseUrl: '/api/persistence',
-        headers: headers satisfies HttpRuntimeHeadersHook,
-      }),
-    learnerKey,
+    store: () => new HttpRuntimeStore({ baseUrl: '/api/persistence' }),
+    learnerKey: getPersistenceLearnerKey,
   };
   const documentOptions: DocumentStorageOptions = {
     store: ({ validateScene, validateStage }) =>
       new HttpDocumentStore({
         baseUrl: '/api/persistence',
-        headers: headers satisfies HttpDocumentHeadersHook,
         validateScene,
         validateStage,
       }),
   };
   // The document outlives the browser that produced it, so the media it
   // references must too: generated bytes go to the same endpoint under the
-  // same credentials, and the document holds the id the pool allocated.
+  // same owner, and the document holds the id the pool allocated.
   // `serverBacked` is what tells local-cache cleanup that these refs are not
   // this browser's to delete.
   const assetOptions: AssetPoolStorageOptions = {
-    store: () =>
-      new HttpAssetStore({
-        baseUrl: '/api/persistence',
-        headers: headers satisfies HttpAssetHeadersHook,
-      }),
+    store: () => new HttpAssetStore({ baseUrl: '/api/persistence' }),
     serverBacked: true,
   };
   try {

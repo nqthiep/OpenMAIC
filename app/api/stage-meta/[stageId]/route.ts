@@ -32,9 +32,9 @@ import {
   readClassroom,
   readClassroomAccess,
 } from '@/lib/server/classroom-storage';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { apiError } from '@/lib/server/api-response';
 import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
 
 // Per-viewer and mutable on every publish/unpublish/delete: this response must
 // never be cached, by Next or by anything in front of it.
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   // owner".
   if (!isServerPersistenceConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { stageId } = await params;
     try {
       const access = await resolveStageAccess(stageId);

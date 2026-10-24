@@ -30,10 +30,13 @@ vi.mock('@/lib/config/feature-flags', () => ({
 
 vi.mock('@/lib/server/accounts/runtime', () => ({
   // The real session lookup needs Postgres; this stub answers from a token table.
-  resolveAuthenticatedOwnerId: async (headers: Headers) => {
+  accountsEnabled: () => true,
+  resolveRequestAccount: async (headers: Headers) => {
     const cookie = headers.get('cookie') ?? '';
     for (const [token, owner] of Object.entries(mocks.sessionOwners)) {
-      if (cookie.includes(`openmaic_session=${token}`)) return owner;
+      if (cookie.includes(`openmaic_session=${token}`)) {
+        return { accountId: owner.replace(/^acct:/, ''), username: owner, role: 'learner' };
+      }
     }
     return undefined;
   },
@@ -65,8 +68,9 @@ function publish(cookie?: string) {
 }
 
 describe('publishing a course by account', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    await (await import('../helpers/account-owner-auth')).useAccountOwnerAuthentication();
     mocks.sessionOwners = {
       [TOKEN_A]: 'acct:owner-a',
       [TOKEN_B]: 'acct:owner-b',

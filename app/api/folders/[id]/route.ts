@@ -19,8 +19,9 @@ import type { DocumentFolder, DocumentFolderStore } from '@openmaic/storage';
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson } from '@/lib/server/agent-runtime/route-response';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { readBoundedJson } from '@/lib/server/bounded-json';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
+import { ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
 import { folderNameErrorResponse } from '@/lib/server/folder-name-errors';
 import { validateFolderName } from '@/lib/utils/folder-name-validation';
 import { apiError } from '@/lib/server/api-response';
@@ -69,7 +70,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     try {
       const store = (await getOwnerScopedDocumentStore(ownerId)) as unknown as DocumentFolderStore;
@@ -93,6 +94,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
       return ownerJson({ folder: folderResponse(updated, ownerId) }, 200, responseHeaders);
     } catch (error) {
+      const claimed = ownerWriteErrorResponse(error, responseHeaders);
+      if (claimed) return claimed;
       // The rename re-checks the name through the unique index; a duplicate
       // that slipped past the pre-check answers the same 409.
       const nameError = folderNameErrorResponse(error);
@@ -113,7 +116,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const modeParam = req.nextUrl.searchParams.get('mode');
   const mode: 'ungroup' | 'remove' = modeParam === 'remove' ? 'remove' : 'ungroup';
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     try {
       const store = (await getOwnerScopedDocumentStore(ownerId)) as unknown as DocumentFolderStore;
@@ -123,6 +126,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       }
       return ownerJson({ ok: true, removedStageIds: result.removedStageIds }, 200, responseHeaders);
     } catch (error) {
+      const claimed = ownerWriteErrorResponse(error, responseHeaders);
+      if (claimed) return claimed;
       console.error(`[Folders] Failed to delete [owner=${ownerId}, id=${id}]:`, error);
       return jsonError(500, 'FOLDER_DELETE_FAILED', 'Failed to delete folder', responseHeaders);
     }

@@ -95,6 +95,8 @@ interface PersistVideoInput {
   result: VideoGenerationResult;
   stageId: string;
   signal: AbortSignal;
+  /** The run's owner; the bytes are allocated in its asset partition. */
+  ownerId?: string;
 }
 
 interface PersistedVideo {
@@ -114,7 +116,10 @@ type PersistGeneratedVideo = (input: PersistVideoInput) => Promise<PersistedVide
 /** The stored ids the completion patch writes onto the element. */
 type PersistedMedia = Pick<PersistedVideo, 'src' | 'poster'>;
 
-export interface GenerateVideoToolDeps extends Pick<CourseToolDeps, 'sessionId' | 'abortSignal'> {
+export interface GenerateVideoToolDeps extends Pick<
+  CourseToolDeps,
+  'sessionId' | 'abortSignal' | 'ownerId'
+> {
   /**
    * The document store for the detached background job's completion patch.
    * It must be owner-bound but NOT fenced by the run lease: the job
@@ -188,6 +193,7 @@ async function fetchGeneratedMedia(url: string, signal: AbortSignal): Promise<Re
  */
 async function storeGeneratedPoster(
   posterUrl: string,
+  ownerId: string,
   stageId: string,
   signal: AbortSignal,
   assetStore?: AssetStore,
@@ -207,6 +213,7 @@ async function storeGeneratedPoster(
     });
     throwIfAborted(signal);
     return await storeGeneratedAssetOrThrow({
+      ownerId,
       stageId,
       bytes,
       mimeType: mime,
@@ -237,9 +244,10 @@ async function storeGeneratedPoster(
  * #1242 replaced the pool with a local file.
  */
 export async function defaultPersistGeneratedVideo(
-  { result, stageId, signal }: PersistVideoInput,
+  { result, stageId, signal, ownerId }: PersistVideoInput,
   assetStore?: AssetStore,
 ): Promise<PersistedVideo> {
+  if (!ownerId) throw new Error('Generated media cannot be stored without the run owner');
   throwIfAborted(signal);
   let parsed: URL;
   try {
@@ -261,6 +269,7 @@ export async function defaultPersistGeneratedVideo(
   throwIfAborted(signal);
 
   const src = await storeGeneratedAssetOrThrow({
+    ownerId,
     stageId,
     bytes,
     mimeType: mime,
@@ -270,7 +279,7 @@ export async function defaultPersistGeneratedVideo(
   throwIfAborted(signal);
 
   const poster = result.poster
-    ? await storeGeneratedPoster(result.poster, stageId, signal, assetStore)
+    ? await storeGeneratedPoster(result.poster, ownerId, stageId, signal, assetStore)
     : undefined;
   throwIfAborted(signal);
   return { src, mime, ...(poster ? { poster } : {}) };
@@ -578,7 +587,12 @@ async function runVideoGenerationJob(input: VideoJobInput): Promise<void> {
     );
     throwIfAborted(signal);
     setPendingMediaStage(ref, 'persist');
-    const stored = await input.persist({ result, stageId, signal });
+    const stored = await input.persist({
+      result,
+      stageId,
+      signal,
+      ...(deps.ownerId ? { ownerId: deps.ownerId } : {}),
+    });
     throwIfAborted(signal);
 
     void recordGenerationUsage({

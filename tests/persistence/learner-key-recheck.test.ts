@@ -14,13 +14,13 @@ function memoryStorage(): Storage {
   } as Storage;
 }
 
-/** Session answers in order: signed in as an account, then signed out after a sign-out elsewhere. */
+/** `GET /api/persistence/learner-key` answers in order: an account, then the anonymous owner after a sign-out elsewhere. */
 function sessionAnswers(answers: Array<Record<string, unknown>>) {
   let index = 0;
   return vi.fn(async () => {
     const body = answers[Math.min(index, answers.length - 1)]!;
     index += 1;
-    return new Response(JSON.stringify({ success: true, enabled: true, ...body }), {
+    return new Response(JSON.stringify(body), {
       status: 200,
       headers: { 'content-type': 'application/json' },
     });
@@ -45,7 +45,7 @@ describe('learner key re-read', () => {
   });
 
   it('keeps the memoised key while the window stays focused and the key is fresh', async () => {
-    const fetch = sessionAnswers([{ authenticated: true, learnerKey: 'acct:one' }]);
+    const fetch = sessionAnswers([{ learnerKey: 'acct:one' }]);
     vi.stubGlobal('fetch', fetch);
     const { getPersistenceLearnerKey } = await import('@/lib/persistence/bootstrap');
 
@@ -56,8 +56,8 @@ describe('learner key re-read', () => {
 
   it('re-reads the session on focus, so a sign-out made in another tab takes effect', async () => {
     const fetch = sessionAnswers([
-      { authenticated: true, learnerKey: 'acct:one' },
-      { authenticated: false },
+      { learnerKey: 'acct:one' },
+      { learnerKey: 'anon:11111111-1111-4111-8111-111111111111' },
     ]);
     vi.stubGlobal('fetch', fetch);
     const { getPersistenceLearnerKey } = await import('@/lib/persistence/bootstrap');
@@ -71,10 +71,7 @@ describe('learner key re-read', () => {
   });
 
   it('re-reads the session once the memoised key is older than five minutes', async () => {
-    const fetch = sessionAnswers([
-      { authenticated: true, learnerKey: 'acct:one' },
-      { authenticated: true, learnerKey: 'acct:two' },
-    ]);
+    const fetch = sessionAnswers([{ learnerKey: 'acct:one' }, { learnerKey: 'acct:two' }]);
     vi.stubGlobal('fetch', fetch);
     vi.useFakeTimers({ toFake: ['Date'] });
     try {

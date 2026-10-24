@@ -26,7 +26,8 @@ import { apiError } from '@/lib/server/api-response';
 import { canReadStageById } from '@/lib/server/authz/viewer';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerApiError, ownerJson, ownerNotFound } from '@/lib/server/agent-runtime/route-response';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
+import { ownerWriteErrorResponse } from '@/lib/persistence/owner-merges';
 import { STAGE_NAME_MAX_LENGTH } from '@/lib/server/agent-runtime/stage-limits';
 import { readBoundedJson } from '@/lib/server/bounded-json';
 
@@ -51,6 +52,8 @@ function isStoreValidationError(error: unknown): error is Error {
 
 /** Map a store save failure onto the route's error surface. */
 function mapSaveError(error: unknown, headers: Headers) {
+  const claimed = ownerWriteErrorResponse(error, headers);
+  if (claimed) return claimed;
   if (error instanceof DocumentNotFoundError) return ownerNotFound(headers);
   if (error instanceof DocumentVersionError) {
     // A document written by a newer client cannot be saved by this one.
@@ -72,7 +75,7 @@ function mapSaveError(error: unknown, headers: Headers) {
 export async function GET(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     if (!(await canReadStageById(req.headers, id, ownerId))) return ownerNotFound(responseHeaders);
     const store = await getOwnerScopedDocumentStore(ownerId);
@@ -106,7 +109,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     const store = await getOwnerScopedDocumentStore(ownerId);
     const document = await store.loadDocument(id);
@@ -153,7 +156,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     if (candidate.stage!.id !== id) {
       return ownerApiError(
@@ -190,10 +193,16 @@ export async function PUT(req: NextRequest, { params }: Params) {
 export async function DELETE(req: NextRequest, { params }: Params) {
   if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     const store = await getOwnerScopedDocumentStore(ownerId);
-    await store.deleteDocument(id);
+    try {
+      await store.deleteDocument(id);
+    } catch (error) {
+      const claimed = ownerWriteErrorResponse(error, responseHeaders);
+      if (claimed) return claimed;
+      throw error;
+    }
     return ownerJson({ ok: true }, 200, responseHeaders);
   });
 }

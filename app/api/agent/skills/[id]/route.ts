@@ -10,15 +10,16 @@ import {
   findUserSkill,
   UserSkillError,
 } from '@/lib/server/agent-runtime/user-skills';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
 import { apiError } from '@/lib/server/api-response';
 import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
+import { ownerRetiredResponseIfRetired } from '@/lib/persistence/owner-merges';
 
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     const skill = await findUserSkill(id, ownerId);
     if (!skill) return apiError('NOT_FOUND', 404, 'Not found');
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!isAgentRuntimeConfigured()) return apiError('NOT_FOUND', 404, 'Not found');
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     if (!id.startsWith('usk_')) {
       return ownerApiError(
@@ -46,6 +47,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return new Response(null, { status: 204, headers: responseHeaders });
     } catch (error) {
       if (error instanceof UserSkillError && error.code === 'not-found') {
+        // A retired identity's skills moved with the claim.
+        const retired = await ownerRetiredResponseIfRetired(ownerId, responseHeaders);
+        if (retired) return retired;
         return ownerApiError('NOT_FOUND', 404, 'Not found', responseHeaders);
       }
       throw error;

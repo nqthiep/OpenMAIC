@@ -37,14 +37,10 @@ import type { NextRequest } from 'next/server';
 import { HOST_AGENT_LIFECYCLE as LIFECYCLE } from '@/lib/agent-runtime/lifecycle';
 import { isAgentRuntimeConfigured } from '@/lib/config/feature-flags';
 import { subscribeAgentEventWakeup } from '@/lib/server/agent-runtime/event-notify-bus';
-import { resolveRequestOwnerId } from '@/lib/server/agent-runtime/owner';
+import { authenticateRequestOwner } from '@/lib/server/identity/with-owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
 import { apiError } from '@/lib/server/api-response';
 import { ownerApiError } from '@/lib/server/agent-runtime/route-response';
-import {
-  resolveSignedInSession,
-  sessionEndedResponse,
-} from '@/lib/server/agent-runtime/with-owner';
 
 export const runtime = 'nodejs';
 // Self-hosted `next start` does not enforce maxDuration; it remains useful to
@@ -70,18 +66,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return apiError('NOT_FOUND', 404, 'Not found');
   }
   const { id } = await params;
-  const responseHeaders = new Headers();
   // The identity cookie is minted for the requester regardless of the target
   // session, and the owner is resolved before the session lookup: a request
   // for a missing session and one for a session owned by someone else return
   // byte-identical 404s (same status, body, and cookie headers), so the
-  // response cannot be used to probe whether a session UUID exists. The signed-in
-  // owner comes from the session cookie and is resolved first; a session cookie
-  // that cannot be checked rejects here rather than falling back to the anonymous
-  // owner.
-  const session = await resolveSignedInSession(req.headers);
-  if (session.ended) return sessionEndedResponse();
-  const ownerId = resolveRequestOwnerId(req, responseHeaders, session.ownerId);
+  // response cannot be used to probe whether a session UUID exists. A signed-in account is
+  // resolved first by its session; a session that has ended is refused rather than answered as
+  // the anonymous owner.
+  const owner = await authenticateRequestOwner(req);
+  if (!owner.ok) return owner.response;
+  const {
+    principal: { ownerId },
+    responseHeaders,
+  } = owner;
   const store = await getAgentSessionStore();
   const meta = await store.getSession(id);
   if (!meta) {

@@ -45,9 +45,11 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@/lib/server/agent-runtime/owner', () => ({
-  resolveRequestOwnerId: mocks.resolveRequestOwnerId,
-}));
+vi.mock('@/lib/server/identity/resolve', async () =>
+  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(
+    mocks.resolveRequestOwnerId,
+  ),
+);
 // The per-viewer read gate is covered by tests/agent-runtime/stage-meta-routes.test.ts.
 vi.mock('@/lib/server/authz/viewer', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/server/authz/viewer')>()),

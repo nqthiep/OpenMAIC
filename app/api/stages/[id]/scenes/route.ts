@@ -26,7 +26,7 @@ import { apiError } from '@/lib/server/api-response';
 import { canReadStageById } from '@/lib/server/authz/viewer';
 import { getOwnerScopedDocumentStore } from '@/lib/server/agent-runtime/owner-scoped-documents';
 import { ownerJson, ownerNotFound } from '@/lib/server/agent-runtime/route-response';
-import { withRequestOwnerId } from '@/lib/server/agent-runtime/with-owner';
+import { withRequestOwner } from '@/lib/server/identity/with-owner';
 
 export const runtime = 'nodejs';
 
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     );
   }
 
-  return withRequestOwnerId(req, async (ownerId, responseHeaders) => {
+  return withRequestOwner(req, async ({ ownerId }, responseHeaders) => {
     const { id } = await params;
     if (!(await canReadStageById(req.headers, id, ownerId))) return ownerNotFound(responseHeaders);
     const store = await getOwnerScopedDocumentStore(ownerId);

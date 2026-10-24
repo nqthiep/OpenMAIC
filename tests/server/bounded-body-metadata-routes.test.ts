@@ -28,15 +28,16 @@ vi.mock('@/lib/config/feature-flags', () => ({
   isAgentRuntimeEnabled: () => true,
   isAgentRuntimeConfigured: () => true,
 }));
-vi.mock('@/lib/server/agent-runtime/owner', () => ({
-  resolveRequestOwnerId: () => 'owner-1',
-}));
+vi.mock('@/lib/server/identity/resolve', async () =>
+  (await import('../helpers/owner-resolution-mock')).ownerResolveModule(() => 'owner-1'),
+);
 vi.mock('@/lib/server/agent-runtime/owner-scoped-documents', () => ({
   getOwnerScopedDocumentStore: async () => mocks.fakeStore!.store,
 }));
 vi.mock('@/lib/server/agent-runtime/store', () => ({
   getAgentSessionStore: async () => ({
     createSession: mocks.createSession,
+    readRetirement: async () => null,
     postUserMessage: mocks.postUserMessage,
     softDeleteSession: mocks.softDeleteSession,
     listSessionsByOwner: mocks.listSessionsByOwner,

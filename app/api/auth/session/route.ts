@@ -6,7 +6,6 @@ import {
   registrationOpen,
   resolveRequestAccount,
 } from '@/lib/server/accounts/runtime';
-import { accountOwnerId } from '@/lib/server/accounts/service';
 import { capabilitiesFor, singleUserCapabilities } from '@/lib/server/authz/capabilities';
 import { resolveViewer } from '@/lib/server/authz/viewer';
 
@@ -14,8 +13,9 @@ export const runtime = 'nodejs';
 
 /**
  * Reports whether accounts are available, who (if anyone) is signed in, and what that visitor may
- * do. `capabilities` is the one list the interface reads for gating. `learnerKey`, `role`,
- * `administrator` and `membership` are returned only to the account's own session.
+ * do. `capabilities` is the one list the interface reads for gating. `role`, `administrator`
+ * and `membership` are returned only to the account's own session. The runtime learner key is
+ * not here: the browser reads it from `GET /api/persistence/learner-key`.
  */
 export async function GET(request: Request): Promise<Response> {
   return runAccountRoute(async () => {
@@ -39,7 +39,6 @@ export async function GET(request: Request): Promise<Response> {
       ...(account
         ? {
             account: { username: account.username },
-            learnerKey: accountOwnerId(account.accountId),
             role: account.role,
             administrator: account.role === 'admin',
             membership: viewer.membership ?? null,

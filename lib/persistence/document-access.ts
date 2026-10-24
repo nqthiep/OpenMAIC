@@ -18,7 +18,11 @@ export type DocumentClaimGate = (stageId: string) => Promise<boolean>;
 
 const LONE_SURROGATE = /[\uD800-\uDFFF]/u;
 
-function isQueryableSegment(value: string): boolean {
+/**
+ * Whether a stage id is one the document read path can address at all. The
+ * library listing applies the same rule to the ids a host provider returns.
+ */
+export function isQueryableSegment(value: string): boolean {
   return (
     value !== '' &&
     value !== '.' &&
