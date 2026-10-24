@@ -1,6 +1,8 @@
 'use server';
 
 import { cookies, headers } from 'next/headers';
+import { anonymousCookieSecure } from '@/lib/server/agent-runtime/owner';
+import { resolveSharedOwnerId } from '@/lib/server/agent-runtime/shared-owner';
 import { getAgentSessionStore } from '@/lib/server/agent-runtime/store';
 import { resolveSignedInOwnerId } from '@/lib/server/agent-runtime/with-owner';
 
@@ -21,6 +23,11 @@ const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 async function currentOwnerId(): Promise<string> {
   const signedInOwnerId = await resolveSignedInOwnerId(await headers());
   if (signedInOwnerId !== undefined) return signedInOwnerId;
+  // A configured deployment-wide id replaces the cookie partition entirely, and
+  // has to be read here too: otherwise the workspace list would be filtered by
+  // one owner while its row actions acted on another.
+  const sharedOwnerId = resolveSharedOwnerId();
+  if (sharedOwnerId) return sharedOwnerId;
 
   const cookieStore = await cookies();
   const existing = cookieStore.get(ANONYMOUS_COOKIE)?.value;
@@ -31,7 +38,7 @@ async function currentOwnerId(): Promise<string> {
     sameSite: 'lax',
     path: '/',
     maxAge: 30 * 24 * 60 * 60,
-    secure: process.env.NODE_ENV === 'production',
+    secure: anonymousCookieSecure(),
   });
   return `anon:${minted}`;
 }

@@ -63,6 +63,53 @@ describe('embedded persistence route', () => {
     });
   });
 
+  it('logs 5xx responses with route details and echoes the request id', async () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://unused-in-this-test');
+    vi.stubEnv('PERSISTENCE_DEV_TOKEN', '');
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    try {
+      const { PATCH } = await import('@/app/api/persistence/[...path]/route');
+      const response = await PATCH(
+        new Request('http://localhost/api/persistence/runtime/sessions/session-1/status', {
+          method: 'PATCH',
+          headers: { 'x-request-id': 'req-abc' },
+        }),
+      );
+
+      expect(response.status).toBe(503);
+      expect(response.headers.get('x-request-id')).toBe('req-abc');
+      expect(errorSpy).toHaveBeenCalledOnce();
+      expect(errorSpy.mock.calls[0]?.join(' ')).toContain(
+        'PATCH /api/persistence/runtime/sessions/session-1/status -> 503 PERSISTENCE_DEV_TOKEN_MISSING (requestId=req-abc)',
+      );
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it('does not log 4xx responses and replaces an invalid request id', async () => {
+    vi.stubEnv('DATABASE_URL', '');
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    try {
+      const { GET } = await import('@/app/api/persistence/[...path]/route');
+      const response = await GET(
+        new Request('http://localhost/api/persistence/runtime/sessions', {
+          headers: { 'x-request-id': 'invalid request id' },
+        }),
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.headers.get('x-request-id')).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
   it('retries initialization on the next request after a failed pool initialization', async () => {
     const ensureSchema = vi
       .fn()
@@ -78,7 +125,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema,
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -148,7 +200,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -276,7 +333,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -412,7 +474,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -509,7 +576,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     // The real registry, with only its schema bootstrap stubbed out.
     vi.doMock('@openmaic/storage/asset/pg', async () => {
@@ -566,7 +638,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -614,6 +691,7 @@ describe('embedded persistence route', () => {
       instance: unknown;
     }> = [];
     const documentConstructions: Array<{ queryable: unknown; options: unknown }> = [];
+    const declarations: unknown[] = [];
     const byteConstructions: unknown[] = [];
     const assetConstructions: Array<{ queryable: unknown; options: unknown; instance: unknown }> =
       [];
@@ -633,6 +711,9 @@ describe('embedded persistence route', () => {
         constructor(queryable: unknown, options: unknown) {
           documentConstructions.push({ queryable, options });
         }
+        declareAssetReferenceTracking = async () => {
+          declarations.push(this);
+        };
       },
     }));
     vi.doMock('@openmaic/storage/asset/pg-bytes', () => ({
@@ -690,6 +771,10 @@ describe('embedded persistence route', () => {
     expect(runtimeConstructions[0]?.queryable).toBe(pool);
     expect(documentConstructions[0]?.queryable).toBe(pool);
     expect(assetConstructions[0]?.queryable).toBe(pool);
+    // Declared while the provider comes up, not on the first document write.
+    // Without it the collector's entry level refuses on a database nobody has
+    // written to yet, which is every database on the day it is upgraded.
+    expect(declarations).toHaveLength(1);
     // The byte layer is deferred to first use: nothing constructs it during
     // handler initialization, and the first byte operation builds the
     // PostgreSQL byte store on the same pool.
@@ -725,6 +810,19 @@ describe('embedded persistence route', () => {
     expect(sharedProvider.runtimeStore).toBe(runtimeConstructions[0]?.instance);
     expect(secondPoolFactory).not.toHaveBeenCalled();
     expect(sdkModuleResolved).not.toHaveBeenCalled();
+
+    // Whitespace in DATABASE_URL must not split the memo. The route and the
+    // agent runtime pass the variable as it is; the collector schedule and the
+    // shutdown hook trim it first, because they also need it to tell a blank
+    // variable from an unset one. Both spellings have to land on one provider,
+    // or a padded value opens a second pool for the same database.
+    const paddedProvider = await getServerPersistenceProvider(
+      '  postgres://asset-wiring-test\n',
+      secondPoolFactory,
+    );
+    expect(paddedProvider).toBe(sharedProvider);
+    expect(secondPoolFactory).not.toHaveBeenCalled();
+    expect(runtimeConstructions).toHaveLength(1);
   });
 
   it('defers S3 resolution to the first asset byte operation', async () => {
@@ -739,7 +837,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg-bytes', () => ({
       PgAssetByteStore: class {
@@ -817,7 +920,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg-bytes', () => ({
       PgAssetByteStore: class {},
@@ -891,7 +999,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg-bytes', () => ({
       PgAssetByteStore: class {},
@@ -960,7 +1073,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -1022,7 +1140,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -1105,7 +1228,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/server/reference', () => ({
       nodePostgresTransaction: vi.fn(() => vi.fn()),
@@ -1291,7 +1419,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg', () => ({
       ensureAssetSchema: vi.fn().mockResolvedValue(undefined),
@@ -1453,7 +1586,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg-bytes', () => ({
       PgAssetByteStore: class {},
@@ -1514,7 +1652,12 @@ describe('embedded persistence route', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     // No signReadUrl on the PostgreSQL byte store: the wrapper must answer
     // undefined rather than fail, so the handler falls back to direct bytes.
@@ -1588,7 +1731,12 @@ describe('embedded persistence route -- real handler boundary', () => {
     }));
     vi.doMock('@openmaic/storage/document/pg', () => ({
       ensureDocumentSchema: vi.fn().mockResolvedValue(undefined),
-      PgDocumentStore: class {},
+      // The provider declares reference tracking as part of coming up, so a
+      // stand-in document store has to answer that call the way the real one
+      // does or every persistence request fails at initialization.
+      PgDocumentStore: class {
+        declareAssetReferenceTracking = async () => undefined;
+      },
     }));
     vi.doMock('@openmaic/storage/asset/pg-bytes', () => ({
       PgAssetByteStore: class {},

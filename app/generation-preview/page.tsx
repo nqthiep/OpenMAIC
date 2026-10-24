@@ -36,7 +36,7 @@ import {
   fetchSceneContent,
   generateTTSForScene,
 } from '@/lib/hooks/use-scene-generator';
-import { isAbortError } from '@openmaic/generation';
+import { isAbortError } from '@openmaic/generation/browser';
 import { FOREGROUND_SCENE_RETRY_OPTIONS } from './foreground-retry';
 import {
   loadImageMapping,
@@ -44,7 +44,7 @@ import {
   cleanupOldImages,
   storeImages,
 } from '@/lib/utils/image-storage';
-import { getCurrentModelConfig } from '@/lib/utils/model-config';
+import { getCurrentModelConfig, getStageRoutesHeaderValue } from '@/lib/utils/model-config';
 import { resolveSessionDocumentSources } from '@/lib/document/session-sources';
 import { MAX_VISION_IMAGES } from '@/lib/constants/generation';
 import {
@@ -269,8 +269,10 @@ function GenerationPreviewContent() {
     const settings = useSettingsStore.getState();
     const imageProviderConfig = settings.imageProvidersConfig?.[settings.imageProviderId];
     const videoProviderConfig = settings.videoProvidersConfig?.[settings.videoProviderId];
+    const stageRoutesHeader = getStageRoutesHeaderValue();
     return {
       'Content-Type': 'application/json',
+      ...(stageRoutesHeader ? { 'x-model-routes': stageRoutesHeader } : {}),
       'x-model': modelConfig.modelString,
       'x-api-key': modelConfig.apiKey,
       'x-base-url': modelConfig.baseUrl,

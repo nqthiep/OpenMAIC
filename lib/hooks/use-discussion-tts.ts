@@ -10,6 +10,10 @@ import {
   type ResolvedVoice,
 } from '@/lib/audio/voice-resolver';
 import { isTTSProviderEnabled } from '@/lib/audio/provider-enablement';
+import {
+  getDiscussionAudioElement,
+  releaseDiscussionAudioLine,
+} from '@/lib/audio/discussion-audio';
 import { useAllVoiceProfiles } from '@/lib/audio/voxcpm-voices';
 import { resolveAgentVoiceOptions } from '@/lib/audio/agent-voice';
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
@@ -92,6 +96,13 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
   const segmentDoneCounterRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  /**
+   * Identifies the line that currently owns the reused element. Element identity
+   * can no longer tell lines apart (there is one element), so a stale `ended` /
+   * `error` / rejected-play path from an earlier line must be recognised by its
+   * token instead of by which element it came from.
+   */
+  const playbackTokenRef = useRef(0);
   const onAudioStateChangeRef = useRef(onAudioStateChange);
   onAudioStateChangeRef.current = onAudioStateChange;
   const processQueueRef = useRef<() => void>(() => {});
@@ -350,21 +361,24 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       if ('error' in result) throw result.error;
       abortControllerRef.current = null;
       const audioUrl = result.audioUrl;
-      const audio = new Audio(audioUrl);
+      // Reuse this playback module's element rather than creating one per line:
+      // a fresh element's programmatic play() is what mobile autoplay policies
+      // refuse, which left the discussion silent from the second line on.
+      const audio = getDiscussionAudioElement();
+      const token = ++playbackTokenRef.current;
+      audio.src = audioUrl;
       const settings = playbackSettingsRef.current;
+      audio.defaultPlaybackRate = settings.playbackSpeed;
       audio.playbackRate = settings.playbackSpeed;
       audio.volume = settings.ttsMuted ? 0 : settings.ttsVolume;
       audioRef.current = audio;
       const finish = () => {
-        if (audioRef.current !== audio) return;
+        if (token !== playbackTokenRef.current) return;
         audioRef.current = null;
         finishAudioRef.current = null;
         currentItemRef.current = null;
         currentProviderRef.current = null;
-        audio.removeEventListener('ended', finish);
-        audio.removeEventListener('error', finish);
-        audio.pause();
-        audio.src = '';
+        releaseDiscussionAudioLine(audio);
         isPlayingRef.current = false;
         if (!retriedAsBrowser) segmentDoneCounterRef.current++;
         onAudioStateChangeRef.current?.(item.agentId, 'idle');
@@ -373,15 +387,18 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
         }
       };
       finishAudioRef.current = finish;
-      audio.addEventListener('ended', finish);
+      // Assignment rather than addEventListener: the element is reused, so a
+      // listener would otherwise accumulate once per line and fire this callback
+      // several times for one line.
+      audio.onended = finish;
       // Undecodable or unreachable audio: speak the segment with the browser.
-      // Registered before finish so the retry is queued before finish advances.
-      audio.addEventListener('error', () => {
+      // Queued before finish advances the queue.
+      audio.onerror = () => {
         if (audioRef.current === audio) {
           retriedAsBrowser = requeueAsBrowserSpeech(queueRef.current, item);
         }
-      });
-      audio.addEventListener('error', finish);
+        finish();
+      };
 
       // If paused during TTS generation, keep audio ready but don't play
       if (pausedRef.current) {
@@ -392,7 +409,8 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
 
       onAudioStateChangeRef.current?.(item.agentId, 'playing');
       await audio.play();
-      if (audioRef.current === audio) prefetchNextRef.current();
+      // Identity no longer distinguishes lines (one element), so the token does.
+      if (token === playbackTokenRef.current) prefetchNextRef.current();
     } catch (err) {
       if (controller.signal.aborted || currentItemRef.current !== item) return;
       if (finishAudioRef.current) {
@@ -510,11 +528,13 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
     prefetchedRef.current = null;
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
+    // The element outlives this line now, so the line's handlers have to go with
+    // it: a leftover handler would let a late event finish the *next* line.
+    playbackTokenRef.current++;
     if (audioRef.current) {
       const audio = audioRef.current;
       audioRef.current = null;
-      audio.pause();
-      audio.src = '';
+      releaseDiscussionAudioLine(audio);
     }
     browserCancelRef.current();
     queueRef.current = [];
@@ -542,9 +562,11 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
       browserResumeRef.current();
     } else if (audioRef.current && audioRef.current.paused) {
       const audio = audioRef.current;
-      void audio.play().catch(() => {
-        if (audioRef.current === audio) finishAudioRef.current?.();
-      });
+      // Take this line's own finish closure: it carries the line's token, so a
+      // rejection that arrives after another line took the element cannot finish
+      // the line that is playing now.
+      const lineFinish = finishAudioRef.current;
+      void audio.play().catch(() => lineFinish?.());
     } else if (!isPlayingRef.current) {
       // Audio finished while paused — kick-start the queue
       processQueueRef.current();
@@ -555,6 +577,7 @@ export function useDiscussionTTS({ enabled, agents, onAudioStateChange }: Discus
   // Sync playbackSpeed to currently playing audio in real-time
   useEffect(() => {
     if (audioRef.current) {
+      audioRef.current.defaultPlaybackRate = playbackSpeed;
       audioRef.current.playbackRate = playbackSpeed;
     }
   }, [playbackSpeed]);

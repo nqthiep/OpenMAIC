@@ -56,6 +56,8 @@ vi.mock('@/lib/server/provider-config', () => ({
 
 vi.mock('@/lib/server/ssrf-guard', () => ({
   validateUrlForSSRF: async () => null,
+  findUnsafeNetworkTargetError: () => undefined,
+  validatePublicUrlForSSRF: async () => null,
 }));
 
 function formRequest(path: string, fields: Record<string, string | File>): NextRequest {

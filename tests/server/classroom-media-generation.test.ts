@@ -368,4 +368,40 @@ describe('generateMediaForClassroom model fallback', () => {
     const genBody = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(genBody.model).toBe('pinned-video-a');
   });
+
+  test('names Grok inline bytes with the extension for the type it reported', async () => {
+    // xAI answers `b64_json` with JPEG bytes and declares no media type of its
+    // own, so the adapter reports one. Recording it under `.png` — which this
+    // path did for every inline image — serves the file back as the wrong type.
+    // The generic key is cleared for the same reason the first test clears it:
+    // it would otherwise enable OpenAI's image fallback alongside Grok's.
+    vi.resetModules();
+    useProviders({ image: { 'grok-image': { apiKey: 'sk-grok' } } });
+
+    const jpegBase64 = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]).toString('base64');
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: [{ b64_json: jpegBase64 }] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { generateMediaForClassroom } = await import('@/lib/server/classroom-media-generation');
+
+    const outlines = [
+      {
+        id: 'outline_1',
+        type: 'slide',
+        title: 'Scene 1',
+        description: 'd',
+        order: 1,
+        mediaGenerations: [{ type: 'image', prompt: 'a cat', elementId: 'gen_img_grok' }],
+      },
+    ] as unknown as SceneOutline[];
+
+    const mediaMap = await generateMediaForClassroom(outlines, 'cls-grok', 'http://localhost');
+
+    expect(mediaMap['gen_img_grok']).toBe(
+      'http://localhost/api/classroom-media/cls-grok/media/gen_img_grok.jpg',
+    );
+  });
 });

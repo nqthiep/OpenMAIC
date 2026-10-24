@@ -15,6 +15,9 @@ export async function register(): Promise<void> {
   // want; the persistence stack is Node-only.
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
 
+  const { warnIfAccessCodeIsUnset } = await import('@/lib/server/access-code-warning');
+  warnIfAccessCodeIsUnset(process.env.ACCESS_CODE);
+
   // The asset quota, read here rather than at the first persistence request.
   // The provider that consumes it is lazy and memoised, so a malformed ceiling
   // would otherwise let the process boot, pass its health check, and then fail
@@ -25,6 +28,22 @@ export async function register(): Promise<void> {
   // teardown registration for something this function has already started.
   const { resolveAssetQuotaBytes } = await import('@/lib/persistence/asset-quota');
   resolveAssetQuotaBytes();
+
+  // The pending-allocation window, for the same reason and at the same moment.
+  // Too short is worse than malformed: it silently expires allocations whose
+  // document write was still coming, so it must fail the process rather than
+  // the request that discovers it.
+  const { resolveAssetPendingTtlMs } = await import('@/lib/persistence/asset-pending-ttl');
+  resolveAssetPendingTtlMs();
+
+  // The shared owner id, for the same reason and at the same moment. A
+  // malformed value would otherwise boot, pass its health check, and then fail
+  // every owner-scoped request — and an operator who meant to share one course
+  // library has no way to tell from the outside that their setting was not
+  // accepted. `resolveSharedOwnerId` treats an empty value as unset, so this
+  // only rejects values that are present and unusable.
+  const { resolveSharedOwnerId } = await import('@/lib/server/agent-runtime/shared-owner');
+  resolveSharedOwnerId();
 
   // Imported dynamically so the Edge bundle never pulls in `pg`.
   const { startAssetCollectorSchedule } =
@@ -43,11 +62,8 @@ export async function register(): Promise<void> {
   // routes, master key) and leftover environment config. Cheap and non-throwing:
   // broken config surfaces here as [config] warnings instead of failing at request
   // time. Imported dynamically so the Edge bundle never pulls in `fs`.
-  const { validateServerConfig, checkClassroomStorage } =
-    await import('@/lib/server/config-validation');
+  const { validateServerConfig } = await import('@/lib/server/config-validation');
   validateServerConfig();
-  // Not awaited: the probe writes to disk, and register must return before the server is ready.
-  void checkClassroomStorage();
 
   let runner: import('@/lib/server/agent-runtime/runner').AgentRunnerHandle | undefined;
   let extractionRunner:

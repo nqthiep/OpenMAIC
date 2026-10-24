@@ -27,6 +27,7 @@ import {
   visitorErrorText,
   visitorStreamEvent,
 } from '@/lib/server/error-summary';
+import { parseUserStageRoutes } from '@/lib/server/model-routes';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import { readBoundedJson } from '@/lib/server/bounded-json';
 const log = createLogger('Chat API');
@@ -100,6 +101,7 @@ export async function POST(req: NextRequest) {
     } = await resolveModel({
       modelString: body.model,
       stage: 'chat-adapter',
+      userRoutes: keysAllowed ? parseUserStageRoutes(req.headers.get('x-model-routes')) : undefined,
       apiKey: keysAllowed ? body.apiKey : undefined,
       baseUrl: keysAllowed ? body.baseUrl : undefined,
       providerType: body.providerType,

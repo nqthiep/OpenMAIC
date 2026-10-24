@@ -9,6 +9,12 @@
  * network scanners out of a trusted-network endpoint. Suitable only for
  * localhost or trusted-network, single-user deployments.
  *
+ * This authenticator is only consulted for `/runtime/*`. Document and asset
+ * requests skip it and take their principal from the 30-day anonymous owner
+ * cookie. Document reads are capability-by-id (stage id, no owner check);
+ * writes and deletes compare that cookie-derived owner. `x-learner-key` is a
+ * client-supplied runtime partition key, not a document-access token.
+ *
  * This is the anonymous path. A request with a live account session is identified
  * by that session (lib/server/accounts) and never reaches this module. For an
  * anonymous caller holding the token, the header selects an anonymous learner

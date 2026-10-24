@@ -80,6 +80,8 @@ vi.mock('@/lib/server/image-sizing', () => ({
 
 vi.mock('@/lib/server/ssrf-guard', () => ({
   validateUrlForSSRF: async () => null,
+  findUnsafeNetworkTargetError: () => undefined,
+  validatePublicUrlForSSRF: async () => null,
 }));
 
 vi.mock('@/lib/server/web-search-config', () => ({

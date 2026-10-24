@@ -12,7 +12,10 @@ vi.mock('@/lib/server/accounts/runtime', () => ({
   registrationOpen: () => false,
 }));
 
-vi.mock('@/lib/server/ssrf-guard', () => ({ validateUrlForSSRF: async () => null }));
+vi.mock('@/lib/server/ssrf-guard', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/ssrf-guard')>()),
+  validateUrlForSSRF: async () => null,
+}));
 
 async function postProxy(cookie?: string): Promise<Response> {
   const { POST } = await import('@/app/api/proxy-media/route');

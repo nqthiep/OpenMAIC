@@ -215,24 +215,6 @@ function validateManagedKeys(): void {
 }
 
 /**
- * Classroom creation needs hard links in the data directory. Without them each
- * create fails with a 500, so check at boot instead of waiting for a teacher to
- * find out. Asynchronous and fire-and-forget: it never blocks startup.
- */
-export async function checkClassroomStorage(): Promise<void> {
-  try {
-    const { CLASSROOMS_DIR, probeHardLinkSupport } = await import('@/lib/server/classroom-storage');
-    if (await probeHardLinkSupport()) return;
-    warn(
-      `Hard links are not supported in ${CLASSROOMS_DIR}. Classroom creation will fail until the data directory is on a filesystem that supports them.`,
-    );
-  } catch (err) {
-    const code = (err as NodeJS.ErrnoException | undefined)?.code ?? 'unknown';
-    warn(`Could not check classroom storage (${code}). Classroom creation may fail.`);
-  }
-}
-
-/**
  * PUBLIC_APP_ORIGIN sets the origin in generated links. An invalid value is never
  * trusted; the server's own origin is used instead. Unset in production, the
  * proxy's forwarded host decides the origin, which is worth saying at boot.

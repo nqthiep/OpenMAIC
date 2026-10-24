@@ -14,7 +14,7 @@ import type { ASRProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
 import { describeUnexpectedError, visitorErrorText } from '@/lib/server/error-summary';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { findUnsafeNetworkTargetError, validatePublicUrlForSSRF } from '@/lib/server/ssrf-guard';
 
 /** B49: route-specific fixed text — "model provider" wording is inaccurate for transcription. */
 const TRANSCRIPTION_FAILURE_TEXT = 'The transcription service could not complete this request.';
@@ -65,8 +65,12 @@ export async function POST(req: NextRequest) {
     managed = isServerConfiguredProvider('asr', effectiveProviderId);
     const keysAllowed = !managed && (await clientKeysAllowed(req.headers));
     const clientBaseUrl = keysAllowed ? baseUrl || undefined : undefined;
+    // A client-supplied BYOK base URL is always judged under the strict public
+    // policy, even when the operator enabled local networks for their own
+    // server-configured ASR backend.
+    const publicOnly = Boolean(clientBaseUrl);
     if (clientBaseUrl) {
-      const ssrfError = await validateUrlForSSRF(clientBaseUrl);
+      const ssrfError = await validatePublicUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);
       }
@@ -82,6 +86,7 @@ export async function POST(req: NextRequest) {
       language: language || 'auto',
       apiKey: resolveASRApiKey(effectiveProviderId, keysAllowed ? apiKey || undefined : undefined),
       baseUrl: resolveASRBaseUrl(effectiveProviderId, clientBaseUrl),
+      publicOnly,
     };
     // Reflect the resolved (possibly server-pinned) model in failure logs.
     resolvedModelId = config.modelId;
@@ -94,6 +99,10 @@ export async function POST(req: NextRequest) {
     log.error(
       `Transcription failed [provider=${resolvedProviderId ?? 'unknown'}, model=${resolvedModelId ?? 'default'}]: ${describeUnexpectedError(error)}`,
     );
+    const blocked = findUnsafeNetworkTargetError(error);
+    if (blocked) {
+      return apiError('INVALID_URL', 403, blocked.message);
+    }
     return apiError(
       'TRANSCRIPTION_FAILED',
       500,

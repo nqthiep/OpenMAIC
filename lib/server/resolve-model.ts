@@ -21,8 +21,11 @@ import {
   getDefaultModel,
   getDefaultRoute,
   getStageRoute,
+  getUserStageRoute,
+  parseUserStageRoutes,
   type LlmStage,
   type StageRoute,
+  type UserStageRoute,
 } from '@/lib/server/model-routes';
 
 export interface ResolvedModel extends ModelWithInfo {
@@ -83,19 +86,31 @@ export async function resolveModel(params: {
    * lib/server/model-routes.ts.
    */
   stage?: LlmStage;
+  /**
+   * User-level per-stage routes (parsed from the `x-model-routes` header by
+   * resolveModelFromHeaders/FromRequest). Precedence: operator MODEL_ROUTES >
+   * these user routes > x-model > DEFAULT_MODEL. A user route carries its own
+   * connection params (apiKey/baseUrl/providerType) for the routed provider;
+   * server-managed providers still resolve credentials authoritatively.
+   */
+  userRoutes?: Record<string, UserStageRoute>;
   apiKey?: string;
   baseUrl?: string;
   providerType?: string;
   thinkingConfig?: ThinkingConfig;
 }): Promise<ResolvedModel> {
-  // Resolution order: stage route > x-model > the default model.
+  // Resolution order: stage route > user stage route > x-model > the default model.
   // A configured stage route is the operator's deliberate per-stage choice and
   // wins even over a client-sent x-model (otherwise the browser UI, which always
-  // sends its saved model, would shadow every route). Unrouted stages fall back
+  // sends its saved model, would shadow every route). User routes (an administrator's
+  // own per-stage selection in the course model settings) sit just below operator
+  // routes and above the client's main-model x-model. Unrouted stages fall back
   // to the client x-model, then the default model. There is intentionally no hardcoded
   // model fallback — if nothing resolves we fail loud rather than silently pick a
   // vendor default.
-  const stageRoute = getStageRoute(params.stage);
+  const envRoute = getStageRoute(params.stage);
+  const userRoute = envRoute ? undefined : getUserStageRoute(params.userRoutes ?? {}, params.stage);
+  const stageRoute: UserStageRoute | undefined = envRoute ?? userRoute;
   const stageModel = stageRoute?.model;
   const modelString = stageModel || params.modelString || getDefaultModel();
   if (!modelString) {
@@ -109,11 +124,13 @@ export async function resolveModel(params: {
   // params (apiKey/baseUrl/providerType) belong to the client's *other* model
   // and must not bleed onto the routed provider — otherwise e.g. a routed
   // Anthropic model would be built with the client's OpenAI providerType/key.
-  // A routed model resolves purely from server config, as if no x-model was sent.
+  // A routed model resolves purely from server config, as if no x-model was sent
+  // — except a *user* route, which supplies its own connection for the routed
+  // provider (server-managed providers ignore it regardless).
   const routed = Boolean(stageModel);
-  const clientApiKey = routed ? undefined : params.apiKey;
-  const clientProviderType = routed ? undefined : params.providerType;
-  const clientBaseUrlParam = routed ? undefined : params.baseUrl;
+  const clientApiKey = routed ? userRoute?.apiKey : params.apiKey;
+  const clientProviderType = routed ? userRoute?.providerType : params.providerType;
+  const clientBaseUrlParam = routed ? userRoute?.baseUrl : params.baseUrl;
 
   // Server-managed providers are admin-owned: the operator's key and base URL
   // are authoritative and any client-sent override is ignored. Origin URL
@@ -202,8 +219,9 @@ function getThinkingConfigFromBody(body: unknown): ThinkingConfig | undefined {
 /**
  * Resolve a language model from standard request headers.
  *
- * Reads: x-model, x-api-key, x-base-url, x-provider-type. The key and base URL are used only
- * for an administrator's own key; other callers get the server's providers.
+ * Reads: x-model, x-api-key, x-base-url, x-provider-type, x-model-routes. The key, the base URL
+ * and the routes are used only for an administrator's own settings; other callers get the
+ * server's providers.
  * Note: requiresApiKey is derived server-side from the provider registry,
  * never from client headers, to prevent auth bypass.
  */
@@ -216,6 +234,7 @@ export async function resolveModelFromHeaders(
   return resolveModel({
     modelString: req.headers.get('x-model') || undefined,
     stage,
+    userRoutes: keysAllowed ? parseUserStageRoutes(req.headers.get('x-model-routes')) : undefined,
     apiKey: keysAllowed ? req.headers.get('x-api-key') || undefined : undefined,
     baseUrl: keysAllowed ? req.headers.get('x-base-url') || undefined : undefined,
     providerType: req.headers.get('x-provider-type') || undefined,

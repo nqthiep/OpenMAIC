@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
+import { resolveSharedOwnerId } from './shared-owner';
+
 const ANONYMOUS_COOKIE = 'anonymous_id';
 const ANONYMOUS_COOKIE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -28,8 +30,19 @@ export function readAnonymousOwnerId(headers: Headers): string | undefined {
   return existingId && UUID_V4.test(existingId) ? `anon:${existingId}` : undefined;
 }
 
+/**
+ * Whether the anonymous owner cookie carries `Secure`. Production sets it by
+ * default; plain-HTTP deployments opt out with the exact value COOKIE_SECURE=0
+ * (Safari refuses to store `Secure` cookies served over plain http://localhost,
+ * which makes every request mint a fresh owner and owner-scoped writes fail).
+ * Shared with the Server Action path so both entry points agree.
+ */
+export function anonymousCookieSecure(): boolean {
+  return process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== '0';
+}
+
 function anonymousCookieHeader(id: string): string {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  const secure = anonymousCookieSecure() ? '; Secure' : '';
   return (
     `${ANONYMOUS_COOKIE}=${id}; Path=/; HttpOnly; SameSite=Lax; ` +
     `Max-Age=${ANONYMOUS_COOKIE_MAX_AGE_SECONDS}${secure}`
@@ -48,6 +61,12 @@ function anonymousCookieHeader(id: string): string {
  * requests must not be partitioned under a fresh anonymous identity, and no
  * anonymous cookie is minted for them.
  *
+ * A deployment that configured `PERSISTENCE_SHARED_OWNER_ID` resolves to that
+ * fixed id instead of a per-browser one, and mints no cookie: see
+ * `./shared-owner.ts` for why a single-tenant installation wants that. The
+ * explicit identity above still wins, so adding a real auth layer later does
+ * not require clearing the variable first.
+ *
  * Otherwise the identity comes from a valid anonymous cookie, or a fresh UUID
  * is minted. A mint is only useful when it is persisted, so `responseHeaders`
  * — the headers the caller returns to the client — is required: it receives
@@ -65,6 +84,9 @@ export function resolveRequestOwnerId(
   authenticatedOwnerId?: string,
 ): string {
   if (authenticatedOwnerId) return authenticatedOwnerId;
+
+  const sharedOwnerId = resolveSharedOwnerId();
+  if (sharedOwnerId) return sharedOwnerId;
 
   const existingId = readCookie(req.headers, ANONYMOUS_COOKIE);
   if (existingId && UUID_V4.test(existingId)) return `anon:${existingId}`;

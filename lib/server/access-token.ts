@@ -1,6 +1,9 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 
-import { isAccessTokenTimestampFresh } from './access-token-policy';
+import {
+  isAccessTokenSignatureFormatValid,
+  isAccessTokenTimestampValid,
+} from './access-token-shared';
 
 /**
  * Create an HMAC-signed token: `timestamp.signature`. `signingKey` is the value
@@ -22,7 +25,12 @@ export function verifyAccessToken(token: string, signingKey: string): boolean {
 
   const timestamp = token.substring(0, dotIndex);
   const signature = token.substring(dotIndex + 1);
-  if (!isAccessTokenTimestampFresh(timestamp, Date.now())) return false;
+  // Reject expired, future-dated, and malformed timestamps before spending
+  // work on the HMAC comparison.
+  if (!isAccessTokenTimestampValid(timestamp)) return false;
+
+  // Reject non-canonical signatures so this verifier agrees with the Edge one.
+  if (!isAccessTokenSignatureFormatValid(signature)) return false;
 
   const expected = createHmac('sha256', signingKey).update(timestamp).digest('hex');
 

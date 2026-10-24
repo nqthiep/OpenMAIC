@@ -20,6 +20,21 @@ export const maxDuration = 30;
  */
 const GENERATE_CLASSROOM_MAX_BYTES = 10 * 1024 * 1024;
 
+type PdfContent = NonNullable<GenerateClassroomInput['pdfContent']>;
+
+function isValidPdfContent(value: unknown): value is PdfContent {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const { text, images } = value as { text?: unknown; images?: unknown };
+  return (
+    typeof text === 'string' &&
+    Array.isArray(images) &&
+    images.every((item) => typeof item === 'string')
+  );
+}
+
 export async function POST(req: NextRequest) {
   const denied = await requireSpender(req.headers);
   if (denied) return denied;
@@ -38,11 +53,22 @@ export async function POST(req: NextRequest) {
     }
     const rawBody = read.value as Partial<GenerateClassroomInput>;
     requirementLength = rawBody.requirement?.length;
+    const pdfContent = rawBody.pdfContent;
+
+    if (pdfContent !== undefined && !isValidPdfContent(pdfContent)) {
+      return apiError(
+        'INVALID_REQUEST',
+        400,
+        'Invalid pdfContent: expected { text: string; images: string[] }',
+      );
+    }
+
     // Only an administrator's own web-search key is used; others get the server's provider.
     const keysAllowed = await clientKeysAllowed(req.headers);
+
     const body: GenerateClassroomInput = {
       requirement: rawBody.requirement || '',
-      ...(rawBody.pdfContent ? { pdfContent: rawBody.pdfContent } : {}),
+      ...(pdfContent !== undefined ? { pdfContent } : {}),
 
       ...(rawBody.enableWebSearch != null ? { enableWebSearch: rawBody.enableWebSearch } : {}),
       ...(rawBody.webSearchProviderId ? { webSearchProviderId: rawBody.webSearchProviderId } : {}),
