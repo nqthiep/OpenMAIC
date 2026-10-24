@@ -20,6 +20,7 @@ import {
   type ProviderSettings,
 } from '@/components/learning/learning-api';
 import { useOmniRouteMode } from '@/components/settings/omniroute-mode';
+import { CredentialStorageHint } from '@/components/settings/server-settings';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -413,6 +414,7 @@ function CredentialForm({
             ) : null}
           </>
         )}
+        <CredentialStorageHint />
 
         {field(
           'pv-url',
