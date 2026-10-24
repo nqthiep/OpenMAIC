@@ -2,6 +2,26 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
+## Assignment: Review of "Đăng xuất các thiết bị khác" (read-only review)
+- Requested by: repository owner (nqthiep)
+- Original request (verbatim): "Hãy review xem chức năng logout khỏi các thiết bị khác có hoạt động đúng không?"
+- Assignment status: Review done; the one gap found was then fixed (row 5), committed and pushed; not deployed (the owner said "commit và push")
+- Branch and commit: `it-math`, pushed: yes (see the log line `fix(account): re-check the session ...`). Git writes: the owner asked "nếu có sửa gì thì commit và push đi".
+- Last updated: 2026-10-24 (UTC time not recorded)
+
+### Task table
+| # | Task | Status | Evidence / notes |
+|---|------|--------|------------------|
+| 1 | Read the path: menu item, `signOutOtherSessions`, `app/api/auth/revoke-others/route.ts`, `revokeOtherSessions`, `findSessionAccount`, password change, account disable, OmniRoute gate | Done | The revoke is one `UPDATE account_sessions SET revoked_at ... WHERE account_id AND token_hash <> kept AND revoked_at IS NULL AND expires_at > now`; every consumer of the cookie checks the database (no cache); self password change keeps the current session and revokes the rest; disabling an account revokes all; the OmniRoute gate cookie names the OpenMAIC session it came from and checks `account_sessions` |
+| 2 | Existing tests | Done | `tests/accounts/revoke-others.test.ts` (keeps the caller, revokes the other, 401 without a session, refuses cross-site), `session-ended`, `store`, `password-routes`: 25 pass |
+| 3 | Run it for real on `localhost:3002` with two devices (cookie jars) and a throwaway account (deleted afterwards) | Done | A registers, B logs in; A `POST /api/auth/revoke-others` -> `{"success":true,"revoked":1}`; then `/api/auth/session`: A `authenticated true`, B `false`; B `POST /api/auth/revoke-others` -> 401; A `GET /api/membership/usage` 200 |
+| 4 | What the revoked device shows | Done, one gap | B's routes answer differently: `/api/stages` and `/api/folders` (persistence and agent routes) answer 401 `SESSION_ENDED` and clear the cookie; learning routes (`/api/support`, `/api/progress`, `/api/classes`, `/api/membership/contribution`) answer 401 `UNAUTHENTICATED` and leave the cookie. In a browser tab of B the account menu stayed signed in after a `focus` event (the unread-support check got a plain 401) and flipped to "Đăng nhập" with the toast "Phiên đăng nhập đã kết thúc" only after a call to `/api/stages`. So an open tab on the other device looks signed in until it reloads or saves something. Server-side access is refused at once |
+| 5 | Fix the gap (owner: "ok, nếu có sửa gì thì commit và push đi"): an open tab re-reads the session when the window gets focus or the tab becomes visible | Done, pushed, not deployed | `components/account/account-control.tsx`: a tab that believes it is signed in calls `fetchAccountSession()` on `focus` and `visibilitychange` (only while visible); `authenticated: false` dispatches the existing `SESSION_ENDED_EVENT` (toast, signed-out state, shared cache cleared); a failed check changes nothing. New `tests/accounts/session-recheck-on-return.test.ts` (6 tests, jsdom): flips on focus and on tab switch, no change when alive, none when the check fails, none while hidden, none for a visitor; with the listeners removed 2 of them fail (mutation check). Seen in the browser on `localhost:3002` with a throwaway account (deleted): signed in, the second device ran `revoke-others`, `focus` -> the menu became "Đăng nhập" and the toast "Phiên đăng nhập đã kết thúc" appeared. eslint and `tsc` clean |
+
+### Open questions and blockers
+- Not done: learning routes still answer 401 `UNAUTHENTICATED` (not `SESSION_ENDED`) for a dead cookie and leave the cookie in the browser; the re-check on focus covers what the person sees, so this was left alone. Changing `resolveViewer` would be the second way.
+- Before 2026-10-24 00:25 UTC the production bundle had persistence switched off, so the `SESSION_ENDED` watcher (`watchForEndedSessions`, installed only when the flag is on) did not run there. Fixed by the flag rebuild above.
+
 ## Assignment: The account menu is missing from the top bar of the deployed site
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "Trên bản deploy này bị mất user menu trên topbar" (with a screenshot of `khaitam.ai.vn/admin`: language, theme and settings only)

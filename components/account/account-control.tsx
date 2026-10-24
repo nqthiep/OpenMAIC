@@ -94,6 +94,31 @@ export function AccountControl() {
     };
   }, []);
 
+  // A tab left open on another device learns that its session was revoked (sign out of other
+  // devices), expired or disabled when the person comes back to it, not only at its next save.
+  // Only a tab that believes it is signed in asks; a failed check changes nothing.
+  const signedInRef = useRef(false);
+  useEffect(() => {
+    signedInRef.current = session?.authenticated === true;
+  }, [session]);
+  useEffect(() => {
+    if (!isBrowserPersistenceEnabled()) return;
+    const recheck = () => {
+      if (document.visibilityState !== 'visible' || !signedInRef.current) return;
+      fetchAccountSession()
+        .then((next) => {
+          if (!next.authenticated) window.dispatchEvent(new Event(SESSION_ENDED_EVENT));
+        })
+        .catch(() => {});
+    };
+    window.addEventListener('focus', recheck);
+    document.addEventListener('visibilitychange', recheck);
+    return () => {
+      window.removeEventListener('focus', recheck);
+      document.removeEventListener('visibilitychange', recheck);
+    };
+  }, []);
+
   // The server reports an ended session on any API request. Show the signed-out state and say why.
   useEffect(() => {
     const onSessionEnded = () => {
