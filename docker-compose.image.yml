@@ -1,0 +1,12 @@
+# Run the app from the image GitHub built (.github/workflows/build-image.yml) instead of
+# building it on this machine. Use it on top of the main file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.image.yml pull openmaic
+#   docker compose -f docker-compose.yml -f docker-compose.image.yml up -d --no-build openmaic
+#
+# ops/deploy/deploy.sh does this, with a backup first and a rollback if the app does not come up.
+# OPENMAIC_IMAGE_TAG names the version: `sha-<7 chars of the commit>` for an exact one, `it-math`
+# for the latest build of that branch.
+services:
+  openmaic:
+    image: ghcr.io/nqthiep/openmaic:${OPENMAIC_IMAGE_TAG:-it-math}
