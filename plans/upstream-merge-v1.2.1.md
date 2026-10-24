@@ -35,7 +35,10 @@ git reset --soft "$C"
 
 1. **Chốt thay đổi dở dang trên `it-math`** (phiên khác): `components/settings/{omniroute-panel,server-credential-card}.tsx`, 12 file locale, `tests/settings/omniroute-panel.test.ts`, `tests/security/*redaction*.test.ts`, `openmaic.local.yml`, `.omo/`. Nhánh merge cắt từ HEAD `ae128e1b` nên không mang theo chúng. Chủ dự án quyết commit, stash hay bỏ.
 2. **Đóng băng hoặc đồng bộ `it-math`**: thay đổi mới trên `it-math` trong lúc merge phải được merge vào nhánh merge ở mỗi biên giai đoạn (`git merge it-math`, dễ vì là tổ tiên). Tránh sửa các vùng xung đột (settings, generation, persistence, identity) trên `it-math` cho tới khi xong.
-3. **Mốc đo gốc (baseline) trên `it-math`**, ghi vào HANDOFF: `npx tsc --noEmit`, `pnpm test` (số file/test pass, danh sách fail có sẵn), `pnpm lint`, `pnpm check:i18n-keys`, `pnpm build`. **[Chưa kiểm]** tôi chưa chạy mốc này; thiếu mốc thì không phân biệt được lỗi do merge với lỗi có sẵn.
+3. **Mốc đo gốc (baseline) trên `it-math`**, ghi vào HANDOFF: `npx tsc --noEmit`, `pnpm test` (số file/test pass, danh sách fail có sẵn), `pnpm lint`, `pnpm check:i18n-keys`, `pnpm build`. **[Đã đo 2026-10-24 trên `it-math-merge-1.2.1` @ `a8a1a13b`]** (nhật ký lệnh trong HANDOFF):
+   - `pnpm install --frozen-lockfile`: ok. `pnpm lint`: 0 lỗi, 18 cảnh báo. `pnpm check:i18n-keys`: pass. `pnpm build`: thành công.
+   - `npx tsc --noEmit`: 3 lỗi, đều ở hai file test redaction (thiếu `redactSecretsForLog` trong `@/lib/pdf/pdf-providers`, thiếu module `@/lib/server/provider-fetch` và `@/lib/server/audio-provider-fetch`).
+   - `pnpm test`: 6 file fail, 68 test fail, 9141 pass, 29 skip. Danh sách fail có sẵn (so sánh sau mỗi giai đoạn): `tests/runtime/chat-storage.test.ts` 40, `tests/security/provider-log-redaction.test.ts` 11, `tests/security/log-redaction.test.ts` 10, `tests/quiz/runtime.test.ts` 4, `tests/media/server-backed-media-orchestrator.test.ts` 2, `tests/media/media-placeholder-lease-guard.test.ts` 1. Chạy riêng bốn file không phải redaction vẫn fail (nhiều lỗi `Test timed out in 5000ms`); nguyên nhân [chưa kiểm].
 4. **Bản sao dữ liệu để thử migration**: sao lưu DB VPS (`~/backups/*.sql.gz`, thói quen hiện có) rồi nạp vào Postgres cục bộ. Dữ liệu người dùng thật: cần chủ dự án đồng ý; nếu không, dùng dữ liệu giả cùng schema.
 5. **Quyết định D1–D4 ở mục 7.**
 

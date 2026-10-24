@@ -2,11 +2,11 @@
 
 Read `AGENTS.md` first. This file holds the current assignment at the top and closed assignments below.
 
-## Assignment: Plan the merge of upstream release v1.2.1 into `it-math` (planning only, no merge done)
+## Assignment: Merge upstream release v1.2.1 into `it-math` through branch `it-math-merge-1.2.1`
 - Requested by: repository owner (nqthiep)
 - Original request (verbatim): "tôi muốn merge bản này https://github.com/THU-MAIC/OpenMAIC/releases/tag/v1.2.1 vào nhánh it-math trên repo của tôi. Bạn hãy brainstorming để lên kế hoạch merge."
-- Assignment status: Approach A chosen; plan written in `plans/upstream-merge-v1.2.1.md`; waiting for the owner's answers to D1-D5. Nothing merged, nothing committed (git writes not requested).
-- Branch and commit: `it-math` @ `ae128e1b`, pushed: n/a. Working tree has another session's uncommitted OmniRoute-panel changes (left alone).
+- Assignment status: In progress. Plan and decisions D1-D5 done, branch created, baseline recorded; no upstream stage merged yet (S1 is next).
+- Branch and commit: `it-math-merge-1.2.1` @ `a8a1a13b` (starts from `it-math`), worktree `.claude/worktrees/it-math-merge-1.2.1`. Git writes: the owner allowed pushing this branch after each stage, never `it-math`.
 - Last updated: 2026-10-24 (UTC time not recorded)
 
 ### Task table
@@ -20,10 +20,14 @@ Read `AGENTS.md` first. This file holds the current assignment at the top and cl
 | 6 | Plan for A | Done | `plans/upstream-merge-v1.2.1.md`: 8 stages on the true linear chain (S1 `v1.1.1` base `ebf665f3`; S2 `a686481e` identity seam; S3 `fa47efe1` persistence; S4 `5312c2b4` model-config; S5 `636fab0d` rc.1; S6 rc.2; S7 v1.2.0; S8 v1.2.1), gates, four integration designs, v1.2.1 feature acceptance table, decisions D1-D5, risks, task list |
 | 7 | Rehearse the merge recipe (throwaway worktree, removed) | Done | `git merge-tree --write-tree --name-only --merge-base=ebf665f3 HEAD v1.1.1` -> 51 conflicted files, 50 with markers; `git read-tree -u --reset <tree>` then `git commit-tree -p HEAD -p v1.1.1` gives a 2-parent commit. `git read-tree -m` + `git merge-index` was tried first and left 102 unmerged paths, so it is not used. After that commit `git merge-base HEAD v1.2.1` is still `8c3a90d5` (wrong) |
 | 7b | Commit the pending changes of another session on `it-math` (owner request: "Commit các thay đổi dở ... loại openmaic.local.yml và .omo/") | Done | `70c600c4` OmniRoute panel + locales + settings test (`pnpm vitest run tests/settings`: pass; `pnpm check:i18n-keys` ok; eslint clean), `efc8648b` two redaction test files, `8c6390c4` this plan. Left untracked: `openmaic.local.yml`, `.omo/`. Not pushed. **Baseline note:** `tests/security/log-redaction.test.ts` and `tests/security/provider-log-redaction.test.ts` are red on purpose: 21 tests fail (`pnpm vitest run` on both files: "2 failed, 21 failed tests") because provider URLs with credentials and MinerU Cloud error messages still reach the log. Count them as known failures in the merge baseline; the fix is not written |
-| 8 | Execute the plan | Todo | Not started. Needs the owner's answers to D1-D5 and P0 (pending uncommitted changes from another session) |
+| 8 | Owner's answers to D1-D5 | Done | 2026-10-24: D1-D4 agreed as proposed, D5 yes (push `it-math-merge-1.2.1` after each stage, never `it-math`). Recorded in the plan, section 7; commit `a8a1a13b` on `it-math` |
+| 9 | Create branch `it-math-merge-1.2.1` and its worktree | Done | `git worktree add .claude/worktrees/it-math-merge-1.2.1 -b it-math-merge-1.2.1 it-math` at `a8a1a13b`; `pnpm install --frozen-lockfile` exit 0 |
+| 10 | Baseline gates on the branch start | Done | `pnpm lint` 0 errors (18 warnings); `pnpm check:i18n-keys` pass; `pnpm build` ok; `npx tsc --noEmit` 3 errors, all in the two redaction test files; `pnpm test`: 6 files / 68 tests fail, 9141 pass, 29 skipped, 210 s. Failing files: `tests/runtime/chat-storage.test.ts` 40, `tests/security/provider-log-redaction.test.ts` 11, `tests/security/log-redaction.test.ts` 10, `tests/quiz/runtime.test.ts` 4, `tests/media/server-backed-media-orchestrator.test.ts` 2, `tests/media/media-placeholder-lease-guard.test.ts` 1. The four non-redaction files fail also when run alone (`Test timed out in 5000ms` and 3 assertion errors); cause [Unverified] |
+| 11 | S1: merge `v1.1.1` (base `ebf665f3`) | Todo | Next. 51 conflicted files expected |
+| 12 | S2 to S8, acceptance table, staging, deploy | Todo | See `plans/upstream-merge-v1.2.1.md` sections 4, 6, 9 and 12 |
 
 ### Next step (exact)
-- Owner answers D1-D5 in `plans/upstream-merge-v1.2.1.md` section 7 and decides what to do with the uncommitted changes on `it-math` (section 3). Then: create branch `it-math-merge-1.2.1` from `it-math` in a separate worktree, record the baseline gates, and run S1 with the recipe in section 2.
+- In `.claude/worktrees/it-math-merge-1.2.1` run S1 with the recipe in section 2 of the plan (`BASE=ebf665f3`, `TAG=v1.1.1`), resolve the conflicts, run the gates and compare against the baseline in row 10, commit with two parents, then `git push -u origin it-math-merge-1.2.1`.
 
 ### Open questions and blockers
 - [Unverified] Whether our tutor/account/OmniRoute code can sit on upstream's 1.2.x server-first model-config and generation runs without redesign; not tried beyond textual conflicts.
